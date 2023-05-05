@@ -152,6 +152,7 @@
     "marital_status": "SINGLE",
     "phone_no": "0048724467321",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "household": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
     "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "disability": "not disabled",
@@ -209,6 +210,7 @@
     "marital_status": "SINGLE",
     "phone_no": "0048875012932",
     "phone_no_alternative": "",
+    "email": "fake222test@email.com",
     "household": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
     "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "disability": "not disabled",
@@ -266,6 +268,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048503123555",
     "phone_no_alternative": "",
+    "email": "fake333test@email.com",
     "household": null,
     "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "disability": "not disabled",
@@ -323,6 +326,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048734123423",
     "phone_no_alternative": "",
+    "email": "fake444test@email.com",
     "household": "732c60be-0276-4054-a2e1-d425acdb821a",
     "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "disability": "not disabled",
@@ -389,6 +393,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048601123432",
     "phone_no_alternative": "",
+    "email": "fake555test@email.com",
     "household": "732c60be-0276-4054-a2e1-d425acdb821a",
     "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "disability": "not disabled",
@@ -446,6 +451,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048605899014",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "household": "732c60be-0276-4054-a2e1-d425acdb821a",
     "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "disability": "not disabled",
@@ -606,7 +612,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Electoral Card",
-    "type": "ELECTORAL_CARD"
+    "key": "electoral_card"
   }
 },
 {
@@ -616,7 +622,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "National ID",
-    "type": "NATIONAL_ID"
+    "key": "national_id"
   }
 },
 {
@@ -626,7 +632,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Other",
-    "type": "OTHER"
+    "key": "other"
   }
 },
 {
@@ -636,7 +642,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Driver's License",
-    "type": "DRIVERS_LICENSE"
+    "key": "drivers_license"
   }
 },
 {
@@ -646,7 +652,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Tax Number Identification",
-    "type": "TAX_ID"
+    "key": "tax_id"
   }
 },
 {
@@ -656,7 +662,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "National Passport",
-    "type": "NATIONAL_PASSPORT"
+    "key": "national_passport"
   }
 },
 {
@@ -666,7 +672,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Birth Certificate",
-    "type": "BIRTH_CERTIFICATE"
+    "key": "birth_certificate"
   }
 },
 {
@@ -676,7 +682,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Foreigner's Residence Permit",
-    "type": "RESIDENCE_PERMIT_NO"
+    "key": "residence_permit_no"
   }
 },
 {

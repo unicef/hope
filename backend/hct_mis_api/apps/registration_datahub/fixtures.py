@@ -124,6 +124,7 @@ class ImportedIndividualFactory(DjangoModelFactory):
     )
     phone_no = factory.LazyFunction(faker.phone_number)
     phone_no_alternative = ""
+    email = factory.Faker("email")
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
     household = factory.SubFactory(ImportedHouseholdFactory)
@@ -176,4 +177,4 @@ class ImportedDocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = ImportedDocumentType
 
-    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+    key = random.choice(["birth_certificate", "tax_id", "drivers_license"])

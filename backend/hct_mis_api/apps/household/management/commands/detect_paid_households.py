@@ -19,7 +19,7 @@ def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Di
         storage_obj=storage_file, business_area__slug=business_area_slug
     )
     tax_ids_of_inds_loaded_via_sf = Document.objects.filter(
-        individual__household__in=households_loaded_via_sf, type__type="TAX_ID"
+        individual__household__in=households_loaded_via_sf, type__key="tax_id"
     ).values_list("document_number", flat=True)
     hh_ids_not_loaded_via_sf = Household.objects.filter(
         Q(
@@ -32,7 +32,7 @@ def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Di
 
     def match(household_to_match: Household) -> QuerySet[Household]:
         tax_ids_in_household_to_match = Document.objects.filter(
-            individual__household=household_to_match, type__type="TAX_ID"
+            individual__household=household_to_match, type__key="tax_id"
         ).values_list("document_number", flat=True)
         return households_loaded_via_sf.filter(
             individuals__documents__document_number__in=tax_ids_in_household_to_match,

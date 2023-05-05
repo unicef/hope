@@ -20,8 +20,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import (
     HEAD,
-    IDENTIFICATION_TYPE_DICT,
-    IDENTIFICATION_TYPE_OTHER,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -54,40 +52,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     update the status of that registration data import instance.
     """
 
-    DOCS_AND_IDENTITIES_FIELDS = {
-        "birth_certificate_no_i_c",
-        "birth_certificate_photo_i_c",
-        "birth_certificate_issuer_i_c",
-        "drivers_license_no_i_c",
-        "drivers_license_photo_i_c",
-        "drivers_license_issuer_i_c",
-        "electoral_card_no_i_c",
-        "electoral_card_photo_i_c",
-        "electoral_card_issuer_i_c",
-        "unhcr_id_no_i_c",
-        "unhcr_id_photo_i_c",
-        "unhcr_id_issuer_i_c",
-        "national_id_no_i_c",
-        "national_id_photo_i_c",
-        "national_id_issuer_i_c",
-        "national_passport_i_c",
-        "national_passport_photo_i_c",
-        "national_passport_issuer_i_c",
-        "tax_id_no_i_c",
-        "tax_id_photo_i_c",
-        "tax_id_issuer_i_c",
-        "scope_id_no_i_c",
-        "scope_id_photo_i_c",
-        "scope_id_issuer_i_c",
-        "other_id_type_i_c",
-        "other_id_no_i_c",
-        "other_id_photo_i_c",
-        "other_id_issuer_i_c",
-    }
-
     reduced_submissions = None
     business_area = None
     attachments = None
+
+    def __init__(
+        self,
+    ) -> None:
+        document_keys = ImportedDocumentType.objects.values_list("key", flat=True)
+        self.DOCS_AND_IDENTITIES_FIELDS = [
+            f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
+        ]
 
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
         if not self.registration_data_import_mis.pull_pictures:
@@ -175,25 +150,18 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             country=country,
                         )
                     )
-                else:
-                    type_name = document_name.upper()
-                    if type_name == "OTHER_ID":
-                        type_name = IDENTIFICATION_TYPE_OTHER
-                    label = IDENTIFICATION_TYPE_DICT.get(type_name, data.get("name"))
-                    document_type, _ = ImportedDocumentType.objects.get_or_create(
-                        label=label,
-                        type=type_name,
+                    continue
+                document_type = ImportedDocumentType.objects.get(key=document_name)
+                file = self._handle_image_field(data.get("photo", ""), False)
+                documents.append(
+                    ImportedDocument(
+                        document_number=data["number"],
+                        country=country,
+                        photo=file,
+                        individual=data["individual"],
+                        type=document_type,
                     )
-                    file = self._handle_image_field(data.get("photo", ""), False)
-                    documents.append(
-                        ImportedDocument(
-                            document_number=data["number"],
-                            country=country,
-                            photo=file,
-                            individual=data["individual"],
-                            type=document_type,
-                        )
-                    )
+                )
         ImportedDocument.objects.bulk_create(documents)
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
@@ -260,7 +228,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     i_field.replace("_photo_i_c", "")
                                     .replace("_no_i_c", "")
                                     .replace("_issuer_i_c", "")
-                                    .replace("_type_i_c", "")
                                     .replace("_i_c", "")
                                 )
                                 if i_field.endswith("_type_i_c"):
@@ -361,7 +328,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
         if not self.business_area.postpone_deduplication:
-            DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
+            DeduplicateTask(self.business_area.slug).deduplicate_imported_individuals(
+                registration_data_import_datahub=registration_data_import
+            )
 
     def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:
         logger.warning(e)

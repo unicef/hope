@@ -30,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DISABILITY_CHOICES,
-    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     NOT_PROVIDED,
@@ -229,6 +228,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     phone_no_valid = models.BooleanField(null=True)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
     phone_no_alternative_valid = models.BooleanField(null=True)
+    email = models.CharField(max_length=255, blank=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -440,7 +440,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
-    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    key = models.CharField(max_length=50, unique=True)
     is_identity_document = models.BooleanField(default=True)
 
     def __str__(self) -> str:
@@ -663,6 +663,7 @@ class DiiaIndividual(models.Model):
     doc_serie = models.CharField(max_length=64, blank=True, null=True)
     doc_number = models.CharField(max_length=64, blank=True, null=True)
     doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",

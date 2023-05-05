@@ -125,13 +125,11 @@ export const HouseholdDetails = ({
                 {household?.village}
               </LabelizedField>
             </Grid>
-            {household.zipCode && (
-              <Grid item xs={3}>
-                <LabelizedField label={t('Zip code')}>
-                  {household.zipCode}
-                </LabelizedField>
-              </Grid>
-            )}
+            <Grid item xs={3}>
+              <LabelizedField label={t('Zip code')}>
+                {household?.zipCode}
+              </LabelizedField>
+            </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Administrative Level 1')}>
                 {household?.admin1?.name}

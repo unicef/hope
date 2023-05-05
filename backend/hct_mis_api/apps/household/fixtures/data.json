@@ -160,7 +160,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "National Passport",
-    "type": "NATIONAL_PASSPORT"
+    "key": "national_passport"
   }
 },
 {
@@ -170,7 +170,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "National ID",
-    "type": "NATIONAL_ID"
+    "key": "national_id"
   }
 },
 {
@@ -180,7 +180,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Driver's License",
-    "type": "DRIVERS_LICENSE"
+    "key": "drivers_license"
   }
 },
 {
@@ -190,7 +190,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Other",
-    "type": "OTHER"
+    "key": "other"
   }
 },
 {
@@ -200,7 +200,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Tax Number Identification",
-    "type": "TAX_ID"
+    "key": "tax_id"
   }
 },
 {
@@ -210,7 +210,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Foreigner's Residence Permit",
-    "type": "RESIDENCE_PERMIT_NO"
+    "key": "residence_permit_no"
   }
 },
 {
@@ -220,7 +220,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Electoral Card",
-    "type": "ELECTORAL_CARD"
+    "key": "electoral_card"
   }
 },
 {
@@ -230,7 +230,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Birth Certificate",
-    "type": "BIRTH_CERTIFICATE"
+    "key": "birth_certificate"
   }
 },
 {
@@ -240,7 +240,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Disability Certificate",
-    "type": "DISABILITY_CERTIFICATE"
+    "key": "disability_certificate"
   }
 },
 {
@@ -250,7 +250,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Foster child",
-    "type": "FOSTER_CHILD"
+    "key": "foster_child"
   }
 },
 {
@@ -260,7 +260,7 @@
     "created_at": "2022-08-10T14:00:37.291Z",
     "updated_at": "2022-08-10T14:00:37.291Z",
     "label": "Bank Statement",
-    "type": "BANK_STATEMENT"
+    "key": "bank_statement"
   }
 },
 {
@@ -459,6 +459,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048605899014",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "HEAD",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -552,6 +553,7 @@
     "marital_status": "SINGLE",
     "phone_no": "0048724467321",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "BROTHER_SISTER",
     "household": "20077498-80f0-462a-82e6-866cef92d06a",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -627,6 +629,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048503123555",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "NON_BENEFICIARY",
     "household": null,
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -702,6 +705,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048601123432",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "WIFE_HUSBAND",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -777,6 +781,7 @@
     "marital_status": "SINGLE",
     "phone_no": "0048875012932",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "HEAD",
     "household": "20077498-80f0-462a-82e6-866cef92d06a",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -852,6 +857,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048734123423",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "BROTHER_SISTER",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",

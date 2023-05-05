@@ -2,7 +2,10 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import graphene
 
-from hct_mis_api.apps.core.utils import decode_and_get_object
+from hct_mis_api.apps.core.utils import (
+    decode_and_get_object,
+    decode_and_get_payment_object,
+)
 from hct_mis_api.apps.grievance.models import TicketSensitiveDetails
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -37,12 +40,12 @@ def save_sensitive_grievance_extras(
     payment_record = None
     if payment_record_encoded_ids_list:
         payment_record_encoded_id = payment_record_encoded_ids_list.pop(0)
-        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
+        payment_record = decode_and_get_payment_object(payment_record_encoded_id, False)
 
     TicketSensitiveDetails.objects.create(
         individual=individual,
         household=household,
-        payment_record=payment_record,
+        payment_obj=payment_record,
         ticket=grievance_ticket,
     )
     grievance_ticket.refresh_from_db()
@@ -61,7 +64,7 @@ def save_sensitive_grievance_extras(
         TicketSensitiveDetails.objects.create(
             individual=individual,
             household=household,
-            payment_record=payment_record,
+            payment_obj=payment_record,
             ticket=ticket,
         )
 

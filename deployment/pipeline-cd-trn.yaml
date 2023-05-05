@@ -1,6 +1,11 @@
 trigger: none
 pr: none
 resources:
+  repositories:
+  - repository: hct-mis-helm
+    type: github
+    endpoint: "unicef (2)"
+    name: unicef/hct-mis-helm
   pipelines:
   - pipeline: ci-hope
     source: '[CI] HOPE'
@@ -17,6 +22,7 @@ variables:
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "uniappsakshopedev.azurecr.io"
+  Chart.version: "0.1.3"
 
 stages:
   - stage: deploy
@@ -27,14 +33,8 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
-          - task: HelmDeploy@0
-            displayName: "Update Chart dependencies"
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
-              command: package
-              updatedependency: true
-              chartPath: '**/deployment/hope'
+          - checkout: self
+          - checkout: hct-mis-helm
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -43,12 +43,12 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: '**/deployment/hope'
+              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
               releaseName: 'hope'
               install: true
               waitForExecution: false
               failOnStderr: false
-              valueFile: '**/deployment/pipeline-cd-trn.values.yaml'
+              valueFile: 'hct-mis/deployment/pipeline-cd-trn.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
@@ -63,7 +63,7 @@ stages:
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
-                postgresql.externalDatabase.password=$(POSTGRES_PASSWORD),\
-                registrationdatahubpostgresql.externalDatabase.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                postgresql.password=$(POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"

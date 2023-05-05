@@ -1,11 +1,13 @@
 from typing import Any, Dict
 
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.forms import model_to_dict
 
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     DISABLED,
     IDENTIFICATION_TYPE_TAX_ID,
@@ -37,6 +39,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
             RdiDiiaCreateTask,
         )
 
+        call_command("generatedocumenttypes")
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
         super().setUpTestData()
 
@@ -59,12 +62,14 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
             str(individual.documents.filter(document_number="VPO-DOC-2222").first().doc_date), "2022-04-29"
         )
         self.assertEqual(
-            individual.documents.filter(document_number="123412341234999222").first().type.type,
-            IDENTIFICATION_TYPE_TAX_ID,
+            individual.documents.filter(document_number="123412341234999222").first().type.key,
+            IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
+        self.assertEqual(individual.email, "fake111test@email.com")
 
         individual_2 = individuals.get(full_name="Sam Bautista")
         self.assertEqual(str(individual_2.birth_date), "2009-06-16")
+        self.assertEqual(individual_2.email, "fake111sam_bautista@email.com")
 
         individuals_obj_data = model_to_dict(
             individual,
