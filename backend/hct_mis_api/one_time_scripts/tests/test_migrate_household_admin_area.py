@@ -46,7 +46,7 @@ class TestMigrateAdminArea(TestCase):
 
     def test_household_admin_area_set(self) -> None:
         household, (individual) = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.admin_area = self.area3
+        household.admin3 = self.area3
         household.save()
 
         with mock.patch("sys.stdout", new=StringIO()):
