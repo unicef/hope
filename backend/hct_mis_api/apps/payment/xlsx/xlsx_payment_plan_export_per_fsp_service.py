@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.not_excluded_payments.select_related(
+        self.payment_list = payment_plan.eligible_payments.select_related(
             "household", "collector", "financial_service_provider"
         ).order_by("unicef_id")
 

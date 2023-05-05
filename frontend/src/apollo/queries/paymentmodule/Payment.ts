@@ -49,6 +49,7 @@ export const Payment = gql`
       parent {
         id
         status
+        isFollowUp
         unicefId
         program {
           id
