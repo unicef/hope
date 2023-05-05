@@ -385,7 +385,8 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=pp).update(input_data=dict(end_date=parse_date("2021-09-10")))  # date
 
     @freeze_time("2020-10-10")
-    def test_create_follow_up_pp(self) -> None:
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
             start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),

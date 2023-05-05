@@ -1162,21 +1162,18 @@ class ExcludeHouseholdsMutation(PermissionMutation):
             raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
 
         if payment_plan.excluded_households_ids:
-            msg = "This Payment Plan already contains excluded households"
-            logger.error(msg)
-            raise GraphQLError(msg)
+            raise GraphQLError("This Payment Plan already contains excluded households")
 
         if not payment_plan.eligible_payments.exists():
-            msg = "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
-            logger.error(msg)
-            raise GraphQLError(msg)
+            raise GraphQLError(
+                "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
+            )
+
+        for hh_unicef_id in excluded_households_ids:
+            if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
+                raise GraphQLError("These Households are not included in this Payment Plan")
 
         payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
-
-        if not payments_for_exclude:
-            msg = "These Households are not included in this Payment Plan"
-            logger.error(msg)
-            raise GraphQLError(msg)
 
         payments_for_exclude.update(excluded=True)
 
