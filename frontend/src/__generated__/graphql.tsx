@@ -834,6 +834,11 @@ export type CreateDashboardReportInput = {
   program?: Maybe<Scalars['ID']>,
 };
 
+export type CreateFollowUpPaymentPlanMutation = {
+   __typename?: 'CreateFollowUpPaymentPlanMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
 export type CreateGrievanceTicketExtrasInput = {
   category?: Maybe<CategoryExtrasInput>,
   issueType?: Maybe<IssueTypeExtrasInput>,
@@ -1181,6 +1186,11 @@ export type EditPaymentVerificationMutation = {
   paymentPlan?: Maybe<GenericPaymentPlanNode>,
 };
 
+export type ExcludeHouseholdsMutation = {
+   __typename?: 'ExcludeHouseholdsMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
 export type ExportXlsxPaymentPlanPaymentListMutation = {
    __typename?: 'ExportXLSXPaymentPlanPaymentListMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
@@ -1338,7 +1348,8 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   Currency = 'CURRENCY',
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
   EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
-  DeliveredQuantity = 'DELIVERED_QUANTITY'
+  DeliveredQuantity = 'DELIVERED_QUANTITY',
+  DeliveryDate = 'DELIVERY_DATE'
 }
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -3077,6 +3088,7 @@ export type Mutations = {
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   actionPaymentPlanMutation?: Maybe<ActionPaymentPlanMutation>,
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>,
+  createFollowUpPaymentPlan?: Maybe<CreateFollowUpPaymentPlanMutation>,
   updatePaymentPlan?: Maybe<UpdatePaymentPlanMutation>,
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>,
   chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
@@ -3086,6 +3098,7 @@ export type Mutations = {
   importXlsxPaymentPlanPaymentList?: Maybe<ImportXlsxPaymentPlanPaymentListMutation>,
   importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
+  excludeHouseholds?: Maybe<ExcludeHouseholdsMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -3332,6 +3345,13 @@ export type MutationsCreatePaymentPlanArgs = {
 };
 
 
+export type MutationsCreateFollowUpPaymentPlanArgs = {
+  dispersionEndDate: Scalars['Date'],
+  dispersionStartDate: Scalars['Date'],
+  paymentPlanId: Scalars['ID']
+};
+
+
 export type MutationsUpdatePaymentPlanArgs = {
   input: UpdatePaymentPlanInput
 };
@@ -3377,6 +3397,12 @@ export type MutationsImportXlsxPaymentPlanPaymentListPerFspArgs = {
 export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID'],
   steficonRuleId: Scalars['ID']
+};
+
+
+export type MutationsExcludeHouseholdsArgs = {
+  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
+  paymentPlanId: Scalars['ID']
 };
 
 
@@ -3619,10 +3645,14 @@ export type PaymentNode = Node & {
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId?: Maybe<Scalars['String']>,
   parent: PaymentPlanNode,
+  conflicted: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
   entitlementDate?: Maybe<Scalars['DateTime']>,
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
   collector: IndividualNode,
+  sourcePayment?: Maybe<PaymentNode>,
+  isFollowUp: Scalars['Boolean'],
+  followUps: PaymentNodeConnection,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
   paymentPlanSoftConflicted?: Maybe<Scalars['Boolean']>,
@@ -3633,6 +3663,15 @@ export type PaymentNode = Node & {
   distributionModality?: Maybe<Scalars['String']>,
   totalPersonsCovered?: Maybe<Scalars['Int']>,
   serviceProvider?: Maybe<FinancialServiceProviderNode>,
+};
+
+
+export type PaymentNodeFollowUpsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type PaymentNodeConnection = {
@@ -3861,6 +3900,9 @@ export type PaymentPlanNode = Node & {
   importedFileDate?: Maybe<Scalars['DateTime']>,
   steficonRule?: Maybe<RuleCommitNode>,
   steficonAppliedDate?: Maybe<Scalars['DateTime']>,
+  sourcePaymentPlan?: Maybe<PaymentPlanNode>,
+  isFollowUp: Scalars['Boolean'],
+  followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
   approvalProcess: ApprovalProcessNodeConnection,
@@ -3877,6 +3919,18 @@ export type PaymentPlanNode = Node & {
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
   availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
   reconciliationSummary?: Maybe<ReconciliationSummaryNode>,
+  excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>,
+  canCreateFollowUp?: Maybe<Scalars['Boolean']>,
+  totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
+};
+
+
+export type PaymentPlanNodeFollowUpsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -4935,6 +4989,8 @@ export type QueryAllPaymentPlansArgs = {
   totalEntitledQuantityTo?: Maybe<Scalars['Float']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
+  isFollowUp?: Maybe<Scalars['Boolean']>,
+  sourcePaymentPlanId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8034,6 +8090,24 @@ export type ChooseDeliveryMechForPaymentPlanMutation = (
   )> }
 );
 
+export type CreateFollowUpPpMutationVariables = {
+  dispersionStartDate: Scalars['Date'],
+  dispersionEndDate: Scalars['Date'],
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type CreateFollowUpPpMutation = (
+  { __typename?: 'Mutations' }
+  & { createFollowUpPaymentPlan: Maybe<(
+    { __typename?: 'CreateFollowUpPaymentPlanMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+    )> }
+  )> }
+);
+
 export type CreatePpMutationVariables = {
   input: CreatePaymentPlanInput
 };
@@ -8078,6 +8152,27 @@ export type UpdatePpMutation = (
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id'>
+    )> }
+  )> }
+);
+
+export type ExcludeHouseholdsPpMutationVariables = {
+  paymentPlanId: Scalars['ID'],
+  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>
+};
+
+
+export type ExcludeHouseholdsPpMutation = (
+  { __typename?: 'Mutations' }
+  & { excludeHouseholds: Maybe<(
+    { __typename?: 'ExcludeHouseholdsMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
+      & { excludedHouseholds: Maybe<Array<Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )>>> }
     )> }
   )> }
 );
@@ -9832,7 +9927,8 @@ export type AllPaymentPlansForTableQueryVariables = {
   totalEntitledQuantityFrom?: Maybe<Scalars['Float']>,
   totalEntitledQuantityTo?: Maybe<Scalars['Float']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
-  dispersionEndDate?: Maybe<Scalars['Date']>
+  dispersionEndDate?: Maybe<Scalars['Date']>,
+  isFollowUp?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -9849,7 +9945,7 @@ export type AllPaymentPlansForTableQuery = (
       & Pick<PaymentPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentPlanNode' }
-        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'isFollowUp' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
         & { createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9910,7 +10006,7 @@ export type PaymentQuery = (
       & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'status' | 'unicefId'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'isFollowUp' | 'unicefId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -9940,7 +10036,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -10050,12 +10146,32 @@ export type PaymentPlanQuery = (
         { __typename?: 'PaymentNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'PaymentNode' }
-          & Pick<PaymentNode, 'id'>
+          & Pick<PaymentNode, 'id' | 'status'>
         )> }
       )>> }
     ), reconciliationSummary: Maybe<(
       { __typename?: 'ReconciliationSummaryNode' }
       & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'unsuccessful' | 'pending' | 'numberOfPayments' | 'reconciled'>
+    )>, excludedHouseholds: Maybe<Array<Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
+    )>>>, followUps: (
+      { __typename?: 'PaymentPlanNodeConnection' }
+      & Pick<PaymentPlanNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentPlanNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentPlanNode' }
+          & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'createdAt'>
+          & { paymentItems: (
+            { __typename?: 'PaymentNodeConnection' }
+            & Pick<PaymentNodeConnection, 'totalCount'>
+          ) }
+        )> }
+      )>> }
+    ), sourcePaymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
     )> }
   )> }
 );
@@ -13335,6 +13451,60 @@ export function useChooseDeliveryMechForPaymentPlanMutation(baseOptions?: Apollo
 export type ChooseDeliveryMechForPaymentPlanMutationHookResult = ReturnType<typeof useChooseDeliveryMechForPaymentPlanMutation>;
 export type ChooseDeliveryMechForPaymentPlanMutationResult = ApolloReactCommon.MutationResult<ChooseDeliveryMechForPaymentPlanMutation>;
 export type ChooseDeliveryMechForPaymentPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<ChooseDeliveryMechForPaymentPlanMutation, ChooseDeliveryMechForPaymentPlanMutationVariables>;
+export const CreateFollowUpPpDocument = gql`
+    mutation CreateFollowUpPP($dispersionStartDate: Date!, $dispersionEndDate: Date!, $paymentPlanId: ID!) {
+  createFollowUpPaymentPlan(dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+      unicefId
+    }
+  }
+}
+    `;
+export type CreateFollowUpPpMutationFn = ApolloReactCommon.MutationFunction<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
+export type CreateFollowUpPpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>, 'mutation'>;
+
+    export const CreateFollowUpPpComponent = (props: CreateFollowUpPpComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables> mutation={CreateFollowUpPpDocument} {...props} />
+    );
+    
+export type CreateFollowUpPpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables> & TChildProps;
+export function withCreateFollowUpPp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateFollowUpPpMutation,
+  CreateFollowUpPpMutationVariables,
+  CreateFollowUpPpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables, CreateFollowUpPpProps<TChildProps>>(CreateFollowUpPpDocument, {
+      alias: 'createFollowUpPp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateFollowUpPpMutation__
+ *
+ * To run a mutation, you first call `useCreateFollowUpPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFollowUpPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFollowUpPpMutation, { data, loading, error }] = useCreateFollowUpPpMutation({
+ *   variables: {
+ *      dispersionStartDate: // value for 'dispersionStartDate'
+ *      dispersionEndDate: // value for 'dispersionEndDate'
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useCreateFollowUpPpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>(CreateFollowUpPpDocument, baseOptions);
+      }
+export type CreateFollowUpPpMutationHookResult = ReturnType<typeof useCreateFollowUpPpMutation>;
+export type CreateFollowUpPpMutationResult = ApolloReactCommon.MutationResult<CreateFollowUpPpMutation>;
+export type CreateFollowUpPpMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
 export const CreatePpDocument = gql`
     mutation CreatePP($input: CreatePaymentPlanInput!) {
   createPaymentPlan(input: $input) {
@@ -13489,6 +13659,62 @@ export function useUpdatePpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdatePpMutationHookResult = ReturnType<typeof useUpdatePpMutation>;
 export type UpdatePpMutationResult = ApolloReactCommon.MutationResult<UpdatePpMutation>;
 export type UpdatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePpMutation, UpdatePpMutationVariables>;
+export const ExcludeHouseholdsPpDocument = gql`
+    mutation ExcludeHouseholdsPP($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!) {
+  excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds) {
+    paymentPlan {
+      id
+      excludedHouseholds {
+        id
+        unicefId
+      }
+    }
+  }
+}
+    `;
+export type ExcludeHouseholdsPpMutationFn = ApolloReactCommon.MutationFunction<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
+export type ExcludeHouseholdsPpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>, 'mutation'>;
+
+    export const ExcludeHouseholdsPpComponent = (props: ExcludeHouseholdsPpComponentProps) => (
+      <ApolloReactComponents.Mutation<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables> mutation={ExcludeHouseholdsPpDocument} {...props} />
+    );
+    
+export type ExcludeHouseholdsPpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables> & TChildProps;
+export function withExcludeHouseholdsPp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExcludeHouseholdsPpMutation,
+  ExcludeHouseholdsPpMutationVariables,
+  ExcludeHouseholdsPpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables, ExcludeHouseholdsPpProps<TChildProps>>(ExcludeHouseholdsPpDocument, {
+      alias: 'excludeHouseholdsPp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExcludeHouseholdsPpMutation__
+ *
+ * To run a mutation, you first call `useExcludeHouseholdsPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExcludeHouseholdsPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [excludeHouseholdsPpMutation, { data, loading, error }] = useExcludeHouseholdsPpMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      excludedHouseholdsIds: // value for 'excludedHouseholdsIds'
+ *   },
+ * });
+ */
+export function useExcludeHouseholdsPpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>(ExcludeHouseholdsPpDocument, baseOptions);
+      }
+export type ExcludeHouseholdsPpMutationHookResult = ReturnType<typeof useExcludeHouseholdsPpMutation>;
+export type ExcludeHouseholdsPpMutationResult = ApolloReactCommon.MutationResult<ExcludeHouseholdsPpMutation>;
+export type ExcludeHouseholdsPpMutationOptions = ApolloReactCommon.BaseMutationOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
 export const ExportXlsxPpListDocument = gql`
     mutation ExportXlsxPPList($paymentPlanId: ID!) {
   exportXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId) {
@@ -18010,8 +18236,8 @@ export type AllDeliveryMechanismsQueryHookResult = ReturnType<typeof useAllDeliv
 export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsLazyQuery>;
 export type AllDeliveryMechanismsQueryResult = ApolloReactCommon.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean) {
+  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, isFollowUp: $isFollowUp) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -18024,6 +18250,7 @@ export const AllPaymentPlansForTableDocument = gql`
       node {
         id
         unicefId
+        isFollowUp
         status
         createdBy {
           id
@@ -18101,6 +18328,7 @@ export function withAllPaymentPlansForTable<TProps, TChildProps = {}>(operationO
  *      totalEntitledQuantityTo: // value for 'totalEntitledQuantityTo'
  *      dispersionStartDate: // value for 'dispersionStartDate'
  *      dispersionEndDate: // value for 'dispersionEndDate'
+ *      isFollowUp: // value for 'isFollowUp'
  *   },
  * });
  */
@@ -18216,6 +18444,7 @@ export const PaymentDocument = gql`
     parent {
       id
       status
+      isFollowUp
       unicefId
       program {
         id
@@ -18290,6 +18519,7 @@ export const PaymentPlanDocument = gql`
     id
     unicefId
     status
+    canCreateFollowUp
     backgroundActionStatus
     canCreatePaymentVerificationPlan
     availablePaymentRecordsCount
@@ -18325,6 +18555,7 @@ export const PaymentPlanDocument = gql`
     totalEntitledQuantity
     totalDeliveredQuantity
     totalUndeliveredQuantity
+    totalWithdrawnHouseholdsCount
     approvalProcess {
       totalCount
       edgeCount
@@ -18488,6 +18719,7 @@ export const PaymentPlanDocument = gql`
       edges {
         node {
           id
+          status
         }
       }
     }
@@ -18499,6 +18731,28 @@ export const PaymentPlanDocument = gql`
       pending
       numberOfPayments
       reconciled
+    }
+    excludedHouseholds {
+      id
+      unicefId
+    }
+    isFollowUp
+    followUps {
+      totalCount
+      edges {
+        node {
+          id
+          unicefId
+          createdAt
+          paymentItems {
+            totalCount
+          }
+        }
+      }
+    }
+    sourcePaymentPlan {
+      id
+      unicefId
     }
   }
 }
@@ -23221,6 +23475,7 @@ export type ResolversTypes = {
   ActionPaymentPlanMutation: ResolverTypeWrapper<ActionPaymentPlanMutation>,
   CreatePaymentPlanInput: CreatePaymentPlanInput,
   CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>,
+  CreateFollowUpPaymentPlanMutation: ResolverTypeWrapper<CreateFollowUpPaymentPlanMutation>,
   UpdatePaymentPlanInput: UpdatePaymentPlanInput,
   UpdatePaymentPlanMutation: ResolverTypeWrapper<UpdatePaymentPlanMutation>,
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>,
@@ -23234,6 +23489,7 @@ export type ResolversTypes = {
   ImportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListMutation>,
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
+  ExcludeHouseholdsMutation: ResolverTypeWrapper<ExcludeHouseholdsMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -23667,6 +23923,7 @@ export type ResolversParentTypes = {
   ActionPaymentPlanMutation: ActionPaymentPlanMutation,
   CreatePaymentPlanInput: CreatePaymentPlanInput,
   CreatePaymentPlanMutation: CreatePaymentPlanMutation,
+  CreateFollowUpPaymentPlanMutation: CreateFollowUpPaymentPlanMutation,
   UpdatePaymentPlanInput: UpdatePaymentPlanInput,
   UpdatePaymentPlanMutation: UpdatePaymentPlanMutation,
   DeletePaymentPlanMutation: DeletePaymentPlanMutation,
@@ -23680,6 +23937,7 @@ export type ResolversParentTypes = {
   ImportXLSXPaymentPlanPaymentListMutation: ImportXlsxPaymentPlanPaymentListMutation,
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ImportXlsxPaymentPlanPaymentListPerFspMutation,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation,
+  ExcludeHouseholdsMutation: ExcludeHouseholdsMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -24095,6 +24353,10 @@ export type CreateDashboardReportResolvers<ContextType = any, ParentType extends
   success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
+export type CreateFollowUpPaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFollowUpPaymentPlanMutation'] = ResolversParentTypes['CreateFollowUpPaymentPlanMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
 export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
   grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
@@ -24274,6 +24536,10 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['GenericPaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type ExcludeHouseholdsMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExcludeHouseholdsMutation'] = ResolversParentTypes['ExcludeHouseholdsMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
 export type ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXLSXPaymentPlanPaymentListMutation'] = ResolversParentTypes['ExportXLSXPaymentPlanPaymentListMutation']> = {
@@ -25174,6 +25440,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
+  createFollowUpPaymentPlan?: Resolver<Maybe<ResolversTypes['CreateFollowUpPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFollowUpPaymentPlanArgs, 'dispersionEndDate' | 'dispersionStartDate' | 'paymentPlanId'>>,
   updatePaymentPlan?: Resolver<Maybe<ResolversTypes['UpdatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>>,
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>,
   chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
@@ -25183,6 +25450,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>,
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
+  excludeHouseholds?: Resolver<Maybe<ResolversTypes['ExcludeHouseholdsMutation']>, ParentType, ContextType, RequireFields<MutationsExcludeHouseholdsArgs, 'excludedHouseholdsIds' | 'paymentPlanId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -25283,10 +25551,14 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   parent?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
+  conflicted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   entitlementDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
   collector?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  sourcePayment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
+  isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
   paymentPlanSoftConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -25347,6 +25619,9 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   importedFileDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   steficonRule?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>,
   steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+  isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
   approvalProcess?: Resolver<ResolversTypes['ApprovalProcessNodeConnection'], ParentType, ContextType, PaymentPlanNodeApprovalProcessArgs>,
@@ -25363,6 +25638,9 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reconciliationSummary?: Resolver<Maybe<ResolversTypes['ReconciliationSummaryNode']>, ParentType, ContextType>,
+  excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>,
+  canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
@@ -26830,6 +27108,7 @@ export type Resolvers<ContextType = any> = {
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
+  CreateFollowUpPaymentPlanMutation?: CreateFollowUpPaymentPlanMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
@@ -26859,6 +27138,7 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
+  ExcludeHouseholdsMutation?: ExcludeHouseholdsMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
   ExportXlsxPaymentVerificationPlanFile?: ExportXlsxPaymentVerificationPlanFileResolvers<ContextType>,

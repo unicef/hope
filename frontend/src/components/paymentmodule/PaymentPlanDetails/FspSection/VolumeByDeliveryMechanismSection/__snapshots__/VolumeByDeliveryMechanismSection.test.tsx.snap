@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
     class="MuiBox-root MuiBox-root-1"
   >
     <div
-      class="sc-htpNat fhvuOp"
+      class="sc-bxivhb lealwS"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -16,7 +16,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
        
     </div>
     <div
-      class="sc-bxivhb cDFCAd"
+      class="sc-ifAKCX WOpjk"
     >
       <div
         class="MuiGrid-root MuiGrid-container"
@@ -25,7 +25,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
         >
           <div
-            class="sc-ifAKCX jUgrjC"
+            class="sc-htpNat eLbkxR"
             color="#D8E1EE"
           >
             <div>
@@ -52,7 +52,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
         >
           <div
-            class="sc-ifAKCX bPCvhn"
+            class="sc-htpNat kToeqy"
             color=" #d8d8d8"
           >
             <div>
@@ -79,7 +79,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
         >
           <div
-            class="sc-ifAKCX ecqLoz"
+            class="sc-htpNat klzvan"
             color="#003C8F"
           >
             <div>

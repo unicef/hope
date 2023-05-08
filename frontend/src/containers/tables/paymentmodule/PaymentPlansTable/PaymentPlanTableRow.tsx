@@ -32,7 +32,9 @@ export const PaymentPlanTableRow = ({
 }: PaymentVerificationTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const paymentPlanPath = `/${businessArea}/payment-module/payment-plans/${plan.id}`;
+  const paymentPlanPath = `/${businessArea}/payment-module/${
+    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+  }/${plan.id}`;
   const handleClick = (): void => {
     history.push(paymentPlanPath);
   };
@@ -50,6 +52,7 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align='left'>
+        {plan.isFollowUp ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
