@@ -17,7 +17,7 @@ def populate_program_cycles(apps, schema_editor):
                 program=program,
                 start_date=program.start_date,
                 end_date=program.end_date,
-                status=ProgramCycle.ACTIVE,
+                status="ACTIVE", # ProgramCycle.ACTIVE
             )
         )
 
