@@ -29,7 +29,15 @@ backend:
 
 frontend:
   image: #from-pipeline
-
+elasticsearch:
+  data:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 2500Mi
+      requests:
+        cpu: 25m
+        memory: 2048Mi      
 celery:
   image: #from-pipeline
   replicaCount: 2
