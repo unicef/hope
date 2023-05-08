@@ -67,6 +67,14 @@ export function FinishVerificationPlan({
     return null;
   };
 
+  const generateModalPrefixText = (): string => {
+    const beneficiariesFloat = parseFloat(beneficiariesPercent());
+    if (beneficiariesFloat) {
+      return beneficiariesFloat < 100 ? `Only ${beneficiariesPercent()}` : "All"
+    }
+    return "None"
+  }
+
   return (
     <>
       <Box p={2}>
@@ -94,9 +102,9 @@ export function FinishVerificationPlan({
             <Box>
               {beneficiariesPercent() && (
                 <Typography variant='body2' style={{ marginTop: '20px' }}>
-                  {t('Only')} {beneficiariesPercent()}{' '}
+                  {generateModalPrefixText()}
                   {t(
-                    'of the beneficiaries have responded to this payment verification.',
+                    ' of the beneficiaries have responded to this payment verification.',
                   )}
                 </Typography>
               )}
