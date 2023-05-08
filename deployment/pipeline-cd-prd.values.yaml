@@ -33,11 +33,11 @@ elasticsearch:
   data:
     resources:
       limits:
-        cpu: 100m
-        memory: 2500Mi
+        cpu: '4'
+        memory: 5000Mi
       requests:
-        cpu: 25m
-        memory: 2048Mi      
+        cpu: 500m
+        memory: 2Gi      
 celery:
   image: #from-pipeline
   replicaCount: 2
