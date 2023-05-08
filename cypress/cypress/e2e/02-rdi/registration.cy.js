@@ -12,7 +12,10 @@ context("RDI", () => {
     cy.get('[data-cy="filter-import-date"]').should('be.visible')
     cy.get('[data-cy="filter-status"]').should('be.visible')
   })
-  
+  it("Registration Data Import and merge the data and verify ", () => {
+    uploadRDIFile();
+    return;
+  })
  it("Registration Data Import and merge the data and verify merge file", () => {
     uploadRDIFile();
     mergeRDIFile()
@@ -43,8 +46,7 @@ function uploadRDIFile() {
       });
     });
   });
-  cy.wait(5000)
-  cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+  cy.get('[data-cy="button-import-rdi"]', { timeout: 20000}).should('be.enabled').click()
   cy.get("span").contains("Registration Data Import").click();
   cy.reload()
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
