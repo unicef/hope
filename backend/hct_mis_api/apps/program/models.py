@@ -212,3 +212,5 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
 
     def __str__(self) -> str:
         return f"{self.program.name} - cycle {self.iteration}"
+
+    ProgramCycle.ACTIVE
