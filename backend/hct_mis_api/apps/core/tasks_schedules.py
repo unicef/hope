@@ -41,12 +41,4 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.registration_datahub.celery_tasks.check_rdi_import_periodic_task",
         "schedule": crontab(minute="*/15"),
     },
-    "check_rdi_merge_periodic_task": {
-        "task": "hct_mis_api.apps.registration_datahub.celery_tasks.check_rdi_merge_periodic_task",
-        "schedule": crontab(minute="*/15"),
-    },
-    "check_send_tp_periodic_task": {
-        "task": "hct_mis_api.apps.targeting.celery_tasks.check_send_tp_periodic_task",
-        "schedule": crontab(minute="*/15"),
-    },
 }

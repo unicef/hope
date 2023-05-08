@@ -100,15 +100,3 @@ def target_population_full_rebuild(self: Any, target_population_id: UUID) -> Non
             target_population.build_status = TargetPopulation.BUILD_STATUS_FAILED
             target_population.save()
             raise self.retry(exc=e)
-
-
-@app.task
-@sentry_tags
-def check_send_tp_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import send_tp_celery_manager
-
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        send_tp_celery_manager.execute()
-    return True

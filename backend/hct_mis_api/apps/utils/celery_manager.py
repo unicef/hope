@@ -1,8 +1,10 @@
 import abc
 import logging
+from functools import cached_property
 from typing import Any, List, Tuple
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.core.celery_utils import get_all_celery_tasks, get_task_in_queue_or_running
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -15,92 +17,77 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 logger = logging.getLogger(__name__)
 
 
-class BaseCeleryManager(abc.ABC):
-    model: Any = ""
-    model_status: str = ""
-    task: Any = ""
-    lookup: str = ""
+class BaseCeleryTaskManager:
+    pending_status = None
+    pending_queryset = None
+    in_progress_queryset = None
+    queue = "default"
 
-    def create_obj_list(self) -> List[str]:
-        return list(self.model.objects.filter(status=self.model_status).values_list("id", flat=True))
+    @cached_property
+    def celery_task(self):
+        raise NotImplementedError
 
-    @staticmethod
-    def get_celery_tasks() -> Tuple[Any, Any, Any]:
-        i = app.control.inspect()
-        return i.scheduled(), i.active(), i.reserved()
+    def __init__(self):
+        self.all_celery_tasks = get_all_celery_tasks(self.queue)
 
-    @abc.abstractmethod
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        pass
+    def get_task_kwargs(self, model_object: any) -> dict:
+        raise NotImplementedError
 
-    def execute(self) -> None:
-        list_to_check = self.create_obj_list()
-        celery_ids_list = []
-        model_name = self.model.__name__
+    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> dict:
+        raise NotImplementedError
 
-        for group in self.get_celery_tasks():
-            for _, task_list in group.items():
-                for task in task_list:
-                    task_name = task["name"].split(".")[-1]
-                    if task_name == self.task.__name__:
-                        celery_ids_list.append(task["kwargs"].get(self.lookup))
+    def execute(self):
+        pending_queryset = self.pending_queryset
+        in_progress_queryset = self.in_progress_queryset
 
-        ids_to_run = [rdi_id for rdi_id in list_to_check if rdi_id not in celery_ids_list]
-        if not ids_to_run:
-            logger.info(f"Found no {model_name} with status {self.model_status}")
+        for model_object in in_progress_queryset:
+            task_kwargs = self.get_task_kwargs(model_object)
+            task = self.get_celery_task_by_kwargs(task_kwargs)
+            if task and task.get("status") == "queued" or not task:
+                logger.info(
+                    f"{in_progress_queryset.model.__name__}: id {model_object.id} was in status IN PROGRESS importing should be PENDING because  task was {'not_in_queue' if not task else 'queued'}"
+                )
+                model_object.status = self.pending_status
+            model_object.save()
 
-        task_kwargs = self.create_kwargs(ids_to_run)
-        for kwargs in task_kwargs:
-            self.task.delay(**kwargs)
-            logger.info(f"Celery task run for {model_name} id: {kwargs[self.lookup]} from periodic task scheduler")
-
-
-class RdiImportCeleryManager(BaseCeleryManager):
-    model = RegistrationDataImport
-    model_status = RegistrationDataImport.IMPORTING
-    task = registration_xlsx_import_task
-    lookup = "registration_data_import_id"
-
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        registration_xlsx_import_task_kwargs = []
-        for rdi_id in ids_to_run:
-            rdi = RegistrationDataImport.objects.get(id=rdi_id)
-            rdi_datahub = RegistrationDataImportDatahub.objects.get(id=str(rdi.datahub_id))
-            kwargs = {
-                "registration_data_import_id": str(rdi_datahub.id),
-                "import_data_id": str(rdi_datahub.import_data_id),
-                "business_area_id": str(rdi.business_area.id),
-            }
-            registration_xlsx_import_task_kwargs.append(kwargs)
-        return registration_xlsx_import_task_kwargs
+        for model_object in pending_queryset:
+            task_kwargs = self.get_task_kwargs(model_object)
+            task = self.get_celery_task_by_kwargs(task_kwargs)
+            if task:
+                continue
+            logger.info(
+                f"{pending_queryset.model.__name__}: id {model_object.id} was in status PENDING but not in celery queue"
+            )
+            logger.info(f"registration_xlsx_import_task scheduled with kwargs {task_kwargs}")
+            self.celery_task.delay(**task_kwargs)
 
 
-class RdiMergeCeleryManager(BaseCeleryManager):
-    model = RegistrationDataImport
-    model_status = RegistrationDataImport.MERGING
-    task = merge_registration_data_import_task
-    lookup = "registration_data_import_id"
+class RegistrationDataXlsImportCeleryManager(BaseCeleryTaskManager):
+    pending_status = RegistrationDataImport.IMPORT_SCHEDULED
+    pending_queryset = RegistrationDataImport.objects.filter(
+        status=RegistrationDataImport.IMPORT_SCHEDULED, data_source=RegistrationDataImport.XLS
+    )
+    in_progress_queryset = RegistrationDataImport.objects.filter(
+        status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
+    )
 
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        merge_registration_data_import_task_kwargs = []
-        for rdi_id in ids_to_run:
-            merge_registration_data_import_task_kwargs.append({"registration_data_import_id": str(rdi_id)})
-        return merge_registration_data_import_task_kwargs
+    @cached_property
+    def celery_task(self):
+        from hct_mis_api.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 
+        return registration_xlsx_import_task
 
-class SendTPCeleryManager(BaseCeleryManager):
-    model = TargetPopulation
-    model_status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
-    task = send_target_population_task
-    lookup = "target_population_id"
+    def get_task_kwargs(self, rdi: RegistrationDataImport) -> dict:
+        rdi_datahub = RegistrationDataImportDatahub.objects.get(hct_id=rdi.id)
+        return {
+            "registration_data_import_id": str(rdi_datahub.id),
+            "import_data_id": str(rdi_datahub.import_data_id),
+            "business_area_id": str(rdi.business_area_id),
+        }
 
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        send_tp_task_kwargs = []
-        for tp_id in ids_to_run:
-            send_tp_task_kwargs.append({"target_population_id": str(tp_id)})
-        return send_tp_task_kwargs
-
-
-rdi_import_celery_manager = RdiImportCeleryManager()
-rdi_merge_celery_manager = RdiMergeCeleryManager()
-send_tp_celery_manager = SendTPCeleryManager()
+    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> dict:
+        return get_task_in_queue_or_running(
+            name=self.celery_task.name,
+            all_celery_tasks=self.all_celery_tasks,
+            kwargs=task_kwargs,
+        )
