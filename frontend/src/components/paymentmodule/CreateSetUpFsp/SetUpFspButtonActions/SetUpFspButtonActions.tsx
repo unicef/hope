@@ -2,7 +2,6 @@ import { Box, Button } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ButtonTooltip } from '../../../core/ButtonTooltip';
 
 interface SetUpFspButtonActionsProps {
   step: number;
@@ -10,7 +9,6 @@ interface SetUpFspButtonActionsProps {
   businessArea: string;
   paymentPlanId: string;
   handleBackStep: () => void;
-  isFspEmpty: boolean;
 }
 
 export const SetUpFspButtonActions = ({
@@ -19,22 +17,18 @@ export const SetUpFspButtonActions = ({
   businessArea,
   paymentPlanId,
   handleBackStep,
-  isFspEmpty,
 }: SetUpFspButtonActionsProps): React.ReactElement => {
   const { t } = useTranslation();
-
   return (
     <Box pt={3} display='flex'>
       <Box mr={3}>
         {step === 0 && (
-          <ButtonTooltip
+          <Button
             component={Link}
-            title={t('All delivery mechanisms must have a FSP assigned')}
             to={`/${businessArea}/payment-module/payment-plans/${paymentPlanId}`}
-            disabled={isFspEmpty}
           >
             {t('Cancel')}
-          </ButtonTooltip>
+          </Button>
         )}
         {step === 1 && <Button onClick={handleBackStep}>{t('Back')}</Button>}
       </Box>
