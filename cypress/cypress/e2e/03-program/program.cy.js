@@ -7,7 +7,7 @@ context("Program", () => {
     cy.get("span").contains("Programme Management").click();
     cy.get("h5").should('contain', "Programme Management");
     });
-  it("visit the Programs page and create a program", () => {
+  it("Create a program", () => {
     cy.get('[data-cy="button-new-program"]').click({ force: true });
     cy.get("h6").contains("Set-up a new Programme");
     cy.uniqueSeed().then((seed) => {
