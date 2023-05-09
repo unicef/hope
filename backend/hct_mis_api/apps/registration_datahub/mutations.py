@@ -149,15 +149,6 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
         created_obj_hct.status = RegistrationDataImport.IMPORT_SCHEDULED
         created_obj_hct.save(update_fields=["status"])
-
-        # transaction.on_commit(
-        #     lambda: registration_xlsx_import_task.delay(
-        #         registration_data_import_id=str(created_obj_datahub.id),
-        #         import_data_id=str(import_data_obj.id),
-        #         business_area_id=str(business_area.id),
-        #     )
-        # )
-
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
 
 
