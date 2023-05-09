@@ -45,17 +45,17 @@ def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
 
 @contextmanager
 def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
-    if cache.get(key):
-        logger.info(f"Task with key {key} is already running")
-        yield False
-    else:
-        try:
-            logger.info(f"Task with key {key} running")
-            cache.set(key, True, timeout=timeout)
+    now = timezone.now()
+    try:
+        if cache.get_or_set(key, now, timeout=timeout) == now:
+            logger.info(f"Task with key {key} started")
             yield True
-        finally:
-            cache.delete(key)
-            logger.info(f"Task with key {key} finished")
+        else:
+            logger.info(f"Task with key {key} is already running")
+            yield False
+    finally:
+        cache.delete(key)
+        logger.info(f"Task with key {key} finished")
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -480,7 +480,7 @@ def check_rdi_import_periodic_task() -> bool:
     with locked_cache(key="check_rdi_import_periodic_task1", timeout=15 * 60) as locked:
         if not locked:
             raise Exception(f"cannot set lock on check_rdi_import_periodic_task")
-        from hct_mis_api.apps.utils.celery_manager import RegistrationDataXlsImportCeleryManager
+        from hct_mis_api.apps.utils.celery_manager import RegistrationDataXlsxImportCeleryManager
 
-        manager = RegistrationDataXlsImportCeleryManager()
+        manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()

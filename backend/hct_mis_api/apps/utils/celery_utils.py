@@ -19,9 +19,7 @@ def get_worker_tasks(
         all_tasks.extend(format_tasks(i.reserved(), "queued"))
         all_tasks.extend(format_tasks(i.scheduled(), "queued"))
         return all_tasks
-    except ValueError:
-        return get_worker_tasks(celery_app)
-    except AttributeError:
+    except (ValueError, AttributeError):
         return get_worker_tasks(celery_app)
 
 
@@ -29,7 +27,6 @@ def get_all_celery_tasks(queue_name):
     import base64
     import json
 
-    # Get a configured instance of a celery app:
     from hct_mis_api.apps.core.celery import app as celery_app
 
     all_tasks = []
@@ -66,10 +63,7 @@ def get_task_in_queue_or_running(name, all_celery_tasks=None, args=None, kwargs=
             if not all(a == b for a, b in zip(args, task.get("args", []))):
                 continue
         if kwargs is not None:
-            if not all(
-                task.get("kwargs", {}).get(key) == value
-                for key, value in kwargs.items()
-            ):
+            if not all(task.get("kwargs", {}).get(key) == value for key, value in kwargs.items()):
                 continue
         return task
 
