@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -18,6 +18,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -33,6 +34,9 @@ from hct_mis_api.apps.registration_datahub.services.base_flex_registration_servi
 
 
 class CzechRepublicFlexRegistration(BaseRegistrationService):
+    BUSINESS_AREA_SLUG: str = "czech-republic"
+    REGISTRATION_ID: Tuple = (25, )
+
     INDIVIDUAL_MAPPING_DICT = {
         "sex": "gender_i_c",
         "birth_date": "birth_date_i_c",
@@ -74,7 +78,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     )
 
     def _prepare_household_data(
-        self, record, household_address, consent_data, needs_assessment, registration_data_import
+            self, record, household_address, consent_data, needs_assessment, registration_data_import
     ):
         address = household_address.get("address_h_c", "") + household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
@@ -92,9 +96,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             consent=consent_data.get("consent_h_c", False),
             flex_fields=needs_assessment,
             address=address,
-            zip_code=zip_code,
-            admin1=admin1,
-            admin2=admin2,
+            zip_code=zip_code
         )
 
         return household_data
@@ -160,7 +162,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         return documents
 
     def create_household_for_rdi_household(self, record: Record, registration_data_import):
-        # remember to check number
+        self._check_registration_id(record.registration, "Czech Republic data is processed only from registration 25")
         record_data_dict = record.get_data()
 
         household_address = record_data_dict.get("household-address")
@@ -189,8 +191,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 "admin_area_title",
                 "admin1_title",
                 "admin2_title",
-                "admin3_title",
-                "admin4_title",
                 "kobo_asset_id",
             )
         )
@@ -213,7 +213,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 if bank_account_data:
                     self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
                 if role:
-                    if role == "primary":
+                    if role.upper() == ROLE_PRIMARY:
                         ImportedIndividualRoleInHousehold.objects.create(
                             individual=individual, household=household, role=ROLE_PRIMARY
                         )
