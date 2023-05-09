@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING, Any, Dict, List
 
+from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
+    CzechRepublicFlexRegistration,
+)
 from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
 from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
-)
-from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
-    CzechRepublicFlexRegistration
 )
 
 if TYPE_CHECKING:

@@ -1,4 +1,6 @@
-from typing import List, Tuple
+import json
+import logging
+from typing import Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -18,7 +20,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -27,15 +28,18 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
     Record,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class CzechRepublicFlexRegistration(BaseRegistrationService):
     BUSINESS_AREA_SLUG: str = "czech-republic"
-    REGISTRATION_ID: Tuple = (25, )
+    REGISTRATION_ID: Tuple = (25,)
 
     INDIVIDUAL_MAPPING_DICT = {
         "sex": "gender_i_c",
@@ -78,30 +82,38 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     )
 
     def _prepare_household_data(
-            self, record, household_address, consent_data, needs_assessment, registration_data_import
-    ):
+        self,
+        record: Record,
+        household_address: Dict,
+        consent_data: Dict,
+        needs_assessment: Dict,
+        registration_data_import: RegistrationDataImportDatahub,
+    ) -> Dict:
         address = household_address.get("address_h_c", "") + household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
 
-        admin1 = household_address.get("admin1_h_c", "")
-        admin2 = household_address.get("admin2_h_c", "")
+        # admin1 = household_address.get("admin1_h_c", "")
+        # admin2 = household_address.get("admin2_h_c", "")
 
-        household_data = dict(
-            flex_registrations_record=record,
-            registration_data_import=registration_data_import,
-            first_registration_date=record.timestamp,
-            last_registration_date=record.timestamp,
-            country_origin=Country(code="CZ"),
-            country=Country(code="CZ"),
-            consent=consent_data.get("consent_h_c", False),
-            flex_fields=needs_assessment,
-            address=address,
-            zip_code=zip_code
-        )
+        return {
+            "flex_registrations_record": record,
+            "registration_data_import": registration_data_import,
+            "first_registration_date": record.timestamp,
+            "last_registration_date": record.timestamp,
+            "country_origin": Country(code="CZ"),
+            "country": Country(code="CZ"),
+            "consent": consent_data.get("consent_h_c", False),
+            "flex_fields": needs_assessment,
+            "address": address,
+            "zip_code": zip_code,
+        }
 
-        return household_data
-
-    def _prepare_individual_data(self, individual_dict, household, registration_data_import):
+    def _prepare_individual_data(
+        self,
+        individual_dict: Dict,
+        household: ImportedHousehold,
+        registration_data_import: RegistrationDataImportDatahub,
+    ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
             flex_fields=build_flex_arg_dict_from_list_if_exists(individual_dict, self.INDIVIDUAL_FLEX_FIELDS),
@@ -128,16 +140,21 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_bank_account_info(self, individual_dict, imported_individual):
-        bank_account_number = individual_dict.get("bank_account_number")
+    def _prepare_bank_account_info(
+        self, individual_dict: Dict, imported_individual: ImportedIndividual
+    ) -> Optional[Dict]:
+        bank_account_number = individual_dict.get("bank_account_number_h_f")
         if not bank_account_number:
             return None
 
-        return ImportedBankAccountInfo.objects.create(
-            bank_account_number=bank_account_number, individual=imported_individual
-        )
+        return {
+            "bank_account_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
+            "individual": imported_individual,
+        }
 
-    def _prepare_documents(self, individual_dict, imported_individual):
+    def _prepare_documents(
+        self, individual_dict: Dict, imported_individual: ImportedIndividual
+    ) -> list[ImportedDocument]:
         documents = []
 
         for document_key, individual_document_number in self.DOCUMENT_MAPPING:
@@ -161,17 +178,22 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return documents
 
-    def create_household_for_rdi_household(self, record: Record, registration_data_import):
+    def create_household_for_rdi_household(
+        self, record: Record, registration_data_import: RegistrationDataImportDatahub
+    ) -> None:
         self._check_registration_id(record.registration, "Czech Republic data is processed only from registration 25")
+
         record_data_dict = record.get_data()
+        if isinstance(record_data_dict, str):
+            record_data_dict = json.loads(record_data_dict)
 
-        household_address = record_data_dict.get("household-address")
-        consent_data = record_data_dict.get("consent")
-        needs_assessment = record_data_dict.get("needs-assessment")
+        household_address = record_data_dict.get("household-address", [])[0]
+        consent_data = record_data_dict.get("consent", [])[0]
+        needs_assessment = record_data_dict.get("needs-assessment", [])[0]
 
-        primary_carer_info = record_data_dict.get("primary-carer-info")
-        children_information = record_data_dict.get("children-information")
-        legal_guardian_information = record_data_dict.get("legal-guardian-information")
+        primary_carer_info = record_data_dict.get("primary-carer-info", [])
+        children_information = record_data_dict.get("children-information", [])
+        legal_guardian_information = record_data_dict.get("legal-guardian-information", [])
 
         individuals_array = [*primary_carer_info, *children_information, *legal_guardian_information]
 
@@ -201,7 +223,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
-                role = individual_data.pop("role_i_c")
+                role = individual_dict.pop("role_i_c", "")
                 phone_no = individual_data.pop("phone_no", "")
 
                 individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
@@ -212,6 +234,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
                     self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
+
                 if role:
                     if role.upper() == ROLE_PRIMARY:
                         ImportedIndividualRoleInHousehold.objects.create(

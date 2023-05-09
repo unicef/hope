@@ -300,15 +300,15 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @log_start_and_end
 @sentry_tags
 def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Tuple) -> None:
+    from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
+        CzechRepublicFlexRegistration,
+    )
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         SriLankaRegistrationService,
     )
     from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
         UkraineBaseRegistrationService,
         UkraineRegistrationService,
-    )
-    from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
-        CzechRepublicFlexRegistration
     )
 
     try:
