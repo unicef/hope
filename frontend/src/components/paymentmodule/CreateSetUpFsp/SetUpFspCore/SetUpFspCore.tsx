@@ -176,17 +176,6 @@ export const SetUpFspCore = ({
       enableReinitialize
     >
       {({ values, submitForm }) => {
-        const checkFspIsEmpty = (obj): boolean => {
-          for (let i = 0; i < obj.deliveryMechanisms.length; i + 1) {
-            if (obj.deliveryMechanisms[i].fsp === '') {
-              return true;
-            }
-          }
-          return false;
-        };
-
-        const isFspEmpty = checkFspIsEmpty(values);
-
         return (
           <Form>
             <AutoSubmitFormOnEnter />
@@ -277,7 +266,6 @@ export const SetUpFspCore = ({
                   businessArea={businessArea}
                   paymentPlanId={id}
                   handleBackStep={handleBackStep}
-                  isFspEmpty={isFspEmpty}
                 />
               </ContainerColumnWithBorder>
             </Box>
