@@ -25,6 +25,7 @@ const initialFilter = {
   ageMax: '',
   flags: [],
   orderBy: 'unicef_id',
+  status: '',
 };
 
 export const PopulationIndividualsPage = (): React.ReactElement => {

@@ -2,7 +2,7 @@ import abc
 import logging
 from typing import Any, List, Tuple
 
-from django.db.models import Q
+from django.core.exceptions import FieldDoesNotExist
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
@@ -22,15 +22,19 @@ logger = logging.getLogger(__name__)
 class BaseCeleryManager(abc.ABC):
     model: Any = ""
     model_status: str = ""
+    model_status_field: str = "status"
     task: Any = ""
     lookup: str = ""
 
     def create_obj_list(self) -> List[str]:
-        return list(
-            self.model.objects.filter(
-                Q(status=self.model_status) | Q(background_action_status=self.model_status)
-            ).values_list("id", flat=True)
-        )
+        try:
+            self.model._meta.get_field(self.model_status_field)
+            return list(
+                self.model.objects.filter(**{self.model_status_field: self.model_status}).values_list("id", flat=True)
+            )
+        except FieldDoesNotExist as e:
+            logger.exception(f"Field {self.model_status_field} for model {self.model} does not exists. {e}")
+            raise
 
     @staticmethod
     def get_celery_tasks() -> Tuple[Any, Any, Any]:
@@ -47,11 +51,12 @@ class BaseCeleryManager(abc.ABC):
         model_name = self.model.__name__
 
         for group in self.get_celery_tasks():
-            for _, task_list in group.items():
-                for task in task_list:
-                    task_name = task["name"].split(".")[-1]
-                    if task_name == self.task.__name__:
-                        celery_ids_list.append(task["kwargs"].get(self.lookup))
+            if group is not None:
+                for _, task_list in group.items():
+                    for task in task_list:
+                        task_name = task.get("name", "").split(".")[-1]
+                        if task_name == self.task.__name__:
+                            celery_ids_list.append(task["kwargs"].get(self.lookup))
 
         ids_to_run = [rdi_id for rdi_id in list_to_check if rdi_id not in celery_ids_list]
         if not ids_to_run:
@@ -112,6 +117,7 @@ class SendTPCeleryManager(BaseCeleryManager):
 class XlsxExportingCeleryManager(BaseCeleryManager):
     model = PaymentPlan
     model_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    model_status_field = "background_action_status"
     task = create_payment_plan_payment_list_xlsx
     lookup = "payment_plan_id"
 

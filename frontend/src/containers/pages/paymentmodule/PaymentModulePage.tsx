@@ -20,6 +20,7 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
+  isFollowUp: null,
 };
 
 export const PaymentModulePage = (): React.ReactElement => {

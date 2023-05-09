@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any
 from unittest import mock
 
@@ -19,9 +20,12 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
+from hct_mis_api.apps.payment.celery_tasks import (
+    prepare_follow_up_payment_plan_task,
+    prepare_payment_plan_task,
+)
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
@@ -201,7 +205,7 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         self.assertEqual(pp.payment_items.count(), 1)
 
         new_targeting = TargetPopulationFactory()
@@ -323,7 +327,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -356,7 +360,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -379,3 +383,118 @@ class TestPaymentPlanServices(APITestCase):
                 input_data=dict(end_date=timezone.datetime(2021, 9, 10, tzinfo=utc))  # datetime
             )
             PaymentPlanService(payment_plan=pp).update(input_data=dict(end_date=parse_date("2021-09-10")))  # date
+
+    @freeze_time("2020-10-10")
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
+        pp = PaymentPlanFactory(
+            total_households_count=1,
+            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+        )
+
+        new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
+        new_targeting.program = ProgramFactory(
+            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
+        )
+
+        payments = []
+
+        for _ in range(4):
+            hoh = IndividualFactory(household=None)
+            hh = HouseholdFactory(head_of_household=hoh)
+            IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
+            IndividualFactory.create_batch(2, household=hh)
+            payment = PaymentFactory(parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+            payments.append(payment)
+
+        new_targeting.households.set([p.household for p in payments])
+        new_targeting.save()
+        pp.target_population = new_targeting
+        pp.save()
+
+        dispersion_start_date = pp.dispersion_start_date + timedelta(days=1)
+        dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
+
+        with self.assertRaisesMessage(
+            GraphQLError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
+        ):
+            PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
+
+        # do not create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED,
+        for payment, status in zip(
+            payments[:3], [Payment.STATUS_ERROR, Payment.STATUS_NOT_DISTRIBUTED, Payment.STATUS_FORCE_FAILED]
+        ):
+            payment.status = status
+            payment.save()
+
+        # do not create follow-up payments for withdrawn households
+        payments[3].household.withdrawn = True
+        payments[3].household.save()
+
+        pp_error = payments[0]
+        pp_not_distributed = payments[1]
+        pp_force_failed = payments[2]
+
+        with self.assertNumQueries(4):
+            follow_up_pp = PaymentPlanService(pp).create_follow_up(
+                self.user, dispersion_start_date, dispersion_end_date
+            )
+
+        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.PREPARING)
+        self.assertEqual(follow_up_pp.target_population, pp.target_population)
+        self.assertEqual(follow_up_pp.program, pp.program)
+        self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
+        self.assertEqual(follow_up_pp.business_area, pp.business_area)
+        self.assertEqual(follow_up_pp.created_by, self.user)
+        self.assertEqual(follow_up_pp.currency, pp.currency)
+        self.assertEqual(follow_up_pp.dispersion_start_date, dispersion_start_date)
+        self.assertEqual(follow_up_pp.dispersion_end_date, dispersion_end_date)
+        self.assertEqual(follow_up_pp.start_date, pp.start_date)
+        self.assertEqual(follow_up_pp.end_date, pp.end_date)
+        self.assertEqual(follow_up_pp.total_households_count, 0)
+        self.assertEqual(follow_up_pp.total_individuals_count, 0)
+        self.assertEqual(follow_up_pp.payment_items.count(), 0)
+
+        self.assertEqual(pp.follow_ups.count(), 1)
+
+        with self.assertNumQueries(12):
+            prepare_follow_up_payment_plan_task(follow_up_pp.id)
+
+        self.assertEqual(follow_up_pp.payment_items.count(), 3)
+        self.assertEqual(
+            {pp_error.id, pp_not_distributed.id, pp_force_failed.id},
+            set(follow_up_pp.payment_items.values_list("source_payment_id", flat=True)),
+        )
+
+        follow_up_payment = follow_up_pp.payment_items.first()
+        self.assertEqual(follow_up_payment.status, Payment.STATUS_PENDING)
+        self.assertEqual(follow_up_payment.parent, follow_up_pp)
+        self.assertIsNotNone(follow_up_payment.source_payment)
+        self.assertEqual(follow_up_payment.is_follow_up, True)
+        self.assertEqual(follow_up_payment.business_area, follow_up_payment.source_payment.business_area)
+        self.assertEqual(follow_up_payment.household, follow_up_payment.source_payment.household)
+        self.assertEqual(follow_up_payment.head_of_household, follow_up_payment.source_payment.head_of_household)
+        self.assertEqual(follow_up_payment.collector, follow_up_payment.source_payment.collector)
+        self.assertEqual(follow_up_payment.currency, follow_up_payment.source_payment.currency)
+
+        # exclude one payment from follow up pp, create new follow up pp which covers this payment
+        follow_up_payment.excluded = True
+        follow_up_payment.save()
+
+        with self.assertNumQueries(4):
+            follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
+                self.user, dispersion_start_date, dispersion_end_date
+            )
+
+        self.assertEqual(pp.follow_ups.count(), 2)
+
+        with self.assertNumQueries(12):
+            prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
+
+        self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
+        self.assertEqual(
+            {follow_up_payment.source_payment.id},
+            set(follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)),
+        )

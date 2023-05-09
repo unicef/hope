@@ -21,17 +21,17 @@ import {
   HouseholdNode,
 } from '../../../../__generated__/graphql';
 
-interface HouseHoldTableRowProps {
+interface HouseholdTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
   canViewDetails: boolean;
 }
 
-export function HouseHoldTableRow({
+export const HouseholdTableRow = ({
   household,
   choicesData,
   canViewDetails,
-}: HouseHoldTableRowProps): React.ReactElement {
+}: HouseholdTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -101,4 +101,4 @@ export function HouseHoldTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};
