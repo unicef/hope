@@ -150,6 +150,23 @@ export const IndividualsFilter = ({
             ))}
           </SelectFilter>
         </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            label={t('Status')}
+            value={filter.status}
+          >
+            <MenuItem key='active' value='ACTIVE'>
+              Active
+            </MenuItem>
+            <MenuItem key='duplicate' value='DUPLICATE'>
+              Duplicate
+            </MenuItem>
+            <MenuItem key='withdrawn' value='WITHDRAWN'>
+              Withdrawn
+            </MenuItem>
+          </SelectFilter>
+        </Grid>
       </Grid>
     </ContainerWithBorder>
   );

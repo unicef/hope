@@ -32,6 +32,7 @@ export const IndividualsListTable = ({
     search: filter.text,
     adminArea: filter.adminArea,
     flags: filter.flags,
+    status: filter.status,
   };
 
   return (
