@@ -1,4 +1,4 @@
-def format_tasks(tasks_dict, status):
+def format_tasks(tasks_dict, status) -> list:
     for tasks_list in tasks_dict.values():
         for task in tasks_list:
             yield {
@@ -36,7 +36,6 @@ def get_all_celery_tasks(queue_name):
         while tasks is None:
             tasks = conn.default_channel.client.lrange(queue_name, 0, -1)
         for task in tasks:
-
             j = json.loads(task)
             body = json.loads(base64.b64decode(j["body"]))
             all_tasks.append(

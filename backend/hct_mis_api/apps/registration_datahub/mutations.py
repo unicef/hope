@@ -27,7 +27,6 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
-    registration_xlsx_import_task,
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc

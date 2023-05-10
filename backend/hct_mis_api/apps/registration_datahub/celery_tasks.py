@@ -7,14 +7,13 @@ from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
+
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    Record,
-)
+from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
@@ -479,8 +478,10 @@ def deduplicate_documents() -> bool:
 def check_rdi_import_periodic_task() -> bool:
     with locked_cache(key="check_rdi_import_periodic_task1", timeout=15 * 60) as locked:
         if not locked:
-            raise Exception(f"cannot set lock on check_rdi_import_periodic_task")
-        from hct_mis_api.apps.utils.celery_manager import RegistrationDataXlsxImportCeleryManager
+            raise Exception("cannot set lock on check_rdi_import_periodic_task")
+        from hct_mis_api.apps.utils.celery_manager import (
+            RegistrationDataXlsxImportCeleryManager,
+        )
 
         manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()

@@ -1,9 +1,12 @@
 import logging
 from functools import cached_property
 
-from hct_mis_api.apps.utils.celery_utils import get_all_celery_tasks, get_task_in_queue_or_running
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+from hct_mis_api.apps.utils.celery_utils import (
+    get_all_celery_tasks,
+    get_task_in_queue_or_running,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +69,9 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
 
     @cached_property
     def celery_task(self):
-        from hct_mis_api.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
+        from hct_mis_api.apps.registration_datahub.celery_tasks import (
+            registration_xlsx_import_task,
+        )
 
         return registration_xlsx_import_task
 

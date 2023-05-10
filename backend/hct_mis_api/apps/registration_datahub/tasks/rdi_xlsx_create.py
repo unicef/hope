@@ -5,12 +5,13 @@ from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Optional, Union
 
-import openpyxl
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
+
+import openpyxl
 from django_countries.fields import Country
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
@@ -271,9 +272,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 return True
         return value
 
-    def _handle_geopoint_field(
-        self, value: Any, *args: Any, **kwargs: Any
-    ) -> Union[str, Point]:
+    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> Union[str, Point]:
         if not value:
             return ""
 
@@ -393,14 +392,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if not hh_id:
                 continue
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
-            self.collectors[hh_id].append(
-                ImportedIndividualRoleInHousehold(individual=individual, role=role)
-            )
+            self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_bank_accounts_infos(self) -> None:
         bank_accounts_infos_to_create = [
-            ImportedBankAccountInfo(**bank_account_info)
-            for bank_account_info in self.bank_accounts.values()
+            ImportedBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
         ]
 
         ImportedBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
@@ -409,9 +405,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(
-                type=document_data["type"].strip().upper()
-            )
+            doc_type = ImportedDocumentType.objects.get(type=document_data["type"].strip().upper())
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
@@ -461,9 +455,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return obj_to_create
 
-    def _create_objects(
-        self, sheet: Worksheet, registration_data_import: RegistrationDataImport
-    ) -> None:
+    def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "tax_id_no_i_c": self._handle_document_fields,
@@ -525,13 +517,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(
-                ImportedHousehold, registration_data_import=registration_data_import
-            )
+            obj = partial(ImportedHousehold, registration_data_import=registration_data_import)
         elif sheet_title == "individuals":
-            obj = partial(
-                ImportedIndividual, registration_data_import=registration_data_import
-            )
+            obj = partial(ImportedIndividual, registration_data_import=registration_data_import)
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")
 
@@ -570,9 +558,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             cell_value = cell_value.strip()
 
                         is_not_required_and_empty = (
-                            not current_field.get("required")
-                            and cell.value is None
-                            and is_not_image
+                            not current_field.get("required") and cell.value is None and is_not_image
                         )
                         if header in excluded:
                             continue
@@ -581,16 +567,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                         if header == "household_id":
                             temp_value = cell_value
-                            if (
-                                isinstance(temp_value, float)
-                                and temp_value.is_integer()
-                            ):
+                            if isinstance(temp_value, float) and temp_value.is_integer():
                                 temp_value = int(temp_value)
                             household_id = str(temp_value)
                             if sheet_title == "individuals":
-                                obj_to_create.household = self.households.get(
-                                    household_id
-                                )
+                                obj_to_create.household = self.households.get(household_id)
 
                         if header in complex_fields[sheet_title]:
                             fn_complex: Callable = complex_fields[sheet_title][header]
@@ -599,12 +580,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 cell=cell,
                                 header=header,
                                 row_num=cell.row,
-                                individual=obj_to_create
-                                if sheet_title == "individuals"
-                                else None,
-                                household=obj_to_create
-                                if sheet_title == "households"
-                                else None,
+                                individual=obj_to_create if sheet_title == "individuals" else None,
+                                household=obj_to_create if sheet_title == "households" else None,
                                 is_field_required=current_field.get("required", False),
                             )
                             if value is not None:
@@ -645,9 +622,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     cell=cell,
                                     header=header,
                                     is_flex_field=True,
-                                    is_field_required=current_field.get(
-                                        "required", False
-                                    ),
+                                    is_field_required=current_field.get("required", False),
                                 )
                             if value is not None:
                                 obj_to_create.flex_fields[header] = value
@@ -656,9 +631,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
                         ) from e
 
-                obj_to_create.last_registration_date = (
-                    obj_to_create.first_registration_date
-                )
+                obj_to_create.last_registration_date = obj_to_create.first_registration_date
                 obj_to_create.row_id = row[0].row
 
                 if sheet_title == "households":
@@ -670,9 +643,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     obj_to_create = self._validate_birth_date(obj_to_create)
                     self.individuals.append(obj_to_create)
             except Exception as e:
-                raise Exception(
-                    f"Error processing row {row[0].row}: {e.__class__.__name__}({e})"
-                ) from e
+                raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
 
         if sheet_title == "households":
             ImportedHousehold.objects.bulk_create(self.households.values())
@@ -695,10 +666,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         import_data_id: str,
         business_area_id: str,
     ) -> None:
-        registration_data_import = (
-            RegistrationDataImportDatahub.objects.select_for_update().get(
-                id=registration_data_import_id,
-            )
+        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
+            id=registration_data_import_id,
         )
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
@@ -718,14 +687,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
-        old_rdi_mis = RegistrationDataImport.objects.get(
-            id=registration_data_import.hct_id
-        )
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         if not self.business_area.postpone_deduplication:
             logger.info("Starting deduplication of %s", registration_data_import.id)
-            rdi_mis = RegistrationDataImport.objects.get(
-                id=registration_data_import.hct_id
-            )
+            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
             rdi_mis.save()
             DeduplicateTask(self.business_area.slug).deduplicate_imported_individuals(
@@ -733,9 +698,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             )
             logger.info("Finished deduplication of %s", registration_data_import.id)
         else:
-            rdi_mis = RegistrationDataImport.objects.get(
-                id=registration_data_import.hct_id
-            )
+            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
             rdi_mis.status = RegistrationDataImport.IN_REVIEW
             rdi_mis.save()
             log_create(
