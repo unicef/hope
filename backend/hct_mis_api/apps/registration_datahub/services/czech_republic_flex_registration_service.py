@@ -224,6 +224,31 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return documents
 
+    @staticmethod
+    def _set_default_head_of_household(individuals_array: "QuerySet") -> None:
+        for individual_data in individuals_array:
+            if individual_data.get("role_i_c") == "y":
+                individual_data["relationship_i_c"] = "head"
+                break
+
+    @staticmethod
+    def _has_head(individuals_array: List[ImportedIndividual]) -> bool:
+        return any(
+            individual_data.get(
+                "relationship_i_c",
+            )
+            == "head"
+            for individual_data in individuals_array
+        )
+
+    def validate_household(self, individuals_array: List[ImportedIndividual]) -> None:
+        if not individuals_array:
+            raise ValidationError("Household should has at least one individual")
+
+        has_head = self._has_head(individuals_array)
+        if not has_head:
+            raise ValidationError("Household should has at least one Head of Household")
+
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
@@ -242,6 +267,11 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         legal_guardian_information = record_data_dict.get("legal-guardian-information", [])
 
         individuals_array = [*primary_carer_info, *children_information, *legal_guardian_information]
+
+        if not self._has_head(individuals_array):
+            self._set_default_head_of_household(individuals_array)
+
+        self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(
             record, household_address, consent_data, needs_assessment, registration_data_import
