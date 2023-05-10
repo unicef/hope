@@ -11,7 +11,6 @@ from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
