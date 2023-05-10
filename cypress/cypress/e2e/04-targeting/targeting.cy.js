@@ -9,7 +9,7 @@ context("Targeting", () => {
     cy.get("span").contains("Targeting").click();
     cy.get("h5").should('contain', "Targeting");
   });
-  it("Can visit the targeting page and create a target population", () => {
+  it("create a target population", () => {
     cy.get('[data-cy="button-target-population-create-new"]').click({ force: true });
     cy.uniqueSeed().then((seed) => {
       const targetPopulationName = `test TP ${seed}`;
