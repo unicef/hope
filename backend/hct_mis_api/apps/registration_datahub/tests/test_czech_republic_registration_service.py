@@ -26,7 +26,7 @@ from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registra
 )
 
 
-class TestSriLankaRegistrationService(TestCase):
+class TestCzechRepublicRegistrationService(TestCase):
     databases = {
         "default",
         "registration_datahub",
@@ -64,8 +64,8 @@ class TestSriLankaRegistrationService(TestCase):
 
         consent = [
             {
-                "consent_h_c": True,
-                "consent_sharing_h_c": "government_partner",
+                "consent_sharing_h_c": True,
+                "government_partner": "some_government_partner",
                 "consent_sharing_h_c_1": True,
                 "consent_sharing_h_c_2": True,
             }
@@ -135,7 +135,35 @@ class TestSriLankaRegistrationService(TestCase):
                 "preregistration_case_id": "13277",
                 "qualifies_for_programme_i_f": "y",
                 "relationship_i_c": "son_daughter",
-            }
+            },
+            {
+                "gender_i_c": "female",
+                "id_type_i_c": "national_id",
+                "birth_date_i_c": "2023-04-30",
+                "disability_i_c": "disabled",
+                "follow_up_flag": ["legal_guardianship_documents"],
+                "given_name_i_c": "TEST",
+                "family_name_i_c": "TEST",
+                "other_id_no_i_c": "TPV123",
+                "follow_up_needed": "y",
+                "relationship_i_c": "brother_sister",
+                "follow_up_comments": "No comments",
+                "national_id_no_i_c": "123214",
+                "national_passport_i_c": "",
+                "disability_card_i_c": "y",
+                "disability_degree_i_c": "2",
+                "disability_card_no_i_c": "1213",
+                "medical_certificate_i_c": "y",
+                "preregistration_case_id": "10937",
+                "has_birth_certificate_i_c": "n",
+                "medical_certificate_no_i_c": "2321",
+                "qualifies_for_programme_i_f": "y",
+                "disability_card_issuance_i_c": "2023-05-01",
+                "proof_legal_guardianship_no_i_c": "128dj",
+                "medical_certificate_issuance_i_c": "2023-05-01",
+                "medical_certificate_validity_i_c": "2023-05-17",
+                "has_disability_card_and_medical_cert": "Has Both",
+            },
         ]
 
         legal_guardian_information = [

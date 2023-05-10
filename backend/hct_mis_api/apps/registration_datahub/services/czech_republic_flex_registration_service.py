@@ -12,8 +12,10 @@ from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     HEAD,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -79,6 +81,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT], "national_passport_i_c"),
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE], "disability_card_no_i_c"),
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE], "medical_certificate_no_i_c"),
+        (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], "birth_certificate_no_i_c"),
     )
 
     def _prepare_household_data(
@@ -89,24 +92,56 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         needs_assessment: Dict,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
-        address = household_address.get("address_h_c", "") + household_address.get("village_h_c", "")
+        consent = consent_data.get("consent_sharing_h_c", False)
+        address = household_address.get("address_h_c", "")
+        village = household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
 
-        # admin1 = household_address.get("admin1_h_c", "")
-        # admin2 = household_address.get("admin2_h_c", "")
-
-        return {
+        household_data = {
             "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": Country(code="CZ"),
             "country": Country(code="CZ"),
-            "consent": consent_data.get("consent_h_c", False),
+            "consent": consent,
             "flex_fields": needs_assessment,
-            "address": address,
-            "zip_code": zip_code,
         }
+
+        if consent_data:
+            household_data["consent_sharing"].append("HUMANITARIAN_PARTNER")
+
+        consent_sharing_1 = consent_data.get("consent_sharing_h_c_1", False)
+        consent_sharing_2 = consent_data.get("consent_sharing_h_c_2", False)
+
+        if consent_sharing_1 or consent_sharing_2:
+            household_data["consent_sharing"].append("PARTNERS")
+
+        if address:
+            household_data["address"] = address
+        if village:
+            household_data["village"] = village
+        if zip_code:
+            household_data["zip_code"] = zip_code
+
+        admin1 = household_address.get("admin1_h_c", "")
+        if admin1 and Area.objects.filter(p_code=admin1).exists():
+            household_data["admin1_title"] = Area.objects.get(p_code=admin1).name
+            household_data["admin1"] = Area.objects.get(p_code=admin1).p_code
+
+        admin2 = household_address.get("admin2_h_c", "")
+        if admin2 and Area.objects.filter(p_code=admin2).exists():
+            household_data["admin2_title"] = Area.objects.get(p_code=admin2).name
+            household_data["admin2"] = Area.objects.get(p_code=admin2).p_code
+
+        if admin2 and Area.objects.filter(p_code=admin2).exists():
+            household_data["admin_area"] = Area.objects.get(p_code=admin2).p_code
+            household_data["admin_area_title"] = Area.objects.get(p_code=admin2).name
+        elif admin1 and Area.objects.filter(p_code=admin1).exists():
+            household_data["admin_area"] = Area.objects.get(p_code=admin1).p_code
+            household_data["admin_area_title"] = Area.objects.get(p_code=admin1).name
+
+        return household_data
 
     def _prepare_individual_data(
         self,
