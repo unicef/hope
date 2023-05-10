@@ -1689,6 +1689,19 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "email",
         "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.INDIVIDUAL_XLSX_UPDATE],
     },
+    {
+        "id": "e2b8dd27-f861-4c54-9651-677636918c47",
+        "type": TYPE_STRING,
+        "name": "preferred_language",
+        "lookup": "preferred_language",
+        "required": False,
+        "label": {"English(EN)": "Preferred language"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "preferred_language",
+        "scope": [Scope.XLSX],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
