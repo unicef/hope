@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     HEAD,
+    HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -80,7 +81,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID], "national_id_no_i_c"),
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT], "national_passport_i_c"),
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE], "disability_card_no_i_c"),
-        (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE], "medical_certificate_no_i_c"),
         (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], "birth_certificate_no_i_c"),
     )
 
@@ -106,16 +106,18 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "country": Country(code="CZ"),
             "consent": consent,
             "flex_fields": needs_assessment,
+            "consent_sharing": [],
         }
 
         if consent_data:
-            household_data["consent_sharing"].append("HUMANITARIAN_PARTNER")
+            household_data["consent_sharing"].append(HUMANITARIAN_PARTNER)
 
         consent_sharing_1 = consent_data.get("consent_sharing_h_c_1", False)
         consent_sharing_2 = consent_data.get("consent_sharing_h_c_2", False)
 
         if consent_sharing_1 or consent_sharing_2:
-            household_data["consent_sharing"].append("PARTNERS")
+            # TODO we can't add "partners" to this field
+            pass
 
         if address:
             household_data["address"] = address
@@ -172,6 +174,15 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         family_name = individual_data.get("family_name")
 
         individual_data["full_name"] = " ".join(filter(None, [given_name, middle_name, family_name]))
+
+        work_status = individual_dict.get("work_status_i_c")
+        if work_status:
+            if work_status == "y":
+                individual_data["work_status"] = "1"
+            else:
+                individual_data["work_status"] = "0"
+        else:
+            individual_data["work_status"] = "NOT_PROVIDED"
 
         return individual_data
 

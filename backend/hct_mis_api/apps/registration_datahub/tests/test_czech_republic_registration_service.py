@@ -3,14 +3,21 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 
+from django_countries.fields import Country
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
+    FEMALE,
+    HUMANITARIAN_PARTNER,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    MALE,
+    NOT_DISABLED,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -35,20 +42,18 @@ class TestCzechRepublicRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        ImportedDocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
-            label=IDENTIFICATION_TYPE_NATIONAL_ID,
-        )
+        document_types_to_create = []
 
-        ImportedDocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            label=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-        )
-
-        ImportedDocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE],
-            label=IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
-        )
+        for label in (
+            IDENTIFICATION_TYPE_NATIONAL_ID,
+            IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+            IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
+            IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+        ):
+            document_types_to_create.append(
+                ImportedDocumentType(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[label], label=label)
+            )
+        ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
         BusinessArea.objects.create(
             **{
@@ -65,7 +70,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         consent = [
             {
                 "consent_sharing_h_c": True,
-                "government_partner": "some_government_partner",
+                "government_partner": "",
                 "consent_sharing_h_c_1": True,
                 "consent_sharing_h_c_2": True,
             }
@@ -115,7 +120,6 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "phone_no_i_c": "+420774844183",
                 "preferred_language_i_c": "uk-ua",
                 "primary_carer_is_legal_guardian": "y",
-                "relationship_i_c": "head",
                 "role_i_c": "primary",
                 "work_status_i_c": "n",
             }
@@ -170,21 +174,22 @@ class TestCzechRepublicRegistrationService(TestCase):
             {
                 "gender_i_c": "male",
                 "id_type_i_c": "national_passport",
-                "phone_no_i_c": "+420123123123",
-                "birth_date_i_c": "1998-12-27",
-                "given_name_i_c": "TEST",
-                "family_name_i_c": "TEST",
+                "phone_no_i_c": "+420123123666",
+                "birth_date_i_c": "1988-12-27",
+                "given_name_i_c": "Ivan",
+                "family_name_i_c": "Drago",
                 "relationship_i_c": "head",
-                "confirm_phone_number": "+420123123123",
-                "national_passport_i_c": "1234",
+                "confirm_phone_number": "+420123123666",
+                "national_passport_i_c": "1234567890",
                 "national_id_no_i_c": "",
                 "legal_guardia_not_primary_carer": "y",
+                "work_status_i_c": "y",
             }
         ]
 
         records = [
             Record(
-                registration=17,
+                registration=25,
                 timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
                 source_id=1,
                 fields={
@@ -209,38 +214,44 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         self.records[0].refresh_from_db()
         self.assertEqual(
-            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
+            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
         )
 
         self.assertEqual(ImportedHousehold.objects.count(), 1)
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
-        self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
-        self.assertEqual(ImportedDocument.objects.count(), 1)
-
         imported_household = ImportedHousehold.objects.first()
-        self.assertEqual(imported_household.admin1, "LK1")
-        self.assertEqual(imported_household.admin1_title, "SriLanka admin1")
-        self.assertEqual(imported_household.admin2, "LK11")
-        self.assertEqual(imported_household.admin2_title, "SriLanka admin2")
-        self.assertEqual(imported_household.admin3, "LK1163")
-        self.assertEqual(imported_household.admin3_title, "SriLanka admin3")
-        self.assertEqual(imported_household.admin4, "LK1163020")
-        self.assertEqual(imported_household.admin4_title, "SriLanka admin4")
-        self.assertEqual(imported_household.admin_area, "LK1163020")
-        self.assertEqual(imported_household.admin_area_title, "SriLanka admin4")
+        self.assertEqual(imported_household.consent, True)
+        self.assertEqual(imported_household.consent_sharing, [HUMANITARIAN_PARTNER])
+        self.assertEqual(imported_household.country, Country(code="CZ"))
+        self.assertEqual(imported_household.country_origin, Country(code="CZ"))
+        self.assertEqual(imported_household.size, 4)
+        self.assertEqual(imported_household.zip_code, "19017")
+        self.assertEqual(imported_household.village, "Praha")
+        self.assertEqual(imported_household.head_of_household, ImportedIndividual.objects.get(full_name="Ivan Drago"))
 
-        self.assertEqual(
-            ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
-        )
+        self.assertEqual(ImportedIndividual.objects.count(), imported_household.size)
+        head_of_household = ImportedIndividual.objects.get(full_name="Ivan Drago")
+        self.assertEqual(head_of_household.sex, MALE)
+        self.assertEqual(head_of_household.phone_no, "+420123123666")
+        self.assertEqual(head_of_household.disability, NOT_DISABLED)
+        self.assertEqual(head_of_household.work_status, "1")
+        primary_collector = ImportedIndividual.objects.get(full_name="Tetiana Symkanych")
+        self.assertEqual(primary_collector.sex, FEMALE)
+        self.assertEqual(primary_collector.phone_no, "+420774844183")
+        self.assertEqual(primary_collector.disability, NOT_DISABLED)
+        self.assertEqual(primary_collector.work_status, "0")
+        self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
+        primary_role = ImportedIndividualRoleInHousehold.objects.first()
+        self.assertEqual(primary_role.individual, primary_collector)
+        self.assertEqual(primary_role.household, imported_household)
 
-        self.assertEqual(
-            ImportedIndividual.objects.filter(full_name="Dome").first().flex_fields,
-            {
-                "confirm_nic_number": "123456789V",
-                "branch_or_branch_code": "7472_002",
-                "who_answers_this_phone": "alternate collector",
-                "confirm_alternate_collector_phone_number": "+94788908046",
-                "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
-            },
-        )
-        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
+        bank_account_info = ImportedBankAccountInfo.objects.first()
+        self.assertEqual(bank_account_info.bank_account_number, "CZ6003000000000306979952")
+
+        self.assertEqual(ImportedDocument.objects.count(), 5)
+        birth_certificate = ImportedDocument.objects.filter(type__key="birth_certificate").first()
+        self.assertEqual(birth_certificate.document_number, "262873")
+        self.assertEqual(ImportedDocument.objects.filter(type__key="disability_certificate").count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(type__key="national_passport").count(), 2)
+        national_passport = ImportedDocument.objects.filter(document_number="GB500567").first()
+        self.assertEqual(national_passport.individual, primary_collector)
