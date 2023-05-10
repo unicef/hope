@@ -528,7 +528,13 @@ class Household(
                     admin = getattr(self, f"admin{admin_level}")
                     if admin:
                         for i in reversed(range(1, admin_level)):
-                            parent_admin = admin.parent
+                            cache_key = f"parent_admin_{admin.pk}"
+                            parent_admin = cache.get(cache_key)
+
+                            if parent_admin is None:
+                                parent_admin = admin.parent
+                                cache.set(cache_key, parent_admin, 7200)
+
                             if parent_admin:
                                 setattr(self, f"admin{i}", parent_admin)
                                 admin = parent_admin
