@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -225,7 +225,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         return documents
 
     @staticmethod
-    def _set_default_head_of_household(individuals_array: "QuerySet") -> None:
+    def _set_default_head_of_household(individuals_array: List[Any]) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
