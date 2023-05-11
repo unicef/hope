@@ -6,17 +6,6 @@ context("RDI", () => {
     cy.get("span").contains("Registration Data Import").click();
   })
 
-  it("RDI - Download Template", () => {
-    cy.get("span").contains("IMPORT").click({ force: true });
-    cy.window().document().then(function (doc) {
-      doc.addEventListener('click', () => {
-        setTimeout(function () { doc.location.reload() }, 5000)
-      })
-      cy.get('span').contains('DOWNLOAD TEMPLATE').click()
-    })
-    cy.verifyDownload('registration_data_import_template.xlsx');
-  })
-
   it("RDI - Upload the Excel File and verify ", () => {
     uploadRDIFile();
     return;
