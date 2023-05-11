@@ -122,8 +122,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if payment is None:
             return
 
-        cell = row[self.xlsx_headers.index("delivery_date")]
-        delivery_date = cell.value
+        if "delivery_date" in self.xlsx_headers:
+            cell = row[self.xlsx_headers.index("delivery_date")]
+            delivery_date = cell.value
+        else:
+            delivery_date = None
 
         if delivery_date is None:
             self.is_updated = True  # Update Payment item with current datetime
@@ -217,7 +220,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             return  # safety check
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
-        delivery_date = row[self.xlsx_headers.index("delivery_date")].value
+
+        if "delivery_date" in self.xlsx_headers:
+            delivery_date = row[self.xlsx_headers.index("delivery_date")].value
+        else:
+            delivery_date = None
 
         if delivery_date is None:
             delivery_date = timezone.now()

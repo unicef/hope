@@ -614,6 +614,7 @@ class PaymentPlanService:
         if source_pp.is_follow_up:
             raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
 
+        # TODO: add the same logic here as in create_follow_up_payments() `payments_to_copy`
         if (
             not source_pp.payment_items.eligible()
             .filter(
