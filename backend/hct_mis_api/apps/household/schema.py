@@ -53,7 +53,6 @@ from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     DUPLICATE,
     DUPLICATE_IN_BATCH,
-    IDENTIFICATION_TYPE_CHOICE,
     INDIVIDUAL_FLAGS_CHOICES,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
@@ -593,7 +592,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(ROLE_CHOICE)
 
     def resolve_document_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
+        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.all()]
 
     def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)

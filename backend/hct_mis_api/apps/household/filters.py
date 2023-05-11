@@ -162,7 +162,7 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
             if value.startswith(("HOPE-", "KOBO-")):
-                _value = self._prepare_kobo_asset_id_value(value)
+                _value = _prepare_kobo_asset_id_value(value)
                 # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                 # will filter by '111222' like 111222 is ID
                 inner_query |= Q(kobo_asset_id__endswith=_value)
@@ -240,6 +240,8 @@ class IndividualFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids)).distinct()
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        if value.upper().startswith("IND-"):
+            return qs.filter(unicef_id__istartswith=value)
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)

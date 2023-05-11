@@ -149,6 +149,10 @@ class BooleanValueCaster(BaseValueCaster):
                 return False
             elif value.lower() == "true":
                 return True
+            elif value == "0":
+                return False
+            elif value == "1":
+                return True
         return value
 
 

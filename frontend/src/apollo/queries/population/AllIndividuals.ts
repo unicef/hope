@@ -88,7 +88,7 @@ export const AllIndividuals = gql`
                 photo
                 type {
                   label
-                  type
+                  key
                 }
               }
             }
