@@ -16,6 +16,7 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -98,7 +99,7 @@ class APITestCase(SnapshotTestTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(DocumentType(label=label, type=doc_type))
+            document_types.append(DocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
 
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 

@@ -14,6 +14,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -134,8 +135,12 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         first_individual = cls.individuals[0]
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
+        birth_certificate_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+        )
         cls.national_id = DocumentFactory(
             country=country_pl, type=national_id_type, document_number="789-789-645", individual=first_individual
         )
@@ -166,7 +171,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [
+                    {
+                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                        "country": "POL",
+                        "number": "123-123-UX-321",
+                    }
+                ],
             },
             approve_status=True,
         )
@@ -194,7 +205,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                            "number": "999-888-777",
+                        },
                         "approve_status": True,
                     },
                 ],
@@ -290,7 +305,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "role": ROLE_PRIMARY,
                             "documents": [
                                 {
-                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "USA",
                                     "number": "321-321-UX-321",
                                     "photo": SimpleUploadedFile(name="test.jpg", content=b""),
@@ -329,7 +344,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": "PRIMARY",
                 "documents": [
                     {
-                        "type": "NATIONAL_ID",
+                        "key": "national_id",
                         "number": "321-321-UX-321",
                         "country": "USA",
                         "photo": "test_file_name.jpg",
@@ -364,7 +379,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": "1980-02-01",
                 "marital_status": "SINGLE",
                 "role": "PRIMARY",
-                "documents": [{"type": "NATIONAL_ID", "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [{"key": "national_id", "country": "POL", "number": "123-123-UX-321"}],
                 "relationship": "UNKNOWN",
                 "estimated_birth_date": False,
             }
@@ -417,7 +432,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "documents": [
                                 {
                                     "country": "POL",
-                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "number": "111-222-777",
                                     "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 },
@@ -459,7 +474,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "documents": [
                     {
                         "value": {
-                            "type": "NATIONAL_ID",
+                            "key": "national_id",
                             "number": "111-222-777",
                             "country": "POL",
                             "photo": "test_file_name.jpg",
@@ -516,7 +531,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [
                     {
-                        "value": {"type": "NATIONAL_ID", "number": "999-888-777", "country": "POL"},
+                        "value": {"key": "national_id", "number": "999-888-777", "country": "POL"},
                         "approve_status": True,
                     }
                 ],

@@ -224,7 +224,7 @@ export function RegistrationIndividualBioData({
             {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
           </LabelizedField>
         </Grid>
-        {!mappedIndividualDocuments.length &&
+        {!mappedIndividualDocuments?.length &&
         !mappedIdentities.length ? null : (
           <Grid item xs={12}>
             <BorderBox />

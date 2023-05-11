@@ -807,3 +807,9 @@ export const createHandleFilterChange = (
 
   return handleFilterChange;
 };
+
+export const removeBracketsAndQuotes = (str: string): string => {
+  let modifiedStr = str;
+  modifiedStr = modifiedStr.replace(/\[|\]|"|'/g, '');
+  return modifiedStr;
+};
