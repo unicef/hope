@@ -532,7 +532,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                     Payment.STATUS_NOT_DISTRIBUTED,
                     Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
                 ],
-                is_follow_up=False
+                is_follow_up=False,
             )
             .exists()
         )
