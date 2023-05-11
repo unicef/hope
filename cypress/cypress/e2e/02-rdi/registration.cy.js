@@ -3,6 +3,8 @@
 context("RDI", () => {
   beforeEach(() => {
     cy.adminLogin()
+    cy.visit("/");
+  cy.get("span").contains("Registration Data Import").click();
   });
 
   it("Registration Data Import", () => {
@@ -58,8 +60,7 @@ function verifyMergedData() {
 }
 
 function uploadRDIFile() {
-  cy.visit("/");
-  cy.get("span").contains("Registration Data Import").click();
+  cy.createExcel()
   cy.get("h5").contains("Registration Data Import");
   cy.get("button > span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
