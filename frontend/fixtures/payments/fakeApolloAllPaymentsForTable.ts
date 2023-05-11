@@ -9,7 +9,7 @@ export const fakeApolloAllPaymentsForTable = [
         paymentPlanId:
           'UGF5bWVudFBsYW5Ob2RlOjZmOTIxYmFlLTljODktNGRkYy1iNTRjLTI4Mzc3ZTA2YjUwNg==',
 
-        first: 5,
+        first: 10,
         orderBy: '-created_at',
       },
     },
