@@ -77,8 +77,6 @@ function verifyMergedData() {
     .find("td:nth-child(2)")
     .then(($td) => {
       householdId = $td.text().split(" (")[0];
-      cy.log($td.text())
-      cy.log(`Saved householdId: ${householdId}`);
     })
     .then(() => {
       cy.get("button> span").contains("Individuals").click({ force: true });
@@ -86,18 +84,15 @@ function verifyMergedData() {
         .find(`tbody > tr:nth-child(1) > td:nth-child(1)`)
         .then(($td) => {
           individualId = $td.text().split(" (")[0];
-          cy.log(`Saved individualId: ${individualId}`);
         })
         .then(() => {
           cy.get("span").contains("Population").click();
           cy.get("span").contains("Households").click();
-          cy.log(`looking for householdId: ${householdId}`);
           cy.get('[data-cy="hh-filters-search"]')
             .find("input")
             .type(householdId, { force: true });
           cy.get("td").should("contain", householdId);
           cy.get("span").contains("Individuals").click({ force: true });
-          cy.log(`looking for individualId: + ${individualId}`);
           cy.get('[data-cy="ind-filters-search"]').type(individualId);
           cy.get("td").should("contain", individualId);
         });
