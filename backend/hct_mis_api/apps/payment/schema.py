@@ -523,19 +523,22 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_excluded_households(self, info: Any) -> graphene.List:
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
-    def resolve_can_create_follow_up(self, info: Any) -> graphene.List:
-        return (
-            self.payment_items.eligible()
-            .filter(
-                status__in=[
-                    Payment.STATUS_ERROR,
-                    Payment.STATUS_NOT_DISTRIBUTED,
-                    Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
-                ],
-                is_follow_up=False
-            )
-            .exists()
+    def resolve_can_create_follow_up(self, info: Any) -> bool:
+        # Check there are payments in error/not distributed status
+        qs = self.payment_items.eligible().filter(
+            status__in=[
+                Payment.STATUS_ERROR,
+                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+            ]
         )
+
+        # Check if all payments are used in FPPs
+        follow_up_payment_ids = Payment.objects.filter(
+            parent__source_payment_plan_id=self.id, excluded=False
+        ).values_list("source_payment_id", flat=True)
+
+        return qs.exists() and set(follow_up_payment_ids) != set(qs.values_list("id", flat=True))
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
