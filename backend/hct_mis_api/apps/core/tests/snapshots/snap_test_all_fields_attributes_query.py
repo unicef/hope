@@ -47130,6 +47130,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FOSTER_CHILD'
                     },
                     {
+                        'labelEn': 'Free union',
+                        'labels': [
+                            {
+                                'label': 'Free union',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FREE_UNION'
+                    },
+                    {
                         'labelEn': 'Granddaughter / Grandson',
                         'labels': [
                             {
