@@ -119,7 +119,7 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
 
 class IndividualDocumentObjectType(graphene.InputObjectType):
     country = graphene.String(required=True)
-    type = graphene.String(required=True)
+    key = graphene.String(required=True)
     number = graphene.String(required=True)
     photo = Arg()
     photoraw = Arg()
@@ -128,7 +128,7 @@ class IndividualDocumentObjectType(graphene.InputObjectType):
 class EditIndividualDocumentObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
     country = graphene.String(required=True)
-    type = graphene.String(required=True)
+    key = graphene.String(required=True)
     number = graphene.String(required=True)
     photo = Arg()
     photoraw = Arg()
