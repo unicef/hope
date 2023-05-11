@@ -13686,6 +13686,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "FREE_UNION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null

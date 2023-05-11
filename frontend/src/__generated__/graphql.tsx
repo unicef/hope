@@ -2835,7 +2835,8 @@ export enum IndividualRelationship {
   SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   SonDaughter = 'SON_DAUGHTER',
   WifeHusband = 'WIFE_HUSBAND',
-  FosterChild = 'FOSTER_CHILD'
+  FosterChild = 'FOSTER_CHILD',
+  FreeUnion = 'FREE_UNION'
 }
 
 export type IndividualRoleInHouseholdNode = {
