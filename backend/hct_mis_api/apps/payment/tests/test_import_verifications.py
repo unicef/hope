@@ -1,6 +1,10 @@
 import io
 import uuid
-from typing import Any
+from pathlib import Path
+from typing import Any, List
+from unittest.mock import patch
+
+from django.conf import settings
 
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
@@ -12,7 +16,12 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
+from hct_mis_api.apps.household.fixtures import (
+    EntitlementCardFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentRecordFactory,
@@ -129,6 +138,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
+
         error = import_service.errors[0]
         self.assertListEqual(
             [error.sheet, error.coordinates, error.message],
@@ -136,7 +146,7 @@ class TestXlsxVerificationImport(APITestCase):
                 "Payment Verifications",
                 f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
                 "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
-                "[None, 'YES', 'NO']",
+                "(None, 'YES', 'NO')",
             ],
         )
 
@@ -181,6 +191,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
+
         self.assertListEqual(
             [error.sheet, error.coordinates, error.message],
             [
@@ -298,3 +309,63 @@ class TestXlsxVerificationImport(APITestCase):
             payment_verification.received_amount,
             payment_verification.payment_obj.delivered_quantity,
         )
+
+    @parameterized.expand(
+        [
+            ("unordered_columns_1", []),
+            ("unordered_columns_2", []),
+            ("unordered_columns_3", []),
+        ]
+    )
+    @patch(
+        "hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service.XlsxVerificationImportService._check_version",
+        return_value=None,
+    )
+    def test_validation_of_unordered_columns(self, file_name: str, error_list: List, mock_check_version: Any) -> None:
+        """
+        1st scenario - unordered columns with missing standard columns
+        2nd scenario - missing standard columns and additional user columns
+        3rd scenario - like above + one null header
+        """
+
+        cash_plan = CashPlanFactory()
+
+        hoh1 = IndividualFactory(household=None)
+        household_1 = HouseholdFactory(head_of_household=hoh1)
+        payment_1 = PaymentRecordFactory(
+            id="0329a41f-affd-4669-9e38-38ec2d6699b3",
+            parent=cash_plan,
+            household=household_1,
+            entitlement_quantity=120,
+            delivered_quantity=150,
+        )
+
+        hoh2 = IndividualFactory(household=None)
+        household_2 = HouseholdFactory(head_of_household=hoh2)
+        payment_2 = PaymentRecordFactory(
+            id="299811ef-b123-427d-b77d-9fd5d1bc8946",
+            parent=cash_plan,
+            household=household_2,
+            entitlement_quantity=120,
+            delivered_quantity=150,
+        )
+
+        payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
+
+        PaymentVerificationFactory(
+            generic_fk_obj=payment_1,
+            payment_verification_plan=payment_verification_plan,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        PaymentVerificationFactory(
+            generic_fk_obj=payment_2,
+            payment_verification_plan=payment_verification_plan,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+
+        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/{file_name}.xlsx").read_bytes()
+        xlsx_verification_import_service = XlsxVerificationImportService(payment_verification_plan, io.BytesIO(content))
+        xlsx_verification_import_service.open_workbook()
+        xlsx_verification_import_service.validate()
+
+        self.assertEqual(xlsx_verification_import_service.errors, error_list)
