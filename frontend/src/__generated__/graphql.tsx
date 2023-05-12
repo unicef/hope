@@ -3402,6 +3402,7 @@ export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
 
 export type MutationsExcludeHouseholdsArgs = {
   excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
+  exclusionReason?: Maybe<Scalars['String']>,
   paymentPlanId: Scalars['ID']
 };
 
@@ -3902,6 +3903,7 @@ export type PaymentPlanNode = Node & {
   steficonAppliedDate?: Maybe<Scalars['DateTime']>,
   sourcePaymentPlan?: Maybe<PaymentPlanNode>,
   isFollowUp: Scalars['Boolean'],
+  exclusionReason: Scalars['String'],
   followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
@@ -8158,7 +8160,8 @@ export type UpdatePpMutation = (
 
 export type ExcludeHouseholdsPpMutationVariables = {
   paymentPlanId: Scalars['ID'],
-  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>
+  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
+  exclusionReason?: Maybe<Scalars['String']>
 };
 
 
@@ -8168,7 +8171,7 @@ export type ExcludeHouseholdsPpMutation = (
     { __typename?: 'ExcludeHouseholdsMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id'>
+      & Pick<PaymentPlanNode, 'id' | 'exclusionReason'>
       & { excludedHouseholds: Maybe<Array<Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -10046,7 +10049,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'isFollowUp'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13670,10 +13673,11 @@ export type UpdatePpMutationHookResult = ReturnType<typeof useUpdatePpMutation>;
 export type UpdatePpMutationResult = ApolloReactCommon.MutationResult<UpdatePpMutation>;
 export type UpdatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePpMutation, UpdatePpMutationVariables>;
 export const ExcludeHouseholdsPpDocument = gql`
-    mutation ExcludeHouseholdsPP($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!) {
-  excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds) {
+    mutation ExcludeHouseholdsPP($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!, $exclusionReason: String) {
+  excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds, exclusionReason: $exclusionReason) {
     paymentPlan {
       id
+      exclusionReason
       excludedHouseholds {
         id
         unicefId
@@ -13716,6 +13720,7 @@ export function withExcludeHouseholdsPp<TProps, TChildProps = {}>(operationOptio
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
  *      excludedHouseholdsIds: // value for 'excludedHouseholdsIds'
+ *      exclusionReason: // value for 'exclusionReason'
  *   },
  * });
  */
@@ -18755,6 +18760,7 @@ export const PaymentPlanDocument = gql`
       id
       unicefId
     }
+    exclusionReason
     isFollowUp
     followUps {
       totalCount
@@ -25640,6 +25646,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
