@@ -16,7 +16,6 @@ context("Targeting", () => {
       cy.get('[data-cy="input-program"]').first().click();
       cy.get(`[data-cy="select-option-${programName}-${seed}"]`).click();
       cy.get('[data-cy="button-target-population-add-criteria"]').click();
-      cy.wait(1000)
       cy.get('[data-cy="button-individual-rule"]').click({ force: true })
       cy.get('[data-cy="autocomplete-target-criteria"]').should("be.visible")
       cy.get('[data-cy="autocomplete-target-criteria-option-0"]').type('Age {downArrow}{enter}')
@@ -26,7 +25,6 @@ context("Targeting", () => {
       cy.get('[data-cy="criteria-container"]').should('to.visible')
       cy.get("[data-cy='button-target-population-create']").click({ force: true });
       cy.get('[data-cy="status-container"]').should('contain', "OPEN");
-      cy.wait(1000)
       cy.get('[data-cy="button-target-population-lock"]').should('to.visible');
       cy.get('[data-cy="label-Total Number of Households"]').invoke('text').should('not.contain', '0');
       cy.get('[data-cy="label-Targeted Individuals"]').invoke('text').should('not.contain', '0');
