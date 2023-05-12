@@ -11,13 +11,14 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     FEMALE,
-    HUMANITARIAN_PARTNER,
+    GOVERNMENT_PARTNER,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     MALE,
-    NOT_DISABLED, GOVERNMENT_PARTNER, PRIVATE_PARTNER,
+    NOT_DISABLED,
+    PRIVATE_PARTNER,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
