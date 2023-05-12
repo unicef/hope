@@ -9946,7 +9946,17 @@ export type AllPaymentPlansForTableQuery = (
       & { node: Maybe<(
         { __typename?: 'PaymentPlanNode' }
         & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'isFollowUp' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
-        & { createdBy: (
+        & { followUps: (
+          { __typename?: 'PaymentPlanNodeConnection' }
+          & Pick<PaymentPlanNodeConnection, 'totalCount'>
+          & { edges: Array<Maybe<(
+            { __typename?: 'PaymentPlanNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'PaymentPlanNode' }
+              & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+            )> }
+          )>> }
+        ), createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         ), program: (
@@ -18251,6 +18261,15 @@ export const AllPaymentPlansForTableDocument = gql`
         id
         unicefId
         isFollowUp
+        followUps {
+          totalCount
+          edges {
+            node {
+              id
+              unicefId
+            }
+          }
+        }
         status
         createdBy {
           id
