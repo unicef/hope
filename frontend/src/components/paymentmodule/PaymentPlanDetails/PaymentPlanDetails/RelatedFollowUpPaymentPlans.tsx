@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
+import { Box } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
@@ -32,18 +33,21 @@ export const RelatedFollowUpPaymentPlans = ({
         to={`/${businessArea}/payment-module/followup-payment-plans/${followUp?.node?.id}`}
       >
         {followUp?.node?.unicefId}
+        <br />
       </BlackLink>
     ));
   }
 
   return (
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-      {followUpLinks || '-'}
-      {followUps?.edges?.length > 5 && (
-        <Button variant='outlined' color='primary' onClick={handleButtonClick}>
-          {showAll ? t('Hide') : t('See all')}
-        </Button>
-      )}
+      <Box display="flex" flexDirection="column">
+        {followUpLinks || '-'}
+        {followUps?.edges?.length > 5 && (
+          <Button variant='outlined' color='primary' onClick={handleButtonClick}>
+            {showAll ? t('Hide') : t('See all')}
+          </Button>
+        )}
+      </Box>
     </LabelizedField>
   );
 };

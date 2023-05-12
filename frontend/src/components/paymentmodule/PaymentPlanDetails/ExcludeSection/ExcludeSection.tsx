@@ -134,10 +134,11 @@ export const ExcludeSection = ({
   };
 
   const numberOfExcluded = excludedIds.length - deletedIds.length;
-  const canExclude = hasPermissions(
-    PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
-    permissions,
-  );
+  const canExclude =
+    hasPermissions(
+      PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
+      permissions,
+    ) && paymentPlan.status === PaymentPlanStatus.Locked;
 
   const renderButtons = (): React.ReactElement => {
     const noExclusions = numberOfExcluded === 0;
