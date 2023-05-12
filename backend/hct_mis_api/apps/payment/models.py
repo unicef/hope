@@ -462,6 +462,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+    exclusion_reason = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
