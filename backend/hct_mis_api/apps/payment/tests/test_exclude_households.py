@@ -74,7 +74,7 @@ class TestExcludeHouseholds(APITestCase):
             variables={
                 "paymentPlanId": self.payment_plan_id,
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
-                "exclusionReason": "I don't like those households"
+                "exclusionReason": "I don't like those households",
             },
         )
 
