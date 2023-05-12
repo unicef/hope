@@ -14,12 +14,14 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
+    GOVERNMENT_PARTNER,
     HEAD,
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
@@ -92,7 +94,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         needs_assessment: Dict,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
-        consent = consent_data.get("consent_sharing_h_c", False)
         address = household_address.get("address_h_c", "")
         village = household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
@@ -104,20 +105,25 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "last_registration_date": record.timestamp,
             "country_origin": Country(code="CZ"),
             "country": Country(code="CZ"),
-            "consent": consent,
             "flex_fields": needs_assessment,
             "consent_sharing": [],
         }
 
-        if consent_data:
-            household_data["consent_sharing"].append(HUMANITARIAN_PARTNER)
-
+        consent_h_c = consent_data.get("consent_h_c", False)
+        consent_sharing = consent_data.get("consent_sharing_h_c", False)
         consent_sharing_1 = consent_data.get("consent_sharing_h_c_1", False)
         consent_sharing_2 = consent_data.get("consent_sharing_h_c_2", False)
 
-        if consent_sharing_1 or consent_sharing_2:
-            # TODO we can't add "partners" to this field
-            pass
+        household_data["consent_sharing"] = []
+
+        if consent_h_c == "y" or consent_h_c is True:
+            household_data["consent"] = True
+        if consent_sharing == "y" or consent_sharing is True:
+            household_data["consent_sharing"].append(GOVERNMENT_PARTNER)
+        if consent_sharing_1 == "y" or consent_sharing_1 is True:
+            household_data["consent_sharing"].append(PRIVATE_PARTNER)
+        if consent_sharing_2 == "y" or consent_sharing_2 is True:
+            household_data["consent_sharing"].append(HUMANITARIAN_PARTNER)
 
         if address:
             household_data["address"] = address

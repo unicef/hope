@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     MALE,
-    NOT_DISABLED,
+    NOT_DISABLED, GOVERNMENT_PARTNER, PRIVATE_PARTNER,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -69,10 +69,11 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         consent = [
             {
+                "consent_h_c": "y",
                 "consent_sharing_h_c": True,
                 "government_partner": "",
-                "consent_sharing_h_c_1": True,
-                "consent_sharing_h_c_2": True,
+                "consent_sharing_h_c_1": "y",
+                "consent_sharing_h_c_2": "n",
             }
         ]
 
@@ -220,7 +221,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 1)
         imported_household = ImportedHousehold.objects.first()
         self.assertEqual(imported_household.consent, True)
-        self.assertEqual(imported_household.consent_sharing, [HUMANITARIAN_PARTNER])
+        self.assertEqual(imported_household.consent_sharing, [GOVERNMENT_PARTNER, PRIVATE_PARTNER])
         self.assertEqual(imported_household.country, Country(code="CZ"))
         self.assertEqual(imported_household.country_origin, Country(code="CZ"))
         self.assertEqual(imported_household.size, 4)
