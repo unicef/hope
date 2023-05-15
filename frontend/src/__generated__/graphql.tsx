@@ -3402,6 +3402,7 @@ export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
 
 export type MutationsExcludeHouseholdsArgs = {
   excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
+  exclusionReason?: Maybe<Scalars['String']>,
   paymentPlanId: Scalars['ID']
 };
 
@@ -3902,6 +3903,7 @@ export type PaymentPlanNode = Node & {
   steficonAppliedDate?: Maybe<Scalars['DateTime']>,
   sourcePaymentPlan?: Maybe<PaymentPlanNode>,
   isFollowUp: Scalars['Boolean'],
+  exclusionReason: Scalars['String'],
   followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
@@ -3922,6 +3924,8 @@ export type PaymentPlanNode = Node & {
   excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>,
   canCreateFollowUp?: Maybe<Scalars['Boolean']>,
   totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
+  unsuccessfulPaymentsCount?: Maybe<Scalars['Int']>,
+  paymentsUsedInFollowPaymentPlansCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -10046,7 +10050,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -18773,6 +18777,8 @@ export const PaymentPlanDocument = gql`
       id
       unicefId
     }
+    unsuccessfulPaymentsCount
+    paymentsUsedInFollowPaymentPlansCount
   }
 }
     `;
@@ -25640,6 +25646,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
@@ -25660,6 +25667,8 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>,
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  unsuccessfulPaymentsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  paymentsUsedInFollowPaymentPlansCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
