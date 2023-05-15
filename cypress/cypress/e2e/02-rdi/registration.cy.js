@@ -3,12 +3,6 @@ context("RDI", () => {
   beforeEach(() => {
     cy.adminLogin()
     cy.visit("/");
-<<<<<<< HEAD
-    cy.get("span").contains("Registration Data Import").click();
-  })
-
-  it("RDI - Upload the Excel File and verify ", () => {
-=======
   cy.get("span").contains("Registration Data Import").click();
   });
   it("RDI - Download Template", () => {
@@ -22,7 +16,6 @@ context("RDI", () => {
     cy.verifyDownload('registration_data_import_template.xlsx',{timeout:20000});
   })
   it("Registration Data Import", () => {
->>>>>>> develop
     uploadRDIFile();
     return;
   })
@@ -36,10 +29,6 @@ context("RDI", () => {
 });
 
 function uploadRDIFile() {
-<<<<<<< HEAD
-  cy.createExcel()
-=======
->>>>>>> develop
   cy.get("h5").contains("Registration Data Import");
   cy.get("span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
@@ -66,47 +55,6 @@ function uploadRDIFile() {
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
 }
 function mergeRDIFile() {
-<<<<<<< HEAD
-  cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
-  cy.get('[data-cy="label-Total Number of Households"]').contains("1");
-  cy.get('[data-cy="label-Total Number of Individuals"]').contains("1");
-  cy.get("span").contains("Merge").click({ force: true });
-  cy.get('strong').should('contain', '1 households and 1 individuals will be merged.')
-  cy.get("span").contains("MERGE").click({ force: true })
-  cy.get("span").contains("Registration Data Import").click();
-  cy.reload()
-  cy.get('[data-cy="status-container"]').eq(0).should('contain', 'MERGED')
-}
-function verifyMergedData() {
-  let householdId;
-  let individualId;
-  cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
-  cy.log("Looking for householdId");
-  cy.get('[data-cy="imported-households-row"]')
-    .find("td:nth-child(2)")
-    .then(($td) => {
-      householdId = $td.text().split(" (")[0];
-    })
-    .then(() => {
-      cy.get("button> span").contains("Individuals").click({ force: true });
-      cy.get('[data-cy="imported-individuals-table"]')
-        .find(`tbody > tr:nth-child(1) > td:nth-child(1)`)
-        .then(($td) => {
-          individualId = $td.text().split(" (")[0];
-        })
-        .then(() => {
-          cy.get("span").contains("Population").click();
-          cy.get("span").contains("Households").click();
-          cy.get('[data-cy="hh-filters-search"]')
-            .find("input")
-            .type(householdId, { force: true });
-          cy.get("td").should("contain", householdId);
-          cy.get("span").contains("Individuals").click({ force: true });
-          cy.get('[data-cy="ind-filters-search"]').type(individualId);
-          cy.get("td").should("contain", individualId);
-        });
-    });
-=======
   cy.get('[data-cy="number-of-households"]').contains(
     "1 Household available to import",
     {
@@ -135,5 +83,4 @@ function verifyMergedData() {
   cy.reload();
 
   cy.get("div").contains("MERGED");
->>>>>>> develop
 }
