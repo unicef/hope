@@ -275,6 +275,29 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   </svg>
                 </span>
               </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  role="button"
+                  tabindex="0"
+                >
+                  Follow-up Payment Plans
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody
@@ -282,11 +305,11 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
           >
             <tr
               class="MuiTableRow-root"
-              style="height: 108px;"
+              style="height: 54px;"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="9"
+                colspan="10"
               />
             </tr>
           </tbody>
@@ -340,7 +363,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-3 of 3
+            1-4 of 4
           </p>
           <div
             class="MuiTablePagination-actions"

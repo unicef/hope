@@ -36,8 +36,7 @@ ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 ####
 ADMINS = (
     ("Alerts", env("ALERTS_EMAIL")),
-    # TODO: update to @kellton.com
-    ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
+    ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@kellton.com"),
 )
 
 SITE_ID = 1
@@ -99,24 +98,48 @@ CSP_STYLE_SRC = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
+    "fonts.googleapis.com",
+    "hctmisdev.blob.core.windows.net",  # dev
+    "saunihopestg.blob.core.windows.net",  # stg
+    "saunihopetrn.blob.core.windows.net",  # trn
+    "saunihopeprd.blob.core.windows.net",  # prod
 )
 CSP_SCRIPT_SRC = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+    "gov-bam.nr-data.net",
+    "js-agent.newrelic.com",
 )
 CSP_IMG_SRC = (
     "'self'",
     "data:",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
 )
 CSP_FONT_SRC = (
     "'self'",
     "data:",
+    "fonts.gstatic.com",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
 )
 CSP_MEDIA_SRC = ("'self'",)
 CSP_CONNECT_SRC = (
     "excubo.unicef.io",
     "sentry.io",
+    "gov-bam.nr-data.net",
+    "hope.unicef.org",  # prod
+    "stg-hope.unitst.org",  # stg
+    "trn-hope.unitst.org",  # trn
 )
 
 DEBUG = True
