@@ -482,3 +482,4 @@ def check_rdi_import_periodic_task() -> bool:
 
         manager = RegistrationDataXlsxImportCeleryManager()
         manager.execute()
+        return True
