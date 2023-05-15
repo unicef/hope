@@ -1,5 +1,10 @@
 import logging
 from functools import cached_property
+from typing import Any, Optional
+
+from django.db.models import QuerySet
+
+from celery import Task
 
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
@@ -12,15 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 class BaseCeleryTaskManager:
-    pending_status = None
-    pending_queryset = None
-    in_progress_queryset = None
+    pending_status: Optional[str] = None
+    pending_queryset: Optional[QuerySet] = None
+    in_progress_queryset: Optional[QuerySet] = None
     queue = "default"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.all_celery_tasks = get_all_celery_tasks(self.queue)
 
-    def execute(self):
+    def execute(self) -> None:
         for model_object in self.in_progress_queryset:
             task_kwargs = self.get_task_kwargs(model_object)
             task = self.get_celery_task_by_kwargs(task_kwargs)
@@ -43,7 +48,7 @@ class BaseCeleryTaskManager:
             logger.info(f"registration_xlsx_import_task scheduled with kwargs {task_kwargs}")
             self.celery_task.delay(**task_kwargs)
 
-    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> dict:
+    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> Optional[dict]:
         return get_task_in_queue_or_running(
             name=self.celery_task.name,
             all_celery_tasks=self.all_celery_tasks,
@@ -51,10 +56,10 @@ class BaseCeleryTaskManager:
         )
 
     @cached_property
-    def celery_task(self):
+    def celery_task(self) -> Task:
         raise NotImplementedError
 
-    def get_task_kwargs(self, model_object: any) -> dict:
+    def get_task_kwargs(self, model_object: Any) -> dict:
         raise NotImplementedError
 
 
@@ -68,7 +73,7 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
     )
 
     @cached_property
-    def celery_task(self):
+    def celery_task(self) -> Task:
         from hct_mis_api.apps.registration_datahub.celery_tasks import (
             registration_xlsx_import_task,
         )
