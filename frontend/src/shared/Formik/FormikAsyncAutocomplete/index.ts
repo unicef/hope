@@ -1,0 +1,1 @@
+export { FormikAsyncAutocomplete } from './FormikAsyncAutocomplete';

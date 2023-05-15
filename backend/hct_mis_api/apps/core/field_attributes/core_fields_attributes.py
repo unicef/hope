@@ -1592,7 +1592,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Household resides in which admin area?"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(*args, **kwargs),
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin_area_h_c",
