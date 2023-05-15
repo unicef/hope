@@ -7,8 +7,7 @@ export const fakeApolloAllPaymentsForTable = [
       variables: {
         businessArea: 'afghanistan',
         paymentPlanId:
-          'UGF5bWVudFBsYW5Ob2RlOjZmOTIxYmFlLTljODktNGRkYy1iNTRjLTI4Mzc3ZTA2YjUwNg==',
-
+          'UGF5bWVudFBsYW5Ob2RlOmU3NjE4MzA4LTgyYmQtNDAxYi1iNjkzLTAyZGRlZGU3MmY2NQ==',
         first: 10,
         orderBy: '-created_at',
       },
@@ -29,19 +28,19 @@ export const fakeApolloAllPaymentsForTable = [
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
                 id:
-                  'UGF5bWVudE5vZGU6YzY4YzMxY2MtNDNkZC00NWI1LWE0ZTMtMTgyMThiMDNjZDli',
-                unicefId: 'RCPT-0060-23-0.000.121',
+                  'UGF5bWVudE5vZGU6NWU0ZjRiNDEtMjFkMS00ZDFiLWEzMzEtZjkyZTBlOGZmMjU4',
+                unicefId: 'RCPT-0060-23-0.000.010',
                 status: 'PENDING',
                 household: {
                   id:
-                    'SG91c2Vob2xkTm9kZTozYWI5ZDU3MC04NGI4LTQ2MDYtODg5YS0xNjc3MDBiOTBlMTE=',
-                  unicefId: 'HH-23-0000.0017',
-                  size: 8,
+                    'SG91c2Vob2xkTm9kZTozMGIwMjQ2YS05YzA5LTQzMTktYWI5MS1lYjU3MTE1NTljM2M=',
+                  unicefId: 'HH-23-0000.0012',
+                  size: 5,
                   admin2: null,
                   __typename: 'HouseholdNode',
                 },
-                entitlementQuantity: null,
-                entitlementQuantityUsd: null,
+                entitlementQuantity: 2123,
+                entitlementQuantityUsd: 2123,
                 currency: 'USD',
                 deliveredQuantity: null,
                 deliveredQuantityUsd: null,
@@ -51,8 +50,8 @@ export const fakeApolloAllPaymentsForTable = [
                 paymentPlanSoftConflictedData: [],
                 collector: {
                   id:
-                    'SW5kaXZpZHVhbE5vZGU6ZDdhNDgwNWMtMzQ5My00ZTQ3LWIyNGEtMTJkZmU3NmMxMWQ0',
-                  fullName: 'Emily Tracey Walter',
+                    'SW5kaXZpZHVhbE5vZGU6OGVmYTVjZmUtNzkxOC00MDU0LTk3YWMtMWQ0YzYzMDhjYjM1',
+                  fullName: 'John Latoya Smith',
                   __typename: 'IndividualNode',
                 },
                 financialServiceProvider: null,
