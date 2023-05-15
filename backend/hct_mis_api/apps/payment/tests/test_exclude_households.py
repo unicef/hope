@@ -64,6 +64,7 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
 
     @freeze_time("2020-10-10")
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_households(self) -> None:
         household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
@@ -74,7 +75,7 @@ class TestExcludeHouseholds(APITestCase):
             variables={
                 "paymentPlanId": self.payment_plan_id,
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
-                "exclusionReason": "I don't like those households",
+                "exclusionReason": "I do not like those households",
             },
         )
 
@@ -90,8 +91,9 @@ class TestExcludeHouseholds(APITestCase):
             set(self.payment_plan.excluded_households_ids),
             {self.payment_1.household.unicef_id, self.payment_2.household.unicef_id},
         )
-        self.assertEqual(str(self.payment_plan.exclusion_reason), "I don't like those households")
+        self.assertEqual(self.payment_plan.exclusion_reason, "I do not like those households")
 
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_payment_raises_error_when_payment_plan_contains_already_excluded_payments(self) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
