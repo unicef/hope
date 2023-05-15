@@ -135,7 +135,9 @@ def get_quantity_in_usd(
 
 
 def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
-    return ExtendedQuerySetSequence(Payment.objects.filter(excluded=False), PaymentRecord.objects.all())
+    return ExtendedQuerySetSequence(
+        Payment.objects.filter(excluded=False, conflicted=False), PaymentRecord.objects.all()
+    )
 
 
 def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
