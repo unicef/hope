@@ -61,9 +61,7 @@ export const LookUpLinkedTicketsModal = ({
         >
           {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              {t('Look up Linked Tickets')}
-            </DialogTitle>
+            <DialogTitle>{t('Look up Linked Tickets')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpLinkedTicketsFilters

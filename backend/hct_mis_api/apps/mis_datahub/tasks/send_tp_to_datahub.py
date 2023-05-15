@@ -80,7 +80,7 @@ class SendTPToDatahubTask:
         "mis_id": "id",
         "number": "document_number",
         "individual_mis_id": "individual_id",
-        "type": "type.type",
+        "type": "type.key",
     }
 
     def execute(self, target_population: "TargetPopulation") -> Dict:
@@ -146,6 +146,7 @@ class SendTPToDatahubTask:
 
             for document in documents_to_sync:
                 dh_document = self._prepare_datahub_object_document(document)
+                dh_document.type = dh_document.type.upper()
                 documents_to_bulk_create.append(dh_document)
                 if len(documents_to_bulk_create) % chunk_size:
                     dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)

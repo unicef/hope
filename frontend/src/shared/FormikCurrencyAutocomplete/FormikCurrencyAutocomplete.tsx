@@ -3,6 +3,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import get from 'lodash/get';
 import { useCurrencyChoicesQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
 
@@ -17,6 +18,7 @@ export const FormikCurrencyAutocomplete = ({
   field,
   form,
   disabled,
+  ...otherProps
 }): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -29,6 +31,11 @@ export const FormikCurrencyAutocomplete = ({
       form.setFieldValue(field.name, option.value);
     }
   };
+
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
+
   if (!data) return null;
 
   return (
@@ -46,9 +53,12 @@ export const FormikCurrencyAutocomplete = ({
             label={t('Currency')}
             variant='outlined'
             margin='dense'
+            error={isInvalid}
+            helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}
+            {...otherProps}
           />
         )}
-        data-cy="input-currency"
+        data-cy='input-currency'
       />
     </Box>
   );

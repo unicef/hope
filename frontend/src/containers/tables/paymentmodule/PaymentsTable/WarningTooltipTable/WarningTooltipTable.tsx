@@ -70,7 +70,9 @@ export const WarningTooltipTable = ({
       <ClickableTableRow hover>
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={`/${businessArea}/payment-module/payment-plans/${row.paymentPlanId}`}>
+            <BlackLink
+              to={`/${businessArea}/payment-module/payment-plans/${row.paymentPlanId}`}
+            >
               {row.paymentPlanUnicefId}
             </BlackLink>
           ) : (
@@ -111,7 +113,7 @@ export const WarningTooltipTable = ({
       maxWidth='md'
     >
       <DialogTitleWrapper>
-        <DialogTitle id='scroll-dialog-title'>{t('Warning')}</DialogTitle>
+        <DialogTitle>{t('Warning')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display='flex'>

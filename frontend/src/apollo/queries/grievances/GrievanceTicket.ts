@@ -134,7 +134,8 @@ export const GrievanceTicket = gql`
               node {
                 id
                 type {
-                  type
+                  label
+                  key
                 }
                 documentNumber
               }
@@ -210,6 +211,7 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
+                  key
                 }
                 documentNumber
                 photo
@@ -244,6 +246,7 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
+                  key
                 }
                 documentNumber
                 photo
@@ -280,6 +283,7 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
+                  key
                 }
                 documentNumber
                 photo
