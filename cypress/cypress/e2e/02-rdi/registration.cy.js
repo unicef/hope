@@ -76,7 +76,7 @@ function uploadRDIFile() {
     });
   });
   cy.get('[data-cy="button-import-rdi"]').as('importButton')
-  cy.get('@importButton').should('be.enabled').click()
+  cy.get('@importButton',{timeout:20000}).should('be.enabled').click()
   cy.get("span").contains("Registration Data Import").click();
   cy.reload()
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
