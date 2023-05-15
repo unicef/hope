@@ -241,6 +241,8 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         unicefId
       }
+      unsuccessfulPaymentsCount
+      paymentsUsedInFollowPaymentPlansCount
     }
   }
 `;
