@@ -8162,7 +8162,8 @@ export type UpdatePpMutation = (
 
 export type ExcludeHouseholdsPpMutationVariables = {
   paymentPlanId: Scalars['ID'],
-  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>
+  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
+  exclusionReason?: Maybe<Scalars['String']>
 };
 
 
@@ -8172,7 +8173,7 @@ export type ExcludeHouseholdsPpMutation = (
     { __typename?: 'ExcludeHouseholdsMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id'>
+      & Pick<PaymentPlanNode, 'id' | 'exclusionReason'>
       & { excludedHouseholds: Maybe<Array<Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -10050,7 +10051,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13674,10 +13675,11 @@ export type UpdatePpMutationHookResult = ReturnType<typeof useUpdatePpMutation>;
 export type UpdatePpMutationResult = ApolloReactCommon.MutationResult<UpdatePpMutation>;
 export type UpdatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePpMutation, UpdatePpMutationVariables>;
 export const ExcludeHouseholdsPpDocument = gql`
-    mutation ExcludeHouseholdsPP($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!) {
-  excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds) {
+    mutation ExcludeHouseholdsPP($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!, $exclusionReason: String) {
+  excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds, exclusionReason: $exclusionReason) {
     paymentPlan {
       id
+      exclusionReason
       excludedHouseholds {
         id
         unicefId
@@ -13720,6 +13722,7 @@ export function withExcludeHouseholdsPp<TProps, TChildProps = {}>(operationOptio
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
  *      excludedHouseholdsIds: // value for 'excludedHouseholdsIds'
+ *      exclusionReason: // value for 'exclusionReason'
  *   },
  * });
  */
@@ -18759,6 +18762,7 @@ export const PaymentPlanDocument = gql`
       id
       unicefId
     }
+    exclusionReason
     isFollowUp
     followUps {
       totalCount

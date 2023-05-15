@@ -2,6 +2,7 @@ import { Box, TableCell } from '@material-ui/core';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
@@ -11,10 +12,6 @@ import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import {
-  AllPaymentPlansForTableQuery,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '../../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
