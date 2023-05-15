@@ -25,7 +25,6 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     COLLECT_TYPE_UNKNOWN,
     HEAD,
-    IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -116,43 +115,20 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     ) -> None:
         if value is None:
             return
-        common_header = header.replace("_no", "")
-        if header.startswith("other_id"):
-            document_data = self.documents.get(f"individual_{row_num}_other")
-        else:
-            document_data = self.documents.get(f"individual_{row_num}_{common_header}")
 
-        if header == "other_id_type_i_c":
-            if document_data:
-                document_data["name"] = value
-            else:
-                self.documents[f"individual_{row_num}_other"] = {
-                    "individual": individual,
-                    "name": value,
-                    "type": "OTHER",
-                }
-        elif header == "other_id_no_i_c":
-            if document_data:
-                document_data["value"] = value
-            else:
-                self.documents[f"individual_{row_num}_other"] = {
-                    "individual": individual,
-                    "value": value,
-                    "type": "OTHER",
-                }
-        else:
-            document_name = header.replace("_no", "").replace("_i_c", "")
-            doc_type = document_name.upper().strip()
+        header = header.replace("_no", "")
+        common_header = f"individual_{row_num}_{header}"
+        document_key = header.replace("_i_c", "").strip()
+        document_data = self.documents.get(
+            common_header,
+            {
+                "individual": individual,
+                "key": document_key,
+            },
+        )
 
-            if document_data:
-                document_data["value"] = value
-            else:
-                self.documents[f"individual_{row_num}_{common_header}"] = {
-                    "individual": individual,
-                    "name": IDENTIFICATION_TYPE_DICT.get(doc_type),
-                    "type": doc_type,
-                    "value": value,
-                }
+        document_data["value"] = value
+        self.documents[common_header] = document_data
 
     def _handle_document_photo_fields(
         self,
@@ -165,28 +141,20 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     ) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
+
         header = header.replace("_photo_i_c", "_i_c")
-        if header.startswith("other_id"):
-            document_data = self.documents.get(f"individual_{row_num}_other")
-        else:
-            document_data = self.documents.get(f"individual_{row_num}_{header}")
-
-        file = self._handle_image_field(cell)
-
-        if document_data:
-            document_data["photo"] = file
-        else:
-            doc_type = (
-                "OTHER"
-                if header.startswith("other_id")
-                else header.replace("_no", "").replace("_i_c", "").upper().strip()
-            )
-            suffix = "other" if header.startswith("other_id") else header
-            self.documents[f"individual_{row_num}_{suffix}"] = {
+        document_key = header.replace("_i_c", "").strip()
+        common_header = f"individual_{row_num}_{header}"
+        document_data = self.documents.get(
+            common_header,
+            {
                 "individual": individual,
-                "photo": file,
-                "type": doc_type,
-            }
+                "key": document_key,
+            },
+        )
+        file = self._handle_image_field(cell)
+        document_data["photo"] = file
+        self.documents[common_header] = document_data
 
     def _handle_document_issuing_country_fields(
         self,
@@ -199,26 +167,19 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     ) -> None:
         if value is None:
             return
-        header = header.replace("_issuer_i_c", "_i_c")
-        if header.startswith("other_id"):
-            document_data = self.documents.get(f"individual_{row_num}_other")
-        else:
-            document_data = self.documents.get(f"individual_{row_num}_{header}")
 
-        if document_data:
-            document_data["issuing_country"] = Country(value)
-        else:
-            doc_type = (
-                "OTHER"
-                if header.startswith("other_id")
-                else header.replace("_no", "").replace("_i_c", "").upper().strip()
-            )
-            suffix = "other" if header.startswith("other_id") else header
-            self.documents[f"individual_{row_num}_{suffix}"] = {
+        header = header.replace("_issuer_i_c", "_i_c")
+        document_key = header.replace("_i_c", "").strip()
+        common_header = f"individual_{row_num}_{header}"
+        document_data = self.documents.get(
+            common_header,
+            {
                 "individual": individual,
-                "issuing_country": Country(value),
-                "type": doc_type,
-            }
+                "key": document_key,
+            },
+        )
+        document_data["issuing_country"] = Country(value)
+        self.documents[common_header] = document_data
 
     def _handle_image_field(
         self,
@@ -405,7 +366,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(type=document_data["type"].strip().upper())
+            doc_type = ImportedDocumentType.objects.get(key=document_data["key"])
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
@@ -458,34 +419,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
-                "tax_id_no_i_c": self._handle_document_fields,
-                "tax_id_photo_i_c": self._handle_document_photo_fields,
-                "tax_id_issuer_i_c": self._handle_document_issuing_country_fields,
-                "birth_certificate_no_i_c": self._handle_document_fields,
-                "birth_certificate_photo_i_c": self._handle_document_photo_fields,
-                "birth_certificate_issuer_i_c": self._handle_document_issuing_country_fields,
-                "drivers_license_no_i_c": self._handle_document_fields,
-                "drivers_license_photo_i_c": self._handle_document_photo_fields,
-                "drivers_license_issuer_i_c": self._handle_document_issuing_country_fields,
-                "electoral_card_no_i_c": self._handle_document_fields,
-                "electoral_card_photo_i_c": self._handle_document_photo_fields,
-                "electoral_card_issuer_i_c": self._handle_document_issuing_country_fields,
-                "unhcr_id_no_i_c": self._handle_identity_fields,
-                "unhcr_id_photo_i_c": self._handle_identity_photo,
-                "unhcr_id_issuer_i_c": self._handle_identity_issuing_country_fields,
-                "national_id_no_i_c": self._handle_document_fields,
-                "national_id_photo_i_c": self._handle_document_photo_fields,
-                "national_id_issuer_i_c": self._handle_document_issuing_country_fields,
-                "national_passport_i_c": self._handle_document_fields,
-                "national_passport_photo_i_c": self._handle_document_photo_fields,
-                "national_passport_issuer_i_c": self._handle_document_issuing_country_fields,
-                "scope_id_no_i_c": self._handle_identity_fields,
-                "scope_id_photo_i_c": self._handle_identity_photo,
-                "scope_id_issuer_i_c": self._handle_identity_issuing_country_fields,
-                "other_id_type_i_c": self._handle_document_fields,
-                "other_id_no_i_c": self._handle_document_fields,
-                "other_id_photo_i_c": self._handle_document_photo_fields,
-                "other_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "photo_i_c": self._handle_image_field,
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
@@ -507,7 +440,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "collect_individual_data": self._handle_collect_individual_data,
             },
         }
-
+        document_complex_types: Dict[str, Callable] = {}
+        for document_type in ImportedDocumentType.objects.all():
+            document_complex_types[f"{document_type.key}_no_i_c"] = self._handle_document_fields
+            document_complex_types[f"{document_type.key}_photo_i_c"] = self._handle_document_photo_fields
+            document_complex_types[f"{document_type.key}_issuer_i_c"] = self._handle_document_issuing_country_fields
+        complex_fields["individuals"].update(document_complex_types)
         complex_types: Dict[str, Callable] = {
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,

@@ -36,8 +36,7 @@ ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 ####
 ADMINS = (
     ("Alerts", env("ALERTS_EMAIL")),
-    # TODO: update to @kellton.com
-    ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
+    ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@kellton.com"),
 )
 
 SITE_ID = 1
@@ -94,28 +93,53 @@ CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
 CSP_DEFAULT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
 CSP_STYLE_SRC = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
+    "fonts.googleapis.com",
+    "hctmisdev.blob.core.windows.net",  # dev
+    "saunihopestg.blob.core.windows.net",  # stg
+    "saunihopetrn.blob.core.windows.net",  # trn
+    "saunihopeprd.blob.core.windows.net",  # prod
 )
 CSP_SCRIPT_SRC = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+    "gov-bam.nr-data.net",
+    "js-agent.newrelic.com",
 )
 CSP_IMG_SRC = (
     "'self'",
     "data:",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
 )
 CSP_FONT_SRC = (
     "'self'",
     "data:",
+    "fonts.gstatic.com",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
 )
 CSP_MEDIA_SRC = ("'self'",)
 CSP_CONNECT_SRC = (
     "excubo.unicef.io",
     "sentry.io",
+    "gov-bam.nr-data.net",
+    "hope.unicef.org",  # prod
+    "stg-hope.unitst.org",  # stg
+    "trn-hope.unitst.org",  # trn
 )
 
 DEBUG = True
@@ -213,11 +237,13 @@ DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
     "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
@@ -412,8 +438,9 @@ CACHES = {
     "default": env.cache(),
 }
 
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
+SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY")
+SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 
@@ -904,3 +931,10 @@ if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
     raise ImproperlyConfigured(
         f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
     )
+
+CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
+
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
+SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")

@@ -912,7 +912,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # Important! if value == 0 or 1 it's also evaluated to True
                 # checking for int values even tho Kobo returns everything as str
                 # to no not break import if they start returning integers
-                if value in ("True", "False", True, False, "0", "1"):
+                if value in ("True", "False", True, False, "0", "1", "TRUE", "FALSE", "true", "false"):
                     return None
                 return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type bool"
         except Exception as e:

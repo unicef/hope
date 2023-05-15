@@ -31,7 +31,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
         )
 
         cls.cash_plan = CashPlanFactory(business_area=cls.business_area)
-        cls.document_type = DocumentTypeFactory(type="TAX_ID")
+        cls.document_type = DocumentTypeFactory(key="tax_id")
 
         ##
 
