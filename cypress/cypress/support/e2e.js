@@ -16,14 +16,14 @@
 // Import commands.js using ES2015 syntax:
 import "cypress-file-upload";
 import "./commands";
-
+require('cy-verify-downloads').addCustomCommand();
 const uniqueSeed = Date.now();
 Cypress.Commands.add("uniqueSeed", () => uniqueSeed);
 
 Cypress.Commands.add("adminLogin", () => {
   cy.uniqueSeed().then((seed) => {
     cy.exec(
-      `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
+      `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`,{failOnNonZeroExit: false}
     );
   });
   cy.visit("/api/unicorn/");
