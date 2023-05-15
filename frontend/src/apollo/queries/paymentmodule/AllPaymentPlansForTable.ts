@@ -44,6 +44,15 @@ export const AllPaymentPlansForTable = gql`
           id
           unicefId
           isFollowUp
+          followUps {
+            totalCount
+            edges {
+              node {
+                id
+                unicefId
+              }
+            }
+          }
           status
           createdBy {
             id
