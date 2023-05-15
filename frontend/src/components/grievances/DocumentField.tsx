@@ -39,7 +39,7 @@ export function DocumentField({
     <>
       <Grid item xs={3}>
         <Field
-          name={`${docFieldName}.type`}
+          name={`${docFieldName}.key`}
           fullWidth
           variant='outlined'
           label={t('Type')}

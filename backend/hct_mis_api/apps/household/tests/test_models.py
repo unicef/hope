@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import create_household
@@ -90,7 +91,7 @@ class TestDocument(TestCase):
 
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
-            type=IDENTIFICATION_TYPE_OTHER,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
             defaults=dict(
                 label="Other",
                 unique_for_individual=False,
@@ -116,7 +117,7 @@ class TestDocument(TestCase):
 
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
-            type=IDENTIFICATION_TYPE_OTHER,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
             defaults=dict(
                 label="Other",
                 unique_for_individual=False,
@@ -144,7 +145,7 @@ class TestDocument(TestCase):
 
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
-            type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(
                 label="National Passport",
                 unique_for_individual=True,
@@ -172,7 +173,7 @@ class TestDocument(TestCase):
         self,
     ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
-            type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(
                 label="National Passport",
                 unique_for_individual=True,
@@ -198,14 +199,14 @@ class TestDocument(TestCase):
 
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
-            type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(
                 label="National Passport",
                 unique_for_individual=True,
             ),
         )
         document_type2, _ = DocumentType.objects.update_or_create(
-            type=IDENTIFICATION_TYPE_TAX_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             defaults=dict(
                 label="Tax Number Identification",
                 unique_for_individual=True,

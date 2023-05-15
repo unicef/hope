@@ -30,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DISABILITY_CHOICES,
-    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     NOT_PROVIDED,
@@ -441,7 +440,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
-    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    key = models.CharField(max_length=50, unique=True)
     is_identity_document = models.BooleanField(default=True)
 
     def __str__(self) -> str:

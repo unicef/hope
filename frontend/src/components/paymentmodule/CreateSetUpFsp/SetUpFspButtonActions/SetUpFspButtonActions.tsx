@@ -19,7 +19,6 @@ export const SetUpFspButtonActions = ({
   handleBackStep,
 }: SetUpFspButtonActionsProps): React.ReactElement => {
   const { t } = useTranslation();
-
   return (
     <Box pt={3} display='flex'>
       <Box mr={3}>

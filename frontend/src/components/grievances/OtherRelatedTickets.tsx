@@ -66,7 +66,7 @@ export const OtherRelatedTickets = ({
       )
     : [];
 
-  return linkedTickets.length || existingTickets.length ? (
+  return linkedTickets.length > 0 || existingTickets.length > 0 ? (
     <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
@@ -81,7 +81,7 @@ export const OtherRelatedTickets = ({
           <>{renderIds(openLinkedTickets)}</>
         </LabelizedField>
         {!show &&
-        (closedLinkedTickets.length || closedExistingTickets.length) ? (
+        (closedLinkedTickets.length > 0 || closedExistingTickets.length > 0) ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
               {t('SHOW CLOSED TICKETS')} (
@@ -104,7 +104,7 @@ export const OtherRelatedTickets = ({
           </Box>
         )}
         {show &&
-        (closedLinkedTickets.length || closedExistingTickets.length) ? (
+        (closedLinkedTickets.length > 0 || closedExistingTickets.length > 0) ? (
           <BlueBold onClick={() => setShow(false)}>
             {t('HIDE CLOSED TICKETS')} (
             {closedLinkedTickets.length + closedExistingTickets.length})
