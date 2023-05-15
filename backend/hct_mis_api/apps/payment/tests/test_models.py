@@ -33,8 +33,8 @@ class TestPaymentPlanModel(TestCase):
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        PaymentFactory(parent=pp, excluded=False, household=hh1, head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh2, head_of_household=hoh2)
+        PaymentFactory(parent=pp, household=hh1, head_of_household=hoh1)
+        PaymentFactory(parent=pp, household=hh2, head_of_household=hoh2)
 
         IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
         IndividualFactory(household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5))
@@ -56,7 +56,6 @@ class TestPaymentPlanModel(TestCase):
         pp = PaymentPlanFactory()
         PaymentFactory(
             parent=pp,
-            excluded=False,
             entitlement_quantity=100.00,
             entitlement_quantity_usd=200.00,
             delivered_quantity=50.00,
@@ -64,7 +63,6 @@ class TestPaymentPlanModel(TestCase):
         )
         PaymentFactory(
             parent=pp,
-            excluded=False,
             entitlement_quantity=100.00,
             entitlement_quantity_usd=200.00,
             delivered_quantity=50.00,
@@ -84,11 +82,11 @@ class TestPaymentPlanModel(TestCase):
 
     def test_not_excluded_payments(self) -> None:
         pp = PaymentPlanFactory()
-        PaymentFactory(parent=pp, excluded=False)
-        PaymentFactory(parent=pp, excluded=True)
+        PaymentFactory(parent=pp, conflicted=False)
+        PaymentFactory(parent=pp, conflicted=True)
 
         pp.refresh_from_db()
-        self.assertEqual(pp.not_excluded_payments.count(), 1)
+        self.assertEqual(pp.eligible_payments.count(), 1)
 
     def test_can_be_locked(self) -> None:
         pp1 = PaymentPlanFactory()
@@ -98,13 +96,13 @@ class TestPaymentPlanModel(TestCase):
         pp1_conflicted = PaymentPlanFactory(
             start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.LOCKED
         )
-        p1 = PaymentFactory(parent=pp1, excluded=False)
-        PaymentFactory(parent=pp1_conflicted, household=p1.household, excluded=False)
+        p1 = PaymentFactory(parent=pp1, conflicted=False)
+        PaymentFactory(parent=pp1_conflicted, household=p1.household, conflicted=False)
         self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create not conflicted payment
-        PaymentFactory(parent=pp1, excluded=False)
+        PaymentFactory(parent=pp1, conflicted=False)
         self.assertEqual(pp1.can_be_locked, True)
 
 
@@ -124,9 +122,9 @@ class TestPaymentModel(TestCase):
         pp = PaymentPlanFactory()
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         with self.assertRaises(IntegrityError):
-            PaymentFactory(parent=pp, excluded=False, household=hh1)
+            PaymentFactory(parent=pp, household=hh1)
 
     def test_manager_annotations__pp_conflicts(self) -> None:
         pp1 = PaymentPlanFactory()
@@ -136,10 +134,10 @@ class TestPaymentModel(TestCase):
         # create soft conflicted payments
         pp3 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
         pp4 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
-        p1 = PaymentFactory(parent=pp1, excluded=False)
-        p2 = PaymentFactory(parent=pp2, household=p1.household, excluded=False)
-        p3 = PaymentFactory(parent=pp3, household=p1.household, excluded=False)
-        p4 = PaymentFactory(parent=pp4, household=p1.household, excluded=False)
+        p1 = PaymentFactory(parent=pp1, conflicted=False)
+        p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False)
+        p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False)
+        p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False)
 
         for _ in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
             _.refresh_from_db()  # update unicef_id from trigger
@@ -185,3 +183,50 @@ class TestPaymentModel(TestCase):
                 },
             ],
         )
+
+    def test_manager_annotations__pp_no_conflicts_for_follow_up(self) -> None:
+        pp1 = PaymentPlanFactory()
+
+        # create follow up pps
+        pp2 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.LOCKED,
+            is_follow_up=True,
+            source_payment_plan=pp1,
+        )
+        pp3 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.OPEN,
+            is_follow_up=True,
+            source_payment_plan=pp1,
+        )
+        p1 = PaymentFactory(parent=pp1, conflicted=False)
+        p2 = PaymentFactory(
+            parent=pp2,
+            household=p1.household,
+            conflicted=False,
+            is_follow_up=True,
+            source_payment=p1,
+        )
+        p3 = PaymentFactory(
+            parent=pp3,
+            household=p1.household,
+            conflicted=False,
+            is_follow_up=True,
+            source_payment=p1,
+        )
+
+        for _ in [pp1, pp2, pp3, p1, p2, p3]:
+            _.refresh_from_db()  # update unicef_id from trigger
+
+        p2_data = Payment.objects.filter(id=p2.id).values()[0]
+        self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
+        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+        p3_data = Payment.objects.filter(id=p3.id).values()[0]
+        self.assertEqual(p3_data["payment_plan_hard_conflicted"], False)
+        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
+
+        self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
+        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [])

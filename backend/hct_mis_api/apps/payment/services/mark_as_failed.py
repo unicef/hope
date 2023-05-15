@@ -35,9 +35,7 @@ def revert_mark_as_failed(
 
 
 def recalculate_cash_received(household: "Household") -> None:
-    payment_items = ExtendedQuerySetSequence(
-        household.paymentrecord_set.all(), household.payment_set.exclude(excluded=True)
-    )
+    payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.eligible())
     aggregated_delivered_quantity = payment_items.aggregate(
         total_cash_received=Sum("delivered_quantity"),
         total_cash_received_usd=Sum("delivered_quantity_usd"),

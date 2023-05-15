@@ -7,8 +7,8 @@ export const fakeApolloAllPaymentsForTable = [
       variables: {
         businessArea: 'afghanistan',
         paymentPlanId:
-          'UGF5bWVudFBsYW5Ob2RlOmM2ZWYyMzJjLTgyODEtNGM0Yy05MTdhLTdmMWZkYzhhYTI0Ng==',
-        first: 5,
+          'UGF5bWVudFBsYW5Ob2RlOmU3NjE4MzA4LTgyYmQtNDAxYi1iNjkzLTAyZGRlZGU3MmY2NQ==',
+        first: 10,
         orderBy: '-created_at',
       },
     },
@@ -19,29 +19,29 @@ export const fakeApolloAllPaymentsForTable = [
             hasNextPage: false,
             hasPreviousPage: false,
             startCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
-            endCursor: 'YXJyYXljb25uZWN0aW9uOjE=',
+            endCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
             __typename: 'PageInfo',
           },
-          totalCount: 2,
+          totalCount: 1,
           edges: [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
                 id:
-                  'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
-                unicefId: 'RCPT-0060-22-0.000.015',
-                status: 'TRANSACTION_ERRONEOUS',
+                  'UGF5bWVudE5vZGU6NWU0ZjRiNDEtMjFkMS00ZDFiLWEzMzEtZjkyZTBlOGZmMjU4',
+                unicefId: 'RCPT-0060-23-0.000.010',
+                status: 'PENDING',
                 household: {
                   id:
-                    'SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE=',
-                  unicefId: 'HH-21-0000.0003',
-                  size: 4,
+                    'SG91c2Vob2xkTm9kZTozMGIwMjQ2YS05YzA5LTQzMTktYWI5MS1lYjU3MTE1NTljM2M=',
+                  unicefId: 'HH-23-0000.0012',
+                  size: 5,
                   admin2: null,
                   __typename: 'HouseholdNode',
                 },
-                entitlementQuantity: null,
-                entitlementQuantityUsd: null,
-                currency: '',
+                entitlementQuantity: 2123,
+                entitlementQuantityUsd: 2123,
+                currency: 'USD',
                 deliveredQuantity: null,
                 deliveredQuantityUsd: null,
                 paymentPlanHardConflicted: false,
@@ -50,56 +50,11 @@ export const fakeApolloAllPaymentsForTable = [
                 paymentPlanSoftConflictedData: [],
                 collector: {
                   id:
-                    'SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx',
-                  fullName: 'Jan Kowalski',
+                    'SW5kaXZpZHVhbE5vZGU6OGVmYTVjZmUtNzkxOC00MDU0LTk3YWMtMWQ0YzYzMDhjYjM1',
+                  fullName: 'John Latoya Smith',
                   __typename: 'IndividualNode',
                 },
-                financialServiceProvider: {
-                  id:
-                    'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
-                  name: 'Test FSP 1',
-                  __typename: 'FinancialServiceProviderNode',
-                },
-                __typename: 'PaymentNode',
-              },
-              __typename: 'PaymentNodeEdge',
-            },
-            {
-              cursor: 'YXJyYXljb25uZWN0aW9uOjE=',
-              node: {
-                id:
-                  'UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
-                unicefId: 'RCPT-0060-22-0.000.016',
-                status: 'TRANSACTION_SUCCESSFUL',
-                household: {
-                  id:
-                    'SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI=',
-                  unicefId: 'HH-21-0000.0004',
-                  size: 4,
-                  admin2: null,
-                  __typename: 'HouseholdNode',
-                },
-                entitlementQuantity: 10,
-                entitlementQuantityUsd: 20,
-                currency: 'PLN',
-                deliveredQuantity: 10,
-                deliveredQuantityUsd: 20,
-                paymentPlanHardConflicted: false,
-                paymentPlanSoftConflicted: false,
-                paymentPlanHardConflictedData: [],
-                paymentPlanSoftConflictedData: [],
-                collector: {
-                  id:
-                    'SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAy',
-                  fullName: 'Adam Nowak',
-                  __typename: 'IndividualNode',
-                },
-                financialServiceProvider: {
-                  id:
-                    'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
-                  name: 'Test FSP 1',
-                  __typename: 'FinancialServiceProviderNode',
-                },
+                financialServiceProvider: null,
                 __typename: 'PaymentNode',
               },
               __typename: 'PaymentNodeEdge',
