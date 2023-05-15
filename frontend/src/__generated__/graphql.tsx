@@ -8285,6 +8285,12 @@ export type HouseholdMinimalFragment = (
   )>, admin2: Maybe<(
     { __typename?: 'AreaNode' }
     & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
+  )>, admin3: Maybe<(
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
+  )>, admin4: Maybe<(
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
   )>, headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName' | 'givenName' | 'familyName'>
@@ -13453,6 +13459,18 @@ export const HouseholdMinimalFragmentDoc = gql`
     pCode
   }
   admin2 {
+    id
+    name
+    level
+    pCode
+  }
+  admin3 {
+    id
+    name
+    level
+    pCode
+  }
+  admin4 {
     id
     name
     level
