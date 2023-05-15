@@ -80,6 +80,24 @@ export const HouseholdQuestionnaire = ({
           size: 3,
         },
         {
+          name: 'admin2',
+          label: t('Administrative Level 2'),
+          value: selectedHouseholdData.admin2?.name,
+          size: 3,
+        },
+        {
+          name: 'admin3',
+          label: t('Administrative Level 3'),
+          value: selectedHouseholdData.admin3?.name,
+          size: 3,
+        },
+        {
+          name: 'admin4',
+          label: t('Administrative Level 4'),
+          value: selectedHouseholdData.admin4?.name,
+          size: 3,
+        },
+        {
           name: 'unhcrId',
           label: t('UNHCR CASE ID'),
           value: selectedHouseholdData.unicefId,
