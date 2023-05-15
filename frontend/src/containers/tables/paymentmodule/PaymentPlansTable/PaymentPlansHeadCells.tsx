@@ -1,9 +1,4 @@
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { AllPaymentPlansForTableQuery } from '../../../../__generated__/graphql';
-
-export const headCells: HeadCell<
-  AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node']
->[] = [
+export const headCells = [
   {
     disablePadding: false,
     label: 'Payment Plan ID',
@@ -16,6 +11,7 @@ export const headCells: HeadCell<
     id: 'status',
     numeric: false,
   },
+
   {
     disablePadding: false,
     label: 'No. of Households',
@@ -56,6 +52,12 @@ export const headCells: HeadCell<
     disablePadding: false,
     label: 'Dispersion End Date',
     id: 'dispersionEndDate',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Follow-up Payment Plans',
+    id: 'id',
     numeric: false,
   },
 ];
