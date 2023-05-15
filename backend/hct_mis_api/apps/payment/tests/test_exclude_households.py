@@ -90,7 +90,7 @@ class TestExcludeHouseholds(APITestCase):
             set(self.payment_plan.excluded_households_ids),
             {self.payment_1.household.unicef_id, self.payment_2.household.unicef_id},
         )
-        self.assertEqual(self.payment_plan.exclusion_reason, "I don't like those households")
+        self.assertEqual(str(self.payment_plan.exclusion_reason), "I don't like those households")
 
     def test_exclude_payment_raises_error_when_payment_plan_contains_already_excluded_payments(self) -> None:
         self.payment_1.excluded = True
