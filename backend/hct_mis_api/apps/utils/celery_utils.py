@@ -1,4 +1,7 @@
-def format_tasks(tasks_dict, status) -> list:
+from typing import Any, Optional
+
+
+def format_tasks(tasks_dict: dict, status: str) -> list:
     for tasks_list in tasks_dict.values():
         for task in tasks_list:
             yield {
@@ -10,8 +13,8 @@ def format_tasks(tasks_dict, status) -> list:
 
 
 def get_worker_tasks(
-    celery_app,
-):
+    celery_app: Any,
+) -> list:
     all_tasks = []
     try:
         i = celery_app.control.inspect()
@@ -23,7 +26,7 @@ def get_worker_tasks(
         return get_worker_tasks(celery_app)
 
 
-def get_all_celery_tasks(queue_name):
+def get_all_celery_tasks(queue_name: str) -> list:
     import base64
     import json
 
@@ -50,7 +53,9 @@ def get_all_celery_tasks(queue_name):
     return all_tasks
 
 
-def get_task_in_queue_or_running(name, all_celery_tasks=None, args=None, kwargs=None):
+def get_task_in_queue_or_running(
+    name: str, all_celery_tasks: Optional[list] = None, args: Optional[list] = None, kwargs: Optional[dict] = None
+) -> Optional[dict]:
     if all_celery_tasks is None:
         all_celery_tasks = get_all_celery_tasks("default")
     for task in all_celery_tasks:
