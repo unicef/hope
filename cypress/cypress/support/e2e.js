@@ -16,7 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import "cypress-file-upload";
 import "./commands";
-
+require('cy-verify-downloads').addCustomCommand();
 const uniqueSeed = Date.now();
 Cypress.Commands.add("uniqueSeed", () => uniqueSeed);
 Cypress.Commands.add("createExcel", () => {

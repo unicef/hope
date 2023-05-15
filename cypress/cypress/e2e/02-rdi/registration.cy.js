@@ -3,10 +3,26 @@ context("RDI", () => {
   beforeEach(() => {
     cy.adminLogin()
     cy.visit("/");
+<<<<<<< HEAD
     cy.get("span").contains("Registration Data Import").click();
   })
 
   it("RDI - Upload the Excel File and verify ", () => {
+=======
+  cy.get("span").contains("Registration Data Import").click();
+  });
+  it("RDI - Download Template", () => {
+    cy.get("span").contains("IMPORT").click({ force: true });
+    cy.window().document().then(function (doc) {
+      doc.addEventListener('click', () => {
+        setTimeout(function () { doc.location.reload() }, 5000)
+      })
+      cy.get('span').contains('DOWNLOAD TEMPLATE').click()
+    })
+    cy.verifyDownload('registration_data_import_template.xlsx',{timeout:20000});
+  })
+  it("Registration Data Import", () => {
+>>>>>>> develop
     uploadRDIFile();
     return;
   })
@@ -20,7 +36,10 @@ context("RDI", () => {
 });
 
 function uploadRDIFile() {
+<<<<<<< HEAD
   cy.createExcel()
+=======
+>>>>>>> develop
   cy.get("h5").contains("Registration Data Import");
   cy.get("span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
@@ -47,6 +66,7 @@ function uploadRDIFile() {
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
 }
 function mergeRDIFile() {
+<<<<<<< HEAD
   cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
   cy.get('[data-cy="label-Total Number of Households"]').contains("1");
   cy.get('[data-cy="label-Total Number of Individuals"]').contains("1");
@@ -86,4 +106,34 @@ function verifyMergedData() {
           cy.get("td").should("contain", individualId);
         });
     });
+=======
+  cy.get('[data-cy="number-of-households"]').contains(
+    "1 Household available to import",
+    {
+      timeout: 10000,
+    }
+  );
+  cy.get('[data-cy="number-of-individuals"]').contains(
+    "1 Individual available to import"
+  );
+  cy.get("div").contains("Errors").should("not.exist");
+  cy.get('[data-cy="button-import-rdi"').click();
+
+  cy.wait(1000);
+  cy.reload();
+  cy.wait(500);
+  // it lets the browser load the status
+
+  cy.get("div").contains("IMPORT ERROR").should("not.exist");
+  cy.get("div").contains("IN REVIEW");
+
+  cy.get("span").contains("Merge").click({ force: true }); // top of page
+  cy.get("span").contains("MERGE").click({ force: true }); // inside modal
+
+  cy.get("div").contains("MERGING");
+
+  cy.reload();
+
+  cy.get("div").contains("MERGED");
+>>>>>>> develop
 }
