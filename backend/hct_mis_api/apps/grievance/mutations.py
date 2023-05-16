@@ -694,7 +694,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                     f"No close function found for category {grievance_ticket.category} and issue type {grievance_ticket.issue_type}"
                 )
             close_function(grievance_ticket, info)
-
             grievance_ticket.refresh_from_db()
 
             clear_cache(ticket_details, grievance_ticket.business_area.slug)
