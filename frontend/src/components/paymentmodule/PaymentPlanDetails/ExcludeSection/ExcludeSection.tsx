@@ -6,9 +6,10 @@ import {
   Grid,
   Typography,
 } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
+import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 import {
   PaymentPlanDocument,
   PaymentPlanQuery,
@@ -18,8 +19,8 @@ import {
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { StyledTextField } from '../../../../shared/StyledTextField';
-import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
@@ -34,14 +35,13 @@ export const ExcludeSection = ({
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
   const permissions = usePermissions();
-  const canEditExclude = paymentPlan.status === PaymentPlanStatus.Locked;
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
   );
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
-  const [value, setValue] = useState('');
+  const [idsValue, setIdsValue] = useState('');
   const [excludedIds, setExcludedIds] = useState<string[]>(
     initialExcludedIds || [],
   );
@@ -51,20 +51,30 @@ export const ExcludeSection = ({
 
   const [mutate, { error }] = useExcludeHouseholdsPpMutation();
 
-  const handleChange = (event): void => {
+  const handleIdsChange = (event): void => {
     if (event.target.value === '') {
       setErrors([]);
     }
-    setValue(event.target.value);
+    setIdsValue(event.target.value);
   };
 
-  const handleSave = async (): Promise<void> => {
+  const initialValues = {
+    exclusionReason: '',
+  };
+  const validationSchema = Yup.object().shape({
+    exclusionReason: Yup.string()
+      .max(500, t('Too long'))
+      .required(t('Exclusion reason is required')),
+  });
+
+  const handleSave = async (values): Promise<void> => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
     try {
       await mutate({
         variables: {
           paymentPlanId: paymentPlan.id,
           excludedHouseholdsIds: idsToSave,
+          exclusionReason: values.exclusionReason,
         },
         refetchQueries: () => [
           {
@@ -85,7 +95,7 @@ export const ExcludeSection = ({
 
   const handleApply = (): void => {
     const idRegex = /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
-    const ids = value.trim().split(/,\s*|\s+/);
+    const ids = idsValue.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
     const newExcludedIds: string[] = [];
@@ -113,7 +123,7 @@ export const ExcludeSection = ({
     } else {
       setErrors([]);
       setExcludedIds([...excludedIds, ...newExcludedIds]);
-      setValue('');
+      setIdsValue('');
     }
   };
 
@@ -134,26 +144,26 @@ export const ExcludeSection = ({
   };
 
   const numberOfExcluded = excludedIds.length - deletedIds.length;
-  const canExclude = hasPermissions(
-    PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
-    permissions,
-  );
+  const canExclude =
+    hasPermissions(
+      PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
+      permissions,
+    ) && paymentPlan.status === PaymentPlanStatus.Locked;
 
-  const renderButtons = (): React.ReactElement => {
+  const renderButtons = (submitForm, values): React.ReactElement => {
     const noExclusions = numberOfExcluded === 0;
     const editMode = isExclusionsOpen && isEdit;
     const previewMode = !isExclusionsOpen && numberOfExcluded > 0;
-    const editAllowed = isExclusionsOpen && !isEdit && canEditExclude;
 
     const resetExclusions = (): void => {
       setExclusionsOpen(false);
       setErrors([]);
-      setValue('');
+      setIdsValue('');
       setEdit(false);
     };
 
     const saveExclusions = (): void => {
-      handleSave();
+      submitForm();
       setExclusionsOpen(false);
     };
 
@@ -165,28 +175,17 @@ export const ExcludeSection = ({
               {t('Cancel')}
             </Button>
           </Box>
-          <ButtonTooltip
+          <Button
             variant='contained'
             color='primary'
-            disabled={!canExclude || excludedIds.length === 0}
+            disabled={
+              !canExclude || excludedIds.length === 0 || !values.exclusionReason
+            }
             onClick={saveExclusions}
           >
             {t('Save')}
-          </ButtonTooltip>
+          </Button>
         </Box>
-      );
-    }
-
-    if (editAllowed) {
-      return (
-        <Button
-          color='primary'
-          variant='outlined'
-          startIcon={<EditIcon />}
-          onClick={() => setEdit(true)}
-        >
-          {t('Edit')}
-        </Button>
       );
     }
 
@@ -240,8 +239,8 @@ export const ExcludeSection = ({
               <Box mr={2}>
                 <StyledTextField
                   label={t('Household Ids')}
-                  value={value}
-                  onChange={handleChange}
+                  value={idsValue}
+                  onChange={handleIdsChange}
                   fullWidth
                   error={errors.length > 0}
                 />
@@ -251,13 +250,23 @@ export const ExcludeSection = ({
               <Button
                 variant='contained'
                 color='primary'
-                disabled={!value}
+                disabled={!idsValue}
                 onClick={() => {
                   handleApply();
                 }}
               >
                 {t('Apply')}
               </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <Field
+                name='exclusionReason'
+                fullWidth
+                multiline
+                variant='outlined'
+                label={t('Exclusion Reason')}
+                component={FormikTextField}
+              />
             </Grid>
           </Grid>
         </Box>
@@ -267,51 +276,75 @@ export const ExcludeSection = ({
   };
 
   return (
-    <PaperContainer>
-      <Box display='flex' justifyContent='space-between'>
-        <Typography variant='h6'>{t('Exclude')}</Typography>
-        {renderButtons()}
-      </Box>
-      {!isExclusionsOpen && numberOfExcluded > 0 ? (
-        <Box mt={2} mb={2}>
-          <GreyText>{`${numberOfExcluded} ${
-            numberOfExcluded === 1 ? 'Household' : 'Households'
-          } excluded`}</GreyText>
-        </Box>
-      ) : null}
-      <Collapse in={isExclusionsOpen}>
-        <Box display='flex' flexDirection='column'>
-          {renderInputAndApply()}
-          <Grid container item xs={6}>
-            {errors?.map((formError) => (
-              <Grid item xs={12}>
-                <FormHelperText error>{formError}</FormHelperText>
-              </Grid>
-            ))}
-          </Grid>
-          {numberOfExcluded > 0 && (
-            <Box mt={2} mb={2}>
-              <GreyText>{`${numberOfExcluded} ${
-                numberOfExcluded === 1 ? 'Household' : 'Households'
-              } excluded`}</GreyText>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={(values) => handleSave(values)}
+    >
+      {({ submitForm, values }) => (
+        <Form>
+          <PaperContainer>
+            <Box display='flex' justifyContent='space-between'>
+              <Typography variant='h6'>{t('Exclude')}</Typography>
+              {renderButtons(submitForm, values)}
             </Box>
-          )}
-          <Grid container direction='column' item xs={3}>
-            {excludedIds.map((id) => (
-              <Grid item xs={12}>
-                <ExcludedItem
-                  key={id}
-                  id={id}
-                  onDelete={() => handleDelete(id)}
-                  onUndo={() => handleUndo(id)}
-                  isDeleted={handleCheckIfDeleted(id)}
-                  isEdit={isEdit}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      </Collapse>
-    </PaperContainer>
+            {!isExclusionsOpen && numberOfExcluded > 0 ? (
+              <Box mt={2} mb={2}>
+                <GreyText>{`${numberOfExcluded} ${
+                  numberOfExcluded === 1 ? 'Household' : 'Households'
+                } excluded`}</GreyText>
+              </Box>
+            ) : null}
+            <Collapse in={isExclusionsOpen}>
+              <Box display='flex' flexDirection='column'>
+                {renderInputAndApply()}
+                <Grid container item xs={6}>
+                  {errors?.map((formError) => (
+                    <Grid item xs={12}>
+                      <FormHelperText error>{formError}</FormHelperText>
+                    </Grid>
+                  ))}
+                </Grid>
+                {numberOfExcluded > 0 && (
+                  <Box mt={2} mb={2}>
+                    <GreyText>{`${numberOfExcluded} ${
+                      numberOfExcluded === 1 ? 'Household' : 'Households'
+                    } excluded`}</GreyText>
+                  </Box>
+                )}
+                <Grid container direction='column' item xs={3}>
+                  {excludedIds.map((id) => (
+                    <Grid item xs={12}>
+                      <ExcludedItem
+                        key={id}
+                        id={id}
+                        onDelete={() => handleDelete(id)}
+                        onUndo={() => handleUndo(id)}
+                        isDeleted={handleCheckIfDeleted(id)}
+                        isEdit={isEdit}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+                {isExclusionsOpen && paymentPlan.exclusionReason ? (
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box mt={4} mb={2}>
+                        <Typography variant='subtitle2'>
+                          {t('Exclusion Reason')}:
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography>{paymentPlan.exclusionReason}</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                ) : null}
+              </Box>
+            </Collapse>
+          </PaperContainer>
+        </Form>
+      )}
+    </Formik>
   );
 };

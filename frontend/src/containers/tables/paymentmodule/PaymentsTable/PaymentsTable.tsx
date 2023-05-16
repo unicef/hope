@@ -64,6 +64,7 @@ export const PaymentsTable = ({
             isOnPaper={false}
             headCells={headCells}
             query={useAllPaymentsForTableQuery}
+            rowsPerPageOptions={[10, 25, 50]}
             queriedObjectName='allPayments'
             initialVariables={initialVariables}
             defaultOrderBy='createdAt'
