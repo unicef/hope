@@ -223,6 +223,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         unicefId
       }
+      exclusionReason
       isFollowUp
       followUps {
         totalCount
@@ -241,6 +242,8 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         unicefId
       }
+      unsuccessfulPaymentsCount
+      paymentsUsedInFollowPaymentPlansCount
     }
   }
 `;
