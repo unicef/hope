@@ -48,7 +48,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: 'hct-mis-helm/pkg/hope-$(CHART_VERSION).tgz'
+              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
               releaseName: 'hope'
               install: true
               waitForExecution: false
