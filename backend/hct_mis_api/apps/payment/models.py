@@ -462,6 +462,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+    exclusion_reason = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -820,6 +821,18 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             return 1
 
         return self.acceptance_process_threshold.finance_release_number_required
+
+    def unsuccessful_payments(self) -> "QuerySet":
+        return self.payment_items.eligible().filter(
+            status__in=[
+                Payment.STATUS_ERROR,
+                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+            ]
+        )
+
+    def payments_used_in_follow_payment_plans(self) -> "QuerySet":
+        return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):

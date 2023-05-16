@@ -334,27 +334,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  RCPT-0060-23-0.000.121
+                  RCPT-0060-23-0.000.010
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  HH-23-0000.0017
+                  HH-23-0000.0012
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  8
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  Emily Tracey Walter
+                  5
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -364,7 +354,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
+                  John Latoya Smith
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
                   -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  USD 2,123.00 (USD 2,123.00)
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -376,7 +376,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 216px;"
+                style="height: 486px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
@@ -412,13 +412,13 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 role="button"
                 tabindex="0"
               >
-                5
+                10
               </div>
               <input
                 aria-hidden="true"
                 class="MuiSelect-nativeInput"
                 tabindex="-1"
-                value="5"
+                value="10"
               />
               <svg
                 aria-hidden="true"
