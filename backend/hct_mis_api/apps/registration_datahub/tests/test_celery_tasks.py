@@ -381,7 +381,7 @@ class TestAutomatingRDICreationTask(TestCase):
         """
         based on registration_id select RegistrationService
         Ukraine - 2, 3 -> UkraineBaseRegistrationService()
-        Ukraine - 11 -> UkraineRegistrationService()
+        Ukraine - 21 -> UkraineRegistrationService()
         Sri Lanka - 17 -> SriLankaRegistrationService()
         Czech Republic - 18, 19 -> NotImplementedError for now
 
@@ -395,7 +395,7 @@ class TestAutomatingRDICreationTask(TestCase):
         registration_id_to_ba_name_map = {
             2: "ukraine",
             3: "ukraine",
-            11: "ukraine",  # new form
+            21: "ukraine",  # new form
             17: "sri-lanka",
             18: "czech republic",
             19: "czech republic",
@@ -407,14 +407,14 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        registration_ids = [2, 3, 11, 17, 18, 19, 999]
+        registration_ids = [2, 3, 21, 17, 18, 19, 999]
         for registration_id in registration_ids:
             for _ in range(amount_of_records):
                 records_count += 1
                 files = None
                 if registration_id == 17:
                     data = SRI_LANKA_FIELDS
-                elif registration_id == 11:
+                elif registration_id == 21:
                     data = UKRAINE_NEW_FORM_FIELDS
                     files = UKRAINE_NEW_FORM_FILES
                 else:
@@ -438,7 +438,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 # for SriLanka we create "children" and "caretaker" as two separate Individuals
                 # and for Ukr new form reg_id=11 we create 2 Ind and 1 Hh
                 # that why need amount_of_records * 2
-                imported_ind_count += amount_of_records if registration_id not in [17, 11] else amount_of_records * 2
+                imported_ind_count += amount_of_records if registration_id not in [17, 21] else amount_of_records * 2
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
@@ -488,7 +488,7 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_record(
             fields=UKRAINE_NEW_FORM_FIELDS,
-            registration=11,
+            registration=21,
             status=Record.STATUS_TO_IMPORT,
             files=UKRAINE_NEW_FORM_FILES,
         )
