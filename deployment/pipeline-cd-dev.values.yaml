@@ -38,7 +38,7 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/appgw-ssl-certificate: cert-ictd-hope-dev-aks-unitst-tls
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: kv-cert-unitst
   host: dev-hope.unitst.org
 
 
