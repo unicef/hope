@@ -3,8 +3,19 @@
 context("RDI", () => {
   beforeEach(() => {
     cy.adminLogin()
+    cy.visit("/");
+  cy.get("span").contains("Registration Data Import").click();
   });
-
+  it("RDI - Download Template", () => {
+    cy.get("span").contains("IMPORT").click({ force: true });
+    cy.window().document().then(function (doc) {
+      doc.addEventListener('click', () => {
+        setTimeout(function () { doc.location.reload() }, 5000)
+      })
+      cy.get('span').contains('DOWNLOAD TEMPLATE').click()
+    })
+    cy.verifyDownload('registration_data_import_template.xlsx',{timeout:20000});
+  })
   it("Registration Data Import", () => {
     uploadRDIFile();
 
@@ -58,8 +69,6 @@ function verifyMergedData() {
 }
 
 function uploadRDIFile() {
-  cy.visit("/");
-  cy.get("span").contains("Registration Data Import").click();
   cy.get("h5").contains("Registration Data Import");
   cy.get("button > span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
@@ -99,7 +108,7 @@ function mergeRDIFile() {
   cy.reload();
   cy.wait(500);
   // it lets the browser load the status
-  
+
   cy.get("div").contains("IMPORT ERROR").should("not.exist");
   cy.get("div").contains("IN REVIEW");
 

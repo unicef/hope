@@ -18,5 +18,8 @@
     "init-scenario": "./cypress/scripts/initScenario.js",
     "lint": "eslint .",
     "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*"
+  },
+  "dependencies": {
+    "cy-verify-downloads": "^0.1.14"
   }
 }
