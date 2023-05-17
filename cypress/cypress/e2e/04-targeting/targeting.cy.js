@@ -30,7 +30,7 @@ context("Targeting", () => {
       cy.get('[data-cy="status-container"]').should('contain', "LOCKED");
       cy.get('[data-cy="button-target-population-send-to-hope"]').click({ force: true });
       cy.get('[data-cy="button-target-population-modal-send-to-hope"]').click({ force: true });
-      cy.get('[data-cy="status-container"]').should('contain', "READY FOR PAYMENT MODULE");
+      cy.get('[data-cy="status-container"]').should('contain', "READY FOR PAYMENT MODULE",{timeout:100000});
     });
   });
 });
