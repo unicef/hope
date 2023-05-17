@@ -102,6 +102,7 @@ class ImportedHouseholdFactory(DjangoModelFactory):
     )
     org_name_enumerator = "Partner Organization"
     village = factory.Faker("city")
+    enumerator_rec_id = factory.fuzzy.FuzzyInteger(9999999, 99999999)
 
 
 class ImportedIndividualFactory(DjangoModelFactory):
