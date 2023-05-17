@@ -17,6 +17,7 @@ from ...targeting.services.targeting_stats_refresher import refresh_stats
 from ..forms import (
     AddToTargetPopulationForm,
     CreateTargetPopulationForm,
+    MassRestoreForm,
     MassWithdrawForm,
     RestoreForm,
     WithdrawForm,
@@ -48,11 +49,11 @@ class HouseholdWithDrawnMixin:
         service = HouseholdWithdraw(hh)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
-            hh.unwithdraw()
+            service.unwithdraw()
             message = "{target} has been restored by {user}. {comment}"
             ticket_message = "Ticket reopened due to Household restore"
         else:
-            hh.withdraw(tag=tag)
+            service.withdraw(tag=tag)
             message = "{target} has been withdrawn by {user}. {comment}"
             ticket_message = "Ticket closed due to Household withdrawn"
 
@@ -120,7 +121,7 @@ class HouseholdWithDrawnMixin:
         context["queryset"] = qs
         results = 0
         if "apply" in request.POST:
-            form = RestoreForm(request.POST)
+            form = MassRestoreForm(request.POST)
             if form.is_valid():
                 with atomic():
                     if form.cleaned_data["reopen_tickets"]:
