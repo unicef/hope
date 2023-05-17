@@ -6,6 +6,7 @@ module.exports = defineConfig({
       on('task', verifyDownloadTasks);
     },
     projectId: "cypress",
+    defaultCommandTimeout: 10000 ,
     baseUrl: "http://localhost:8082",
     env: {
       username: 'cypress-username',
