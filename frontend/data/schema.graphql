@@ -793,6 +793,10 @@ type EditPaymentVerificationMutation {
   paymentPlan: GenericPaymentPlanNode
 }
 
+type ExcludeHouseholdsMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type ExportXLSXPaymentPlanPaymentListMutation {
   paymentPlan: PaymentPlanNode
 }
@@ -909,6 +913,7 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   ENTITLEMENT_QUANTITY
   ENTITLEMENT_QUANTITY_USD
   DELIVERED_QUANTITY
+  DELIVERY_DATE
 }
 
 type FinancialServiceProviderXlsxTemplateNode implements Node {
@@ -1622,6 +1627,7 @@ type ImportedHouseholdNode implements Node {
   koboSubmissionTime: DateTime
   rowId: Int
   diiaRecId: String!
+  enumeratorRecId: Int
   misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
@@ -2220,6 +2226,7 @@ type Mutations {
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
+  excludeHouseholds(householdUnicefIds: [String]!, paymentPlanId: ID!): ExcludeHouseholdsMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2595,6 +2602,7 @@ type PaymentPlanNode implements Node {
   canCreatePaymentVerificationPlan: Boolean
   availablePaymentRecordsCount: Int
   reconciliationSummary: ReconciliationSummaryNode
+  excludedPayments: [String]
 }
 
 type PaymentPlanNodeConnection {
