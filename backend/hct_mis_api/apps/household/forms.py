@@ -91,7 +91,6 @@ class UpdateIndividualsIBANFromXlsxForm(forms.Form):
 
 
 class WithdrawForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     tag = forms.SlugField(
         max_length=100,
@@ -101,13 +100,16 @@ class WithdrawForm(forms.Form):
 
 
 class RestoreForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     reopen_tickets = forms.BooleanField(required=False, help_text="Restore all previously closed tickets")
 
 
 class MassWithdrawForm(WithdrawForm):
-    pass
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+
+
+class MassRestoreForm(RestoreForm):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
 
 
 class AddToTargetPopulationForm(forms.Form):
