@@ -18,15 +18,21 @@ logger = logging.getLogger(__name__)
 
 class BaseCeleryTaskManager:
     pending_status: Optional[str] = None
-    pending_queryset: Optional[QuerySet] = None
-    in_progress_queryset: Optional[QuerySet] = None
     queue = "default"
 
     def __init__(self) -> None:
         self.all_celery_tasks = get_all_celery_tasks(self.queue)
 
+    @property
+    def pending_queryset(self) -> QuerySet:
+        raise NotImplementedError("pending_queryset not implemented")
+
+    @property
+    def in_progress_queryset(self) -> QuerySet:
+        raise NotImplementedError("in_progress_queryset not implemented")
+
     def execute(self) -> None:
-        for model_object in self.in_progress_queryset:
+        for model_object in self.in_progress_queryset.all():
             task_kwargs = self.get_task_kwargs(model_object)
             task = self.get_celery_task_by_kwargs(task_kwargs)
             if not (task and task.get("status") == "queued" or not task):
@@ -37,7 +43,7 @@ class BaseCeleryTaskManager:
             model_object.status = self.pending_status
             model_object.save()
 
-        for model_object in self.pending_queryset:
+        for model_object in self.pending_queryset.all():
             task_kwargs = self.get_task_kwargs(model_object)
             task = self.get_celery_task_by_kwargs(task_kwargs)
             if task:
@@ -65,12 +71,18 @@ class BaseCeleryTaskManager:
 
 class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
     pending_status = RegistrationDataImport.IMPORT_SCHEDULED
-    pending_queryset = RegistrationDataImport.objects.filter(
-        status=RegistrationDataImport.IMPORT_SCHEDULED, data_source=RegistrationDataImport.XLS
-    )
-    in_progress_queryset = RegistrationDataImport.objects.filter(
-        status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
-    )
+
+    @property
+    def pending_queryset(self) -> QuerySet:
+        return RegistrationDataImport.objects.filter(
+            status=RegistrationDataImport.IMPORT_SCHEDULED, data_source=RegistrationDataImport.XLS
+        )
+
+    @property
+    def in_progress_queryset(self) -> QuerySet:
+        return RegistrationDataImport.objects.filter(
+            status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
+        )
 
     @cached_property
     def celery_task(self) -> Task:
