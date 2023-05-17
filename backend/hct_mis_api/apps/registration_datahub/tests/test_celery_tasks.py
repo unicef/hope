@@ -145,6 +145,7 @@ UKRAINE_NEW_FORM_FIELDS: Dict = {
         "rounds": "1",
         "elapsed": "71464926",
     },
+    "enumerator": "655384",
     "household": [{"admin1_h_c": "UA14", "admin2_h_c": "UA1408", "admin3_h_c": "UA1408005"}],
     "marketing": [{"can_unicef_contact_you": [{}]}],
     "individuals": [
@@ -436,7 +437,7 @@ class TestAutomatingRDICreationTask(TestCase):
             else:
                 rdi_count += amount_of_records // page_size
                 # for SriLanka we create "children" and "caretaker" as two separate Individuals
-                # and for Ukr new form reg_id=11 we create 2 Ind and 1 Hh
+                # and for Ukr new form reg_id=21 we create 2 Ind and 1 Hh
                 # that why need amount_of_records * 2
                 imported_ind_count += amount_of_records if registration_id not in [17, 21] else amount_of_records * 2
                 result = run_automate_rdi_creation_task(
@@ -521,6 +522,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert hh.admin1 == "UA14"
         assert hh.admin2 == "UA1408"
         assert hh.admin3 == "UA1408005"
+        assert hh.enumerator_rec_id == 655384
 
         assert ind_1.birth_date == datetime.date(1990, 11, 11)
         assert ind_1.disability == NOT_DISABLED
