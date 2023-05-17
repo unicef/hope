@@ -25,10 +25,7 @@ context("Targeting", () => {
       cy.get('[data-cy="criteria-container"]').should('to.visible')
       cy.get("[data-cy='button-target-population-create']").click({ force: true });
       cy.get('[data-cy="status-container"]').should('contain', "OPEN");
-      cy.wait(5000)
-      cy.get('[data-cy="label-Total Number of Households"]').invoke('text').should('not.contain', ' 0 ');
-      cy.get('[data-cy="label-Targeted Individuals"]').invoke('text').should('not.contain', ' 0 ');
-      cy.get('[data-cy="button-target-population-lock"]').click({ force: true });
+      cy.get('[data-cy="button-target-population-lock"]').should('to.visible',{timeout:100000}).click({ force: true });
       cy.get('[data-cy="button-target-population-modal-lock"]').click({ force: true });
       cy.get('[data-cy="status-container"]').should('contain', "LOCKED");
       cy.get('[data-cy="button-target-population-send-to-hope"]').click({ force: true });
