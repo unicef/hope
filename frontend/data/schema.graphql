@@ -1987,6 +1987,7 @@ enum IndividualRelationship {
   SON_DAUGHTER
   WIFE_HUSBAND
   FOSTER_CHILD
+  FREE_UNION
 }
 
 type IndividualRoleInHouseholdNode {
@@ -2230,7 +2231,7 @@ type Mutations {
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
-  excludeHouseholds(excludedHouseholdsIds: [String]!, paymentPlanId: ID!): ExcludeHouseholdsMutation
+  excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2596,6 +2597,7 @@ type PaymentPlanNode implements Node {
   steficonAppliedDate: DateTime
   sourcePaymentPlan: PaymentPlanNode
   isFollowUp: Boolean!
+  exclusionReason: String!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -2616,6 +2618,8 @@ type PaymentPlanNode implements Node {
   excludedHouseholds: [HouseholdNode]
   canCreateFollowUp: Boolean
   totalWithdrawnHouseholdsCount: Int
+  unsuccessfulPaymentsCount: Int
+  paymentsUsedInFollowPaymentPlansCount: Int
 }
 
 type PaymentPlanNodeConnection {
