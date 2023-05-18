@@ -52,13 +52,13 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     create_task_for_processing_records,
-    get_registration_to_rdi_service_map,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
+from hct_mis_api.aurora.models import Registration
 
 logger = logging.getLogger(__name__)
 
@@ -390,7 +390,12 @@ class CreateRDIForm(forms.Form):
         (ANY, "Any"),
     )
     name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
-    registration = forms.IntegerField(required=True)
+    registration = forms.ModelChoiceField(
+        label="Registration",
+        required=True,
+        queryset=Registration.objects.all(),
+        help_text="Registration to be used",
+    )
     filters = forms.CharField(
         widget=forms.Textarea,
         required=False,
@@ -414,14 +419,6 @@ class CreateRDIForm(forms.Form):
         filter = QueryStringFilter(None, {}, Record, None)
         return filter.get_filters(self.cleaned_data["filters"])
 
-    def clean_registration(self) -> dict:
-        if self.cleaned_data["registration"] not in get_registration_to_rdi_service_map().keys():
-            raise ValidationError(
-                "Invalid registration number. Data can be processed only for registration(s): "
-                "17 - Sri Lanka; 2, 3 - Ukraine;"
-            )
-        return self.cleaned_data["registration"]
-
     def clean_rdi(self) -> dict:
         if self.cleaned_data.get("rdi") and self.cleaned_data["rdi"].status != RegistrationDataImport.IN_REVIEW:
             raise ValidationError("Only RDI within status 'In Review' can be processed")
@@ -430,8 +427,6 @@ class CreateRDIForm(forms.Form):
     def clean(self) -> None:
         super().clean()
         filters, excludes = self.cleaned_data["filters"]
-        if "registration" in self.cleaned_data:
-            filters["registration"] = self.cleaned_data["registration"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
             filters["status__isnull"] = True
         elif self.cleaned_data["status"] in [Record.STATUS_IMPORTED, Record.STATUS_ERROR]:
@@ -449,7 +444,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         "timestamp",
         "source_id",
         "registration_data_import",
-        "status",
+        # "status",
         "error_message",
     )
     # list_editable = ("ignored",)
@@ -476,35 +471,6 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs
-
-    @admin.action(description="Create RDI")
-    def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-        if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
-            self.message_user(
-                request,
-                "Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3, 11 - Ukraine;",
-                messages.ERROR,
-            )
-            return
-
-        msg_resp = ""
-        for service in list(set(get_registration_to_rdi_service_map().values())):
-            qs = queryset.filter(registration__in=service.REGISTRATION_ID).values_list("id", flat=True)
-            if not qs:
-                continue
-            try:
-                records_ids = qs.values_list("id", flat=True)
-                rdi = service().create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
-
-                create_task_for_processing_records(service, rdi.pk, list(records_ids))
-
-                url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
-                msg_resp += f"<ul><a href='{url}'>{rdi.name}</ul></a> "
-
-            except Exception as e:
-                self.message_user(request, str(e), messages.ERROR)
-
-        self.message_user(request, mark_safe(f"Started RDI Import with name(s): {msg_resp}"), messages.SUCCESS)
 
     @admin.action(description="Async extract")
     def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
@@ -567,14 +533,15 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         if request.method == "POST":
             form = CreateRDIForm(request.POST, request=request)
             if form.is_valid():
-                registration_id = form.cleaned_data["registration"]
+                registration = form.cleaned_data["registration"]
                 filters, exclude = form.cleaned_data["filters"]
                 rdi = form.cleaned_data.get("rdi")
                 update_rdi = "update " if rdi else ""
+                # filters["registration__in"] = registration.rdi_parser.REGISTRATION_ID
+
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
-
-                if service := get_registration_to_rdi_service_map().get(registration_id):
+                if service := registration.rdi_parser:
                     qs = (
                         Record.objects.defer("storage", "counters", "files", "fields")
                         .filter(**filters)
@@ -583,10 +550,11 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                     if records_ids := qs.values_list("id", flat=True):
                         try:
                             if not rdi:
-                                rdi = service().create_rdi(
-                                    request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
-                                )
-                            create_task_for_processing_records(service, rdi.pk, list(records_ids))
+                                project = registration.project
+                                # programme = project.programme TODO programme refactoring
+                                organization = project.organization
+                                rdi = service.create_rdi(request.user, f"{organization.slug} rdi {timezone.now()}")
+                            create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
                                 request,
@@ -601,8 +569,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                 else:
                     self.message_user(
                         request,
-                        "Invalid registration number. Data can be processed only for registration(s): "
-                        "17 - Sri Lanka; 2, 3, 11 - Ukraine;",
+                        "Selected registration doesn't have any strategy service associated.",
                         messages.ERROR,
                     )
         else:

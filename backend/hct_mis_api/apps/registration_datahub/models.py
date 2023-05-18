@@ -524,6 +524,7 @@ class Record(models.Model):
         related_name="records",
         on_delete=models.SET_NULL,
         null=True,
+        # blank=True,
     )
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)

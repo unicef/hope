@@ -51,6 +51,8 @@ class RegistrationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 @smart_register(models.Record)
 class RecordAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+    list_display = ("registration", "status", "registration_data_import", "source_id")
+
     @button()
     def fetch(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request)

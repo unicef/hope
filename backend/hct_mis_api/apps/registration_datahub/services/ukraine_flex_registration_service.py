@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -37,6 +37,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
+from hct_mis_api.aurora.rdi import registry
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -45,9 +46,6 @@ if TYPE_CHECKING:
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):
-    BUSINESS_AREA_SLUG: str = "ukraine"
-    REGISTRATION_ID: Tuple = (2, 3)
-
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
@@ -96,8 +94,6 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        self._check_registration_id(record.registration, "Ukraine data is processed only from registration 2, 3 or 11!")
-
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
         record_data_dict = record.get_data()
@@ -316,11 +312,13 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
 
 class UkraineRegistrationService(UkraineBaseRegistrationService):
-    REGISTRATION_ID: Tuple = (21,)
-
     HOUSEHOLD_MAPPING_DICT = {
         "admin1": "admin1_h_c",
         "admin2": "admin2_h_c",
         "admin3": "admin3_h_c",
         "admin4": "admin4_h_c",
     }
+
+
+registry.register(UkraineBaseRegistrationService)
+registry.register(UkraineRegistrationService)
