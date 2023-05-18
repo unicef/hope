@@ -22,6 +22,13 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name='document',
+                    name='expiry_date',
+                    field=models.DateTimeField(db_index=True),
+                )
+            ],
             database_operations=[
                 AddIndexConcurrently(
                     model_name="document",
