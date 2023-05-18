@@ -1,5 +1,6 @@
 import { Button, Grid, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { v4 as uuidv4 } from 'uuid';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
@@ -156,37 +157,42 @@ export const AddIndividualDataChange = ({
           render={(arrayHelpers) => {
             return (
               <>
-                {values.individualData?.documents?.map((item) => (
-                  <DocumentField
-                    id={item.node.id}
-                    onDelete={() =>
-                      removeItemById(
-                        values.individualData.documents,
-                        item.node.id,
-                        arrayHelpers,
-                      )
-                    }
-                    countryChoices={data.countriesChoices}
-                    documentTypeChoices={data.documentTypeChoices}
-                    baseName='individualData.documents'
-                    setFieldValue={setFieldValue}
-                    values={values}
-                  />
-                ))}
-
+                {values.individualData?.documents?.map((item) => {
+                  const existingOrNewId = item.node?.id || item.id;
+                  return (
+                    <DocumentField
+                      id={existingOrNewId}
+                      key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
+                      onDelete={() =>
+                        removeItemById(
+                          values.individualData.documents,
+                          existingOrNewId,
+                          arrayHelpers,
+                        )
+                      }
+                      countryChoices={data.countriesChoices}
+                      documentTypeChoices={data.documentTypeChoices}
+                      baseName='individualData.documents'
+                      baseNameArray={values.individualData.documents}
+                      setFieldValue={setFieldValue}
+                      values={values}
+                    />
+                  );
+                })}
                 <Grid item xs={8} />
                 <Grid item xs={12}>
                   <Button
                     color='primary'
+                    startIcon={<AddCircleOutline />}
                     onClick={() => {
                       arrayHelpers.push({
+                        id: uuidv4(),
                         country: null,
-                        type: null,
+                        key: null,
                         number: '',
                       });
                     }}
                   >
-                    <AddCircleOutline />
                     {t('Add Document')}
                   </Button>
                 </Grid>
@@ -201,23 +207,26 @@ export const AddIndividualDataChange = ({
           render={(arrayHelpers) => {
             return (
               <>
-                {values.individualData?.identities?.map((item) => (
-                  <AgencyField
-                    id={item.node.id}
-                    onDelete={() =>
-                      removeItemById(
-                        values.individualData.identities,
-                        item.node.id,
-                        arrayHelpers,
-                      )
-                    }
-                    countryChoices={data.countriesChoices}
-                    identityTypeChoices={data.identityTypeChoices}
-                    baseName='individualData.identities'
-                    values={values}
-                  />
-                ))}
-
+                {values.individualData?.identities?.map((item) => {
+                  const existingOrNewId = item.node?.id || item.id;
+                  return (
+                    <AgencyField
+                      id={existingOrNewId}
+                      onDelete={() =>
+                        removeItemById(
+                          values.individualData.identities,
+                          existingOrNewId,
+                          arrayHelpers,
+                        )
+                      }
+                      countryChoices={data.countriesChoices}
+                      identityTypeChoices={data.identityTypeChoices}
+                      baseName='individualData.identities'
+                      baseNameArray={values.individualData.identities}
+                      values={values}
+                    />
+                  );
+                })}
                 <Grid item xs={8} />
                 <Grid item xs={12}>
                   <Button
@@ -225,6 +234,7 @@ export const AddIndividualDataChange = ({
                     startIcon={<AddCircleOutline />}
                     onClick={() => {
                       arrayHelpers.push({
+                        id: uuidv4(),
                         country: null,
                         partner: null,
                         number: '',
