@@ -239,12 +239,16 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             return  # safety check
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
-        reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
 
         if "delivery_date" in self.xlsx_headers:
             delivery_date = row[self.xlsx_headers.index("delivery_date")].value
         else:
             delivery_date = None
+
+        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
+            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
+        else:
+            reason_for_unsuccessful_payment = None
 
         if delivery_date is None:
             delivery_date = timezone.now()
