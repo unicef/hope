@@ -194,7 +194,14 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(
-            self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status", "delivery_date", "reason_for_unsuccessful_payment")
+            self.payments_to_save,
+            (
+                "delivered_quantity",
+                "delivered_quantity_usd",
+                "status",
+                "delivery_date",
+                "reason_for_unsuccessful_payment",
+            ),
         )
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
