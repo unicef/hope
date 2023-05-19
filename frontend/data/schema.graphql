@@ -1631,6 +1631,7 @@ type ImportedHouseholdNode implements Node {
   koboSubmissionTime: DateTime
   rowId: Int
   diiaRecId: String!
+  enumeratorRecId: Int
   misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
