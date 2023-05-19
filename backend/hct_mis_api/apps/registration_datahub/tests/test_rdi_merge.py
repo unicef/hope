@@ -176,6 +176,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin4=self.area4.p_code,
             admin4_title=self.area4.name,
             zip_code="00-123",
+            enumerator_rec_id=1234567890,
         )
         self.set_imported_individuals(imported_household)
 
@@ -187,6 +188,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(1, households.count())
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
+        self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
