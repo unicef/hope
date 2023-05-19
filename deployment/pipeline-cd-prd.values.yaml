@@ -54,11 +54,10 @@ celeryflower:
     FLOWER_BASIC_AUTH: #secret-variables: FLOWER_BASIC_AUTH
 
 ingress:
-  tls: true
-  tlsSecret: aks-unicef-tls
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: kv-cert-hope
   host: hope.unicef.org
 
 elasticsearch:
