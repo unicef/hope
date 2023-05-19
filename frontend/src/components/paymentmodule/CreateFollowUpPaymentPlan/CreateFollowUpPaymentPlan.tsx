@@ -16,8 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
-  PaymentStatus,
-  useCreateFollowUpPpMutation,
+  useCreateFollowUpPpMutation
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '../../../containers/dialogs/DialogContainer';

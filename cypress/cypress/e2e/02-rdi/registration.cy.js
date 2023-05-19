@@ -69,6 +69,7 @@ function verifyMergedData() {
 }
 
 function uploadRDIFile() {
+  cy.createExcel()
   cy.get("h5").contains("Registration Data Import");
   cy.get("button > span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();

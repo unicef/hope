@@ -1988,6 +1988,7 @@ enum IndividualRelationship {
   SON_DAUGHTER
   WIFE_HUSBAND
   FOSTER_CHILD
+  FREE_UNION
 }
 
 type IndividualRoleInHouseholdNode {
