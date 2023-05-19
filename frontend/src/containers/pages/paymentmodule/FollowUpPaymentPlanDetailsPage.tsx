@@ -67,7 +67,6 @@ export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
     status === PaymentPlanStatus.Finished;
 
   const { paymentPlan } = data;
-  console.log('🤪 working on new version');
   return (
     <>
       <FollowUpPaymentPlanDetailsHeader

@@ -138,17 +138,13 @@ export const Entitlement = ({
   );
 
   const shouldDisableEntitlementSelect =
-    !canApplySteficonRule ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan.isFollowUp;
+    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || paymentPlan.isFollowUp;
+    paymentPlan.status !== PaymentPlanStatus.Locked;
 
   const shouldDisableExportXlsx =
-    loadingExport ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan.isFollowUp;
+    loadingExport || paymentPlan.status !== PaymentPlanStatus.Locked;
 
   return (
     <Box m={5}>
