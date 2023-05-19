@@ -51,10 +51,12 @@ export const ExcludeSection = ({
     PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
     permissions,
   );
-  const hasLockedStatus = paymentPlan.status === PaymentPlanStatus.Locked;
+  const hasOpenOrLockedStatus =
+    paymentPlan.status === PaymentPlanStatus.Locked ||
+    paymentPlan.status === PaymentPlanStatus.Open;
 
   const getTooltipText = (): string => {
-    if (!hasLockedStatus) {
+    if (!hasOpenOrLockedStatus) {
       return t('Households can only be excluded from a locked Payment Plan');
     }
     if (!hasExcludePermission) {
@@ -182,11 +184,12 @@ export const ExcludeSection = ({
     };
     const saveExclusionsDisabled =
       !hasExcludePermission ||
-      !hasLockedStatus ||
+      !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
       !values.exclusionReason;
 
-    const editExclusionsDisabled = !hasExcludePermission || !hasLockedStatus;
+    const editExclusionsDisabled =
+      !hasExcludePermission || !hasOpenOrLockedStatus;
 
     if (editMode) {
       return (
