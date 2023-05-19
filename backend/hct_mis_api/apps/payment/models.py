@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Union
 
 from django import forms
 from django.conf import settings
+from django.contrib.gis.db.models import Q
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import (
     Count,
@@ -1294,6 +1295,12 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+    order_number = models.PositiveIntegerField(
+        blank=True, null=True, validators=[MinValueValidator(100000000), MaxValueValidator(999999999)]
+    )  # 9 digits
+    token_number = models.PositiveIntegerField(
+        blank=True, null=True, validators=[MinValueValidator(1000000), MaxValueValidator(9999999)]
+    )  # 7 digits
 
     @property
     def full_name(self) -> str:
@@ -1322,7 +1329,19 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 fields=["parent", "household"],
                 condition=Q(is_removed=False),
                 name="payment_plan_and_household",
-            )
+            ),
+            # TODO: tokens per Program or BA?
+            # parent__program_cycle__program__business_area
+            UniqueConstraint(
+                fields=["order_number", "parent_id"],
+                condition=Q(parent__program_cycle__program_id=models.F("self__parent__program_cycle__program_id")),
+                name="unique_order_number_per_program",
+            ),
+            UniqueConstraint(
+                fields=["token_number", "parent_id"],
+                condition=Q(parent__program_cycle__program_id=models.F("self__parent__program_cycle__program_id")),
+                name="unique_token_number_per_program",
+            ),
         ]
 
 
