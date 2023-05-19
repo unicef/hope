@@ -310,13 +310,10 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @register(ReportDocument)
 class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("title", "content_type", "arguments", "size")
+    list_display = ("title", "content_type", "arguments")
     list_filter = (("report", AutoCompleteFilter),)
     filter_horizontal = ("limit_access_to",)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
-
-    def size(self, obj: ReportDocument) -> int:
-        return len(obj.output or "")
 
     @button()
     def view(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:

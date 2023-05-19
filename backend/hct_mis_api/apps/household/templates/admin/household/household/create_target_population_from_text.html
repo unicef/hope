@@ -16,11 +16,7 @@
                 <div class="content">
                     You are going to create a new Target Population
                     '<strong>{{ form.name.value }}</strong>' within business area <strong>{{ ba_name }}</strong> 
-                    for the list of <b>{{total}}</b> households. Please, remember to attach a program at the next step. {% if total <= 100 %}
-                        <strong> {% for household  in households  %}
-                        <p>{{household}}</p>
-                    {% endfor %} </strong>
-                    {% endif %}.
+                    for the list of <b>{{total}}</b> households. Please, remember to attach a programme at the next step.
                 </div>
             {% endif %}
             <div class="submit-row">
