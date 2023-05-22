@@ -131,6 +131,8 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             row = f" (Source id {parent.kobo_asset_id})"
         if parent.row_id:
             row = f" (XLS row {parent.row_id})"
+        if parent.enumerator_rec_id:
+            row = f" (Enumerator ID {parent.enumerator_rec_id})"
 
         return resp + row
 
