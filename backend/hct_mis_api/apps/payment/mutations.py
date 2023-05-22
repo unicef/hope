@@ -1156,7 +1156,7 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         if not payment_plan.is_follow_up:
             raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
 
-        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED) :
+        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
             raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
         if not payment_plan.eligible_payments.exists():
