@@ -31,7 +31,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
-    remove_old_rdi_links,
+    remove_old_rdi_links_task,
 )
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedBankAccountInfoFactory,
@@ -623,7 +623,7 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         self.assertEqual(ImportedDocument.objects.count(), 3)
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 2)
 
-        remove_old_rdi_links.__wrapped__()
+        remove_old_rdi_links_task.__wrapped__()
 
         self.assertEqual(ImportedHousehold.objects.count(), 1)
         self.assertEqual(ImportedIndividual.objects.count(), 1)

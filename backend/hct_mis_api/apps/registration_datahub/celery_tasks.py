@@ -540,7 +540,7 @@ def check_rdi_merge_periodic_task() -> bool:
 
 @app.task
 @sentry_tags
-def remove_old_rdi_links() -> None:
+def remove_old_rdi_links_task() -> None:
     """This task removes linked RDI Datahub objects for households which were created more than 2 weeks ago"""
 
     from datetime import timedelta
