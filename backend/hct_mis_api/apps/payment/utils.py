@@ -1,6 +1,5 @@
 import datetime
 import random
-import secrets
 import typing
 from decimal import Decimal
 from math import ceil
@@ -147,8 +146,6 @@ def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
 
 
 def generate_numeric_token(digit_number: int = 3) -> int:
-    # secrets.choice(seq=range(10))
-    # secrets.randbelow(exclusive_upper_bound=10)
     while True:
         token = "".join(random.choices("1234567890", k=digit_number))
         if not token.startswith("0") and not has_repeated_digits(token):

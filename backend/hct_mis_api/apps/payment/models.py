@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Union
 
 from django import forms
 from django.conf import settings
-from django.contrib.gis.db.models import Q
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -365,6 +364,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
 
     class Status(models.TextChoices):
+        PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -373,7 +373,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
-        PREPARING = "PREPARING", "Preparing"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -849,6 +848,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
         ("delivery_date", _("Delivery Date")),
+        ("order_number", _("Order Number")),
+        ("token_number", _("Token Number")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -904,6 +905,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
+            "order_number": (payment, "order_number"),
+            "token_number": (payment, "token_number"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1323,24 +1326,34 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
 
     objects = PaymentManager()
 
+    def clean(self) -> None:
+        if self.parent.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+            # Check for existing Payment objects with the same token_number and the same Program
+            existing_payments = Payment.objects.filter(
+                parent__program=self.parent.program,
+                token_number=self.token_number,
+            )
+            if self.pk:
+                existing_payments = existing_payments.exclude(pk=self.pk)
+            if existing_payments.exists():
+                raise ValidationError("Token number must be unique per Program.")
+
+            # Check for existing Payment objects with the same order_number and the same Program
+            existing_payments = Payment.objects.filter(
+                parent__program=self.parent.program,
+                order_number=self.order_number,
+            )
+            if self.pk:
+                existing_payments = existing_payments.exclude(pk=self.pk)
+            if existing_payments.exists():
+                raise ValidationError("Order number must be unique per Program.")
+
     class Meta:
         constraints = [
             UniqueConstraint(
                 fields=["parent", "household"],
                 condition=Q(is_removed=False),
                 name="payment_plan_and_household",
-            ),
-            # TODO: tokens per Program or BA?
-            # parent__program_cycle__program__business_area
-            UniqueConstraint(
-                fields=["order_number", "parent_id"],
-                condition=Q(parent__program_cycle__program_id=models.F("self__parent__program_cycle__program_id")),
-                name="unique_order_number_per_program",
-            ),
-            UniqueConstraint(
-                fields=["token_number", "parent_id"],
-                condition=Q(parent__program_cycle__program_id=models.F("self__parent__program_cycle__program_id")),
-                name="unique_token_number_per_program",
             ),
         ]
 
