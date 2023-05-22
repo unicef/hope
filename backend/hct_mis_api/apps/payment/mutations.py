@@ -1177,6 +1177,8 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
         # 1. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
 
+        # payments_for_exclude.update(excluded=True)
+
         payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
 
         payments_for_exclude.update(excluded=True)
@@ -1185,6 +1187,7 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         payment_plan.update_money_fields()
 
         if exclusion_reason:
+            # payment_plan.
             payment_plan.exclusion_reason = exclusion_reason
             payment_plan.save(update_fields=["exclusion_reason"])
 
