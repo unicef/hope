@@ -130,9 +130,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
-        if self.payment_plan.is_follow_up:
-            raise GraphQLError("Unlock is available only for Follow-up Payment Plan")
-
         self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
