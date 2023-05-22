@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('household', '0147_migration'),
+        ('household', '0146_migration'),
     ]
 
     operations = [
