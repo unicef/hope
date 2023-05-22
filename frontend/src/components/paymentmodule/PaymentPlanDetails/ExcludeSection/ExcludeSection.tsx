@@ -57,7 +57,9 @@ export const ExcludeSection = ({
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
-      return t('Households can only be excluded from a locked Payment Plan');
+      return t(
+        'Households can only be excluded from a Payment Plan in status open or locked',
+      );
     }
     if (!hasExcludePermission) {
       return t('Permission denied');
