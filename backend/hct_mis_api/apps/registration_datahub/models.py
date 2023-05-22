@@ -155,6 +155,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
+    enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
         related_name="imported_households",
