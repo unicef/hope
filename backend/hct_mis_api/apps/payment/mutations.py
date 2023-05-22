@@ -1003,11 +1003,6 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.is_follow_up:
-            msg = "Entitlements of follow-up payment plan cannot be changed"
-            logger.error(msg)
-            raise GraphQLError(msg)
-
         with transaction.atomic():
             import_service = XlsxPaymentPlanImportService(payment_plan, file)
             import_service.open_workbook()
@@ -1110,11 +1105,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.is_follow_up:
-            msg = "Entitlements of follow-up payment plan cannot be changed"
-            logger.error(msg)
-            raise GraphQLError(msg)
-
         old_payment_plan = copy_model_object(payment_plan)
 
         engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
@@ -1142,6 +1132,8 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 class ExcludeHouseholdsMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
+    # TODO: will be async
+
     class Input:
         payment_plan_id = graphene.ID(required=True)
         excluded_households_ids = graphene.List(graphene.String, required=True)
@@ -1164,11 +1156,8 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         if not payment_plan.is_follow_up:
             raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
 
-        if payment_plan.status != PaymentPlan.Status.LOCKED:
-            raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
-
-        if payment_plan.excluded_households_ids:
-            raise GraphQLError("This Payment Plan already contains excluded households")
+        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED) :
+            raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
         if not payment_plan.eligible_payments.exists():
             raise GraphQLError(
@@ -1178,6 +1167,15 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         for hh_unicef_id in excluded_households_ids:
             if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
                 raise GraphQLError("These Households are not included in this Payment Plan")
+
+        # TODO: add validation
+        # Types of conflicting payments:
+        # Hard conflict - At least one of the payments is in a Plan with a status other than "Open".
+        # Soft conflict - All payments are in Plans with the status "Open".
+        # If Payment Plan check against other Payment Plans in the Program Cycle.
+        # If Follow-Up Payment Plan check against the other Follow-up Payment Plans of the Payment Plan.
+
+        # 1. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
 
         payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
 
