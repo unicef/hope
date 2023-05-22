@@ -848,6 +848,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
         ("delivery_date", _("Delivery Date")),
+        ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
         ("order_number", _("Order Number")),
         ("token_number", _("Token Number")),
     )
@@ -864,6 +865,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
+        max_length=250,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -905,6 +907,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
+            "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
             "order_number": (payment, "order_number"),
             "token_number": (payment, "token_number"),
         }
@@ -1298,6 +1301,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+    reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
     order_number = models.PositiveIntegerField(
         blank=True, null=True, validators=[MinValueValidator(100000000), MaxValueValidator(999999999)]
     )  # 9 digits
