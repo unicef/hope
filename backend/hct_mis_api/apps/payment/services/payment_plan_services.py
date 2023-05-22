@@ -117,9 +117,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:
-        if self.payment_plan.is_follow_up:
-            raise GraphQLError("Lock is available only for Follow-up Payment Plan")
-
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
