@@ -55,6 +55,6 @@ TASKS_SCHEDULES = {
     },
     "remove_old_rdi_links_task": {
         "task": "hct_mis_api.apps.registration_datahub.celery_tasks.remove_old_rdi_links_task",
-        "schedule": crontab(0, 0, day_of_month='1,15'),
-    }
+        "schedule": crontab(0, 0, day_of_month="1,15"),
+    },
 }
