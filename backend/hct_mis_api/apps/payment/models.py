@@ -825,8 +825,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def unsuccessful_payments(self) -> "QuerySet":
         return self.payment_items.eligible().filter(
             status__in=[
-                Payment.STATUS_ERROR,
-                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
+                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
                 Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
             ]
         )

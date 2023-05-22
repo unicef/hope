@@ -1165,29 +1165,33 @@ class ExcludeHouseholdsMutation(PermissionMutation):
             )
 
         for hh_unicef_id in excluded_households_ids:
+            if payment_plan.payment_items.filter(excluded=True, household__unicef_id=hh_unicef_id).exists():
+                # skip for already excluded payments
+                continue
             if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
-                raise GraphQLError("These Households are not included in this Payment Plan")
+                raise GraphQLError(f"This Household {hh_unicef_id} not included in this Payment Plan")
 
         # TODO: add validation
         # Types of conflicting payments:
-        # Hard conflict - At least one of the payments is in a Plan with a status other than "Open".
-        # Soft conflict - All payments are in Plans with the status "Open".
         # If Payment Plan check against other Payment Plans in the Program Cycle.
         # If Follow-Up Payment Plan check against the other Follow-up Payment Plans of the Payment Plan.
 
-        # 1. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
+        # 6. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
 
-        # payments_for_exclude.update(excluded=True)
+        # When undo exclusion should check IF HH is included in other PP (not FPP) with in status not OPEN ???
 
+        payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
+            household__unicef_id__in=excluded_households_ids
+        )
         payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
 
         payments_for_exclude.update(excluded=True)
+        payments_for_revert_exclude.update(excluded=False)
 
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
 
         if exclusion_reason:
-            # payment_plan.
             payment_plan.exclusion_reason = exclusion_reason
             payment_plan.save(update_fields=["exclusion_reason"])
 
