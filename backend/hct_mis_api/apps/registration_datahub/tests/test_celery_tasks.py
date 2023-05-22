@@ -9,11 +9,14 @@ from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
 
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -28,6 +31,14 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
+    remove_old_rdi_links,
+)
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedBankAccountInfoFactory,
+    ImportedDocumentFactory,
+    ImportedDocumentTypeFactory,
+    ImportedHouseholdFactory,
+    ImportedIndividualFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -550,3 +561,71 @@ class TestAutomatingRDICreationTask(TestCase):
 
         with self.assertRaises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), [1])
+
+
+class RemoveOldRDIDatahubLinksTest(TestCase):
+    databases = {"default", "registration_datahub"}
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        call_command("loadbusinessareas")
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        geo_models.Country.objects.create(name="Afghanistan")
+
+        cls.household_1, cls.individuals_1 = create_household(
+            household_args={"size": 1, "business_area": cls.business_area}
+        )
+        cls.household_2, cls.individuals_2 = create_household(
+            household_args={"size": 1, "business_area": cls.business_area}
+        )
+        cls.household_3, cls.individuals_3 = create_household(
+            household_args={"size": 1, "business_area": cls.business_area}
+        )
+
+    def test_remove_old_rdi_objects(self) -> None:
+        self.household_1.created_at = "2023-01-10"  # older than 2 weeks
+        self.household_2.created_at = "2022-08-10"  # older than 2 weeks
+        self.household_3.created_at = timezone.now()
+
+        imported_household_1 = ImportedHouseholdFactory()
+        imported_household_2 = ImportedHouseholdFactory()
+        imported_household_3 = ImportedHouseholdFactory()
+
+        imported_individual_1 = ImportedIndividualFactory(household=imported_household_1)
+        imported_individual_2 = ImportedIndividualFactory(household=imported_household_2)
+        imported_individual_3 = ImportedIndividualFactory(household=imported_household_3)
+
+        self.individuals_1[0].imported_individual_id = imported_individual_1.id
+        self.individuals_2[0].imported_individual_id = imported_individual_2.id
+        self.individuals_3[0].imported_individual_id = imported_individual_3.id
+
+        ImportedDocumentFactory(
+            individual=imported_individual_1, type=ImportedDocumentTypeFactory(key="birth_certificate")
+        )
+        ImportedDocumentFactory(individual=imported_individual_2, type=ImportedDocumentTypeFactory(key="tax_id"))
+        ImportedDocumentFactory(
+            individual=imported_individual_3, type=ImportedDocumentTypeFactory(key="drivers_license")
+        )
+
+        ImportedBankAccountInfoFactory(individual=imported_individual_1)
+        ImportedBankAccountInfoFactory(individual=imported_individual_2)
+
+        self.household_1.save()
+        self.household_2.save()
+        self.household_3.save()
+
+        self.individuals_1[0].save()
+        self.individuals_2[0].save()
+        self.individuals_3[0].save()
+
+        self.assertEqual(ImportedHousehold.objects.count(), 3)
+        self.assertEqual(ImportedIndividual.objects.count(), 3)
+        self.assertEqual(ImportedDocument.objects.count(), 3)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 2)
+
+        remove_old_rdi_links.__wrapped__()
+
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(ImportedDocument.objects.count(), 1)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 0)

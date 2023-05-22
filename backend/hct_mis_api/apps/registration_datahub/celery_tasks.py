@@ -12,7 +12,11 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedHousehold,
+    ImportedIndividual,
+    Record,
+)
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
@@ -532,3 +536,41 @@ def check_rdi_merge_periodic_task() -> bool:
             return True
         rdi_merge_celery_manager.execute()
     return True
+
+
+@app.task
+@sentry_tags
+def remove_old_rdi_links() -> None:
+    """This task removes linked RDI Datahub objects for households which were created more than 2 weeks ago"""
+
+    from datetime import timedelta
+
+    from hct_mis_api.apps.household.models import Household, Individual
+
+    try:
+        # Get all HHs older than 2 weeks
+        old_household_ids = list(
+            Household.objects.filter(is_removed=False, created_at__lte=timezone.now() - timedelta(weeks=2)).values_list(
+                "id", flat=True
+            )
+        )
+
+        # Get all imported individuals linked to HHs
+        old_imported_individuals_ids = list(
+            Individual.objects.filter(household__id__in=old_household_ids).values_list(
+                "imported_individual_id", flat=True
+            )
+        )
+
+        # Get unique imported HHs ids
+        imported_household_ids_to_remove = list(
+            ImportedIndividual.objects.filter(id__in=old_imported_individuals_ids)
+            .values_list("household_id", flat=True)
+            .distinct()
+        )
+
+        # removes with CASCADE individuals, documents, roles, bank_infos
+        ImportedHousehold.objects.filter(id__in=imported_household_ids_to_remove).delete()
+    except Exception:
+        logger.error("Removing old RDI objects failed")
+        raise
