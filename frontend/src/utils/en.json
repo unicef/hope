@@ -747,5 +747,6 @@
   "Households excluded from Payment Plan": "Households excluded from Payment Plan",
   "Show only Follow-up plans": "Show only Follow-up plans",
   "All delivery mechanisms must have a FSP assigned": "All delivery mechanisms must have a FSP assigned",
-  "Households can only be excluded from a Payment Plan in status open or locked": "Households can only be excluded from a Payment Plan in status open or locked"
+  "Households can only be excluded from a Payment Plan in status open or locked": "Households can only be excluded from a Payment Plan in status open or locked",
+  "Follow-up Payment Plan Edited": "Follow-up Payment Plan Edited"
 }

@@ -32,12 +32,14 @@ export const EditPaymentPlanHeader = ({
   paymentPlan,
 }: EditPaymentPlanHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { id } = paymentPlan;
+  const { id, isFollowUp } = paymentPlan;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/payment-plans/${id}`,
+      to: `/${businessArea}/payment-module/${
+        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+      }/${id}`,
     },
   ];
 
@@ -45,7 +47,8 @@ export const EditPaymentPlanHeader = ({
     <PageHeader
       title={
         <Box display='flex' alignItems='center'>
-          {t('Payment Plan')} ID {paymentPlan.unicefId}
+          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
+          {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
