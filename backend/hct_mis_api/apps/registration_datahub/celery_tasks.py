@@ -314,7 +314,7 @@ def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, regi
         registration_id = next(iter(registration_ids))
         if registration_id in [2, 3]:
             UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_id == 11:
+        elif registration_id == 21:
             UkraineRegistrationService().process_records(rdi_id, records_ids)
         elif registration_id == 17:
             SriLankaRegistrationService().process_records(rdi_id, records_ids)

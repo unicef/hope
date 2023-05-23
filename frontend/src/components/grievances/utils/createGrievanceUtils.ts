@@ -120,6 +120,15 @@ function prepareAddIndividualVariables(requiredVariables, values) {
       }
     }
   }
+
+  const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+    values.individualData.documents,
+  );
+
+  const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+    values.individualData.identities,
+  );
+
   return {
     variables: {
       input: {
@@ -130,7 +139,12 @@ function prepareAddIndividualVariables(requiredVariables, values) {
           issueType: {
             addIndividualIssueTypeExtras: {
               household: values.selectedHousehold?.id,
-              individualData: { ...values.individualData, flexFields },
+              individualData: {
+                ...values.individualData,
+                documents: newlyAddedDocumentsWithoutIds,
+                identities: newlyAddedIdentitiesWithoutIds,
+                flexFields,
+              },
             },
           },
         },

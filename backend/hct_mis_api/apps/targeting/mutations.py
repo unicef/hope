@@ -191,7 +191,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
-        if TargetPopulation.objects.filter(name=name).exists():
+        if TargetPopulation.objects.filter(name=name).exclude(id=decode_id_string(id)).exists():
             raise ValidationError(f"Target population with name {name} already exists")
         if target_population.is_finalized():
             msg = "Finalized Target Population can't be changed"
