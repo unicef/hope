@@ -1349,7 +1349,8 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
   EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
   DeliveredQuantity = 'DELIVERED_QUANTITY',
-  DeliveryDate = 'DELIVERY_DATE'
+  DeliveryDate = 'DELIVERY_DATE',
+  ReasonForUnsuccessfulPayment = 'REASON_FOR_UNSUCCESSFUL_PAYMENT'
 }
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -3655,6 +3656,7 @@ export type PaymentNode = Node & {
   collector: IndividualNode,
   sourcePayment?: Maybe<PaymentNode>,
   isFollowUp: Scalars['Boolean'],
+  reasonForUnsuccessfulPayment?: Maybe<Scalars['String']>,
   followUps: PaymentNodeConnection,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
@@ -3698,7 +3700,9 @@ export enum PaymentPlanBackgroundActionStatus {
   XlsxExportError = 'XLSX_EXPORT_ERROR',
   XlsxImportError = 'XLSX_IMPORT_ERROR',
   XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
-  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION'
+  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
+  ExcludeBeneficiaries = 'EXCLUDE_BENEFICIARIES',
+  ExcludeBeneficiariesError = 'EXCLUDE_BENEFICIARIES_ERROR'
 }
 
 export enum PaymentPlanCurrency {
@@ -25590,6 +25594,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   collector?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   sourcePayment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  reasonForUnsuccessfulPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,

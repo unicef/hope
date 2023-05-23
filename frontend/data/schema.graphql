@@ -918,6 +918,7 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   ENTITLEMENT_QUANTITY_USD
   DELIVERED_QUANTITY
   DELIVERY_DATE
+  REASON_FOR_UNSUCCESSFUL_PAYMENT
 }
 
 type FinancialServiceProviderXlsxTemplateNode implements Node {
@@ -2360,6 +2361,7 @@ type PaymentNode implements Node {
   collector: IndividualNode!
   sourcePayment: PaymentNode
   isFollowUp: Boolean!
+  reasonForUnsuccessfulPayment: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
@@ -2393,6 +2395,8 @@ enum PaymentPlanBackgroundActionStatus {
   XLSX_IMPORT_ERROR
   XLSX_IMPORTING_ENTITLEMENTS
   XLSX_IMPORTING_RECONCILIATION
+  EXCLUDE_BENEFICIARIES
+  EXCLUDE_BENEFICIARIES_ERROR
 }
 
 enum PaymentPlanCurrency {
