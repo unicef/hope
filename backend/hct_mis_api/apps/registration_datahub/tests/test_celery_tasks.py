@@ -583,8 +583,8 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         )
 
     def test_remove_old_rdi_objects(self) -> None:
-        self.household_1.created_at = "2023-01-10"  # older than 2 weeks
-        self.household_2.created_at = "2022-08-10"  # older than 2 weeks
+        self.household_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
+        self.household_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
         self.household_3.created_at = timezone.now()
 
         imported_household_1 = ImportedHouseholdFactory()

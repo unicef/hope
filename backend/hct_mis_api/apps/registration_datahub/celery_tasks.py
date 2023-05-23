@@ -569,8 +569,20 @@ def remove_old_rdi_links_task() -> None:
             .distinct()
         )
 
-        # removes with CASCADE individuals, documents, roles, bank_infos
-        ImportedHousehold.objects.filter(id__in=imported_household_ids_to_remove).delete()
+        page_count = 1000
+        if len(imported_household_ids_to_remove) <= page_count:
+            # removes with CASCADE individuals, documents, roles, bank_infos
+            ImportedHousehold.objects.filter(id__in=imported_household_ids_to_remove).delete()
+        else:
+            i, count = 0, len(imported_household_ids_to_remove) // page_count
+            while i <= count:
+                logger.info(f"Page {i}/{count} processing...")
+
+                ImportedHousehold.objects.filter(
+                    id__in=imported_household_ids_to_remove[i * page_count : (i + 1) * page_count]
+                ).delete()
+                i += 1
+
     except Exception:
         logger.error("Removing old RDI objects failed")
         raise
