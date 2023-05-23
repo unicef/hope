@@ -16,7 +16,7 @@ def get_registration_to_rdi_service_map() -> Dict[int, Any]:
     return {
         2: UkraineBaseRegistrationService,  # ukraine
         3: UkraineBaseRegistrationService,  # ukraine
-        11: UkraineRegistrationService,  # ukraine new form
+        21: UkraineRegistrationService,  # ukraine new form
         17: SriLankaRegistrationService,  # sri lanka
         # 18: "czech republic",
         # 19: "czech republic",
