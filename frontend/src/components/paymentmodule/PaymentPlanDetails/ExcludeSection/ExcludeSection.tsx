@@ -110,6 +110,7 @@ export const ExcludeSection = ({
       if (!error) {
         showMessage(t('Households excluded from Payment Plan'));
       }
+      setExclusionsOpen(false);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -170,7 +171,9 @@ export const ExcludeSection = ({
   const renderButtons = (submitForm, values, resetForm): React.ReactElement => {
     const noExclusions = numberOfExcluded === 0;
     const editMode = isExclusionsOpen && isEdit;
-    const previewMode = !isExclusionsOpen && numberOfExcluded > 0;
+    const previewMode =
+      (!isExclusionsOpen && numberOfExcluded > 0) ||
+      (!isExclusionsOpen && deletedIds.length > 0);
 
     const resetExclusions = (): void => {
       setExclusionsOpen(false);
@@ -182,7 +185,6 @@ export const ExcludeSection = ({
 
     const saveExclusions = (): void => {
       submitForm();
-      setExclusionsOpen(false);
     };
     const saveExclusionsDisabled =
       !hasExcludePermission ||
@@ -253,7 +255,7 @@ export const ExcludeSection = ({
       );
     }
 
-    if (noExclusions) {
+    if (noExclusions && !deletedIds.length) {
       return (
         <Button
           variant='contained'
