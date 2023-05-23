@@ -527,8 +527,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
-        # Check there are payments in error/not distributed status
-        qs = self.unsuccessful_payments()
+        # Check there are payments in error/not distributed status and excluded withdrawn households
+        qs = self.unsuccessful_payments().exclude(household__withdrawn=True)
 
         # Check if all payments are used in FPPs
         follow_up_payment = self.payments_used_in_follow_payment_plans()
