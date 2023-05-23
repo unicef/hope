@@ -315,6 +315,9 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     filter_horizontal = ("limit_access_to",)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
 
+    def get_queryset(self, request: HttpRequest) -> QuerySet[ReportDocument]:
+        return super().get_queryset(request).defer("output")
+
     @button()
     def view(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         if not (obj := self.get_object(request, str(pk))):
