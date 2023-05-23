@@ -27,6 +27,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
+    payment_plan_exclude_beneficiaries,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
@@ -1132,8 +1133,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 class ExcludeHouseholdsMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
-    # TODO: will be async
-
     class Input:
         payment_plan_id = graphene.ID(required=True)
         excluded_households_ids = graphene.List(graphene.String, required=True)
@@ -1157,41 +1156,14 @@ class ExcludeHouseholdsMutation(PermissionMutation):
             raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
         if not payment_plan.eligible_payments.exists():
-            raise GraphQLError(
-                "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
-            )
+            raise GraphQLError("There is not at least one beneficiary in the Payment Plan that is not excluded")
 
-        for hh_unicef_id in excluded_households_ids:
-            if payment_plan.payment_items.filter(excluded=True, household__unicef_id=hh_unicef_id).exists():
-                # skip for already excluded payments
-                continue
-            if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
-                raise GraphQLError(f"This Household {hh_unicef_id} not included in this Payment Plan")
-
-        # TODO: add validation
-        # Types of conflicting payments:
-        # If Payment Plan check against other Payment Plans in the Program Cycle.
-        # If Follow-Up Payment Plan check against the other Follow-up Payment Plans of the Payment Plan.
-
-        # 6. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
-        # When UNDO exclusion should check IF HH is included in other PP (not FPP) with in status not OPEN ???
-
-        # check if after exclusion we have qs.eligible_payments() > .exclude(Q(conflicted=True) | Q(excluded=True))
-
-        payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
-            household__unicef_id__in=excluded_households_ids
+        payment_plan_exclude_beneficiaries.delay(
+            decode_id_string(payment_plan_id), excluded_households_ids, exclusion_reason
         )
-        payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
 
-        payments_for_exclude.update(excluded=True)
-        payments_for_revert_exclude.update(excluded=False)
-
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
-
-        if exclusion_reason:
-            payment_plan.exclusion_reason = exclusion_reason
-            payment_plan.save(update_fields=["exclusion_reason"])
+        payment_plan.background_action_status_excluding_beneficiaries()
+        payment_plan.save(update_fields=["background_action_status"])
 
         payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)

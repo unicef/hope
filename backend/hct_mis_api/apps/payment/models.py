@@ -382,6 +382,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
         XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+        EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
+        EXCLUDE_BENEFICIARIES_ERROR = "EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -564,6 +566,24 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self) -> None:
         self.background_action_status = None  # little hack
+
+    @transition(
+        field=background_action_status,
+        source=[None, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
+        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
+    )
+    def background_action_status_excluding_beneficiaries(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
+    )
+    def background_action_status_exclude_beneficiaries_error(self) -> None:
+        pass
 
     @transition(
         field=status,
