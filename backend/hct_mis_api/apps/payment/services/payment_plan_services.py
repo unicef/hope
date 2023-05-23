@@ -374,15 +374,12 @@ class PaymentPlanService:
         basic_fields = ["start_date", "end_date"]
 
         if self.payment_plan.is_follow_up:
+            # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
             # remove not editable fields
             input_data.pop("targeting_id", None)
             input_data.pop("currency", None)
-            follow_up_pp_not_editable_fields = ["start_date", "end_date"]
-            for field_name in follow_up_pp_not_editable_fields:
-                if getattr(self.payment_plan, field_name).date() != input_data.get(field_name):
-                    raise GraphQLError(
-                        "Can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan"
-                    )
+            input_data.pop("start_date", None)
+            input_data.pop("end_date", None)
 
         for basic_field in basic_fields:
             if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):

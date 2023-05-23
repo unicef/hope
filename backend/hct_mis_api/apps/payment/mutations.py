@@ -1153,9 +1153,6 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, payment_plan.business_area)
 
-        if not payment_plan.is_follow_up:
-            raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
-
         if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
             raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
@@ -1177,8 +1174,9 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         # If Follow-Up Payment Plan check against the other Follow-up Payment Plans of the Payment Plan.
 
         # 6. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
+        # When UNDO exclusion should check IF HH is included in other PP (not FPP) with in status not OPEN ???
 
-        # When undo exclusion should check IF HH is included in other PP (not FPP) with in status not OPEN ???
+        # check if after exclusion we have qs.eligible_payments() > .exclude(Q(conflicted=True) | Q(excluded=True))
 
         payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
             household__unicef_id__in=excluded_households_ids
