@@ -1,10 +1,11 @@
 import datetime
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
@@ -444,3 +445,73 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         raise self.retry(exc=e) from e
 
     return True
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_exclude_beneficiaries(
+    self: Any, payment_plan_id: str, excluded_households_ids: List[str], exclusion_reason: Optional[str] = ""
+) -> None:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        error_msg = []
+
+        try:
+            for hh_unicef_id in excluded_households_ids:
+                if payment_plan.payment_items.filter(excluded=True, household__unicef_id=hh_unicef_id).exists():
+                    # skip for already excluded payments
+                    continue
+                if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
+                    error_msg.append(f"Household {hh_unicef_id} not included in this Payment Plan.")
+                    # remove HH_id from list because later will compare number of HHs with eligible_payments().count()
+                    excluded_households_ids.remove(hh_unicef_id)
+
+            if len(excluded_households_ids) >= payment_plan.eligible_payments.count():
+                error_msg.append(
+                    f"There will be not at least one beneficiary in the Plan that is not excluded after exclusion process for ID(s): {excluded_households_ids}"
+                )
+
+            payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
+                household__unicef_id__in=excluded_households_ids
+            )
+            # TODO: add validation for FPP and PP
+            # 6. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
+            # When UNDO (!) exclusion should check IF HH is included in other PP (or FPP) with in status not OPEN ???
+
+            if error_msg:
+                payment_plan.background_action_status_exclude_beneficiaries_error()
+                payment_plan.exclusion_reason = (
+                    exclusion_reason + str(error_msg) if exclusion_reason else str(error_msg)
+                )
+                payment_plan.save(update_fields=["exclusion_reason", "background_action_status"])
+                raise ValidationError("PaymentPlan Excluding Beneficiaries Validation Error")
+
+            payments_for_exclude = payment_plan.eligible_payments.filter(
+                household__unicef_id__in=excluded_households_ids
+            )
+
+            payments_for_exclude.update(excluded=True)
+            payments_for_revert_exclude.update(excluded=False)
+
+            payment_plan.update_population_count_fields()
+            payment_plan.update_money_fields()
+
+            if exclusion_reason:
+                payment_plan.exclusion_reason = exclusion_reason
+
+            payment_plan.background_action_status_none()
+            payment_plan.save(update_fields=["exclusion_reason", "background_action_status"])
+        except Exception as e:
+            logger.exception("PaymentPlan Excluding Beneficiaries Error")
+
+            payment_plan.background_action_status_exclude_beneficiaries_error()
+            errors = str(error_msg) + str(e)
+            payment_plan.exclusion_reason = exclusion_reason + errors if exclusion_reason else errors
+            payment_plan.save(update_fields=["exclusion_reason", "background_action_status"])
+
+    except Exception as e:
+        logger.exception("PaymentPlan Excluding Beneficiaries Error")
+        raise self.retry(exc=e)
