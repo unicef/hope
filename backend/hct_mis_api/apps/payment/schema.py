@@ -156,6 +156,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
         connection_class = ExtendedConnection
 
     report_url = graphene.String()
+    status = graphene.Int()
 
     def resolve_report_url(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.file.url if self.file else ""
