@@ -16,7 +16,7 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.utils import generate_numeric_token
+from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
 if TYPE_CHECKING:
@@ -25,22 +25,22 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
+def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
     return Payment.objects.filter(parent__program=payment.parent.program, **{field_name: token}).exists()
 
 
 def generate_token_and_order_numbers(payment: Payment) -> Payment:
     # AB#134721
-    if payment.order_number or payment.token_number:
+    if payment.order_number and payment.token_number:
         return payment
 
     order_number = generate_numeric_token(9)
     token_number = generate_numeric_token(7)
 
-    while token_or_order_number_exists_per_program(payment, "order_number", order_number):
+    while check_if_token_or_order_number_exists_per_program(payment, "order_number", order_number):
         order_number = generate_numeric_token(9)
 
-    while token_or_order_number_exists_per_program(payment, "token_number", token_number):
+    while check_if_token_or_order_number_exists_per_program(payment, "token_number", token_number):
         token_number = generate_numeric_token(7)
 
     payment.order_number = order_number

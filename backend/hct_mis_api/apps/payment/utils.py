@@ -1,5 +1,4 @@
 import datetime
-import random
 import typing
 from decimal import Decimal
 from math import ceil
@@ -143,20 +142,3 @@ def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
 
 def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
     return ExtendedQuerySetSequence(PaymentPlan.objects.all(), CashPlan.objects.all())
-
-
-def generate_numeric_token(digit_number: int = 3) -> int:
-    while True:
-        token = "".join(random.choices("1234567890", k=digit_number))
-        if not token.startswith("0") and not has_repeated_digits(token):
-            return int(token)
-
-
-def has_repeated_digits(token: str) -> bool:
-    """
-    check if the token has the same digit repeated more than 3 times in a row (like 1111)
-    """
-    for i in range(len(token) - 3):
-        if token[i] == token[i + 1] == token[i + 2] == token[i + 3]:
-            return True
-    return False
