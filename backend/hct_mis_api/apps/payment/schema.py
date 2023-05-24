@@ -53,7 +53,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
@@ -382,7 +382,7 @@ def _calculate_volume(
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
     # TODO simple volume calculation
-    payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
+    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
@@ -456,7 +456,12 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
-    excluded_payments = graphene.List(graphene.String)
+    excluded_households = graphene.List(HouseholdNode)
+    can_create_follow_up = graphene.Boolean()
+    total_withdrawn_households_count = graphene.Int()
+
+    unsuccessful_payments_count = graphene.Int()
+    payments_used_in_follow_payment_plans_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -467,7 +472,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment_verification_plans
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
-        return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
+        return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
 
     def resolve_currency_name(self, info: Any) -> graphene.String:
         return self.get_currency_display()
@@ -503,9 +508,12 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                     return False
             return True
 
+    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.List:
+        return self.payment_items.eligible().filter(household__withdrawn=True).count()
+
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
-        return parent.not_excluded_payments.aggregate(
+        return parent.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
@@ -515,8 +523,25 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
 
-    def resolve_excluded_payments(self, info: Any) -> graphene.List:
-        return self.excluded_payments
+    def resolve_excluded_households(self, info: Any) -> graphene.List:
+        return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
+
+    def resolve_can_create_follow_up(self, info: Any) -> bool:
+        # Check there are payments in error/not distributed status
+        qs = self.unsuccessful_payments()
+
+        # Check if all payments are used in FPPs
+        follow_up_payment = self.payments_used_in_follow_payment_plans()
+
+        return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
+            qs.values_list("id", flat=True)
+        )
+
+    def resolve_unsuccessful_payments_count(self, info: Any) -> int:
+        return self.unsuccessful_payments().count()
+
+    def resolve_payments_used_in_follow_payment_plans_count(self, info: Any) -> int:
+        return len(set(self.payments_used_in_follow_payment_plans().values_list("source_payment_id", flat=True)))
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -1317,9 +1342,9 @@ class Query(graphene.ObjectType):
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
         """used in Household Page > Payment Records"""
-        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.exclude(excluded=True)).order_by(
-            "-updated_at"
-        )
+        qs = ExtendedQuerySetSequence(
+            PaymentRecord.objects.all(), Payment.objects.eligible().exclude(parent__is_removed=True)
+        ).order_by("-updated_at")
 
         qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
 

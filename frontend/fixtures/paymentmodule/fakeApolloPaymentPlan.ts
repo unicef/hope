@@ -6,6 +6,7 @@ import {
   PaymentVerificationPlanVerificationChannel,
   PaymentVerificationPlanSampling,
   FinancialServiceProviderCommunicationChannel,
+  PaymentStatus,
 } from '../../src/__generated__/graphql';
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
@@ -13,8 +14,14 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     'UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==',
   unicefId: 'PP-0060-22-00000001',
   status: PaymentPlanStatus.Locked,
+  isFollowUp: false,
+  sourcePaymentPlan: null,
+  excludedHouseholds: null,
+  exclusionReason: '',
+  followUps: null,
   backgroundActionStatus: null,
   canCreatePaymentVerificationPlan: false,
+  canCreateFollowUp: false,
   availablePaymentRecordsCount: 0,
   bankReconciliationSuccess: 0,
   bankReconciliationError: 0,
@@ -260,6 +267,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
           id:
             'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
           __typename: 'PaymentNode',
+          status: PaymentStatus.Pending,
         },
         __typename: 'PaymentNodeEdge',
       },
@@ -268,6 +276,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
           id:
             'UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
           __typename: 'PaymentNode',
+          status: PaymentStatus.Pending,
         },
         __typename: 'PaymentNodeEdge',
       },

@@ -21,6 +21,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.models import (
@@ -116,10 +117,13 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:
+        if self.payment_plan.is_follow_up:
+            raise GraphQLError("Lock is available only for Follow-up Payment Plan")
+
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
+        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(conflicted=True)
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -129,6 +133,9 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
+        if self.payment_plan.is_follow_up:
+            raise GraphQLError("Unlock is available only for Follow-up Payment Plan")
+
         self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -345,6 +352,7 @@ class PaymentPlanService:
             created_by=user,
             target_population=target_population,
             program=target_population.program,
+            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
             currency=input_data["currency"],
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
@@ -369,7 +377,15 @@ class PaymentPlanService:
         recreate_payments = False
         recalculate_payments = False
 
-        basic_fields = ["start_date", "end_date", "dispersion_start_date"]
+        basic_fields = ["start_date", "end_date"]
+
+        if self.payment_plan.is_follow_up:
+            follow_up_pp_fields = ["dispersion_start_date", "dispersion_end_date"]
+            not_supported_fields = [field for field in list(input_data.keys()) if field not in follow_up_pp_fields]
+            if not_supported_fields:
+                raise GraphQLError(
+                    "Can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan"
+                )
 
         for basic_field in basic_fields:
             if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):
@@ -397,6 +413,13 @@ class PaymentPlanService:
 
             except TargetPopulation.DoesNotExist:
                 raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
+
+        if (
+            input_data.get("dispersion_start_date")
+            and input_data["dispersion_start_date"] != self.payment_plan.dispersion_start_date
+        ):
+            self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
+            recalculate_payments = True
 
         if (
             input_data.get("dispersion_end_date")
@@ -439,8 +462,10 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be deleted")
 
-        self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        self.payment_plan.target_population.save()
+        if not self.payment_plan.is_follow_up:
+            self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+            self.payment_plan.target_population.save()
+
         self.payment_plan.delete()
         return self.payment_plan
 
@@ -498,7 +523,7 @@ class PaymentPlanService:
                     raise GraphQLError(f"{fsp} cannot accept any volume")
 
                 payments_for_delivery_mechanism = (
-                    self.payment_plan.not_excluded_payments.exclude(
+                    self.payment_plan.eligible_payments.exclude(
                         id__in=[processed_payment.id for processed_payment in processed_payments]
                     )
                     .distinct()
@@ -536,5 +561,90 @@ class PaymentPlanService:
                     delivery_mechanism_per_payment_plan.financial_service_provider = fsp
                     delivery_mechanism_per_payment_plan.save()
 
-            if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
+            if set(processed_payments) != set(self.payment_plan.eligible_payments):
                 raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
+
+    def create_follow_up_payments(self) -> None:
+        payments_to_copy = (
+            self.payment_plan.source_payment_plan.eligible_payments.filter(
+                status__in=[
+                    Payment.STATUS_ERROR,
+                    Payment.STATUS_NOT_DISTRIBUTED,
+                    Payment.STATUS_FORCE_FAILED,
+                ]  # TODO remove force failed?
+            )
+            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
+            .exclude(  # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self.payment_plan.source_payment_plan,
+                    parent__program_cycle=self.payment_plan.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self.payment_plan)
+                .values_list("household_id", flat=True)
+            )
+        )
+
+        follow_up_payments = [
+            Payment(
+                parent=self.payment_plan,
+                source_payment=payment,
+                is_follow_up=True,
+                business_area_id=payment.business_area_id,
+                status=Payment.STATUS_PENDING,
+                status_date=timezone.now(),
+                household_id=payment.household_id,
+                head_of_household_id=payment.head_of_household_id,
+                collector_id=payment.collector_id,
+                currency=payment.currency,
+                entitlement_quantity=payment.entitlement_quantity,
+                entitlement_quantity_usd=payment.entitlement_quantity_usd,
+            )
+            for payment in payments_to_copy
+        ]
+        Payment.objects.bulk_create(follow_up_payments)
+
+    @transaction.atomic
+    def create_follow_up(
+        self, user: "User", dispersion_start_date: datetime.date, dispersion_end_date: datetime.date
+    ) -> PaymentPlan:
+        source_pp = self.payment_plan
+
+        if source_pp.is_follow_up:
+            raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
+
+        # TODO: add the same logic here as in create_follow_up_payments() `payments_to_copy`
+        if (
+            not source_pp.payment_items.eligible()
+            .filter(
+                status__in=[
+                    Payment.STATUS_ERROR,
+                    Payment.STATUS_NOT_DISTRIBUTED,
+                    Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+                ]
+            )
+            .exists()
+        ):
+            raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
+
+        follow_up_pp = PaymentPlan.objects.create(
+            status=PaymentPlan.Status.PREPARING,
+            status_date=timezone.now(),
+            is_follow_up=True,
+            source_payment_plan=source_pp,
+            business_area=source_pp.business_area,
+            created_by=user,
+            target_population=source_pp.target_population,
+            program=source_pp.program,
+            program_cycle=source_pp.program_cycle,
+            currency=source_pp.currency,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+            start_date=source_pp.start_date,
+            end_date=source_pp.end_date,
+        )
+
+        transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
+
+        return follow_up_pp

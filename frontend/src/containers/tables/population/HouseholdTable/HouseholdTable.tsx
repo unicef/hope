@@ -9,7 +9,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
-import { HouseHoldTableRow } from './HouseholdTableRow';
+import { HouseholdTableRow } from './HouseholdTableRow';
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -34,6 +34,7 @@ export const HouseholdTable = ({
     search: filter.text,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
+    withdrawn: filter.withdrawn === 'true' ? true : undefined,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
@@ -51,7 +52,7 @@ export const HouseholdTable = ({
         allowSort={false}
         filterOrderBy={filter.orderBy}
         renderRow={(row) => (
-          <HouseHoldTableRow
+          <HouseholdTableRow
             key={row.id}
             household={row}
             choicesData={choicesData}

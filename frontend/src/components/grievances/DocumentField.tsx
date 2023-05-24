@@ -12,6 +12,7 @@ import { getIndexForId } from './utils/helpers';
 export interface DocumentFieldProps {
   id: string;
   baseName: string;
+  baseNameArray?;
   onDelete;
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
@@ -24,6 +25,7 @@ export interface DocumentFieldProps {
 export function DocumentField({
   id,
   baseName,
+  baseNameArray,
   onDelete,
   countryChoices,
   documentTypeChoices,
@@ -33,7 +35,10 @@ export function DocumentField({
   values,
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
-  const docFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
+  const docFieldName = `${baseName}.${getIndexForId(
+    baseNameArray || values[baseName],
+    id,
+  )}`;
 
   return (
     <>
