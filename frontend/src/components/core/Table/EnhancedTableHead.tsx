@@ -99,7 +99,7 @@ export function EnhancedTableHead<T>(
           <TableCell
             key={headCell.id.toString()}
             align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
             data-cy={headCell.dataCy}
           >

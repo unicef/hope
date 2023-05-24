@@ -148,7 +148,7 @@ export function LookUpHouseholdFilters({
             }
           />
         </Grid>
-        <Grid container justify='flex-end'>
+        <Grid container justifyContent='flex-end'>
           <Button
             color='primary'
             onClick={() => {
