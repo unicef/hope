@@ -90,8 +90,8 @@ export const MainActivityLogTable = ({
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}
-          onChangePage={onChangePage}
-          onChangeRowsPerPage={onChangeRowsPerPage}
+          onPageChange={onChangePage}
+          onRowsPerPageChange={onChangeRowsPerPage}
           backIconButtonProps={{ ...(loading && { disabled: true }) }}
           nextIconButtonProps={{ ...(loading && { disabled: true }) }}
         />
