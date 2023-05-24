@@ -39,13 +39,14 @@ class BaseCeleryTaskManager:
     def in_progress_queryset(self) -> QuerySet:
         raise NotImplementedError("in_progress_queryset not implemented")
 
+    @property
     def in_progress_queryset_for_business_area(self) -> QuerySet:
         if not self.business_area:
             return self.in_progress_queryset
         return self.in_progress_queryset.filter(business_area=self.business_area)
 
     def execute(self) -> None:
-        for model_object in self.in_progress_queryset.all():
+        for model_object in self.in_progress_queryset_for_business_area.all():
             task_kwargs = self.get_task_kwargs(model_object)
             task = self.get_celery_task_by_kwargs(task_kwargs)
             if not (task and task.get("status") == "queued" or not task):
@@ -56,7 +57,7 @@ class BaseCeleryTaskManager:
             model_object.status = self.pending_status
             model_object.save()
 
-        for model_object in self.pending_queryset.all():
+        for model_object in self.pending_queryset_for_business_area.all():
             task_kwargs = self.get_task_kwargs(model_object)
             task = self.get_celery_task_by_kwargs(task_kwargs)
             if task:

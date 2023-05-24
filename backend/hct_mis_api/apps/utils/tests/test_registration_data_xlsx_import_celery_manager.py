@@ -1,6 +1,9 @@
 from unittest import mock
 
+from django.core.management import call_command
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -14,7 +17,7 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        pass
+        call_command("loadbusinessareas")
 
     @mock.patch("hct_mis_api.apps.utils.celery_manager.get_all_celery_tasks")
     def test_querysets(self, _: mock.MagicMock) -> None:
@@ -205,3 +208,51 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         rdi.refresh_from_db()
         self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
         self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 0)
+
+    @mock.patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+    @mock.patch("hct_mis_api.apps.utils.celery_manager.get_all_celery_tasks")
+    def test_parametrized_by_business_area(
+        self,
+        mock_get_all_celery_tasks: mock.MagicMock,
+        mock_registration_xlsx_import_task_delay: mock.MagicMock,
+    ) -> None:
+        from hct_mis_api.apps.utils.celery_manager import (
+            RegistrationDataXlsxImportCeleryManager,
+        )
+
+        rdi = RegistrationDataImportFactory(
+            name="IMPORT_SCHEDULED afghanistan",
+            status=RegistrationDataImport.IMPORT_SCHEDULED,
+            data_source=RegistrationDataImport.XLS,
+            business_area=BusinessArea.objects.get(slug="afghanistan"),
+        )
+        import_data = ImportData.objects.create()
+        rdi_datahub = RegistrationDataImportDatahub.objects.create(hct_id=rdi.id, import_data=import_data)
+        rdi.datahub_id = rdi_datahub.id
+        rdi.save()
+
+        rdi2 = RegistrationDataImportFactory(
+            name="IMPORT_SCHEDULED sudan",
+            status=RegistrationDataImport.IMPORT_SCHEDULED,
+            data_source=RegistrationDataImport.XLS,
+            business_area=BusinessArea.objects.get(slug="sudan"),
+        )
+
+        import_data2 = ImportData.objects.create()
+        rdi_datahub2 = RegistrationDataImportDatahub.objects.create(hct_id=rdi2.id, import_data=import_data2)
+        rdi2.datahub_id = rdi_datahub2.id
+        rdi2.save()
+
+        mock_get_all_celery_tasks.return_value = []
+        manager = RegistrationDataXlsxImportCeleryManager(business_area=BusinessArea.objects.get(slug="afghanistan"))
+        manager.execute()
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
+        self.assertEqual(mock_registration_xlsx_import_task_delay.call_count, 1)
+        mock_registration_xlsx_import_task_delay.assert_called_with(
+            **{
+                "registration_data_import_id": str(rdi_datahub.id),
+                "import_data_id": str(rdi_datahub.import_data_id),
+                "business_area_id": str(rdi.business_area_id),
+            }
+        )
