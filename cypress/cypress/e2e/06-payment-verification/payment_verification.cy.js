@@ -75,8 +75,8 @@ describe("Payment Verification", () => {
       cy.get("h6").contains("Verification Plans Summary");
     });
   });
-  context.skip("E2E tests Payment Verification", () => {
+  context("E2E tests Payment Verification", () => {
   });
-  context.skip("Regression tests Payment Verification", () => {
+  context("Regression tests Payment Verification", () => {
   });
 });
