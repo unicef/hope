@@ -5,9 +5,9 @@
 import replaceAllInserter from 'string.prototype.replaceall';
 import '@testing-library/jest-dom/extend-expect';
 import 'jest-canvas-mock';
-import setupInternalization from '../src/i18n';
-import { random, seed } from '../src/testUtils/testUtils';
-import * as useBusinessAreaModule from '../src/hooks/useBusinessArea';
+import setupInternalization from './i18n';
+import { random, seed } from './testUtils/testUtils';
+import * as useBusinessAreaModule from './hooks/useBusinessArea';
 
 global.Date.now = () => new Date('1970-01-01T00:00:00.000Z').getTime();
 replaceAllInserter.shim();

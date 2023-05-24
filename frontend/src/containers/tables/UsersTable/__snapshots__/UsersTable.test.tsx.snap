@@ -85,7 +85,6 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

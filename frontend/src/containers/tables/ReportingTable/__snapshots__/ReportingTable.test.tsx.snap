@@ -213,7 +213,6 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -289,9 +288,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  
                    
-                  
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body sc-gqjmRU jlajgV MuiTableCell-alignLeft"
