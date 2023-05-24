@@ -23,7 +23,7 @@ export const TotalNumberOfChildrenReachedSection = ({
   return (
     <DashboardCard color='#4CD0E0'>
       <CardTitle>{t('TOTAL NUMBER OF CHILDREN REACHED')}</CardTitle>
-      <Grid container justify='space-between' alignItems='center'>
+      <Grid container justifyContent='space-between' alignItems='center'>
         <Grid item>
           <CardAmountSmaller>{formatNumber(data?.total)}</CardAmountSmaller>
         </Grid>
