@@ -179,6 +179,10 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
 
+        payment = self.payment_plan.eligible_payments.first()
+        self.assertEqual(payment.token_number, None)
+        self.assertEqual(payment.order_number, None)
+
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 

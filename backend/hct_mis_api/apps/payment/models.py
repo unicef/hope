@@ -50,6 +50,7 @@ from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -1303,11 +1304,19 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     is_follow_up = models.BooleanField(default=False)
     reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
     order_number = models.PositiveIntegerField(
-        blank=True, null=True, validators=[MinValueValidator(100000000), MaxValueValidator(999999999)]
+        blank=True,
+        null=True,
+        validators=[
+            MinValueValidator(100000000),
+            MaxValueValidator(999999999),
+            payment_token_and_order_number_validator,
+        ],
     )  # 9 digits
     token_number = models.PositiveIntegerField(
-        blank=True, null=True, validators=[MinValueValidator(1000000), MaxValueValidator(9999999)]
-    )  # 7 digits
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
+    )  # 7 digits  UniquePerProgram
 
     @property
     def full_name(self) -> str:
@@ -1330,8 +1339,11 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
 
     objects = PaymentManager()
 
-    def clean(self) -> None:
-        if self.parent.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        # TODO: update in future to use UniqueConstraint token_number and order_number unique per Program on db level
+        if self.parent.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and (
+            self.order_number or self.token_number
+        ):
             # Check for existing Payment objects with the same token_number and the same Program
             existing_payments = Payment.objects.filter(
                 parent__program=self.parent.program,
@@ -1351,6 +1363,8 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 existing_payments = existing_payments.exclude(pk=self.pk)
             if existing_payments.exists():
                 raise ValidationError("Order number must be unique per Program.")
+
+        return super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
