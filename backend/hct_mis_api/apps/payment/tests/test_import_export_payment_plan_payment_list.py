@@ -186,6 +186,11 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
+        # FIXME: why not updated here ?
+        payment.refresh_from_db(fields=["token_number", "order_number"])
+        # self.assertEqual(len(str(payment.token_number)), 7)
+        # self.assertEqual(len(str(payment.order_number)), 9)
+
         self.assertTrue(self.payment_plan.has_export_file)
         self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
         self.assertTrue(
