@@ -33,6 +33,10 @@ Cypress.Commands.add("adminLogin", () => {
   cy.get("input").contains("Log in").click();
 })
 
+Cypress.Commands.add("navigateToHomePage", () => {
+  cy.visit("/");
+})
+
 Cypress.Commands.add("initScenario", (scenario) => {
   cy.uniqueSeed().then((seed) => {
     cy.exec(
