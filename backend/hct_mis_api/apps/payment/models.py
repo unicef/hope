@@ -401,6 +401,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
 
+    program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -457,6 +458,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         object_id_field="payment_plan_object_id",
         related_query_name="payment_plan",
     )
+    source_payment_plan = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
+    exclusion_reason = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -474,8 +480,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def excluded_payments(self) -> List[str]:
-        return list(self.payment_items.filter(excluded=True).values_list("unicef_id", flat=True))
+    def excluded_households_ids(self) -> List[str]:
+        return list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
 
     @transition(
         field=background_action_status,
@@ -660,15 +666,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
-    def not_excluded_payments(self) -> QuerySet:
-        return self.payment_items.exclude(excluded=True)
+    def eligible_payments(self) -> QuerySet:
+        return self.payment_items.eligible()
 
     @property
     def can_be_locked(self) -> bool:
         return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self) -> None:
-        households_ids = self.not_excluded_payments.values_list("household_id", flat=True)
+        households_ids = self.eligible_payments.values_list("household_id", flat=True)
 
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
@@ -702,7 +708,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def update_money_fields(self) -> None:
         self.exchange_rate = self.get_exchange_rate()
-        payments = self.not_excluded_payments.aggregate(
+        payments = self.eligible_payments.aggregate(
             total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
             total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
             total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
@@ -732,7 +738,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def has_export_file(self) -> bool:
         try:
-            if self.status == PaymentPlan.Status.LOCKED:
+            if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
                 return self.export_file_per_fsp is not None
@@ -743,7 +749,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        if self.status == PaymentPlan.Status.LOCKED:
+        if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
             return self.export_file_entitlement.file.url
         elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             return self.export_file_per_fsp.file.url
@@ -762,8 +768,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def is_reconciled(self) -> bool:
         # TODO what in case of active grievance tickets?
         return (
-            self.not_excluded_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
-            == self.not_excluded_payments.count()
+            self.eligible_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
+            == self.eligible_payments.count()
         )
 
     def remove_export_file(self) -> None:
@@ -816,6 +822,18 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
         return self.acceptance_process_threshold.finance_release_number_required
 
+    def unsuccessful_payments(self) -> "QuerySet":
+        return self.payment_items.eligible().filter(
+            status__in=[
+                Payment.STATUS_ERROR,
+                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+            ]
+        )
+
+    def payments_used_in_follow_payment_plans(self) -> "QuerySet":
+        return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
@@ -830,6 +848,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
         ("delivery_date", _("Delivery Date")),
+        ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -844,6 +863,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
+        max_length=250,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -885,6 +905,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
+            "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1252,6 +1273,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         on_delete=models.CASCADE,
         related_name="payment_items",
     )
+    conflicted = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
@@ -1270,6 +1292,12 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         object_id_field="payment_object_id",
         related_query_name="payment",
     )
+
+    source_payment = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
+    reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def full_name(self) -> str:

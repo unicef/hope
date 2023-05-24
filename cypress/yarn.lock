@@ -494,6 +494,11 @@ cross-spawn@^7.0.0, cross-spawn@^7.0.2:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+cy-verify-downloads@^0.1.14:
+  version "0.1.14"
+  resolved "https://registry.yarnpkg.com/cy-verify-downloads/-/cy-verify-downloads-0.1.14.tgz#d273bd3f679a37c95e6b1d782f74cf5c81b12e6e"
+  integrity sha512-9V26Ihgr11bgbIm06NWm4s/eM0ulKLuFN/IYrqaeKifcASVzjWRBIzPHF8heE0jhtjVGUH5Vpc3kNq3SDSjOOQ==
+
 cypress-file-upload@^5.0.8:
   version "5.0.8"
   resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-5.0.8.tgz#d8824cbeaab798e44be8009769f9a6c9daa1b4a1"

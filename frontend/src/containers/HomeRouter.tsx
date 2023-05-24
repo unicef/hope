@@ -48,6 +48,9 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
+import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
+import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
 
 const Root = styled.div`
   display: flex;
@@ -153,6 +156,12 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute exact path='/:businessArea/payment-module'>
             <PaymentModulePage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/create'>
+            <SetFollowUpUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/edit'>
+            <EditFollowUpSetUpFspPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
             <SetUpFspPage />
           </SentryRoute>
@@ -167,6 +176,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
             <PaymentPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
+            <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />

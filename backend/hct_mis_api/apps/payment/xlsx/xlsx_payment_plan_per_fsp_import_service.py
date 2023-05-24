@@ -33,7 +33,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
-        self.payment_list: QuerySet["Payment"] = payment_plan.not_excluded_payments
+        self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments
         self.file = file
         self.errors: List[XlsxError] = []
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
@@ -116,14 +116,28 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 else:
                     self.is_updated = True
 
+    def _validate_reason_for_unsuccessful_payment(self, row: Row) -> None:
+        payment_id = row[self.xlsx_headers.index("payment_id")].value
+        payment = self.payments_dict.get(payment_id)
+        if payment is None:
+            return
+
+        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
+            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
+            if reason_for_unsuccessful_payment != payment.reason_for_unsuccessful_payment:
+                self.is_updated = True
+
     def _validate_delivery_date(self, row: Row) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
 
-        cell = row[self.xlsx_headers.index("delivery_date")]
-        delivery_date = cell.value
+        if "delivery_date" in self.xlsx_headers:
+            cell = row[self.xlsx_headers.index("delivery_date")]
+            delivery_date = cell.value
+        else:
+            delivery_date = None
 
         if delivery_date is None:
             self.is_updated = True  # Update Payment item with current datetime
@@ -155,6 +169,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._validate_payment_id(row)
             self._validate_delivered_quantity(row)
             self._validate_delivery_date(row)
+            self._validate_reason_for_unsuccessful_payment(row)
 
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
@@ -179,7 +194,14 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(
-            self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status", "delivery_date")
+            self.payments_to_save,
+            (
+                "delivered_quantity",
+                "delivered_quantity_usd",
+                "status",
+                "delivery_date",
+                "reason_for_unsuccessful_payment",
+            ),
         )
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
@@ -217,7 +239,16 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             return  # safety check
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
-        delivery_date = row[self.xlsx_headers.index("delivery_date")].value
+
+        if "delivery_date" in self.xlsx_headers:
+            delivery_date = row[self.xlsx_headers.index("delivery_date")].value
+        else:
+            delivery_date = None
+
+        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
+            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
+        else:
+            reason_for_unsuccessful_payment = None
 
         if delivery_date is None:
             delivery_date = timezone.now()
@@ -249,6 +280,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 )
                 payment.status = status
                 payment.delivery_date = delivery_date
+                payment.reason_for_unsuccessful_payment = reason_for_unsuccessful_payment
                 self.payments_to_save.append(payment)
                 # update PaymentVerification status
                 if payment.payment_verification.exists():
