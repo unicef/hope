@@ -10,6 +10,7 @@ from django.utils import timezone
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import Record
@@ -472,7 +473,7 @@ def deduplicate_documents() -> bool:
 @app.task
 @log_start_and_end
 @sentry_tags
-def check_rdi_import_periodic_task() -> bool:
+def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> bool:
     with locked_cache(key="check_rdi_import_periodic_task1", timeout=15 * 60) as locked:
         if not locked:
             raise Exception("cannot set lock on check_rdi_import_periodic_task")
@@ -480,6 +481,7 @@ def check_rdi_import_periodic_task() -> bool:
             RegistrationDataXlsxImportCeleryManager,
         )
 
-        manager = RegistrationDataXlsxImportCeleryManager()
+        business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
+        manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
         manager.execute()
         return True

@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 
 from celery import Task
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.utils.celery_utils import (
@@ -20,16 +21,28 @@ class BaseCeleryTaskManager:
     pending_status: Optional[str] = None
     queue = "default"
 
-    def __init__(self) -> None:
+    def __init__(self, business_area: Optional[BusinessArea] = None) -> None:
         self.all_celery_tasks = get_all_celery_tasks(self.queue)
+        self.business_area = business_area
 
     @property
     def pending_queryset(self) -> QuerySet:
         raise NotImplementedError("pending_queryset not implemented")
 
     @property
+    def pending_queryset_for_business_area(self) -> QuerySet:
+        if not self.business_area:
+            return self.pending_queryset
+        return self.pending_queryset.filter(business_area=self.business_area)
+
+    @property
     def in_progress_queryset(self) -> QuerySet:
         raise NotImplementedError("in_progress_queryset not implemented")
+
+    def in_progress_queryset_for_business_area(self) -> QuerySet:
+        if not self.business_area:
+            return self.in_progress_queryset
+        return self.in_progress_queryset.filter(business_area=self.business_area)
 
     def execute(self) -> None:
         for model_object in self.in_progress_queryset.all():
