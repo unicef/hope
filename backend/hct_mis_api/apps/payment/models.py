@@ -1341,28 +1341,28 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         # TODO: update in future to use UniqueConstraint token_number and order_number unique per Program on db level
-        if self.parent.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and (
-            self.order_number or self.token_number
-        ):
+        if self.parent.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             # Check for existing Payment objects with the same token_number and the same Program
-            existing_payments = Payment.objects.filter(
-                parent__program=self.parent.program,
-                token_number=self.token_number,
-            )
-            if self.pk:
-                existing_payments = existing_payments.exclude(pk=self.pk)
-            if existing_payments.exists():
-                raise ValidationError("Token number must be unique per Program.")
+            if self.token_number:
+                existing_payments = Payment.objects.filter(
+                    parent__program=self.parent.program,
+                    token_number=self.token_number,
+                )
+                if self.pk:
+                    existing_payments = existing_payments.exclude(pk=self.pk)
+                if existing_payments.exists():
+                    raise ValidationError("Token number must be unique per Program.")
 
             # Check for existing Payment objects with the same order_number and the same Program
-            existing_payments = Payment.objects.filter(
-                parent__program=self.parent.program,
-                order_number=self.order_number,
-            )
-            if self.pk:
-                existing_payments = existing_payments.exclude(pk=self.pk)
-            if existing_payments.exists():
-                raise ValidationError("Order number must be unique per Program.")
+            if self.order_number:
+                existing_payments = Payment.objects.filter(
+                    parent__program=self.parent.program,
+                    order_number=self.order_number,
+                )
+                if self.pk:
+                    existing_payments = existing_payments.exclude(pk=self.pk)
+                if existing_payments.exists():
+                    raise ValidationError("Order number must be unique per Program.")
 
         return super().save(*args, **kwargs)
 
