@@ -175,8 +175,8 @@ export function TableComponent<T>({
         count={itemsCount}
         rowsPerPage={rowsPerPage}
         page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
         backIconButtonProps={{ ...(loading && { disabled: true }) }}
         nextIconButtonProps={{ ...(loading && { disabled: true }) }}
       />
