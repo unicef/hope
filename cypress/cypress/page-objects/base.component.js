@@ -10,7 +10,7 @@ export default class BaseComponent {
     getMenuButtonPaymentVerification = () => cy.get(this.buttonPaymentVerification)
 
     clickMenuButtonPaymentVerification(){
-        this.getMenuButtonPaymentVerification().contains(buttonPaymentVerificationText).click()
+        this.getMenuButtonPaymentVerification().contains(this.buttonPaymentVerificationText).click()
         return this
     }
 }
