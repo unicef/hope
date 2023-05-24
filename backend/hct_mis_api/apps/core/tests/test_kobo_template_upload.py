@@ -85,6 +85,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: child_hoh_i_c - Field is missing",
                 "Field: relationship_i_c - Choice: OTHER is not present in the file",
                 "Field: relationship_i_c - Choice: FOSTER_CHILD is not present in the file",
+                "Field: relationship_i_c - Choice: FREE_UNION is not present in the file",
                 "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
                 "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
                 "Field: collect_individual_data_h_c - Choice: 2 is not present in the file",
