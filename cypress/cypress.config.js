@@ -8,8 +8,8 @@ module.exports = defineConfig({
     projectId: "cypress",
     baseUrl: "http://localhost:8082",
     env: {
-      username: 'cypress-username',
-      password: 'cypress-password'
+      username: 'root',
+      password: 'fKXRA1FRYTA1lKfdg'
     },
     reporter: "junit",
     reporterOptions: {
