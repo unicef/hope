@@ -1344,6 +1344,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         if self.parent.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             # Check for existing Payment objects with the same token_number and the same Program
             if self.token_number:
+                payment_token_and_order_number_validator(self.token_number)
                 existing_payments = Payment.objects.filter(
                     parent__program=self.parent.program,
                     token_number=self.token_number,
@@ -1355,6 +1356,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
 
             # Check for existing Payment objects with the same order_number and the same Program
             if self.order_number:
+                payment_token_and_order_number_validator(self.order_number)
                 existing_payments = Payment.objects.filter(
                     parent__program=self.parent.program,
                     order_number=self.order_number,
