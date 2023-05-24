@@ -8,7 +8,7 @@ describe("Payment Verification", () => {
     pv.clickMenuButtonPaymentVerification()
   });
 
-  context("Smoke Payment Verification", () => {
+  context("Smoke tests Payment Verification", () => {
 
     it("Check Payment Verification Page is loaded", () => {
       pv.checkPaymentVerificationTitle()
@@ -19,7 +19,7 @@ describe("Payment Verification", () => {
     });
   });
 
-  context("E2E Payment Verification", () => {
+  context("Component tests Payment Verification", () => {
     it.skip("Create Verification Plan", () => {
       // ToDo
     });
@@ -75,6 +75,8 @@ describe("Payment Verification", () => {
       cy.get("h6").contains("Verification Plans Summary");
     });
   });
-  context("Regression Payment Verification", () => {
+  context.skip("E2E tests Payment Verification", () => {
+  });
+  context.skip("Regression tests Payment Verification", () => {
   });
 });
