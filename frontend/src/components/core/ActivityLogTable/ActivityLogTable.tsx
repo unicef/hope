@@ -96,8 +96,8 @@ export function ActivityLogTable({
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}
-          onChangePage={onChangePage}
-          onChangeRowsPerPage={onChangeRowsPerPage}
+          onPageChange={onChangePage}
+          onRowsPerPageChange={onChangeRowsPerPage}
         />
       </Collapse>
     </PaperContainer>
