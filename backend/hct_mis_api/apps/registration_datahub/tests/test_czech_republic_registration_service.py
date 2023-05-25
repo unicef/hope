@@ -45,15 +45,20 @@ class TestCzechRepublicRegistrationService(TestCase):
     def setUp(cls) -> None:
         document_types_to_create = []
 
-        for label in (
-            IDENTIFICATION_TYPE_NATIONAL_ID,
-            IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-            IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
-            IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-        ):
+        DOCUMENT_MAPPING = {
+            "birth_certificate": "Birth Certificate",
+            "disability_card": "Disability Card",
+            "national_id": "National ID",
+            "national_passport": "National Passport",
+            "medical_certificate": "Medical Certificate",
+            "temporary_protection_visa": "Temporary Protection Visa",
+        }
+
+        for key, label in DOCUMENT_MAPPING.items():
             document_types_to_create.append(
-                ImportedDocumentType(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[label], label=label)
+                ImportedDocumentType(key=key, label=label)
             )
+
         ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
         BusinessArea.objects.create(
@@ -135,7 +140,7 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "family_name_i_c": "Symkanych",
                 "follow_up_needed": "n",
                 "gender_i_c": "male",
-                "given_name_i_c": "Ivan",
+                "given_name_i_c": "John",
                 "has_birth_certificate_i_c": "y",
                 "other_id_no_i_c": "900541571",
                 "preregistration_case_id": "13277",
@@ -229,31 +234,60 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(imported_household.zip_code, "19017")
         self.assertEqual(imported_household.village, "Praha")
         self.assertEqual(imported_household.head_of_household, ImportedIndividual.objects.get(full_name="Ivan Drago"))
-
         self.assertEqual(ImportedIndividual.objects.count(), imported_household.size)
+
         head_of_household = ImportedIndividual.objects.get(full_name="Ivan Drago")
         self.assertEqual(head_of_household.sex, MALE)
         self.assertEqual(head_of_household.phone_no, "+420123123666")
         self.assertEqual(head_of_household.disability, NOT_DISABLED)
         self.assertEqual(head_of_household.work_status, "1")
+
         primary_collector = ImportedIndividual.objects.get(full_name="Tetiana Symkanych")
         self.assertEqual(primary_collector.sex, FEMALE)
         self.assertEqual(primary_collector.phone_no, "+420774844183")
         self.assertEqual(primary_collector.disability, NOT_DISABLED)
         self.assertEqual(primary_collector.work_status, "0")
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
+
         primary_role = ImportedIndividualRoleInHousehold.objects.first()
         self.assertEqual(primary_role.individual, primary_collector)
         self.assertEqual(primary_role.household, imported_household)
-
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
+
+        first_child = ImportedIndividual.objects.get(given_name="John")
+        self.assertEqual(first_child.sex, MALE)
+        self.assertEqual(first_child.birth_date, "2013-07-04")
+        self.assertEqual(first_child.disability, False)
+
+        second_child = ImportedIndividual.objects.get(given_name="TEST")
+        self.assertEqual(second_child.sex, FEMALE)
+        self.assertEqual(second_child.birth_date, "2023-04-30")
+        self.assertEqual(second_child.disability, True)
+
         bank_account_info = ImportedBankAccountInfo.objects.first()
         self.assertEqual(bank_account_info.bank_account_number, "CZ6003000000000306979952")
-
         self.assertEqual(ImportedDocument.objects.count(), 5)
+
         birth_certificate = ImportedDocument.objects.filter(type__key="birth_certificate").first()
         self.assertEqual(birth_certificate.document_number, "262873")
         self.assertEqual(ImportedDocument.objects.filter(type__key="disability_certificate").count(), 1)
         self.assertEqual(ImportedDocument.objects.filter(type__key="national_passport").count(), 2)
+
         national_passport = ImportedDocument.objects.filter(document_number="GB500567").first()
         self.assertEqual(national_passport.individual, primary_collector)
+
+        disability_card = ImportedDocument.objects.filter(type__key="disability_card").first()
+        self.assertEqual(disability_card.document_number, "1213")
+        self.assertEqual(disability_card.individual, second_child)
+
+        medical_certificate = ImportedDocument.objects.filter(type__key="medical_certificate")
+        self.assertEqual(medical_certificate.document_number, "2321")
+        self.assertEqual(medical_certificate.individual, second_child)
+
+        temporary_protection_visa = ImportedDocument.objects.filter(type__key="temporary_protection_visa")
+        self.assertEqual(temporary_protection_visa.document_number, "900541571")
+        self.assertEqual(temporary_protection_visa.individual, first_child)
+
+        proof_of_legal_guardianship = ImportedDocument.objects.filter(type__key="proof_of_legal_guardianship")
+        self.assertEqual(proof_of_legal_guardianship.document_number, "128dj")
+        self.assertEqual(proof_of_legal_guardianship.individual, second_child)
