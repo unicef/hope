@@ -242,7 +242,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 expiry_date = individual_dict.get("medical_certificate_validity_i_c")
 
             if photo:
-                document_kwargs["photo"] = self._prepare_picture_from_base64(photo)
+                document_kwargs["photo"] = self._prepare_picture_from_base64(photo, document_number)
             if issuance_date:
                 document_kwargs["issuance_date"] = issuance_date
             if expiry_date:
@@ -281,13 +281,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         has_head = self._has_head(individuals_array)
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
-
-    def _prepare_picture_from_base64(self, picture: Any, document_number: str) -> Union[ContentFile, Any]:
-        if picture:
-            format_image = "jpg"
-            name = hashlib.md5(document_number.encode()).hexdigest()
-            picture = ContentFile(base64.b64decode(picture), name=f"{name}.{format_image}")
-        return picture
 
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
