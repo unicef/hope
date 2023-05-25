@@ -528,6 +528,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households
+        if self.is_follow_up:
+            return False
+
         qs = self.unsuccessful_payments().exclude(household__withdrawn=True)
 
         # Check if all payments are used in FPPs
