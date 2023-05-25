@@ -76,23 +76,27 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
     return null;
   }
   return (
-    <MuiAppBar
-      position='absolute'
-      className={clsx(classes.appBar, open && classes.appBarShift)}
-    >
+    <MuiAppBar className={clsx(classes.appBar, open && classes.appBarShift)}>
       <StyledToolbar>
-        <IconButton
-          edge='start'
-          color='inherit'
-          aria-label='open drawer'
-          onClick={handleDrawerOpen}
-          className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-        >
-          <MenuIcon />
-        </IconButton>
-        <BusinessAreaContainer data-cy='business-area-container'>
-          <BusinessAreaSelect />
-        </BusinessAreaContainer>
+        <Box display='flex' alignItems='center' justifyContent='center'>
+          <Box ml={1}>
+            <IconButton
+              edge='start'
+              color='inherit'
+              aria-label='open drawer'
+              onClick={handleDrawerOpen}
+              className={clsx(
+                classes.menuButton,
+                open && classes.menuButtonHidden,
+              )}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+          <BusinessAreaContainer data-cy='business-area-container'>
+            <BusinessAreaSelect />
+          </BusinessAreaContainer>
+        </Box>
         <Box display='flex' justifyContent='flex-end'>
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
             <StyledLink target='_blank' href={servicenow}>
