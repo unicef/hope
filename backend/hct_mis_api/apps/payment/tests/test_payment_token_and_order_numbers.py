@@ -81,8 +81,5 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
 
         with self.assertRaises(IntegrityError):
             payment_2.token_number = token_number
-            payment_2.save()
-
-        with self.assertRaises(IntegrityError):
             payment_2.order_number = order_number
-            payment_2.save()
+            payment_2.save(update_fields=["order_number", "token_number"])
