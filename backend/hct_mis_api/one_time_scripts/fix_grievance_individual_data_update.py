@@ -5,7 +5,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 
 
-def fix_individual_data_update_details_document_type() -> None:
+def fix_grievance_individual_data_update() -> None:
     """
     "individualData": {
       "documents_to_edit": [
@@ -28,12 +28,11 @@ def fix_individual_data_update_details_document_type() -> None:
     tickets_update_ind_qs = TicketIndividualDataUpdateDetails.objects.exclude(
         ticket__status=GrievanceTicket.STATUS_CLOSED
     )
-    tickets_add_new_ind_qs = TicketAddIndividualDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
     print(
-        f"Found {tickets_update_ind_qs.count() + tickets_add_new_ind_qs.count()} tickets. \n Start fixing...",
+        f"Found {tickets_update_ind_qs.count()} tickets. \n Start fixing...",
     )
 
-    for tickets_qs in (tickets_update_ind_qs, tickets_add_new_ind_qs):
+    for tickets_qs in tickets_update_ind_qs:
         for ticket_details in tickets_qs:
             update = False
 
@@ -49,6 +48,44 @@ def fix_individual_data_update_details_document_type() -> None:
                                 if doc_type := doc_value.pop("type", None):
                                     doc_value.update({"key": doc_type.lower()})
                                     update = True
+            if update:
+                ticket_details.save(update_fields=["individual_data"])
+                print(f"Fixed GrievanceTicket: {ticket_details.ticket.unicef_id}")
+
+    print("Finished fixing.")
+
+
+def fix_grievance_add_individual_data() -> None:
+    """
+    "ind_data": {
+        'documents': [
+            {
+                'type': 'BANK_STATEMENT',
+                'number': '123123',
+            },
+            {
+                'type': 'NATIONAL_ID',
+                'number': '1122',
+            }
+        ],
+    }
+    """
+
+    tickets_add_new_ind_qs = TicketAddIndividualDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+    print(
+        f"Found {tickets_add_new_ind_qs.count()} tickets. \n Start fixing...",
+    )
+
+    for tickets_qs in tickets_add_new_ind_qs:
+        for ticket_details in tickets_qs:
+            update = False
+
+            ind_data = ticket_details.individual_data  # json
+            docs = ind_data.get("documents", [])
+            for doc in docs:
+                if doc_type := doc.pop("type", None):  # {"type": "ADC", "number": "23"}
+                    doc.update({"key": doc_type.lower()})  # {"key": "adc", "number": "23"}
+                    update = True
             if update:
                 ticket_details.save(update_fields=["individual_data"])
                 print(f"Fixed GrievanceTicket: {ticket_details.ticket.unicef_id}")
