@@ -5,8 +5,10 @@ from django.core.exceptions import ValidationError
 
 def generate_numeric_token(digit_number: int = 3) -> int:
     while True:
-        token = "".join(random.choices("1234567890", k=digit_number))
-        if not token.startswith("0") and not has_repeated_digits(token):
+        # Token and Order Number must not start with 0
+        token = random.choice("123456789") + "".join(random.choices("1234567890", k=digit_number - 1))
+        # Token and Order Number must not have the same digit more than 3 times in a row
+        if not has_repeated_digits(token):
             return int(token)
 
 
@@ -21,7 +23,5 @@ def has_repeated_digits(token: str) -> bool:
 
 
 def payment_token_and_order_number_validator(value: int) -> None:
-    if str(value).startswith("0"):
-        raise ValidationError("Token and Order Number must not start with 0.")
     if has_repeated_digits(str(value)):
-        raise ValidationError("Token and Order Number must not has the same digit more than 3 times in a row.")
+        raise ValidationError("Token and Order Number must not have the same digit more than 3 times in a row.")
