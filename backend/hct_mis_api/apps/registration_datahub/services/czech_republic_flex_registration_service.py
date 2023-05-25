@@ -1,8 +1,11 @@
+import base64
+import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.forms import modelform_factory
 
 from django_countries.fields import Country
@@ -211,7 +214,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     ) -> list[ImportedDocument]:
         documents = []
 
-        for document_key, individual_document_number in self.DOCUMENT_MAPPING:
+        for individual_document_number, document_key in self.DOCUMENT_MAPPING:
             document_number = individual_dict.get(individual_document_number)
             if not document_number:
                 continue
@@ -223,6 +226,28 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 "document_number": document_number,
                 "individual": imported_individual,
             }
+
+            photo, issuance_date, expiry_date = None, None, None
+
+            if document_number == "proof_legal_guardianship_no_i_c":
+                photo = individual_dict.get("proof_legal_guardianship_photo_i_c")
+
+            elif document_number == "disability_card_no_i_c":
+                photo = individual_dict.get("disability_card_photo_i_c")
+                issuance_date = individual_dict.get("disability_card_issuance_i_c"
+                                                 )
+            elif document_number == "medical_certificate_no_i_c":
+                photo = individual_dict.get("medical_certificate_photo_i_c")
+                issuance_date = individual_dict.get("medical_certificate_issuance_i_c")
+                expiry_date = individual_dict.get("medical_certificate_validity_i_c")
+
+            if photo:
+                document_kwargs["photo"] = self._prepare_picture_from_base64(photo)
+            if issuance_date:
+                document_kwargs["issuance_date"] = issuance_date
+            if expiry_date:
+                document_kwargs["expiry_date"] = expiry_date
+
             ModelClassForm = modelform_factory(ImportedDocument, fields=list(document_kwargs.keys()))
             form = ModelClassForm(document_kwargs)
             if not form.is_valid():
@@ -256,6 +281,13 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         has_head = self._has_head(individuals_array)
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
+
+    def _prepare_picture_from_base64(self, picture: Any, document_number: str) -> Union[ContentFile, Any]:
+        if picture:
+            format_image = "jpg"
+            name = hashlib.md5(document_number.encode()).hexdigest()
+            picture = ContentFile(base64.b64decode(picture), name=f"{name}.{format_image}")
+        return picture
 
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
