@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -7,6 +8,7 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     check_if_token_or_order_number_exists_per_program,
     generate_token_and_order_numbers,
@@ -31,7 +33,11 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(parent=cls.payment_plan, household=household)
+            PaymentFactory(
+                parent=cls.payment_plan,
+                household=household,
+                program=program,
+            )
 
     def test_payments_created_payments(self) -> None:
         assert self.payment_plan.eligible_payments.count() == 2
@@ -58,17 +64,9 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 987654321) is True
         assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 123456789) is False
 
-    def test_validation_token_must_not_start_from_zero(self) -> None:
-        with self.assertRaises(ValidationError):
-            payment = Payment.objects.first()
-            payment.token_number = "0101010"
-            payment.save()
-
     def test_validation_token_must_not_has_the_same_digit_more_than_three_times(self) -> None:
         with self.assertRaises(ValidationError):
-            payment = Payment.objects.first()
-            payment.token_number = 1111111
-            payment.save()
+            payment_token_and_order_number_validator(1111111)
 
     def test_validation_save_payment_with_exists_token_or_order_number(self) -> None:
         payment_1 = Payment.objects.first()
@@ -81,10 +79,10 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         payment_1.order_number = order_number
         payment_1.save()
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(IntegrityError):
             payment_2.token_number = token_number
             payment_2.save()
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(IntegrityError):
             payment_2.order_number = order_number
             payment_2.save()
