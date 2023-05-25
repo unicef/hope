@@ -26,14 +26,16 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
         totalHouseholdsCount
         totalIndividualsCount
         targetingCriteria{
-        rules{
-            filters{
-            comparisonMethod
-            fieldName
-            arguments
-            isFlexField
+            flagExcludeIfActiveAdjudicationTicket
+            flagExcludeIfOnSanctionList
+            rules{
+                filters{
+                comparisonMethod
+                fieldName
+                arguments
+                isFlexField
+                }
             }
-        }
         }
     }
     validationErrors
@@ -43,6 +45,7 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
 VARIABLES: Dict = {
     "updateTargetPopulationInput": {
         "targetingCriteria": {
+            "flagExcludeIfOnSanctionList": True,
             "rules": [
                 {
                     "filters": [

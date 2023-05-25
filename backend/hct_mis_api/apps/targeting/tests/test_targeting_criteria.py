@@ -1,19 +1,24 @@
 import datetime
 from typing import Any, Dict, List
+from unittest import TestCase
 
 from django.core.management import call_command
 
 from dateutil.relativedelta import relativedelta
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     create_household,
-    create_household_and_individuals,
+    create_household_and_individuals, IndividualFactory,
 )
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -21,6 +26,10 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetPopulation,
+)
+from hct_mis_api.apps.targeting.utils import (
+    apply_flag_exclude_if_active_adjudication_ticket,
+    apply_flag_exclude_if_on_sanction_list,
 )
 
 
@@ -339,3 +348,110 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
             .count()
             == 2
         )
+
+
+class TestTargetingCriteriaFlags(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.business_area = BusinessArea.objects.first()
+        cls.household1, cls.individuals1 = create_household_and_individuals(
+            household_data={
+                "business_area": cls.business_area,
+            },
+            individuals_data=[
+                {
+                    "given_name": "OK1",
+                },
+                {
+                    "given_name": "OK2",
+                },
+            ],
+        )
+        cls.representative1 = IndividualFactory(household=None)
+        cls.household1.representatives.set([cls.representative1])
+
+        cls.household2, cls.individuals2 = create_household_and_individuals(
+            household_data={
+                "business_area": cls.business_area,
+            },
+            individuals_data=[
+                {
+                    "given_name": "TEST1",
+                },
+                {
+                    "given_name": "TEST2",
+                },
+            ],
+        )
+        cls.representative2 = IndividualFactory(household=None)
+        cls.household2.representatives.set([cls.representative2])
+
+        cls.ticket_needs_adjudication_details_for_member = TicketNeedsAdjudicationDetailsFactory(
+            golden_records_individual=cls.individuals2[0],
+        )
+        cls.ticket_needs_adjudication_details_for_representative = TicketNeedsAdjudicationDetailsFactory(
+            golden_records_individual=cls.representative2,
+        )
+
+    @parameterized.expand(
+        [
+            (True, False, GrievanceTicket.STATUS_IN_PROGRESS, 1),
+            (True, False, GrievanceTicket.STATUS_CLOSED, 2),
+            (False, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
+            (False, True, GrievanceTicket.STATUS_CLOSED, 2),
+            (True, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
+            (True, True, GrievanceTicket.STATUS_CLOSED, 2),
+        ]
+    )
+    def test_flag_exclude_if_active_adjudication_ticket(
+        self,
+        member_has_adjudication_ticket: bool,
+        representative_has_adjudication_ticket: bool,
+        ticket_status: int,
+        household_count: int,
+    ):
+        """
+        household1 does not have any adjudication tickets so should not be excluded in any case.
+        household2 should be excluded if any member or representative has an active adjudication ticket.
+        Ticket is not considered active if its status is CLOSED.
+        """
+        if member_has_adjudication_ticket:
+            self.ticket_needs_adjudication_details_for_member.ticket.status = ticket_status
+            self.ticket_needs_adjudication_details_for_member.ticket.save()
+            self.ticket_needs_adjudication_details_for_member.selected_individuals.set([self.individuals2[0]])
+        if representative_has_adjudication_ticket:
+            self.ticket_needs_adjudication_details_for_representative.ticket.status = ticket_status
+            self.ticket_needs_adjudication_details_for_representative.ticket.save()
+            self.ticket_needs_adjudication_details_for_representative.selected_individuals.set([self.representative2])
+        self.assertEqual(Household.objects.count(), 2)
+        household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
+        self.assertEqual(household_filtered.count(), household_count)
+
+    def test_flag_exclude_if_active_adjudication_ticket_no_ticket(self):
+        self.assertEqual(Household.objects.count(), 2)
+        household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
+        self.assertEqual(household_filtered.count(), 2)
+
+    @parameterized.expand(
+        [
+            (True, False, 1),
+            (False, True, 1),
+            (True, True, 1),
+            (False, False, 2),
+        ]
+    )
+    def test_flag_exclude_if_on_sanction_list(
+        self,
+        member_is_sanctioned: bool,
+        representative_is_sanctioned: bool,
+        household_count: int,
+    ):
+        if member_is_sanctioned:
+            self.individuals2[0].sanction_list_confirmed_match = True
+            self.individuals2[0].save()
+        if representative_is_sanctioned:
+            self.representative2.sanction_list_confirmed_match = True
+            self.representative2.save()
+        self.assertEqual(Household.objects.count(), 2)
+        household_filtered = apply_flag_exclude_if_on_sanction_list(Household.objects.all())
+        self.assertEqual(household_filtered.count(), household_count)

@@ -92,9 +92,10 @@ class ValidatedMutation(PermissionMutation):
 
 
 def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
-    targeting_criteria = TargetingCriteria()
+    rules = targeting_criteria_input.pop("rules", [])
+    targeting_criteria = TargetingCriteria(**targeting_criteria_input)
     targeting_criteria.save()
-    for rule_input in targeting_criteria_input.get("rules"):
+    for rule_input in rules:
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
         for filter_input in rule_input.get("filters", []):
