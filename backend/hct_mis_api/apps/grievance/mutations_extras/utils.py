@@ -52,7 +52,7 @@ def handle_role(role: "IndividualRoleInHousehold", household: Household, individ
 def handle_add_document(document: Document, individual: Individual) -> Document:
     from hct_mis_api.apps.household.models import Document, DocumentType
 
-    document_key = document.get("key") or document.get("type", "").lower()  # temporary added to fix legacy data
+    document_key = document.get("key")
     country_code = document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
     number = document.get("number")
@@ -81,7 +81,7 @@ def handle_edit_document(document_data: Dict) -> Document:
     updated_document = document_data.get("value", {})
 
     document_key = (
-        updated_document.get("key") or updated_document.get("type", "").lower()
+        updated_document.get("key")
     )  # temporary added to fix legacy data
     country_code = updated_document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
