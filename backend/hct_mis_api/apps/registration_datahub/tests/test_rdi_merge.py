@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import Generator, Callable
+from typing import Callable, Generator
 
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
@@ -30,7 +30,6 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 def capture_on_commit_callbacks(
     *, using: str = DEFAULT_DB_ALIAS, execute: bool = False
 ) -> Generator[list[Callable[[], None]], None, None]:
-
     callbacks: list[Callable[[], None]] = []
     start_count = len(connections[using].run_on_commit)
     try:
