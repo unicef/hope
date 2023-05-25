@@ -1,34 +1,36 @@
 import { MockedProvider } from '@apollo/react-testing';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import wait from 'waait';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { fakeImportXlsxPpListMutation } from '../../../../../fixtures/paymentmodule/fakeImportXlsxPpListMutation';
 import { render } from '../../../../testUtils/testUtils';
-import { ImportXlsxPaymentPlanPaymentList } from './ImportXlsxPaymentPlanPaymentList';
 import { PERMISSIONS } from '../../../../config/permissions';
+import { ImportXlsxPaymentPlanPaymentList } from './ImportXlsxPaymentPlanPaymentList';
 
 describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentList', () => {
   it('should render', async () => {
     //TODO Fix this test
-    
-    // const { container } = render(
-    //   <MockedProvider addTypename={false} mocks={fakeImportXlsxPpListMutation}>
-    //     <ImportXlsxPaymentPlanPaymentList
-    //       permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_ENTITLEMENTS]}
-    //       paymentPlan={fakeApolloPaymentPlan}
-    //     />
-    //   </MockedProvider>,
-    // );
+
+    const { container } = render(
+      <MockedProvider addTypename={false} mocks={fakeImportXlsxPpListMutation}>
+        <ImportXlsxPaymentPlanPaymentList
+          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_ENTITLEMENTS]}
+          paymentPlan={fakeApolloPaymentPlan}
+        />
+      </MockedProvider>,
+    );
+    expect(container).toMatchSnapshot();
     // await act(() => wait(0)); // wait for response
     //
     // const buttonImport = container.querySelector('[data-cy="button-import"]');
     // expect(buttonImport).toBeInTheDocument();
-    //
-    // act(() => {
-    //   buttonImport.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    // });
-    expect(true).toBeTruthy();
+    // fireEvent.click(buttonImport);
+    // //
+    // // act(() => {
+    // //   buttonImport.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    // // });
+    // await act(() => wait(0));
+    // const dialog = container.querySelector('[data-cy="dialog-import"]');
+    // expect(dialog).toBeInTheDocument();
 
     // const inputFile = document.querySelector('[data-cy="file-input"]');
     // const buttonImportSubmit = document.querySelector(

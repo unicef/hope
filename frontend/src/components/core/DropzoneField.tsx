@@ -39,7 +39,11 @@ export function DropzoneField({
   }, []);
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
+    },
     onDrop,
   });
   const acceptedFilename =
