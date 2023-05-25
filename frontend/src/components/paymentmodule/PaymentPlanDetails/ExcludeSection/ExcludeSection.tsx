@@ -274,6 +274,8 @@ export const ExcludeSection = ({
   };
 
   const renderInputAndApply = (): React.ReactElement => {
+    const applyDisabled = !hasExcludePermission || !hasOpenOrLockedStatus;
+
     if (isEdit || numberOfExcluded === 0) {
       return (
         <Box mt={2} display='flex' alignItems='center'>
@@ -290,16 +292,17 @@ export const ExcludeSection = ({
               </Box>
             </Grid>
             <Grid item>
-              <Button
+              <ButtonTooltip
+                title={getTooltipText()}
                 variant='contained'
                 color='primary'
-                disabled={!idsValue}
+                disabled={!idsValue || applyDisabled}
                 onClick={() => {
                   handleApply();
                 }}
               >
                 {t('Apply')}
-              </Button>
+              </ButtonTooltip>
             </Grid>
             <Grid item xs={12}>
               <Field
