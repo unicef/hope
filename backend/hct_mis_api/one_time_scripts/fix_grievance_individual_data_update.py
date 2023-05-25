@@ -71,23 +71,22 @@ def fix_grievance_add_individual_data() -> None:
     }
     """
 
-    tickets_add_new_ind_qs = TicketAddIndividualDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
-    print(
-        f"Found {tickets_add_new_ind_qs.count()} tickets. \n Start fixing...",
+    ticket_details_add_new_ind_qs = TicketAddIndividualDetails.objects.exclude(
+        ticket__status=GrievanceTicket.STATUS_CLOSED
     )
+    print(f"Found {ticket_details_add_new_ind_qs.count()} tickets. \n Start fixing...")
 
-    for tickets_qs in tickets_add_new_ind_qs:
-        for ticket_details in tickets_qs:
-            update = False
+    for ticket_details in ticket_details_add_new_ind_qs:
+        update = False
 
-            ind_data = ticket_details.individual_data  # json
-            docs = ind_data.get("documents", [])
-            for doc in docs:
-                if doc_type := doc.pop("type", None):  # {"type": "ADC", "number": "23"}
-                    doc.update({"key": doc_type.lower()})  # {"key": "adc", "number": "23"}
-                    update = True
-            if update:
-                ticket_details.save(update_fields=["individual_data"])
-                print(f"Fixed GrievanceTicket: {ticket_details.ticket.unicef_id}")
+        ind_data = ticket_details.individual_data  # json
+        docs = ind_data.get("documents", [])
+        for doc in docs:
+            if doc_type := doc.pop("type", None):  # {"type": "ADC", "number": "23"}
+                doc.update({"key": doc_type.lower()})  # {"key": "adc", "number": "23"}
+                update = True
+        if update:
+            ticket_details.save(update_fields=["individual_data"])
+            print(f"Fixed GrievanceTicket: {ticket_details.ticket.unicef_id}")
 
     print("Finished fixing.")
