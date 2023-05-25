@@ -1,17 +1,13 @@
-import base64
-import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
@@ -20,10 +16,7 @@ from hct_mis_api.apps.household.models import (
     GOVERNMENT_PARTNER,
     HEAD,
     HUMANITARIAN_PARTNER,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    NOT_DISABLED,
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -49,7 +42,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     BUSINESS_AREA_SLUG: str = "czech-republic"
     REGISTRATION_ID: Tuple = (25,)
 
-    INDIVIDUAL_MAPPING_DICT = {
+    INDIVIDUAL_MAPPING_DICT: Dict[str, str] = {
         "sex": "gender_i_c",
         "birth_date": "birth_date_i_c",
         "phone_no": "phone_no_i_c",
@@ -59,7 +52,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         "preferred_language": "preferred_language_i_c",
     }
 
-    INDIVIDUAL_FLEX_FIELDS = [
+    INDIVIDUAL_FLEX_FIELDS: List[str] = [
         "employment_type",
         "work_status_i_c",
         "other_nationality",
@@ -82,13 +75,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         "legal_guardia_not_primary_carer",
     ]
 
-    DOCUMENT_MAPPING = {
+    DOCUMENT_MAPPING: Dict[str, str] = {
         "birth_certificate_no_i_c": "birth_certificate",
         "disability_card_no_i_c": "disability_card",
         "national_id_no_i_c": "national_id",
         "national_passport_i_c": "national_passport",
         "medical_certificate_no_i_c": "medical_certificate",
         "other_id_no_i_c": "temporary_protection_visa",
+        "proof_legal_guardianship_no_i_c": "proof_of_legal_guardianship",
     }
 
     def _prepare_household_data(
@@ -171,9 +165,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             last_registration_date=household.last_registration_date,
         )
 
-        disability = individual_data.get("disability_i_c")
-        if disability == "disabled":
-            individual_data["disabled"] = True
+        individual_data["disability"] = individual_dict.get("disability_i_c", NOT_DISABLED)
 
         if relationship := individual_data.get("relationship"):
             individual_data["relationship"] = relationship.upper()
@@ -214,7 +206,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     ) -> list[ImportedDocument]:
         documents = []
 
-        for individual_document_number, document_key in self.DOCUMENT_MAPPING:
+        for individual_document_number, document_key in self.DOCUMENT_MAPPING.items():
             document_number = individual_dict.get(individual_document_number)
             if not document_number:
                 continue
@@ -234,8 +226,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
             elif document_number == "disability_card_no_i_c":
                 photo = individual_dict.get("disability_card_photo_i_c")
-                issuance_date = individual_dict.get("disability_card_issuance_i_c"
-                                                 )
+                issuance_date = individual_dict.get("disability_card_issuance_i_c")
             elif document_number == "medical_certificate_no_i_c":
                 photo = individual_dict.get("medical_certificate_photo_i_c")
                 issuance_date = individual_dict.get("medical_certificate_issuance_i_c")

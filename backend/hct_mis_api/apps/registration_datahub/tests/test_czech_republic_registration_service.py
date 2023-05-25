@@ -7,15 +7,11 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
+    DISABLED,
     FEMALE,
     GOVERNMENT_PARTNER,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     MALE,
     NOT_DISABLED,
     PRIVATE_PARTNER,
@@ -52,12 +48,11 @@ class TestCzechRepublicRegistrationService(TestCase):
             "national_passport": "National Passport",
             "medical_certificate": "Medical Certificate",
             "temporary_protection_visa": "Temporary Protection Visa",
+            "proof_of_legal_guardianship": "Proof of Legal Guardianship",
         }
 
         for key, label in DOCUMENT_MAPPING.items():
-            document_types_to_create.append(
-                ImportedDocumentType(key=key, label=label)
-            )
+            document_types_to_create.append(ImportedDocumentType(key=key, label=label))
 
         ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
@@ -155,7 +150,6 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "follow_up_flag": ["legal_guardianship_documents"],
                 "given_name_i_c": "TEST",
                 "family_name_i_c": "TEST",
-                "other_id_no_i_c": "TPV123",
                 "follow_up_needed": "y",
                 "relationship_i_c": "brother_sister",
                 "follow_up_comments": "No comments",
@@ -223,8 +217,8 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
         )
-
         self.assertEqual(ImportedHousehold.objects.count(), 1)
+
         imported_household = ImportedHousehold.objects.first()
         self.assertEqual(imported_household.consent, True)
         self.assertEqual(imported_household.consent_sharing, [GOVERNMENT_PARTNER, PRIVATE_PARTNER])
@@ -256,21 +250,24 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         first_child = ImportedIndividual.objects.get(given_name="John")
         self.assertEqual(first_child.sex, MALE)
-        self.assertEqual(first_child.birth_date, "2013-07-04")
-        self.assertEqual(first_child.disability, False)
+        self.assertEqual(str(first_child.birth_date), "2013-07-04")
+        self.assertEqual(first_child.disability, NOT_DISABLED)
 
         second_child = ImportedIndividual.objects.get(given_name="TEST")
         self.assertEqual(second_child.sex, FEMALE)
-        self.assertEqual(second_child.birth_date, "2023-04-30")
-        self.assertEqual(second_child.disability, True)
+        self.assertEqual(str(second_child.birth_date), "2023-04-30")
+        self.assertEqual(second_child.disability, DISABLED)
 
         bank_account_info = ImportedBankAccountInfo.objects.first()
         self.assertEqual(bank_account_info.bank_account_number, "CZ6003000000000306979952")
-        self.assertEqual(ImportedDocument.objects.count(), 5)
+        self.assertEqual(ImportedDocument.objects.count(), 8)
 
         birth_certificate = ImportedDocument.objects.filter(type__key="birth_certificate").first()
         self.assertEqual(birth_certificate.document_number, "262873")
-        self.assertEqual(ImportedDocument.objects.filter(type__key="disability_certificate").count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(type__key="disability_card").count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(type__key="medical_certificate").count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(type__key="temporary_protection_visa").count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(type__key="proof_of_legal_guardianship").count(), 1)
         self.assertEqual(ImportedDocument.objects.filter(type__key="national_passport").count(), 2)
 
         national_passport = ImportedDocument.objects.filter(document_number="GB500567").first()
@@ -280,14 +277,14 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(disability_card.document_number, "1213")
         self.assertEqual(disability_card.individual, second_child)
 
-        medical_certificate = ImportedDocument.objects.filter(type__key="medical_certificate")
+        medical_certificate = ImportedDocument.objects.filter(type__key="medical_certificate").first()
         self.assertEqual(medical_certificate.document_number, "2321")
         self.assertEqual(medical_certificate.individual, second_child)
 
-        temporary_protection_visa = ImportedDocument.objects.filter(type__key="temporary_protection_visa")
+        temporary_protection_visa = ImportedDocument.objects.filter(type__key="temporary_protection_visa").first()
         self.assertEqual(temporary_protection_visa.document_number, "900541571")
         self.assertEqual(temporary_protection_visa.individual, first_child)
 
-        proof_of_legal_guardianship = ImportedDocument.objects.filter(type__key="proof_of_legal_guardianship")
+        proof_of_legal_guardianship = ImportedDocument.objects.filter(type__key="proof_of_legal_guardianship").first()
         self.assertEqual(proof_of_legal_guardianship.document_number, "128dj")
         self.assertEqual(proof_of_legal_guardianship.individual, second_child)
