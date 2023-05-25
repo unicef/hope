@@ -32,25 +32,23 @@ def fix_grievance_individual_data_update() -> None:
         f"Found {tickets_update_ind_qs.count()} tickets. \n Start fixing...",
     )
 
-    for tickets_qs in tickets_update_ind_qs:
-        for ticket_details in tickets_qs:
-            update = False
+    for ticket_details in tickets_update_ind_qs:
+        update = False
 
-            ind_data = ticket_details.individual_data  # json
-            for documents_list in (
-                "documents",
-                "documents_to_edit",
-            ):  # fix only 'documents' and 'documents_to_edit' lists
-                if docs := ind_data.get(documents_list):
-                    for doc in docs:
-                        for key in ("value", "previous_value"):
-                            if doc_value := doc.get(key):  # {"type": "drivers_license", "number": "23"}
-                                if doc_type := doc_value.pop("type", None):
-                                    doc_value.update({"key": doc_type.lower()})
-                                    update = True
-            if update:
-                ticket_details.save(update_fields=["individual_data"])
-                print(f"Fixed GrievanceTicket: {ticket_details.ticket.unicef_id}")
+        ind_data = ticket_details.individual_data  # json
+        # fix only 'documents' and 'documents_to_edit' lists
+        for documents_list in ("documents", "documents_to_edit"):
+            docs = ind_data.get(documents_list, [])
+
+            for doc in docs:
+                for k in ("value", "previous_value"):
+                    if doc_dict := doc.get(k):  # {"type": "drivers_license", "number": "23"}
+                        if doc_type := doc_dict.pop("type", None):
+                            doc_dict.update({"key": doc_type.lower()})
+                            update = True
+        if update:
+            ticket_details.save(update_fields=["individual_data"])
+            print(f"Fixed GrievanceTicket: {ticket_details.ticket.unicef_id}")
 
     print("Finished fixing.")
 
