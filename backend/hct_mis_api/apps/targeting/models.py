@@ -338,6 +338,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     (against Golden Record) or for a final list (against the approved candidate list).
     If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
     """
+
     flag_exclude_if_active_adjudication_ticket = models.BooleanField(
         default=False,
         help_text=_(

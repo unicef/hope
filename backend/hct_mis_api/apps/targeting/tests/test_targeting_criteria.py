@@ -1,6 +1,5 @@
 import datetime
 from typing import Any, Dict, List
-from unittest import TestCase
 
 from django.core.management import call_command
 
@@ -14,11 +13,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
+    IndividualFactory,
     create_household,
-    create_household_and_individuals, IndividualFactory,
+    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
