@@ -79,12 +79,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         "legal_guardia_not_primary_carer",
     ]
 
-    DOCUMENT_MAPPING = (
-        (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID], "national_id_no_i_c"),
-        (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT], "national_passport_i_c"),
-        (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE], "disability_card_no_i_c"),
-        (IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], "birth_certificate_no_i_c"),
-    )
+    DOCUMENT_MAPPING = {
+        "birth_certificate_no_i_c": "birth_certificate",
+        "disability_card_no_i_c": "disability_card",
+        "national_id_no_i_c": "national_id",
+        "national_passport_i_c": "national_passport",
+        "medical_certificate_no_i_c": "medical_certificate",
+        "other_id_no_i_c": "temporary_protection_visa",
+    }
 
     def _prepare_household_data(
         self,
