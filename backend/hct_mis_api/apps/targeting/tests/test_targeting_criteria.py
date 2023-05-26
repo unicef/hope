@@ -385,11 +385,12 @@ class TestTargetingCriteriaFlags(APITestCase):
         cls.representative2 = IndividualFactory(household=None)
         cls.household2.representatives.set([cls.representative2])
 
+        golden_records_individual = IndividualFactory(household=None)
         cls.ticket_needs_adjudication_details_for_member = TicketNeedsAdjudicationDetailsFactory(
-            golden_records_individual=cls.individuals2[0],
+            golden_records_individual=golden_records_individual,
         )
         cls.ticket_needs_adjudication_details_for_representative = TicketNeedsAdjudicationDetailsFactory(
-            golden_records_individual=cls.representative2,
+            golden_records_individual=golden_records_individual,
         )
 
     @parameterized.expand(
@@ -402,26 +403,63 @@ class TestTargetingCriteriaFlags(APITestCase):
             (True, True, GrievanceTicket.STATUS_CLOSED, 2),
         ]
     )
-    def test_flag_exclude_if_active_adjudication_ticket(
+    def test_flag_exclude_if_active_adjudication_ticket_for_duplicate(
         self,
-        member_has_adjudication_ticket: bool,
-        representative_has_adjudication_ticket: bool,
+        member_has_adjudication_ticket_as_duplicate: bool,
+        representative_has_adjudication_ticket_as_duplicate: bool,
         ticket_status: int,
         household_count: int,
     ) -> None:
         """
         household1 does not have any adjudication tickets so should not be excluded in any case.
-        household2 should be excluded if any member or representative has an active adjudication ticket.
+        household2 should be excluded if any member or representative has an active adjudication ticket as a duplicate.
         Ticket is not considered active if its status is CLOSED.
         """
-        if member_has_adjudication_ticket:
+        if member_has_adjudication_ticket_as_duplicate:
             self.ticket_needs_adjudication_details_for_member.ticket.status = ticket_status
             self.ticket_needs_adjudication_details_for_member.ticket.save()
             self.ticket_needs_adjudication_details_for_member.possible_duplicates.set([self.individuals2[0]])
-        if representative_has_adjudication_ticket:
+        if representative_has_adjudication_ticket_as_duplicate:
             self.ticket_needs_adjudication_details_for_representative.ticket.status = ticket_status
             self.ticket_needs_adjudication_details_for_representative.ticket.save()
             self.ticket_needs_adjudication_details_for_representative.possible_duplicates.set([self.representative2])
+        self.assertEqual(Household.objects.count(), 2)
+        household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
+        self.assertEqual(household_filtered.count(), household_count)
+
+    @parameterized.expand(
+        [
+            (True, False, GrievanceTicket.STATUS_IN_PROGRESS, 1),
+            (True, False, GrievanceTicket.STATUS_CLOSED, 2),
+            (False, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
+            (False, True, GrievanceTicket.STATUS_CLOSED, 2),
+            (True, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
+            (True, True, GrievanceTicket.STATUS_CLOSED, 2),
+        ]
+    )
+    def test_flag_exclude_if_active_adjudication_ticket_for_golden_record(
+        self,
+        member_has_adjudication_ticket_as_golden_record: bool,
+        representative_has_adjudication_ticket_golden_record: bool,
+        ticket_status: int,
+        household_count: int,
+    ) -> None:
+        """
+        household1 does not have any adjudication tickets so should not be excluded in any case.
+        household2 should be excluded if any member or representative has an active adjudication ticket as a golden
+        records individual.
+        Ticket is not considered active if its status is CLOSED.
+        """
+        if member_has_adjudication_ticket_as_golden_record:
+            self.ticket_needs_adjudication_details_for_member.ticket.status = ticket_status
+            self.ticket_needs_adjudication_details_for_member.ticket.save()
+            self.ticket_needs_adjudication_details_for_member.golden_records_individual = self.individuals2[0]
+            self.ticket_needs_adjudication_details_for_member.save()
+        if representative_has_adjudication_ticket_golden_record:
+            self.ticket_needs_adjudication_details_for_representative.ticket.status = ticket_status
+            self.ticket_needs_adjudication_details_for_representative.ticket.save()
+            self.ticket_needs_adjudication_details_for_representative.golden_records_individual = self.representative2
+            self.ticket_needs_adjudication_details_for_representative.save()
         self.assertEqual(Household.objects.count(), 2)
         household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
         self.assertEqual(household_filtered.count(), household_count)

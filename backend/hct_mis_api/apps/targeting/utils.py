@@ -21,8 +21,16 @@ def apply_flag_exclude_if_active_adjudication_ticket(households: QuerySet) -> Qu
                     & ~Q(individuals__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
                 )
                 | (
+                    Q(individuals__ticket_golden_records__isnull=False)
+                    & ~Q(individuals__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                )
+                | (
                     Q(representatives__ticket_duplicates__isnull=False)
                     & ~Q(representatives__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                )
+                | (
+                    Q(representatives__ticket_golden_records__isnull=False)
+                    & ~Q(representatives__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
                 ),
                 then=True,
             ),
