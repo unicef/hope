@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Dict, Optional
 
-from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD, config
+from hct_mis_api.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD, config
 
 logger = logging.getLogger(__name__)
 #

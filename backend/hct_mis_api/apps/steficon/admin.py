@@ -33,17 +33,17 @@ from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
-from ..account.models import User
-from ..administration.widgets import JsonWidget
-from ..utils.admin import HOPEModelAdminBase
-from ..utils.security import is_root
-from .forms import (
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
+from hct_mis_api.apps.steficon.forms import (
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
     RuleForm,
     RuleTestForm,
 )
-from .models import MONITORED_FIELDS, Rule, RuleCommit
+from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 
 logger = logging.getLogger(__name__)
 

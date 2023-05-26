@@ -29,12 +29,12 @@ from hct_mis_api.apps.utils.admin import (
 )
 from hct_mis_api.apps.utils.security import is_root
 
-from ..celery_tasks import (
+from hct_mis_api.apps.household.celery_tasks import (
     revalidate_phone_number_task,
     update_individuals_iban_from_xlsx_task,
 )
-from ..forms import UpdateIndividualsIBANFromXlsxForm
-from ..models import (
+from hct_mis_api.apps.household.forms import UpdateIndividualsIBANFromXlsxForm
+from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,

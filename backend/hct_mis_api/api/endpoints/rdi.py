@@ -17,12 +17,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 
-from ...apps.registration_data.models import RegistrationDataImport
-from ..models import Grant
-from ..utils import humanize_errors
-from .base import HOPEAPIBusinessAreaView, HOPEAPIView
-from .mixin import HouseholdUploadMixin
-from .upload import HouseholdSerializer
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.api.models import Grant
+from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
+from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
+from hct_mis_api.api.endpoints.upload import HouseholdSerializer
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea

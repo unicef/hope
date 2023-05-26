@@ -13,11 +13,11 @@ from django.template.response import TemplateResponse
 from admin_extra_buttons.decorators import button
 from requests import HTTPError
 
-from ...core.models import BusinessArea
-from ...core.utils import build_arg_dict_from_dict
-from .. import models as account_models
-from ..microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from ..models import User
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
+from hct_mis_api.apps.account import models as account_models
+from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
+from hct_mis_api.apps.account.models import User
 
 logger = logging.getLogger(__name__)
 

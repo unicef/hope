@@ -18,10 +18,10 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 
-from ...apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from ...apps.registration_data.models import RegistrationDataImport
-from ..models import Grant
-from .base import HOPEApiTestCase
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.api.models import Grant
+from hct_mis_api.api.tests.base import HOPEApiTestCase
 
 
 class CreateRDITests(HOPEApiTestCase):

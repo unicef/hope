@@ -15,10 +15,10 @@ from import_export.admin import ImportExportModelAdmin
 
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
-from .. import models as account_models
-from ..permissions import Permissions
-from .filters import IncompatibleRoleFilter, PermissionFilter
-from .forms import RoleAdminForm
+from hct_mis_api.apps.account import models as account_models
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.admin.filters import IncompatibleRoleFilter, PermissionFilter
+from hct_mis_api.apps.account.admin.forms import RoleAdminForm
 
 logger = logging.getLogger(__name__)
 

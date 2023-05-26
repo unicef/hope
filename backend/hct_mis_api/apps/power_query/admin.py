@@ -21,14 +21,14 @@ from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
-from ..steficon.widget import PythonEditor
-from ..utils.admin import HOPEModelAdminBase
-from .celery_tasks import refresh_reports, run_background_query
-from .defaults import SYSTEM_PARAMETRIZER
-from .forms import FormatterTestForm
-from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
-from .utils import to_dataset
-from .widget import FormatterEditor
+from hct_mis_api.apps.steficon.widget import PythonEditor
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.power_query.celery_tasks import refresh_reports, run_background_query
+from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
+from hct_mis_api.apps.power_query.forms import FormatterTestForm
+from hct_mis_api.apps.power_query.models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
+from hct_mis_api.apps.power_query.utils import to_dataset
+from hct_mis_api.apps.power_query.widget import FormatterEditor
 
 if TYPE_CHECKING:
     from uuid import UUID

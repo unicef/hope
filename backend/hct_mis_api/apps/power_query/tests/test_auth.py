@@ -1,11 +1,11 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ...household.fixtures import create_household
-from ..defaults import create_defaults
-from ..models import Formatter, Query, Report
-from .fixtures import (
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Formatter, Query, Report
+from hct_mis_api.apps.power_query.tests.fixtures import (
     FormatterFactory,
     ParametrizerFactory,
     QueryFactory,

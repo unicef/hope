@@ -29,15 +29,15 @@ from hct_mis_api.apps.utils.admin import (
     SoftDeletableAdminMixin,
 )
 
-from ...utils.security import is_root
-from ..models import (
+from hct_mis_api.apps.utils.security import is_root
+from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
     IndividualRoleInHousehold,
 )
-from .mixins import CustomTargetPopulationMixin, HouseholdWithDrawnMixin
+from hct_mis_api.apps.household.admin.mixins import CustomTargetPopulationMixin, HouseholdWithDrawnMixin
 
 logger = logging.getLogger(__name__)
 

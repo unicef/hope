@@ -3,8 +3,8 @@ from django.utils import timezone
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 
-from ...apps.account.fixtures import UserFactory
-from ..models import APIToken, Grant
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.api.models import APIToken, Grant
 
 
 class APITokenFactory(DjangoModelFactory):

@@ -11,7 +11,7 @@ from rest_framework.request import Request
 
 from hct_mis_api.apps.account.models import User
 
-from .models import APIToken
+from hct_mis_api.api.models import APIToken
 
 
 class HOPEAuthentication(TokenAuthentication):

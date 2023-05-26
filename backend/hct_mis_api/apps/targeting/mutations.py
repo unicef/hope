@@ -47,12 +47,12 @@ from hct_mis_api.apps.targeting.validators import (
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
-from .celery_tasks import (
+from hct_mis_api.apps.targeting.celery_tasks import (
     target_population_apply_steficon,
     target_population_full_rebuild,
     target_population_rebuild_stats,
 )
-from .inputs import (
+from hct_mis_api.apps.targeting.inputs import (
     CopyTargetPopulationInput,
     CreateTargetPopulationInput,
     UpdateTargetPopulationInput,

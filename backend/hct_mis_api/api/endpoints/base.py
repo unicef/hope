@@ -12,8 +12,8 @@ from rest_framework.viewsets import ViewSetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 
-from ..auth import HOPEAuthentication, HOPEPermission
-from ..models import APILogEntry, Grant
+from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
+from hct_mis_api.api.models import APILogEntry, Grant
 
 
 class RejectPolicy(models.TextChoices):

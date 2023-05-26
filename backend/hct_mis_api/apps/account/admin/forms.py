@@ -14,9 +14,9 @@ from adminactions.api import delimiters, quotes
 
 from hct_mis_api.apps.core.models import BusinessArea
 
-from .. import models as account_models
-from ..models import Partner, Role
-from ..permissions import Permissions
+from hct_mis_api.apps.account import models as account_models
+from hct_mis_api.apps.account.models import Partner, Role
+from hct_mis_api.apps.account.permissions import Permissions
 
 logger = logging.getLogger(__name__)
 

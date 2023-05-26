@@ -3,7 +3,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from ..utils import should_run
+from hct_mis_api.apps.power_query.utils import should_run
 
 
 class TestRunToday(TestCase):

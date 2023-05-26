@@ -22,7 +22,7 @@ class Config(SmartConfig):
 
         from smart_admin.smart_auth.admin import ContentTypeAdmin, PermissionAdmin
 
-        from .admin import LogEntryAdmin
+        from hct_mis_api.apps.administration.admin import LogEntryAdmin
 
         smart_register(ContentType)(ContentTypeAdmin)
         smart_register(LogEntry)(LogEntryAdmin)
@@ -38,7 +38,7 @@ class Config(SmartConfig):
             panel_sysinfo,
         )
 
-        from .panels import email, panel_elasticsearch
+        from hct_mis_api.apps.administration.panels import email, panel_elasticsearch
 
         site.register_panel(panel_migrations)
         site.register_panel(panel_sysinfo)
