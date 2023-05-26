@@ -101,6 +101,9 @@ export const EditTargetPopulation = ({
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({
+              flagExcludeIfActiveAdjudicationTicket:
+                values.flagExcludeIfActiveAdjudicationTicket,
+              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
               criterias: values.targetingCriteria,
             }),
           },
