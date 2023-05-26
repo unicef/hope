@@ -483,10 +483,11 @@ def payment_plan_exclude_beneficiaries(
 
             if error_msg:
                 payment_plan.background_action_status_exclude_beneficiaries_error()
-                payment_plan.exclusion_reason = (
-                    exclusion_reason + " Error: " + str(error_msg) if exclusion_reason else str(error_msg)
+                payment_plan.exclusion_reason = exclusion_reason
+                payment_plan.exclude_household_error = str(error_msg)
+                payment_plan.save(
+                    update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
                 )
-                payment_plan.save(update_fields=["exclusion_reason", "background_action_status"])
                 raise ValidationError("PaymentPlan Exclude Beneficiaries Validation Error")
 
             payments_for_exclude = payment_plan.eligible_payments.filter(
@@ -509,8 +510,10 @@ def payment_plan_exclude_beneficiaries(
 
             payment_plan.background_action_status_exclude_beneficiaries_error()
             errors = str(error_msg) + str(e)
-            payment_plan.exclusion_reason = exclusion_reason + errors if exclusion_reason else errors
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status"])
+            payment_plan.exclusion_reason = exclusion_reason
+            if errors:
+                payment_plan.exclude_household_error = errors
+            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
 
     except Exception as e:
         logger.exception("PaymentPlan Excluding Beneficiaries Error")
