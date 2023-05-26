@@ -195,40 +195,50 @@ export function TargetingCriteria({
               <Box mt={3} p={3}>
                 <Grid container spacing={3}>
                   <Grid item xs={6}>
-                    <FormControlLabel
-                      disabled
-                      control={
-                        <Checkbox
-                          color='primary'
-                          name='flagExcludeIfActiveAdjudicationTicket'
-                          checked={Boolean(
-                            targetPopulation?.targetingCriteria
-                              ?.flagExcludeIfActiveAdjudicationTicket,
-                          )}
-                        />
-                      }
-                      label={t(
-                        'Exclude Households with Active Adjudication Ticket',
-                      )}
-                    />
+                    {Boolean(
+                      targetPopulation?.targetingCriteria
+                        ?.flagExcludeIfActiveAdjudicationTicket,
+                    ) && (
+                      <FormControlLabel
+                        disabled
+                        control={
+                          <Checkbox
+                            color='primary'
+                            name='flagExcludeIfActiveAdjudicationTicket'
+                            checked={Boolean(
+                              targetPopulation?.targetingCriteria
+                                ?.flagExcludeIfActiveAdjudicationTicket,
+                            )}
+                          />
+                        }
+                        label={t(
+                          'Exclude Households with Active Adjudication Ticket',
+                        )}
+                      />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
-                    <FormControlLabel
-                      disabled
-                      control={
-                        <Checkbox
-                          color='primary'
-                          name='flagExcludeIfOnSanctionList'
-                        />
-                      }
-                      checked={Boolean(
-                        targetPopulation?.targetingCriteria
-                          ?.flagExcludeIfOnSanctionList,
-                      )}
-                      label={t(
-                        'Exclude Households with an active sanction screen flag',
-                      )}
-                    />
+                    {Boolean(
+                      targetPopulation?.targetingCriteria
+                        ?.flagExcludeIfOnSanctionList,
+                    ) && (
+                      <FormControlLabel
+                        disabled
+                        control={
+                          <Checkbox
+                            color='primary'
+                            name='flagExcludeIfOnSanctionList'
+                          />
+                        }
+                        checked={Boolean(
+                          targetPopulation?.targetingCriteria
+                            ?.flagExcludeIfOnSanctionList,
+                        )}
+                        label={t(
+                          'Exclude Households with an active sanction screen flag',
+                        )}
+                      />
+                    )}
                   </Grid>
                 </Grid>
               </Box>
