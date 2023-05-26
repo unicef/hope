@@ -8159,7 +8159,7 @@ export type ExcludeHouseholdsPpMutation = (
     { __typename?: 'ExcludeHouseholdsMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'exclusionReason'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'backgroundActionStatus' | 'excludeHouseholdError' | 'exclusionReason'>
       & { excludedHouseholds: Maybe<Array<Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -10037,7 +10037,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13665,6 +13665,9 @@ export const ExcludeHouseholdsPpDocument = gql`
   excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds, exclusionReason: $exclusionReason) {
     paymentPlan {
       id
+      status
+      backgroundActionStatus
+      excludeHouseholdError
       exclusionReason
       excludedHouseholds {
         id
@@ -18751,6 +18754,7 @@ export const PaymentPlanDocument = gql`
       unicefId
     }
     exclusionReason
+    excludeHouseholdError
     isFollowUp
     followUps {
       totalCount
