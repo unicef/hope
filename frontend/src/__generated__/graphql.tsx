@@ -8202,7 +8202,7 @@ export type ExportXlsxPpListMutation = (
     { __typename?: 'ExportXLSXPaymentPlanPaymentListMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'status'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'backgroundActionStatus'>
     )> }
   )> }
 );
@@ -8218,7 +8218,7 @@ export type ExportXlsxPpListPerFspMutation = (
     { __typename?: 'ExportXLSXPaymentPlanPaymentListPerFSPMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'status'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'backgroundActionStatus'>
     )> }
   )> }
 );
@@ -13749,6 +13749,7 @@ export const ExportXlsxPpListDocument = gql`
     paymentPlan {
       id
       status
+      backgroundActionStatus
     }
   }
 }
@@ -13801,6 +13802,7 @@ export const ExportXlsxPpListPerFspDocument = gql`
     paymentPlan {
       id
       status
+      backgroundActionStatus
     }
   }
 }
