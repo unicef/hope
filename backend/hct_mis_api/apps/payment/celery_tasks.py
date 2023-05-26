@@ -451,35 +451,50 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluded_households_ids: List[str], exclusion_reason: Optional[str] = ""
+    self: Any, payment_plan_id: str, excluding_hh_ids: List[str], exclusion_reason: Optional[str] = ""
 ) -> None:
     try:
-        from hct_mis_api.apps.payment.models import PaymentPlan
+        from django.db.models import Q
+
+        from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         error_msg = []
 
         try:
-            for hh_unicef_id in excluded_households_ids:
-                if payment_plan.payment_items.filter(excluded=True, household__unicef_id=hh_unicef_id).exists():
-                    # skip for already excluded payments
-                    continue
+            for hh_unicef_id in excluding_hh_ids:
                 if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
-                    error_msg.append(f"Household {hh_unicef_id} not included in this Payment Plan.")
+                    error_msg.append(f"Household {hh_unicef_id} not included in this Payment Plan.\n")
                     # remove HH_id from list because later will compare number of HHs with eligible_payments().count()
-                    excluded_households_ids.remove(hh_unicef_id)
+                    excluding_hh_ids.remove(hh_unicef_id)
 
-            if len(excluded_households_ids) >= payment_plan.eligible_payments.count():
-                error_msg.append(
-                    f"There will be not at least one beneficiary in the Plan that is not excluded after exclusion process for ID(s): {excluded_households_ids}"
-                )
+            if payment_plan.status == PaymentPlan.Status.LOCKED:
+                # for Locked Payment we check if not remove all HHs
+                if len(excluding_hh_ids) >= payment_plan.eligible_payments.count():
+                    error_msg.append(
+                        f"There will be not at least one beneficiary in the Plan that is not excluded after exclusion process for ID(s): {excluding_hh_ids}.\n"
+                    )
 
             payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
-                household__unicef_id__in=excluded_households_ids
+                household__unicef_id__in=excluding_hh_ids
             )
-            # TODO: add validation for FPP and PP
-            # 6. If not possible to undo the exclusion, beneficiaries can't disappear from the exclusion list.
-            # When UNDO (!) exclusion should check IF HH is included in other PP (or FPP) with in status not OPEN ???
+            reverted_hh_ids = payments_for_revert_exclude.values_list("household__unicef_id", flat=True)
+
+            # check if hard conflicts exists in other Payments for undo exclude HH
+            for hh_unicef_id in reverted_hh_ids:
+                if (
+                    Payment.objects.exclude(parent__id=payment_plan.pk)
+                    .filter(
+                        Q(parent__start_date__lte=payment_plan.end_date)
+                        & Q(parent__end_date__gte=payment_plan.start_date),
+                        ~Q(parent__status=PaymentPlan.Status.OPEN),
+                        Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False)
+                    )
+                    .exists()
+                ):
+                    error_msg.append(
+                        f"Not possible exclude Household with ID {excluding_hh_ids} because of hard conflicts within other PaymentPlan.\n"
+                    )
 
             if error_msg:
                 payment_plan.background_action_status_exclude_beneficiaries_error()
@@ -490,9 +505,7 @@ def payment_plan_exclude_beneficiaries(
                 )
                 raise ValidationError("PaymentPlan Exclude Beneficiaries Validation Error")
 
-            payments_for_exclude = payment_plan.eligible_payments.filter(
-                household__unicef_id__in=excluded_households_ids
-            )
+            payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluding_hh_ids)
 
             payments_for_exclude.update(excluded=True)
             payments_for_revert_exclude.update(excluded=False)
