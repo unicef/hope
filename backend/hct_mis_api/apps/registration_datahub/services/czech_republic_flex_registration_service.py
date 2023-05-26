@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    COLLECT_TYPE_PARTIAL,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -104,9 +105,11 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "last_registration_date": record.timestamp,
             "country_origin": Country(code="CZ"),
             "country": Country(code="CZ"),
-            "flex_fields": needs_assessment,
             "consent_sharing": [],
+            "collect_individual_data": COLLECT_TYPE_PARTIAL,
         }
+        if needs_assessment:
+            household_data["flex_fields"] = needs_assessment
 
         consent_h_c = consent_data.get("consent_h_c", False)
         consent_sharing = consent_data.get("consent_sharing_h_c", False)
@@ -284,12 +287,15 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         household_address = record_data_dict.get("household-address", [])[0]
         consent_data = record_data_dict.get("consent", [])[0]
-        needs_assessment = record_data_dict.get("needs-assessment", [])[0]
+        needs_assessment_list = record_data_dict.get("needs-assessment")
+        needs_assessment = needs_assessment_list[0] if needs_assessment_list else None
 
         primary_carer_info = record_data_dict.get("primary-carer-info", [])
         children_information = record_data_dict.get("children-information", [])
         legal_guardian_information = record_data_dict.get("legal-guardian-information", [])
-
+        legal_guardian_information = [
+            info for info in legal_guardian_information if info.get("legal_guardia_not_primary_carer") != "n"
+        ]
         individuals_array = [*primary_carer_info, *children_information, *legal_guardian_information]
 
         if not self._has_head(individuals_array):
