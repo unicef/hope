@@ -1,4 +1,4 @@
-from django.db.models import Case, Q, QuerySet, When
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.targeting.models import TargetPopulation

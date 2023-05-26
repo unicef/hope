@@ -30,10 +30,10 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
             flagExcludeIfOnSanctionList
             rules{
                 filters{
-                comparisonMethod
-                fieldName
-                arguments
-                isFlexField
+                    comparisonMethod
+                    fieldName
+                    arguments
+                    isFlexField
                 }
             }
         }
