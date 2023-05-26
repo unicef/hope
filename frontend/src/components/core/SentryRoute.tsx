@@ -16,6 +16,8 @@ export const SentryRoute = ({
   exact,
 }: SentryRouteProps): React.ReactElement => (
   <Route exact={exact} path={path}>
+    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+    {/*@ts-ignore*/}
     <Sentry.ErrorBoundary
       beforeCapture={(scope) => {
         scope.setTag('location', label || path);

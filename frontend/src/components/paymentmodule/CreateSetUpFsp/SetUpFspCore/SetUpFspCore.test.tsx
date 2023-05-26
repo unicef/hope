@@ -26,6 +26,8 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
               },
             ],
           }}
+          /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+          /*@ts-ignore*/
           setDeliveryMechanismsForQuery={(_deliveryMechanisms) => {
             console.log(_deliveryMechanisms);
           }}

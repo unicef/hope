@@ -86,6 +86,7 @@ const validationSchema = Yup.object().shape({
 });
 interface ArrayFieldWrapperProps {
   arrayHelpers;
+  children;
 }
 class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
   getArrayHelpers(): object {
@@ -231,12 +232,12 @@ export function TargetCriteriaForm({
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+              {// eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               errors.nonFieldErrors && (
                 <DialogError>
                   <ul>
-                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                    {// eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     errors.nonFieldErrors.map((message) => (
                       <li>{message}</li>
@@ -255,7 +256,7 @@ export function TargetCriteriaForm({
                     arrayHelpers={arrayHelpers}
                     ref={filtersArrayWrapperRef}
                   >
-                    {values.filters.map((each, index) => {
+                    {values.filters.map((each, index) : React.ReactElement=> {
                       return (
                         <TargetingCriteriaFilter
                           //eslint-disable-next-line

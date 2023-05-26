@@ -9,8 +9,9 @@ import { ProfilePage } from './containers/pages/core/ProfilePage';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { Providers } from './providers';
 import { SentryRoute } from './components/core/SentryRoute';
+import {ReactFCWithChildren} from "./utils/types";
 
-export const App: React.FC = () => {
+export const App: ReactFCWithChildren = () => {
   return (
     <Providers>
       <AutoLogout />

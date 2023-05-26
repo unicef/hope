@@ -49,6 +49,8 @@ export function LabelizedField({
   return (
     <div data-cy={dataCy && `labelized-field-container-${dataCy}`}>
       <Label color='textSecondary'>{label}</Label>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/*@ts-ignore*/}
       <div data-cy={`label-${label}`}>{displayValue}</div>
     </div>
   );

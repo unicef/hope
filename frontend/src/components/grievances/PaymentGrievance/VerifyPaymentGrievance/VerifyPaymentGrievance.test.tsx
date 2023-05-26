@@ -13,6 +13,8 @@ describe('components/grievances/VerifyPaymentGrievance', () => {
         mocks={fakeApolloUpdateGrievanceDetailsPaymentVerificationMutation}
       >
         <VerifyPaymentGrievance
+          /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+          /*@ts-ignore*/
           ticket={fakeGrievanceTicketPaymentVerification}
         />
       </MockedProvider>,

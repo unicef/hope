@@ -17,7 +17,7 @@ export const GrievancesChart = ({
     datasets: [
       {
         backgroundColor: ['#80CB26', '#FFE9AC', '#FFAA1D', '#E02020'],
-        data: [...data.datasets[0]?.data],
+        data: [...data?.datasets[0]?.data],
       },
     ],
   };

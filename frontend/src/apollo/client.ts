@@ -127,7 +127,7 @@ export async function getClient(): Promise<
     const cache = new InMemoryCache();
     await persistCache({
         cache,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         storage: localForage,
     });

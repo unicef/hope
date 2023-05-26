@@ -1,7 +1,7 @@
 import { CircularProgress, InputAdornment, TextField } from '@material-ui/core';
 import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LocationState, useHistory, useLocation } from 'react-router-dom';

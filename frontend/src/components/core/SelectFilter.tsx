@@ -18,9 +18,13 @@ export const SelectFilter = ({
 }): React.ReactElement => {
   return (
     <StyledFormControl variant='outlined' margin='dense'>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/*@ts-ignore*/}
       <InputLabel>{label}</InputLabel>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/*@ts-ignore*/}
       <Select
-        /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+        /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
         // @ts-ignore
         onChange={onChange}
         variant='outlined'

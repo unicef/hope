@@ -72,7 +72,10 @@ export function SanctionList(): React.ReactElement {
     </>
   );
 
+
   return (
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     <Sentry.ErrorBoundary
       beforeCapture={(scope) => {
         scope.setTag('location', '/sanction-list');
@@ -105,7 +108,7 @@ export function SanctionList(): React.ReactElement {
                     component='a'
                     href='/api/download-sanction-template'
                     onClick={(event) => {
-                      /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                      /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
                       // @ts-ignore
                       if (window.Cypress) {
                         event.preventDefault();

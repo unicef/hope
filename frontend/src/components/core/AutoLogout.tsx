@@ -19,6 +19,8 @@ export const AutoLogout = (): React.ReactElement => {
 
   return (
     <IdleTimer
+      /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+      // @ts-ignore
       ref={idleTimer}
       onAction={onAction}
       onIdle={onIdle}

@@ -21,14 +21,14 @@ export function useArrayToDict<T>(
     let key;
     let value;
     if (isFunction(keyExtractor)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       key = keyExtractor(currentValue);
     } else {
       key = get(currentValue, keyExtractor);
     }
     if (isFunction(valueExtractor)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       value = valueExtractor(currentValue);
     } else {

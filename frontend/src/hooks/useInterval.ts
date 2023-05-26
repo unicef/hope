@@ -11,7 +11,7 @@ export function useInterval(callback, delay): void {
   useEffect((): (() => void) => {
     function tick(): void {
       if (savedCallback.current !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         savedCallback.current();
       }

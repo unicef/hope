@@ -69,6 +69,8 @@ export function AddIndividualGrievanceDetails({
         <Grid key={key} item xs={6}>
           <LabelizedField
             label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
+            /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+            /*@ts-ignore*/
             value={textValue}
           />
         </Grid>

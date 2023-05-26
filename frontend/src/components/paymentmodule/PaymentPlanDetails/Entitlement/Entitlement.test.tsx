@@ -11,7 +11,7 @@ describe('components/paymentmodule/PaymentPlanDetails/Entitlement', () => {
   it('should render', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllSteficonRules}>
-        <Entitlement paymentPlan={fakeApolloPaymentPlan} />
+        <Entitlement paymentPlan={fakeApolloPaymentPlan} permissions={[]} />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response

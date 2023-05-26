@@ -11,8 +11,9 @@ import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
+import {ReactFCWithChildren} from "./utils/types";
 
-export const Providers: React.FC = ({ children }) => {
+export const Providers: ReactFCWithChildren = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
     ApolloClient<NormalizedCacheObject>
   >();
