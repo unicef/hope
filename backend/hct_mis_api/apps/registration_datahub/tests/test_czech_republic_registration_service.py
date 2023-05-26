@@ -185,7 +185,10 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "national_id_no_i_c": "",
                 "legal_guardia_not_primary_carer": "y",
                 "work_status_i_c": "y",
-            }
+            },
+            {
+                "legal_guardia_not_primary_carer": "n",
+            },
         ]
 
         records = [

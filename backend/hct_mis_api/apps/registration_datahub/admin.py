@@ -494,6 +494,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                 continue
             try:
                 records_ids = qs.values_list("id", flat=True)
+
                 rdi = service().create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
 
                 create_task_for_processing_records(service, rdi.pk, list(records_ids))
