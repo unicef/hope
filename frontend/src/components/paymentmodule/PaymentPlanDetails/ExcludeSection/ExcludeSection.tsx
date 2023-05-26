@@ -27,6 +27,7 @@ import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
+import { removeBracketsAndQuotes } from '../../../../utils/utils';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -405,7 +406,7 @@ export const ExcludeSection = ({
                           {excludeHouseholdError && (
                             <Box mt={2}>
                               <FormHelperText error>
-                                {excludeHouseholdError}
+                                {removeBracketsAndQuotes(excludeHouseholdError)}
                               </FormHelperText>
                             </Box>
                           )}
