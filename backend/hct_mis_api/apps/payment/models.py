@@ -692,7 +692,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def can_be_locked(self) -> bool:
-        return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
+        return (
+            self.payment_items.filter(payment_plan_hard_conflicted=False)
+            .exclude(financial_service_provider__isnull=True)
+            .exists()
+        )
 
     def update_population_count_fields(self) -> None:
         households_ids = self.eligible_payments.values_list("household_id", flat=True)
@@ -844,13 +848,36 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.acceptance_process_threshold.finance_release_number_required
 
     def unsuccessful_payments(self) -> "QuerySet":
-        return self.payment_items.eligible().filter(
+        return self.eligible_payments.filter(
             status__in=[
                 Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
                 Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
                 Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
             ]
         )
+
+    def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
+        """
+        used for creation FPP
+        need to call from source_payment_plan level
+        like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
+        """
+        payments_qs = (
+            self.unsuccessful_payments()
+            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+        )
+        return payments_qs
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)

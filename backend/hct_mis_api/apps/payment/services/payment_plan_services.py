@@ -148,6 +148,9 @@ class PaymentPlanService:
             logging.exception(msg)
             raise GraphQLError(msg)
 
+        if self.payment_plan.payment_items.filter(financial_service_provider__isnull=True).exists():
+            raise GraphQLError("All Payments must have assigned FSP")
+
         dm_to_fsp_mapping = [
             {
                 "fsp": delivery_mechanism_per_payment_plan.financial_service_provider,
@@ -559,26 +562,7 @@ class PaymentPlanService:
                 raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
 
     def create_follow_up_payments(self) -> None:
-        payments_to_copy = (
-            self.payment_plan.source_payment_plan.eligible_payments.filter(
-                status__in=[
-                    Payment.STATUS_ERROR,
-                    Payment.STATUS_NOT_DISTRIBUTED,
-                    Payment.STATUS_FORCE_FAILED,
-                ]  # TODO remove force failed?
-            )
-            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
-            .exclude(  # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
-                household_id__in=Payment.objects.filter(
-                    is_follow_up=True,
-                    parent__source_payment_plan=self.payment_plan.source_payment_plan,
-                    parent__program_cycle=self.payment_plan.program_cycle,
-                    excluded=False,
-                )
-                .exclude(parent=self.payment_plan)
-                .values_list("household_id", flat=True)
-            )
-        )
+        payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
 
         follow_up_payments = [
             Payment(
@@ -608,18 +592,7 @@ class PaymentPlanService:
         if source_pp.is_follow_up:
             raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
 
-        # TODO: add the same logic here as in create_follow_up_payments() `payments_to_copy`
-        if (
-            not source_pp.payment_items.eligible()
-            .filter(
-                status__in=[
-                    Payment.STATUS_ERROR,
-                    Payment.STATUS_NOT_DISTRIBUTED,
-                    Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
-                ]
-            )
-            .exists()
-        ):
+        if not source_pp.unsuccessful_payments().exists():
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
