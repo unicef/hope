@@ -138,6 +138,7 @@ class RapidProFlow(graphene.ObjectType):
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
+    columns = graphene.List(graphene.String)
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -155,6 +156,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
         connection_class = ExtendedConnection
 
     report_url = graphene.String()
+    status = graphene.Int()
 
     def resolve_report_url(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.file.url if self.file else ""
