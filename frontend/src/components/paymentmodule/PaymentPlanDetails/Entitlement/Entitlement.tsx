@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -144,7 +145,11 @@ export const Entitlement = ({
     paymentPlan.status !== PaymentPlanStatus.Locked;
 
   const shouldDisableExportXlsx =
-    loadingExport || paymentPlan.status !== PaymentPlanStatus.Locked;
+    loadingExport ||
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.isFollowUp ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting;
 
   return (
     <Box m={5}>
