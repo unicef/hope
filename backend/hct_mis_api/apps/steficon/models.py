@@ -14,7 +14,10 @@ from concurrency.fields import AutoIncVersionField
 from hct_mis_api.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
 from hct_mis_api.apps.steficon.interpreters import Interpreter, interpreters, mapping
 from hct_mis_api.apps.steficon.result import Result
-from hct_mis_api.apps.steficon.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hct_mis_api.apps.steficon.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 MONITORED_FIELDS = ("name", "enabled", "deprecated", "language", "definition")
 

@@ -10,10 +10,9 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
-from hct_mis_api.apps.core.models import BusinessArea
-
 from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
 from hct_mis_api.api.models import APILogEntry, Grant
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class RejectPolicy(models.TextChoices):

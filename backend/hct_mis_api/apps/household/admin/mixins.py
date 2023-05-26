@@ -13,7 +13,6 @@ from django.utils import timezone
 
 from admin_extra_buttons.decorators import button
 
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.household.forms import (
     AddToTargetPopulationForm,
     CreateTargetPopulationForm,
@@ -24,6 +23,7 @@ from hct_mis_api.apps.household.forms import (
 )
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class HouseholdWithDrawnMixin:

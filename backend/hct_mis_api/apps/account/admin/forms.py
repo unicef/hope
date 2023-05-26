@@ -12,11 +12,10 @@ from django.utils.translation import gettext_lazy as _
 
 from adminactions.api import delimiters, quotes
 
-from hct_mis_api.apps.core.models import BusinessArea
-
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 

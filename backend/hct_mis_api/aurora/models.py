@@ -6,7 +6,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.models import Record as Record_
 from hct_mis_api.apps.steficon.models import RuleCommit
-
 from hct_mis_api.aurora.rdi import registry
 
 

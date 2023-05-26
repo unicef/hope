@@ -1,8 +1,8 @@
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.program.models import Program
 
 
 class CreateProgramTests(HOPEApiTestCase):

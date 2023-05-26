@@ -9,9 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
-from hct_mis_api.apps.account.models import User
-
 from hct_mis_api.api.models import APIToken
+from hct_mis_api.apps.account.models import User
 
 
 class HOPEAuthentication(TokenAuthentication):

@@ -10,11 +10,16 @@ from django.urls import reverse
 
 from adminfilters.autocomplete import AutoCompleteFilter
 
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-
-from hct_mis_api.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
+from hct_mis_api.apps.household.forms import (
+    UpdateByXlsxStage1Form,
+    UpdateByXlsxStage2Form,
+)
 from hct_mis_api.apps.household.models import XlsxUpdateFile
-from hct_mis_api.apps.household.services.individual_xlsx_update import IndividualXlsxUpdate, InvalidColumnsError
+from hct_mis_api.apps.household.services.individual_xlsx_update import (
+    IndividualXlsxUpdate,
+    InvalidColumnsError,
+)
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(XlsxUpdateFile)
