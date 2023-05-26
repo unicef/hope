@@ -85,6 +85,7 @@ interface TargetingCriteriaProps {
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
   selectedProgram?;
   isEdit?: boolean;
+  screenBeneficiary: boolean;
 }
 
 export function TargetingCriteria({
@@ -93,6 +94,7 @@ export function TargetingCriteria({
   targetPopulation,
   selectedProgram,
   isEdit,
+  screenBeneficiary,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
@@ -195,33 +197,25 @@ export function TargetingCriteria({
               <Box mt={3} p={3}>
                 <Grid container spacing={3}>
                   <Grid item xs={6}>
-                    {Boolean(
-                      targetPopulation?.targetingCriteria
-                        ?.flagExcludeIfActiveAdjudicationTicket,
-                    ) && (
-                      <FormControlLabel
-                        disabled
-                        control={
-                          <Checkbox
-                            color='primary'
-                            name='flagExcludeIfActiveAdjudicationTicket'
-                            checked={Boolean(
-                              targetPopulation?.targetingCriteria
-                                ?.flagExcludeIfActiveAdjudicationTicket,
-                            )}
-                          />
-                        }
-                        label={t(
-                          'Exclude Households with Active Adjudication Ticket',
-                        )}
-                      />
-                    )}
+                    <FormControlLabel
+                      disabled
+                      control={
+                        <Checkbox
+                          color='primary'
+                          name='flagExcludeIfActiveAdjudicationTicket'
+                          checked={Boolean(
+                            targetPopulation?.targetingCriteria
+                              ?.flagExcludeIfActiveAdjudicationTicket,
+                          )}
+                        />
+                      }
+                      label={t(
+                        'Exclude Households with Active Adjudication Ticket',
+                      )}
+                    />
                   </Grid>
                   <Grid item xs={6}>
-                    {Boolean(
-                      targetPopulation?.targetingCriteria
-                        ?.flagExcludeIfOnSanctionList,
-                    ) && (
+                    {screenBeneficiary && (
                       <FormControlLabel
                         disabled
                         control={
@@ -256,17 +250,19 @@ export function TargetingCriteria({
                       data-cy='input-active-adjudication-ticket'
                     />
                   </Grid>
-                  <Grid item xs={6}>
-                    <Field
-                      name='flagExcludeIfOnSanctionList'
-                      label={t(
-                        'Exclude Households with an active sanction screen flag',
-                      )}
-                      color='primary'
-                      component={FormikCheckboxField}
-                      data-cy='input-active-sanction-flag'
-                    />
-                  </Grid>
+                  {screenBeneficiary && (
+                    <Grid item xs={6}>
+                      <Field
+                        name='flagExcludeIfOnSanctionList'
+                        label={t(
+                          'Exclude Households with an active sanction screen flag',
+                        )}
+                        color='primary'
+                        component={FormikCheckboxField}
+                        data-cy='input-active-sanction-flag'
+                      />
+                    </Grid>
+                  )}
                 </Grid>
               </Box>
             )}

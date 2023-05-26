@@ -20,6 +20,7 @@ import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import {
   ProgramStatus,
   useAllProgramsForChoicesQuery,
+  useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
 import { PaperContainer } from '../../../components/targeting/PaperContainer';
@@ -45,6 +46,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
+
   const {
     data: allProgramsData,
     loading: loadingPrograms,
@@ -55,6 +60,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
+  if (!allProgramsData || !businessAreaData) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
 
@@ -135,6 +141,9 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                     allProgramsData?.allPrograms?.edges,
                     values.program,
                   )}
+                  screenBeneficiary={
+                    businessAreaData?.businessArea?.screenBeneficiary
+                  }
                   isEdit
                 />
               )}

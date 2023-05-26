@@ -28,10 +28,12 @@ const Label = styled.p`
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
+  screenBeneficiary: boolean;
 }
 
 export const EditTargetPopulation = ({
   targetPopulation,
+  screenBeneficiary,
 }: EditTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
@@ -158,6 +160,7 @@ export const EditTargetPopulation = ({
                   rules={values.targetingCriteria}
                   selectedProgram={selectedProgram(values)}
                   isEdit
+                  screenBeneficiary={screenBeneficiary}
                 />
               )}
             />
