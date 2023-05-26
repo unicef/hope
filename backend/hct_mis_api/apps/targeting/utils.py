@@ -35,6 +35,5 @@ def apply_flag_exclude_if_active_adjudication_ticket(households: QuerySet) -> Qu
 
 def apply_flag_exclude_if_on_sanction_list(households: QuerySet) -> QuerySet:
     return households.exclude(
-        Q(individuals__sanction_list_confirmed_match=True)
-        | Q(representatives__sanction_list_confirmed_match=True)
+        Q(individuals__sanction_list_confirmed_match=True) | Q(representatives__sanction_list_confirmed_match=True)
     )
