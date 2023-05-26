@@ -352,7 +352,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
 class TestTargetingCriteriaFlags(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.business_area = BusinessArea.objects.first()
+        cls.business_area = create_afghanistan()
         cls.household1, cls.individuals1 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -408,7 +408,7 @@ class TestTargetingCriteriaFlags(APITestCase):
         representative_has_adjudication_ticket: bool,
         ticket_status: int,
         household_count: int,
-    ):
+    ) -> None:
         """
         household1 does not have any adjudication tickets so should not be excluded in any case.
         household2 should be excluded if any member or representative has an active adjudication ticket.
@@ -417,16 +417,16 @@ class TestTargetingCriteriaFlags(APITestCase):
         if member_has_adjudication_ticket:
             self.ticket_needs_adjudication_details_for_member.ticket.status = ticket_status
             self.ticket_needs_adjudication_details_for_member.ticket.save()
-            self.ticket_needs_adjudication_details_for_member.selected_individuals.set([self.individuals2[0]])
+            self.ticket_needs_adjudication_details_for_member.possible_duplicates.set([self.individuals2[0]])
         if representative_has_adjudication_ticket:
             self.ticket_needs_adjudication_details_for_representative.ticket.status = ticket_status
             self.ticket_needs_adjudication_details_for_representative.ticket.save()
-            self.ticket_needs_adjudication_details_for_representative.selected_individuals.set([self.representative2])
+            self.ticket_needs_adjudication_details_for_representative.possible_duplicates.set([self.representative2])
         self.assertEqual(Household.objects.count(), 2)
         household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
         self.assertEqual(household_filtered.count(), household_count)
 
-    def test_flag_exclude_if_active_adjudication_ticket_no_ticket(self):
+    def test_flag_exclude_if_active_adjudication_ticket_no_ticket(self) -> None:
         self.assertEqual(Household.objects.count(), 2)
         household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
         self.assertEqual(household_filtered.count(), 2)
@@ -444,7 +444,7 @@ class TestTargetingCriteriaFlags(APITestCase):
         member_is_sanctioned: bool,
         representative_is_sanctioned: bool,
         household_count: int,
-    ):
+    ) -> None:
         if member_is_sanctioned:
             self.individuals2[0].sanction_list_confirmed_match = True
             self.individuals2[0].save()
