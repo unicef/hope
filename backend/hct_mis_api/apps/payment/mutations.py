@@ -1155,9 +1155,6 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
             raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
-        if not payment_plan.eligible_payments.exists():
-            raise GraphQLError("There is not at least one beneficiary in the Payment Plan that is not excluded")
-
         payment_plan_exclude_beneficiaries.delay(
             decode_id_string(payment_plan_id), excluded_households_ids, exclusion_reason
         )
