@@ -41,6 +41,11 @@ export const EditTargetPopulation = ({
     targetingCriteria: targetPopulation.targetingCriteria.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
+    flagExcludeIfActiveAdjudicationTicket:
+      targetPopulation.targetingCriteria
+        .flagExcludeIfActiveAdjudicationTicket || false,
+    flagExcludeIfOnSanctionList:
+      targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();

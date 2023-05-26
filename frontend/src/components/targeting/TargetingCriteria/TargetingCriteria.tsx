@@ -1,10 +1,12 @@
-import React, { Fragment, useState } from 'react';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { Field } from 'formik';
+import React, { Fragment, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { Criteria } from './Criteria';
 import {
   ContentWrapper,
@@ -176,6 +178,32 @@ export function TargetingCriteria({
               <p>{t('Add Filter')}</p>
             </AddCriteria>
           )}
+          <Box mt={3} p={3}>
+            <Grid container spacing={3}>
+              <Grid item xs={6}>
+                <Field
+                  name='flagExcludeIfActiveAdjudicationTicket'
+                  label={t(
+                    'Exclude Households with Active Adjudication Ticket',
+                  )}
+                  color='primary'
+                  component={FormikCheckboxField}
+                  data-cy='input-active-adjudication-ticket'
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <Field
+                  name='flagExcludeIfOnSanctionList'
+                  label={t(
+                    'Exclude Households with an active sanction screen flag',
+                  )}
+                  color='primary'
+                  component={FormikCheckboxField}
+                  data-cy='input-active-sanction-flag'
+                />
+              </Grid>
+            </Grid>
+          </Box>
         </ContentWrapper>
         {targetPopulation && (
           <VulnerabilityScoreComponent targetPopulation={targetPopulation} />

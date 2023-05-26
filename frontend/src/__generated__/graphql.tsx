@@ -1349,7 +1349,8 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
   EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
   DeliveredQuantity = 'DELIVERED_QUANTITY',
-  DeliveryDate = 'DELIVERY_DATE'
+  DeliveryDate = 'DELIVERY_DATE',
+  ReasonForUnsuccessfulPayment = 'REASON_FOR_UNSUCCESSFUL_PAYMENT'
 }
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -3655,6 +3656,7 @@ export type PaymentNode = Node & {
   collector: IndividualNode,
   sourcePayment?: Maybe<PaymentNode>,
   isFollowUp: Scalars['Boolean'],
+  reasonForUnsuccessfulPayment?: Maybe<Scalars['String']>,
   followUps: PaymentNodeConnection,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
@@ -6166,12 +6168,16 @@ export type TargetingCriteriaNode = {
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean'],
+  flagExcludeIfOnSanctionList: Scalars['Boolean'],
   targetPopulation?: Maybe<TargetPopulationNode>,
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>,
 };
 
 export type TargetingCriteriaObjectType = {
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleObjectType>>>,
+  flagExcludeIfActiveAdjudicationTicket?: Maybe<Scalars['Boolean']>,
+  flagExcludeIfOnSanctionList?: Maybe<Scalars['Boolean']>,
 };
 
 export enum TargetingCriteriaRuleFilterComparisonMethod {
@@ -7718,6 +7724,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, targetingCriteria: Maybe<(
     { __typename?: 'TargetingCriteriaNode' }
+    & Pick<TargetingCriteriaNode, 'flagExcludeIfActiveAdjudicationTicket' | 'flagExcludeIfOnSanctionList'>
     & { rules: Maybe<Array<Maybe<(
       { __typename?: 'TargetingCriteriaRuleNode' }
       & Pick<TargetingCriteriaRuleNode, 'id'>
@@ -12469,6 +12476,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     lastName
   }
   targetingCriteria {
+    flagExcludeIfActiveAdjudicationTicket
+    flagExcludeIfOnSanctionList
     rules {
       id
       individualsFiltersBlocks {
@@ -25590,6 +25599,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   collector?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   sourcePayment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  reasonForUnsuccessfulPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
@@ -26507,6 +26517,8 @@ export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>,
 };

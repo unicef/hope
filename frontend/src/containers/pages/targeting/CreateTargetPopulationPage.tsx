@@ -37,6 +37,8 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     program: null,
     excludedIds: '',
     exclusionReason: '',
+    flagExcludeIfActiveAdjudicationTicket: false,
+    flagExcludeIfOnSanctionList: false,
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
