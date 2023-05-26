@@ -64,6 +64,24 @@ class TestExcludeHouseholds(APITestCase):
         cls.household_4 = HouseholdFactory(id="7e14efa4-3ff3-4947-aecc-b517c659ebda", head_of_household=hoh4)
         cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
 
+    def test_payment_plan_within_not_status_open_or_lock(self) -> None:
+        payment_plan_id = encode_id_base64(self.source_payment_plan.id, "PaymentPlan")
+
+        exclude_mutation_response = self.graphql_request(
+            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": payment_plan_id,
+                "excludedHouseholdsIds": [Household.objects.get(id=self.household_1.id).unicef_id],
+            },
+        )
+
+        assert "errors" in exclude_mutation_response
+        self.assertEqual(
+            exclude_mutation_response["errors"][0]["message"],
+            "Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan",
+        )
+
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_households(self, get_exchange_rate_mock: Any) -> None:

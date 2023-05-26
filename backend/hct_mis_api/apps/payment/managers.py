@@ -1,7 +1,6 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
-    Case,
     Exists,
     F,
     Func,
@@ -11,7 +10,6 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
-    When,
 )
 
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
@@ -90,22 +88,10 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)
 
         return self.annotate(
-            payment_plan_hard_conflicted=Case(
-                When(is_follow_up=True, then=Value(False)),
-                default=Exists(hard_conflicting_pps),
-            ),
-            payment_plan_hard_conflicted_data=Case(
-                When(is_follow_up=True, then=Value([])),
-                default=ArraySubquery(hard_conflicting_pps.values("conflict_data")),
-            ),
-            payment_plan_soft_conflicted=Case(
-                When(is_follow_up=True, then=Value(False)),
-                default=Exists(soft_conflicting_pps),
-            ),
-            payment_plan_soft_conflicted_data=Case(
-                When(is_follow_up=True, then=Value([])),
-                default=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
-            ),
+            payment_plan_hard_conflicted=Exists(hard_conflicting_pps),
+            payment_plan_hard_conflicted_data=ArraySubquery(hard_conflicting_pps.values("conflict_data")),
+            payment_plan_soft_conflicted=Exists(soft_conflicting_pps),
+            payment_plan_soft_conflicted_data=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
         )
 
     def eligible(self) -> QuerySet:
