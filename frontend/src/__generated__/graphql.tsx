@@ -1314,7 +1314,7 @@ export type FinancialServiceProviderXlsxReportNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   financialServiceProvider: FinancialServiceProviderNode,
-  status?: Maybe<FinancialServiceProviderXlsxReportStatus>,
+  status?: Maybe<Scalars['Int']>,
   reportUrl?: Maybe<Scalars['String']>,
 };
 
@@ -1332,27 +1332,6 @@ export type FinancialServiceProviderXlsxReportNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum FinancialServiceProviderXlsxReportStatus {
-  A_1 = 'A_1',
-  A_2 = 'A_2',
-  A_3 = 'A_3'
-}
-
-export enum FinancialServiceProviderXlsxTemplateColumns {
-  PaymentId = 'PAYMENT_ID',
-  HouseholdId = 'HOUSEHOLD_ID',
-  HouseholdSize = 'HOUSEHOLD_SIZE',
-  CollectorName = 'COLLECTOR_NAME',
-  PaymentChannel = 'PAYMENT_CHANNEL',
-  FspName = 'FSP_NAME',
-  Currency = 'CURRENCY',
-  EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
-  EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
-  DeliveredQuantity = 'DELIVERED_QUANTITY',
-  DeliveryDate = 'DELIVERY_DATE',
-  ReasonForUnsuccessfulPayment = 'REASON_FOR_UNSUCCESSFUL_PAYMENT'
-}
-
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
    __typename?: 'FinancialServiceProviderXlsxTemplateNode',
   id: Scalars['ID'],
@@ -1360,7 +1339,7 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   updatedAt: Scalars['DateTime'],
   createdBy?: Maybe<UserNode>,
   name: Scalars['String'],
-  columns: FinancialServiceProviderXlsxTemplateColumns,
+  columns?: Maybe<Array<Maybe<Scalars['String']>>>,
   coreFields: Array<Scalars['String']>,
   financialServiceProviders: FinancialServiceProviderNodeConnection,
 };
@@ -3910,6 +3889,7 @@ export type PaymentPlanNode = Node & {
   sourcePaymentPlan?: Maybe<PaymentPlanNode>,
   isFollowUp: Scalars['Boolean'],
   exclusionReason: Scalars['String'],
+  excludeHouseholdError: Scalars['String'],
   followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
@@ -23255,13 +23235,11 @@ export type ResolversTypes = {
   FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
   FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
   FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>,
-  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
   FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>,
   FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>,
   FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>,
   FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>,
   FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
-  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>,
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>,
   PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
@@ -23703,13 +23681,11 @@ export type ResolversParentTypes = {
   FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
   FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
   FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode,
-  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
   FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection,
   FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge,
   FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection,
   FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge,
   FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
-  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
   DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection,
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge,
   PaymentNodeConnection: PaymentNodeConnection,
@@ -24650,7 +24626,7 @@ export type FinancialServiceProviderXlsxReportNodeResolvers<ContextType = any, P
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   financialServiceProvider?: Resolver<ResolversTypes['FinancialServiceProviderNode'], ParentType, ContextType>,
-  status?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportStatus']>, ParentType, ContextType>,
+  status?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reportUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -24672,7 +24648,7 @@ export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  columns?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateColumns'], ParentType, ContextType>,
+  columns?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   coreFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
   financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs>,
 };
@@ -25661,6 +25637,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
