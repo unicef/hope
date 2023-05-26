@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -36,6 +37,13 @@ export const ExcludeSection = ({
   initialOpen = false,
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
+  const {
+    status,
+    backgroundActionStatus,
+    exclusionReason,
+    excludeHouseholdError,
+  } = paymentPlan;
+
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
   );
@@ -52,8 +60,7 @@ export const ExcludeSection = ({
     permissions,
   );
   const hasOpenOrLockedStatus =
-    paymentPlan.status === PaymentPlanStatus.Locked ||
-    paymentPlan.status === PaymentPlanStatus.Open;
+    status === PaymentPlanStatus.Locked || status === PaymentPlanStatus.Open;
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
@@ -110,7 +117,17 @@ export const ExcludeSection = ({
       if (!error) {
         showMessage(t('Households excluded from Payment Plan'));
       }
-      setExclusionsOpen(false);
+
+      const cannotExclude =
+        !excludeHouseholdError &&
+        backgroundActionStatus !==
+          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError &&
+        backgroundActionStatus !==
+          PaymentPlanBackgroundActionStatus.ExcludeBeneficiaries;
+
+      if (cannotExclude) {
+        setExclusionsOpen(false);
+      }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -373,16 +390,25 @@ export const ExcludeSection = ({
                       </Grid>
                     ))}
                   </Grid>
-                  {isExclusionsOpen && paymentPlan.exclusionReason ? (
+                  {isExclusionsOpen && exclusionReason ? (
                     <Grid container>
                       <Grid item xs={8}>
-                        <Box mt={4} mb={2}>
-                          <Typography variant='subtitle2'>
-                            {t('Exclusion Reason')}:
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography>{paymentPlan.exclusionReason}</Typography>
+                        <Box display='flex' flexDirection='column'>
+                          <Box mt={4} mb={2}>
+                            <Typography variant='subtitle2'>
+                              {t('Exclusion Reason')}:
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography>{exclusionReason}</Typography>
+                          </Box>
+                          {excludeHouseholdError && (
+                            <Box mt={2}>
+                              <FormHelperText error>
+                                {excludeHouseholdError}
+                              </FormHelperText>
+                            </Box>
+                          )}
                         </Box>
                       </Grid>
                     </Grid>
