@@ -1160,7 +1160,8 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         )
 
         payment_plan.background_action_status_excluding_beneficiaries()
-        payment_plan.save(update_fields=["background_action_status"])
+        payment_plan.exclude_household_error = ""
+        payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
 
         payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)

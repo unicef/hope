@@ -465,6 +465,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     is_follow_up = models.BooleanField(default=False)
     exclusion_reason = models.TextField(blank=True)
+    exclude_household_error = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
