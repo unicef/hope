@@ -686,6 +686,76 @@
   }
 },
 {
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "afd33528-f377-4494-80be-89f5ab8c2d3b",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Disability Certificate",
+    "key": "disability_certificate"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "b37fbf40-bc38-4a86-9e87-e2f420fd0754",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Foster child",
+    "key": "foster_child"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "6782d559-c2f2-4d89-b8f8-37447c179233",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Bank Statement",
+    "key": "bank_statement"
+  }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "5cc56283-6f85-4572-861a-e85c43bb9873",
+    "fields": {
+        "created_at": "2023-05-25T12:38:42.348Z",
+        "updated_at": "2023-05-25T12:39:06.054Z",
+        "label": "Disability Card",
+        "key": "disability_card"
+    }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "aa5b57f7-d848-4240-8738-96e8a53ca3f0",
+    "fields": {
+        "created_at": "2023-05-25T12:39:27.898Z",
+        "updated_at": "2023-05-25T12:39:27.898Z",
+        "label": "Medical Certificate",
+        "key": "medical_certificate"
+    }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "b2a5bab4-1641-4585-9184-a0f844da6af3",
+    "fields": {
+        "created_at": "2023-05-25T12:38:17.892Z",
+        "updated_at": "2023-05-25T12:38:57.496Z",
+        "label": "Proof of Legal Guardianship",
+        "key": "proof_of_legal_guardianship"
+    }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "fb85dd2a-f73e-403b-8241-677789558605",
+    "fields": {
+        "created_at": "2023-05-25T12:39:46.671Z",
+        "updated_at": "2023-05-25T12:39:46.671Z",
+        "label": "Temporary Protection Visa",
+        "key": "temporary_protection_visa"
+    }
+},
+{
   "model": "registration_datahub.importeddocument",
   "pk": "1f1a5a3b-461f-4da3-9e98-09437ed91b08",
   "fields": {
