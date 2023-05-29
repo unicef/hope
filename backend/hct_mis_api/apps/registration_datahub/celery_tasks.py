@@ -545,7 +545,7 @@ def remove_old_rdi_links_task(page_count: int = 1000) -> None:
         # Get datahub_ids older than 2 weeks which have status other than MERGED
         unmerged_rdi_datahub_ids = list(
             RegistrationDataImport.objects.filter(
-                created_at__lte=timezone.now() - timedelta(weeks=2),
+                created_at__lte=timezone.now() - timedelta(days=14),
                 status__in=[
                     RegistrationDataImport.IN_REVIEW,
                     RegistrationDataImport.DEDUPLICATION_FAILED,
@@ -574,6 +574,9 @@ def remove_old_rdi_links_task(page_count: int = 1000) -> None:
                 ).delete()
                 i += 1
 
+        logger.info(
+            f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
+        )
     except Exception:
         logger.error("Removing old RDI objects failed")
         raise
