@@ -580,7 +580,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+        source=[BackgroundActionStatus.EXCLUDE_BENEFICIARIES, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
         target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
     )
