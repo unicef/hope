@@ -493,7 +493,7 @@ def payment_plan_exclude_beneficiaries(
                     .exists()
                 ):
                     error_msg.append(
-                        f"Not possible exclude Household with ID {excluding_hh_ids} because of hard conflicts within other PaymentPlan"
+                        f"Not possible to exclude Household with ID {excluding_hh_ids} because of hard conflicts within other Payment Plan"
                     )
 
             if exclusion_reason:
@@ -505,7 +505,7 @@ def payment_plan_exclude_beneficiaries(
                 payment_plan.save(
                     update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
                 )
-                raise ValidationError("PaymentPlan Exclude Beneficiaries Validation Error with Beneficiaries List")
+                raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
 
             payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluding_hh_ids)
 
@@ -519,15 +519,13 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.exclude_household_error = ""
             payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
         except Exception as e:
-            logger.exception("PaymentPlan Exclude Beneficiaries Error with excluding method")
-
+            logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
             payment_plan.background_action_status_exclude_beneficiaries_error()
-            errors = str(error_msg) + str(e)
             payment_plan.exclusion_reason = exclusion_reason
-            if errors:
-                payment_plan.exclude_household_error = errors
+            if error_msg:
+                payment_plan.exclude_household_error = str(error_msg)
             payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
 
     except Exception as e:
-        logger.exception("PaymentPlan Excluding Beneficiaries Error with celery task")
+        logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
         raise self.retry(exc=e)
