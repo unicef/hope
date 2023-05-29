@@ -463,7 +463,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     total_withdrawn_households_count = graphene.Int()
 
     unsuccessful_payments_count = graphene.Int()
-    payments_used_in_follow_payment_plans_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -559,9 +558,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_unsuccessful_payments_count(self, info: Any) -> int:
         return self.unsuccessful_payments_for_follow_up().count()
-
-    def resolve_payments_used_in_follow_payment_plans_count(self, info: Any) -> int:
-        return len(set(self.payments_used_in_follow_payment_plans().values_list("source_payment_id", flat=True)))
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
