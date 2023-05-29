@@ -3636,6 +3636,9 @@ export type PaymentNode = Node & {
   sourcePayment?: Maybe<PaymentNode>,
   isFollowUp: Scalars['Boolean'],
   reasonForUnsuccessfulPayment?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  orderNumber?: Maybe<Scalars['Int']>,
+  tokenNumber?: Maybe<Scalars['Int']>,
   followUps: PaymentNodeConnection,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
@@ -3965,6 +3968,7 @@ export type PaymentPlanNodeEdge = {
 };
 
 export enum PaymentPlanStatus {
+  Preparing = 'PREPARING',
   Open = 'OPEN',
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
@@ -3972,8 +3976,7 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  Finished = 'FINISHED',
-  Preparing = 'PREPARING'
+  Finished = 'FINISHED'
 }
 
 export type PaymentRecordAndPaymentNode = {
@@ -4330,6 +4333,7 @@ export type ProgramNode = Node & {
   households: HouseholdNodeConnection,
   paymentplanSet: PaymentPlanNodeConnection,
   cashplanSet: CashPlanNodeConnection,
+  paymentSet: PaymentNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -4368,6 +4372,15 @@ export type ProgramNodePaymentplanSetArgs = {
 
 
 export type ProgramNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodePaymentSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -10037,7 +10050,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -18774,7 +18787,6 @@ export const PaymentPlanDocument = gql`
       unicefId
     }
     unsuccessfulPaymentsCount
-    paymentsUsedInFollowPaymentPlansCount
   }
 }
     `;
@@ -23227,13 +23239,11 @@ export type ResolversTypes = {
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
   GenericPaymentNode: ResolverTypeWrapper<GenericPaymentNode>,
-  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
-  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
-  ReportNode: ResolverTypeWrapper<ReportNode>,
-  PaymentPlanStatus: PaymentPlanStatus,
-  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
-  PaymentPlanCurrency: PaymentPlanCurrency,
-  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
+  PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
+  PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>,
+  PaymentNode: ResolverTypeWrapper<PaymentNode>,
+  PaymentStatus: PaymentStatus,
+  PaymentDeliveryType: PaymentDeliveryType,
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
   FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
@@ -23246,13 +23256,15 @@ export type ResolversTypes = {
   FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>,
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>,
-  PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
-  PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>,
-  PaymentNode: ResolverTypeWrapper<PaymentNode>,
-  PaymentStatus: PaymentStatus,
-  PaymentDeliveryType: PaymentDeliveryType,
-  PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
+  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
+  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
+  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
+  ReportNode: ResolverTypeWrapper<ReportNode>,
+  PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
+  PaymentPlanCurrency: PaymentPlanCurrency,
   ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>,
   ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>,
   ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>,
@@ -23673,13 +23685,11 @@ export type ResolversParentTypes = {
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
   GenericPaymentNode: GenericPaymentNode,
-  ReportNodeConnection: ReportNodeConnection,
-  ReportNodeEdge: ReportNodeEdge,
-  ReportNode: ReportNode,
-  PaymentPlanStatus: PaymentPlanStatus,
-  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
-  PaymentPlanCurrency: PaymentPlanCurrency,
-  DeliveryMechanismNode: DeliveryMechanismNode,
+  PaymentNodeConnection: PaymentNodeConnection,
+  PaymentNodeEdge: PaymentNodeEdge,
+  PaymentNode: PaymentNode,
+  PaymentStatus: PaymentStatus,
+  PaymentDeliveryType: PaymentDeliveryType,
   FinancialServiceProviderNode: FinancialServiceProviderNode,
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
   FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
@@ -23692,13 +23702,15 @@ export type ResolversParentTypes = {
   FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
   DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection,
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge,
-  PaymentNodeConnection: PaymentNodeConnection,
-  PaymentNodeEdge: PaymentNodeEdge,
-  PaymentNode: PaymentNode,
-  PaymentStatus: PaymentStatus,
-  PaymentDeliveryType: PaymentDeliveryType,
-  PaymentConflictDataNode: PaymentConflictDataNode,
+  DeliveryMechanismNode: DeliveryMechanismNode,
   DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentConflictDataNode: PaymentConflictDataNode,
+  ReportNodeConnection: ReportNodeConnection,
+  ReportNodeEdge: ReportNodeEdge,
+  ReportNode: ReportNode,
+  PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
+  PaymentPlanCurrency: PaymentPlanCurrency,
   ApprovalProcessNodeConnection: ApprovalProcessNodeConnection,
   ApprovalProcessNodeEdge: ApprovalProcessNodeEdge,
   ApprovalProcessNode: ApprovalProcessNode,
@@ -25497,7 +25509,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'IndividualIdentityNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'ReportNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'IndividualIdentityNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'DeliveryMechanismNode' | 'ReportNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -25577,6 +25589,9 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   sourcePayment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   reasonForUnsuccessfulPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  orderNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
@@ -25897,6 +25912,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramNodePaymentplanSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
+  paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
