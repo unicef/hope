@@ -410,18 +410,6 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     return True
 
 
-@app.task
-@sentry_tags
-def check_xlsx_exporting_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import xlsx_exporting_celery_manager
-
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        xlsx_exporting_celery_manager.execute()
-    return True
-
-
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
