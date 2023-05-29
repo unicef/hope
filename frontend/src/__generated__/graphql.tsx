@@ -3914,7 +3914,6 @@ export type PaymentPlanNode = Node & {
   canCreateFollowUp?: Maybe<Scalars['Boolean']>,
   totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
   unsuccessfulPaymentsCount?: Maybe<Scalars['Int']>,
-  paymentsUsedInFollowPaymentPlansCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -25678,7 +25677,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   unsuccessfulPaymentsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  paymentsUsedInFollowPaymentPlansCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
