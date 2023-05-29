@@ -12,7 +12,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
-  PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -26,7 +25,6 @@ import { StyledTextField } from '../../../../shared/StyledTextField';
 import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { removeBracketsAndQuotes } from '../../../../utils/utils';
 import { ExcludedItem } from './ExcludedItem';
 
 interface ExcludeSectionProps {
@@ -38,12 +36,7 @@ export const ExcludeSection = ({
   initialOpen = false,
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
-  const {
-    status,
-    backgroundActionStatus,
-    exclusionReason,
-    excludeHouseholdError,
-  } = paymentPlan;
+  const { status, exclusionReason, excludeHouseholdError } = paymentPlan;
 
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
@@ -116,18 +109,7 @@ export const ExcludeSection = ({
         ],
       });
       if (!error) {
-        showMessage(t('Households excluded from Payment Plan'));
-      }
-
-      const cannotExclude =
-        !excludeHouseholdError &&
-        backgroundActionStatus !==
-          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError &&
-        backgroundActionStatus !==
-          PaymentPlanBackgroundActionStatus.ExcludeBeneficiaries;
-
-      if (cannotExclude) {
-        setExclusionsOpen(false);
+        showMessage(t('Households exclusion started'));
       }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -339,6 +321,16 @@ export const ExcludeSection = ({
     return null;
   };
 
+  const formatErrorToArray = (errorsString): string[] => {
+    // Remove brackets and quotes
+    const formattedError = errorsString.replace(/\[|\]|'|"/g, '');
+
+    // Split the formatted error into an array of strings
+    const errorArray = formattedError.split(', ');
+
+    return errorArray;
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -404,10 +396,12 @@ export const ExcludeSection = ({
                             <Typography>{exclusionReason}</Typography>
                           </Box>
                           {excludeHouseholdError && (
-                            <Box mt={2}>
-                              <FormHelperText error>
-                                {removeBracketsAndQuotes(excludeHouseholdError)}
-                              </FormHelperText>
+                            <Box display='flex' flexDirection='column' mt={2}>
+                              {formatErrorToArray(excludeHouseholdError).map(
+                                (el) => (
+                                  <FormHelperText error>{el}</FormHelperText>
+                                ),
+                              )}
                             </Box>
                           )}
                         </Box>
