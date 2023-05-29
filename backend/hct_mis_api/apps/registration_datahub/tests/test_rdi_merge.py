@@ -19,6 +19,10 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedHousehold,
+    ImportedIndividual,
+)
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
@@ -185,9 +189,14 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         households = Household.objects.all()
         individuals = Individual.objects.all()
 
+        imported_households = ImportedHousehold.objects.all()
+        imported_individuals = ImportedIndividual.objects.all()
+
         self.assertEqual(1, households.count())
+        self.assertEqual(0, imported_households.count())  # Removed after successful merge
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
+        self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
         self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
