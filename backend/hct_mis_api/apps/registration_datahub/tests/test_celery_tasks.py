@@ -573,26 +573,26 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         geo_models.Country.objects.create(name="Afghanistan")
 
-    def test_remove_old_rdi_objects(self) -> None:
-        rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)
-        rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
-        rdi_3 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGING)
+        cls.rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)
+        cls.rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
+        cls.rdi_3 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGING)
 
+    def test_remove_old_rdi_objects(self) -> None:
         rdi_hub_1 = RegistrationDataImportDatahubFactory()
         rdi_hub_2 = RegistrationDataImportDatahubFactory()
         rdi_hub_3 = RegistrationDataImportDatahubFactory()
 
-        rdi_1.datahub_id = rdi_hub_1.id
-        rdi_2.datahub_id = rdi_hub_2.id
-        rdi_3.datahub_id = rdi_hub_3.id
+        self.rdi_1.datahub_id = rdi_hub_1.id
+        self.rdi_2.datahub_id = rdi_hub_2.id
+        self.rdi_3.datahub_id = rdi_hub_3.id
 
-        rdi_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
-        rdi_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
-        rdi_3.created_at = timezone.now()
+        self.rdi_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
+        self.rdi_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
+        self.rdi_3.created_at = timezone.now()
 
-        rdi_1.save()
-        rdi_2.save()
-        rdi_3.save()
+        self.rdi_1.save()
+        self.rdi_2.save()
+        self.rdi_3.save()
 
         imported_household_1 = ImportedHouseholdFactory(registration_data_import=rdi_hub_1)
         imported_household_2 = ImportedHouseholdFactory(registration_data_import=rdi_hub_2)
@@ -624,3 +624,11 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         self.assertEqual(ImportedIndividual.objects.count(), 1)
         self.assertEqual(ImportedDocument.objects.count(), 1)
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 0)
+
+        self.rdi_1.refresh_from_db()
+        self.rdi_2.refresh_from_db()
+        self.rdi_3.refresh_from_db()
+
+        self.assertEqual(self.rdi_1.status, RegistrationDataImport.REFUSED_IMPORT)
+        self.assertEqual(self.rdi_2.status, RegistrationDataImport.REFUSED_IMPORT)
+        self.assertEqual(self.rdi_3.status, RegistrationDataImport.MERGING)
