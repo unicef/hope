@@ -19,11 +19,12 @@ from hct_mis_api.apps.household.models import (
     UNICEF,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    RegistrationDataImportDatahub, ImportedBankAccountInfo,
+    RegistrationDataImportDatahub,
 )
 
 faker = Faker()

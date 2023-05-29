@@ -12,7 +12,11 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record, ImportedIndividual, ImportedHousehold
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedHousehold,
+    ImportedIndividual,
+    Record,
+)
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,

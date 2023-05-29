@@ -30,10 +30,16 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
-    process_flex_records_task, remove_old_rdi_links_task,
+    process_flex_records_task,
+    remove_old_rdi_links_task,
 )
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedBankAccountInfoFactory, ImportedDocumentTypeFactory, \
-    ImportedDocumentFactory, ImportedHouseholdFactory, ImportedIndividualFactory
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedBankAccountInfoFactory,
+    ImportedDocumentFactory,
+    ImportedDocumentTypeFactory,
+    ImportedHouseholdFactory,
+    ImportedIndividualFactory,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
