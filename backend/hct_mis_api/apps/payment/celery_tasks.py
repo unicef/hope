@@ -459,12 +459,13 @@ def payment_plan_exclude_beneficiaries(
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
         error_msg = []
 
         try:
             for hh_unicef_id in excluding_hh_ids:
                 if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
-                    error_msg.append(f"Household {hh_unicef_id} not included in this Payment Plan")
+                    error_msg.append(f"Household {hh_unicef_id} is not included in this {payment_plan_title}.")
                     # remove HH_id from list because later will compare number of HHs with eligible_payments().count()
                     excluding_hh_ids.remove(hh_unicef_id)
 
@@ -472,7 +473,7 @@ def payment_plan_exclude_beneficiaries(
                 # for Locked Payment we check if not remove all HHs
                 if len(excluding_hh_ids) >= payment_plan.eligible_payments.count():
                     error_msg.append(
-                        f"There will be not at least one beneficiary in the Plan that is not excluded after exclusion process for ID(s): {excluding_hh_ids}"
+                        f"You can't exclude all households from the {payment_plan_title}."
                     )
 
             payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
@@ -488,12 +489,12 @@ def payment_plan_exclude_beneficiaries(
                         Q(parent__start_date__lte=payment_plan.end_date)
                         & Q(parent__end_date__gte=payment_plan.start_date),
                         ~Q(parent__status=PaymentPlan.Status.OPEN),
-                        Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False)
+                        Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False),
                     )
                     .exists()
                 ):
                     error_msg.append(
-                        f"Not possible to exclude Household with ID {excluding_hh_ids} because of hard conflicts within other Payment Plan"
+                        f"It is not possible to exclude Household(s) with ID {excluding_hh_ids} because of hard conflict(s) with other {payment_plan_title}(s)."
                     )
 
             if exclusion_reason:

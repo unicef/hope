@@ -462,7 +462,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
     unsuccessful_payments_count = graphene.Int()
-    # exclude_household_error = graphene.String()
 
     class Meta:
         model = PaymentPlan
@@ -511,8 +510,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.Int:
         return (
-            self.eligible_payments
-            .filter(household__withdrawn=True)
+            self.eligible_payments.filter(household__withdrawn=True)
             .exclude(
                 # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
                 household_id__in=Payment.objects.filter(
@@ -558,10 +556,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_unsuccessful_payments_count(self, info: Any) -> int:
         return self.unsuccessful_payments_for_follow_up().count()
-    #
-    # def resolve_exclude_household_error(self, info: Any) -> str:
-    #     resp = self.exclude_household_error
-    #     return resp
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
