@@ -40,7 +40,10 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
-from hct_mis_api.apps.utils.elasticsearch_utils import populate_index, remove_elasticsearch_documents_by_matching_ids
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    populate_index,
+    remove_elasticsearch_documents_by_matching_ids,
+)
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -459,6 +462,6 @@ class RdiMergeTask:
             # proactively try to remove also es data for imported individuals
             remove_elasticsearch_documents_by_matching_ids(
                 list(imported_individuals.values_list("id", flat=True)),
-                get_imported_individual_doc(obj_hct.business_area.slug)
+                get_imported_individual_doc(obj_hct.business_area.slug),
             )
             raise
