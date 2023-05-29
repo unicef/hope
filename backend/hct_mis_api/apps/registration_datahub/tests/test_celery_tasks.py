@@ -574,16 +574,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         geo_models.Country.objects.create(name="Afghanistan")
 
-        cls.household_1, cls.individuals_1 = create_household(
-            household_args={"size": 1, "business_area": cls.business_area}
-        )
-        cls.household_2, cls.individuals_2 = create_household(
-            household_args={"size": 1, "business_area": cls.business_area}
-        )
-        cls.household_3, cls.individuals_3 = create_household(
-            household_args={"size": 1, "business_area": cls.business_area}
-        )
-
     def test_remove_old_rdi_objects(self) -> None:
         rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)
         rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
@@ -613,10 +603,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         imported_individual_2 = ImportedIndividualFactory(household=imported_household_2)
         imported_individual_3 = ImportedIndividualFactory(household=imported_household_3)
 
-        self.individuals_1[0].imported_individual_id = imported_individual_1.id
-        self.individuals_2[0].imported_individual_id = imported_individual_2.id
-        self.individuals_3[0].imported_individual_id = imported_individual_3.id
-
         ImportedDocumentFactory(
             individual=imported_individual_1, type=ImportedDocumentTypeFactory(key="birth_certificate")
         )
@@ -627,14 +613,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
 
         ImportedBankAccountInfoFactory(individual=imported_individual_1)
         ImportedBankAccountInfoFactory(individual=imported_individual_2)
-
-        self.household_1.save()
-        self.household_2.save()
-        self.household_3.save()
-
-        self.individuals_1[0].save()
-        self.individuals_2[0].save()
-        self.individuals_3[0].save()
 
         self.assertEqual(ImportedHousehold.objects.count(), 3)
         self.assertEqual(ImportedIndividual.objects.count(), 3)
