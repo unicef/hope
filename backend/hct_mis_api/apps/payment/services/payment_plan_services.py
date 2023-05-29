@@ -148,7 +148,7 @@ class PaymentPlanService:
             logging.exception(msg)
             raise GraphQLError(msg)
 
-        if self.payment_plan.payment_items.filter(financial_service_provider__isnull=True).exists():
+        if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
             raise GraphQLError("All Payments must have assigned FSP")
 
         dm_to_fsp_mapping = [
@@ -165,7 +165,7 @@ class PaymentPlanService:
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
 
-        return self.payment_plan
+        return self.payment_plan.refresh_from_db(fields=["status", "background_action_status"])
 
     def unlock_fsp(self) -> Optional[PaymentPlan]:
         self.payment_plan.status_unlock_fsp()
