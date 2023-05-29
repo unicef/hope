@@ -29,24 +29,20 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_xlsx_import_task,
     validate_xlsx_import_task,
 )
-from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.inputs import (
     RegistrationKoboImportMutationInput,
     RegistrationXlsxImportMutationInput,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    ImportedIndividual,
+    ImportedHousehold,
     KoboImportData,
-    RegistrationDataImportDatahub, ImportedHousehold,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     KoboImportDataNode,
     XlsxRowErrorNode,
-)
-from hct_mis_api.apps.utils.elasticsearch_utils import (
-    remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
