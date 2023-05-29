@@ -295,6 +295,7 @@ class PaymentPlanService:
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
+                    program_id=payment_plan.program_id,
                     business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
@@ -568,6 +569,7 @@ class PaymentPlanService:
             Payment(
                 parent=self.payment_plan,
                 source_payment=payment,
+                program_id=self.payment_plan.program_id,
                 is_follow_up=True,
                 business_area_id=payment.business_area_id,
                 status=Payment.STATUS_PENDING,

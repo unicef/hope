@@ -512,7 +512,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.Int:
         return (
-            self.eligible_payments()
+            self.eligible_payments
             .filter(household__withdrawn=True)
             .exclude(
                 # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
