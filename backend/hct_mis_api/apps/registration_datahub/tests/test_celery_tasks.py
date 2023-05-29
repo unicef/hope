@@ -27,6 +27,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
@@ -39,6 +40,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedDocumentTypeFactory,
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
+    RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -583,13 +585,29 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         )
 
     def test_remove_old_rdi_objects(self) -> None:
-        self.household_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
-        self.household_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
-        self.household_3.created_at = timezone.now()
+        rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)
+        rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
+        rdi_3 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGING)
 
-        imported_household_1 = ImportedHouseholdFactory()
-        imported_household_2 = ImportedHouseholdFactory()
-        imported_household_3 = ImportedHouseholdFactory()
+        rdi_hub_1 = RegistrationDataImportDatahubFactory()
+        rdi_hub_2 = RegistrationDataImportDatahubFactory()
+        rdi_hub_3 = RegistrationDataImportDatahubFactory()
+
+        rdi_1.datahub_id = rdi_hub_1.id
+        rdi_2.datahub_id = rdi_hub_2.id
+        rdi_3.datahub_id = rdi_hub_3.id
+
+        rdi_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
+        rdi_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
+        rdi_3.created_at = timezone.now()
+
+        rdi_1.save()
+        rdi_2.save()
+        rdi_3.save()
+
+        imported_household_1 = ImportedHouseholdFactory(registration_data_import=rdi_hub_1)
+        imported_household_2 = ImportedHouseholdFactory(registration_data_import=rdi_hub_2)
+        imported_household_3 = ImportedHouseholdFactory(registration_data_import=rdi_hub_3)
 
         imported_individual_1 = ImportedIndividualFactory(household=imported_household_1)
         imported_individual_2 = ImportedIndividualFactory(household=imported_household_2)
