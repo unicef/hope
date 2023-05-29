@@ -695,7 +695,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def can_be_locked(self) -> bool:
         return (
             self.payment_items.filter(payment_plan_hard_conflicted=False)
-            .exclude(financial_service_provider__isnull=True)
             .exists()
         )
 
