@@ -536,7 +536,7 @@ def check_rdi_merge_periodic_task() -> bool:
 
 @app.task
 @sentry_tags
-def remove_old_rdi_links_task(page_count: int = 1000) -> None:
+def remove_old_rdi_links_task(days: int = 14, page_count: int = 100) -> None:
     """This task removes linked RDI Datahub objects for households which were created more than 2 weeks ago"""
 
     from datetime import timedelta
@@ -545,7 +545,7 @@ def remove_old_rdi_links_task(page_count: int = 1000) -> None:
         # Get datahub_ids older than 2 weeks which have status other than MERGED
         unmerged_rdi_datahub_ids = list(
             RegistrationDataImport.objects.filter(
-                created_at__lte=timezone.now() - timedelta(days=14),
+                created_at__lte=timezone.now() - timedelta(days=days),
                 status__in=[
                     RegistrationDataImport.IN_REVIEW,
                     RegistrationDataImport.DEDUPLICATION_FAILED,
@@ -555,23 +555,23 @@ def remove_old_rdi_links_task(page_count: int = 1000) -> None:
             ).values_list("datahub_id", flat=True)
         )
 
-        household_ids_to_remove = list(
-            ImportedHousehold.objects.filter(registration_data_import_id__in=unmerged_rdi_datahub_ids).values_list(
-                "id", flat=True
-            )
-        )
+        if len(unmerged_rdi_datahub_ids) <= page_count:  # Remove everything in one batch
+            ImportedHousehold.objects.filter(registration_data_import_id__in=unmerged_rdi_datahub_ids).delete()
 
-        if len(household_ids_to_remove) <= page_count:
-            # removes with CASCADE individuals, documents, roles, bank_infos
-            ImportedHousehold.objects.filter(id__in=household_ids_to_remove).delete()
+            RegistrationDataImport.objects.filter(datahub_id__in=unmerged_rdi_datahub_ids).update(
+                status=RegistrationDataImport.REFUSED_IMPORT
+            )
         else:
-            i, count = 0, len(household_ids_to_remove) // page_count
+            i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
             while i <= count:
                 logger.info(f"Page {i}/{count} processing...")
+                rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
 
-                ImportedHousehold.objects.filter(
-                    id__in=household_ids_to_remove[i * page_count : (i + 1) * page_count]
-                ).delete()
+                ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+
+                RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(
+                    status=RegistrationDataImport.REFUSED_IMPORT
+                )
                 i += 1
 
         logger.info(
