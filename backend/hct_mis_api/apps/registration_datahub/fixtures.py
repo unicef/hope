@@ -23,7 +23,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    RegistrationDataImportDatahub,
+    RegistrationDataImportDatahub, ImportedBankAccountInfo,
 )
 
 faker = Faker()
@@ -179,3 +179,12 @@ class ImportedDocumentTypeFactory(DjangoModelFactory):
         model = ImportedDocumentType
 
     key = random.choice(["birth_certificate", "tax_id", "drivers_license"])
+
+
+class ImportedBankAccountInfoFactory(DjangoModelFactory):
+    class Meta:
+        model = ImportedBankAccountInfo
+
+    individual = factory.SubFactory(ImportedIndividualFactory)
+    bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
+    bank_account_number = random.randint(10**26, 10**27 - 1)
