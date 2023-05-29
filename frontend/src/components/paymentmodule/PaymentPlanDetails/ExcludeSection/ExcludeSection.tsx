@@ -26,8 +26,8 @@ import { StyledTextField } from '../../../../shared/StyledTextField';
 import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { ExcludedItem } from './ExcludedItem';
 import { removeBracketsAndQuotes } from '../../../../utils/utils';
+import { ExcludedItem } from './ExcludedItem';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
