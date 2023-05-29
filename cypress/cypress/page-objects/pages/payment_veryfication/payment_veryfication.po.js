@@ -4,7 +4,6 @@ export default class PaymentVerification extends BaseComponent {
 
     // Locators
     paymentVerificationTitle = 'h5[class="MuiTypography-root MuiTypography-h5"]'
-    listOfCashPlansTitle = 'h6[data-cy="table-title"]'
     paymentPlanID = 'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
     status = 'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
     FSP = 'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
@@ -13,6 +12,13 @@ export default class PaymentVerification extends BaseComponent {
     endDate = 'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
     programme = 'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
     
+    listOfCashPlansTitle = 'h6[data-cy="table-title"]'
+    tableTitle = 'table[aria-labelledby="tableTitle"]'
+    tableColumn = 'span[class="MuiButtonBase-root MuiTableSortLabel-root sc-fBuWsC dHSJjy"]'
+    rowsPerPage = 'id[id="mui-33182"]'
+    table = 'tbody[class="MuiTableBody-root"]'
+    rows = 'tr[class="MuiTableRow-root sc-RefOD isLSKU MuiTableRow-hover"]'
+
     // Texts
     textTitle = "Payment Verification"
     textTabTitle = "List of Cash Plans"
@@ -23,6 +29,12 @@ export default class PaymentVerification extends BaseComponent {
     textStartDate = "Start Date"
     textEndDate = "End Date"
     textProgramme = "Programme"
+    textCashPlanID = "Cash Plan ID"
+    textVerificationStatus = "Verification Status"
+    textCashAmount = "Cash Amount"
+    textTimeframe = "Timeframe"
+    textColumnProgramme = "Programme"
+    textLastModifiedDate = "Last Modified Date"
 
     // Elements
     getPaymentVerificationTitle = () => cy.get(this.paymentVerificationTitle)
@@ -34,15 +46,21 @@ export default class PaymentVerification extends BaseComponent {
     getStartDate = () => cy.get(this.startDate)
     getEndDate = () => cy.get(this.endDate)
     getProgramme = () => cy.get(this.programme)
+    getTable = () => cy.get(this.tableTitle)
+    getCashPlanID = () => cy.get(this.tableColumn).eq(0)
+    getVerificationStatus = () => cy.get(this.tableColumn).eq(1)
+    getCashAmount = () => cy.get(this.tableColumn).eq(2)
+    getTimeFrame = () => cy.get(this.tableColumn).eq(3)
+    getColumnProgramme = () => cy.get(this.tableColumn).eq(4)
+    getLastModifiedDate = () => cy.get(this.tableColumn).eq(5)
+    getCashPlanRows = () => cy.get(this.table).get(this.rows)
 
     checkPaymentVerificationTitle(){
-        this.getPaymentVerificationTitle().contains(this.textTitle)
-        return this
+        return this.getPaymentVerificationTitle().contains(this.textTitle)
     }
 
     checkListOfCashPlansTitle(){
-        this.getListOfCashPlansTitle().contains(this.textTabTitle)
-        return this
+        return this.getListOfCashPlansTitle().contains(this.textTabTitle)
     }
 
     checkAllSearchFieldsVisible(){
@@ -60,12 +78,25 @@ export default class PaymentVerification extends BaseComponent {
         this.getEndDate().get("span").contains(this.textEndDate)
         this.getProgramme().should('be.visible')
         this.getProgramme().get("span").contains(this.textProgramme)
-        return this
     }
 
-    checkChachPlansTableVisible(){
-        // ToDo
-        return this
+    checkCashPlansTableVisible(){
+        this.getTable().should('be.visible')
+        this.getCashPlanID().should('be.visible').contains(this.textCashPlanID)
+        this.getVerificationStatus().should('be.visible').contains(this.textVerificationStatus)
+        this.getCashAmount().should('be.visible').contains(this.textCashAmount)
+        this.getTimeFrame().should('be.visible').contains(this.textTimeframe)
+        this.getColumnProgramme().should('be.visible').contains(this.textColumnProgramme)
+        this.getLastModifiedDate().should('be.visible').contains(this.textLastModifiedDate)
     }
+
+    countCashPlanArray() {
+        return Array.from(Array(4).keys())
+    }
+
+    chooseCashPlan(row){
+        return this.getCashPlanRows().eq(row)
+    }
+
 
 }
