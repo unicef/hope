@@ -205,7 +205,7 @@ export const AddIndividualDataChange = ({
               );
             }}
           />
-          ))}
+          ))
         </Grid>
         <Grid container spacing={3}>
           <FieldArray
