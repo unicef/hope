@@ -165,7 +165,7 @@ class PaymentPlanService:
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
 
-        return self.payment_plan.refresh_from_db(fields=["status", "background_action_status"])
+        return self.payment_plan
 
     def unlock_fsp(self) -> Optional[PaymentPlan]:
         self.payment_plan.status_unlock_fsp()
@@ -473,14 +473,16 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user.pk)
-        return self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        return self.payment_plan
 
     def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
-        return self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        return self.payment_plan
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
         with transaction.atomic():
@@ -500,7 +502,8 @@ class PaymentPlanService:
                     file_temp.pk,
                 )
             )
-        return self.payment_plan.refresh_from_db()
+        self.payment_plan.refresh_from_db()
+        return self.payment_plan
 
     def validate_fsps_per_delivery_mechanisms(
         self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False

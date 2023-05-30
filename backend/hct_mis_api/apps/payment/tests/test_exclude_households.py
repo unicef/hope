@@ -160,3 +160,10 @@ class TestExcludeHouseholds(APITestCase):
             exclude_mutation_response["errors"][0]["message"],
             "These Households are not included in this Payment Plan",
         )
+
+    def test_celery_task(self) -> None:
+        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        household_unicef_id_4 = Household.objects.get(id=self.household_4.id).unicef_id
+        payment_plan_exclude_beneficiaries(
+            self, self.payment_plan_id, [household_unicef_id_1, household_unicef_id_4], "exclusion_reason 123"
+        )
