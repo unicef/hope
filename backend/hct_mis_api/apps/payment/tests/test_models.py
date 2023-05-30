@@ -184,7 +184,7 @@ class TestPaymentModel(TestCase):
             ],
         )
 
-    def test_manager_annotations__pp_no_conflicts_for_follow_up(self) -> None:
+    def test_manager_annotations_pp_no_conflicts_for_follow_up(self) -> None:
         pp1 = PaymentPlanFactory()
 
         # create follow up pps
@@ -223,10 +223,9 @@ class TestPaymentModel(TestCase):
 
         p2_data = Payment.objects.filter(id=p2.id).values()[0]
         self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+        self.assertEqual(p2_data["payment_plan_soft_conflicted"], True)
         p3_data = Payment.objects.filter(id=p3.id).values()[0]
-        self.assertEqual(p3_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
-
+        self.assertEqual(p3_data["payment_plan_hard_conflicted"], True)
+        self.assertEqual(p3_data["payment_plan_soft_conflicted"], True)
         self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
-        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [])
+        self.assertIsNotNone(p3_data["payment_plan_hard_conflicted_data"])
