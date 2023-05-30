@@ -212,6 +212,8 @@ class RdiMergeTask:
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
+                expiry_date=imported_document.expiry_date,
+                issuance_date=imported_document.issuance_date,
             )
             documents_to_create.append(document)
         identities_to_create = []
