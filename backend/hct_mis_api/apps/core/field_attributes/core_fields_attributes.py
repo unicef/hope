@@ -1592,7 +1592,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Household resides in which admin area?"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(*args, **kwargs),
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin_area_h_c",
@@ -1688,6 +1687,19 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "email",
         "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.INDIVIDUAL_XLSX_UPDATE],
+    },
+    {
+        "id": "e2b8dd27-f861-4c54-9651-677636918c47",
+        "type": TYPE_STRING,
+        "name": "preferred_language",
+        "lookup": "preferred_language",
+        "required": False,
+        "label": {"English(EN)": "Preferred language"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "preferred_language",
+        "scope": [Scope.XLSX],
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 

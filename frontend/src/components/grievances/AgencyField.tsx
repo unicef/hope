@@ -12,6 +12,7 @@ import { getIndexForId } from './utils/helpers';
 export interface AgencyFieldProps {
   id: string;
   baseName: string;
+  baseNameArray?;
   onDelete;
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   identityTypeChoices: AllAddIndividualFieldsQuery['identityTypeChoices'];
@@ -22,6 +23,7 @@ export interface AgencyFieldProps {
 export function AgencyField({
   id,
   baseName,
+  baseNameArray,
   onDelete,
   countryChoices,
   identityTypeChoices,
@@ -29,7 +31,10 @@ export function AgencyField({
   values,
 }: AgencyFieldProps): React.ReactElement {
   const { t } = useTranslation();
-  const agencyFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
+  const agencyFieldName = `${baseName}.${getIndexForId(
+    baseNameArray || values[baseName],
+    id,
+  )}`;
 
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

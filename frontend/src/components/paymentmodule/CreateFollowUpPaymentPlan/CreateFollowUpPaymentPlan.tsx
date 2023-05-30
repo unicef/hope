@@ -16,8 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
-  PaymentStatus,
-  useCreateFollowUpPpMutation,
+  useCreateFollowUpPpMutation
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
@@ -49,15 +48,14 @@ export const CreateFollowUpPaymentPlan = ({
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { showMessage } = useSnackbar();
 
-  const { id, paymentItems, totalWithdrawnHouseholdsCount } = paymentPlan;
+  const {
+    id,
+    totalWithdrawnHouseholdsCount,
+    unsuccessfulPaymentsCount,
+    paymentsUsedInFollowPaymentPlansCount
+  } = paymentPlan;
 
-  const unsuccessfulPaymentsNumber = paymentItems?.edges?.filter((el) =>
-    [
-      PaymentStatus.ForceFailed,
-      PaymentStatus.NotDistributed,
-      PaymentStatus.TransactionErroneous,
-    ].includes(el.node.status),
-  ).length;
+  const unsuccessfulPaymentsNumber = unsuccessfulPaymentsCount - paymentsUsedInFollowPaymentPlansCount;
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
