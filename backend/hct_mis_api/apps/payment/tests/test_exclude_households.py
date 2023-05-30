@@ -1,8 +1,3 @@
-from typing import Any
-from unittest import mock
-
-from freezegun import freeze_time
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -82,88 +77,118 @@ class TestExcludeHouseholds(APITestCase):
             "Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan",
         )
 
-    @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_exclude_households(self, get_exchange_rate_mock: Any) -> None:
+    def test_exclude_hh_without_permissions(self) -> None:
+        payment_plan_id = encode_id_base64(self.source_payment_plan.id, "PaymentPlan")
+        user_with_out_perms = UserFactory.create()
+
+        exclude_mutation_response = self.graphql_request(
+            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
+            context={"user": user_with_out_perms},
+            variables={
+                "paymentPlanId": payment_plan_id,
+                "excludedHouseholdsIds": [Household.objects.first().unicef_id],
+            },
+        )
+
+        assert "errors" in exclude_mutation_response
+        self.assertEqual(
+            exclude_mutation_response["errors"][0]["message"],
+            "Permission Denied: User does not have correct permission.",
+        )
+
+    def test_exclude_households_mutation(self) -> None:
         household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
-        household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
         self.graphql_request(
             request_string=EXCLUDE_HOUSEHOLD_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.payment_plan_id,
-                "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
+                "excludedHouseholdsIds": [household_unicef_id_1],
                 "exclusionReason": "I do not like those households",
             },
         )
 
         self.payment_plan.refresh_from_db()
-        self.payment_1.refresh_from_db()
-        self.payment_2.refresh_from_db()
-        self.payment_3.refresh_from_db()
 
-        self.assertEqual(self.payment_1.excluded, True)
-        self.assertEqual(self.payment_2.excluded, True)
-        self.assertEqual(self.payment_3.excluded, False)
         self.assertEqual(
-            set(self.payment_plan.excluded_households_ids),
-            {self.payment_1.household.unicef_id, self.payment_2.household.unicef_id},
+            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
         )
-        self.assertEqual(self.payment_plan.exclusion_reason, "I do not like those households")
+        self.assertEqual(self.payment_plan.exclude_household_error, "")
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_exclude_payment_raises_error_when_payment_plan_contains_already_excluded_payments(
-        self, get_exchange_rate_mock: Any
-    ) -> None:
+    def test_exclude_payment_when_payment_plan_contains_already_excluded_payments(self) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
         self.payment_1.save()
         self.payment_2.save()
+        self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+        self.payment_plan.save(update_fields=["background_action_status"])
 
-        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
-        household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
+        hh_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        hh_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
-        exclude_mutation_response = self.graphql_request(
-            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": self.payment_plan_id,
-                "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
-            },
-        )
+        self.assertEqual(self.payment_plan.exclusion_reason, "")
 
-        assert "errors" in exclude_mutation_response
-        self.assertEqual(
-            exclude_mutation_response["errors"][0]["message"],
-            "This Payment Plan already contains excluded households",
-        )
-
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_exclude_payment_raises_error_when_payment_not_belongs_to_payment_plan(
-        self, get_exchange_rate_mock: Any
-    ) -> None:
-        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
-        household_unicef_id_4 = Household.objects.get(id=self.household_4.id).unicef_id
-
-        exclude_mutation_response = self.graphql_request(
-            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": self.payment_plan_id,
-                "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_4],
-            },
-        )
-
-        assert "errors" in exclude_mutation_response
-        self.assertEqual(
-            exclude_mutation_response["errors"][0]["message"],
-            "These Households are not included in this Payment Plan",
-        )
-
-    def test_celery_task(self) -> None:
-        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
-        household_unicef_id_4 = Household.objects.get(id=self.household_4.id).unicef_id
         payment_plan_exclude_beneficiaries(
-            self, self.payment_plan_id, [household_unicef_id_1, household_unicef_id_4], "exclusion_reason 123"
+            self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2], "reason exclusion Error 123"
         )
+
+        self.payment_plan.refresh_from_db()
+
+        error_msg = f"['Household {hh_unicef_id_1} is not included in this Follow-up Payment Plan.', \"You can't exclude all households from the Follow-up Payment Plan.\"]"
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "reason exclusion Error 123")
+        self.assertEqual(
+            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
+        )
+        self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
+
+    def test_exclude_payment_error_when_payment_has_hard_conflicts(self) -> None:
+        finished_payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.FINISHED,
+            start_date=self.payment_plan.start_date,
+            end_date=self.payment_plan.end_date,
+            is_follow_up=False,
+        )
+        PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False)
+
+        self.payment_1.excluded = True
+        self.payment_1.save()
+        self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+        self.payment_plan.save(update_fields=["background_action_status"])
+        self.household_1.refresh_from_db(fields=["unicef_id"])
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "")
+
+        payment_plan_exclude_beneficiaries(self.payment_plan.pk, [], "Undo HH_1")
+
+        self.assertEqual(set(self.payment_plan.excluded_households_ids), {self.payment_1.household.unicef_id})
+        self.payment_plan.refresh_from_db()
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "Undo HH_1")
+        self.assertEqual(
+            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
+        )
+
+        error_msg = f"['It is not possible to undo exclude Household(s) with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
+
+    def test_exclude_successfully(self) -> None:
+        self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+        self.payment_plan.save(update_fields=["background_action_status"])
+
+        hh_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        hh_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "")
+
+        payment_plan_exclude_beneficiaries(self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2], "Nice Job!")
+
+        self.payment_plan.refresh_from_db()
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "Nice Job!")
+        self.assertIsNone(self.payment_plan.background_action_status)
+        self.assertEqual(self.payment_plan.exclude_household_error, "")
+
+        # excluded hh_1, hh_2
+        self.assertEqual(set(self.payment_plan.excluded_households_ids), {hh_unicef_id_1, hh_unicef_id_2})
