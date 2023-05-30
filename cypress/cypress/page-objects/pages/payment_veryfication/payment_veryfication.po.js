@@ -11,7 +11,8 @@ export default class PaymentVerification extends BaseComponent {
     startDate = 'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
     endDate = 'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
     programme = 'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]'
-    
+    statusOptions = 'li[role="option"]'
+
     listOfCashPlansTitle = 'h6[data-cy="table-title"]'
     tableTitle = 'table[aria-labelledby="tableTitle"]'
     tableColumn = 'span[class="MuiButtonBase-root MuiTableSortLabel-root sc-fBuWsC dHSJjy"]'
@@ -54,6 +55,7 @@ export default class PaymentVerification extends BaseComponent {
     getColumnProgramme = () => cy.get(this.tableColumn).eq(4)
     getLastModifiedDate = () => cy.get(this.tableColumn).eq(5)
     getCashPlanRows = () => cy.get(this.table).get(this.rows)
+    getStatusOption = () => cy.get(this.statusOptions)
 
     checkPaymentVerificationTitle(){
         return this.getPaymentVerificationTitle().contains(this.textTitle)
@@ -98,5 +100,9 @@ export default class PaymentVerification extends BaseComponent {
         return this.getCashPlanRows().eq(row)
     }
 
+    selectStatus(status){
+        this.getStatus().click()
+        this.getStatusOption().contains(status).click()
+    }
 
 }

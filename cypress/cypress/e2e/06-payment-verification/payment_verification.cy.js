@@ -2,7 +2,7 @@ import PaymentVerification from "../../page-objects/pages/payment_veryfication/p
 import PVDetailsPage from "../../page-objects/pages/payment_veryfication/details_page.po";
 
 let pv = new PaymentVerification()
-let pvDetails = new PVDetailsPage()
+let pvd = new PVDetailsPage()
 
 describe("Payment Verification", () => {
   beforeEach(() => {
@@ -11,9 +11,9 @@ describe("Payment Verification", () => {
     pv.clickMenuButtonPaymentVerification()
   });
 
-  context("Smoke tests Payment Verification", () => {
+  describe("Smoke tests Payment Verification", () => {
 
-    it("Check the Payment Verification page", () => {
+    it("Check Payment Verification page", () => {
       pv.checkPaymentVerificationTitle()
       pv.checkListOfCashPlansTitle()
       pv.checkAllSearchFieldsVisible()
@@ -21,61 +21,112 @@ describe("Payment Verification", () => {
     });
 
     pv.countCashPlanArray().forEach((row_no) => {
-      it.only(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
+      it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
         pv.chooseCashPlan(row_no).click()
-        pvDetails.checkPaymentVerificationTitle()
-        pvDetails.checkGridPaymentDetails()
-        pvDetails.checkBankReconciliationTitle()
-        pvDetails.checkGridBankReconciliation()   
-        pvDetails.checkVerificationPlansSummaryTitle()
-        pvDetails.checkGridVerificationPlansSummary()
+        pvd.checkPaymentVerificationTitle()
+        pvd.checkGridPaymentDetails()
+        pvd.checkBankReconciliationTitle()
+        pvd.checkGridBankReconciliation()   
+        pvd.checkVerificationPlansSummaryTitle()
+        pvd.checkGridVerificationPlansSummary()
       });
     });
+
+    it.skip("Check Create Verification Plan pop-up", () => {
+      // ToDo
+    });
   });
 
-  context("Component tests Payment Verification", () => {
-    it.skip("Create Verification Plan", () => {
-      // ToDo
+  describe("Component tests Payment Verification", () => {
+    context("Create Verification Plan", () => {
+      afterEach(() => {
+        pvd.deleteVerificationPlan()
+      });
+      it("Create Verification Plan using random sampling", () => {
+        pv.selectStatus("Pending")
+        pv.getStatusOption().contains("Pending").type('{esc}')
+        pv.getCashPlanRows().should('have.length', 2)
+        pv.chooseCashPlan(1).click()
+        pvd.checkPaymentVerificationTitle()
+        pvd.getCreateVerificationPlan().click()
+        pvd.checkCVPTitle()
+        pvd.getRandomSampling().click()
+        pvd.getCVPConfidenceInterval().contains(pvd.textCVPConfidenceInterval)
+        pvd.getCVPSave().click()
+        pvd.checkVerificationPlan()
+      });
+  });
+
+    context("Verification Plan Settings", () => {
+      it.skip("Test_1", () => {
+        // ToDo
+      });
     });
 
-    it.skip("Verification Plan Settings", () => {
-      // ToDo
+    context("Edit Verification Plan", () => {
+      it.skip("Test_1", () => {
+        // ToDo
+      });
     });
 
-    it.skip("Edit Verification Plan", () => {
-      // ToDo
+    context("Delete Verification Plan", () => {
+      beforeEach(() => {
+        pv.getPaymentPlanID().type("123-21-CSH-00001")
+        pv.getCashPlanRows().should('have.length', 1)
+        pv.chooseCashPlan(0).click()
+        pvd.createNewVerificationPlan()
+      });
+      it("Delete one Verification Plan", () => {
+        pvd.getDeletePlan().click()
+        pvd.getDelete().click()
+        pvd.getNumberOfPlans().contains(1)      
+      });
     });
 
-    it.skip("Delete Verification Plan", () => {
-      // ToDo
+    context("Activate Verification Plan", () => {
+      beforeEach(() => {
+        pv.getPaymentPlanID().type("123-21-CSH-00001")
+        pv.getCashPlanRows().should('have.length', 1)
+        pv.chooseCashPlan(0).click()
+        pvd.createNewVerificationPlan()
+      });
+      afterEach(() => {
+        pvd.discardVerificationPlan()
+        pvd.deleteVerificationPlan()
+      });
+      it.only("Activate Verification Plan", () => {
+        pvd.getActivatePlan().click()
+        pvd.getActivate().click()
+      });
     });
 
-    it.skip("Activate Verification Plan", () => {
-      // ToDo
+    context("Finish Verification Plan", () => {
+      it.skip("Test_1", () => {
+        // ToDo
+      });
     });
 
-    it.skip("Finish Verification Plan", () => {
-      // ToDo
+    context("Grievance creation/preview", () => {
+      it.skip("Test_1", () => {
+        // ToDo
+      });
     });
 
-    it.skip("Grievance creation/preview", () => {
-      // ToDo
-    });
-
-    it.skip("Verify Payment Record - Verify Manually", () => {
-      // ToDo
-    });
-
-    it.skip("Verify Payment Record - Verify using RapidPro", () => {
-      // ToDo
-    });
-
-    it.skip("Verify Payment Record - Verify using XLSX", () => {
-      // ToDo
+    context("Verify Payment Record", () => {
+      it.skip("Verify Manually", () => {
+        // ToDo
+      });
+      it.skip("Verify using RapidPro", () => {
+        // ToDo
+      });
+      it.skip("Verify using XLSX", () => {
+        // ToDo
+      });
+      
     });
 
   });
-  context("E2E tests Payment Verification", () => {
+  describe("E2E tests Payment Verification", () => {
     pv.countCashPlanArray().forEach((row_no) => {
     it.skip(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
       // pv.chooseCashPlan(row_no).click()
@@ -88,7 +139,7 @@ describe("Payment Verification", () => {
       cy.get("h6").contains("Verification Plans Summary");
     });});
   });
-  context("Regression tests Payment Verification", () => {
+  describe("Regression tests Payment Verification", () => {
     it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {
       // ToDo
     });
