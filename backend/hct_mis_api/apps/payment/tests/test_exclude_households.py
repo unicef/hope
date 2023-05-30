@@ -7,7 +7,11 @@ from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+)
 from hct_mis_api.apps.payment.models import PaymentPlan
 
 EXCLUDE_HOUSEHOLD_MUTATION = """
@@ -35,10 +39,18 @@ class TestExcludeHouseholds(APITestCase):
             cls.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], cls.business_area
         )
 
-        cls.source_payment_plan = PaymentPlanFactory(is_follow_up=False, status=PaymentPlan.Status.FINISHED)
+        program = RealProgramFactory()
+        cls.program_cycle = program.cycles.first()
+
+        cls.source_payment_plan = PaymentPlanFactory(
+            is_follow_up=False, status=PaymentPlan.Status.FINISHED, program_cycle=cls.program_cycle
+        )
 
         cls.payment_plan = PaymentPlanFactory(
-            source_payment_plan=cls.source_payment_plan, is_follow_up=True, status=PaymentPlan.Status.LOCKED
+            source_payment_plan=cls.source_payment_plan,
+            is_follow_up=True,
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=cls.program_cycle,
         )
         cls.another_payment_plan = PaymentPlanFactory()
         cls.payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
@@ -149,6 +161,7 @@ class TestExcludeHouseholds(APITestCase):
             start_date=self.payment_plan.start_date,
             end_date=self.payment_plan.end_date,
             is_follow_up=False,
+            program_cycle=self.program_cycle,
         )
         PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False)
 
