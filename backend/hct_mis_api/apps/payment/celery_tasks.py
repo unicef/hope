@@ -451,7 +451,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluding_hh_ids: List[str], exclusion_reason: Optional[str] = ""
+    self: Any, payment_plan_id: str, excluding_hh_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
 ) -> None:
     try:
         from django.db.models import Q
@@ -481,6 +481,7 @@ def payment_plan_exclude_beneficiaries(
 
             # check if hard conflicts exists in other Payments for undo exclude HH
             for hh_unicef_id in reverted_hh_ids:
+                # TODO: update after fix with program_cycle
                 if (
                     Payment.objects.exclude(parent__id=payment_plan.pk)
                     .filter(
@@ -492,7 +493,7 @@ def payment_plan_exclude_beneficiaries(
                     .exists()
                 ):
                     error_msg.append(
-                        f"It is not possible to exclude Household(s) with ID {excluding_hh_ids} because of hard conflict(s) with other {payment_plan_title}(s)."
+                        f"It is not possible to undo exclude Household(s) with ID {hh_unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
                     )
 
             if exclusion_reason:
