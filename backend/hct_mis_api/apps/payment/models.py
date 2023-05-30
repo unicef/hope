@@ -12,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import (
     Count,
@@ -50,6 +50,7 @@ from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -364,6 +365,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
 
     class Status(models.TextChoices):
+        PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -372,7 +374,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
-        PREPARING = "PREPARING", "Preparing"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -848,6 +849,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
         ("delivery_date", _("Delivery Date")),
+        ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
+        ("order_number", _("Order Number")),
+        ("token_number", _("Token Number")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -862,6 +866,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
+        max_length=250,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -903,6 +908,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
+            "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
+            "order_number": (payment, "order_number"),
+            "token_number": (payment, "token_number"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1294,6 +1302,23 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+    reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
+    # use program_id in UniqueConstraint order_number and token_number per Program
+    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
+    order_number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[
+            MinValueValidator(100000000),
+            MaxValueValidator(999999999),
+            payment_token_and_order_number_validator,
+        ],
+    )  # 9 digits
+    token_number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
+    )  # 7 digits
 
     @property
     def full_name(self) -> str:
@@ -1322,7 +1347,17 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 fields=["parent", "household"],
                 condition=Q(is_removed=False),
                 name="payment_plan_and_household",
-            )
+            ),
+            UniqueConstraint(
+                fields=["program_id", "order_number"],
+                condition=Q(is_removed=False),
+                name="order_number_unique_per_program",
+            ),
+            UniqueConstraint(
+                fields=["program_id", "token_number"],
+                condition=Q(is_removed=False),
+                name="token_number_unique_per_program",
+            ),
         ]
 
 
