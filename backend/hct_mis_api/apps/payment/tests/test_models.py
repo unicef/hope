@@ -11,7 +11,11 @@ from dateutil.relativedelta import relativedelta
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+)
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 
@@ -89,12 +93,19 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.eligible_payments.count(), 1)
 
     def test_can_be_locked(self) -> None:
-        pp1 = PaymentPlanFactory()
+        program = RealProgramFactory()
+        program_cycle = program.cycles.first()
+
+        pp1 = PaymentPlanFactory(program=program, program_cycle=program_cycle)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create hard conflicted payment
         pp1_conflicted = PaymentPlanFactory(
-            start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.LOCKED
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.LOCKED,
+            program=program,
+            program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False)
         PaymentFactory(parent=pp1_conflicted, household=p1.household, conflicted=False)
@@ -127,13 +138,34 @@ class TestPaymentModel(TestCase):
             PaymentFactory(parent=pp, household=hh1)
 
     def test_manager_annotations__pp_conflicts(self) -> None:
-        pp1 = PaymentPlanFactory()
+        program = RealProgramFactory()
+        program_cycle = program.cycles.first()
+
+        pp1 = PaymentPlanFactory(program=program, program_cycle=program_cycle)
 
         # create hard conflicted payment
-        pp2 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.LOCKED)
+        pp2 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.LOCKED,
+            program=program,
+            program_cycle=program_cycle,
+        )
         # create soft conflicted payments
-        pp3 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
-        pp4 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
+        pp3 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.OPEN,
+            program=program,
+            program_cycle=program_cycle,
+        )
+        pp4 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.OPEN,
+            program=program,
+            program_cycle=program_cycle,
+        )
         p1 = PaymentFactory(parent=pp1, conflicted=False)
         p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False)
         p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False)
