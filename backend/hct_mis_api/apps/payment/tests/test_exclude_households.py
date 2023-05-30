@@ -15,10 +15,11 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 
 EXCLUDE_HOUSEHOLD_MUTATION = """
-mutation excludeHouseholds($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!) {
+mutation excludeHouseholds($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!, $exclusionReason: String) {
   excludeHouseholds(
     paymentPlanId: $paymentPlanId,
-    excludedHouseholdsIds: $excludedHouseholdsIds
+    excludedHouseholdsIds: $excludedHouseholdsIds,
+    exclusionReason: $exclusionReason
 ) {
     paymentPlan {
         id
@@ -63,7 +64,8 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
 
     @freeze_time("2020-10-10")
-    def test_exclude_households(self) -> None:
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_exclude_households(self, get_exchange_rate_mock: Any) -> None:
         household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
@@ -73,6 +75,7 @@ class TestExcludeHouseholds(APITestCase):
             variables={
                 "paymentPlanId": self.payment_plan_id,
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
+                "exclusionReason": "I do not like those households",
             },
         )
 
@@ -88,8 +91,12 @@ class TestExcludeHouseholds(APITestCase):
             set(self.payment_plan.excluded_households_ids),
             {self.payment_1.household.unicef_id, self.payment_2.household.unicef_id},
         )
+        self.assertEqual(self.payment_plan.exclusion_reason, "I do not like those households")
 
-    def test_exclude_payment_raises_error_when_payment_plan_contains_already_excluded_payments(self) -> None:
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_exclude_payment_raises_error_when_payment_plan_contains_already_excluded_payments(
+        self, get_exchange_rate_mock: Any
+    ) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
         self.payment_1.save()

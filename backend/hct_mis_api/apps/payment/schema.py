@@ -138,6 +138,7 @@ class RapidProFlow(graphene.ObjectType):
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
+    columns = graphene.List(graphene.String)
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -155,6 +156,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
         connection_class = ExtendedConnection
 
     report_url = graphene.String()
+    status = graphene.Int()
 
     def resolve_report_url(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.file.url if self.file else ""
@@ -460,6 +462,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
 
+    unsuccessful_payments_count = graphene.Int()
+    payments_used_in_follow_payment_plans_count = graphene.Int()
+
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
@@ -525,20 +530,20 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
         # Check there are payments in error/not distributed status
-        qs = self.payment_items.eligible().filter(
-            status__in=[
-                Payment.STATUS_ERROR,
-                Payment.STATUS_NOT_DISTRIBUTED,
-                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
-            ]
-        )
+        qs = self.unsuccessful_payments()
 
         # Check if all payments are used in FPPs
-        follow_up_payment_ids = Payment.objects.filter(
-            parent__source_payment_plan_id=self.id, excluded=False
-        ).values_list("source_payment_id", flat=True)
+        follow_up_payment = self.payments_used_in_follow_payment_plans()
 
-        return qs.exists() and set(follow_up_payment_ids) != set(qs.values_list("id", flat=True))
+        return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
+            qs.values_list("id", flat=True)
+        )
+
+    def resolve_unsuccessful_payments_count(self, info: Any) -> int:
+        return self.unsuccessful_payments().count()
+
+    def resolve_payments_used_in_follow_payment_plans_count(self, info: Any) -> int:
+        return len(set(self.payments_used_in_follow_payment_plans().values_list("source_payment_id", flat=True)))
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):

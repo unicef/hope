@@ -40,6 +40,13 @@ elasticsearch:
         memory: 2Gi      
 celery:
   image: #from-pipeline
+  resources:
+    requests:
+      cpu: 300m
+      memory: 500Mi
+    limits:
+      cpu: 1500m
+      memory: 2Gi
   replicaCount: 2
 
 celeryflower:
@@ -47,12 +54,21 @@ celeryflower:
     FLOWER_BASIC_AUTH: #secret-variables: FLOWER_BASIC_AUTH
 
 ingress:
-  tls: true
-  tlsSecret: aks-unicef-tls
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: kv-cert-hope
   host: hope.unicef.org
+
+elasticsearch:
+  data:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2048Mi
+      limits:
+        cpu: 4
+        memory: 5000Mi
 
 
 postgresql:

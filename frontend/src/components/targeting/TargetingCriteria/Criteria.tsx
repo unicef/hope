@@ -124,7 +124,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
               return (
                 <>
                   <span>
-                    {field.fieldAttribute.choices.length
+                    {field.fieldAttribute.choices?.length
                       ? field.fieldAttribute.choices.find(
                           (each) => each.value === argument,
                         )?.labelEn
@@ -139,7 +139,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
           <p>
             {field.fieldAttribute.labelEn || field.fieldName}:{' '}
             <span>
-              {field.fieldAttribute.choices.length
+              {field.fieldAttribute.choices?.length
                 ? field.fieldAttribute.choices.find(
                     (each) => each.value === field.arguments[0],
                   )?.labelEn
