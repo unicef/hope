@@ -286,7 +286,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @classmethod
     def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
         status = kwargs.get("status")
-        if status != RegistrationDataImport.IN_REVIEW:
+        if status not in (RegistrationDataImport.IN_REVIEW, RegistrationDataImport.IMPORT_ERROR, RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.DEDUPLICATION_FAILED):
             logger.error("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
