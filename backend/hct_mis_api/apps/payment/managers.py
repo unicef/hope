@@ -64,6 +64,8 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .select_related("parent")
             .exclude(id=OuterRef("id"))
             .exclude(parent__id=OuterRef("parent_id"))
+            .exclude(is_follow_up=True)
+            .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
             .filter(
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
@@ -81,6 +83,8 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .select_related("parent")
             .exclude(id=OuterRef("id"))
             .exclude(parent__id=OuterRef("parent_id"))
+            .exclude(is_follow_up=True)
+            .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
             .filter(
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
