@@ -8,6 +8,7 @@ import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useRefuseRdiMutation,
+  useAbortRdiMutation
 } from '../../../__generated__/graphql';
 import {BreadCrumbsItem} from '../../core/BreadCrumbs';
 import {LoadingButton} from '../../core/LoadingButton';
@@ -39,17 +40,19 @@ export function RegistrationDataImportDetailsPageHeader({
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
   const [mutate, { loading }] = useRefuseRdiMutation();
+  const [abortRdiMutate, { loading: abortLoading }] = useAbortRdiMutation();
+
   let buttons = null;
 
   const abortButton = (
       <LoadingButton
-        loading={loading}
+        loading={abortLoading}
         onClick={() =>
          confirm({
             title: t('Warning'),
             content: t('Are you sure you want to abort RDI? Aborting RDI causes deletion of all related datahub RDI data'),
           }).then(async () => {
-            await mutate({
+            await abortRdiMutate({
               variables: { id: registration.id },
             })
           })

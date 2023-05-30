@@ -46,6 +46,11 @@ export type _TableTotalCashTransferredDataNode = {
   totalHouseholds?: Maybe<Scalars['Int']>,
 };
 
+export type AbortRegistrationDataImportMutation = {
+   __typename?: 'AbortRegistrationDataImportMutation',
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
 export enum Action {
   Lock = 'LOCK',
   LockFsp = 'LOCK_FSP',
@@ -1314,7 +1319,7 @@ export type FinancialServiceProviderXlsxReportNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   financialServiceProvider: FinancialServiceProviderNode,
-  status?: Maybe<FinancialServiceProviderXlsxReportStatus>,
+  status?: Maybe<Scalars['Int']>,
   reportUrl?: Maybe<Scalars['String']>,
 };
 
@@ -1332,26 +1337,6 @@ export type FinancialServiceProviderXlsxReportNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum FinancialServiceProviderXlsxReportStatus {
-  A_1 = 'A_1',
-  A_2 = 'A_2',
-  A_3 = 'A_3'
-}
-
-export enum FinancialServiceProviderXlsxTemplateColumns {
-  PaymentId = 'PAYMENT_ID',
-  HouseholdId = 'HOUSEHOLD_ID',
-  HouseholdSize = 'HOUSEHOLD_SIZE',
-  CollectorName = 'COLLECTOR_NAME',
-  PaymentChannel = 'PAYMENT_CHANNEL',
-  FspName = 'FSP_NAME',
-  Currency = 'CURRENCY',
-  EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
-  EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
-  DeliveredQuantity = 'DELIVERED_QUANTITY',
-  DeliveryDate = 'DELIVERY_DATE'
-}
-
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
    __typename?: 'FinancialServiceProviderXlsxTemplateNode',
   id: Scalars['ID'],
@@ -1359,7 +1344,7 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   updatedAt: Scalars['DateTime'],
   createdBy?: Maybe<UserNode>,
   name: Scalars['String'],
-  columns: FinancialServiceProviderXlsxTemplateColumns,
+  columns?: Maybe<Array<Maybe<Scalars['String']>>>,
   coreFields: Array<Scalars['String']>,
   financialServiceProviders: FinancialServiceProviderNodeConnection,
 };
@@ -3121,6 +3106,7 @@ export type Mutations = {
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>,
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>,
+  abortRegistrationDataImport?: Maybe<AbortRegistrationDataImportMutation>,
   checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>,
 };
 
@@ -3520,6 +3506,12 @@ export type MutationsRerunDedupeArgs = {
 };
 
 
+export type MutationsAbortRegistrationDataImportArgs = {
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
 export type MutationsCheckAgainstSanctionListArgs = {
   file: Scalars['Upload']
 };
@@ -3655,6 +3647,10 @@ export type PaymentNode = Node & {
   collector: IndividualNode,
   sourcePayment?: Maybe<PaymentNode>,
   isFollowUp: Scalars['Boolean'],
+  reasonForUnsuccessfulPayment?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  orderNumber?: Maybe<Scalars['Int']>,
+  tokenNumber?: Maybe<Scalars['Int']>,
   followUps: PaymentNodeConnection,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
@@ -3981,6 +3977,7 @@ export type PaymentPlanNodeEdge = {
 };
 
 export enum PaymentPlanStatus {
+  Preparing = 'PREPARING',
   Open = 'OPEN',
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
@@ -3988,8 +3985,7 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  Finished = 'FINISHED',
-  Preparing = 'PREPARING'
+  Finished = 'FINISHED'
 }
 
 export type PaymentRecordAndPaymentNode = {
@@ -4346,6 +4342,7 @@ export type ProgramNode = Node & {
   households: HouseholdNodeConnection,
   paymentplanSet: PaymentPlanNodeConnection,
   cashplanSet: CashPlanNodeConnection,
+  paymentSet: PaymentNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -4384,6 +4381,15 @@ export type ProgramNodePaymentplanSetArgs = {
 
 
 export type ProgramNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodePaymentSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5604,7 +5610,8 @@ export enum RegistrationDataImportStatus {
   Merged = 'MERGED',
   Merging = 'MERGING',
   MergeError = 'MERGE_ERROR',
-  Refused = 'REFUSED'
+  Refused = 'REFUSED',
+  Aborted = 'ABORTED'
 }
 
 export type RegistrationDeduplicationMutation = {
@@ -8638,6 +8645,22 @@ export type UpdateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    )> }
+  )> }
+);
+
+export type AbortRdiMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type AbortRdiMutation = (
+  { __typename?: 'Mutations' }
+  & { abortRegistrationDataImport: Maybe<(
+    { __typename?: 'AbortRegistrationDataImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'status'>
     )> }
   )> }
 );
@@ -15067,6 +15090,58 @@ export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const AbortRdiDocument = gql`
+    mutation AbortRDI($id: ID!) {
+  abortRegistrationDataImport(id: $id) {
+    registrationDataImport {
+      id
+      status
+    }
+  }
+}
+    `;
+export type AbortRdiMutationFn = ApolloReactCommon.MutationFunction<AbortRdiMutation, AbortRdiMutationVariables>;
+export type AbortRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<AbortRdiMutation, AbortRdiMutationVariables>, 'mutation'>;
+
+    export const AbortRdiComponent = (props: AbortRdiComponentProps) => (
+      <ApolloReactComponents.Mutation<AbortRdiMutation, AbortRdiMutationVariables> mutation={AbortRdiDocument} {...props} />
+    );
+    
+export type AbortRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<AbortRdiMutation, AbortRdiMutationVariables> & TChildProps;
+export function withAbortRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AbortRdiMutation,
+  AbortRdiMutationVariables,
+  AbortRdiProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, AbortRdiMutation, AbortRdiMutationVariables, AbortRdiProps<TChildProps>>(AbortRdiDocument, {
+      alias: 'abortRdi',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAbortRdiMutation__
+ *
+ * To run a mutation, you first call `useAbortRdiMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAbortRdiMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [abortRdiMutation, { data, loading, error }] = useAbortRdiMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAbortRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AbortRdiMutation, AbortRdiMutationVariables>) {
+        return ApolloReactHooks.useMutation<AbortRdiMutation, AbortRdiMutationVariables>(AbortRdiDocument, baseOptions);
+      }
+export type AbortRdiMutationHookResult = ReturnType<typeof useAbortRdiMutation>;
+export type AbortRdiMutationResult = ApolloReactCommon.MutationResult<AbortRdiMutation>;
+export type AbortRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<AbortRdiMutation, AbortRdiMutationVariables>;
 export const CreateRegistrationKoboImportDocument = gql`
     mutation CreateRegistrationKoboImport($registrationDataImportData: RegistrationKoboImportMutationInput!) {
   registrationKoboImport(registrationDataImportData: $registrationDataImportData) {
@@ -23239,34 +23314,32 @@ export type ResolversTypes = {
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
   GenericPaymentNode: ResolverTypeWrapper<GenericPaymentNode>,
+  PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
+  PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>,
+  PaymentNode: ResolverTypeWrapper<PaymentNode>,
+  PaymentStatus: PaymentStatus,
+  PaymentDeliveryType: PaymentDeliveryType,
+  FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
+  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
+  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
+  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
+  FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>,
+  FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>,
+  FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>,
+  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>,
+  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>,
+  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
+  DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>,
+  DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>,
+  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
+  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
   PaymentPlanStatus: PaymentPlanStatus,
   PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
-  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
-  FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
-  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
-  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
-  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
-  FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>,
-  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
-  FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>,
-  FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>,
-  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>,
-  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>,
-  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
-  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
-  DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>,
-  DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>,
-  PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
-  PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>,
-  PaymentNode: ResolverTypeWrapper<PaymentNode>,
-  PaymentStatus: PaymentStatus,
-  PaymentDeliveryType: PaymentDeliveryType,
-  PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
-  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
   ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>,
   ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>,
   ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>,
@@ -23557,6 +23630,7 @@ export type ResolversTypes = {
   MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
   RefuseRegistrationDataImportMutation: ResolverTypeWrapper<RefuseRegistrationDataImportMutation>,
   RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
+  AbortRegistrationDataImportMutation: ResolverTypeWrapper<AbortRegistrationDataImportMutation>,
   CheckAgainstSanctionListMutation: ResolverTypeWrapper<CheckAgainstSanctionListMutation>,
 };
 
@@ -23687,34 +23761,32 @@ export type ResolversParentTypes = {
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
   GenericPaymentNode: GenericPaymentNode,
+  PaymentNodeConnection: PaymentNodeConnection,
+  PaymentNodeEdge: PaymentNodeEdge,
+  PaymentNode: PaymentNode,
+  PaymentStatus: PaymentStatus,
+  PaymentDeliveryType: PaymentDeliveryType,
+  FinancialServiceProviderNode: FinancialServiceProviderNode,
+  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
+  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
+  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
+  FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode,
+  FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection,
+  FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge,
+  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection,
+  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge,
+  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
+  DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection,
+  DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge,
+  DeliveryMechanismNode: DeliveryMechanismNode,
+  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentConflictDataNode: PaymentConflictDataNode,
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
   PaymentPlanStatus: PaymentPlanStatus,
   PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
-  DeliveryMechanismNode: DeliveryMechanismNode,
-  FinancialServiceProviderNode: FinancialServiceProviderNode,
-  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
-  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
-  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
-  FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode,
-  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
-  FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection,
-  FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge,
-  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection,
-  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge,
-  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
-  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
-  DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection,
-  DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge,
-  PaymentNodeConnection: PaymentNodeConnection,
-  PaymentNodeEdge: PaymentNodeEdge,
-  PaymentNode: PaymentNode,
-  PaymentStatus: PaymentStatus,
-  PaymentDeliveryType: PaymentDeliveryType,
-  PaymentConflictDataNode: PaymentConflictDataNode,
-  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
   ApprovalProcessNodeConnection: ApprovalProcessNodeConnection,
   ApprovalProcessNodeEdge: ApprovalProcessNodeEdge,
   ApprovalProcessNode: ApprovalProcessNode,
@@ -24005,6 +24077,7 @@ export type ResolversParentTypes = {
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
   RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation,
   RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
+  AbortRegistrationDataImportMutation: AbortRegistrationDataImportMutation,
   CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
 };
 
@@ -24022,6 +24095,10 @@ export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, Paren
   admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AbortRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['AbortRegistrationDataImportMutation'] = ResolversParentTypes['AbortRegistrationDataImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
 export type ActionPaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionPaymentPlanMutation'] = ResolversParentTypes['ActionPaymentPlanMutation']> = {
@@ -24646,7 +24723,7 @@ export type FinancialServiceProviderXlsxReportNodeResolvers<ContextType = any, P
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   financialServiceProvider?: Resolver<ResolversTypes['FinancialServiceProviderNode'], ParentType, ContextType>,
-  status?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportStatus']>, ParentType, ContextType>,
+  status?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reportUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -24668,7 +24745,7 @@ export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  columns?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateColumns'], ParentType, ContextType>,
+  columns?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   coreFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
   financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs>,
 };
@@ -25505,6 +25582,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>,
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
+  abortRegistrationDataImport?: Resolver<Maybe<ResolversTypes['AbortRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsAbortRegistrationDataImportArgs, 'id'>>,
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
 };
 
@@ -25513,7 +25591,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'IndividualIdentityNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'ReportNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'IndividualIdentityNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'DeliveryMechanismNode' | 'ReportNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -25592,6 +25670,10 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   collector?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   sourcePayment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  reasonForUnsuccessfulPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  orderNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
@@ -25911,6 +25993,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramNodePaymentplanSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
+  paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -27108,6 +27191,7 @@ export type Resolvers<ContextType = any> = {
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
+  AbortRegistrationDataImportMutation?: AbortRegistrationDataImportMutationResolvers<ContextType>,
   ActionPaymentPlanMutation?: ActionPaymentPlanMutationResolvers<ContextType>,
   ActivatePaymentVerificationPlan?: ActivatePaymentVerificationPlanResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
