@@ -19,4 +19,6 @@ def update_admin_area_for_households() -> None:
                 household.admin2 = Area.objects.filter(p_code=row["admin2_area_id"]).first()
                 household.admin3 = Area.objects.filter(p_code=row["admin3_area_id"]).first()
                 household.save(update_fields=["admin1", "admin2", "admin3"])
+            else:
+                print(f"Household specified in the file is not found in the database ({row['unicef_id']})")
         print("Updated admin areas for specified UKR households")
