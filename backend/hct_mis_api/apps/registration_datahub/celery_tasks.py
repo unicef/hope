@@ -474,11 +474,10 @@ def deduplicate_documents() -> bool:
 @log_start_and_end
 @sentry_tags
 def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> bool:
-
     with cache.lock(
-            f"check_rdi_import_periodic_task_{business_area_slug}",
-            blocking_timeout=60 * 5,
-            timeout=60 * 60 * 1,
+        f"check_rdi_import_periodic_task_{business_area_slug}",
+        blocking_timeout=60 * 5,
+        timeout=60 * 60 * 1,
     ) as locked:
         if not locked:
             raise Exception("cannot set lock on check_rdi_import_periodic_task")
