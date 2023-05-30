@@ -9,7 +9,7 @@ import { createHandleFilterChange } from '../../utils/utils';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;
@@ -56,12 +56,13 @@ export const DashboardFilters = ({
   return (
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>None</em>
