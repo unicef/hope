@@ -44,7 +44,7 @@ export const LookUpLinkedTicketsDisplay = ({
         {!isEditTicket && (
           <Grid item>
             <Box p={2}>
-              <Grid container justify='center' alignItems='center'>
+              <Grid container justifyContent='center' alignItems='center'>
                 <Grid item>
                   <LightGrey>
                     <EditIcon
