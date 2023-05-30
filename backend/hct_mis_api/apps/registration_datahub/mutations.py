@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 import graphene
 from graphene_file_upload.scalars import Upload
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -286,7 +287,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @classmethod
     def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
         status = kwargs.get("status")
-        if status not in (RegistrationDataImport.IN_REVIEW, RegistrationDataImport.IMPORT_ERROR, RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.DEDUPLICATION_FAILED):
+        if status != RegistrationDataImport.IN_REVIEW:
             logger.error("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
@@ -302,17 +303,56 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
 
         cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
-
         cls.validate(status=obj_hct.status)
-        obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
-        obj_hct.save()
 
         ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+        obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
+        obj_hct.save()
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
         )
         return RefuseRegistrationDataImportMutation(obj_hct)
+
+
+class AbortRegistrationDataImportMutation(PermissionMutation):
+    registration_data_import = graphene.Field(RegistrationDataImportNode)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
+    @is_authenticated
+    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "AbortRegistrationDataImportMutation":
+        decode_id = decode_id_string(id)
+        old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
+        obj_hct = RegistrationDataImport.objects.get(id=decode_id)
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
+
+        cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
+
+        if obj_hct.status not in (
+            RegistrationDataImport.IMPORT_ERROR,
+            RegistrationDataImport.MERGE_ERROR,
+            RegistrationDataImport.DEDUPLICATION_FAILED,
+        ):
+            msg = "RDI can be aborted only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+
+        obj_hct.status = RegistrationDataImport.ABORTED
+        obj_hct.save()
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
+        )
+        return AbortRegistrationDataImportMutation(registration_data_import=obj_hct)
 
 
 class UploadImportDataXLSXFileAsync(PermissionMutation):
@@ -393,3 +433,4 @@ class Mutations(graphene.ObjectType):
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
     refuse_registration_data_import = RefuseRegistrationDataImportMutation.Field()
     rerun_dedupe = RegistrationDeduplicationMutation.Field()
+    abort_registration_data_import = AbortRegistrationDataImportMutation.Field()
