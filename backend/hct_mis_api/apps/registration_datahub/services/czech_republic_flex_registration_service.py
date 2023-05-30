@@ -77,14 +77,31 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     ]
 
     DOCUMENT_MAPPING: Dict[str, str] = {
-        "birth_certificate_no_i_c": "birth_certificate",
-        "disability_card_no_i_c": "disability_card",
-        "national_id_no_i_c": "national_id",
-        "national_passport_i_c": "national_passport",
-        "medical_certificate_no_i_c": "medical_certificate",
-        "other_id_no_i_c": "temporary_protection_visa",
-        "proof_legal_guardianship_no_i_c": "proof_of_legal_guardianship",
+        "other_id": "temporary_protection_visa",
     }
+
+    NOT_DOCUMENT_LIST: List[str] = [
+        "phone_no_i_c",
+    ]
+
+    DOCUMENT_NUMBER_SUFFIX: str = "_no_i_c"
+    DOCUMENT_PHOTO_SUFFIX: str = "_photo_i_c"
+    DOCUMENT_ISSUANCE_DATE_SUFFIX: str = "_issuance_i_c"
+    DOCUMENT_EXPIRY_DATE_SUFFIX: str = "_validity_i_c"
+
+    def _fix_document_stupid_keys(self, individual_dict: Dict) -> Dict:
+        if "national_passport_i_c" in individual_dict:
+            individual_dict["national_passport_no_i_c"] = individual_dict.pop("national_passport_i_c")
+        return individual_dict
+
+    def _get_all_document_keys_from_individual_dict(self, individual_dict: Dict) -> List[str]:
+        """Find all keys ending with DOCUMENT_NUMBER_SUFFIX in individuals_dict"""
+        suffix = self.DOCUMENT_NUMBER_SUFFIX
+        return [
+            key[: -len(suffix)]
+            for key in individual_dict.keys()
+            if key.endswith(suffix) and key not in self.NOT_DOCUMENT_LIST
+        ]
 
     def _prepare_household_data(
         self,
@@ -208,47 +225,32 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         self, individual_dict: Dict, imported_individual: ImportedIndividual
     ) -> list[ImportedDocument]:
         documents = []
-
-        for individual_document_number, document_key in self.DOCUMENT_MAPPING.items():
-            document_number = individual_dict.get(individual_document_number)
+        document_keys = self._get_all_document_keys_from_individual_dict(individual_dict)
+        for document_data_key in document_keys:
+            document_number = individual_dict.get(f"{document_data_key}{self.DOCUMENT_NUMBER_SUFFIX}")
             if not document_number:
                 continue
-
-            document_type = ImportedDocumentType.objects.get(key=document_key)
+            real_document_key = self.DOCUMENT_MAPPING.get(document_data_key, document_data_key)
+            document_type = ImportedDocumentType.objects.get(key=real_document_key)
+            issuance_date = individual_dict.get(f"{document_data_key}{self.DOCUMENT_ISSUANCE_DATE_SUFFIX}")
+            expiry_date = individual_dict.get(f"{document_data_key}{self.DOCUMENT_EXPIRY_DATE_SUFFIX}")
+            photo_base64 = individual_dict.get(f"{document_data_key}{self.DOCUMENT_PHOTO_SUFFIX}")
+            photo = self._prepare_picture_from_base64(photo_base64, document_number)
             document_kwargs = {
                 "country": "CZ",
                 "type": document_type,
                 "document_number": document_number,
                 "individual": imported_individual,
+                "issuance_date": issuance_date,
+                "expiry_date": expiry_date,
+                "photo": photo,
             }
-
-            photo, issuance_date, expiry_date = None, None, None
-
-            if document_number == "proof_legal_guardianship_no_i_c":
-                photo = individual_dict.get("proof_legal_guardianship_photo_i_c")
-
-            elif document_number == "disability_card_no_i_c":
-                photo = individual_dict.get("disability_card_photo_i_c")
-                issuance_date = individual_dict.get("disability_card_issuance_i_c")
-            elif document_number == "medical_certificate_no_i_c":
-                photo = individual_dict.get("medical_certificate_photo_i_c")
-                issuance_date = individual_dict.get("medical_certificate_issuance_i_c")
-                expiry_date = individual_dict.get("medical_certificate_validity_i_c")
-
-            if photo:
-                document_kwargs["photo"] = self._prepare_picture_from_base64(photo, document_number)
-            if issuance_date:
-                document_kwargs["issuance_date"] = issuance_date
-            if expiry_date:
-                document_kwargs["expiry_date"] = expiry_date
-
             ModelClassForm = modelform_factory(ImportedDocument, fields=list(document_kwargs.keys()))
             form = ModelClassForm(document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
             document = ImportedDocument(**document_kwargs)
             documents.append(document)
-
         return documents
 
     @staticmethod
@@ -355,7 +357,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 if individual.relationship == HEAD:
                     household.head_of_household = individual
                     household.save(update_fields=("head_of_household",))
-                documents.extend(self._prepare_documents(individual_dict, individual))
+                individual_dict_documents = self._fix_document_stupid_keys(individual_dict)
+                documents.extend(self._prepare_documents(individual_dict_documents, individual))
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
