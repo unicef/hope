@@ -472,9 +472,7 @@ def payment_plan_exclude_beneficiaries(
             if payment_plan.status == PaymentPlan.Status.LOCKED:
                 # for Locked Payment we check if not remove all HHs
                 if len(excluding_hh_ids) >= payment_plan.eligible_payments.count():
-                    error_msg.append(
-                        f"You can't exclude all households from the {payment_plan_title}."
-                    )
+                    error_msg.append(f"You can't exclude all households from the {payment_plan_title}.")
 
             payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
                 household__unicef_id__in=excluding_hh_ids
