@@ -21,7 +21,6 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
