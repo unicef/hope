@@ -103,6 +103,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
+        enumerator_rec_id = record_data_dict.get("enumerator")
 
         if not self._has_head(individuals_array):
             self._set_default_head_of_household(individuals_array)
@@ -112,6 +113,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
         if not household_data.get("size"):
             household_data["size"] = len(individuals_array)
+        if enumerator_rec_id:
+            household_data["enumerator_rec_id"] = enumerator_rec_id
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
@@ -313,7 +316,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
 
 class UkraineRegistrationService(UkraineBaseRegistrationService):
-    REGISTRATION_ID: Tuple = (11,)
+    REGISTRATION_ID: Tuple = (21,)
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin1": "admin1_h_c",
