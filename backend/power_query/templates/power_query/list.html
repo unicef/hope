@@ -1,0 +1,12 @@
+{% extends "power_query/base.html" %}{% load admin_urls %}
+
+{% block content %}
+    {{ report }}
+    <ul>
+        {% for report in reports %}
+            <li>
+                <a href="{{ report.get_absolute_url }}">{{ report.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

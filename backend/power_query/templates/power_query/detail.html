@@ -1,0 +1,37 @@
+{% extends "power_query/list.html" %}{% load admin_urls power_query %}
+{% block breadcrumbs-items %}
+    {{ block.super }}
+    <li><a href='{% url 'power_query:report_list' %}">{{ report }}</a></li>
+
+{% endblock %}
+<div class="title">{% block title %}{{ report }}{% endblock %}</div>
+
+{% block content %}
+    <table class="table">
+        <thead>
+
+        <tr>
+            <td scope="col">Report Name</td>
+            <td scope="col">Date</td>
+            <td scope="col">Size</td>
+            <td scope="col">Format</td>
+            <td scope="col">Args</td>
+        </tr>
+        </thead>
+        {% for doc in report.documents.all %}
+            <tr>
+                <td scope="col">
+                <a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a>
+                </td>
+                <td scope="col">{{ doc.timestamp }}</td>
+                <td class="number">{{ doc.size|fmt_size }}</td>
+                <td scope="col">{{ doc.content_type }}</td>
+                <td scope="col">
+                    {% for k,v in doc.arguments.items %}
+                    {{ k }}: {{ v }} <br>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock content %}

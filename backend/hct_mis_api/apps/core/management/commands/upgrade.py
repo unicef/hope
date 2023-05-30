@@ -12,6 +12,6 @@ class Command(BaseCommand):
 
         create_extra_permissions()
 
-        from hct_mis_api.apps.power_query.defaults import create_defaults
+        from power_query.defaults import create_defaults
 
         create_defaults()

@@ -81,7 +81,7 @@ api_patterns = [
     ),
     path(
         "power_query/",
-        include("hct_mis_api.apps.power_query.urls"),
+        include("power_query.urls"),
     ),
     path(
         "changelog/",

@@ -299,7 +299,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.payment.apps.PaymentConfig",
     "hct_mis_api.apps.program.apps.ProgramConfig",
     "hct_mis_api.apps.changelog.apps.ChangelogConfig",
-    "hct_mis_api.apps.power_query.apps.Config",
+    "power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils.apps.UtilsConfig",
@@ -383,7 +383,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
-    "hct_mis_api.apps.power_query.backends.PowerQueryBackend",
+    "hct_mis_api.libs.power_query.backends.PowerQueryBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]

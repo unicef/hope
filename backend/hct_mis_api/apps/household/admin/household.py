@@ -22,12 +22,12 @@ from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
+from power_query.mixin import PowerQueryMixin
 
 from ...utils.security import is_root
 from ..models import (
