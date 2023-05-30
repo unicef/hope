@@ -23,26 +23,22 @@ x-django-envs: &django_envs
     - PYTHONUNBUFFERED=1
     - CYPRESS_TESTING=yes
     - DJANGO_ALLOWED_HOSTS=*
-    - SESSION_COOKIE_SECURE=false
-    - SESSION_COOKIE_HTTPONLY=true
-    - CSRF_COOKIE_HTTPONLY=false
-    - CSRF_COOKIE_SECURE=false
-    - SECURE_CONTENT_TYPE_NOSNIFF=true
-    - SECURE_REFERRER_POLICY=same-origin
-    - SECURE_HSTS_SECONDS=0
 
 volumes:
   backend-data:
 
 services:
   cypress:
-    image: ${CYPRESS_IMAGE}
+    build:
+      dockerfile: Dockerfile
     command: "ci-test"
     depends_on:
       - proxy
       - celery_worker
     volumes:
       - ../cypress-results:/code/cypress/results
+      - ../cypress-screenshots:/code/cypress/screenshots
+      - ./:/code
 
   proxy:
     image: unicef/hct-mis-proxy
@@ -57,7 +53,9 @@ services:
       - frontend
 
   frontend:
-    image: ${FRONTEND_IMAGE}
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
 
   redis:
     restart: unless-stopped
@@ -65,10 +63,12 @@ services:
 
   backend:
     <<: *django_envs
-    image: ${BACKEND_IMAGE}
-    command: "cy"
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     volumes:
       - backend-data:/data
+    command: "cy"
     depends_on:
       - db
       - redis
@@ -79,32 +79,34 @@ services:
       - elasticsearch
 
   cash_assist_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
+    image: kartoza/postgis:14-3
     <<: *django_envs
 
   mis_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
+    image: kartoza/postgis:14-3
     <<: *django_envs
 
   erp_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
+    image: kartoza/postgis:14-3
     <<: *django_envs
 
   registration_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
+    image: kartoza/postgis:14-3
     <<: *django_envs
 
   db:
-    image: postgis/postgis:14-3.3-alpine
+    image: kartoza/postgis:14-3
     <<: *django_envs
 
   celery_worker:
     <<: *django_envs
-    image: ${BACKEND_IMAGE}
-    restart: unless-stopped
-    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     volumes:
       - backend-data:/data
+    restart: unless-stopped
+    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - backend
 
