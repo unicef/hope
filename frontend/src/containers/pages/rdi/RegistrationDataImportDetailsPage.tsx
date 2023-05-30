@@ -81,7 +81,6 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   if (data.registrationDataImport.status !== 'IMPORTING') {
     stopPolling();
   }
-
   return (
     <div>
       <RegistrationDataImportDetailsPageHeader

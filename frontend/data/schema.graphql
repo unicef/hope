@@ -3,6 +3,10 @@ schema {
   mutation: Mutations
 }
 
+type AbortRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
 enum Action {
   LOCK
   LOCK_FSP
@@ -884,7 +888,7 @@ type FinancialServiceProviderXlsxReportNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   financialServiceProvider: FinancialServiceProviderNode!
-  status: FinancialServiceProviderXlsxReportStatus
+  status: Int
   reportUrl: String
 }
 
@@ -900,33 +904,13 @@ type FinancialServiceProviderXlsxReportNodeEdge {
   cursor: String!
 }
 
-enum FinancialServiceProviderXlsxReportStatus {
-  A_1
-  A_2
-  A_3
-}
-
-enum FinancialServiceProviderXlsxTemplateColumns {
-  PAYMENT_ID
-  HOUSEHOLD_ID
-  HOUSEHOLD_SIZE
-  COLLECTOR_NAME
-  PAYMENT_CHANNEL
-  FSP_NAME
-  CURRENCY
-  ENTITLEMENT_QUANTITY
-  ENTITLEMENT_QUANTITY_USD
-  DELIVERED_QUANTITY
-  DELIVERY_DATE
-}
-
 type FinancialServiceProviderXlsxTemplateNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   createdBy: UserNode
   name: String!
-  columns: FinancialServiceProviderXlsxTemplateColumns!
+  columns: [String]
   coreFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
 }
@@ -2253,6 +2237,7 @@ type Mutations {
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
+  abortRegistrationDataImport(id: ID!, version: BigInt): AbortRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
@@ -2360,6 +2345,10 @@ type PaymentNode implements Node {
   collector: IndividualNode!
   sourcePayment: PaymentNode
   isFollowUp: Boolean!
+  reasonForUnsuccessfulPayment: String
+  program: ProgramNode
+  orderNumber: Int
+  tokenNumber: Int
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
@@ -2636,6 +2625,7 @@ type PaymentPlanNodeEdge {
 }
 
 enum PaymentPlanStatus {
+  PREPARING
   OPEN
   LOCKED
   LOCKED_FSP
@@ -2644,7 +2634,6 @@ enum PaymentPlanStatus {
   IN_REVIEW
   ACCEPTED
   FINISHED
-  PREPARING
 }
 
 type PaymentRecordAndPaymentNode {
@@ -2956,6 +2945,7 @@ type ProgramNode implements Node {
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   totalEntitledQuantity: Decimal
@@ -3299,6 +3289,7 @@ enum RegistrationDataImportStatus {
   MERGING
   MERGE_ERROR
   REFUSED
+  ABORTED
 }
 
 type RegistrationDeduplicationMutation {
