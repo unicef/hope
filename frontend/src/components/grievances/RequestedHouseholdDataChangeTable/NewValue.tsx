@@ -12,7 +12,9 @@ export function NewValue({ field, value }: NewValueProps): React.ReactElement {
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value)?.labelEn || '-';
+        field.choices.find((item) => item.value === value)?.labelEn ||
+        value ||
+        '-';
       break;
     case 'SELECT_MANY':
       displayValue =

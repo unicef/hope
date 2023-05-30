@@ -108,6 +108,10 @@ CSP_STYLE_SRC = (
     "'unsafe-inline'",
     "'unsafe-eval'",
     "fonts.googleapis.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "maxcdn.bootstrapcdn.com",
+    "unpkg.com",
     "hctmisdev.blob.core.windows.net",  # dev
     "saunihopestg.blob.core.windows.net",  # stg
     "saunihopetrn.blob.core.windows.net",  # trn
@@ -123,19 +127,27 @@ CSP_SCRIPT_SRC = (
     "saunihopeprd.blob.core.windows.net",
     "gov-bam.nr-data.net",
     "js-agent.newrelic.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "unpkg.com",
 )
 CSP_IMG_SRC = (
     "'self'",
     "data:",
+    "cdn.datatables.net",
     "hctmisdev.blob.core.windows.net",
     "saunihopestg.blob.core.windows.net",
     "saunihopetrn.blob.core.windows.net",
     "saunihopeprd.blob.core.windows.net",
+    "map1a.vis.earthdata.nasa.gov",
+    "map1b.vis.earthdata.nasa.gov",
+    "map1c.vis.earthdata.nasa.gov",
 )
 CSP_FONT_SRC = (
     "'self'",
     "data:",
     "fonts.gstatic.com",
+    "maxcdn.bootstrapcdn.com",
     "hctmisdev.blob.core.windows.net",
     "saunihopestg.blob.core.windows.net",
     "saunihopetrn.blob.core.windows.net",
@@ -146,9 +158,11 @@ CSP_CONNECT_SRC = (
     "excubo.unicef.io",
     "sentry.io",
     "gov-bam.nr-data.net",
+    "cdn.jsdelivr.net",
     "hope.unicef.org",  # prod
-    "stg-hope.unitst.org",  # stg
     "trn-hope.unitst.org",  # trn
+    "stg-hope.unitst.org",  # stg
+    "dev-hope.unitst.org",  # dev
 )
 
 DEBUG = True

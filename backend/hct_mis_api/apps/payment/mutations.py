@@ -1145,11 +1145,17 @@ class ExcludeHouseholdsMutation(PermissionMutation):
     class Input:
         payment_plan_id = graphene.ID(required=True)
         excluded_households_ids = graphene.List(graphene.String, required=True)
+        exclusion_reason = graphene.String()
 
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, excluded_households_ids: List[str]
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        excluded_households_ids: List[str],
+        exclusion_reason: Optional[str] = "",
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
@@ -1179,6 +1185,10 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
+
+        if exclusion_reason:
+            payment_plan.exclusion_reason = exclusion_reason
+            payment_plan.save(update_fields=["exclusion_reason"])
 
         payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)
