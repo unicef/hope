@@ -203,6 +203,7 @@ class TestExcludeHouseholds(APITestCase):
 
         self.assertEqual(self.payment_plan.exclusion_reason, "Nice Job!")
         self.assertEqual(self.payment_plan.exclude_household_error, "")
+        print("status check = = =", self.payment_plan.background_action_status)
         self.assertEqual(self.payment_plan.background_action_status, None)
 
         # excluded hh_1, hh_2
