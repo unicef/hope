@@ -559,7 +559,7 @@ def remove_old_rdi_links_task(days: int = 14, page_count: int = 100) -> None:
             ImportedHousehold.objects.filter(registration_data_import_id__in=unmerged_rdi_datahub_ids).delete()
 
             RegistrationDataImport.objects.filter(datahub_id__in=unmerged_rdi_datahub_ids).update(
-                status=RegistrationDataImport.REFUSED_IMPORT
+                status=RegistrationDataImport.ABORTED
             )
         else:
             i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
@@ -570,7 +570,7 @@ def remove_old_rdi_links_task(days: int = 14, page_count: int = 100) -> None:
                 ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
 
                 RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(
-                    status=RegistrationDataImport.REFUSED_IMPORT
+                    status=RegistrationDataImport.ABORTED
                 )
                 i += 1
 
