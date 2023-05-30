@@ -72,7 +72,7 @@ export const PaymentPlanDetailsResults = ({
         <ContentWrapper>
           <Grid container>
             <Grid item xs={4}>
-              <Grid container spacing={3} justify='flex-start'>
+              <Grid container spacing={3} justifyContent='flex-start'>
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
@@ -111,7 +111,7 @@ export const PaymentPlanDetailsResults = ({
               <Grid
                 container
                 spacing={0}
-                justify='flex-start'
+                justifyContent='flex-start'
                 alignItems='center'
               >
                 <Grid item xs={4}>
@@ -154,7 +154,7 @@ export const PaymentPlanDetailsResults = ({
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={0} justify='flex-end'>
+              <Grid container spacing={0} justifyContent='flex-end'>
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>

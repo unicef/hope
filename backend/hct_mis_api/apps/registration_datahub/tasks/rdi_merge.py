@@ -187,6 +187,9 @@ class RdiMergeTask:
             if country_origin := countries.get(country_origin.code):
                 household_data["country_origin"] = country_origin
 
+            if enumerator_rec_id := imported_household.enumerator_rec_id:
+                household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
+
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
