@@ -197,14 +197,12 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2], "Nice Job!")
 
-        self.payment_plan.refresh_from_db(
-            fields=["exclusion_reason", "background_action_status", "exclude_household_error"]
-        )
+        pp = PaymentPlan.objects.get(pk=self.payment_plan.pk)
 
-        self.assertEqual(self.payment_plan.exclusion_reason, "Nice Job!")
-        self.assertEqual(self.payment_plan.exclude_household_error, "")
-        print("status check = = =", self.payment_plan.background_action_status)
-        self.assertEqual(self.payment_plan.background_action_status, None)
+        self.assertEqual(pp.exclusion_reason, "Nice Job!")
+        self.assertEqual(pp.exclude_household_error, "")
+        print("status check = = =", pp.background_action_status)
+        self.assertEqual(pp.background_action_status, None)
 
         # excluded hh_1, hh_2
-        self.assertEqual(set(self.payment_plan.excluded_households_ids), {hh_unicef_id_1, hh_unicef_id_2})
+        self.assertEqual(set(pp.excluded_households_ids), {hh_unicef_id_1, hh_unicef_id_2})
