@@ -11,23 +11,12 @@ import {
   Stepper,
   Typography,
 } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
 import { Field, Form, Formik } from 'formik';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import * as Yup from 'yup';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { LookUpSelection } from '../../../../components/accountability/Surveys/LookUps/LookUpSelection';
-import { PaperContainer } from '../../../../components/targeting/PaperContainer';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
 import {
   AccountabilitySampleSizeQueryVariables,
   CreateSurveyAccountabilityMutationVariables,
@@ -38,16 +27,27 @@ import {
   useAvailableFlowsLazyQuery,
   useCreateSurveyAccountabilityMutation,
 } from '../../../../__generated__/graphql';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { TabPanel } from '../../../../components/core/TabPanel';
-import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { getPercentage } from '../../../../utils/utils';
-import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { LookUpSelection } from '../../../../components/accountability/Surveys/LookUps/LookUpSelection';
+import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { FormikEffect } from '../../../../components/core/FormikEffect';
+import { LoadingButton } from '../../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { TabPanel } from '../../../../components/core/TabPanel';
+import { PaperContainer } from '../../../../components/targeting/PaperContainer';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../../hooks/usePermissions';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
+import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
+import { getPercentage } from '../../../../utils/utils';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -233,13 +233,18 @@ export const CreateSurveyPage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  const matchTitle = (values): string => {
+    return category === SurveyCategory.Sms
+      ? values.title
+      : flowsData?.availableFlows.find((el) => values.title === el.id).name;
+  };
+
   const prepareMutationVariables = (
     values,
   ): CreateSurveyAccountabilityMutationVariables => {
     return {
       input: {
-        title: flowsData?.availableFlows.find((el) => values.title === el.id)
-          .name,
+        title: matchTitle(values),
         body: values.body,
         category: values.category,
         targetPopulation: values.targetPopulation,
@@ -278,6 +283,19 @@ export const CreateSurveyPage = (): React.ReactElement => {
       </FormHelperText>
     ));
 
+  const matchCategory = (surveyCategory): string => {
+    switch (surveyCategory) {
+      case SurveyCategory.Sms:
+        return t('SMS');
+      case SurveyCategory.RapidPro:
+        return t('Rapid Pro');
+      case SurveyCategory.Manual:
+        return t('Manual');
+      default:
+        return '';
+    }
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -314,7 +332,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
         return (
           <>
             <PageHeader
-              title='New Survey'
+              title={`${'New Survey'} > ${matchCategory(category)}`}
               breadCrumbs={
                 hasPermissions(
                   PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE,
@@ -531,16 +549,28 @@ export const CreateSurveyPage = (): React.ReactElement => {
                     <Border />
                     <Box my={3}>
                       <Grid item xs={12}>
-                        <Field
-                          name='title'
-                          label={t('Title')}
-                          color='primary'
-                          choices={mappedFlows}
-                          component={FormikSelectField}
-                        />
+                        {category === SurveyCategory.RapidPro ? (
+                          <Field
+                            name='title'
+                            label={t('Title')}
+                            color='primary'
+                            choices={mappedFlows}
+                            component={FormikSelectField}
+                          />
+                        ) : (
+                          <Field
+                            name='title'
+                            label={t('Title')}
+                            fullWidth
+                            required
+                            variant='outlined'
+                            component={FormikTextField}
+                            data-cy='input-body'
+                          />
+                        )}
                       </Grid>
                     </Box>
-                    {category === 'SMS' && (
+                    {category === SurveyCategory.Sms && (
                       <Box my={3}>
                         <Grid item xs={12}>
                           <Field
