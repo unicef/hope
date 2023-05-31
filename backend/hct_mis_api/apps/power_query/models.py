@@ -284,7 +284,7 @@ class Report(NaturalKeyModel, models.Model):
     owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="+")
     limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
     frequence = models.CharField(
-        max_length=3, null=True, blank=True, help_text="Refresh every (e.g. 3 - 1/3 - mon - 1/3,Mon)"
+        max_length=30, null=True, blank=True, help_text="Refresh every (e.g. 3 - 1/3 - mon - 1/3,Mon)"
     )
     last_run = models.DateTimeField(null=True, blank=True)
 
