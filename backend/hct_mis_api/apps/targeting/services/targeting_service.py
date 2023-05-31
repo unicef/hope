@@ -17,6 +17,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 
 logger = logging.getLogger(__name__)
@@ -57,12 +58,52 @@ class TargetingCriteriaQueryingBase:
     def get_basic_query(self) -> Q:
         return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
 
+    def apply_targeting_criteria_flags(self) -> Q:
+        query = Q()
+        query &= self.apply_flag_exclude_if_active_adjudication_ticket()
+        query &= self.apply_flag_exclude_if_on_sanction_list()
+        return query
+
+    @staticmethod
+    def apply_flag_exclude_if_active_adjudication_ticket() -> Q:
+        return ~Q(
+            Q(target_populations__targeting_criteria__flag_exclude_if_active_adjudication_ticket=True)
+            & (
+                (
+                    Q(individuals__ticket_duplicates__isnull=False)
+                    & ~Q(individuals__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                )
+                | (
+                    Q(individuals__ticket_golden_records__isnull=False)
+                    & ~Q(individuals__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                )
+                | (
+                    Q(representatives__ticket_duplicates__isnull=False)
+                    & ~Q(representatives__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                )
+                | (
+                    Q(representatives__ticket_golden_records__isnull=False)
+                    & ~Q(representatives__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                )
+            )
+        )
+
+    @staticmethod
+    def apply_flag_exclude_if_on_sanction_list() -> Q:
+        return ~Q(
+            Q(target_populations__targeting_criteria__flag_exclude_if_on_sanction_list=True)
+            & (
+                Q(individuals__sanction_list_confirmed_match=True)
+                | Q(representatives__sanction_list_confirmed_match=True)
+            )
+        )
+
     def get_query(self) -> Q:
         rules = self.get_rules()
         query = Q()
         for rule in rules:
             query |= rule.get_query()
-        return self.get_basic_query() & Q(query)
+        return self.get_basic_query() & Q(query) & self.apply_targeting_criteria_flags()
 
 
 class TargetingCriteriaRuleQueryingBase:

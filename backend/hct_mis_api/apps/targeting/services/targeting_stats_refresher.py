@@ -4,7 +4,6 @@ from django.utils import timezone
 
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.utils import apply_targeting_criteria_flags
 
 
 def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
@@ -49,6 +48,5 @@ def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
 def full_rebuild(target_population: TargetPopulation) -> TargetPopulation:
     households = Household.objects.filter(business_area=target_population.business_area)
     households = households.filter(target_population.targeting_criteria.get_query())
-    households = apply_targeting_criteria_flags(target_population, households)
     target_population.households.set(households)
     return refresh_stats(target_population)

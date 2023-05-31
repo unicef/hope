@@ -18,6 +18,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -26,10 +27,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
-from hct_mis_api.apps.targeting.utils import (
-    apply_flag_exclude_if_active_adjudication_ticket,
-    apply_flag_exclude_if_on_sanction_list,
-)
+from hct_mis_api.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 
 
 class TestTargetingCriteriaQuery(APITestCase):
@@ -382,6 +380,15 @@ class TestTargetingCriteriaFlags(APITestCase):
                 },
             ],
         )
+        targeting_criteria = TargetingCriteriaFactory(
+            flag_exclude_if_active_adjudication_ticket=True,
+            flag_exclude_if_on_sanction_list=True,
+        )
+        TargetPopulationFactory(
+            targeting_criteria=targeting_criteria,
+            business_area=cls.business_area,
+            households=[cls.household1, cls.household2]
+        )
         cls.representative2 = IndividualFactory(household=None)
         cls.household2.representatives.set([cls.representative2])
 
@@ -424,7 +431,9 @@ class TestTargetingCriteriaFlags(APITestCase):
             self.ticket_needs_adjudication_details_for_representative.ticket.save()
             self.ticket_needs_adjudication_details_for_representative.possible_duplicates.set([self.representative2])
         self.assertEqual(Household.objects.count(), 2)
-        household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
+        household_filtered = Household.objects.filter(
+            TargetingCriteriaQueryingBase.apply_flag_exclude_if_active_adjudication_ticket()
+        )
         self.assertEqual(household_filtered.count(), household_count)
 
     @parameterized.expand(
@@ -461,12 +470,16 @@ class TestTargetingCriteriaFlags(APITestCase):
             self.ticket_needs_adjudication_details_for_representative.golden_records_individual = self.representative2
             self.ticket_needs_adjudication_details_for_representative.save()
         self.assertEqual(Household.objects.count(), 2)
-        household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
+        household_filtered = Household.objects.filter(
+            TargetingCriteriaQueryingBase.apply_flag_exclude_if_active_adjudication_ticket()
+        )
         self.assertEqual(household_filtered.count(), household_count)
 
     def test_flag_exclude_if_active_adjudication_ticket_no_ticket(self) -> None:
         self.assertEqual(Household.objects.count(), 2)
-        household_filtered = apply_flag_exclude_if_active_adjudication_ticket(Household.objects.all())
+        household_filtered = Household.objects.filter(
+            TargetingCriteriaQueryingBase.apply_flag_exclude_if_active_adjudication_ticket()
+        )
         self.assertEqual(household_filtered.count(), 2)
 
     @parameterized.expand(
@@ -490,5 +503,7 @@ class TestTargetingCriteriaFlags(APITestCase):
             self.representative2.sanction_list_confirmed_match = True
             self.representative2.save()
         self.assertEqual(Household.objects.count(), 2)
-        household_filtered = apply_flag_exclude_if_on_sanction_list(Household.objects.all())
+        household_filtered = Household.objects.filter(
+            TargetingCriteriaQueryingBase.apply_flag_exclude_if_on_sanction_list()
+        )
         self.assertEqual(household_filtered.count(), household_count)
