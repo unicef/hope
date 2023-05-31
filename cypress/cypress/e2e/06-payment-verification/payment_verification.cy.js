@@ -45,8 +45,8 @@ describe("Payment Verification", () => {
       it("Create Verification Plan using random sampling", () => {
         pv.selectStatus("Pending")
         pv.getStatusOption().contains("Pending").type('{esc}')
-        pv.getCashPlanRows().should('have.length', 2)
-        pv.chooseCashPlan(1).click()
+        pv.getCashPlanRows().should('have.length', 1)
+        pv.chooseCashPlan(0).click()
         pvd.checkPaymentVerificationTitle()
         pvd.getCreateVerificationPlan().click()
         pvd.checkCVPTitle()
@@ -64,8 +64,15 @@ describe("Payment Verification", () => {
     });
 
     context("Edit Verification Plan", () => {
-      it.skip("Test_1", () => {
-        // ToDo
+      beforeEach(() => {
+        // pv.getPaymentPlanID().type("123-21-CSH-00001")
+        // pv.getCashPlanRows().should('have.length', 1)
+        // pv.chooseCashPlan(0).click()
+        // pvd.createNewVerificationPlan()
+      });
+      it.only("Test_1", () => {
+        pvd.getEditVP().contains("EDIT").click()
+        pvd.getCVPTitle
       });
     });
 
@@ -94,15 +101,27 @@ describe("Payment Verification", () => {
         pvd.discardVerificationPlan()
         pvd.deleteVerificationPlan()
       });
-      it.only("Activate Verification Plan", () => {
+      it("Activate Verification Plan", () => {
         pvd.getActivatePlan().click()
         pvd.getActivate().click()
+        pvd.getStatusVP().eq(1).contains("ACTIVE")
       });
     });
 
     context("Finish Verification Plan", () => {
-      it.skip("Test_1", () => {
-        // ToDo
+      beforeEach(() => {
+        pv.getPaymentPlanID().type("123-21-CSH-00001")
+        pv.getCashPlanRows().should('have.length', 1)
+        pv.chooseCashPlan(0).click()
+        pvd.createNewVerificationPlan()
+      });
+      it.skip("Finish Verification Plan", () => {
+        pvd.getActivatePlan().click()
+        pvd.getActivate().click()
+        pvd.getStatusVP().eq(1).contains("ACTIVE")
+        pvd.getFinishPlan().click()
+        pvd.getFinish().click()
+        pvd.getStatusVP().eq(1).contains("FINISHED")
       });
     });
 

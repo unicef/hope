@@ -12,6 +12,7 @@ export default class PVDetailsPage extends BaseComponent {
     tableTitle = 'h6[class="MuiTypography-root MuiTypography-h6"]'
     gridBankReconciliation = 'div[class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column"]'
     summaryStatus = 'div[data-cy="label-Status"]'
+    statusVP = 'div[data-cy="status-container"]'
     summaryActivationDate = 'div[data-cy="label-Activation Date"]'
     summaryCompletionDate = 'div[data-cy="label-Completion Date"]'
     summaryNumberOfPlans = 'div[data-cy="label-Number of Verification Plans"]'
@@ -20,6 +21,8 @@ export default class PVDetailsPage extends BaseComponent {
     snackbarMessage = 'div[class="MuiSnackbarContent-message"]'
     activetePlan = 'button[data-cy="button-activate-plan"]'
     discardPlan = 'button[data-cy="button-discard-plan"]'
+    finishPlan = 'button[data-cy="button-ed-plan"]'
+    editVP = 'button[data-cy="button-new-plan"]'
     // Create Verification Plan
     cvp = 'div[aria-labelledby="form-dialog-title"]'
     cvpTabList = 'div[role="tablist"]'
@@ -70,6 +73,11 @@ export default class PVDetailsPage extends BaseComponent {
     getActivate = () => cy.get(this.cvpSubmit)
     getDiscardPlan = () => cy.get(this.discardPlan)
     getDiscard = () => cy.get(this.cvpSubmit)
+    getStatusVP = () => cy.get(this.statusVP)
+    getFinishPlan = () => cy.get(this.finishPlan)
+    getFinish = () => cy.get(this.cvpSubmit)
+    getEditVP = () => cy.get(this.editVP)
+    
     // Create Verification Plan
     getCVPTitle = () => cy.get(this.cvp).get(this.cvpTitle)
     getFullList = () => cy.get(this.cvp).get(this.cvpTab).eq(0)
