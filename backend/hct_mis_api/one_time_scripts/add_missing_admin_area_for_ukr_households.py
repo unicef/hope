@@ -13,12 +13,22 @@ def update_admin_area_for_households() -> None:
     )
     with open(households_admin_area_file_path) as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=";")
+        admin_areas = {}
         for row in csv_reader:
-            if household := Household.objects.filter(unicef_id=row["unicef_id"]).first():
-                household.admin_area = Area.objects.filter(p_code=row["admin1_area_id"]).first()
-                household.admin1 = Area.objects.filter(p_code=row["admin2_area_id"]).first()
-                household.admin2 = Area.objects.filter(p_code=row["admin3_area_id"]).first()
-                household.save(update_fields=["admin_area", "admin1", "admin2"])
-            else:
+            admin1_p_code, admin2_p_code, admin3_p_code = (
+                row["admin1_area_id"],
+                row["admin2_area_id"],
+                row["admin3_area_id"],
+            )
+            for p_code in [admin1_p_code, admin2_p_code, admin3_p_code]:
+                if p_code not in admin_areas:
+                    admin_areas[p_code] = Area.objects.filter(p_code=p_code).first()
+            updated = Household.objects.filter(unicef_id=row["unicef_id"]).update(
+                admin_area=admin_areas[admin3_p_code],
+                admin1=admin_areas[admin1_p_code],
+                admin2=admin_areas[admin2_p_code],
+                admin3=admin_areas[admin3_p_code],
+            )
+            if not updated:
                 print(f"Household specified in the file is not found in the database ({row['unicef_id']})")
         print("Updated admin areas for specified UKR households")
