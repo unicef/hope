@@ -556,6 +556,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
                             color='primary'
                             choices={mappedFlows}
                             component={FormikSelectField}
+                            required
+                            data-cy='input-title'
                           />
                         ) : (
                           <Field
@@ -565,7 +567,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                             required
                             variant='outlined'
                             component={FormikTextField}
-                            data-cy='input-body'
+                            data-cy='input-title'
                           />
                         )}
                       </Grid>
@@ -581,7 +583,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                             variant='outlined'
                             label={t('Message')}
                             component={FormikTextField}
-                            data-cy='input-body'
+                            data-cy='input-message'
                           />
                         </Grid>
                       </Box>
