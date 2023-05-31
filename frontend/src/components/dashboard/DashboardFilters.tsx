@@ -1,12 +1,12 @@
 import { Grid, MenuItem, Paper } from '@material-ui/core';
-import { useHistory, useLocation } from 'react-router-dom';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { createHandleFilterChange } from '../../utils/utils';
-import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';

@@ -360,8 +360,8 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                         fontSize={16}
                         fontWeight='fontWeightBold'
                       >
-                        {t('Survey will be sent to all households selected')}: (
-                        {values.households.length})
+                        {t('Message will be sent to all households selected')}:
+                        ({values.households.length})
                       </Box>
                     </Box>
                   </Box>

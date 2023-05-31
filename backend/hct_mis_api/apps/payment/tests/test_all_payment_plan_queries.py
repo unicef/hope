@@ -14,7 +14,11 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+)
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
@@ -186,7 +190,11 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
+            program = RealProgramFactory()
+            program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
+                program=program,
+                program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
                 start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
@@ -223,6 +231,8 @@ class TestPaymentPlanQueries(APITestCase):
 
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
+                program=program,
+                program_cycle=program_cycle,
                 start_date=cls.pp.start_date,
                 end_date=cls.pp.end_date,
                 status=PaymentPlan.Status.LOCKED,
