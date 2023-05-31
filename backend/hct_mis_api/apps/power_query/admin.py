@@ -33,8 +33,6 @@ from .widget import FormatterEditor
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.contrib.admin.options import _ModelT
-
 logger = logging.getLogger(__name__)
 
 
@@ -163,7 +161,7 @@ class DatasetAdmin(HOPEModelAdminBase):
     readonly_fields = ("last_run", "query", "info")
     date_hierarchy = "last_run"
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet["_ModelT"]:
+    def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
         return super().get_queryset(request).defer("extra", "value")
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -260,7 +258,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_list_template = None
     search_fields = ("name",)
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet["_ModelT"]:
+    def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
         return super().get_queryset(request).defer("extra", "value")
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
