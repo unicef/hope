@@ -1,3 +1,6 @@
+from typing import Any
+from unittest import mock
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -186,7 +189,8 @@ class TestExcludeHouseholds(APITestCase):
         error_msg = f"['It is not possible to undo exclude Household(s) with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
-    def test_exclude_successfully(self) -> None:
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_exclude_successfully(self, get_exchange_rate_mock: Any) -> None:
         self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
         self.payment_plan.save(update_fields=["background_action_status"])
 
@@ -197,12 +201,11 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2], "Nice Job!")
 
-        pp = PaymentPlan.objects.get(pk=self.payment_plan.pk)
+        self.payment_plan.refresh_from_db()
 
-        self.assertEqual(pp.exclusion_reason, "Nice Job!")
-        self.assertEqual(pp.exclude_household_error, "")
-        print("status check = = =", pp.background_action_status)
-        self.assertEqual(pp.background_action_status, None)
+        self.assertEqual(self.payment_plan.exclusion_reason, "Nice Job!")
+        self.assertEqual(self.payment_plan.exclude_household_error, "")
+        self.assertEqual(self.payment_plan.background_action_status, None)
 
         # excluded hh_1, hh_2
-        self.assertEqual(set(pp.excluded_households_ids), {hh_unicef_id_1, hh_unicef_id_2})
+        self.assertEqual(set(self.payment_plan.excluded_households_ids), {hh_unicef_id_1, hh_unicef_id_2})
