@@ -1,7 +1,7 @@
 import itertools
 import logging
 import pickle
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django.conf import settings
@@ -21,9 +21,11 @@ from sentry_sdk import capture_exception, configure_scope
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
-from hct_mis_api.apps.power_query.exceptions import QueryRunError
-from hct_mis_api.apps.power_query.utils import dict_hash, to_dataset
+
+from .defaults import SYSTEM_PARAMETRIZER
+from .exceptions import QueryRunError
+from .json import PQJSONEncoder
+from .utils import dict_hash, to_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +103,7 @@ class Query(NaturalKeyModel, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="power_queries")
     target = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     code = models.TextField(default="qs=conn.all()", blank=True)
-    info = JSONField(default=dict, blank=True)
+    info = JSONField(default=dict, blank=True, encoder=PQJSONEncoder)
     parametrizer = models.ForeignKey(Parametrizer, on_delete=models.CASCADE, blank=True, null=True)
     sentry_error_id = models.CharField(max_length=400, blank=True, null=True)
     error_message = models.CharField(max_length=400, blank=True, null=True)
@@ -137,20 +139,21 @@ class Query(NaturalKeyModel, models.Model):
         self.info["last_run_results"] = results
         self.error_message = results.get("error_message", "")
         self.sentry_error_id = results.get("sentry_error_id", "")
-        self.last_run = results.get("timestamp", None)
+        self.last_run = timezone.now()
         self.save()
 
     def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Dict[str, str]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
+            if not args:
+                raise ValueError("No valid arguments provided")
         else:
             args = [{}]
-        if not args:
-            raise ValueError("No valid arguments provided")
         self.error_message = None
         self.sentry_error_id = None
         self.last_run = None
         self.info = {}
+
         results: Dict[str, str] = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
         with configure_scope() as scope:
             scope.set_tag("power_query", True)
@@ -160,7 +163,11 @@ class Query(NaturalKeyModel, models.Model):
                 for a in args:
                     try:
                         dataset, __ = self.run(persist, a)
-                        results[str(a)] = dataset.pk
+                        if isinstance(dataset, Dataset):
+                            results[str(a)] = str(dataset.pk)
+                        else:
+                            results[str(a)] = str(len(dataset))
+
                     except QueryRunError as e:
                         logger.exception(e)
                         err = capture_exception(e)
@@ -169,7 +176,7 @@ class Query(NaturalKeyModel, models.Model):
                 self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist: bool = False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
+    def run(self, persist: bool = False, arguments: Optional[Dict] = None) -> Tuple[Union["Dataset", List], Dict]:
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
