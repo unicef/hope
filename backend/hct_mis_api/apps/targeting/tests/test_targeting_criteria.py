@@ -387,7 +387,7 @@ class TestTargetingCriteriaFlags(APITestCase):
         TargetPopulationFactory(
             targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
-            households=[cls.household1, cls.household2]
+            households=[cls.household1, cls.household2],
         )
         cls.representative2 = IndividualFactory(household=None)
         cls.household2.representatives.set([cls.representative2])
