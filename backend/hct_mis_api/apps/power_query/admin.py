@@ -33,7 +33,6 @@ from .widget import FormatterEditor
 if TYPE_CHECKING:
     from uuid import UUID
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -58,16 +57,22 @@ class QueryResource(resources.ModelResource):
 
 @register(Query)
 class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "target", "description", "owner")
+    list_display = ("name", "target", "owner", "active", "success")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
         ("owner", AutoCompleteFilter),
+        "active",
     )
     autocomplete_fields = ("target", "owner")
     readonly_fields = ("sentry_error_id", "error_message", "info")
     change_form_template = None
     resource_class = QueryResource
+
+    def success(self, obj: Query) -> bool:
+        return not bool(obj.error_message)
+
+    success.boolean = True
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Optional[forms.fields.Field]:
         if db_field.name == "code":
@@ -147,7 +152,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 @register(Dataset)
 class DatasetAdmin(HOPEModelAdminBase):
     search_fields = ("query__name",)
-    list_display = ("query", "id", "last_run", "dataset_type", "target_type", "size", "arguments")
+    list_display = ("query", "last_run", "dataset_type", "target_type", "size", "arguments")
     list_filter = (
         ("query__target", AutoCompleteFilter),
         ("query", AutoCompleteFilter),

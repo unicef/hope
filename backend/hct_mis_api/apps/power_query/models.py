@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 
 from natural_keys import NaturalKeyModel
+from sentry_sdk import capture_exception, configure_scope
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -105,6 +106,8 @@ class Query(NaturalKeyModel, models.Model):
     sentry_error_id = models.CharField(max_length=400, blank=True, null=True)
     error_message = models.CharField(max_length=400, blank=True, null=True)
 
+    last_run = models.DateTimeField(null=True, blank=True)
+
     active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
@@ -123,7 +126,6 @@ class Query(NaturalKeyModel, models.Model):
     ) -> None:
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
-        self.error = None
         super().save(force_insert, force_update, using, update_fields)
 
     def _invoke(self, query_id: UUID, arguments: List) -> Dict:
@@ -133,6 +135,9 @@ class Query(NaturalKeyModel, models.Model):
 
     def update_results(self, results: Any) -> None:
         self.info["last_run_results"] = results
+        self.error_message = results.get("error_message", "")
+        self.sentry_error_id = results.get("sentry_error_id", "")
+        self.last_run = results.get("timestamp", None)
         self.save()
 
     def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Dict[str, str]:
@@ -142,16 +147,26 @@ class Query(NaturalKeyModel, models.Model):
             args = [{}]
         if not args:
             raise ValueError("No valid arguments provided")
+        self.error_message = None
+        self.sentry_error_id = None
+        self.last_run = None
+        self.info = {}
         results: Dict[str, str] = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
-        with transaction.atomic():
-            transaction.on_commit(lambda: self.update_results(results))
-            for a in args:
-                try:
-                    dataset, __ = self.run(persist, a)
-                    results[str(a)] = dataset.pk
-                except QueryRunError as e:
-                    results[str(a)] = str(e)
-            self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
+        with configure_scope() as scope:
+            scope.set_tag("power_query", True)
+            scope.set_tag("power_query.name", self.name)
+            with transaction.atomic():
+                transaction.on_commit(lambda: self.update_results(results))
+                for a in args:
+                    try:
+                        dataset, __ = self.run(persist, a)
+                        results[str(a)] = dataset.pk
+                    except QueryRunError as e:
+                        logger.exception(e)
+                        err = capture_exception(e)
+                        results["sentry_error_id"] = err
+                        results["error_message"] = str(e)
+                self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
     def run(self, persist: bool = False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
@@ -160,6 +175,10 @@ class Query(NaturalKeyModel, models.Model):
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
             for model in [BusinessArea, User]
         }
+        if self.owner.is_superuser:
+            connections["QueryManager"] = Query.objects.filter()
+        else:
+            connections["QueryManager"] = Query.objects.filter(owner=self.owner)
 
         try:
             locals_ = {
