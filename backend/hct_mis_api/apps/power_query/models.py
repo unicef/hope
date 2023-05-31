@@ -171,7 +171,7 @@ class Query(NaturalKeyModel, models.Model):
                     except QueryRunError as e:
                         logger.exception(e)
                         err = capture_exception(e)
-                        results["sentry_error_id"] = err
+                        results["sentry_error_id"] = str(err)
                         results["error_message"] = str(e)
                 self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
