@@ -18,9 +18,19 @@ class Command(BaseCommand):
 
         execute = subparsers.add_parser("execute")
         execute.add_argument("id")
+        execute.add_argument(
+            "--persist",
+            action="store_true",
+            default=False,
+        )
 
         run = subparsers.add_parser("run")
         run.add_argument("id")
+        run.add_argument(
+            "--persist",
+            action="store_true",
+            default=False,
+        )
         run.add_argument(
             "--arguments",
             "-a",
@@ -58,7 +68,7 @@ class Command(BaseCommand):
                 k, v = a.split("=")
                 query_args[k] = v
             pq = PowerQuery.objects.get(pk=options["id"])
-            result, info = pq.run(persist=False, arguments=query_args)
+            result, info = pq.run(persist=options["persist"], arguments=query_args)
             for k, v in info.items():
                 self.stdout.write(f"{k}: {v}")
             self.stdout.write("=" * 80)
@@ -73,7 +83,7 @@ class Command(BaseCommand):
 
         try:
             pq = PowerQuery.objects.get(pk=options["id"])
-            result = pq.execute_matrix(persist=False)
+            result = pq.execute_matrix(persist=options["persist"])
             # for k,v  in info.items():
             #     self.stdout.write(f"{k}: {v}")
             # self.stdout.write("=" * 80)
