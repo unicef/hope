@@ -239,6 +239,8 @@ export function validateUsingSteps(
     'address',
     'village',
     'admin1',
+    'admin2',
+    'admin3',
     'unhcrId',
     'months_displaced_h_f',
     'fullName',
