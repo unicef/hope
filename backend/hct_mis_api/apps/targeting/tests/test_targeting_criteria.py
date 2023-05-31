@@ -18,7 +18,10 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -27,7 +30,9 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
+from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCriteriaQueryingBase,
+)
 
 
 class TestTargetingCriteriaQuery(APITestCase):
