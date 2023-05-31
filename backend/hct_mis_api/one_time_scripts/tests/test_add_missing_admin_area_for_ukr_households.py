@@ -46,6 +46,7 @@ class TestUpdateAdminAreaFromFile(TestCase):
             mock_join.return_value = self.test_file_path
             update_admin_area_for_households()
         self.household.refresh_from_db()
-        self.assertEqual(self.household.admin_area, self.area1)
-        self.assertEqual(self.household.admin1, self.area2)
-        self.assertEqual(self.household.admin2, self.area3)
+        self.assertEqual(self.household.admin_area, self.area3)
+        self.assertEqual(self.household.admin1, self.area1)
+        self.assertEqual(self.household.admin2, self.area2)
+        self.assertEqual(self.household.admin3, self.area3)
