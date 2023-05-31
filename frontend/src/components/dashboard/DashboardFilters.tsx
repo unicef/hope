@@ -9,7 +9,7 @@ import { createHandleFilterChange } from '../../utils/utils';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;
