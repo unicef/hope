@@ -20,6 +20,7 @@ describe("Payment Verification", () => {
       pv.checkCashPlansTableVisible()
     });
 
+    // eslint-disable-next-line mocha/no-setup-in-describe
     pv.countCashPlanArray().forEach((row_no) => {
       it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
         pv.chooseCashPlan(row_no).click()
@@ -65,12 +66,12 @@ describe("Payment Verification", () => {
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        // pv.getPaymentPlanID().type("123-21-CSH-00001")
-        // pv.getCashPlanRows().should('have.length', 1)
-        // pv.chooseCashPlan(0).click()
-        // pvd.createNewVerificationPlan()
+        pv.getPaymentPlanID().type("123-21-CSH-00001")
+        pv.getCashPlanRows().should('have.length', 1)
+        pv.chooseCashPlan(0).click()
+        pvd.createNewVerificationPlan()
       });
-      it.only("Test_1", () => {
+      it.skip("Test_1", () => {
         pvd.getEditVP().contains("EDIT").click()
         pvd.getCVPTitle
       });
@@ -146,6 +147,7 @@ describe("Payment Verification", () => {
 
   });
   describe("E2E tests Payment Verification", () => {
+    // eslint-disable-next-line mocha/no-setup-in-describe
     pv.countCashPlanArray().forEach((row_no) => {
     it.skip(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
       // pv.chooseCashPlan(row_no).click()
