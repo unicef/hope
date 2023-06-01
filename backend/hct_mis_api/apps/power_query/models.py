@@ -142,7 +142,7 @@ class Query(NaturalKeyModel, models.Model):
         self.last_run = timezone.now()
         self.save()
 
-    def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Dict[str, str]:
+    def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Union[Dict[str, int], Dict[str, str]]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
             if not args:
@@ -164,7 +164,7 @@ class Query(NaturalKeyModel, models.Model):
                     try:
                         dataset, __ = self.run(persist, a)
                         if isinstance(dataset, Dataset):
-                            results[str(a)] = str(dataset.pk)
+                            results[str(a)] = dataset.pk
                         else:
                             results[str(a)] = str(len(dataset))
 
