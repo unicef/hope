@@ -629,6 +629,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         self.rdi_2.refresh_from_db()
         self.rdi_3.refresh_from_db()
 
-        self.assertEqual(self.rdi_1.status, RegistrationDataImport.REFUSED_IMPORT)
-        self.assertEqual(self.rdi_2.status, RegistrationDataImport.REFUSED_IMPORT)
+        self.assertEqual(self.rdi_1.status, RegistrationDataImport.ABORTED)
+        self.assertEqual(self.rdi_2.status, RegistrationDataImport.ABORTED)
         self.assertEqual(self.rdi_3.status, RegistrationDataImport.MERGING)

@@ -2,12 +2,16 @@ import { Box, Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 import React, { ReactElement, useState } from 'react';
 import {
   AllImportedIndividualsQueryVariables,
+  AllMergedIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
+  MergedIndividualMinimalFragment,
   useAllImportedIndividualsQuery,
+  useAllMergedIndividualsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './ImportedIndividualsTableHeadCells';
+import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
+import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 
 interface ImportedIndividualsTableProps {
@@ -19,6 +23,7 @@ interface ImportedIndividualsTableProps {
   isOnPaper?: boolean;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;
+  isMerged: boolean;
 }
 
 export function ImportedIndividualsTable({
@@ -30,6 +35,7 @@ export function ImportedIndividualsTable({
   showCheckbox,
   businessArea,
   choicesData,
+  isMerged,
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
 
@@ -60,12 +66,34 @@ export function ImportedIndividualsTable({
           </Grid>
         </Grid>
       )}
-      <UniversalTable<
+      {isMerged ?
+          <UniversalTable<
+            MergedIndividualMinimalFragment,
+            AllMergedIndividualsQueryVariables
+          >
+            title={title}
+            headCells={mergedIndividualHeadCells}
+            query={useAllMergedIndividualsQuery}
+            queriedObjectName='allMergedIndividuals'
+            rowsPerPageOptions={rowsPerPageOptions}
+            initialVariables={initialVariables}
+            isOnPaper={isOnPaper}
+            renderRow={(row) => (
+              <ImportedIndividualsTableRow
+                choices={choicesData}
+                key={row.id}
+                isMerged={isMerged}
+                individual={row}
+              />
+            )}
+          />
+        :
+          <UniversalTable<
         ImportedIndividualMinimalFragment,
         AllImportedIndividualsQueryVariables
       >
         title={title}
-        headCells={headCells}
+        headCells={importedIndividualHeadCells}
         query={useAllImportedIndividualsQuery}
         queriedObjectName='allImportedIndividuals'
         rowsPerPageOptions={rowsPerPageOptions}
@@ -75,10 +103,12 @@ export function ImportedIndividualsTable({
           <ImportedIndividualsTableRow
             choices={choicesData}
             key={row.id}
+            isMerged={isMerged}
             individual={row}
           />
         )}
       />
+      }
     </div>
   );
 }

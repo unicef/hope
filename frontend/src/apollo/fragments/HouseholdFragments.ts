@@ -153,3 +153,25 @@ export const householdDetailed = gql`
     }
   }
 `;
+
+export const mergedHouseholdMinimal = gql`
+  fragment mergedHouseholdMinimal on HouseholdNode {
+    id
+    unicefId
+    headOfHousehold {
+      id
+      fullName
+    }
+    size
+    admin1 {
+        id
+        name
+    }    
+    admin2 {
+        id
+        name
+    }    
+    firstRegistrationDate
+    hasDuplicates
+  }
+`;

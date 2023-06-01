@@ -445,6 +445,8 @@ class RdiMergeTask:
 
             imported_households.delete()
 
+            logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
+
             cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
             cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
 
