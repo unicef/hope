@@ -234,7 +234,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   };
 
   const matchTitle = (values): string => {
-    return category === SurveyCategory.Sms
+    return category === SurveyCategory.Sms || category === SurveyCategory.Manual
       ? values.title
       : flowsData?.availableFlows.find((el) => values.title === el.id).name;
   };
