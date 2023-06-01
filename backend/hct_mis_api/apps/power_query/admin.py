@@ -16,6 +16,7 @@ from django.urls import reverse
 import tablib
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
+from celery.result import AsyncResult
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
@@ -23,7 +24,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from ..steficon.widget import PythonEditor
 from ..utils.admin import HOPEModelAdminBase
-from .celery_tasks import refresh_reports, run_background_query
+from .celery_tasks import refresh_report, refresh_reports, run_background_query
 from .defaults import SYSTEM_PARAMETRIZER
 from .forms import FormatterTestForm
 from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
@@ -32,7 +33,6 @@ from .widget import FormatterEditor
 
 if TYPE_CHECKING:
     from uuid import UUID
-
 
 logger = logging.getLogger(__name__)
 
@@ -58,16 +58,23 @@ class QueryResource(resources.ModelResource):
 
 @register(Query)
 class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "target", "description", "owner")
+    list_display = ("name", "target", "owner", "active", "success")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
         ("owner", AutoCompleteFilter),
+        "active",
+        "last_run",
     )
     autocomplete_fields = ("target", "owner")
     readonly_fields = ("sentry_error_id", "error_message", "info")
     change_form_template = None
     resource_class = QueryResource
+
+    def success(self, obj: Query) -> bool:
+        return not bool(obj.error_message)
+
+    success.boolean = True
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Optional[forms.fields.Field]:
         if db_field.name == "code":
@@ -105,8 +112,8 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button()
     def queue(self, request: HttpRequest, pk: "UUID") -> None:
         try:
-            run_background_query.delay(pk)
-            self.message_user(request, "Query scheduled")
+            res: AsyncResult = run_background_query.delay(pk)
+            self.message_user(request, f"Query scheduled: {res}")
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
@@ -147,14 +154,18 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 @register(Dataset)
 class DatasetAdmin(HOPEModelAdminBase):
     search_fields = ("query__name",)
-    list_display = ("query", "id", "last_run", "dataset_type", "target_type", "size", "arguments")
+    list_display = ("query", "last_run", "dataset_type", "target_type", "size", "arguments")
     list_filter = (
         ("query__target", AutoCompleteFilter),
         ("query", AutoCompleteFilter),
+        "last_run",
     )
     change_form_template = None
     readonly_fields = ("last_run", "query", "info")
     date_hierarchy = "last_run"
+
+    def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
+        return super().get_queryset(request).defer("extra", "value")
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -241,11 +252,16 @@ class ReportResource(resources.ModelResource):
 
 @register(Report)
 class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "query", "formatter", "last_run", "frequence")
-    autocomplete_fields = ("query", "formatter")
-    filter_horizontal = ("limit_access_to",)
+    list_display = ("name", "formatter", "last_run", "frequence", "owner")
+    autocomplete_fields = ("query", "formatter", "owner")
+    filter_horizontal = ["limit_access_to"]
     readonly_fields = ("last_run",)
-    list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
+    list_filter = (
+        ("owner", AutoCompleteFilter),
+        ("query", AutoCompleteFilter),
+        ("formatter", AutoCompleteFilter),
+        "last_run",
+    )
     resource_class = ReportResource
     change_list_template = None
     search_fields = ("name",)
@@ -261,6 +277,17 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             kwargs["name"] = f"Report for {q.name}"
             kwargs["notify_to"] = [request.user]
         return kwargs
+
+    @button(visible=lambda btn: "change" in btn.context["request"].path)
+    def queue(self, request: HttpRequest, pk: "UUID") -> None:
+        if not (obj := self.get_object(request, str(pk))):
+            raise Exception("Report not found")
+        try:
+            res: AsyncResult = refresh_report.delay(obj.pk)
+            self.message_user(request, f"Report scheduled: {res}")
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
@@ -314,6 +341,9 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_filter = (("report", AutoCompleteFilter),)
     filter_horizontal = ("limit_access_to",)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
+
+    def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
+        return super().get_queryset(request).defer("output")
 
     def size(self, obj: ReportDocument) -> int:
         return len(obj.output or "")
