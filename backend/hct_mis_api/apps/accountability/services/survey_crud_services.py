@@ -20,6 +20,7 @@ class SurveyCrudServices:
             title=input_data.get("title"),
             category=input_data.get("category"),
             sampling_type=input_data.get("sampling_type"),
+            body=input_data.get("body", ""),
         )
 
         if target_population := input_data.get("target_population"):
