@@ -459,31 +459,34 @@ def payment_plan_exclude_beneficiaries(
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        pp_payment_items = payment_plan.payment_items
         payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
         error_msg = []
 
         try:
             for hh_unicef_id in excluding_hh_ids:
-                if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
+                if not pp_payment_items.filter(household__unicef_id=hh_unicef_id).exists():
                     error_msg.append(f"Household {hh_unicef_id} is not included in this {payment_plan_title}.")
-                    # remove HH_id from list because later will compare number of HHs with eligible_payments().count()
+                    # remove wrong HH_id from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_ids.remove(hh_unicef_id)
 
             if payment_plan.status == PaymentPlan.Status.LOCKED:
-                # for Locked Payment we check if not remove all HHs
-                if len(excluding_hh_ids) >= payment_plan.eligible_payments.count():
+                # for Locked PaymentPlan we check if all HHs are not removed from PP
+                if len(excluding_hh_ids) >= pp_payment_items.count():
                     error_msg.append(f"You can't exclude all households from the {payment_plan_title}.")
 
-            payments_for_revert_exclude = payment_plan.payment_items.filter(excluded=True).exclude(
+            payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
                 household__unicef_id__in=excluding_hh_ids
             )
-            reverted_hh_ids = payments_for_revert_exclude.values_list("household__unicef_id", flat=True)
+            undo_exclude_hh_ids = payments_for_undo_exclude.values_list("household__unicef_id", flat=True)
 
             # check if hard conflicts exists in other Payments for undo exclude HH
-            for hh_unicef_id in reverted_hh_ids:
-                # TODO: update after fix with program_cycle
+            for hh_unicef_id in undo_exclude_hh_ids:
                 if (
                     Payment.objects.exclude(parent__id=payment_plan.pk)
+                    .filter(
+                        parent__program_cycle_id=payment_plan.program_cycle_id
+                    )  # check only Payments in the same program cycle
                     .filter(
                         Q(parent__start_date__lte=payment_plan.end_date)
                         & Q(parent__end_date__gte=payment_plan.start_date),
@@ -510,7 +513,7 @@ def payment_plan_exclude_beneficiaries(
             payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluding_hh_ids)
 
             payments_for_exclude.update(excluded=True)
-            payments_for_revert_exclude.update(excluded=False)
+            payments_for_undo_exclude.update(excluded=False)
 
             payment_plan.update_population_count_fields()
             payment_plan.update_money_fields()
