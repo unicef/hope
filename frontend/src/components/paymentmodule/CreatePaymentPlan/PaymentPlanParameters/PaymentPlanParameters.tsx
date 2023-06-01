@@ -13,10 +13,12 @@ import { tomorrow } from '../../../../utils/utils';
 
 interface PaymentPlanParametersProps {
   values;
+  paymentPlan?;
 }
 
 export const PaymentPlanParameters = ({
   values,
+  paymentPlan,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
   const [
@@ -51,7 +53,7 @@ export const PaymentPlanParameters = ({
               maxDate={
                 values.endDate || data?.targetPopulation?.program?.endDate
               }
-              disabled={!data || loading}
+              disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-start-date'
@@ -68,7 +70,7 @@ export const PaymentPlanParameters = ({
               required
               minDate={values.startDate}
               maxDate={data?.targetPopulation?.program?.endDate}
-              disabled={!values.startDate}
+              disabled={!values.startDate || Boolean(paymentPlan?.isFollowUp)}
               initialFocusedDate={values.startDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
@@ -83,6 +85,7 @@ export const PaymentPlanParameters = ({
               name='currency'
               component={FormikCurrencyAutocomplete}
               required
+              disabled={Boolean(paymentPlan?.isFollowUp)}
             />
           </Grid>
           <Grid item xs={4}>
