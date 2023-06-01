@@ -546,6 +546,10 @@ class MergedHouseholdFilter(FilterSet):
 
 
 class MergedIndividualFilter(FilterSet):
+    """
+    This filter emulates ImportedIndividual filter for data structure which is linked to Import Preview when RDI is merged
+    """
+
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
     business_area = CharFilter(field_name="business_area__slug")
