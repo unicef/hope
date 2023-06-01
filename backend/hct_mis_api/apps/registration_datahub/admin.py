@@ -418,7 +418,7 @@ class CreateRDIForm(forms.Form):
         if self.cleaned_data["registration"] not in get_registration_to_rdi_service_map().keys():
             raise ValidationError(
                 "Invalid registration number. Data can be processed only for registration(s): "
-                "17 - Sri Lanka; 2, 3 - Ukraine;"
+                "17 - Sri Lanka; 2, 3 - Ukraine; 25 - Czech Republic;"
             )
         return self.cleaned_data["registration"]
 
@@ -482,7 +482,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
             self.message_user(
                 request,
-                "Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3, 11 - Ukraine;",
+                "Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3, 11 - Ukraine; 25 - Czech Republic",
                 messages.ERROR,
             )
             return
@@ -494,6 +494,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                 continue
             try:
                 records_ids = qs.values_list("id", flat=True)
+
                 rdi = service().create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
 
                 create_task_for_processing_records(service, rdi.pk, list(records_ids))
@@ -602,7 +603,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                     self.message_user(
                         request,
                         "Invalid registration number. Data can be processed only for registration(s): "
-                        "17 - Sri Lanka; 2, 3, 11 - Ukraine;",
+                        "17 - Sri Lanka; 2, 3, 11 - Ukraine; 25 - Czech Republic",
                         messages.ERROR,
                     )
         else:
