@@ -730,6 +730,8 @@ type DocumentNode implements Node {
   cleared: Boolean!
   clearedDate: DateTime!
   clearedBy: UserNode
+  issuanceDate: DateTime
+  expiryDate: DateTime
   countryIso3: String
 }
 
@@ -1343,6 +1345,8 @@ type ImportedDocumentNode implements Node {
   type: ImportedDocumentTypeNode!
   country: String
   docDate: Date
+  issuanceDate: Date
+  expiryDate: Date
 }
 
 type ImportedDocumentNodeConnection {

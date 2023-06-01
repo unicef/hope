@@ -1107,6 +1107,8 @@ export type DocumentNode = Node & {
   cleared: Scalars['Boolean'],
   clearedDate: Scalars['DateTime'],
   clearedBy?: Maybe<UserNode>,
+  issuanceDate?: Maybe<Scalars['DateTime']>,
+  expiryDate?: Maybe<Scalars['DateTime']>,
   countryIso3?: Maybe<Scalars['String']>,
 };
 
@@ -1976,6 +1978,8 @@ export type ImportedDocumentNode = Node & {
   type: ImportedDocumentTypeNode,
   country?: Maybe<Scalars['String']>,
   docDate?: Maybe<Scalars['Date']>,
+  issuanceDate?: Maybe<Scalars['Date']>,
+  expiryDate?: Maybe<Scalars['Date']>,
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -24935,6 +24939,8 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   cleared?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   clearedDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  issuanceDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  expiryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -25364,6 +25370,8 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   docDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  issuanceDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
