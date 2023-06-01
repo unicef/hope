@@ -1,10 +1,11 @@
 import datetime
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
@@ -438,10 +439,96 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
         payment_plan.status_open()
-        payment_plan.status_lock()
         payment_plan.save(update_fields=("status",))
     except Exception as e:
         logger.exception("Prepare Follow Up Payment Plan Error")
         raise self.retry(exc=e) from e
 
     return True
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_exclude_beneficiaries(
+    self: Any, payment_plan_id: str, excluding_hh_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
+) -> None:
+    try:
+        from django.db.models import Q
+
+        from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        pp_payment_items = payment_plan.payment_items
+        payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
+        error_msg = []
+
+        try:
+            for hh_unicef_id in excluding_hh_ids:
+                if not pp_payment_items.filter(household__unicef_id=hh_unicef_id).exists():
+                    error_msg.append(f"Household {hh_unicef_id} is not included in this {payment_plan_title}.")
+                    # remove wrong HH_id from the list because later will compare number of HHs with .eligible_payments()
+                    excluding_hh_ids.remove(hh_unicef_id)
+
+            if payment_plan.status == PaymentPlan.Status.LOCKED:
+                # for Locked PaymentPlan we check if all HHs are not removed from PP
+                if len(excluding_hh_ids) >= pp_payment_items.count():
+                    error_msg.append(f"You can't exclude all households from the {payment_plan_title}.")
+
+            payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
+                household__unicef_id__in=excluding_hh_ids
+            )
+            undo_exclude_hh_ids = payments_for_undo_exclude.values_list("household__unicef_id", flat=True)
+
+            # check if hard conflicts exists in other Payments for undo exclude HH
+            for hh_unicef_id in undo_exclude_hh_ids:
+                if (
+                    Payment.objects.exclude(parent__id=payment_plan.pk)
+                    .filter(
+                        parent__program_cycle_id=payment_plan.program_cycle_id
+                    )  # check only Payments in the same program cycle
+                    .filter(
+                        Q(parent__start_date__lte=payment_plan.end_date)
+                        & Q(parent__end_date__gte=payment_plan.start_date),
+                        ~Q(parent__status=PaymentPlan.Status.OPEN),
+                        Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False),
+                    )
+                    .exists()
+                ):
+                    error_msg.append(
+                        f"It is not possible to undo exclude Household(s) with ID {hh_unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
+                    )
+
+            if exclusion_reason:
+                payment_plan.exclusion_reason = exclusion_reason
+
+            if error_msg:
+                payment_plan.background_action_status_exclude_beneficiaries_error()
+                payment_plan.exclude_household_error = str(error_msg)
+                payment_plan.save(
+                    update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
+                )
+                raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
+
+            payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluding_hh_ids)
+
+            payments_for_exclude.update(excluded=True)
+            payments_for_undo_exclude.update(excluded=False)
+
+            payment_plan.update_population_count_fields()
+            payment_plan.update_money_fields()
+
+            payment_plan.background_action_status_none()
+            payment_plan.exclude_household_error = ""
+            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+        except Exception as e:
+            logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
+            payment_plan.background_action_status_exclude_beneficiaries_error()
+
+            if error_msg:
+                payment_plan.exclude_household_error = str(error_msg)
+            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+
+    except Exception as e:
+        logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
+        raise self.retry(exc=e)
