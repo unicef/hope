@@ -4563,6 +4563,8 @@ export type Query = {
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
   allIndividuals?: Maybe<IndividualNodeConnection>,
+  allMergedHouseholds?: Maybe<HouseholdNodeConnection>,
+  allMergedIndividuals?: Maybe<IndividualNodeConnection>,
   sectionHouseholdsReached?: Maybe<SectionTotalNode>,
   sectionIndividualsReached?: Maybe<SectionTotalNode>,
   sectionChildReached?: Maybe<SectionTotalNode>,
@@ -5245,6 +5247,32 @@ export type QueryAllIndividualsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllMergedHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllMergedIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  household?: Maybe<Scalars['ID']>,
+  rdiId?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -7451,6 +7479,21 @@ export type HouseholdDetailedFragment = (
   & HouseholdMinimalFragment
 );
 
+export type MergedHouseholdMinimalFragment = (
+  { __typename?: 'HouseholdNode' }
+  & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'firstRegistrationDate' | 'hasDuplicates'>
+  & { headOfHousehold: (
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'fullName'>
+  ), admin1: Maybe<(
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name'>
+  )>, admin2: Maybe<(
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name'>
+  )> }
+);
+
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
   & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'email' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
@@ -7540,6 +7583,21 @@ export type IndividualDetailedFragment = (
     & Pick<BankAccountInfoNode, 'bankName' | 'bankAccountNumber'>
   )> }
   & IndividualMinimalFragment
+);
+
+export type MergedIndividualMinimalFragment = (
+  { __typename?: 'IndividualNode' }
+  & Pick<IndividualNode, 'id' | 'unicefId' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
+  )>>>, deduplicationBatchResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
+  )>>>, registrationDataImport: Maybe<(
+    { __typename?: 'RegistrationDataImportNode' }
+    & Pick<RegistrationDataImportNode, 'id' | 'datahubId'>
+  )> }
 );
 
 export type PaymentRecordDetailsFragment = (
@@ -11336,6 +11394,68 @@ export type AllKoboProjectsQuery = (
   )> }
 );
 
+export type AllMergedHouseholdsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllMergedHouseholdsQuery = (
+  { __typename?: 'Query' }
+  & { allMergedHouseholds: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & MergedHouseholdMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllMergedIndividualsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllMergedIndividualsQuery = (
+  { __typename?: 'Query' }
+  & { allMergedIndividuals: Maybe<(
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & MergedIndividualMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllRegistrationDataImportsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -12083,6 +12203,27 @@ export const HouseholdDetailedFragmentDoc = gql`
 }
     ${HouseholdMinimalFragmentDoc}
 ${IndividualMinimalFragmentDoc}`;
+export const MergedHouseholdMinimalFragmentDoc = gql`
+    fragment mergedHouseholdMinimal on HouseholdNode {
+  id
+  unicefId
+  headOfHousehold {
+    id
+    fullName
+  }
+  size
+  admin1 {
+    id
+    name
+  }
+  admin2 {
+    id
+    name
+  }
+  firstRegistrationDate
+  hasDuplicates
+}
+    `;
 export const IndividualDetailedFragmentDoc = gql`
     fragment individualDetailed on IndividualNode {
   ...individualMinimal
@@ -12164,6 +12305,40 @@ export const IndividualDetailedFragmentDoc = gql`
   preferredLanguage
 }
     ${IndividualMinimalFragmentDoc}`;
+export const MergedIndividualMinimalFragmentDoc = gql`
+    fragment mergedIndividualMinimal on IndividualNode {
+  id
+  unicefId
+  age
+  fullName
+  birthDate
+  sex
+  role
+  relationship
+  deduplicationBatchStatus
+  deduplicationGoldenRecordStatus
+  deduplicationGoldenRecordResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+    age
+    location
+  }
+  deduplicationBatchResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+    age
+    location
+  }
+  registrationDataImport {
+    id
+    datahubId
+  }
+}
+    `;
 export const PaymentRecordDetailsFragmentDoc = gql`
     fragment paymentRecordDetails on PaymentRecordNode {
   id
@@ -21705,6 +21880,144 @@ export function useAllKoboProjectsLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProjectsQuery>;
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
+export const AllMergedHouseholdsDocument = gql`
+    query AllMergedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
+  allMergedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...mergedHouseholdMinimal
+      }
+    }
+  }
+}
+    ${MergedHouseholdMinimalFragmentDoc}`;
+export type AllMergedHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>, 'query'>;
+
+    export const AllMergedHouseholdsComponent = (props: AllMergedHouseholdsComponentProps) => (
+      <ApolloReactComponents.Query<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables> query={AllMergedHouseholdsDocument} {...props} />
+    );
+    
+export type AllMergedHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables> & TChildProps;
+export function withAllMergedHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllMergedHouseholdsQuery,
+  AllMergedHouseholdsQueryVariables,
+  AllMergedHouseholdsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables, AllMergedHouseholdsProps<TChildProps>>(AllMergedHouseholdsDocument, {
+      alias: 'allMergedHouseholds',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllMergedHouseholdsQuery__
+ *
+ * To run a query within a React component, call `useAllMergedHouseholdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllMergedHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllMergedHouseholdsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      rdiId: // value for 'rdiId'
+ *      orderBy: // value for 'orderBy'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllMergedHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, baseOptions);
+      }
+export function useAllMergedHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, baseOptions);
+        }
+export type AllMergedHouseholdsQueryHookResult = ReturnType<typeof useAllMergedHouseholdsQuery>;
+export type AllMergedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllMergedHouseholdsLazyQuery>;
+export type AllMergedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>;
+export const AllMergedIndividualsDocument = gql`
+    query AllMergedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String, $duplicatesOnly: Boolean, $businessArea: String) {
+  allMergedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy, duplicatesOnly: $duplicatesOnly, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...mergedIndividualMinimal
+      }
+    }
+  }
+}
+    ${MergedIndividualMinimalFragmentDoc}`;
+export type AllMergedIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>, 'query'>;
+
+    export const AllMergedIndividualsComponent = (props: AllMergedIndividualsComponentProps) => (
+      <ApolloReactComponents.Query<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables> query={AllMergedIndividualsDocument} {...props} />
+    );
+    
+export type AllMergedIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables> & TChildProps;
+export function withAllMergedIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllMergedIndividualsQuery,
+  AllMergedIndividualsQueryVariables,
+  AllMergedIndividualsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables, AllMergedIndividualsProps<TChildProps>>(AllMergedIndividualsDocument, {
+      alias: 'allMergedIndividuals',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllMergedIndividualsQuery__
+ *
+ * To run a query within a React component, call `useAllMergedIndividualsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllMergedIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllMergedIndividualsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      rdiId: // value for 'rdiId'
+ *      household: // value for 'household'
+ *      orderBy: // value for 'orderBy'
+ *      duplicatesOnly: // value for 'duplicatesOnly'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllMergedIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, baseOptions);
+      }
+export function useAllMergedIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, baseOptions);
+        }
+export type AllMergedIndividualsQueryHookResult = ReturnType<typeof useAllMergedIndividualsQuery>;
+export type AllMergedIndividualsLazyQueryHookResult = ReturnType<typeof useAllMergedIndividualsLazyQuery>;
+export type AllMergedIndividualsQueryResult = ApolloReactCommon.QueryResult<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
     query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String) {
   allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea) {
@@ -26111,6 +26424,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
   allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
+  allMergedHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllMergedHouseholdsArgs>,
+  allMergedIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllMergedIndividualsArgs>,
   sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>,
