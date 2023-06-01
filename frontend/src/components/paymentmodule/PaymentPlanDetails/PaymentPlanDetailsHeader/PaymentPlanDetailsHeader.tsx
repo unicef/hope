@@ -20,7 +20,7 @@ import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPla
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
-  width: 140px;
+  width: 300px;
   margin-left: 30px;
 `;
 
