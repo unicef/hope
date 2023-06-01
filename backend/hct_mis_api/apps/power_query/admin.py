@@ -16,6 +16,7 @@ from django.urls import reverse
 import tablib
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
+from celery.result import AsyncResult
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
@@ -111,8 +112,8 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button()
     def queue(self, request: HttpRequest, pk: "UUID") -> None:
         try:
-            run_background_query.delay(pk)
-            self.message_user(request, "Query scheduled")
+            res: AsyncResult = run_background_query.delay(pk)
+            self.message_user(request, f"Query scheduled: {res}")
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
@@ -282,8 +283,8 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
         try:
-            refresh_report.delay(obj.pk)
-            self.message_user(request, "Query scheduled")
+            res: AsyncResult = refresh_report.delay(obj.pk)
+            self.message_user(request, f"Report scheduled: {res}")
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
