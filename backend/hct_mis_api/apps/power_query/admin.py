@@ -290,7 +290,6 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
-        obj: Report
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
         try:
