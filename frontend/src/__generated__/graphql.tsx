@@ -3694,7 +3694,9 @@ export enum PaymentPlanBackgroundActionStatus {
   XlsxExportError = 'XLSX_EXPORT_ERROR',
   XlsxImportError = 'XLSX_IMPORT_ERROR',
   XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
-  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION'
+  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
+  ExcludeBeneficiaries = 'EXCLUDE_BENEFICIARIES',
+  ExcludeBeneficiariesError = 'EXCLUDE_BENEFICIARIES_ERROR'
 }
 
 export enum PaymentPlanCurrency {
@@ -3902,6 +3904,7 @@ export type PaymentPlanNode = Node & {
   sourcePaymentPlan?: Maybe<PaymentPlanNode>,
   isFollowUp: Scalars['Boolean'],
   exclusionReason: Scalars['String'],
+  excludeHouseholdError: Scalars['String'],
   followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
@@ -3923,7 +3926,6 @@ export type PaymentPlanNode = Node & {
   canCreateFollowUp?: Maybe<Scalars['Boolean']>,
   totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
   unsuccessfulPaymentsCount?: Maybe<Scalars['Int']>,
-  paymentsUsedInFollowPaymentPlansCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -8240,7 +8242,7 @@ export type ExcludeHouseholdsPpMutation = (
     { __typename?: 'ExcludeHouseholdsMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'exclusionReason'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'backgroundActionStatus' | 'excludeHouseholdError' | 'exclusionReason'>
       & { excludedHouseholds: Maybe<Array<Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -10134,7 +10136,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'isFollowUp' | 'unsuccessfulPaymentsCount' | 'paymentsUsedInFollowPaymentPlansCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13879,6 +13881,9 @@ export const ExcludeHouseholdsPpDocument = gql`
   excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds, exclusionReason: $exclusionReason) {
     paymentPlan {
       id
+      status
+      backgroundActionStatus
+      excludeHouseholdError
       exclusionReason
       excludedHouseholds {
         id
@@ -19017,6 +19022,7 @@ export const PaymentPlanDocument = gql`
       unicefId
     }
     exclusionReason
+    excludeHouseholdError
     isFollowUp
     followUps {
       totalCount
@@ -19036,7 +19042,6 @@ export const PaymentPlanDocument = gql`
       unicefId
     }
     unsuccessfulPaymentsCount
-    paymentsUsedInFollowPaymentPlansCount
   }
 }
     `;
@@ -26051,6 +26056,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
@@ -26072,7 +26078,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   unsuccessfulPaymentsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  paymentsUsedInFollowPaymentPlansCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
