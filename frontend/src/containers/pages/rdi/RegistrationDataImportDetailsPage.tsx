@@ -16,11 +16,13 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
+  RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
+import {HouseholdTable} from "../../tables/population/HouseholdTable";
 
 const Container = styled.div`
   && {
@@ -81,6 +83,9 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   if (data.registrationDataImport.status !== 'IMPORTING') {
     stopPolling();
   }
+
+  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status
+
   return (
     <div>
       <RegistrationDataImportDetailsPageHeader
@@ -98,7 +103,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
         <TableWrapper>
           <ContainerColumnWithBorder>
             <Title>
-              <Typography variant='h6'>{t('Import Preview')}</Typography>
+              <Typography variant='h6'>{isMerged ? t('Population Preview') : t('Import Preview')}</Typography>
             </Title>
             <TabsContainer>
               <StyledTabs
@@ -118,6 +123,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
             <TabPanel value={selectedTab} index={0}>
               <ImportedHouseholdTable
                 key={`${data.registrationDataImport.status}-household`}
+                isMerged={isMerged}
                 rdiId={id}
                 businessArea={businessArea}
               />
@@ -126,6 +132,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
               <ImportedIndividualsTable
                 showCheckbox
                 rdiId={id}
+                isMerged={isMerged}
                 businessArea={businessArea}
                 key={`${data.registrationDataImport.status}-individual`}
                 choicesData={choicesData}

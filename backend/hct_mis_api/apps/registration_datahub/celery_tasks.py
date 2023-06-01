@@ -555,24 +555,17 @@ def remove_old_rdi_links_task(days: int = 14, page_count: int = 100) -> None:
             ).values_list("datahub_id", flat=True)
         )
 
-        if len(unmerged_rdi_datahub_ids) <= page_count:  # Remove everything in one batch
-            ImportedHousehold.objects.filter(registration_data_import_id__in=unmerged_rdi_datahub_ids).delete()
+        i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
+        while i <= count:
+            logger.info(f"Page {i}/{count} processing...")
+            rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
 
-            RegistrationDataImport.objects.filter(datahub_id__in=unmerged_rdi_datahub_ids).update(
+            ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+
+            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(
                 status=RegistrationDataImport.ABORTED
             )
-        else:
-            i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
-            while i <= count:
-                logger.info(f"Page {i}/{count} processing...")
-                rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
-
-                ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
-
-                RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(
-                    status=RegistrationDataImport.ABORTED
-                )
-                i += 1
+            i += 1
 
         logger.info(
             f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
