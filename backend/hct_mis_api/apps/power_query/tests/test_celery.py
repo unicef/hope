@@ -30,16 +30,19 @@ class TestPowerQueryCelery(TestCase):
         run_background_query(target)
         assert self.query1.datasets.exists()
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_query_queue(self) -> None:
         target = self.query1.pk
         res = run_background_query.delay(target)
         assert res
         assert self.query1.datasets.exists()
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_reports_queue(self) -> None:
         refresh_reports.delay()
         assert self.report.documents.exists()
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_report_queue(self) -> None:
         target = self.report.pk
         refresh_report.delay(target)

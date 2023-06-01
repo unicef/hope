@@ -2,7 +2,6 @@ import itertools
 import logging
 import pickle
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from uuid import UUID
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -131,9 +130,9 @@ class Query(NaturalKeyModel, models.Model):
             self.code = "qs=conn.all().order_by('id')"
         super().save(force_insert, force_update, using, update_fields)
 
-    def _invoke(self, query_id: UUID, arguments: List) -> Dict:
+    def _invoke(self, query_id: int, arguments: List) -> Dict:
         query = Query.objects.get(id=query_id)
-        result = query.run(persist=False, arguments=arguments)
+        result = query.run(persist=False, arguments=arguments, use_existing=True)
         return result
 
     def update_results(self, results: Any) -> None:
@@ -177,7 +176,9 @@ class Query(NaturalKeyModel, models.Model):
                 self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist: bool = False, arguments: Optional[Dict] = None) -> Tuple[Union["Dataset", List], Dict]:
+    def run(
+        self, persist: bool = False, arguments: Optional[Dict] = None, use_existing: bool = False
+    ) -> Tuple[Union["Dataset", List], Dict]:
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
@@ -197,28 +198,32 @@ class Query(NaturalKeyModel, models.Model):
                 "invoke": self._invoke,
                 **connections,
             }
-            exec(self.code, globals(), locals_)
-            result = locals_.get("result", None)
-            extra = locals_.get("extra", None)
-
-            if persist:
-                info = {
-                    "type": type(result).__name__,
-                    "arguments": arguments,
-                }
-                dataset, __ = Dataset.objects.update_or_create(
-                    query=self,
-                    hash=dict_hash({"query": self.pk, **(arguments if arguments else {})}),
-                    defaults={
-                        "info": info,
-                        "last_run": timezone.now(),
-                        "value": pickle.dumps(result),
-                        "extra": pickle.dumps(extra),
-                    },
-                )
-                return_value = dataset, extra
+            signature = dict_hash({"query": self.pk, **(arguments if arguments else {})})
+            if use_existing and (ds := Dataset.objects.filter(query=self, hash=signature).first()):
+                return_value = ds, ds.extra
             else:
-                return_value = result, extra
+                exec(self.code, globals(), locals_)
+                result = locals_.get("result", None)
+                extra = locals_.get("extra", None)
+
+                if persist:
+                    info = {
+                        "type": type(result).__name__,
+                        "arguments": arguments,
+                    }
+                    dataset, __ = Dataset.objects.update_or_create(
+                        query=self,
+                        hash=signature,
+                        defaults={
+                            "info": info,
+                            "last_run": timezone.now(),
+                            "value": pickle.dumps(result),
+                            "extra": pickle.dumps(extra),
+                        },
+                    )
+                    return_value = dataset, extra
+                else:
+                    return_value = result, extra
         except Exception as e:
             raise QueryRunError(e) from e
         return return_value
@@ -359,7 +364,7 @@ class ReportDocument(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name="documents")
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     output = models.BinaryField(null=True, blank=True)
-    arguments = models.JSONField(default=dict)
+    arguments = models.JSONField(default=dict, encoder=PQJSONEncoder)
     limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
     content_type = models.CharField(max_length=5, choices=MIMETYPES)  # type: ignore # internal mypy error
 
