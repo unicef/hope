@@ -165,7 +165,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const validationSchema = useCallback(() => {
     const datum = {
       title: Yup.string(),
-      message: Yup.string(),
+      body: Yup.string(),
     };
     if (activeStep === SurveySteps.Details) {
       datum.title = Yup.string()
@@ -173,7 +173,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
         .max(255, t('Too long'))
         .required(t('Title is required'));
       if (category === 'SMS') {
-        datum.message = Yup.string()
+        datum.body = Yup.string()
           .min(2, t('Too short'))
           .max(255, t('Too long'))
           .required(t('Message is required'));
@@ -307,8 +307,12 @@ export const CreateSurveyPage = (): React.ReactElement => {
         if (activeStep === steps.length - 1) {
           confirm({
             title: t('Confirmation'),
-            content: t('Are you sure you want to send this survey?'),
-            continueText: 'Save',
+            content:
+              category === SurveyCategory.Manual
+                ? t('Are you sure you want to save this survey?')
+                : t('Are you sure you want to send this survey?'),
+            continueText:
+              category === SurveyCategory.Manual ? t('Save') : t('Send'),
           }).then(async () => {
             try {
               const response = await mutate({
@@ -576,7 +580,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                       <Box my={3}>
                         <Grid item xs={12}>
                           <Field
-                            name='message'
+                            name='body'
                             required
                             multiline
                             fullWidth
@@ -629,7 +633,15 @@ export const CreateSurveyPage = (): React.ReactElement => {
                     onClick={submitForm}
                     data-cy='button-submit'
                   >
-                    {t(activeStep === steps.length - 1 ? 'Save' : 'Next')}
+                    {t(
+                      activeStep === steps.length - 1
+                        ? t(
+                            category === SurveyCategory.Manual
+                              ? 'Save'
+                              : 'Send',
+                          )
+                        : 'Next',
+                    )}
                   </LoadingButton>
                 </Box>
               </Box>

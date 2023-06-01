@@ -88,7 +88,7 @@ export const SurveyDetails = ({
             </LabelizedField>
           </Grid>
           {body && (
-            <Grid item xs={3}>
+            <Grid item xs={8}>
               <LabelizedField label={t('Message')} value={body} />
             </Grid>
           )}
