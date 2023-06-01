@@ -50,9 +50,10 @@ export const allAccountabilityCommunicationMessages = gql`
           title
           numberOfRecipients
           createdBy {
+            id
             firstName
             lastName
-            id
+            email
           }
           createdAt
         }
