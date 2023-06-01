@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING, Any, Dict, List
 
+from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
+    CzechRepublicFlexRegistration,
+)
 from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
@@ -20,6 +23,7 @@ def get_registration_to_rdi_service_map() -> Dict[int, Any]:
         17: SriLankaRegistrationService,  # sri lanka
         # 18: "czech republic",
         # 19: "czech republic",
+        25: CzechRepublicFlexRegistration,  # czech republic
     }
 
 
