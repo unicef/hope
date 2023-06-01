@@ -96,7 +96,7 @@ class ExportSurveySampleService:
             str(recipient.unicef_id),
             str(recipient.head_of_household.full_name),
             recipient.size,
-            str(recipient.admin2.name),
+            str(getattr(recipient.admin2, "name", "")),
             str(recipient.residence_status),
             str(recipient.last_registration_date),
         )
