@@ -22,7 +22,7 @@ class ArraySubquery(Subquery):
 
 class PaymentQuerySet(SoftDeletableQuerySet):
     def with_payment_plan_conflicts(self) -> QuerySet:
-        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
         def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
             return qs.annotate(
@@ -69,9 +69,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .filter(
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
-                ~Q(status="Transaction Erroneous"),
-                ~Q(status="Not Distributed"),
-                ~Q(status="Force failed"),
+                ~Q(status=Payment.STATUS_ERROR),
+                ~Q(status=Payment.STATUS_NOT_DISTRIBUTED),
+                ~Q(status=Payment.STATUS_FORCE_FAILED),
                 parent__status=PaymentPlan.Status.OPEN,
                 household=OuterRef("household"),
             )
@@ -90,9 +90,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
                 Q(household=OuterRef("household")) & Q(conflicted=False),
                 ~Q(parent__status=PaymentPlan.Status.OPEN),
-                ~Q(status="Transaction Erroneous"),
-                ~Q(status="Not Distributed"),
-                ~Q(status="Force failed"),
+                ~Q(status=Payment.STATUS_ERROR),
+                ~Q(status=Payment.STATUS_NOT_DISTRIBUTED),
+                ~Q(status=Payment.STATUS_FORCE_FAILED),
             )
         )
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)
