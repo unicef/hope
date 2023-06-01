@@ -693,7 +693,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def can_be_locked(self) -> bool:
-        return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
+        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
 
     def update_population_count_fields(self) -> None:
         households_ids = self.eligible_payments.values_list("household_id", flat=True)

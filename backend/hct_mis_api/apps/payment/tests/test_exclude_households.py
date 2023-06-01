@@ -131,7 +131,32 @@ class TestExcludeHouseholds(APITestCase):
         )
         self.assertEqual(self.payment_plan.exclude_household_error, "")
 
-    def test_exclude_payment_when_payment_plan_contains_already_excluded_payments(self) -> None:
+    def test_exclude_payment_with_wrong_hh_ids(self) -> None:
+        self.payment_1.excluded = True
+        self.payment_2.excluded = True
+        self.payment_1.save()
+        self.payment_2.save()
+        self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+        self.payment_plan.save(update_fields=["background_action_status"])
+
+        hh_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        wrong_hh_unicef_id_4 = Household.objects.get(id=self.household_4.id).unicef_id
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "")
+
+        payment_plan_exclude_beneficiaries(
+            self.payment_plan.pk, [hh_unicef_id_1, wrong_hh_unicef_id_4], "reason exclusion Error 123"
+        )
+        self.payment_plan.refresh_from_db()
+        error_msg = f"['Household {wrong_hh_unicef_id_4} is not included in this Follow-up Payment Plan.']"
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "reason exclusion Error 123")
+        self.assertEqual(
+            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
+        )
+        self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
+
+    def test_exclude_all_households(self) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
         self.payment_1.save()
@@ -141,18 +166,17 @@ class TestExcludeHouseholds(APITestCase):
 
         hh_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         hh_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
+        hh_unicef_id_3 = Household.objects.get(id=self.household_3.id).unicef_id
 
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
         payment_plan_exclude_beneficiaries(
-            self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2], "reason exclusion Error 123"
+            self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3], "reason exclude_all_households"
         )
-
         self.payment_plan.refresh_from_db()
+        error_msg = '["You can\'t exclude all households from the Follow-up Payment Plan."]'
 
-        error_msg = f"['Household {hh_unicef_id_1} is not included in this Follow-up Payment Plan.', \"You can't exclude all households from the Follow-up Payment Plan.\"]"
-
-        self.assertEqual(self.payment_plan.exclusion_reason, "reason exclusion Error 123")
+        self.assertEqual(self.payment_plan.exclusion_reason, "reason exclude_all_households")
         self.assertEqual(
             self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
         )
