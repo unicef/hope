@@ -2382,6 +2382,8 @@ enum PaymentPlanBackgroundActionStatus {
   XLSX_IMPORT_ERROR
   XLSX_IMPORTING_ENTITLEMENTS
   XLSX_IMPORTING_RECONCILIATION
+  EXCLUDE_BENEFICIARIES
+  EXCLUDE_BENEFICIARIES_ERROR
 }
 
 enum PaymentPlanCurrency {
@@ -2588,6 +2590,7 @@ type PaymentPlanNode implements Node {
   sourcePaymentPlan: PaymentPlanNode
   isFollowUp: Boolean!
   exclusionReason: String!
+  excludeHouseholdError: String!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -2609,7 +2612,6 @@ type PaymentPlanNode implements Node {
   canCreateFollowUp: Boolean
   totalWithdrawnHouseholdsCount: Int
   unsuccessfulPaymentsCount: Int
-  paymentsUsedInFollowPaymentPlansCount: Int
 }
 
 type PaymentPlanNodeConnection {

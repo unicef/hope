@@ -213,6 +213,8 @@ class RdiMergeTask:
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
+                expiry_date=imported_document.expiry_date,
+                issuance_date=imported_document.issuance_date,
             )
             documents_to_create.append(document)
         identities_to_create = []
@@ -362,7 +364,7 @@ class RdiMergeTask:
                 individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                 household_ids = [str(household.id) for household in households_dict.values()]
 
-                recalculate_population_fields_task(household_ids)
+                transaction.on_commit(lambda: recalculate_population_fields_task(household_ids))
                 logger.info(
                     f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                 )

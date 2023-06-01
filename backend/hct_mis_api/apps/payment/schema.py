@@ -461,9 +461,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     excluded_households = graphene.List(HouseholdNode)
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
-
     unsuccessful_payments_count = graphene.Int()
-    payments_used_in_follow_payment_plans_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -510,8 +508,22 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                     return False
             return True
 
-    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.List:
-        return self.payment_items.eligible().filter(household__withdrawn=True).count()
+    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.Int:
+        return (
+            self.eligible_payments.filter(household__withdrawn=True)
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+            .count()
+        )
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
@@ -529,8 +541,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
-        # Check there are payments in error/not distributed status
-        qs = self.unsuccessful_payments()
+        # Check there are payments in error/not distributed status and excluded withdrawn households
+        if self.is_follow_up:
+            return False
+
+        qs = self.unsuccessful_payments_for_follow_up()
 
         # Check if all payments are used in FPPs
         follow_up_payment = self.payments_used_in_follow_payment_plans()
@@ -540,10 +555,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_unsuccessful_payments_count(self, info: Any) -> int:
-        return self.unsuccessful_payments().count()
-
-    def resolve_payments_used_in_follow_payment_plans_count(self, info: Any) -> int:
-        return len(set(self.payments_used_in_follow_payment_plans().values_list("source_payment_id", flat=True)))
+        return self.unsuccessful_payments_for_follow_up().count()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
