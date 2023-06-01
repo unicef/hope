@@ -1,8 +1,10 @@
 from django.core.exceptions import ValidationError
+from django.utils.deconstruct import deconstructible
 
 from hct_mis_api.apps.power_query.utils import should_run
 
 
+@deconstructible
 class FrequencyValidator:
     message = "Invalid frequency"
     code = "invalid"

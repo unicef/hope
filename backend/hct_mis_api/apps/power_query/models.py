@@ -293,6 +293,7 @@ class Report(NaturalKeyModel, models.Model):
         validators=[FrequencyValidator()],
     )
     last_run = models.DateTimeField(null=True, blank=True)
+    validity_days = models.IntegerField(default=365)
 
     def save(
         self,

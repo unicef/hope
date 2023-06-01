@@ -63,6 +63,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         ("target", AutoCompleteFilter),
         ("owner", AutoCompleteFilter),
         "active",
+        "last_run",
     )
     autocomplete_fields = ("target", "owner")
     readonly_fields = ("sentry_error_id", "error_message", "info")
@@ -156,6 +157,7 @@ class DatasetAdmin(HOPEModelAdminBase):
     list_filter = (
         ("query__target", AutoCompleteFilter),
         ("query", AutoCompleteFilter),
+        "last_run",
     )
     change_form_template = None
     readonly_fields = ("last_run", "query", "info")
@@ -249,17 +251,19 @@ class ReportResource(resources.ModelResource):
 
 @register(Report)
 class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "query", "formatter", "last_run", "frequence", "owner")
+    list_display = ("name", "formatter", "last_run", "frequence", "owner")
     autocomplete_fields = ("query", "formatter", "owner")
-    filter_horizontal = "limit_access_to"
+    filter_horizontal = ["limit_access_to"]
     readonly_fields = ("last_run",)
-    list_filter = (("owner", AutoCompleteFilter), ("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
+    list_filter = (
+        ("owner", AutoCompleteFilter),
+        ("query", AutoCompleteFilter),
+        ("formatter", AutoCompleteFilter),
+        "last_run",
+    )
     resource_class = ReportResource
     change_list_template = None
     search_fields = ("name",)
-
-    def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
-        return super().get_queryset(request).defer("extra", "value")
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_superuser or bool(obj and obj.owner == request.user)
@@ -286,6 +290,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
+        obj: Report
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
         try:
@@ -336,6 +341,9 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_filter = (("report", AutoCompleteFilter),)
     filter_horizontal = ("limit_access_to",)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
+
+    def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
+        return super().get_queryset(request).defer("output")
 
     def size(self, obj: ReportDocument) -> int:
         return len(obj.output or "")
