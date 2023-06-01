@@ -26,6 +26,7 @@ from .defaults import SYSTEM_PARAMETRIZER
 from .exceptions import QueryRunError
 from .json import PQJSONEncoder
 from .utils import dict_hash, to_dataset
+from .validators import FrequencyValidator
 
 logger = logging.getLogger(__name__)
 
@@ -284,7 +285,12 @@ class Report(NaturalKeyModel, models.Model):
     owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="+")
     limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
     frequence = models.CharField(
-        max_length=30, null=True, blank=True, help_text="Refresh every (e.g. 3 - 1/3 - mon - 1/3,Mon)"
+        max_length=30,
+        null=True,
+        blank=True,
+        help_text="Refresh every (e.g. 3 - 1/3 - mon - 1/3,Mon)",
+        default="mon,tue,wed,thu,fri,sat,sun",
+        validators=[FrequencyValidator()],
     )
     last_run = models.DateTimeField(null=True, blank=True)
 
