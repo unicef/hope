@@ -62,6 +62,7 @@ import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsP
 import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
 import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
+import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpPaymentPlanPage';
 
 const Root = styled.div`
   display: flex;
@@ -166,6 +167,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute exact path='/:businessArea/payment-module'>
             <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/edit'>
+            <EditFollowUpPaymentPlanPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/create'>
             <SetFollowUpUpFspPage />
