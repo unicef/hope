@@ -23,6 +23,13 @@ x-django-envs: &django_envs
     - PYTHONUNBUFFERED=1
     - CYPRESS_TESTING=yes
     - DJANGO_ALLOWED_HOSTS=*
+    - SESSION_COOKIE_SECURE=false
+    - SESSION_COOKIE_HTTPONLY=true
+    - CSRF_COOKIE_HTTPONLY=false
+    - CSRF_COOKIE_SECURE=false
+    - SECURE_CONTENT_TYPE_NOSNIFF=true
+    - SECURE_REFERRER_POLICY=same-origin
+    - SECURE_HSTS_SECONDS=0
 
 volumes:
   backend-data:
@@ -38,6 +45,7 @@ services:
     volumes:
       - ../cypress-results:/code/cypress/results
       - ../cypress-screenshots:/code/cypress/screenshots
+      - /code/node_modules
       - ./:/code
 
   proxy:
