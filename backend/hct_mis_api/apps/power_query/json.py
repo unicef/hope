@@ -13,6 +13,6 @@ class PQJSONEncoder(DjangoJSONEncoder):
             return str(o)
         if isinstance(o, UUID):
             return o.hex
-        elif isinstance(o, (GdalPoint, GeosPoint)):
+        if isinstance(o, (GdalPoint, GeosPoint)):
             return [o.x, o.y]
         return super().default(o)
