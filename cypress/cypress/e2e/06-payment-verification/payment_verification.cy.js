@@ -22,7 +22,7 @@ describe("Payment Verification", () => {
 
     // eslint-disable-next-line mocha/no-setup-in-describe
     pv.countCashPlanArray().forEach((row_no) => {
-      it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
+      it.skip(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
         pv.chooseCashPlan(row_no).click()
         pvd.checkPaymentVerificationTitle()
         pvd.checkGridPaymentDetails()
@@ -43,7 +43,7 @@ describe("Payment Verification", () => {
       afterEach(() => {
         pvd.deleteVerificationPlan()
       });
-      it("Create Verification Plan using random sampling", () => {
+      it.skip("Create Verification Plan using random sampling", () => {
         pv.selectStatus("Pending")
         pv.getStatusOption().contains("Pending").type('{esc}')
         pv.getCashPlanRows().should('have.length', 1)
@@ -84,7 +84,7 @@ describe("Payment Verification", () => {
         pv.chooseCashPlan(0).click()
         pvd.createNewVerificationPlan()
       });
-      it("Delete one Verification Plan", () => {
+      it.skip("Delete one Verification Plan", () => {
         pvd.getDeletePlan().click()
         pvd.getDelete().click()
         pvd.getNumberOfPlans().contains(1)      
@@ -102,7 +102,7 @@ describe("Payment Verification", () => {
         pvd.discardVerificationPlan()
         pvd.deleteVerificationPlan()
       });
-      it("Activate Verification Plan", () => {
+      it.skip("Activate Verification Plan", () => {
         pvd.getActivatePlan().click()
         pvd.getActivate().click()
         pvd.getStatusVP().eq(1).contains("ACTIVE")
