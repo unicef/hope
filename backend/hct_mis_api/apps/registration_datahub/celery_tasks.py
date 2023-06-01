@@ -300,6 +300,9 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @log_start_and_end
 @sentry_tags
 def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Tuple) -> None:
+    from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
+        CzechRepublicFlexRegistration,
+    )
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         SriLankaRegistrationService,
     )
@@ -312,12 +315,14 @@ def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, regi
         # check only first item in tuple registration_ids
         # TODO: maybe refactor registration_ids arg or add service_name in arg
         registration_id = next(iter(registration_ids))
-        if registration_id in [2, 3]:
+        if registration_id in (2, 3):
             UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
         elif registration_id == 21:
             UkraineRegistrationService().process_records(rdi_id, records_ids)
         elif registration_id == 17:
             SriLankaRegistrationService().process_records(rdi_id, records_ids)
+        elif registration_id == 25:
+            CzechRepublicFlexRegistration().process_records(rdi_id, records_ids)
         else:
             logger.exception(f"Not Implemented Service for Registration id(s): {registration_ids}")
             raise NotImplementedError

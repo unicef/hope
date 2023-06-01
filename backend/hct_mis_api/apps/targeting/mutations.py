@@ -384,7 +384,6 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 transaction.on_commit(
                     lambda: send_target_population_task.delay(target_population_id=target_population.id)
                 )
-                transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",

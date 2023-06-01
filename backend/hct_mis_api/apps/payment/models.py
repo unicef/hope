@@ -12,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import (
     Count,
@@ -50,6 +50,7 @@ from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -364,6 +365,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
 
     class Status(models.TextChoices):
+        PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -372,7 +374,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
-        PREPARING = "PREPARING", "Preparing"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -382,6 +383,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
         XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+        EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
+        EXCLUDE_BENEFICIARIES_ERROR = "EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -463,6 +466,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     is_follow_up = models.BooleanField(default=False)
     exclusion_reason = models.TextField(blank=True)
+    exclude_household_error = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -564,6 +568,24 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self) -> None:
         self.background_action_status = None  # little hack
+
+    @transition(
+        field=background_action_status,
+        source=[None, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
+        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
+    )
+    def background_action_status_excluding_beneficiaries(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.EXCLUDE_BENEFICIARIES, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
+        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
+    )
+    def background_action_status_exclude_beneficiaries_error(self) -> None:
+        pass
 
     @transition(
         field=status,
@@ -671,7 +693,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def can_be_locked(self) -> bool:
-        return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
+        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
 
     def update_population_count_fields(self) -> None:
         households_ids = self.eligible_payments.values_list("household_id", flat=True)
@@ -741,7 +763,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-                return self.export_file_per_fsp is not None
+                return self.export_file_per_fsp is not None or FileTemp.objects.filter(object_id=self.id).exists()
             else:
                 return False
         except FileTemp.DoesNotExist:
@@ -752,7 +774,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
             return self.export_file_entitlement.file.url
         elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-            return self.export_file_per_fsp.file.url
+            if self.export_file_per_fsp:
+                return self.export_file_per_fsp.file.url
+            return FileTemp.objects.filter(object_id=self.id).order_by("-created").first().file.url
         else:
             return None
 
@@ -823,13 +847,36 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.acceptance_process_threshold.finance_release_number_required
 
     def unsuccessful_payments(self) -> "QuerySet":
-        return self.payment_items.eligible().filter(
+        return self.eligible_payments.filter(
             status__in=[
-                Payment.STATUS_ERROR,
-                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
+                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
                 Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
             ]
         )
+
+    def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
+        """
+        used for creation FPP
+        need to call from source_payment_plan level
+        like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
+        """
+        payments_qs = (
+            self.unsuccessful_payments()
+            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+        )
+        return payments_qs
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
@@ -849,6 +896,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("delivered_quantity", _("Delivered Quantity")),
         ("delivery_date", _("Delivery Date")),
         ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
+        ("order_number", _("Order Number")),
+        ("token_number", _("Token Number")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -906,6 +955,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
             "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
+            "order_number": (payment, "order_number"),
+            "token_number": (payment, "token_number"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1298,6 +1349,22 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     )
     is_follow_up = models.BooleanField(default=False)
     reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
+    # use program_id in UniqueConstraint order_number and token_number per Program
+    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
+    order_number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[
+            MinValueValidator(100000000),
+            MaxValueValidator(999999999),
+            payment_token_and_order_number_validator,
+        ],
+    )  # 9 digits
+    token_number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
+    )  # 7 digits
 
     @property
     def full_name(self) -> str:
@@ -1326,7 +1393,17 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 fields=["parent", "household"],
                 condition=Q(is_removed=False),
                 name="payment_plan_and_household",
-            )
+            ),
+            UniqueConstraint(
+                fields=["program_id", "order_number"],
+                condition=Q(is_removed=False),
+                name="order_number_unique_per_program",
+            ),
+            UniqueConstraint(
+                fields=["program_id", "token_number"],
+                condition=Q(is_removed=False),
+                name="token_number_unique_per_program",
+            ),
         ]
 
 
