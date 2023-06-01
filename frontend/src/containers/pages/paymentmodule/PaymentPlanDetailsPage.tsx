@@ -82,10 +82,10 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      {paymentPlan.isFollowUp && <ExcludeSection paymentPlan={paymentPlan} />}
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
+      <ExcludeSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

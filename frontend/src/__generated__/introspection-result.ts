@@ -96,16 +96,7 @@
             "name": "TicketPaymentVerificationDetailsNode"
           },
           {
-            "name": "ReportNode"
-          },
-          {
-            "name": "FeedbackNode"
-          },
-          {
-            "name": "FeedbackMessageNode"
-          },
-          {
-            "name": "DeliveryMechanismNode"
+            "name": "PaymentNode"
           },
           {
             "name": "FinancialServiceProviderNode"
@@ -117,7 +108,16 @@
             "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
-            "name": "PaymentNode"
+            "name": "DeliveryMechanismNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "FeedbackNode"
+          },
+          {
+            "name": "FeedbackMessageNode"
           },
           {
             "name": "ApprovalProcessNode"

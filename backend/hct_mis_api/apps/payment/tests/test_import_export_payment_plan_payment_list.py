@@ -85,6 +85,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             payment_plan=cls.payment_plan,
             financial_service_provider=fsp_1,
             delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=1,
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
@@ -185,12 +186,14 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
+            delivery_mechanism_order=2,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
             financial_service_provider=financial_service_provider2,
+            delivery_mechanism_order=3,
         )
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
