@@ -84,9 +84,6 @@ class Command(BaseCommand):
         try:
             pq = PowerQuery.objects.get(pk=options["id"])
             result = pq.execute_matrix(persist=options["persist"])
-            # for k,v  in info.items():
-            #     self.stdout.write(f"{k}: {v}")
-            # self.stdout.write("=" * 80)
             for entry in result:
                 self.stdout.write(str(entry))
         except Exception as e:
