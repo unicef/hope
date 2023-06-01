@@ -10201,7 +10201,7 @@ export type AllAccountabilityCommunicationMessagesQuery = (
         & Pick<CommunicationMessageNode, 'id' | 'unicefId' | 'title' | 'numberOfRecipients' | 'createdAt'>
         & { createdBy: Maybe<(
           { __typename?: 'UserNode' }
-          & Pick<UserNode, 'firstName' | 'lastName' | 'id'>
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )> }
       )> }
     )>> }
@@ -18469,9 +18469,10 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
         title
         numberOfRecipients
         createdBy {
+          id
           firstName
           lastName
-          id
+          email
         }
         createdAt
       }
