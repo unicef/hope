@@ -22,6 +22,9 @@ class TestRunToday(TestCase):
             ("1/3,sat", True),
             ("1/3,Mon", False),
             ("1/3,Mon,3/1", True),
+            ("mon,tue", False),
+            ("mon,sat", True),
+            ("3/1,4/1", True),
         ]
     )
     @freeze_time("1987-01-03")

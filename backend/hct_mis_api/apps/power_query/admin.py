@@ -249,11 +249,11 @@ class ReportResource(resources.ModelResource):
 
 @register(Report)
 class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "query", "formatter", "last_run", "frequence")
-    autocomplete_fields = ("query", "formatter")
-    filter_horizontal = ("limit_access_to",)
+    list_display = ("name", "query", "formatter", "last_run", "frequence", "owner")
+    autocomplete_fields = ("query", "formatter", "owner")
+    filter_horizontal = "limit_access_to"
     readonly_fields = ("last_run",)
-    list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
+    list_filter = (("owner", AutoCompleteFilter), ("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
     resource_class = ReportResource
     change_list_template = None
     search_fields = ("name",)
