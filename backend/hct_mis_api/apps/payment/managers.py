@@ -88,8 +88,8 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .filter(
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
-                ~Q(parent__status=PaymentPlan.Status.OPEN),
                 Q(household=OuterRef("household")) & Q(conflicted=False),
+                ~Q(parent__status=PaymentPlan.Status.OPEN),
                 ~Q(status="Transaction Erroneous"),
                 ~Q(status="Not Distributed"),
                 ~Q(status="Force failed"),
