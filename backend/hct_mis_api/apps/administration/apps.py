@@ -30,6 +30,7 @@ class Config(SmartConfig):
 
         from django.contrib.admin import site
 
+        from adminactions import tasks  # noqa
         from smart_admin.console import (
             panel_error_page,
             panel_migrations,

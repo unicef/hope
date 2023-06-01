@@ -27,6 +27,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
+    payment_plan_exclude_beneficiaries,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
@@ -1003,11 +1004,6 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.is_follow_up:
-            msg = "Entitlements of follow-up payment plan cannot be changed"
-            logger.error(msg)
-            raise GraphQLError(msg)
-
         with transaction.atomic():
             import_service = XlsxPaymentPlanImportService(payment_plan, file)
             import_service.open_workbook()
@@ -1110,11 +1106,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.is_follow_up:
-            msg = "Entitlements of follow-up payment plan cannot be changed"
-            logger.error(msg)
-            raise GraphQLError(msg)
-
         old_payment_plan = copy_model_object(payment_plan)
 
         engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
@@ -1161,34 +1152,16 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, payment_plan.business_area)
 
-        if not payment_plan.is_follow_up:
-            raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
+        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
+            raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
-        if payment_plan.status != PaymentPlan.Status.LOCKED:
-            raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
+        payment_plan_exclude_beneficiaries.delay(
+            decode_id_string(payment_plan_id), excluded_households_ids, exclusion_reason
+        )
 
-        if payment_plan.excluded_households_ids:
-            raise GraphQLError("This Payment Plan already contains excluded households")
-
-        if not payment_plan.eligible_payments.exists():
-            raise GraphQLError(
-                "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
-            )
-
-        for hh_unicef_id in excluded_households_ids:
-            if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
-                raise GraphQLError("These Households are not included in this Payment Plan")
-
-        payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
-
-        payments_for_exclude.update(excluded=True)
-
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
-
-        if exclusion_reason:
-            payment_plan.exclusion_reason = exclusion_reason
-            payment_plan.save(update_fields=["exclusion_reason"])
+        payment_plan.background_action_status_excluding_beneficiaries()
+        payment_plan.exclude_household_error = ""
+        payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
 
         payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)

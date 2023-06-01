@@ -1,3 +1,7 @@
+from contextlib import contextmanager
+from typing import Callable, Generator
+
+from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 
 from freezegun import freeze_time
@@ -24,6 +28,27 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+
+
+@contextmanager
+def capture_on_commit_callbacks(
+    *, using: str = DEFAULT_DB_ALIAS, execute: bool = False
+) -> Generator[list[Callable[[], None]], None, None]:
+    callbacks: list[Callable[[], None]] = []
+    start_count = len(connections[using].run_on_commit)
+    try:
+        yield callbacks
+    finally:
+        while True:
+            callback_count = len(connections[using].run_on_commit)
+            for _, callback in connections[using].run_on_commit[start_count:]:
+                callbacks.append(callback)
+                if execute:
+                    callback()
+
+            if callback_count == len(connections[using].run_on_commit):
+                break
+            start_count = callback_count
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
@@ -183,8 +208,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             enumerator_rec_id=1234567890,
         )
         self.set_imported_individuals(imported_household)
-
-        RdiMergeTask().execute(self.rdi.pk)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
@@ -266,7 +291,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         self.set_imported_individuals(imported_household)
 
-        RdiMergeTask().execute(self.rdi.pk)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
