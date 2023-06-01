@@ -23,7 +23,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from ..steficon.widget import PythonEditor
 from ..utils.admin import HOPEModelAdminBase
-from .celery_tasks import refresh_reports, run_background_query
+from .celery_tasks import refresh_report, refresh_reports, run_background_query
 from .defaults import SYSTEM_PARAMETRIZER
 from .forms import FormatterTestForm
 from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
@@ -272,6 +272,17 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             kwargs["name"] = f"Report for {q.name}"
             kwargs["notify_to"] = [request.user]
         return kwargs
+
+    @button(visible=lambda btn: "change" in btn.context["request"].path)
+    def queue(self, request: HttpRequest, pk: "UUID") -> None:
+        if not (obj := self.get_object(request, str(pk))):
+            raise Exception("Report not found")
+        try:
+            refresh_report.delay(obj.pk)
+            self.message_user(request, "Query scheduled")
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
