@@ -7,42 +7,37 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_cannot_be_changed_with_file_import 1'] = {
+snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule 1'] = {
     'data': {
-        'importXlsxPaymentPlanPaymentList': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 65,
-                    'line': 2
-                }
-            ],
-            'message': 'Entitlements of follow-up payment plan cannot be changed',
-            'path': [
-                'importXlsxPaymentPlanPaymentList'
-            ]
+        'setSteficonRuleOnPaymentPlanPaymentList': {
+            'paymentPlan': {
+                'unicefId': 'PP-0060-23-00000001'
+            }
         }
-    ]
+    }
 }
 
-snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_cannot_be_changed_with_steficon_rule 1'] = {
+snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_updated_with_file 1'] = {
     'data': {
-        'setSteficonRuleOnPaymentPlanPaymentList': None
-    },
-    'errors': [
-        {
-            'locations': [
+        'importXlsxPaymentPlanPaymentList': {
+            'errors': [
                 {
-                    'column': 5,
-                    'line': 3
+                    'coordinates': 'A2',
+                    'message': 'This payment id 714a72db-79e3-42d1-a9e8-a949aebbf1ae is not in Payment Plan Payment List',
+                    'sheet': 'Payment Plan - Payment List'
+                },
+                {
+                    'coordinates': 'A3',
+                    'message': 'This payment id a15e9214-a0e0-4af5-8dbf-9657184e9e3a is not in Payment Plan Payment List',
+                    'sheet': 'Payment Plan - Payment List'
+                },
+                {
+                    'coordinates': None,
+                    'message': "There aren't any updates in imported file, please add changes and try again",
+                    'sheet': 'Payment Plan - Payment List'
                 }
             ],
-            'message': 'Entitlements of follow-up payment plan cannot be changed',
-            'path': [
-                'setSteficonRuleOnPaymentPlanPaymentList'
-            ]
+            'paymentPlan': None
         }
-    ]
+    }
 }

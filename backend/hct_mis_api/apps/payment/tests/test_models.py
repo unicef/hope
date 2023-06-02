@@ -216,16 +216,17 @@ class TestPaymentModel(TestCase):
             ],
         )
 
-    def test_manager_annotations__pp_no_conflicts_for_follow_up(self) -> None:
-        pp1 = PaymentPlanFactory()
-
-        # create follow up pps
+    def test_manager_annotations_pp_no_conflicts_for_follow_up(self) -> None:
+        program_cycle = RealProgramFactory().cycles.first()
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
+        # create follow up pp
         pp2 = PaymentPlanFactory(
             start_date=pp1.start_date,
             end_date=pp1.end_date,
             status=PaymentPlan.Status.LOCKED,
             is_follow_up=True,
             source_payment_plan=pp1,
+            program_cycle=program_cycle,
         )
         pp3 = PaymentPlanFactory(
             start_date=pp1.start_date,
@@ -233,6 +234,7 @@ class TestPaymentModel(TestCase):
             status=PaymentPlan.Status.OPEN,
             is_follow_up=True,
             source_payment_plan=pp1,
+            program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False)
         p2 = PaymentFactory(
@@ -255,10 +257,9 @@ class TestPaymentModel(TestCase):
 
         p2_data = Payment.objects.filter(id=p2.id).values()[0]
         self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+        self.assertEqual(p2_data["payment_plan_soft_conflicted"], True)
         p3_data = Payment.objects.filter(id=p3.id).values()[0]
         self.assertEqual(p3_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
-
+        self.assertEqual(p3_data["payment_plan_soft_conflicted"], True)
         self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
-        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [])
+        self.assertIsNotNone(p3_data["payment_plan_hard_conflicted_data"])

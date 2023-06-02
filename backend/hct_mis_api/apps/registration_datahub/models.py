@@ -459,6 +459,8 @@ class ImportedDocument(TimeStampedUUIDModel):
     )
     country = CountryField(default="U")
     doc_date = models.DateField(blank=True, null=True, default=None)
+    issuance_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True, db_index=True)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
