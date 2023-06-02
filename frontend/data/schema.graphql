@@ -726,6 +726,8 @@ type DocumentNode implements Node {
   cleared: Boolean!
   clearedDate: DateTime!
   clearedBy: UserNode
+  issuanceDate: DateTime
+  expiryDate: DateTime
   countryIso3: String
 }
 
@@ -1339,6 +1341,8 @@ type ImportedDocumentNode implements Node {
   type: ImportedDocumentTypeNode!
   country: String
   docDate: Date
+  issuanceDate: Date
+  expiryDate: Date
 }
 
 type ImportedDocumentNodeConnection {
@@ -1926,6 +1930,7 @@ type IndividualNode implements Node {
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
   deleteIndividualTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
   ticketsystemflaggingdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
+  ticketGoldenRecords(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   ticketDuplicates(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   ticketSelected(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
@@ -3743,12 +3748,16 @@ type TargetingCriteriaNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  flagExcludeIfActiveAdjudicationTicket: Boolean!
+  flagExcludeIfOnSanctionList: Boolean!
   targetPopulation: TargetPopulationNode
   rules: [TargetingCriteriaRuleNode]
 }
 
 input TargetingCriteriaObjectType {
   rules: [TargetingCriteriaRuleObjectType]
+  flagExcludeIfActiveAdjudicationTicket: Boolean
+  flagExcludeIfOnSanctionList: Boolean
 }
 
 enum TargetingCriteriaRuleFilterComparisonMethod {

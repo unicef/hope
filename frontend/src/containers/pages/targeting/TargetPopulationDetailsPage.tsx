@@ -9,9 +9,11 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   TargetPopulationBuildStatus,
+  useBusinessAreaDataQuery,
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export const TargetPopulationDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -25,6 +27,11 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
   } = useTargetPopulationQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
+  });
+
+  const businessArea = useBusinessArea();
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
   });
 
   const buildStatus = data?.targetPopulation?.buildStatus;
@@ -46,7 +53,7 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
+  if (!data || permissions === null || !businessAreaData) return null;
 
   const { targetPopulation } = data;
 
@@ -70,6 +77,7 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
         id={targetPopulation.id}
         targetPopulation={targetPopulation}
         permissions={permissions}
+        screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
     </>
   );
