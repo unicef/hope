@@ -1,16 +1,18 @@
 export default class BaseComponent {
+  // Menu Locators
+  buttonPaymentVerification =
+    'span[class="MuiTypography-root MuiListItemText-primary MuiTypography-body1 MuiTypography-displayBlock"]';
 
-    // Menu Locators
-    buttonPaymentVerification = 'span[class="MuiTypography-root MuiListItemText-primary MuiTypography-body1 MuiTypography-displayBlock"]'
+  // Texts
+  buttonPaymentVerificationText = "Payment Verification";
 
-    // Texts
-    buttonPaymentVerificationText = "Payment Verification"
+  // Elements
+  getMenuButtonPaymentVerification = () =>
+    cy.get(this.buttonPaymentVerification);
 
-    // Elements
-    getMenuButtonPaymentVerification = () => cy.get(this.buttonPaymentVerification)
-
-    clickMenuButtonPaymentVerification(){
-        this.getMenuButtonPaymentVerification().contains(this.buttonPaymentVerificationText).click()
-    }
-
+  clickMenuButtonPaymentVerification() {
+    this.getMenuButtonPaymentVerification()
+      .contains(this.buttonPaymentVerificationText)
+      .click();
+  }
 }
