@@ -103,7 +103,10 @@ export function TableComponent<T>({
   let body;
   if (loading) {
     body = (
-      <TableRow style={{ height: 54 * rowsPerPage, minHeight: 54 }}>
+      <TableRow
+        data-cy='table-row'
+        style={{ height: 54 * rowsPerPage, minHeight: 54 }}
+      >
         <TableCell colSpan={headCells.length}>
           <LoadingComponent />
         </TableCell>
@@ -111,7 +114,10 @@ export function TableComponent<T>({
     );
   } else if (!data.length) {
     body = (
-      <TableRow style={{ height: 54 * emptyRows, minHeight: 54 }}>
+      <TableRow
+        data-cy='table-row'
+        style={{ height: 54 * emptyRows, minHeight: 54 }}
+      >
         <TableCell colSpan={headCells.length}>
           <div className={classes.empty}>
             <FindInPageIcon className={classes.icon} fontSize='inherit' />
@@ -154,6 +160,7 @@ export function TableComponent<T>({
           aria-labelledby='tableTitle'
           size='medium'
           aria-label='enhanced table'
+          data-cy='table'
         >
           <EnhancedTableHead<T>
             order={order}
@@ -179,6 +186,7 @@ export function TableComponent<T>({
         onRowsPerPageChange={handleChangeRowsPerPage}
         backIconButtonProps={{ ...(loading && { disabled: true }) }}
         nextIconButtonProps={{ ...(loading && { disabled: true }) }}
+        data-cy='table-pagination'
       />
     </>
   );

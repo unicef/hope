@@ -61,6 +61,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
+          data-cy="table"
         >
           <thead
             class="MuiTableHead-root"
@@ -75,6 +76,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -98,6 +100,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -121,6 +124,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -144,6 +148,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -167,6 +172,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -190,6 +196,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -213,6 +220,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -236,6 +244,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -525,6 +534,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

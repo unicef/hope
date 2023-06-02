@@ -3,29 +3,41 @@ import BaseComponent from "../../base.component";
 export default class PaymentVerification extends BaseComponent {
   // Locators
   paymentVerificationTitle = 'h5[class="MuiTypography-root MuiTypography-h5"]';
+  //data-cy='page-header-title'
   paymentPlanID =
     'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy="filter-search"
   status =
     'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy='filter-status'
   FSP =
     'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy='filter-fsp'
   modality =
     'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy='filter-Modality'
   startDate =
     'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy='filter-start-date'
   endDate =
     'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy='filter-end-date'
   programme =
     'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
+  //data-cy='filter-program'
   statusOptions = 'li[role="option"]';
-
   listOfCashPlansTitle = 'h6[data-cy="table-title"]';
   tableTitle = 'table[aria-labelledby="tableTitle"]';
+  //data-cy="table-label"
   tableColumn =
     'span[class="MuiButtonBase-root MuiTableSortLabel-root sc-fBuWsC dHSJjy"]';
+  //data-cy="unicefId" , data-cy="verificationStatus"
   rowsPerPage = 'id[id="mui-33182"]';
+  //data-cy='table-pagination'
   table = 'tbody[class="MuiTableBody-root"]';
+  //data-cy='table'
   rows = 'tr[class="MuiTableRow-root sc-RefOD isLSKU MuiTableRow-hover"]';
+  //data-cy="table-row"
 
   // Texts
   textTitle = "Payment Verification";

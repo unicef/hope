@@ -3,32 +3,45 @@ import BaseComponent from "../../base.component";
 export default class PVDetailsPage extends BaseComponent {
   // Locators
   paymentVerificationTitle = 'a[class="sc-kpOJdX bEMsyB"]';
+  //data-cy='plan-link' data-cy='plan-id'
   createVerificationPlan = 'button[data-cy="button-new-plan"]';
   divPaymentDetails =
     'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"]';
   gridPaymentDetails =
     'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"]';
+  //data-cy="grid-payment-plan-details"
   divBankReconciliation =
     'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"]';
+  //data-cy="grid-bank-reconciliation"
   divVerificationPlansSummary = 'div[class="sc-feJyhm GGSnz"]';
+  //data-cy="grid-verification-plans-summary"
   tableTitle = 'h6[class="MuiTypography-root MuiTypography-h6"]';
+  //data-cy="table-label"
   gridBankReconciliation =
     'div[class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column"]';
+  //data-cy='grid-bank-reconciliation'
   summaryStatus = 'div[data-cy="label-Status"]';
+  //data-cy='verification-plans-summary-status'
   statusVP = 'div[data-cy="status-container"]';
+  //dataCy='verification-plan-status'
   summaryActivationDate = 'div[data-cy="label-Activation Date"]';
+  //data-cy="summary-activation-date"
   summaryCompletionDate = 'div[data-cy="label-Completion Date"]';
+  //data-cy="summary-completion-date"
   summaryNumberOfPlans = 'div[data-cy="label-Number of Verification Plans"]';
+  //data-cy="summary-number-of-plans"
   deletePlan = 'button[data-cy="button-delete-plan"]';
   deletePopUP = 'div[data-cy="dialog-actions-container"]';
   snackbarMessage = 'div[class="MuiSnackbarContent-message"]';
-  activetePlan = 'button[data-cy="button-activate-plan"]';
+  activatePlan = 'button[data-cy="button-activate-plan"]';
   discardPlan = 'button[data-cy="button-discard-plan"]';
   finishPlan = 'button[data-cy="button-ed-plan"]';
   editVP = 'button[data-cy="button-new-plan"]';
   // Create Verification Plan
   cvp = 'div[aria-labelledby="form-dialog-title"]';
+  //data-cy="dialog-title"
   cvpTabList = 'div[role="tablist"]';
+  //data-cy="tabs"
   cvpTab = 'button[role="tab"]';
   cvpTitle = 'h2[class="MuiTypography-root MuiTypography-h6"]';
   cvpSubtitle = 'span[class="MuiTypography-root MuiTypography-caption"]';
@@ -91,7 +104,7 @@ export default class PVDetailsPage extends BaseComponent {
   getDeletePlan = () => cy.get(this.deletePlan);
   getDelete = () => cy.get(this.deletePopUP).get(this.cvpSubmit);
   getSnackbarMessage = () => cy.get(this.snackbarMessage);
-  getActivatePlan = () => cy.get(this.activetePlan);
+  getActivatePlan = () => cy.get(this.activatePlan);
   getActivate = () => cy.get(this.cvpSubmit);
   getDiscardPlan = () => cy.get(this.discardPlan);
   getDiscard = () => cy.get(this.cvpSubmit);

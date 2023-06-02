@@ -24,7 +24,7 @@ export function VerificationPlansSummary({
 
   return (
     <Grid container>
-      <Grid item xs={9}>
+      <Grid data-cy='grid-verification-plans-summary' item xs={9}>
         <Title>
           <Typography variant='h6'>
             {t('Verification Plans Summary')}
@@ -35,6 +35,7 @@ export function VerificationPlansSummary({
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
                 <StatusBox
+                  dataCy='verification-plans-summary-status'
                   status={status}
                   statusToColor={paymentVerificationStatusToColor}
                 />
@@ -43,21 +44,30 @@ export function VerificationPlansSummary({
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
-              <LabelizedField label={t('Activation Date')}>
+              <LabelizedField
+                data-cy='summary-activation-date'
+                label={t('Activation Date')}
+              >
                 <UniversalMoment>{activationDate}</UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
-              <LabelizedField label={t('Completion Date')}>
+              <LabelizedField
+                data-cy='summary-completion-date'
+                label={t('Completion Date')}
+              >
                 <UniversalMoment>{completionDate}</UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
-              <LabelizedField label={t('Number of Verification Plans')}>
+              <LabelizedField
+                data-cy='summary-number-of-plans'
+                label={t('Number of Verification Plans')}
+              >
                 {planNode.verificationPlans.totalCount}
               </LabelizedField>
             </Box>

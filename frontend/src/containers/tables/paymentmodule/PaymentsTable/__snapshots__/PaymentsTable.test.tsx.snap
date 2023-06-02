@@ -82,6 +82,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-4"
+            data-cy="table"
           >
             <thead
               class="MuiTableHead-root"
@@ -96,6 +97,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -119,6 +121,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -142,6 +145,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -165,6 +169,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -188,6 +193,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -211,6 +217,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -234,6 +241,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -257,6 +265,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -280,6 +289,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -303,6 +313,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -388,6 +399,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
         </div>
         <div
           class="MuiTablePagination-root"
+          data-cy="table-pagination"
         >
           <div
             class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

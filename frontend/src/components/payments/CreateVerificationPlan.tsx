@@ -237,12 +237,15 @@ export function CreateVerificationPlan({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Create Verification Plan')}</DialogTitle>
+              <DialogTitle data-cy='dialog-title'>
+                {t('Create Verification Plan')}
+              </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <TabsContainer>
                   <StyledTabs
+                    data-cy='tabs'
                     value={selectedTab}
                     onChange={(
                       event: React.ChangeEvent<{}>,

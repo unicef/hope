@@ -68,6 +68,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-3"
+            data-cy="table"
           >
             <thead
               class="MuiTableHead-root"
@@ -82,6 +83,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   />
                 </th>
                 <th
@@ -91,6 +93,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Individual ID
                   </span>
@@ -102,6 +105,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Individual
                   </span>
@@ -113,6 +117,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Household ID
                   </span>
@@ -124,6 +129,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Relationship to HoH
                   </span>
@@ -135,6 +141,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Age
                   </span>
@@ -146,6 +153,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Gender
                   </span>
@@ -157,6 +165,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Administrative Level 2
                   </span>
@@ -247,6 +256,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
         </div>
         <div
           class="MuiTablePagination-root"
+          data-cy="table-pagination"
         >
           <div
             class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
