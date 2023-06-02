@@ -7,6 +7,7 @@ export default class PVDetailsPage extends BaseComponent {
   createVerificationPlan = 'button[data-cy="button-new-plan"]';
   divPaymentDetails =
     'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"]';
+  //data-cy='div-payment-plan-details'
   gridPaymentDetails =
     'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"]';
   //data-cy="grid-payment-plan-details"
@@ -23,7 +24,7 @@ export default class PVDetailsPage extends BaseComponent {
   summaryStatus = 'div[data-cy="label-Status"]';
   //data-cy='verification-plans-summary-status'
   statusVP = 'div[data-cy="status-container"]';
-  //dataCy='verification-plan-status'
+  //data-cy='verification-plan-status'
   summaryActivationDate = 'div[data-cy="label-Activation Date"]';
   //data-cy="summary-activation-date"
   summaryCompletionDate = 'div[data-cy="label-Completion Date"]';
