@@ -8,8 +8,10 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   TargetPopulationBuildStatus,
+  useBusinessAreaDataQuery,
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export const EditTargetPopulationPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -17,6 +19,11 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
   const { data, loading, error, refetch } = useTargetPopulationQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
+  });
+  const businessArea = useBusinessArea();
+
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
   });
   const [
     startPollingTargetPopulation,
@@ -42,9 +49,14 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
+  if (!data || permissions === null || !businessAreaData) return null;
 
   const { targetPopulation } = data;
 
-  return <EditTargetPopulation targetPopulation={targetPopulation} />;
+  return (
+    <EditTargetPopulation
+      targetPopulation={targetPopulation}
+      screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+    />
+  );
 };
