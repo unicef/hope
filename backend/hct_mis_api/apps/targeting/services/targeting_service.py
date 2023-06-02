@@ -58,7 +58,7 @@ class TargetingCriteriaQueryingBase:
     def get_basic_query(self) -> Q:
         return Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
 
-    def apply_targeting_criteria_flags(self) -> Q:
+    def apply_targeting_criteria_exclusion_flags(self) -> Q:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()
 
     @staticmethod
@@ -100,7 +100,7 @@ class TargetingCriteriaQueryingBase:
         query = Q()
         for rule in rules:
             query |= rule.get_query()
-        return self.get_basic_query() & Q(query) & self.apply_targeting_criteria_flags()
+        return self.get_basic_query() & Q(query) & self.apply_targeting_criteria_exclusion_flags()
 
 
 class TargetingCriteriaRuleQueryingBase:
