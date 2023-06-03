@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence
 
 from django import forms
 from django.conf import settings
@@ -16,7 +16,8 @@ from django.urls import reverse
 import tablib
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
-from celery.result import AsyncResult
+
+# from celery.result import AsyncResult
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
@@ -24,7 +25,8 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from ..steficon.widget import PythonEditor
 from ..utils.admin import HOPEModelAdminBase
-from .celery_tasks import refresh_report, refresh_reports, run_background_query
+
+# from .celery_tasks import refresh_report, refresh_reports, run_background_query
 from .defaults import SYSTEM_PARAMETRIZER
 from .forms import FormatterTestForm
 from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
@@ -33,6 +35,8 @@ from .widget import FormatterEditor
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+    from django.contrib.admin.options import _ModelT
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +60,26 @@ class QueryResource(resources.ModelResource):
         return row
 
 
+class CeleryEnabledMixin:
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional["_ModelT"] = None) -> Sequence[str]:
+        ret = list(super().get_readonly_fields(request, obj))
+        ret.append("celery_task")
+        return ret
+
+    @button()
+    def queue(self, request: HttpRequest, pk: "UUID") -> None:
+        obj: Query
+        try:
+            if not (obj := self.get_object(request, str(pk))):
+                raise Exception("Target not found")
+            obj.queue()
+            self.message_user(request, f"Run scheduled: {obj.celery_task}")
+        except Exception as e:
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
+
 @register(Query)
-class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
     list_display = ("name", "target", "owner", "active", "success")
     search_fields = ("name",)
     list_filter = (
@@ -108,14 +130,6 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         self.message_user(request, "Done", messages.SUCCESS)
         ctx["results"] = results
         return render(request, "admin/power_query/query/run_result.html", ctx)
-
-    @button()
-    def queue(self, request: HttpRequest, pk: "UUID") -> None:
-        try:
-            res: AsyncResult = run_background_query.delay(pk)
-            self.message_user(request, f"Query scheduled: {res}")
-        except Exception as e:
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button()
     def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
@@ -251,7 +265,7 @@ class ReportResource(resources.ModelResource):
 
 
 @register(Report)
-class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+class ReportAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
     list_display = ("name", "formatter", "last_run", "frequence", "owner")
     autocomplete_fields = ("query", "formatter", "owner")
     filter_horizontal = ["limit_access_to"]
@@ -278,16 +292,16 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             kwargs["notify_to"] = [request.user]
         return kwargs
 
-    @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def queue(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, str(pk))):
-            raise Exception("Report not found")
-        try:
-            res: AsyncResult = refresh_report.delay(obj.pk)
-            self.message_user(request, f"Report scheduled: {res}")
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+    # @button()
+    # def queue(self, request: HttpRequest, pk: "UUID") -> None:
+    #     obj: Report
+    #     try:
+    #         if not (obj := self.get_object(request, str(pk))):
+    #             raise Exception("Report not found")
+    #         obj.queue()
+    #         self.message_user(request, f"Report scheduled: {obj.celery_task}")
+    #     except Exception as e:
+    #         self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
@@ -309,6 +323,8 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
     def refresh(self, request: HttpRequest) -> None:
+        from .celery_tasks import refresh_reports
+
         try:
             refresh_reports.delay()
             self.message_user(request, "Reports refresh queued", messages.SUCCESS)
