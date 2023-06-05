@@ -2,13 +2,11 @@ from unittest import skip
 
 from django.test import TestCase, override_settings
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
+from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, ReportFactory
 from ..celery_tasks import refresh_report, refresh_reports, run_background_query
 from ..defaults import create_defaults
 from ..models import Formatter, Parametrizer, Query, Report
-from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, ReportFactory
-from ...core import celery
-from ...core.celery import app
+from ...account.fixtures import BusinessAreaFactory, UserFactory
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
