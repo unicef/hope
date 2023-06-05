@@ -28,10 +28,12 @@ const Label = styled.p`
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
+  screenBeneficiary: boolean;
 }
 
 export const EditTargetPopulation = ({
   targetPopulation,
+  screenBeneficiary,
 }: EditTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
@@ -41,6 +43,11 @@ export const EditTargetPopulation = ({
     targetingCriteria: targetPopulation.targetingCriteria.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
+    flagExcludeIfActiveAdjudicationTicket:
+      targetPopulation.targetingCriteria
+        .flagExcludeIfActiveAdjudicationTicket || false,
+    flagExcludeIfOnSanctionList:
+      targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
@@ -96,6 +103,9 @@ export const EditTargetPopulation = ({
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({
+              flagExcludeIfActiveAdjudicationTicket:
+                values.flagExcludeIfActiveAdjudicationTicket,
+              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
               criterias: values.targetingCriteria,
             }),
           },
@@ -150,6 +160,7 @@ export const EditTargetPopulation = ({
                   rules={values.targetingCriteria}
                   selectedProgram={selectedProgram(values)}
                   isEdit
+                  screenBeneficiary={screenBeneficiary}
                 />
               )}
             />
