@@ -68,8 +68,9 @@ export function DeleteIndividualGrievanceDetails({
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveDeleteIndividualDataChangeMutation();
   if (loading) return <LoadingComponent />;
+  if (!data) return null;
   const documents = ticket.individual?.documents;
-  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
+  const fieldsDict = data.allAddIndividualsFieldsAttributes?.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,
       [currentValue?.name]: currentValue,
