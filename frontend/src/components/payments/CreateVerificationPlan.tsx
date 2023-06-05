@@ -326,6 +326,7 @@ export function CreateVerificationPlan({
                       max={99}
                       component={FormikSliderField}
                       suffix='%'
+                      dataCy='slider-confidence-interval'
                     />
                     <Field
                       name='marginOfError'
@@ -334,6 +335,7 @@ export function CreateVerificationPlan({
                       max={9}
                       component={FormikSliderField}
                       suffix='%'
+                      dataCy='slider-margin-of-error'
                     />
                     <Typography variant='caption'>
                       {t('Cluster Filters')}
