@@ -55,6 +55,7 @@ class ReportFactory(DjangoModelFactory):
     query = factory.Iterator(Query.objects.all())
     formatter = factory.Iterator(Formatter.objects.all())
     owner = factory.SubFactory(UserFactory, is_superuser=True, is_staff=True, password="123")
+    frequence = "1/m"
 
     class Meta:
         model = Report
