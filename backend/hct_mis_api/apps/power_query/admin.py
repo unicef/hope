@@ -75,6 +75,14 @@ class CeleryEnabledMixin:
         return ret
 
     @button(visible=settings.DEBUG)
+    def check_status(self: HOPEModelAdminBase, request: HttpRequest) -> HttpResponse:  # type: ignore
+        obj: CeleryEnabled
+        for obj in self.get_queryset(request):
+            if obj.async_result is None:
+                obj.celery_task = None
+                obj.save()
+
+    @button(visible=settings.DEBUG)
     def monitor(self: HOPEModelAdminBase, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request, title="Celery Monitor")
         ctx["flower_address"] = settings.FLOWER_ADDRESS
@@ -96,7 +104,7 @@ class CeleryEnabledMixin:
 
 @register(Query)
 class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
-    list_display = ("name", "target", "owner", "active", "success")
+    list_display = ("name", "target", "owner", "active", "last_run", "status")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
