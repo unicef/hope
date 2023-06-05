@@ -33,7 +33,8 @@ class TestPowerQuery(TestCase):
         p = ParametrizerFactory()
 
         cls.query1: Query = QueryFactory(name="Query1", code="result=conn.all()", parametrizer=p)
-        cls.query1.execute_matrix()
+        res = cls.query1.execute_matrix()
+        assert res
         cls.formatter: Formatter = FormatterFactory(name="Queryset To HTML")
         cls.report1: Report = ReportFactory(formatter=cls.formatter, query=cls.query1)
         cls.report1.execute()
