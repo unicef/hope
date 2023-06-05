@@ -46,6 +46,7 @@ DEFAULTS = {
     "SECURE_REFERRER_POLICY": (str, "same-origin"),
     "SESSION_COOKIE_NAME": (str, "sessionid"),
     "SECURE_HSTS_SECONDS": (int, 3600),
+    "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
 }
 
 env = Env(**DEFAULTS)
