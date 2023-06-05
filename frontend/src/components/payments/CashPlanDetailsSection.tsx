@@ -85,7 +85,7 @@ export const CashPlanDetailsSection = ({
       <Grid data-cy='grid-bank-reconciliation' item xs={3}>
         <BorderLeftBox>
           <Title>
-            <Typography variant='h6'>{t('Bank reconciliation')}</Typography>
+            <Typography variant='h6' data-cy='table-label'>{t('Bank reconciliation')}</Typography>
           </Title>
           <Grid container>
             <Grid item xs={6}>

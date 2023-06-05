@@ -2,49 +2,34 @@ import BaseComponent from "../../base.component";
 
 export default class PVDetailsPage extends BaseComponent {
   // Locators
-  paymentVerificationTitle = 'a[class="sc-kpOJdX bEMsyB"]';
-  //data-cy='plan-link' data-cy='plan-id'
+  paymentVerificationTitle = 'h5[data-cy="page-header-title"]';
   createVerificationPlan = 'button[data-cy="button-new-plan"]';
-  divPaymentDetails =
-    'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"]';
-  //data-cy='div-payment-plan-details'
-  gridPaymentDetails =
-    'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"]';
-  //data-cy="grid-payment-plan-details"
-  divBankReconciliation =
-    'div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"]';
-  //data-cy="grid-bank-reconciliation"
-  divVerificationPlansSummary = 'div[class="sc-feJyhm GGSnz"]';
-  //data-cy="grid-verification-plans-summary"
-  tableTitle = 'h6[class="MuiTypography-root MuiTypography-h6"]';
-  //data-cy="table-label"
-  gridBankReconciliation =
-    'div[class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column"]';
-  //data-cy='grid-bank-reconciliation'
-  summaryStatus = 'div[data-cy="label-Status"]';
-  //data-cy='verification-plans-summary-status'
-  statusVP = 'div[data-cy="status-container"]';
-  //data-cy='verification-plan-status'
-  summaryActivationDate = 'div[data-cy="label-Activation Date"]';
-  //data-cy="summary-activation-date"
-  summaryCompletionDate = 'div[data-cy="label-Completion Date"]';
-  //data-cy="summary-completion-date"
-  summaryNumberOfPlans = 'div[data-cy="label-Number of Verification Plans"]';
-  //data-cy="summary-number-of-plans"
+  divPaymentDetails = 'div[data-cy="div-payment-plan-details"]';
+  gridPaymentDetails = 'div[data-cy="grid-payment-plan-details"]';
+  divBankReconciliation = 'div[data-cy="grid-bank-reconciliation"]';
+  divVerificationPlansSummary =
+    'div[data-cy="grid-verification-plans-summary"]';
+  tableTitle = 'h6[data-cy="table-label"]';
+  gridBankReconciliation = 'div[data-cy="grid-bank-reconciliation"]';
+  summaryStatus = 'div[data-cy="verification-plans-summary-status"]';
+  statusVP = 'div[data-cy="verification-plan-status"]';
+  summaryActivationDate =
+    'div[data-cy="labelized-field-container-summary-activation-date"]';
+  summaryCompletionDate =
+    'div[data-cy="labelized-field-container-summary-completion-date"]';
+  summaryNumberOfPlans =
+    'div[data-cy="labelized-field-container-summary-number-of-plans"]';
   deletePlan = 'button[data-cy="button-delete-plan"]';
   deletePopUP = 'div[data-cy="dialog-actions-container"]';
-  snackbarMessage = 'div[class="MuiSnackbarContent-message"]';
   activatePlan = 'button[data-cy="button-activate-plan"]';
   discardPlan = 'button[data-cy="button-discard-plan"]';
   finishPlan = 'button[data-cy="button-ed-plan"]';
   editVP = 'button[data-cy="button-new-plan"]';
   // Create Verification Plan
-  cvp = 'div[aria-labelledby="form-dialog-title"]';
-  //data-cy="dialog-title"
-  cvpTabList = 'div[role="tablist"]';
-  //data-cy="tabs"
+  cvp = 'div[data-cy="dialog-title"]';
+  cvpTabList = 'div[data-cy="tabs"]';
   cvpTab = 'button[role="tab"]';
-  cvpTitle = 'h2[class="MuiTypography-root MuiTypography-h6"]';
+  cvpTitle = 'div[data-cy="dialog-title"]';
   cvpSubtitle = 'span[class="MuiTypography-root MuiTypography-caption"]';
   cvpSubmit = 'button[data-cy="button-submit"]';
 
@@ -71,15 +56,15 @@ export default class PVDetailsPage extends BaseComponent {
   getPaymentVerificationTitle = () => cy.get(this.paymentVerificationTitle);
   getCreateVerificationPlan = () => cy.get(this.createVerificationPlan);
   getProgrammeName = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails).eq(0);
+    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
   getProgrammeID = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails).eq(1);
+    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
   getPaymentRecords = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails).eq(2);
+    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
   getStartDate = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails).eq(3);
+    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
   getEndDate = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails).eq(4);
+    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
   getBankReconciliationTitle = () =>
     cy.get(this.divBankReconciliation).get(this.tableTitle);
   getSuccessful = () =>
@@ -104,7 +89,6 @@ export default class PVDetailsPage extends BaseComponent {
   getNumberOfPlans = () => cy.get(this.summaryNumberOfPlans);
   getDeletePlan = () => cy.get(this.deletePlan);
   getDelete = () => cy.get(this.deletePopUP).get(this.cvpSubmit);
-  getSnackbarMessage = () => cy.get(this.snackbarMessage);
   getActivatePlan = () => cy.get(this.activatePlan);
   getActivate = () => cy.get(this.cvpSubmit);
   getDiscardPlan = () => cy.get(this.discardPlan);
@@ -122,7 +106,7 @@ export default class PVDetailsPage extends BaseComponent {
   getCVPSave = () => cy.get(this.cvp).get(this.cvpSubmit);
 
   checkPaymentVerificationTitle() {
-    this.getPaymentVerificationTitle().contains(this.textTitle);
+    this.getPaymentVerificationTitle().should("be.visible");
     this.getCreateVerificationPlan()
       .get("span")
       .contains(this.textCreateVerificationPlan);
@@ -152,10 +136,10 @@ export default class PVDetailsPage extends BaseComponent {
   }
 
   checkGridVerificationPlansSummary() {
-    this.getStatus().prev().contains(this.textSummaryStatus);
-    this.getActivationDate().prev().contains(this.textSummaryActivationDate);
-    this.getCompletionDate().prev().contains(this.textSummaryCompletionDate);
-    this.getNumberOfPlans().prev().contains(this.textSummaryNumberOfPlans);
+    this.getStatus().get("span").contains(this.textSummaryStatus);
+    this.getActivationDate().contains(this.textSummaryActivationDate);
+    this.getCompletionDate().contains(this.textSummaryCompletionDate);
+    this.getNumberOfPlans().contains(this.textSummaryNumberOfPlans);
   }
 
   checkCVPTitle() {
@@ -166,22 +150,22 @@ export default class PVDetailsPage extends BaseComponent {
     this.checkVerificationPlansSummaryTitle();
   }
 
-  deleteVerificationPlan() {
+  deleteVerificationPlan(num = 0) {
     this.getDeletePlan().click();
     this.getDelete().click();
-    this.getNumberOfPlans().contains(0);
+    this.getNumberOfPlans().contains(num);
   }
 
-  discardVerificationPlan() {
-    this.getDiscardPlan().click();
+  discardVerificationPlan(num = 0) {
+    this.getDiscardPlan().eq(num).click();
     this.getDiscard().click();
     this.getDeletePlan();
   }
 
-  createNewVerificationPlan() {
+  createNewVerificationPlan(num = 0) {
     this.checkPaymentVerificationTitle();
     this.getNumberOfPlans().then(($el) => {
-      if ($el.text() == "0") {
+      if ($el.find("div").text() === num.toString()) {
         this.getCreateVerificationPlan().click();
         this.checkCVPTitle();
         this.getRandomSampling().click();

@@ -160,7 +160,7 @@ export function TableComponent<T>({
           aria-labelledby='tableTitle'
           size='medium'
           aria-label='enhanced table'
-          data-cy='table'
+          data-cy='table-title'
         >
           <EnhancedTableHead<T>
             order={order}

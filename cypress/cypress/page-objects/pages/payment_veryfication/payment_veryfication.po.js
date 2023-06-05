@@ -2,42 +2,19 @@ import BaseComponent from "../../base.component";
 
 export default class PaymentVerification extends BaseComponent {
   // Locators
-  paymentVerificationTitle = 'h5[class="MuiTypography-root MuiTypography-h5"]';
-  //data-cy='page-header-title'
-  paymentPlanID =
-    'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy="filter-search"
-  status =
-    'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy='filter-status'
-  FSP =
-    'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy='filter-fsp'
-  modality =
-    'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy='filter-Modality'
-  startDate =
-    'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy='filter-start-date'
-  endDate =
-    'input[class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy='filter-end-date'
-  programme =
-    'div[class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedStart MuiOutlinedInput-inputAdornedStart MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"]';
-  //data-cy='filter-program'
+  paymentVerificationTitle = "h5[data-cy='page-header-title']";
+  paymentPlanID = 'div[data-cy="filter-search"]';
+  status = 'div[data-cy="filter-status"]';
+  FSP = 'div[data-cy="filter-fsp"]';
+  modality = 'div[data-cy="filter-Modality"]';
+  startDate = 'div[data-cy="filter-start-date"]';
+  endDate = 'div[data-cy="filter-end-date"]';
+  programme = 'div[data-cy="filter-program"]';
   statusOptions = 'li[role="option"]';
   listOfCashPlansTitle = 'h6[data-cy="table-title"]';
-  tableTitle = 'table[aria-labelledby="tableTitle"]';
-  //data-cy="table-label"
-  tableColumn =
-    'span[class="MuiButtonBase-root MuiTableSortLabel-root sc-fBuWsC dHSJjy"]';
-  //data-cy="unicefId" , data-cy="verificationStatus"
-  rowsPerPage = 'id[id="mui-33182"]';
-  //data-cy='table-pagination'
-  table = 'tbody[class="MuiTableBody-root"]';
-  //data-cy='table'
-  rows = 'tr[class="MuiTableRow-root sc-RefOD isLSKU MuiTableRow-hover"]';
-  //data-cy="table-row"
+  tableTitle = 'table[data-cy="table-title"]';
+  tableColumn = 'span[data-cy="table-label"]';
+  rows = 'tr[data-cy="cash-plan-table-row"]';
 
   // Texts
   textTitle = "Payment Verification";
@@ -61,8 +38,8 @@ export default class PaymentVerification extends BaseComponent {
   getListOfCashPlansTitle = () => cy.get(this.listOfCashPlansTitle);
   getPaymentPlanID = () => cy.get(this.paymentPlanID).eq(0);
   getStatus = () => cy.get(this.status);
-  getFSP = () => cy.get(this.FSP).eq(1);
-  getModality = () => cy.get(this.modality).eq(1);
+  getFSP = () => cy.get(this.FSP);
+  getModality = () => cy.get(this.modality);
   getStartDate = () => cy.get(this.startDate);
   getEndDate = () => cy.get(this.endDate);
   getProgramme = () => cy.get(this.programme);
@@ -73,7 +50,7 @@ export default class PaymentVerification extends BaseComponent {
   getTimeFrame = () => cy.get(this.tableColumn).eq(3);
   getColumnProgramme = () => cy.get(this.tableColumn).eq(4);
   getLastModifiedDate = () => cy.get(this.tableColumn).eq(5);
-  getCashPlanRows = () => cy.get(this.table).get(this.rows);
+  getCashPlanRows = () => cy.get(this.rows);
   getStatusOption = () => cy.get(this.statusOptions);
 
   checkPaymentVerificationTitle() {
@@ -118,7 +95,7 @@ export default class PaymentVerification extends BaseComponent {
   }
 
   countCashPlanArray() {
-    return Array.from(Array(4).keys());
+    return Array.from(Array(2).keys());
   }
 
   chooseCashPlan(row) {

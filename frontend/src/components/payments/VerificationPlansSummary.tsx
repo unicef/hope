@@ -26,7 +26,7 @@ export function VerificationPlansSummary({
     <Grid container>
       <Grid data-cy='grid-verification-plans-summary' item xs={9}>
         <Title>
-          <Typography variant='h6'>
+          <Typography variant='h6' data-cy='table-label'>
             {t('Verification Plans Summary')}
           </Typography>
         </Title>
