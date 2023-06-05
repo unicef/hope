@@ -193,6 +193,9 @@ function mapFilterToVariable(
 export function getTargetingCriteriaVariables(values) {
   return {
     targetingCriteria: {
+      flagExcludeIfActiveAdjudicationTicket:
+        values.flagExcludeIfActiveAdjudicationTicket,
+      flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
       rules: values.criterias.map((rule) => {
         return {
           filters: rule.filters.map(mapFilterToVariable),

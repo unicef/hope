@@ -812,6 +812,8 @@
   "Households excluded from Payment Plan": "Households excluded from Payment Plan",
   "Show only Follow-up plans": "Show only Follow-up plans",
   "All delivery mechanisms must have a FSP assigned": "All delivery mechanisms must have a FSP assigned",
+  "Exclude Households with Active Adjudication Ticket": "Exclude Households with Active Adjudication Ticket",
+  "Exclude Households with an active sanction screen flag": "Exclude Households with an active sanction screen flag",
   "Households can only be excluded from a Payment Plan in status open or locked": "Households can only be excluded from a Payment Plan in status open or locked",
   "Follow-up Payment Plan Edited": "Follow-up Payment Plan Edited",
   "Households exclusion started": "Households exclusion started"
