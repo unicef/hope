@@ -42,7 +42,7 @@ export function StatusBox({
       <StatusBoxContainer
         status={status}
         statusToColor={statusToColor}
-        data-cy={dataCy ? dataCy : 'status-container'}
+        data-cy={dataCy || 'status-container'}
       >
         {statusNameMapping
           ? statusNameMapping(status)
