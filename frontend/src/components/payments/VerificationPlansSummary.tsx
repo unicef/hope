@@ -45,7 +45,7 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField
-                data-cy='summary-activation-date'
+                dataCy='summary-activation-date'
                 label={t('Activation Date')}
               >
                 <UniversalMoment>{activationDate}</UniversalMoment>
@@ -55,7 +55,7 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField
-                data-cy='summary-completion-date'
+                dataCy='summary-completion-date'
                 label={t('Completion Date')}
               >
                 <UniversalMoment>{completionDate}</UniversalMoment>
@@ -65,7 +65,7 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField
-                data-cy='summary-number-of-plans'
+                dataCy='summary-number-of-plans'
                 label={t('Number of Verification Plans')}
               >
                 {planNode.verificationPlans.totalCount}
