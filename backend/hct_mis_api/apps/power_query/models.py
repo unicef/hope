@@ -77,7 +77,7 @@ class CeleryEnabled(models.Model):
 
     @property
     def async_result(self) -> Union[AsyncResult, None]:
-        if self.status not in self.SCHEDULED:
+        if self.celery_task and self.status not in self.SCHEDULED:
             return AsyncResult(self.celery_task, app=app)
         else:
             return None
