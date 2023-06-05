@@ -1,0 +1,182 @@
+[
+  {
+    "model": "targeting.targetpopulation",
+    "pk": "38be979c-2d49-4b9e-871c-f84aaac8bbfd",
+    "fields": {
+      "is_removed": false,
+      "created_at": "2023-06-02T10:00:08.568Z",
+      "updated_at": "2023-06-02T10:00:29.760Z",
+      "version": 1685699083075418,
+      "name": "Test NEW TP",
+      "ca_id": null,
+      "ca_hash_id": null,
+      "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "change_date": "2023-06-02T10:00:26.018Z",
+      "changed_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "finalized_at": "2023-06-02T10:00:29.759Z",
+      "finalized_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+      "status": "ASSIGNED",
+      "build_status": "OK",
+      "built_at": "2023-06-02T10:00:26.147Z",
+      "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+      "targeting_criteria": "89fab1a5-3d37-4421-be68-53895ed3ef64",
+      "sent_to_datahub": false,
+      "steficon_rule": null,
+      "steficon_applied_date": null,
+      "vulnerability_score_min": null,
+      "vulnerability_score_max": null,
+      "excluded_ids": "",
+      "exclusion_reason": "",
+      "total_households_count": 2,
+      "total_individuals_count": 8,
+      "child_male_count": 0,
+      "child_female_count": 0,
+      "adult_male_count": 0,
+      "adult_female_count": 0,
+      "storage_file": null
+    }
+  },
+  {
+    "model": "targeting.targetpopulation",
+    "pk": "f06fe264-9fe1-4329-b3c4-e7ad51516b38",
+    "fields": {
+      "is_removed": false,
+      "created_at": "2023-06-02T10:00:40.190Z",
+      "updated_at": "2023-06-02T10:00:40.412Z",
+      "version": 1685699093727977,
+      "name": "Copy TP",
+      "ca_id": null,
+      "ca_hash_id": null,
+      "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "change_date": null,
+      "changed_by": null,
+      "finalized_at": null,
+      "finalized_by": null,
+      "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+      "status": "OPEN",
+      "build_status": "OK",
+      "built_at": "2023-06-02T10:00:40.411Z",
+      "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+      "targeting_criteria": "3c6ec9fb-c2bc-41e2-84dd-64fa1ba121de",
+      "sent_to_datahub": false,
+      "steficon_rule": null,
+      "steficon_applied_date": null,
+      "vulnerability_score_min": null,
+      "vulnerability_score_max": null,
+      "excluded_ids": "",
+      "exclusion_reason": "",
+      "total_households_count": 2,
+      "total_individuals_count": 8,
+      "child_male_count": 0,
+      "child_female_count": 0,
+      "adult_male_count": 0,
+      "adult_female_count": 0,
+      "storage_file": null
+    }
+  },
+  {
+    "model": "targeting.householdselection",
+    "pk": "985c3573-c457-4e8d-8c7f-b5d2d465f4b1",
+    "fields": {
+      "created_at": "2023-06-02T10:00:40.401Z",
+      "updated_at": "2023-06-02T10:00:40.401Z",
+      "household": "20077498-80f0-462a-82e6-866cef92d06a",
+      "target_population": "f06fe264-9fe1-4329-b3c4-e7ad51516b38",
+      "vulnerability_score": null
+    }
+  },
+  {
+    "model": "targeting.householdselection",
+    "pk": "b7712cd3-eb95-482f-ab9e-ca078a02ee3a",
+    "fields": {
+      "created_at": "2023-06-02T10:00:40.401Z",
+      "updated_at": "2023-06-02T10:00:40.401Z",
+      "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
+      "target_population": "f06fe264-9fe1-4329-b3c4-e7ad51516b38",
+      "vulnerability_score": null
+    }
+  },
+  {
+    "model": "targeting.householdselection",
+    "pk": "d0e97cdd-7c28-41bb-b441-b82006cbc593",
+    "fields": {
+      "created_at": "2023-06-02T10:00:08.873Z",
+      "updated_at": "2023-06-02T10:00:08.873Z",
+      "household": "20077498-80f0-462a-82e6-866cef92d06a",
+      "target_population": "38be979c-2d49-4b9e-871c-f84aaac8bbfd",
+      "vulnerability_score": null
+    }
+  },
+  {
+    "model": "targeting.householdselection",
+    "pk": "ffd9fca8-d752-4502-b80e-cf7fac3027e4",
+    "fields": {
+      "created_at": "2023-06-02T10:00:08.873Z",
+      "updated_at": "2023-06-02T10:00:08.873Z",
+      "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
+      "target_population": "38be979c-2d49-4b9e-871c-f84aaac8bbfd",
+      "vulnerability_score": null
+    }
+  },
+  {
+    "model": "targeting.targetingcriteria",
+    "pk": "3c6ec9fb-c2bc-41e2-84dd-64fa1ba121de",
+    "fields": {
+      "created_at": "2023-06-02T10:00:40.195Z",
+      "updated_at": "2023-06-02T10:00:40.195Z"
+    }
+  },
+  {
+    "model": "targeting.targetingcriteria",
+    "pk": "89fab1a5-3d37-4421-be68-53895ed3ef64",
+    "fields": {
+      "created_at": "2023-06-02T10:00:08.542Z",
+      "updated_at": "2023-06-02T10:00:08.542Z"
+    }
+  },
+  {
+    "model": "targeting.targetingcriteriarule",
+    "pk": "5c632b70-1b2a-4eb2-957b-2f1b20d77228",
+    "fields": {
+      "created_at": "2023-06-02T10:00:40.199Z",
+      "updated_at": "2023-06-02T10:00:40.199Z",
+      "targeting_criteria": "3c6ec9fb-c2bc-41e2-84dd-64fa1ba121de"
+    }
+  },
+  {
+    "model": "targeting.targetingcriteriarule",
+    "pk": "f99cd30f-c986-47b9-84ee-bc5ed1c1378c",
+    "fields": {
+      "created_at": "2023-06-02T10:00:08.545Z",
+      "updated_at": "2023-06-02T10:00:08.545Z",
+      "targeting_criteria": "89fab1a5-3d37-4421-be68-53895ed3ef64"
+    }
+  },
+  {
+    "model": "targeting.targetingcriteriarulefilter",
+    "pk": "c4a30d41-d42c-4a43-9dd1-fed2bfbd1aad",
+    "fields": {
+      "created_at": "2023-06-02T10:00:40.202Z",
+      "updated_at": "2023-06-02T10:00:40.202Z",
+      "comparison_method": "RANGE",
+      "targeting_criteria_rule": "5c632b70-1b2a-4eb2-957b-2f1b20d77228",
+      "is_flex_field": false,
+      "field_name": "size",
+      "arguments": [1, 11]
+    }
+  },
+  {
+    "model": "targeting.targetingcriteriarulefilter",
+    "pk": "f15c4650-90ab-4fc9-ad7f-cf4dce502d4a",
+    "fields": {
+      "created_at": "2023-06-02T10:00:08.547Z",
+      "updated_at": "2023-06-02T10:00:08.547Z",
+      "comparison_method": "RANGE",
+      "targeting_criteria_rule": "f99cd30f-c986-47b9-84ee-bc5ed1c1378c",
+      "is_flex_field": false,
+      "field_name": "size",
+      "arguments": [1, 11]
+    }
+  }
+]
