@@ -31,7 +31,7 @@ export const LookUpReassignRoleDisplay = ({
         </Grid>
         <Grid item>
           <Box p={2}>
-            <Grid container justify='center' alignItems='center'>
+            <Grid container justifyContent='center' alignItems='center'>
               <Grid item>
                 {disabled ? null : (
                   <LightGrey>

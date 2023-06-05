@@ -3,11 +3,12 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
 } from '../../__generated__/graphql';
+import { MiśTheme } from '../../theme';
+import { FieldBorder } from '../core/FieldBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 
@@ -24,13 +25,6 @@ const Title = styled.div`
 
 const ContentWrapper = styled.div`
   display: flex;
-`;
-
-const FieldBorder = styled.div`
-  padding: 0 ${({ theme }) => theme.spacing(2)}px;
-  border-color: ${(props) => props.color};
-  border-left-width: 2px;
-  border-left-style: solid;
 `;
 
 const SummaryBorder = styled.div`
@@ -75,7 +69,7 @@ export function Results({
         <ContentWrapper>
           <Grid container>
             <Grid item xs={4}>
-              <Grid container spacing={0} justify='flex-start'>
+              <Grid container spacing={0} justifyContent='flex-start'>
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
@@ -114,7 +108,7 @@ export function Results({
               <Grid
                 container
                 spacing={0}
-                justify='flex-start'
+                justifyContent='flex-start'
                 alignItems='center'
               >
                 <Grid item xs={4}>
@@ -157,7 +151,7 @@ export function Results({
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={0} justify='flex-end'>
+              <Grid container spacing={0} justifyContent='flex-end'>
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>

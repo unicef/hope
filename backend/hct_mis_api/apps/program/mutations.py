@@ -16,7 +16,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.program.inputs import CreateProgramInput, UpdateProgramInput
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
@@ -50,6 +50,13 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         )
         program.full_clean()
         program.save()
+        ProgramCycle.objects.create(
+            program=program,
+            start_date=program.start_date,
+            end_date=program.end_date,
+            status=ProgramCycle.ACTIVE,
+        )
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
         return CreateProgram(program=program)
 

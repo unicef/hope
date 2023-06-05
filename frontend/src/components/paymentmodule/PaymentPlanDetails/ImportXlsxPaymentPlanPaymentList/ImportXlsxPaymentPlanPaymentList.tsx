@@ -85,6 +85,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
     permissions,
   );
 
+  const shouldDisableUpload =
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    !canUploadFile ||
+    paymentPlan.isFollowUp;
+
   return (
     <>
       <Box key='import'>
@@ -93,9 +98,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           color='primary'
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
-          disabled={
-            paymentPlan.status !== PaymentPlanStatus.Locked || !canUploadFile
-          }
+          disabled={shouldDisableUpload}
         >
           {t('Upload File')}
         </Button>
