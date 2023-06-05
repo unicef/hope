@@ -90,7 +90,7 @@ class CeleryEnabledMixin:
     def queue(self: HOPEModelAdminBase, request: HttpRequest, pk: int) -> HttpResponse:  # type: ignore
         obj: CeleryEnabled
         try:
-            if not (obj := self.get_object(request, str(pk))):
+            if not (obj := self.get_object(request, str(pk))):  # type: ignore
                 raise Exception("Target not found")
             obj.queue()
             self.message_user(request, f"Run scheduled: {obj.celery_task}")
@@ -153,7 +153,7 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
     @button()
     def preview(self, request: HttpRequest, pk: "UUID") -> HttpResponse:  # type: ignore
         obj: Query
-        if not (obj := self.get_object(request, str(pk))):
+        if not (obj := self.get_object(request, str(pk))):  # type: ignore
             raise Exception("Query not found")
         try:
             context = self.get_common_context(request, pk, title="Results")
@@ -324,7 +324,7 @@ class ReportAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: int) -> HttpResponse:  # type: ignore
         obj: Report
-        if not (obj := self.get_object(request, str(pk))):
+        if not (obj := self.get_object(request, str(pk))):  # type: ignore
             raise Exception("Report not found")
         try:
             result = obj.execute(run_query=True)
