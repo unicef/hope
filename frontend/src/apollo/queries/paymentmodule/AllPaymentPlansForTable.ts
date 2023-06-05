@@ -14,6 +14,7 @@ export const AllPaymentPlansForTable = gql`
     $totalEntitledQuantityTo: Float
     $dispersionStartDate: Date
     $dispersionEndDate: Date
+    $isFollowUp: Boolean
   ) {
     allPaymentPlans(
       after: $after
@@ -28,6 +29,7 @@ export const AllPaymentPlansForTable = gql`
       totalEntitledQuantityTo: $totalEntitledQuantityTo
       dispersionStartDate: $dispersionStartDate
       dispersionEndDate: $dispersionEndDate
+      isFollowUp: $isFollowUp
     ) {
       pageInfo {
         hasNextPage
@@ -41,6 +43,16 @@ export const AllPaymentPlansForTable = gql`
         node {
           id
           unicefId
+          isFollowUp
+          followUps {
+            totalCount
+            edges {
+              node {
+                id
+                unicefId
+              }
+            }
+          }
           status
           createdBy {
             id
