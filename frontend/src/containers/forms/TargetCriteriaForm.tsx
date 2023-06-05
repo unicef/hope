@@ -148,7 +148,11 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
-    const filterNullOrNoSelections = (filter): boolean => filter.value === null || (filter?.fieldAttribute?.type === "SELECT_MANY" && filter.value && filter.value.length === 0);
+    const filterNullOrNoSelections = (filter): boolean =>
+      filter.value === null ||
+      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
+        filter.value &&
+        filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
       filter.value?.hasOwnProperty('from') &&
@@ -156,7 +160,9 @@ export function TargetCriteriaForm({
       !filter.value.from &&
       !filter.value.to;
 
-    const hasFiltersNullValues = Boolean(filters.filter(filterNullOrNoSelections).length);
+    const hasFiltersNullValues = Boolean(
+      filters.filter(filterNullOrNoSelections).length,
+    );
 
     const hasFiltersEmptyFromToValues = Boolean(
       filters.filter(filterEmptyFromTo).length,
@@ -167,7 +173,9 @@ export function TargetCriteriaForm({
 
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
-        const hasNulls = block.individualBlockFilters.some(filterNullOrNoSelections);
+        const hasNulls = block.individualBlockFilters.some(
+          filterNullOrNoSelections,
+        );
         const hasFromToError = block.individualBlockFilters.some(
           filterEmptyFromTo,
         );
@@ -341,8 +349,8 @@ export function TargetCriteriaForm({
                         })
                     }
                     color='primary'
+                    startIcon={<AddCircleOutline />}
                   >
-                    <AddCircleOutline />
                     ADD INDIVIDUAL RULE GROUP
                   </Button>
                 </ButtonBox>
