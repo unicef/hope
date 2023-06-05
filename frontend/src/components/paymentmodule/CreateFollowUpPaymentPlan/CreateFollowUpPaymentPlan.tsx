@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
-  useCreateFollowUpPpMutation
+  useCreateFollowUpPpMutation,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
@@ -52,10 +52,7 @@ export const CreateFollowUpPaymentPlan = ({
     id,
     totalWithdrawnHouseholdsCount,
     unsuccessfulPaymentsCount,
-    paymentsUsedInFollowPaymentPlansCount
   } = paymentPlan;
-
-  const unsuccessfulPaymentsNumber = unsuccessfulPaymentsCount - paymentsUsedInFollowPaymentPlansCount;
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
@@ -138,7 +135,7 @@ export const CreateFollowUpPaymentPlan = ({
               <DialogContainer>
                 <Box p={5}>
                   <Box display='flex' flexDirection='column'>
-                    {unsuccessfulPaymentsNumber === 0 && (
+                    {unsuccessfulPaymentsCount === 0 && (
                       <Box mb={2}>
                         <FieldBorder color='#FF0200'>
                           <GreyText>
@@ -178,7 +175,7 @@ export const CreateFollowUpPaymentPlan = ({
                     </Grid> */}
                     <Grid item xs={6}>
                       <LabelizedField label={t('Unsuccessful payments')}>
-                        {unsuccessfulPaymentsNumber}
+                        {unsuccessfulPaymentsCount}
                       </LabelizedField>
                     </Grid>
                     {/* <Grid item xs={6}>

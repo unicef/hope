@@ -64,6 +64,8 @@ export const targetPopulationDetailed = gql`
       lastName
     }
     targetingCriteria {
+      flagExcludeIfActiveAdjudicationTicket
+      flagExcludeIfOnSanctionList
       rules {
         id
         individualsFiltersBlocks {
