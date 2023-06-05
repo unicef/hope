@@ -1,4 +1,10 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  MenuItem,
+} from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -21,6 +27,7 @@ export type FilterProps = Pick<
   | 'totalEntitledQuantityTo'
   | 'dispersionStartDate'
   | 'dispersionEndDate'
+  | 'isFollowUp'
 >;
 
 interface PaymentPlansFiltersProps {
@@ -149,6 +156,25 @@ export function PaymentPlansFilters({
             />
           </Grid>
         </Grid>
+        <Box ml={2}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={Boolean(filter.isFollowUp)}
+                value={filter.isFollowUp}
+                color='primary'
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    handleFilterChange('isFollowUp', true);
+                  } else {
+                    handleFilterChange('isFollowUp', false);
+                  }
+                }}
+              />
+            }
+            label={t('Show only Follow-up plans')}
+          />
+        </Box>
       </Grid>
     </ContainerWithBorder>
   );

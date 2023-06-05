@@ -9,11 +9,11 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { Title } from '../../../core/Title';
 import { FormikCurrencyAutocomplete } from '../../../../shared/FormikCurrencyAutocomplete';
 import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
+import { tomorrow } from '../../../../utils/utils';
 
 interface PaymentPlanParametersProps {
   values;
 }
-const tomorrow = new Date().setDate(new Date().getDate() + 1);
 
 export const PaymentPlanParameters = ({
   values,

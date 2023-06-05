@@ -112,6 +112,7 @@ COUSIN = "COUSIN"
 FOSTER_CHILD = "FOSTER_CHILD"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
+FREE_UNION = "FREE_UNION"
 
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
@@ -134,6 +135,7 @@ RELATIONSHIP_CHOICE = (
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
     (FOSTER_CHILD, "Foster child"),
+    (FREE_UNION, "Free union"),
 )
 YES = "1"
 NO = "0"
@@ -940,7 +942,7 @@ class Individual(
 
     def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
-            self.unicef_id = original_individual.unicef_id
+            self.unicef_id: str = str(original_individual.unicef_id)  # type: ignore
         self.documents.update(status=Document.STATUS_INVALID)
         self.duplicate = True
         self.duplicate_date = timezone.now()
