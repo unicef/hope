@@ -344,6 +344,8 @@ class PaymentFilter(FilterSet):
         q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             qs = qs.eligible()
+        else:
+            qs = qs.exclude(excluded=True)
 
         return qs.filter(q)
 

@@ -21,7 +21,7 @@ import {
 import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
-export const EditPaymentPlanPage = (): React.ReactElement => {
+export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
   const { id } = useParams();
   const { t } = useTranslation();
   const {
@@ -51,6 +51,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
+
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
@@ -119,8 +120,8 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
           },
         },
       });
-      showMessage(t('Payment Plan Edited'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+      showMessage(t('Follow-up Payment Plan Edited'), {
+        pathname: `/${businessArea}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {

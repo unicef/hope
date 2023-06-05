@@ -114,6 +114,8 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                 'name': 'with_permission_draft updated',
                 'status': 'OPEN',
                 'targetingCriteria': {
+                    "flagExcludeIfActiveAdjudicationTicket": False,
+                    "flagExcludeIfOnSanctionList": True,
                     'rules': [
                         {
                             'filters': [
