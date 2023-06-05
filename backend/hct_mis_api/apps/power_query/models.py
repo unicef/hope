@@ -405,6 +405,14 @@ class Report(NaturalKeyModel, CeleryEnabled, models.Model):
     def get_absolute_url(self) -> str:
         return reverse("power_query:report", args=[self.pk])
 
+    def _queue(self) -> str:
+        from hct_mis_api.apps.power_query.celery_tasks import refresh_report
+
+        res = refresh_report.delay(self.id)
+        self.celery_task = res.id
+        self.save()
+        return res.id
+
 
 class ReportDocumentManager(models.Manager):
     def get_queryset(self) -> models.QuerySet:
