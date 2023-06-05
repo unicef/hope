@@ -16,8 +16,6 @@ from django.urls import reverse
 import tablib
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
-
-# from celery.result import AsyncResult
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
@@ -25,8 +23,6 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from ..steficon.widget import PythonEditor
 from ..utils.admin import HOPEModelAdminBase
-
-# from .celery_tasks import refresh_report, refresh_reports, run_background_query
 from .defaults import SYSTEM_PARAMETRIZER
 from .forms import FormatterTestForm
 from .models import (
@@ -91,7 +87,7 @@ class CeleryEnabledMixin:
         return render(request, f"admin/power_query/{self.model._meta.model_name}/monitor.html", ctx)
 
     @button()
-    def queue(self: HOPEModelAdminBase, request: HttpRequest, pk: "UUID") -> None:
+    def queue(self: HOPEModelAdminBase, request: HttpRequest, pk: int) -> HttpResponse:  # type: ignore
         obj: CeleryEnabled
         try:
             if not (obj := self.get_object(request, str(pk))):
@@ -136,14 +132,13 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
         return request.user.is_superuser or bool(obj and obj.owner == request.user)
 
     @button()
-    def datasets(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponseRedirect]:
+    def datasets(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:  # type: ignore
         obj = self.get_object(request, str(pk))
         try:
             url = reverse("admin:power_query_dataset_changelist")
             return HttpResponseRedirect(f"{url}?query__exact={obj.pk}")
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-        return None
 
     @button(visible=settings.DEBUG)
     def run(self, request: HttpRequest, pk: int) -> HttpResponse:
@@ -156,7 +151,7 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
         return render(request, "admin/power_query/query/run_result.html", ctx)
 
     @button()
-    def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
+    def preview(self, request: HttpRequest, pk: "UUID") -> HttpResponse:  # type: ignore
         obj: Query
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Query not found")
@@ -183,7 +178,6 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-        return None
 
     def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Any]:
         ct = ContentType.objects.filter(id=request.GET.get("ct", 0)).first()
@@ -219,7 +213,7 @@ class DatasetAdmin(HOPEModelAdminBase):
         return obj.query.target
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
+    def preview(self, request: HttpRequest, pk: "UUID") -> HttpResponse:  # type: ignore
         obj = self.get_object(request, str(pk))
         try:
             context = self.get_common_context(request, pk, title="Results")
@@ -228,7 +222,6 @@ class DatasetAdmin(HOPEModelAdminBase):
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-        return None
 
 
 class FormatterResource(resources.ModelResource):
@@ -329,7 +322,7 @@ class ReportAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
     #         self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def execute(self, request: HttpRequest, pk: "UUID") -> None:
+    def execute(self, request: HttpRequest, pk: int) -> HttpResponse:  # type: ignore
         obj: Report
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
@@ -348,7 +341,7 @@ class ReportAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
-    def refresh(self, request: HttpRequest) -> None:
+    def refresh(self, request: HttpRequest) -> HttpResponse:  # type: ignore
         from .celery_tasks import refresh_reports
 
         try:
@@ -371,7 +364,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "admin/power_query/queryargs/preview.html", context)
 
     @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
-    def refresh(self, request: HttpRequest, pk: "UUID") -> None:
+    def refresh(self, request: HttpRequest, pk: "UUID") -> HttpResponse:  # type: ignore
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Parametrizer not found")
         obj.refresh()

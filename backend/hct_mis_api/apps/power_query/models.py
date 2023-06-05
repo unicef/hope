@@ -76,13 +76,13 @@ class CeleryEnabled(models.Model):
         return result
 
     @property
-    def async_result(self) -> Union[AsyncResult, None]:
+    def async_result(self) -> Optional[AsyncResult]:
         if self.celery_task and self.status not in self.SCHEDULED:
             return AsyncResult(self.celery_task, app=app)
         else:
             return None
 
-    def queue(self) -> Union[str, None]:
+    def queue(self) -> Optional[str]:
         if self.status not in self.SCHEDULED:
             task_id = self._queue()
             if not task_id:
