@@ -30,7 +30,7 @@ export default class PVDetailsPage extends BaseComponent {
   cvpTabList = 'div[data-cy="tabs"]';
   cvpTab = 'button[role="tab"]';
   cvpTitle = 'div[data-cy="dialog-title"]';
-  cvpSubtitle = 'span[class="MuiTypography-root MuiTypography-caption"]';
+  cvpSliderConfidenceInterval = 'span[data-cy="slider-confidence-interval"]';
   cvpSubmit = 'button[data-cy="button-submit"]';
 
   // Texts
@@ -102,7 +102,8 @@ export default class PVDetailsPage extends BaseComponent {
   getCVPTitle = () => cy.get(this.cvp).get(this.cvpTitle);
   getFullList = () => cy.get(this.cvp).get(this.cvpTab).eq(0);
   getRandomSampling = () => cy.get(this.cvp).get(this.cvpTab).eq(1);
-  getCVPConfidenceInterval = () => cy.get(this.cvp).get(this.cvpSubtitle);
+  getCVPConfidenceInterval = () =>
+    cy.get(this.cvp).get(this.cvpSliderConfidenceInterval);
   getCVPSave = () => cy.get(this.cvp).get(this.cvpSubmit);
 
   checkPaymentVerificationTitle() {
@@ -169,9 +170,7 @@ export default class PVDetailsPage extends BaseComponent {
         this.getCreateVerificationPlan().click();
         this.checkCVPTitle();
         this.getRandomSampling().click();
-        this.getCVPConfidenceInterval().contains(
-          this.textCVPConfidenceInterval
-        );
+        this.getCVPConfidenceInterval().should("be.visible");
         this.getCVPSave().click();
         this.checkVerificationPlan();
       }
