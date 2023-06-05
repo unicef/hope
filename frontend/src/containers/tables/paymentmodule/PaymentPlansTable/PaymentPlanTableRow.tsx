@@ -1,7 +1,8 @@
-import TableCell from '@material-ui/core/TableCell';
+import { Box, TableCell } from '@material-ui/core';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
@@ -11,28 +12,26 @@ import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import {
-  AllPaymentPlansForTableQuery,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '../../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
 
-interface PaymentVerificationTableRowProps {
-  plan: AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node'];
+interface PaymentPlanTableRowProps {
+  plan;
   canViewDetails: boolean;
 }
 
 export const PaymentPlanTableRow = ({
   plan,
   canViewDetails,
-}: PaymentVerificationTableRowProps): React.ReactElement => {
+}: PaymentPlanTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const paymentPlanPath = `/${businessArea}/payment-module/payment-plans/${plan.id}`;
+  const paymentPlanPath = `/${businessArea}/payment-module/${
+    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+  }/${plan.id}`;
   const handleClick = (): void => {
     history.push(paymentPlanPath);
   };
@@ -42,6 +41,24 @@ export const PaymentPlanTableRow = ({
 
   if (!statusChoicesData) return null;
 
+  const followUpLinks = (): React.ReactElement => {
+    if (!plan.followUps?.edges?.length) return <>-</>;
+    return (
+      <Box display='flex' flexDirection='column'>
+        {plan.followUps?.edges?.map((followUp) => {
+          const followUpPaymentPlanPath = `/${businessArea}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
+          return (
+            <Box mb={1}>
+              <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
+                {followUp?.node?.unicefId}
+              </BlackLink>
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  };
+
   return (
     <ClickableTableRow
       hover
@@ -50,6 +67,7 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align='left'>
+        {plan.isFollowUp ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
@@ -90,6 +108,7 @@ export const PaymentPlanTableRow = ({
       <TableCell align='left'>
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
+      <TableCell align='left'>{followUpLinks()}</TableCell>
     </ClickableTableRow>
   );
 };

@@ -23,7 +23,6 @@ variables:
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "uniappsakshope.azurecr.io"
-  Chart.version: "0.1.3"
 
 stages:
   - stage: deploy
@@ -36,6 +35,11 @@ stages:
         steps:
           - checkout: self
           - checkout: hct-mis-helm
+          - task: Kubernetes@1
+            inputs:
+              connectionType: 'Kubernetes Service Connection' 
+              kubernetesServiceEndpoint: $(Kubernetes.serviceConnection)
+              command: 'login'
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -52,6 +56,7 @@ stages:
               valueFile: 'hct-mis/deployment/pipeline-cd-prd.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
+                git.sha=$(Build.SourceVersion),\
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
@@ -70,3 +75,13 @@ stages:
                 registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
+          - script: |
+              timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/job=upgrade \
+              --tail=-1 --prefix | awk '/Upgrade succeeded/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL UPGRADE JOB"
+            condition: always()
+          - script: |
+              timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/service=backend \
+              --tail=-1 --prefix | awk '/Worker spawned/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL BACKEND"
+            condition: succeeded()

@@ -554,8 +554,9 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, file: io.BytesIO, payment_verification_plan_id: str
     ) -> "ImportXlsxPaymentVerificationPlanFile":
-        id = decode_id_string(payment_verification_plan_id)
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
+        payment_verification_plan = get_object_or_404(
+            PaymentVerificationPlan, id=decode_id_string(payment_verification_plan_id)
+        )
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, payment_verification_plan.business_area)
 
@@ -867,7 +868,7 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if not payment_plan.not_excluded_payments:
+        if not payment_plan.eligible_payments:
             msg = "Export is not impossible because Payment list is empty"
             logger.error(msg)
             raise GraphQLError(msg)
@@ -1002,6 +1003,11 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
+        if payment_plan.is_follow_up:
+            msg = "Entitlements of follow-up payment plan cannot be changed"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
         with transaction.atomic():
             import_service = XlsxPaymentPlanImportService(payment_plan, file)
             import_service.open_workbook()
@@ -1050,7 +1056,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
 
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
@@ -1104,6 +1110,11 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
+        if payment_plan.is_follow_up:
+            msg = "Entitlements of follow-up payment plan cannot be changed"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
         old_payment_plan = copy_model_object(payment_plan)
 
         engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
@@ -1127,26 +1138,90 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+# TODO: Depending on the designation of the Program we can exclude Ind or HH
 class ExcludeHouseholdsMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
     class Input:
         payment_plan_id = graphene.ID(required=True)
-        household_unicef_ids = graphene.List(graphene.String, required=True)
+        excluded_households_ids = graphene.List(graphene.String, required=True)
+        exclusion_reason = graphene.String()
 
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, household_unicef_ids: List[str]
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        excluded_households_ids: List[str],
+        exclusion_reason: Optional[str] = "",
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-        if payment_plan.excluded_payments:
-            msg = "This Payment Plan contains already excluded payments"
-            logger.error(msg)
-            raise GraphQLError(msg)
 
-        payment_plan.payment_items.filter(household__unicef_id__in=household_unicef_ids).update(excluded=True)
+        cls.has_permission(info, Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, payment_plan.business_area)
+
+        if not payment_plan.is_follow_up:
+            raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
+
+        if payment_plan.excluded_households_ids:
+            raise GraphQLError("This Payment Plan already contains excluded households")
+
+        if not payment_plan.eligible_payments.exists():
+            raise GraphQLError(
+                "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
+            )
+
+        for hh_unicef_id in excluded_households_ids:
+            if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
+                raise GraphQLError("These Households are not included in this Payment Plan")
+
+        payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
+
+        payments_for_exclude.update(excluded=True)
+
+        payment_plan.update_population_count_fields()
+        payment_plan.update_money_fields()
+
+        if exclusion_reason:
+            payment_plan.exclusion_reason = exclusion_reason
+            payment_plan.save(update_fields=["exclusion_reason"])
+
+        payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)
+
+
+class CreateFollowUpPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+        dispersion_start_date = graphene.Date(required=True)
+        dispersion_end_date = graphene.Date(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        dispersion_start_date: date,
+        dispersion_end_date: date,
+        **kwargs: Any,
+    ) -> "CreateFollowUpPaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+
+        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
+            info.context.user, dispersion_start_date, dispersion_end_date
+        )
+
+        return cls(follow_up_pp)
 
 
 class Mutations(graphene.ObjectType):
@@ -1170,6 +1245,7 @@ class Mutations(graphene.ObjectType):
     )
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
     create_payment_plan = CreatePaymentPlanMutation.Field()
+    create_follow_up_payment_plan = CreateFollowUpPaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
