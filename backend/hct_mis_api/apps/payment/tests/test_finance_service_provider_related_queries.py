@@ -13,6 +13,15 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
 )
 
+QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE = """
+query financialServiceProviderXlsxTemplate($id:ID!) {
+  financialServiceProviderXlsxTemplate(id:$id) {
+    name
+    columns
+  }
+}
+"""
+
 QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES = """
 query AllFinancialServiceProviderXlsxTemplates(
     $offset: Int
@@ -41,6 +50,16 @@ allFinancialServiceProviderXlsxTemplates(
         }
     }
 }
+}
+"""
+
+QUERY_FINANCIAL_SERVICE_PROVIDER = """
+query FinancialServiceProvider($id:ID!) {
+  financialServiceProvider(id:$id) {
+    name
+    visionVendorNumber
+    distributionLimit
+  }
 }
 """
 
@@ -84,6 +103,17 @@ allFinancialServiceProviders(
         }
     }
   }
+}
+"""
+
+QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_REPORT = """
+query financialServiceProviderXlsxReport($id: ID!) {
+financialServiceProviderXlsxReport(id: $id) {
+    status
+    financialServiceProvider {
+        name
+    }
+}
 }
 """
 
@@ -156,15 +186,42 @@ class TestFSPRelatedSchema(APITestCase):
             status=FinancialServiceProviderXlsxReport.IN_PROGRESS, financial_service_provider=cls.fsp_2
         )
 
-    def test_query_all_financial_service_provider_xlsx_templates(self) -> None:
+    # def test_query_all_financial_service_provider_xlsx_templates(self) -> None:
+    #     self.snapshot_graphql_request(
+    #         request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES, context={"user": self.user}
+    #     )
+    #
+    # def test_query_all_financial_service_providers(self) -> None:
+    #     self.snapshot_graphql_request(request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDERS, context={"user": self.user})
+    #
+    # def test_query_all_financial_service_provider_xlsx_reports(self) -> None:
+    #     self.snapshot_graphql_request(
+    #         request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_REPORTS, context={"user": self.user}
+    #     )
+
+    def test_query_single_financial_service_provider(self) -> None:
         self.snapshot_graphql_request(
-            request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES, context={"user": self.user}
+            request_string=QUERY_FINANCIAL_SERVICE_PROVIDER,
+            context={"user": self.user},
+            variables={"id": self.id_to_base64(self.fsp_1.id, "FinancialServiceProviderNode")},
         )
 
-    def test_query_all_financial_service_providers(self) -> None:
-        self.snapshot_graphql_request(request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDERS, context={"user": self.user})
-
-    def test_query_all_financial_service_provider_xlsx_reports(self) -> None:
+    def test_query_single_financial_service_provider_xlsx_template(self) -> None:
         self.snapshot_graphql_request(
-            request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_REPORTS, context={"user": self.user}
+            request_string=QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE,
+            context={"user": self.user},
+            variables={
+                "id": self.id_to_base64(self.fsp_xlsx_template_1.id, "FinancialServiceProviderXlsxTemplateNode")
+            },
+        )
+
+    def test_query_single_financial_service_provider_xlsx_report(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_REPORT,
+            context={"user": self.user},
+            variables={
+                "id": self.id_to_base64(
+                    self.financial_service_provider_xlsx_report_1.id, "FinancialServiceProviderXlsxReportNode"
+                )
+            },
         )
