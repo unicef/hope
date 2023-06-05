@@ -12,21 +12,81 @@ from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from environ.environ import Env
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
 from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-from hct_mis_api.settings.config import env
+
+DEFAULTS = {
+    "AURORA_SERVER": (str, ""),
+    "AURORA_TOKEN": (str, ""),
+    "AURORA_USER": (str, ""),
+    "DEBUG": (bool, False),
+    "ENV": (str, "dev"),
+    "DOMAIN": (str, "localhost"),
+    "DJANGO_ALLOWED_HOSTS": (list, "*"),
+    "HCT_MIS_FRONTEND_HOST": (str, ""),
+    "ALERTS_EMAIL": (str, "admin@hct-mis.com"),
+    "SECRET_KEY": (str, ""),
+    "DATA_VOLUME": (str, "/data"),
+    "HCT_MIS_UPLOADS_PATH": (str, ""),
+    "DEFAULT_FROM_EMAIL": (str, "HCT-MIS Stage <noreply@hct-mis.org>"),
+    "EMAIL_BACKEND": (str, "django.core.mail.backends.smtp.EmailBackend"),
+    "EMAIL_HOST": (str, ""),
+    "EMAIL_PORT": (str, ""),
+    "EMAIL_HOST_USER": (str, ""),
+    "EMAIL_HOST_PASSWORD": (str, ""),
+    "EMAIL_USE_TLS": (bool, True),
+    "KOBO_KF_URL": (str, "https://kf-hope.unitst.org"),
+    "KOBO_KC_URL": (str, "https://kc-hope.unitst.org"),
+    "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
+    "AZURE_CLIENT_ID": (str, ""),
+    "AZURE_CLIENT_SECRET": (str, ""),
+    "AZURE_TENANT_KEY": (str, ""),
+    "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
+    "ELASTICSEARCH_HOST": (str, "elasticsearch:9200"),
+    "RAPID_PRO_URL": (str, "https://rapidpro.io"),
+    "DATAMART_USER": (str, ""),
+    "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
+    "DATAMART_PASSWORD": (str, ""),
+    "POWER_QUERY_DB_ALIAS": (str, "read_only"),
+    "ROOT_ACCESS_TOKEN": (str, ""),
+    "SENTRY_DSN": (str, ""),
+    "SENTRY_URL": (str, ""),
+    "CELERY_BROKER_URL": (str, ""),
+    "CELERY_RESULT_BACKEND": (str, ""),
+    "CELERY_TASK_ALWAYS_EAGER": (bool, False),
+    "ADMIN_PANEL_URL": (str, "unicorn"),
+    "SESSION_COOKIE_SECURE": (bool, True),
+    "SESSION_COOKIE_HTTPONLY": (bool, True),
+    "CSRF_COOKIE_HTTPONLY": (bool, True),
+    "CSRF_COOKIE_SECURE": (bool, True),
+    "SECURE_CONTENT_TYPE_NOSNIFF": (bool, True),
+    "SECURE_REFERRER_POLICY": (str, "same-origin"),
+    "SESSION_COOKIE_NAME": (str, "sessionid"),
+    "SECURE_HSTS_SECONDS": (int, 3600),
+    "SOCIAL_AUTH_REDIRECT_IS_HTTPS": (bool, True),
+    "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
+}
+
+env = Env(**DEFAULTS)
+
+DEBUG = env.bool("DEBUG", default=False)
+IS_TEST = env.bool("IS_TEST", default=False)
 
 PROJECT_NAME = "hct_mis_api"
-# project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
 WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
+
+if DEBUG:
+    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2"])
+
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 
@@ -35,7 +95,7 @@ ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 ####
 ADMINS = (
     ("Alerts", env("ALERTS_EMAIL")),
-    ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@kellton.com"),
+    ("Kellton", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@kellton.com"),
 )
 
 SITE_ID = 1
@@ -87,7 +147,7 @@ if SENTRY_DSN:
     sentry_key = re.search(r"//(.*)@", SENTRY_DSN).group(1)
     sentry_id = re.search(r"@.*/(\d*)$", SENTRY_DSN).group(1)
     CSP_REPORT_URI = (f"https://excubo.unicef.io/api/{sentry_id}/security/?sentry_key={sentry_key}",)
-    CSP_REPORT_ONLY = True
+    CSP_REPORT_ONLY = True  # TODO: change to False after testing
 CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
@@ -155,13 +215,9 @@ CSP_CONNECT_SRC = (
     "dev-hope.unitst.org",  # dev
 )
 
-DEBUG = True
-IS_DEV = False
-IS_STAGING = False
-IS_PROD = False
-
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
+EMAIL_BACKEND = env("EMAIL_BACKEND")
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
@@ -218,6 +274,7 @@ if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
         f'@{os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST")}:5432/'
         f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
     )
+
 RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
     {
@@ -236,6 +293,31 @@ DATABASES = {
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
+
+if env.bool("POSTGRES_SSL", default=False):
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
+    DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=mis",
+    }
+    DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=ca",
+    }
+    DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=erp",
+    }
+    DATABASES["registration_datahub"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
@@ -285,6 +367,7 @@ TEMPLATES: List[Dict[str, Any]] = [
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
             ],
+            "debug": DEBUG,
         },
     },
 ]
@@ -425,7 +508,7 @@ LOGGING: Dict[str, Any] = {
         "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
         "django.request": {
             "handlers": ["default"],
-            "level": "ERROR",
+            "level": "DEBUG" if DEBUG else "ERROR",
             "propagate": False,
         },
         "django.security.DisallowedHost": {
@@ -437,10 +520,10 @@ LOGGING: Dict[str, Any] = {
     },
 }
 
-GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
+GIT_VERSION = env("GIT_VERSION", default="UNKNOWN")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 
-REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
+REDIS_INSTANCE = env("REDIS_INSTANCE", default="redis:6379")
 if "CACHE_URL" not in os.environ:
     if REDIS_INSTANCE:
         os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
@@ -520,7 +603,7 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
-ELASTICSEARCH_INDEX_PREFIX = ""
+ELASTICSEARCH_INDEX_PREFIX = env("ELASTICSEARCH_INDEX_PREFIX", default="")
 ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
 }
@@ -799,7 +882,7 @@ SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
 SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
 
-EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
+EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY", default=1 * 60 * 60 * 24)
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 
@@ -876,6 +959,28 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
+REMOTE_STORAGE_ACTIVATE = env.bool("REMOTE_STORAGE_ACTIVATE", default=False)
+if not REMOTE_STORAGE_ACTIVATE:
+    STATIC_LOCATION = "static"
+    MEDIA_LOCATION = "media"
+
+    DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
+    STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
+
+    AZURE_ACCOUNT_NAME = env("STORAGE_AZURE_ACCOUNT_NAME", default="")
+    AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")
+    MEDIA_STORAGE_AZURE_ACCOUNT_NAME = env("MEDIA_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
+    MEDIA_STORAGE_AZURE_ACCOUNT_KEY = env("MEDIA_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
+    STATIC_STORAGE_AZURE_ACCOUNT_NAME = env("STATIC_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
+    STATIC_STORAGE_AZURE_ACCOUNT_KEY = env("STATIC_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
+
+    AZURE_URL_EXPIRATION_SECS = 10800
+
+    AZURE_STATIC_CUSTOM_DOMAIN = f"{STATIC_STORAGE_AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+    AZURE_MEDIA_CUSTOM_DOMAIN = f"{MEDIA_STORAGE_AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+    STATIC_URL = f"https://{AZURE_STATIC_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
+    MEDIA_URL = f"https://{AZURE_MEDIA_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
+
 MAX_STORAGE_FILE_SIZE = 30
 USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
@@ -932,18 +1037,12 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Household",
 ]
 #
-# AURORA_SERVER = env("AURORA_SERVER")
-# AURORA_TOKEN = env("AURORA_TOKEN")
-# AURORA_USER = env("AURORA_USER")
 
-CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
-
-if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
+CYPRESS_TESTING = env.bool("CYPRESS_TESTING", default=False)
+if CYPRESS_TESTING and not DEBUG:
     from django.core.exceptions import ImproperlyConfigured
 
-    raise ImproperlyConfigured(
-        f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
-    )
+    raise ImproperlyConfigured(f"CYPRESS_TESTING can only be used in development env: ENV={ENV} DEBUG={DEBUG}")
 
 CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")

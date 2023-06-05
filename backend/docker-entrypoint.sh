@@ -31,6 +31,19 @@ else
       wait_for_db mis_datahub_db
       wait_for_db erp_datahub_db
       wait_for_db registration_datahub_db
+      export SECURE_HSTS_SECONDS=0
+      export CSRF_COOKIE_SECURE=0
+      export CSRF_COOKIE_HTTPONLY=0
+      export SESSION_COOKIE_SECURE=0
+      export USE_DUMMY_EXCHANGE_RATES=0
+      export CELERY_TASK_ALWAYS_EAGER=1
+      export IS_TEST=1
+      export CYPRESS_TESTING=1
+      export DEBUG=1
+      export DOMAIN="localhost:8000"
+      export ELASTICSEARCH_INDEX_PREFIX="test_"
+      export EXCHANGE_RATE_CACHE_EXPIRY=0
+      export REMOTE_STORAGE_ACTIVATE=0
       python manage.py test --settings hct_mis_api.settings.test --noinput --parallel
       ;;
     "lint")

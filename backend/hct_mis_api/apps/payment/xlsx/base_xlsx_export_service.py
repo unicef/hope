@@ -71,7 +71,7 @@ class XlsxExportBaseService:
 
     @staticmethod
     def get_link(api_url: Optional[str] = None) -> str:
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
         if api_url:
             return link
