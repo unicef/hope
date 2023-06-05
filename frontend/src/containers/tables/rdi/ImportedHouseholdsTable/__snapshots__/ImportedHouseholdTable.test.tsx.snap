@@ -48,7 +48,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
         aria-label="enhanced table"
         aria-labelledby="tableTitle"
         class="MuiTable-root makeStyles-table-3"
-        data-cy="table"
+        data-cy="table-title"
       >
         <thead
           class="MuiTableHead-root"

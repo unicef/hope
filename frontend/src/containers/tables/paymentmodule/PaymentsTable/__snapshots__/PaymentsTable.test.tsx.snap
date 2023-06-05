@@ -82,7 +82,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-4"
-            data-cy="table"
+            data-cy="table-title"
           >
             <thead
               class="MuiTableHead-root"

@@ -68,7 +68,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-3"
-            data-cy="table"
+            data-cy="table-title"
           >
             <thead
               class="MuiTableHead-root"

@@ -32,7 +32,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-15"
-          data-cy="table"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -381,7 +381,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
-          data-cy="table"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
