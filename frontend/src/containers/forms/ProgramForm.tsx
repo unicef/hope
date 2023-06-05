@@ -17,7 +17,7 @@ import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { selectFields } from '../../utils/utils';
+import { selectFields, today } from '../../utils/utils';
 import {
   ProgramNode,
   useProgrammeChoiceDataQuery,
@@ -43,9 +43,6 @@ const DialogContainer = styled.div`
 const FullWidth = styled.div`
   width: 100%;
 `;
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
 
 interface ProgramFormPropTypes {
   program?: ProgramNode;

@@ -13,8 +13,10 @@ from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
+    Payment,
     PaymentPlan,
 )
+from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
 if TYPE_CHECKING:
@@ -23,12 +25,38 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
+    return Payment.objects.filter(parent__program=payment.parent.program, **{field_name: token}).exists()
+
+
+def generate_token_and_order_numbers(payment: Payment) -> Payment:
+    # AB#134721
+    if payment.order_number and payment.token_number:
+        return payment
+
+    order_number = generate_numeric_token(9)
+    token_number = generate_numeric_token(7)
+
+    while check_if_token_or_order_number_exists_per_program(payment, "order_number", order_number):
+        order_number = generate_numeric_token(9)
+
+    while check_if_token_or_order_number_exists_per_program(payment, "token_number", token_number):
+        token_number = generate_numeric_token(7)
+
+    payment.order_number = order_number
+    payment.token_number = token_number
+    payment.save(update_fields=["order_number", "token_number"])
+    return payment
+
+
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.not_excluded_payments.select_related(
+        self.payment_list = payment_plan.eligible_payments.select_related(
             "household", "collector", "financial_service_provider"
         ).order_by("unicef_id")
+        # TODO: in future will be per BA or program flag?
+        self.payment_generate_token_and_order_numbers = True
 
     def export_per_fsp(self, user: "User") -> None:
         # TODO this should be refactored
@@ -90,6 +118,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
                     # add rows
                     for payment in payment_qs:
+                        if self.payment_generate_token_and_order_numbers:
+                            payment = generate_token_and_order_numbers(payment)
+
                         payment_row = [
                             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
                             for column_name in template_column_list
