@@ -29,7 +29,15 @@ from ..utils.admin import HOPEModelAdminBase
 # from .celery_tasks import refresh_report, refresh_reports, run_background_query
 from .defaults import SYSTEM_PARAMETRIZER
 from .forms import FormatterTestForm
-from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
+from .models import (
+    CeleryEnabled,
+    Dataset,
+    Formatter,
+    Parametrizer,
+    Query,
+    Report,
+    ReportDocument,
+)
 from .utils import to_dataset
 from .widget import FormatterEditor
 
@@ -66,9 +74,17 @@ class CeleryEnabledMixin:
         ret.append("celery_task")
         return ret
 
+    @button(visible=settings.DEBUG)
+    def monitor(self: HOPEModelAdminBase, request: HttpRequest) -> HttpResponse:
+        ctx = self.get_common_context(request, title="Celery Monitor")
+        ctx["flower_address"] = settings.FLOWER_ADDRESS
+        ctx["queries"] = Query.objects.all()
+        ctx["reports"] = Report.objects.all()
+        return render(request, f"admin/power_query/{self.model._meta.model_name}/monitor.html", ctx)
+
     @button()
-    def queue(self, request: HttpRequest, pk: "UUID") -> None:
-        obj: Query
+    def queue(self: HOPEModelAdminBase, request: HttpRequest, pk: "UUID") -> None:
+        obj: CeleryEnabled
         try:
             if not (obj := self.get_object(request, str(pk))):
                 raise Exception("Target not found")
@@ -122,7 +138,7 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
         return None
 
     @button(visible=settings.DEBUG)
-    def run(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    def run(self, request: HttpRequest, pk: int) -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
         if not (query := self.get_object(request, str(pk))):
             raise Exception("Query not found")
@@ -133,6 +149,7 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
 
     @button()
     def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
+        obj: Query
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Query not found")
         try:
@@ -141,7 +158,7 @@ class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
                 args = obj.parametrizer.get_matrix()[0]
             else:
                 args = {}
-            ret, extra = obj.run(False, args)
+            ret, extra = obj.run(False, args, use_existing=True)
             context["type"] = type(ret).__name__
             context["raw"] = ret
             context["info"] = extra
@@ -305,6 +322,7 @@ class ReportAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
+        obj: Report
         if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
         try:
