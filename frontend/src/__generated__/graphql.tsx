@@ -1316,6 +1316,8 @@ export type DocumentNode = Node & {
   cleared: Scalars['Boolean'],
   clearedDate: Scalars['DateTime'],
   clearedBy?: Maybe<UserNode>,
+  issuanceDate?: Maybe<Scalars['DateTime']>,
+  expiryDate?: Maybe<Scalars['DateTime']>,
   countryIso3?: Maybe<Scalars['String']>,
 };
 
@@ -2364,6 +2366,8 @@ export type ImportedDocumentNode = Node & {
   type: ImportedDocumentTypeNode,
   country?: Maybe<Scalars['String']>,
   docDate?: Maybe<Scalars['Date']>,
+  issuanceDate?: Maybe<Scalars['Date']>,
+  expiryDate?: Maybe<Scalars['Date']>,
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -3022,6 +3026,7 @@ export type IndividualNode = Node & {
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNodeConnection,
   deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNodeConnection,
   ticketsystemflaggingdetailsSet: TicketSystemFlaggingDetailsNodeConnection,
+  ticketGoldenRecords: TicketNeedsAdjudicationDetailsNodeConnection,
   ticketDuplicates: TicketNeedsAdjudicationDetailsNodeConnection,
   ticketSelected: TicketNeedsAdjudicationDetailsNodeConnection,
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNodeConnection,
@@ -3127,6 +3132,15 @@ export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
 
 
 export type IndividualNodeTicketsystemflaggingdetailsSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeTicketGoldenRecordsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6952,12 +6966,16 @@ export type TargetingCriteriaNode = {
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean'],
+  flagExcludeIfOnSanctionList: Scalars['Boolean'],
   targetPopulation?: Maybe<TargetPopulationNode>,
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>,
 };
 
 export type TargetingCriteriaObjectType = {
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleObjectType>>>,
+  flagExcludeIfActiveAdjudicationTicket?: Maybe<Scalars['Boolean']>,
+  flagExcludeIfOnSanctionList?: Maybe<Scalars['Boolean']>,
 };
 
 export enum TargetingCriteriaRuleFilterComparisonMethod {
@@ -8642,6 +8660,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>
   )>, targetingCriteria: Maybe<(
     { __typename?: 'TargetingCriteriaNode' }
+    & Pick<TargetingCriteriaNode, 'flagExcludeIfActiveAdjudicationTicket' | 'flagExcludeIfOnSanctionList'>
     & { rules: Maybe<Array<Maybe<(
       { __typename?: 'TargetingCriteriaRuleNode' }
       & Pick<TargetingCriteriaRuleNode, 'id'>
@@ -14092,6 +14111,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     lastName
   }
   targetingCriteria {
+    flagExcludeIfActiveAdjudicationTicket
+    flagExcludeIfOnSanctionList
     rules {
       id
       individualsFiltersBlocks {
@@ -28057,6 +28078,8 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   cleared?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   clearedDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  issuanceDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  expiryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -28583,6 +28606,8 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   docDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  issuanceDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
@@ -28898,6 +28923,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   individualDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'], ParentType, ContextType, IndividualNodeIndividualDataUpdateTicketDetailsArgs>,
   deleteIndividualTicketDetails?: Resolver<ResolversTypes['TicketDeleteIndividualDetailsNodeConnection'], ParentType, ContextType, IndividualNodeDeleteIndividualTicketDetailsArgs>,
   ticketsystemflaggingdetailsSet?: Resolver<ResolversTypes['TicketSystemFlaggingDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketsystemflaggingdetailsSetArgs>,
+  ticketGoldenRecords?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketGoldenRecordsArgs>,
   ticketDuplicates?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketDuplicatesArgs>,
   ticketSelected?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketSelectedArgs>,
   positiveFeedbackTicketDetails?: Resolver<ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodePositiveFeedbackTicketDetailsArgs>,
@@ -30225,6 +30251,8 @@ export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>,
 };

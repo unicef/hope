@@ -27,6 +27,12 @@ class TestPowerQuery(TestCase):
         self.assertTrue(self.query1.datasets.exists())
         self.assertEqual(result["{}"], self.query1.datasets.first().pk)
 
+    def test_query_lazy_execution(self) -> None:
+        self.query1.execute_matrix()
+        ds1 = self.query1.datasets.first()
+        ds2, __ = self.query1.run(use_existing=True)
+        self.assertEqual(ds1.pk, ds2.pk)
+
     def test_report_execution(self) -> None:
         self.query1.execute_matrix()
         dataset = self.query1.datasets.first()

@@ -21,12 +21,14 @@ interface TargetPopulationCoreProps {
   id: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   permissions: string[];
+  screenBeneficiary: boolean;
 }
 
 export function TargetPopulationCore({
   id,
   targetPopulation,
   permissions,
+  screenBeneficiary,
 }: TargetPopulationCoreProps): React.ReactElement {
   const { t } = useTranslation();
   if (!targetPopulation) return null;
@@ -37,6 +39,7 @@ export function TargetPopulationCore({
         <TargetingCriteria
           rules={targetPopulation.targetingCriteria?.rules || []}
           targetPopulation={targetPopulation}
+          screenBeneficiary={screenBeneficiary}
         />
       ) : null}
       {targetPopulation?.excludedIds ? (

@@ -125,4 +125,6 @@ def should_run(expression: str) -> bool:
             day, month = exp.split("/")
             if day.isnumeric() and month.isnumeric() and int(day) == today.day and int(month) == today.month:
                 return True
+        else:
+            raise ValueError(f"Invalid expression '{expression}'")
     return False
