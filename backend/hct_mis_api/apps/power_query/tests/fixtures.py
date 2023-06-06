@@ -55,7 +55,7 @@ class ReportFactory(DjangoModelFactory):
     query = factory.Iterator(Query.objects.all())
     formatter = factory.Iterator(Formatter.objects.all())
     owner = factory.SubFactory(UserFactory, is_superuser=True, is_staff=True, password="123")
-    frequence = "1/m"
+    frequence = "mon,tue,wed,thu,fri,sat,sun"
 
     class Meta:
         model = Report
@@ -66,6 +66,7 @@ class ParametrizerFactory(DjangoModelFactory):
     code = "active-business-areas"
     name = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["name"])
     value = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["value"])
+    source = None
 
     class Meta:
         model = Parametrizer
