@@ -17,8 +17,7 @@ from single_source import get_version
 from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-
-from .config import env
+from hct_mis_api.settings.config import env
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -816,7 +815,7 @@ def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
 def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
-    from ..apps.utils.security import is_root
+    from ..apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
         return mark_safe(value.replace(":", r":<br>"))

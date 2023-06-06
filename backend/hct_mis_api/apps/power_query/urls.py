@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import data, document, report, report_list
+from hct_mis_api.apps.power_query.views import data, document, report, report_list
 
 app_name = "power_query"
 
