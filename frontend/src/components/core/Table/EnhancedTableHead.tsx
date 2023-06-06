@@ -105,6 +105,7 @@ export function EnhancedTableHead<T>(
           >
             {allowSort && !headCell.disableSort ? (
               <TableSortLabelStyled
+                data-cy='table-label'
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
@@ -119,7 +120,7 @@ export function EnhancedTableHead<T>(
                 )}
               </TableSortLabelStyled>
             ) : (
-              <StyledLabel>{headCell.label}</StyledLabel>
+              <StyledLabel data-cy='table-label'>{headCell.label}</StyledLabel>
             )}
           </TableCell>
         ))}

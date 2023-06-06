@@ -47,6 +47,7 @@ export const PaymentFilters = ({
         <Grid item>
           <SearchTextField
             value={filter.search}
+            data-cy='filter-search'
             label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
@@ -58,6 +59,7 @@ export const PaymentFilters = ({
             }
             label='Status'
             multiple
+            data-cy='filter-status'
             value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
@@ -72,6 +74,7 @@ export const PaymentFilters = ({
         <Grid item>
           <SearchTextField
             value={filter.serviceProvider}
+            data-cy='filter-fsp'
             label='FSP'
             onChange={(e) =>
               handleFilterChange('serviceProvider', e.target.value)
@@ -82,6 +85,7 @@ export const PaymentFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
             label='Modality'
+            data-cy='filter-Modality'
             value={filter.deliveryType}
             icon={<MonetizationOnIcon />}
           >
@@ -98,6 +102,7 @@ export const PaymentFilters = ({
         <Grid item>
           <DatePickerFilter
             label='Start Date'
+            data-cy='filter-start-date'
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -112,6 +117,7 @@ export const PaymentFilters = ({
         <Grid item>
           <DatePickerFilter
             label='End Date'
+            data-cy='filter-end-date'
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -127,6 +133,7 @@ export const PaymentFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label='Programme'
+            data-cy='filter-program'
             value={filter.program}
             icon={<FlashOnIcon />}
           >
