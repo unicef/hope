@@ -21,14 +21,13 @@ from natural_keys import NaturalKeyModel
 from sentry_sdk import capture_exception, configure_scope
 
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
-
-from ..core.celery import app
-from .defaults import SYSTEM_PARAMETRIZER
-from .exceptions import QueryRunError
-from .json import PQJSONEncoder
-from .utils import dict_hash, to_dataset
-from .validators import FrequencyValidator
+from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
+from hct_mis_api.apps.power_query.exceptions import QueryRunError
+from hct_mis_api.apps.power_query.json import PQJSONEncoder
+from hct_mis_api.apps.power_query.utils import dict_hash, to_dataset
+from hct_mis_api.apps.power_query.validators import FrequencyValidator
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +103,6 @@ class Parametrizer(NaturalKeyModel, models.Model):
     )
     value = models.JSONField(default=dict, blank=False, validators=[validate_queryargs])
     system = models.BooleanField(blank=True, default=False, editable=False)
-    source = models.ForeignKey("Query", blank=True, null=True, on_delete=models.CASCADE, related_name="+")
 
     class Meta:
         verbose_name_plural = "Arguments"

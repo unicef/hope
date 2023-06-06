@@ -21,11 +21,9 @@ from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
-from ..steficon.widget import PythonEditor
-from ..utils.admin import HOPEModelAdminBase
-from .defaults import SYSTEM_PARAMETRIZER
-from .forms import FormatterTestForm
-from .models import (
+from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
+from hct_mis_api.apps.power_query.forms import FormatterTestForm
+from hct_mis_api.apps.power_query.models import (
     CeleryEnabled,
     Dataset,
     Formatter,
@@ -34,8 +32,10 @@ from .models import (
     Report,
     ReportDocument,
 )
-from .utils import to_dataset
-from .widget import FormatterEditor
+from hct_mis_api.apps.power_query.utils import to_dataset
+from hct_mis_api.apps.power_query.widget import FormatterEditor
+from hct_mis_api.apps.steficon.widget import PythonEditor
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -99,8 +99,8 @@ class CeleryEnabledMixin:
 
 
 @register(Query)
-class QueryAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
-    list_display = ("name", "target", "owner", "active", "last_run", "status")
+class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "target", "owner", "active", "success")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
@@ -342,7 +342,7 @@ class ReportAdmin(LinkedObjectsMixin, CeleryEnabledMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
     def refresh(self, request: HttpRequest) -> HttpResponse:  # type: ignore
-        from .celery_tasks import refresh_reports
+        from hct_mis_api.apps.power_query.celery_tasks import refresh_reports
 
         try:
             refresh_reports.delay()
