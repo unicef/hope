@@ -397,6 +397,10 @@ class TestAutomatingRDICreationTask(TestCase):
             2: "ukraine",
             3: "ukraine",
             21: "ukraine",  # new form
+            26: "ukraine",  # new form
+            27: "ukraine",  # new form
+            28: "ukraine",  # new form
+            29: "ukraine",  # new form
             17: "sri-lanka",
             18: "czech republic",
             19: "czech republic",
@@ -408,14 +412,14 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        registration_ids = [2, 3, 21, 17, 18, 19, 999]
+        registration_ids = [2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999]
         for registration_id in registration_ids:
             for _ in range(amount_of_records):
                 records_count += 1
                 files = None
                 if registration_id == 17:
                     data = SRI_LANKA_FIELDS
-                elif registration_id == 21:
+                elif registration_id in [21, 26, 27, 28, 29]:
                     data = UKRAINE_NEW_FORM_FIELDS
                     files = UKRAINE_NEW_FORM_FILES
                 else:
@@ -439,7 +443,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 # for SriLanka we create "children" and "caretaker" as two separate Individuals
                 # and for Ukr new form reg_id=21 we create 2 Ind and 1 Hh
                 # that why need amount_of_records * 2
-                imported_ind_count += amount_of_records if registration_id not in [17, 21] else amount_of_records * 2
+                imported_ind_count += amount_of_records if registration_id not in [17, 21, 26, 27, 28, 29] else amount_of_records * 2
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
