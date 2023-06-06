@@ -1925,7 +1925,7 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.2.3)", "diff-cover (>=7.5)", "p
 name = "flake8"
 version = "6.0.0"
 description = "the modular source code checker: pep8 pyflakes and co"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8.1"
 files = [
@@ -1937,6 +1937,20 @@ files = [
 mccabe = ">=0.7.0,<0.8.0"
 pycodestyle = ">=2.10.0,<2.11.0"
 pyflakes = ">=3.0.0,<3.1.0"
+
+[[package]]
+name = "flake8-absolute-import"
+version = "1.0.0.1"
+description = "flake8 plugin to require absolute imports"
+category = "main"
+optional = false
+python-versions = ">=3.4"
+files = [
+    {file = "flake8_absolute_import-1.0.0.1-py3-none-any.whl", hash = "sha256:d24f189bca52ffc0d13e8046606ea42d22a9ad9d409bf39e52b93493cf2ffd2c"},
+]
+
+[package.dependencies]
+flake8 = ">=3.7"
 
 [[package]]
 name = "flake8-bugbear"
@@ -2765,7 +2779,7 @@ traitlets = "*"
 name = "mccabe"
 version = "0.7.0"
 description = "McCabe checker, plugin for flake8"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -3325,7 +3339,7 @@ files = [
 name = "pyflakes"
 version = "3.0.1"
 description = "passive checker of Python programs"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -4750,4 +4764,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.*"
-content-hash = "f11d7b4ff479c35ffd9c308636b39d1aa92c4539c83a845a791b7b8eca5b1c40"
+content-hash = "b815e383c9e7d49c26467722c58bee8ba7ecff696d43643230f858fcdc34ce82"
