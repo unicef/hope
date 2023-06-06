@@ -22,22 +22,24 @@ from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
-from hct_mis_api.apps.utils.admin import (
-    HOPEModelAdminBase,
-    LastSyncDateResetMixin,
-    SoftDeletableAdminMixin,
+from hct_mis_api.apps.household.admin.mixins import (
+    CustomTargetPopulationMixin,
+    HouseholdWithDrawnMixin,
 )
-
-from ...utils.security import is_root
-from ..models import (
+from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
     IndividualRoleInHousehold,
 )
-from .mixins import CustomTargetPopulationMixin, HouseholdWithDrawnMixin
+from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 

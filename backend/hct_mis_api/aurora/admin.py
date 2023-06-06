@@ -12,9 +12,8 @@ from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.aurora import models
-
-from .forms import FetchForm
-from .utils import fetch_records, get_metadata
+from hct_mis_api.aurora.forms import FetchForm
+from hct_mis_api.aurora.utils import fetch_records, get_metadata
 
 logger = logging.getLogger(__name__)
 
