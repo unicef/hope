@@ -165,7 +165,7 @@ def get_has_bank_account_number_query(_: Any, args: Any) -> Q:
 
 def get_has_tax_id_query(_: Any, args: Any) -> Q:
     has_tax_id = args[0] in [True, "True"]
-    return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
+    return Q(documents__type__key__iexact="TAX_ID") if has_tax_id else ~Q(documents__type__key__iexact="TAX_ID")
 
 
 def country_generic_query(comparison_method: str, args: Any, lookup: Any) -> Q:
