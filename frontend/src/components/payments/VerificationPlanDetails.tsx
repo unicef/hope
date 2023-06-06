@@ -309,6 +309,7 @@ export const VerificationPlanDetails = ({
                 <StatusBox
                   status={verificationPlan.status}
                   statusToColor={paymentVerificationStatusToColor}
+                  dataCy='verification-plan-status'
                 />
               </LabelizedField>
             </Grid>

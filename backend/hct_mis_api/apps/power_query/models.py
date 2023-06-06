@@ -15,10 +15,13 @@ from django.utils.datetime_safe import strftime
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 
+from celery import states
+from celery.result import AsyncResult
 from natural_keys import NaturalKeyModel
 from sentry_sdk import capture_exception, configure_scope
 
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
 from hct_mis_api.apps.power_query.exceptions import QueryRunError
@@ -51,6 +54,43 @@ def validate_queryargs(value: Any) -> None:
         raise
     except Exception as e:
         raise ValidationError("%(exc)s: " "%(value)s is not a valid QueryArgs", params={"value": value, "exc": e})
+
+
+class CeleryEnabled(models.Model):
+    SCHEDULED = frozenset({states.PENDING, states.RECEIVED, states.STARTED, states.RETRY})
+
+    celery_task = models.CharField(max_length=36, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def status(self) -> str:
+        if self.celery_task:
+            try:
+                result = self.async_result.state
+            except Exception as e:
+                result = str(e)
+        else:
+            result = "Not scheduled"
+        return result
+
+    @property
+    def async_result(self) -> Optional[AsyncResult]:
+        if self.celery_task and self.status not in self.SCHEDULED:
+            return AsyncResult(self.celery_task, app=app)
+        else:
+            return None
+
+    def queue(self) -> Optional[str]:
+        if self.status not in self.SCHEDULED:
+            task_id = self._queue()
+            if not task_id:
+                raise NotImplementedError("`_queue` not properly implemented")
+            return task_id
+        return None
+
+    def _queue(self) -> str:
+        return ""
 
 
 class Parametrizer(NaturalKeyModel, models.Model):
@@ -91,12 +131,16 @@ class Parametrizer(NaturalKeyModel, models.Model):
             getter: Callable = SYSTEM_PARAMETRIZER[self.code]["value"]
             self.value = getter()
             self.save()
+        elif self.source:
+            out, __ = self.source.run(use_existing=True)
+            self.value = out
+            self.save()
 
     def __str__(self) -> str:
         return self.name
 
 
-class Query(NaturalKeyModel, models.Model):
+class Query(NaturalKeyModel, CeleryEnabled, models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="power_queries")
@@ -227,6 +271,14 @@ class Query(NaturalKeyModel, models.Model):
             raise QueryRunError(e) from e
         return return_value
 
+    def _queue(self) -> str:
+        from hct_mis_api.apps.power_query.celery_tasks import run_background_query
+
+        res = run_background_query.delay(self.id)
+        self.celery_task = res.id
+        self.save()
+        return res.id
+
 
 class Dataset(NaturalKeyModel, models.Model):
     hash = models.CharField(unique=True, max_length=200, editable=False)
@@ -280,7 +332,7 @@ class Formatter(NaturalKeyModel, models.Model):
         return tpl.render(Context(context))
 
 
-class Report(NaturalKeyModel, models.Model):
+class Report(NaturalKeyModel, CeleryEnabled, models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
     document_title = models.CharField(max_length=255, blank=True, null=True)
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
@@ -350,6 +402,14 @@ class Report(NaturalKeyModel, models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse("power_query:report", args=[self.pk])
+
+    def _queue(self) -> str:
+        from hct_mis_api.apps.power_query.celery_tasks import refresh_report
+
+        res = refresh_report.delay(self.id)
+        self.celery_task = res.id
+        self.save()
+        return res.id
 
 
 class ReportDocumentManager(models.Manager):
