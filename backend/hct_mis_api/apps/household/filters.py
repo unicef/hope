@@ -140,6 +140,9 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        hh_id_regex = r"^HH-\d{2}-\d{4}\.\d{4}$"
+        if re.match(hh_id_regex, value):
+            return qs.filter(unicef_id=value)
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
