@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import BusinessArea, TicketPriority
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -22,7 +22,9 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    HardDocumentDeduplication,
+)
 
 
 def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -> None:
@@ -31,7 +33,7 @@ def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
         individual.deduplication_golden_record_results = {}
         individual.deduplication_batch_results = {}
-        DeduplicateTask.hard_deduplicate_documents(individual.documents.all())
+        HardDocumentDeduplication().deduplicate(individual.documents.all())
     Individual.objects.bulk_update(
         individuals,
         [
@@ -125,21 +127,12 @@ def create_grievance_ticket_with_details(
     admin_level_2 = household.admin2 if household else None
     area = household.village if household else ""
 
-    priority = TicketPriority.priority_by_business_area_and_ticket_type(
-        business_area.id, TicketPriority.NEEDS_ADJUDICATION
-    )
-    urgency = TicketPriority.urgency_by_business_area_and_ticket_type(
-        business_area.id, TicketPriority.NEEDS_ADJUDICATION
-    )
-
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         business_area=business_area,
         admin2=admin_level_2,
         area=area,
         registration_data_import=registration_data_import,
-        priority=priority,
-        urgency=urgency,
     )
     golden_records = main_individual.get_deduplication_golden_record()
     extra_data = {
