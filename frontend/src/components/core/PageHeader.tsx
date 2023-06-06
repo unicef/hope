@@ -85,7 +85,9 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Box display='flex' alignItems='center'>
-                  <Typography variant='h5'>{title}</Typography>
+                  <Typography data-cy='page-header-title' variant='h5'>
+                    {title}
+                  </Typography>
                   <Box display='flex' ml={2}>
                     {flags}
                   </Box>

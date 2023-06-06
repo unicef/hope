@@ -61,6 +61,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -70,11 +71,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
             >
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                data-cy="unicefId"
                 scope="col"
               >
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -93,11 +96,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               </th>
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                data-cy="verificationStatus"
                 scope="col"
               >
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -116,11 +121,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               </th>
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                data-cy="totalDeliveredQuantity"
                 scope="col"
               >
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -139,11 +146,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               </th>
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                data-cy="startDate"
                 scope="col"
               >
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -162,11 +171,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               </th>
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                data-cy="program__name"
                 scope="col"
               >
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -185,11 +196,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               </th>
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                data-cy="updatedAt"
                 scope="col"
               >
                 <span
                   aria-disabled="false"
                   class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -225,6 +238,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

@@ -57,7 +57,8 @@ def refresh_reports(self: Any) -> List:
     try:
         for report in Report.objects.filter(active=True, frequence__isnull=False):
             if should_run(report.frequence):
-                ret = report.execute(run_query=True)
+                ret = report.queue()
+                # ret = report.execute(run_query=True)
                 results.append(ret)
             else:
                 results.append([report.pk, "skip"])
