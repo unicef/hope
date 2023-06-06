@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Any, Union
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
 
-from ..account.models import User
-from .models import Report, ReportDocument
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.power_query.models import Report, ReportDocument
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractBaseUser, AnonymousUser

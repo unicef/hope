@@ -113,8 +113,12 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink to={`/${businessArea}/paymentplans/${paymentPlan.id}`}>
-          {t('Payment Plan')} {paymentPlan.unicefId}
+        <BlackLink
+          data-cy='plan-link'
+          to={`/${businessArea}/paymentplans/${paymentPlan.id}`}
+        >
+          {t('Payment Plan')}{' '}
+          <span data-cy='plan-id'>{paymentPlan.unicefId}</span>
         </BlackLink>
       }
       breadCrumbs={
