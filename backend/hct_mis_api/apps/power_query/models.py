@@ -102,7 +102,8 @@ class Parametrizer(NaturalKeyModel, models.Model):
         blank=True,
     )
     value = models.JSONField(default=dict, blank=False, validators=[validate_queryargs])
-    system = models.BooleanField(blank=True, default=False, editable=False)
+    system = models.BooleanField(blank=True, default=False, editable=False
+    source = models.ForeignKey("Query", blank=True, null=True, on_delete=models.CASCADE, related_name="+")
 
     class Meta:
         verbose_name_plural = "Arguments"
