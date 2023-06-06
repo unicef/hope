@@ -170,6 +170,7 @@ tblib = "^1.7.0"
 update = "^0.0.1"
 urllib3 = "^1.26.9"
 xlrd = "^1.2"  # update to 2 breaks
+flake8-absolute-import = "^1.0.0.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "0.982"

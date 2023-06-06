@@ -1,11 +1,10 @@
 import logging
 from typing import Any, List, Union
 
+from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.power_query.models import Query, Report
+from hct_mis_api.apps.power_query.utils import should_run
 from hct_mis_api.apps.utils.sentry import sentry_tags
-
-from ..core.celery import app
-from .models import Query, Report
-from .utils import should_run
 
 logger = logging.getLogger(__name__)
 
