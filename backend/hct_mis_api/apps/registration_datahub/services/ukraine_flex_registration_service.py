@@ -316,7 +316,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
 
 class UkraineRegistrationService(UkraineBaseRegistrationService):
-    REGISTRATION_ID: Tuple = (21,)
+    REGISTRATION_ID: Tuple = (21, 26, 27, 28, 29)
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin1": "admin1_h_c",
