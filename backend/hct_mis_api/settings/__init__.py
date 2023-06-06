@@ -1,7 +1,7 @@
 # import defaults
 from importlib import import_module
 
-from .base import *  # noqa: F403
+from .base import *  # noqa: F403, ABS101
 
 overrides = import_module(f"hct_mis_api.settings.{ENV}")
 
