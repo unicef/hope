@@ -41,6 +41,11 @@ mimetype_map = {
 
 MIMETYPES = ((k, v) for k, v in mimetype_map.items())
 
+DocumentResult = Tuple[int, Union[str, int]]
+ReportResult = List[Union[DocumentResult, Any, str]]
+QueryResult = Tuple[Any, Any]
+QueryMatrixResult = Dict[str, Union[int, str]]
+
 
 def validate_queryargs(value: Any) -> None:
     try:
@@ -135,14 +140,14 @@ class Query(NaturalKeyModel, models.Model):
         result = query.run(persist=False, arguments=arguments, use_existing=True)
         return result
 
-    def update_results(self, results: Any) -> None:
+    def update_results(self, results: QueryMatrixResult) -> None:
         self.info["last_run_results"] = results
         self.error_message = results.get("error_message", "")
         self.sentry_error_id = results.get("sentry_error_id", "")
         self.last_run = timezone.now()
         self.save()
 
-    def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Union[Dict[str, int], Dict[str, str]]:
+    def execute_matrix(self, persist: bool = True, **kwargs: Any) -> QueryMatrixResult:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
             if not args:
@@ -154,7 +159,7 @@ class Query(NaturalKeyModel, models.Model):
         self.last_run = None
         self.info = {}
 
-        results: Dict[str, str] = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
+        results: QueryMatrixResult = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
         with configure_scope() as scope:
             scope.set_tag("power_query", True)
             scope.set_tag("power_query.name", self.name)
@@ -176,14 +181,13 @@ class Query(NaturalKeyModel, models.Model):
                 self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(
-        self, persist: bool = False, arguments: Optional[Dict] = None, use_existing: bool = False
-    ) -> Tuple[Union["Dataset", List], Dict]:
+    def run(self, persist: bool = False, arguments: Optional[Dict] = None, use_existing: bool = False) -> QueryResult:
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
             for model in [BusinessArea, User]
         }
+        return_value: QueryResult
         if self.owner.is_superuser:
             connections["QueryManager"] = Query.objects.filter()
         else:
@@ -311,10 +315,10 @@ class Report(NaturalKeyModel, models.Model):
             self.document_title = self.name
         super().save(force_insert, force_update, using, update_fields)
 
-    def execute(self, run_query: bool = False) -> List:
+    def execute(self, run_query: bool = False) -> ReportResult:
         # TODO: refactor that
         query: Query = self.query
-        result: List = []
+        result: ReportResult = []
         if run_query:
             query.execute_matrix()
         for dataset in query.datasets.all():
@@ -337,11 +341,11 @@ class Report(NaturalKeyModel, models.Model):
                         "arguments": dataset.arguments,
                     },
                 )
-                result.append([dataset.pk, len(res.output)])
+                result.append((res.pk, len(res.output)))
             except Exception as e:
                 logger.exception(e)
-                result.append([dataset.pk, e])
-            self.last_run = timezone.now()
+                result.append((dataset.pk, str(e)))
+        self.last_run = timezone.now()
         if not result:
             result = ["No Dataset available"]
         return result

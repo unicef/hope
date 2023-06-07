@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
+from django.db.models import Model
 
 from ..account.models import User
 from .models import Report, ReportDocument
@@ -14,7 +15,7 @@ class PowerQueryBackend(ModelBackend):
     def get_office_permissions(self, user_obj: User, office_slug: str) -> Any:
         key = f"_perm_{office_slug}"
         if not hasattr(user_obj, key):
-            permsissions = Permission.objects.filter(
+            permissions = Permission.objects.filter(
                 group__user_groups__user=user_obj, group__user_groups__business_area__slug=office_slug
             )
             setattr(
@@ -22,12 +23,14 @@ class PowerQueryBackend(ModelBackend):
                 key,
                 {
                     f"{ct}.{name}"
-                    for ct, name in permsissions.values_list("content_type__app_label", "codename").order_by()
+                    for ct, name in permissions.values_list("content_type__app_label", "codename").order_by()
                 },
             )
         return getattr(user_obj, key)
 
-    def has_perm(self, user_obj: Union["AbstractBaseUser", "AnonymousUser"], perm: Any, obj: Any = None) -> bool:
+    def has_perm(
+        self, user_obj: Union["AbstractBaseUser", "AnonymousUser"], perm: str, obj: Optional[Model] = None
+    ) -> bool:
         if not isinstance(user_obj, User):
             return False
         if isinstance(obj, Report):

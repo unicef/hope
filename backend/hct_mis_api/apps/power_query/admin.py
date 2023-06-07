@@ -37,25 +37,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class QueryResource(resources.ModelResource):
-    class Meta:
-        model = Query
-        fields = ("name", "description", "target", "code", "info")
-        import_id_fields = ("name",)
-
-    def dehydrate_target(self, obj: Any) -> str:
-        return f"{obj.target.app_label}.{obj.target.model}"
-
-    def before_import_row(self, row: Dict, row_number: Optional[int] = None, **kwargs: Any) -> Dict:
-        ct = row.get("target")
-        app_label, model_name = ct.split(".")
-        try:
-            row["target"] = ContentType.objects.get(app_label=app_label, model=model_name).pk
-        except ContentType.DoesNotExist:
-            pass
-        return row
-
-
 @register(Query)
 class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("name", "target", "owner", "active", "success")
@@ -69,7 +50,6 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     autocomplete_fields = ("target", "owner")
     readonly_fields = ("sentry_error_id", "error_message", "info")
     change_form_template = None
-    resource_class = QueryResource
 
     def success(self, obj: Query) -> bool:
         return not bool(obj.error_message)
@@ -90,27 +70,25 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return request.user.is_superuser or bool(obj and obj.owner == request.user)
 
     @button()
-    def datasets(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponseRedirect]:
+    def datasets(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:  # type: ignore[return]
         obj = self.get_object(request, str(pk))
         try:
             url = reverse("admin:power_query_dataset_changelist")
             return HttpResponseRedirect(f"{url}?query__exact={obj.pk}")
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-        return None
 
     @button(visible=settings.DEBUG)
-    def run(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    def run(self, request: HttpRequest, pk: int) -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
-        if not (query := self.get_object(request, str(pk))):
-            raise Exception("Query not found")
+        query = self.get_object(request, str(pk))
         results = query.execute_matrix(persist=True)
         self.message_user(request, "Done", messages.SUCCESS)
         ctx["results"] = results
         return render(request, "admin/power_query/query/run_result.html", ctx)
 
     @button()
-    def queue(self, request: HttpRequest, pk: "UUID") -> None:
+    def queue(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:  # type: ignore[return]
         try:
             res: AsyncResult = run_background_query.delay(pk)
             self.message_user(request, f"Query scheduled: {res}")
@@ -118,9 +96,8 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button()
-    def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
-        if not (obj := self.get_object(request, str(pk))):
-            raise Exception("Query not found")
+    def preview(self, request: HttpRequest, pk: int) -> HttpResponse:  # type: ignore[return]
+        obj = self.get_object(request, str(pk))
         try:
             context = self.get_common_context(request, pk, title="Results")
             if obj.parametrizer:
@@ -144,7 +121,6 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-        return None
 
     def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Any]:
         ct = ContentType.objects.filter(id=request.GET.get("ct", 0)).first()
@@ -180,7 +156,7 @@ class DatasetAdmin(HOPEModelAdminBase):
         return obj.query.target
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
+    def preview(self, request: HttpRequest, pk: int) -> HttpResponse:  # type: ignore[return]
         obj = self.get_object(request, str(pk))
         try:
             context = self.get_common_context(request, pk, title="Results")
@@ -189,7 +165,6 @@ class DatasetAdmin(HOPEModelAdminBase):
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-        return None
 
 
 class FormatterResource(resources.ModelResource):
@@ -279,9 +254,8 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return kwargs
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def queue(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, str(pk))):
-            raise Exception("Report not found")
+    def queue(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:  # type: ignore[return]
+        obj = self.get_object(request, str(pk))
         try:
             res: AsyncResult = refresh_report.delay(obj.pk)
             self.message_user(request, f"Report scheduled: {res}")
@@ -290,9 +264,8 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def execute(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, str(pk))):
-            raise Exception("Report not found")
+    def execute(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:  # type: ignore[return]
+        obj = self.get_object(request, str(pk))
         try:
             result = obj.execute(run_query=True)
             errors = [r[1] for r in result if isinstance(r[1], Exception)]
@@ -307,8 +280,8 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
-    def refresh(self, request: HttpRequest) -> None:
+    @button(visible=lambda btn: btn.context["request"].path.endswith("/power_query/report/"))
+    def refresh(self, request: HttpRequest) -> HttpResponseRedirect:  # type: ignore[return]
         try:
             refresh_reports.delay()
             self.message_user(request, "Reports refresh queued", messages.SUCCESS)
@@ -324,14 +297,13 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     json_enabled = True
 
     @button()
-    def preview(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
+    def preview(self, request: HttpRequest, pk: int) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Execution Plan")
         return TemplateResponse(request, "admin/power_query/queryargs/preview.html", context)
 
     @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
-    def refresh(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, str(pk))):
-            raise Exception("Parametrizer not found")
+    def refresh(self, request: HttpRequest, pk: int) -> None:
+        obj = self.get_object(request, str(pk))
         obj.refresh()
 
 
