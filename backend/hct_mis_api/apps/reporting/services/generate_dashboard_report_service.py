@@ -58,7 +58,8 @@ class GenerateDashboardReportContentHelpers:
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
             valid_households = Household.objects.filter(
-                payment_records__in=valid_payment_records_in_instance
+                Q(payment__in=valid_payment_records_in_instance)
+                | Q(paymentrecord__in=valid_payment_records_in_instance)
             ).distinct()
             households_aggr = cls._aggregate_instances_sum(
                 valid_households,
@@ -69,7 +70,9 @@ class GenerateDashboardReportContentHelpers:
             instance["num_households"] = valid_households.count()
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
-        households = Household.objects.filter(payment_records__in=valid_payment_records).distinct()
+        households = Household.objects.filter(
+            Q(payment__in=valid_payment_records) | Q(paymentrecord__in=valid_payment_records)
+        ).distinct()
         households_aggr = cls._aggregate_instances_sum(households, individual_count_fields)
         totals = {
             "num_households": households.count(),
@@ -93,14 +96,19 @@ class GenerateDashboardReportContentHelpers:
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
             households_aggr = cls._aggregate_instances_sum(
-                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
+                Household.objects.filter(
+                    Q(payment__in=valid_payment_records_in_instance)
+                    | Q(paymentrecord__in=valid_payment_records_in_instance)
+                ).distinct(),
                 individual_count_fields,
             )
             instance.update(households_aggr)
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
         households_aggr = cls._aggregate_instances_sum(
-            Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
+            Household.objects.filter(
+                Q(payment__in=valid_payment_records) | Q(paymentrecord__in=valid_payment_records)
+            ).distinct(),
             individual_count_fields,
         )
         # return instances for rows and totals row info
@@ -395,14 +403,19 @@ class GenerateDashboardReportContentHelpers:
         for admin_area in admin_areas:
             valid_payment_records_in_instance = valid_payment_records.filter(household__admin_area=admin_area["id"])
             households_aggr = cls._aggregate_instances_sum(
-                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
+                Household.objects.filter(
+                    Q(payment__in=valid_payment_records_in_instance)
+                    | Q(paymentrecord__in=valid_payment_records_in_instance)
+                ).distinct(),
                 individual_count_fields,
             )
             admin_area.update(households_aggr)
 
         totals.update(
             cls._aggregate_instances_sum(
-                Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
+                Household.objects.filter(
+                    Q(payment__in=valid_payment_records) | Q(paymentrecord__in=valid_payment_records)
+                ).distinct(),
                 individual_count_fields,
             )
         )
@@ -580,7 +593,7 @@ class GenerateDashboardReportContentHelpers:
             {"delivered_quantity_usd__gt": 0},
             "delivery_date",
             "household__admin_area",
-            "cash_plan__program",
+            "parent__program",
             "business_area",
         )
 
