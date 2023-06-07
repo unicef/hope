@@ -63,6 +63,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
             onClick={() => setToggleInfo(true)}
             color='primary'
             aria-label='Targeting Information'
+            data-cy='button-target-population-info'
           >
             <Info />
           </IconButton>
