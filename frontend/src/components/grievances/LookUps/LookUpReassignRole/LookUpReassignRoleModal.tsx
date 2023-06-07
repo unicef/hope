@@ -119,7 +119,7 @@ export const LookUpReassignRoleModal = ({
         };
 
         const shouldUseMultiple =
-          ticket.needsAdjudicationTicketDetails.selectedIndividuals.length;
+          ticket.needsAdjudicationTicketDetails.selectedIndividuals?.length;
 
         try {
           await mutate({
