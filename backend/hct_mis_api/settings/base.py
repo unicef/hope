@@ -707,36 +707,6 @@ Clear Cache,clear-cache/
         "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
         bool,
     ),
-    "NEEDS_ADJUDICATION_PRIORITY": (
-        1,
-        "Default value of needs adjudication priority",
-        "priority_choices",
-    ),
-    "NEEDS_ADJUDICATION_URGENCY": (
-        2,
-        "Default value of needs adjudication urgency",
-        "urgency_choices",
-    ),
-    "PAYMENT_VERIFICATION_PRIORITY": (
-        1,
-        "Default value of payment verification priority",
-        "priority_choices",
-    ),
-    "PAYMENT_VERIFICATION_URGENCY": (
-        1,
-        "Default value of payment verification urgency",
-        "urgency_choices",
-    ),
-    "SYSTEM_FLAGGING_PRIORITY": (
-        1,
-        "Default value of system flagging priority",
-        "priority_choices",
-    ),
-    "SYSTEM_FLAGGING_URGENCY": (
-        2,
-        "Default value of system flagging urgency",
-        "urgency_choices",
-    ),
 }
 
 CONSTANCE_DBS = ("default",)

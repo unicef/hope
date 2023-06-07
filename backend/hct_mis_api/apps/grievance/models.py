@@ -23,9 +23,9 @@ from model_utils.models import UUIDModel
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.grievance.constants import (
     PRIORITY_CHOICES,
-    PRIORITY_LOW,
+    PRIORITY_NOT_SET,
     URGENCY_CHOICES,
-    URGENCY_NOT_URGENT,
+    URGENCY_NOT_SET,
 )
 from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
@@ -358,8 +358,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     extras = JSONField(blank=True, default=dict)
     ignored = models.BooleanField(default=False, db_index=True)
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
-    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_LOW)
-    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_URGENT)
+    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_NOT_SET)
+    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_SET)
     partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
     programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
     comments = models.TextField(blank=True, null=True)
