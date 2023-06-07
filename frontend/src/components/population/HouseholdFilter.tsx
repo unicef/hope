@@ -149,11 +149,14 @@ export const HouseholdFilters = ({
             label={t('Status')}
             value={filter.status}
           >
+            <MenuItem key='all' value='null'>
+              All
+            </MenuItem>
             <MenuItem key='active' value='false'>
               Active
             </MenuItem>
             <MenuItem key='inactive' value='true'>
-              Inactive
+              Withdrawn
             </MenuItem>
           </SelectFilter>
         </Grid>
