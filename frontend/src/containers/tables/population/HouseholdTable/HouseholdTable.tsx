@@ -34,7 +34,8 @@ export const HouseholdTable = ({
     search: filter.text,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
-    withdrawn: filter.withdrawn === 'true' ? true : undefined,
+    // eslint-disable-next-line no-nested-ternary
+    withdrawn: filter.withdrawn === 'true' ? true : filter.withdrawn === 'false' ? false : undefined,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
