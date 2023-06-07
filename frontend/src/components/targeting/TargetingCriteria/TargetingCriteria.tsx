@@ -133,7 +133,9 @@ export function TargetingCriteria({
     <PaperContainer>
       <Box display='flex' flexDirection='column'>
         <Title>
-          <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
+          <Typography data-cy='title-targeting-criteria' variant='h6'>
+            {t('Targeting Criteria')}
+          </Typography>
           {isEdit && (
             <>
               {!!rules.length && (
@@ -141,6 +143,7 @@ export function TargetingCriteria({
                   variant='outlined'
                   color='primary'
                   onClick={() => setOpen(true)}
+                  data-cy='button-target-population-add-criteria'
                 >
                   {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
@@ -203,6 +206,7 @@ export function TargetingCriteria({
                         <Checkbox
                           color='primary'
                           name='flagExcludeIfActiveAdjudicationTicket'
+                          data-cy='checkbox-exclude-if-active-adjudication-ticket'
                           checked={Boolean(
                             targetPopulation?.targetingCriteria
                               ?.flagExcludeIfActiveAdjudicationTicket,
@@ -220,6 +224,7 @@ export function TargetingCriteria({
                         disabled
                         control={
                           <Checkbox
+                            data-cy='checkbox-exclude-if-on-sanction-list'
                             color='primary'
                             name='flagExcludeIfOnSanctionList'
                           />
