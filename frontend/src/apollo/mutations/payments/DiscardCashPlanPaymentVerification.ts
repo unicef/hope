@@ -23,6 +23,10 @@ export const DISCARD_CASH_PLAN_PAYMENT_VERIFICATION = gql`
             }
           }
         }
+        paymentVerificationSummary {
+          id
+          status
+        }
       }
     }
   }

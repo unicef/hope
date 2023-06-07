@@ -8398,6 +8398,9 @@ export type DeletePaymentVerificationPlanMutation = (
             & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
           )> }
         )>> }
+      )>, paymentVerificationSummary: Maybe<(
+        { __typename?: 'PaymentVerificationSummaryNode' }
+        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
       )> }
     )> }
   )> }
@@ -8425,6 +8428,9 @@ export type DiscardPaymentVerificationPlanMutation = (
             & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
           )> }
         )>> }
+      )>, paymentVerificationSummary: Maybe<(
+        { __typename?: 'PaymentVerificationSummaryNode' }
+        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
       )> }
     )> }
   )> }
@@ -14290,6 +14296,10 @@ export const DeletePaymentVerificationPlanDocument = gql`
           }
         }
       }
+      paymentVerificationSummary {
+        id
+        status
+      }
     }
   }
 }
@@ -14356,6 +14366,10 @@ export const DiscardPaymentVerificationPlanDocument = gql`
             activationDate
           }
         }
+      }
+      paymentVerificationSummary {
+        id
+        status
       }
     }
   }
