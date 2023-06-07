@@ -3,15 +3,9 @@ from django.conf import settings
 from constance.test import override_config
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.models import BusinessArea, TicketPriority
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_HIGH,
-    PRIORITY_MEDIUM,
-    URGENCY_URGENT,
-    URGENCY_VERY_URGENT,
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -127,10 +121,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country)
         super().setUpTestData()
 
-    def setUp(self) -> None:
-        TicketPriority.priority_by_business_area_and_ticket_type.cache_clear()
-        TicketPriority.urgency_by_business_area_and_ticket_type.cache_clear()
-
     def test_execute(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
 
@@ -152,22 +142,3 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
         self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 3)
-
-    def test_create_system_flag_ticket_with_default_priority_and_urgency(self) -> None:
-        CheckAgainstSanctionListPreMergeTask.execute()
-
-        self.assertEqual(GrievanceTicket.objects.last().priority, PRIORITY_HIGH)
-        self.assertEqual(GrievanceTicket.objects.last().urgency, URGENCY_URGENT)
-
-    def test_create_system_flag_ticket_with_priority_and_urgency_by_business_area(self) -> None:
-        TicketPriority.objects.create(
-            business_area=self.business_area,
-            priority=PRIORITY_MEDIUM,
-            urgency=URGENCY_VERY_URGENT,
-            ticket_type=TicketPriority.SYSTEM_FLAGGING,
-        )
-
-        CheckAgainstSanctionListPreMergeTask.execute()
-
-        self.assertEqual(GrievanceTicket.objects.last().priority, PRIORITY_MEDIUM)
-        self.assertEqual(GrievanceTicket.objects.last().urgency, URGENCY_VERY_URGENT)

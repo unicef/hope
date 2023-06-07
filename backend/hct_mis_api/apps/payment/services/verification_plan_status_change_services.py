@@ -2,7 +2,6 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.models import TicketPriority
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketPaymentVerificationDetails,
@@ -139,18 +138,10 @@ class VerificationPlanStatusChangeServices:
             return
 
         business_area = payment_verification_plan.payment_plan_obj.business_area
-        priority = TicketPriority.priority_by_business_area_and_ticket_type(
-            business_area.id, TicketPriority.PAYMENT_VERIFICATION
-        )
-        urgency = TicketPriority.urgency_by_business_area_and_ticket_type(
-            business_area.id, TicketPriority.PAYMENT_VERIFICATION
-        )
         grievance_ticket_list = [
             GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                 business_area=business_area,
-                priority=priority,
-                urgency=urgency,
             )
             for _ in list(range(verifications.count()))
         ]
