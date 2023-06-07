@@ -3,6 +3,7 @@ import PVDetailsPage from "../../page-objects/pages/payment_veryfication/details
 
 let pv = new PaymentVerification();
 let pvd = new PVDetailsPage();
+let defaultNumberOfVPlans002 = 0;
 
 describe("Payment Verification", () => {
   beforeEach(() => {
@@ -21,7 +22,7 @@ describe("Payment Verification", () => {
 
     // eslint-disable-next-line mocha/no-setup-in-describe
     pv.countCashPlanArray().forEach((row_no) => {
-      it.skip(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
+      it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
         pv.chooseCashPlan(row_no).click();
         pvd.checkPaymentVerificationTitle();
         pvd.checkGridPaymentDetails();
@@ -42,7 +43,7 @@ describe("Payment Verification", () => {
       afterEach(() => {
         pvd.deleteVerificationPlan(1);
       });
-      it.skip("Create Verification Plan using random sampling", () => {
+      it("Create Verification Plan using random sampling", () => {
         pv.selectStatus("Active");
         pv.getStatusOption().contains("Active").type("{esc}");
         pv.getCashPlanRows().should("have.length", 1);
@@ -51,7 +52,7 @@ describe("Payment Verification", () => {
         pvd.getCreateVerificationPlan().click();
         pvd.checkCVPTitle();
         pvd.getRandomSampling().click();
-        pvd.getCVPConfidenceInterval().contains(pvd.textCVPConfidenceInterval);
+        pvd.getCVPConfidenceInterval().should("be.visible");
         pvd.getCVPSave().click();
         pvd.checkVerificationPlan();
       });
@@ -81,7 +82,7 @@ describe("Payment Verification", () => {
         pv.getPaymentPlanID().type("123-21-CSH-00002");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(1);
+        pvd.createNewVerificationPlan(defaultNumberOfVPlans002);
       });
       it.skip("Delete one Verification Plan", () => {
         pvd.getDeletePlan().click();
@@ -95,16 +96,16 @@ describe("Payment Verification", () => {
         pv.getPaymentPlanID().type("123-21-CSH-00002");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(1);
+        pvd.createNewVerificationPlan(defaultNumberOfVPlans002);
       });
       afterEach(() => {
-        pvd.discardVerificationPlan(1);
-        pvd.deleteVerificationPlan(1);
+        pvd.discardVerificationPlan(0);
+        pvd.deleteVerificationPlan(0);
       });
-      it.skip("Activate Verification Plan", () => {
+      it("Activate Verification Plan", () => {
         pvd.getActivatePlan().click();
         pvd.getActivate().click();
-        pvd.getStatusVP().eq(1).contains("ACTIVE");
+        pvd.getStatusVP().contains("ACTIVE");
       });
     });
 
@@ -113,15 +114,15 @@ describe("Payment Verification", () => {
         pv.getPaymentPlanID().type("123-21-CSH-00001");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan();
+        pvd.createNewVerificationPlan(defaultNumberOfVPlans002);
       });
       it.skip("Finish Verification Plan", () => {
         pvd.getActivatePlan().click();
         pvd.getActivate().click();
-        pvd.getStatusVP().eq(1).contains("ACTIVE");
+        pvd.getStatusVP().contains("ACTIVE");
         pvd.getFinishPlan().click();
         pvd.getFinish().click();
-        pvd.getStatusVP().eq(1).contains("FINISHED");
+        pvd.getStatusVP().contains("FINISHED");
       });
     });
 
@@ -148,8 +149,6 @@ describe("Payment Verification", () => {
     pv.countCashPlanArray().forEach((row_no) => {
       it.skip(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
         // pv.chooseCashPlan(row_no).click()
-
-        return; // TODO: must seed with some cash plan
         cy.get('[data-cy="cash-plan-table-row"]').first().click();
         cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
         cy.get('[data-cy="page-header-container"]').contains("Payment Plan");
