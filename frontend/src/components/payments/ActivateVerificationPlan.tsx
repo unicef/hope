@@ -11,7 +11,6 @@ import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
 }
 
 export function ActivateVerificationPlan({
@@ -43,7 +42,7 @@ export function ActivateVerificationPlan({
         showMessage(t('Error during activating.'));
       }
     }
-
+    setActivateDialogOpen(false);
     showMessage(t('Verification plan has been activated.'));
   };
   return (

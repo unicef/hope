@@ -148,7 +148,6 @@ export const VerificationPlanDetails = ({
                   {canDelete && (
                     <DeleteVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={planNode.id}
                     />
                   )}
                 </Box>
@@ -162,7 +161,6 @@ export const VerificationPlanDetails = ({
                   <Box alignItems='center' display='flex'>
                     <ActivateVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={planNode.id}
                     />
                   </Box>
                 )}
@@ -238,7 +236,6 @@ export const VerificationPlanDetails = ({
                     {canFinish && verificationPlan.xlsxFileImported && (
                       <FinishVerificationPlan
                         verificationPlan={verificationPlan}
-                        cashOrPaymentPlanId={planNode.id}
                       />
                     )}
                     {canDiscard &&
@@ -246,7 +243,6 @@ export const VerificationPlanDetails = ({
                       !verificationPlan.xlsxFileImported && (
                         <DiscardVerificationPlan
                           paymentVerificationPlanId={verificationPlan.id}
-                          cashOrPaymentPlanId={planNode.id}
                         />
                       )}
                     {canMarkInvalid && (
@@ -285,13 +281,11 @@ export const VerificationPlanDetails = ({
                     {canFinish && (
                       <FinishVerificationPlan
                         verificationPlan={verificationPlan}
-                        cashOrPaymentPlanId={planNode.id}
                       />
                     )}
                     {canDiscard && (
                       <DiscardVerificationPlan
                         paymentVerificationPlanId={verificationPlan.id}
-                        cashOrPaymentPlanId={planNode.id}
                       />
                     )}
                   </>

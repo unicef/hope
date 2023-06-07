@@ -8390,6 +8390,7 @@ export type DeletePaymentVerificationPlanMutation = (
       & Pick<GenericPaymentPlanNode, 'id'>
       & { verificationPlans: Maybe<(
         { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNodeEdge' }
           & { node: Maybe<(
@@ -8416,6 +8417,7 @@ export type DiscardPaymentVerificationPlanMutation = (
       & Pick<GenericPaymentPlanNode, 'id'>
       & { verificationPlans: Maybe<(
         { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNodeEdge' }
           & { node: Maybe<(
@@ -8474,6 +8476,7 @@ export type FinishPaymentVerificationPlanMutation = (
       & Pick<GenericPaymentPlanNode, 'id'>
       & { verificationPlans: Maybe<(
         { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNodeEdge' }
           & { node: Maybe<(
@@ -14272,6 +14275,7 @@ export const DeletePaymentVerificationPlanDocument = gql`
     paymentPlan {
       id
       verificationPlans {
+        totalCount
         edges {
           node {
             id
@@ -14338,6 +14342,7 @@ export const DiscardPaymentVerificationPlanDocument = gql`
     paymentPlan {
       id
       verificationPlans {
+        totalCount
         edges {
           node {
             id
@@ -14506,6 +14511,7 @@ export const FinishPaymentVerificationPlanDocument = gql`
     paymentPlan {
       id
       verificationPlans {
+        totalCount
         edges {
           node {
             id

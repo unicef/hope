@@ -7,7 +7,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
@@ -15,28 +14,25 @@ import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
 }
 
 export function DeleteVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
 }: DeleteVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
-  const [finishDialogOpen, setFinishDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useDeletePaymentVerificationPlanMutation();
 
   const handleDeleteVerificationPlan = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { paymentVerificationPlanId },
-      refetchQueries,
     });
     if (errors) {
       showMessage(t('Error while submitting'));
       return;
     }
+    setDeleteDialogOpen(false);
     showMessage(t('Verification plan has been deleted.'));
   };
   return (
@@ -44,15 +40,15 @@ export function DeleteVerificationPlan({
       <Box p={2}>
         <ErrorButton
           startIcon={<ClearIcon />}
-          onClick={() => setFinishDialogOpen(true)}
+          onClick={() => setDeleteDialogOpen(true)}
           data-cy='button-delete-plan'
         >
           DELETE
         </ErrorButton>
       </Box>
       <Dialog
-        open={finishDialogOpen}
-        onClose={() => setFinishDialogOpen(false)}
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
         maxWidth='md'
@@ -73,7 +69,7 @@ export function DeleteVerificationPlan({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setFinishDialogOpen(false)}>
+            <Button onClick={() => setDeleteDialogOpen(false)}>
               {t('CANCEL')}
             </Button>
             <ErrorButtonContained
