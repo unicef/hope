@@ -142,7 +142,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             xlsx_obj.file.save(filename, File(tmp))
 
     def get_email_context(self, user: "User") -> dict:
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
         api = reverse("download-payment-verification-plan", args=[payment_verification_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
