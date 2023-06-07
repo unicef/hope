@@ -147,6 +147,7 @@ export const VerificationPlanDetails = ({
                 <Box mr={2}>
                   {canDelete && (
                     <DeleteVerificationPlan
+                      cashOrPaymentPlanId={planNode.id}
                       paymentVerificationPlanId={verificationPlan.id}
                     />
                   )}

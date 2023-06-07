@@ -11,14 +11,18 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function DeleteVerificationPlan({
   paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: DeleteVerificationPlanProps): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -27,6 +31,7 @@ export function DeleteVerificationPlan({
   const handleDeleteVerificationPlan = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { paymentVerificationPlanId },
+      refetchQueries,
     });
     if (errors) {
       showMessage(t('Error while submitting'));
