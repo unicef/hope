@@ -8354,7 +8354,7 @@ export type ActivatePaymentVerificationPlanMutation = (
         )>> }
       )>, paymentVerificationSummary: Maybe<(
         { __typename?: 'PaymentVerificationSummaryNode' }
-        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
+        & Pick<PaymentVerificationSummaryNode, 'id' | 'status' | 'activationDate'>
       )> }
     )> }
   )> }
@@ -14166,6 +14166,7 @@ export const ActivatePaymentVerificationPlanDocument = gql`
       paymentVerificationSummary {
         id
         status
+        activationDate
       }
     }
     validationErrors

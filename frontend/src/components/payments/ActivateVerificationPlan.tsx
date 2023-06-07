@@ -6,7 +6,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 
@@ -17,9 +16,7 @@ export interface ActivateVerificationPlanProps {
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
 }: ActivateVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
@@ -29,7 +26,6 @@ export function ActivateVerificationPlan({
     try {
       await mutate({
         variables: { paymentVerificationPlanId },
-        refetchQueries,
       });
     } catch (error) {
       /* eslint-disable-next-line no-console */

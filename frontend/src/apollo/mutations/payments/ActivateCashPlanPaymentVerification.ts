@@ -21,6 +21,7 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         paymentVerificationSummary {
           id
           status
+          activationDate
         }
       }
       validationErrors
