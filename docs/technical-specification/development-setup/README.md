@@ -97,13 +97,13 @@ We are keeping tests in &lt;app\_name&gt;/tests/ and creating separate files for
 to run all tests use:
 
 ```bash
-./manage.py test
+pytest hct_mis_api
 ```
 
 to overwrite existing snapshots:
 
 ```bash
-./manage.py test --snapshot-update
+pytest hct_mis_api --snapshot-update
 ```
 
 You can run single test in TestCase or overwrite snapshot for only one TestCase by providing a path.
@@ -111,7 +111,7 @@ You can run single test in TestCase or overwrite snapshot for only one TestCase 
 Example for running single test method in TestCase.
 
 ```bash
-./manage.py test core.tests.test_flexibles.TestFlexibles.test_load_invalid_file
+pytest hct_mis_api/core/tests/test_flexibles/
 ```
 
 More information can be found here:
