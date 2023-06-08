@@ -29,7 +29,7 @@ docker-compose run --rm backend sh -c "black . && isort . && flake8 . && mypy ."
 To run tests, you call `./manage.py test`. Example invocation:
 
 ```shell
-docker-compose run --rm backend python3 manage.py test -v3 --keepdb --settings hct_mis_api.settings.test --parallel
+docker-compose run --rm backend python3 manage.py test -v3 --keepdb --settings hct_mis_api.settings --parallel
 ```
 
 ## Linting

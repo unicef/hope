@@ -77,7 +77,7 @@ env = Env(**DEFAULTS)
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(__file__)
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
@@ -912,7 +912,7 @@ SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root
 
 EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY", default=1 * 60 * 60 * 24)
 
-VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
+VERSION = get_version(__name__, Path(PROJECT_ROOT), default_return=None)
 
 # see adminactions.perms
 # set handker to AA_PERMISSION_CREATE_USE_COMMAND
@@ -926,7 +926,7 @@ def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
 def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
-    from ..apps.utils.security import is_root  # noqa: ABS101
+    from .apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
         return mark_safe(value.replace(":", r":<br>"))

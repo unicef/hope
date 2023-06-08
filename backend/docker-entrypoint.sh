@@ -42,7 +42,7 @@ else
       wait_for_db mis_datahub_db
       wait_for_db erp_datahub_db
       wait_for_db registration_datahub_db
-      python manage.py test --settings hct_mis_api.settings.test --noinput --parallel
+      python manage.py test --settings hct_mis_api.settings --noinput --parallel
       ;;
     "lint")
       mkdir -p ./lint-results
