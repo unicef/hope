@@ -4,10 +4,10 @@ from django.urls import reverse
 
 from django_webtest import WebTest
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ..defaults import create_defaults
-from ..models import Parametrizer, Query
-from .fixtures import (
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Parametrizer, Query
+from hct_mis_api.apps.power_query.tests.fixtures import (
     DatasetFactory,
     FormatterFactory,
     ParametrizerFactory,

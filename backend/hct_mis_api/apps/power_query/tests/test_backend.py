@@ -1,10 +1,14 @@
 from django.test import TestCase, override_settings
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ..backends import PowerQueryBackend
-from ..defaults import create_defaults
-from ..models import Formatter, Query
-from .fixtures import ParametrizerFactory, QueryFactory, user_grant_office_permission
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.power_query.backends import PowerQueryBackend
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Formatter, Query
+from hct_mis_api.apps.power_query.tests.fixtures import (
+    ParametrizerFactory,
+    QueryFactory,
+    user_grant_office_permission,
+)
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
