@@ -9,8 +9,8 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.cache import get_conditional_response
 from django.utils.http import http_date
 
-from .models import Report, ReportDocument, mimetype_map
-from .utils import basicauth
+from hct_mis_api.apps.power_query.models import Report, ReportDocument, mimetype_map
+from hct_mis_api.apps.power_query.utils import basicauth
 
 
 @login_required()

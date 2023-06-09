@@ -282,8 +282,11 @@ class BaseNodePermissionMixin:
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Any) -> None:
-        business_area = object_instance.business_area
-        if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
+        business_area = getattr(object_instance, "business_area", None)  # not every object has business_area attr
+        if (
+            business_area
+            and not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)
+        ) or not (business_area or info.context.user.is_authenticated):
             raise PermissionDenied("Permission Denied")
 
     @classmethod
