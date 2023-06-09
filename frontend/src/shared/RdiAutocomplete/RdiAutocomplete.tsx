@@ -20,7 +20,7 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const RdiAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   name,
   onFilterChange,
   filter,
