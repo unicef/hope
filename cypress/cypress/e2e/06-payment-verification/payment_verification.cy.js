@@ -29,7 +29,7 @@ describe("Payment Verification", () => {
       it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
         // Scenario:
         // 1. Go to Payment Verification page
-        // 2. Choose and open Chase plan
+        // 2. Choose and open cash plan
         // 3. Check if all elements on page exist
 
         pv.chooseCashPlan(row_no).click();

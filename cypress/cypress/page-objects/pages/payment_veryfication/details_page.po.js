@@ -166,7 +166,6 @@ export default class PVDetailsPage extends BaseComponent {
     this.getDiscard().click();
     this.getDiscard().should("not.exist");
     this.getDiscardPlan().should("not.exist");
-    console.log("to widac?");
     this.getDeletePlan();
   }
 
