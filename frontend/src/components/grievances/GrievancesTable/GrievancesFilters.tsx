@@ -172,10 +172,13 @@ export const GrievancesFilters = ({
 
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            onFilterChange={setFilter}
             filter={filter}
             name='admin'
             value={filter.admin}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid item xs={3}>
@@ -208,18 +211,24 @@ export const GrievancesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <RdiAutocomplete
-            onFilterChange={setFilter}
             filter={filter}
             name='registrationDataImport'
             value={filter.registrationDataImport}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
           />
         </Grid>
         <Grid item xs={3}>
           <LanguageAutocomplete
-            onFilterChange={setFilter}
             filter={filter}
             name='preferredLanguage'
             value={filter.preferredLanguage}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
           />
         </Grid>
       </Grid>

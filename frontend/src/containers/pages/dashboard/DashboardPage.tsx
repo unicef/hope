@@ -80,7 +80,6 @@ export const DashboardPage = (): React.ReactElement => {
             <DashboardFilters
               filter={filter}
               setFilter={setFilter}
-              onFilterChange={setFilter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
