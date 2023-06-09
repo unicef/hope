@@ -3,7 +3,7 @@ import PVDetailsPage from "../../page-objects/pages/payment_veryfication/details
 
 let pv = new PaymentVerification();
 let pvd = new PVDetailsPage();
-let defaultNumberOfVPlans002 = 0;
+let defaultNumberOfVPlans016 = 0;
 
 describe("Payment Verification", () => {
   beforeEach(() => {
@@ -101,7 +101,7 @@ describe("Payment Verification", () => {
         pv.getPaymentPlanID().type("123-21-CSH-00002");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(defaultNumberOfVPlans002);
+        pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
       });
       it.skip("Delete one Verification Plan", () => {
         pvd.getDeletePlan().click();
@@ -115,7 +115,7 @@ describe("Payment Verification", () => {
         pv.getPaymentPlanID().type("123-21-CSH-00002");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(defaultNumberOfVPlans002);
+        pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
       });
       afterEach(() => {
         pvd.discardVerificationPlan(0);
@@ -142,7 +142,7 @@ describe("Payment Verification", () => {
         pv.getPaymentPlanID().type("123-21-CSH-00001");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(defaultNumberOfVPlans002);
+        pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
       });
       it.skip("Finish Verification Plan", () => {
         pvd.getActivatePlan().click();
