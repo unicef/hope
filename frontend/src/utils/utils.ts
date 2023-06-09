@@ -819,12 +819,11 @@ interface HandleFilterChangeFunctions {
 }
 
 export const createHandleApplyFilterChange = (
-  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
   initialFilter: Filter,
   history: useHistory<LocationState>,
   location: Location,
   filter: Filter,
-  setFilter: (filter: Filter) => void,
+  setFilter: (filter: { [key: string]: FilterValue }) => void,
   appliedFilter: Filter,
   setAppliedFilter: (filter: Filter) => void,
 ): HandleFilterChangeFunctions => {
@@ -842,7 +841,7 @@ export const createHandleApplyFilterChange = (
 
     const params = new URLSearchParams(location.search);
     Object.entries(filter).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (value !== undefined && value !== null && value !== '') {
         if (Array.isArray(value)) {
           params.delete(key);
           value.forEach((val) => {
@@ -863,7 +862,7 @@ export const createHandleApplyFilterChange = (
     const search = params.toString();
     history.push({ search });
 
-    onFilterChange(filter);
+    setFilter(filter);
   };
 
   const clearFilter = (): void => {
@@ -877,7 +876,6 @@ export const createHandleApplyFilterChange = (
 
     setFilter(initialFilter);
     setAppliedFilter(initialFilter);
-    onFilterChange(initialFilter);
   };
 
   return {
