@@ -19,7 +19,7 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const LanguageAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   name,
   onFilterChange,
   filter,
