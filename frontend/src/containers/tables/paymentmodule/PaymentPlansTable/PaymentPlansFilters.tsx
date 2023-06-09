@@ -8,16 +8,17 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
+import {
+  AllPaymentPlansForTableQueryVariables,
+  usePaymentPlanStatusChoicesQueryQuery,
+} from '../../../../__generated__/graphql';
+import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { createHandleFilterChange } from '../../../../utils/utils';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '../../../../__generated__/graphql';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -31,23 +32,44 @@ export type FilterProps = Pick<
 >;
 
 interface PaymentPlansFiltersProps {
-  onFilterChange;
   filter;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
-export function PaymentPlansFilters({
-  onFilterChange,
+export const PaymentPlansFilters = ({
   filter,
-}: PaymentPlansFiltersProps): React.ReactElement {
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+}: PaymentPlansFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
 
@@ -176,6 +198,10 @@ export function PaymentPlansFilters({
           />
         </Box>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
-}
+};
