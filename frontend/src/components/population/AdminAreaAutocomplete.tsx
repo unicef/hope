@@ -23,7 +23,7 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const AdminAreaAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   name,
   onFilterChange,
   filter,
