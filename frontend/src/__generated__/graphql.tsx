@@ -8354,7 +8354,7 @@ export type ActivatePaymentVerificationPlanMutation = (
         )>> }
       )>, paymentVerificationSummary: Maybe<(
         { __typename?: 'PaymentVerificationSummaryNode' }
-        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
+        & Pick<PaymentVerificationSummaryNode, 'id' | 'status' | 'activationDate'>
       )> }
     )> }
   )> }
@@ -8390,6 +8390,7 @@ export type DeletePaymentVerificationPlanMutation = (
       & Pick<GenericPaymentPlanNode, 'id'>
       & { verificationPlans: Maybe<(
         { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNodeEdge' }
           & { node: Maybe<(
@@ -8397,6 +8398,9 @@ export type DeletePaymentVerificationPlanMutation = (
             & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
           )> }
         )>> }
+      )>, paymentVerificationSummary: Maybe<(
+        { __typename?: 'PaymentVerificationSummaryNode' }
+        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
       )> }
     )> }
   )> }
@@ -8416,6 +8420,7 @@ export type DiscardPaymentVerificationPlanMutation = (
       & Pick<GenericPaymentPlanNode, 'id'>
       & { verificationPlans: Maybe<(
         { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNodeEdge' }
           & { node: Maybe<(
@@ -8423,6 +8428,9 @@ export type DiscardPaymentVerificationPlanMutation = (
             & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
           )> }
         )>> }
+      )>, paymentVerificationSummary: Maybe<(
+        { __typename?: 'PaymentVerificationSummaryNode' }
+        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
       )> }
     )> }
   )> }
@@ -8474,6 +8482,7 @@ export type FinishPaymentVerificationPlanMutation = (
       & Pick<GenericPaymentPlanNode, 'id'>
       & { verificationPlans: Maybe<(
         { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNodeEdge' }
           & { node: Maybe<(
@@ -14166,6 +14175,7 @@ export const ActivatePaymentVerificationPlanDocument = gql`
       paymentVerificationSummary {
         id
         status
+        activationDate
       }
     }
     validationErrors
@@ -14271,6 +14281,7 @@ export const DeletePaymentVerificationPlanDocument = gql`
     paymentPlan {
       id
       verificationPlans {
+        totalCount
         edges {
           node {
             id
@@ -14284,6 +14295,10 @@ export const DeletePaymentVerificationPlanDocument = gql`
             activationDate
           }
         }
+      }
+      paymentVerificationSummary {
+        id
+        status
       }
     }
   }
@@ -14337,6 +14352,7 @@ export const DiscardPaymentVerificationPlanDocument = gql`
     paymentPlan {
       id
       verificationPlans {
+        totalCount
         edges {
           node {
             id
@@ -14350,6 +14366,10 @@ export const DiscardPaymentVerificationPlanDocument = gql`
             activationDate
           }
         }
+      }
+      paymentVerificationSummary {
+        id
+        status
       }
     }
   }
@@ -14505,6 +14525,7 @@ export const FinishPaymentVerificationPlanDocument = gql`
     paymentPlan {
       id
       verificationPlans {
+        totalCount
         edges {
           node {
             id
