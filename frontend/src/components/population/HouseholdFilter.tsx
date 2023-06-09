@@ -124,8 +124,11 @@ export const HouseholdFilters = ({
           <AdminAreaAutocomplete
             name='admin2'
             value={filter.admin2}
-            onFilterChange={setFilter}
             filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid item xs={3}>

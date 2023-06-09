@@ -3,11 +3,11 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LocationState, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleFilterChange } from '../../utils/utils';
 import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
+import { useDebounce } from '../../hooks/useDebounce';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import TextField from '../TextField';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -21,19 +21,27 @@ export const LanguageAutocomplete = ({
   disabled,
   fullWidth = true,
   name,
-  onFilterChange,
   filter,
   value,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+  setFilter,
 }: {
   disabled?;
   fullWidth?: boolean;
   name: string;
-  onFilterChange: (filters: { [key: string]: string }) => void;
   filter?;
   value?: string;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
+  setFilter: (filter) => void;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const history = useHistory();
+  const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
 
@@ -55,11 +63,14 @@ export const LanguageAutocomplete = ({
     loadData();
   }, [loadData]);
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
+  const { handleFilterChange } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
     filter,
-    useHistory<LocationState>(),
-    useLocation(),
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
 
   if (!data) return null;
