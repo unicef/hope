@@ -14,10 +14,10 @@ describe("Payment Verification", () => {
 
   describe("Smoke tests Payment Verification", () => {
     it("Check Payment Verification page", () => {
-      // Scenario:
-      // 1. Go to Payment Verification page
-      // 2. Check if all elements on page exist
-
+      pv.scenario([
+        "Go to Payment Verification page",
+        "Check if all elements on page exist",
+      ]);
       pv.checkPaymentVerificationTitle();
       pv.checkListOfCashPlansTitle();
       pv.checkAllSearchFieldsVisible();
@@ -27,11 +27,11 @@ describe("Payment Verification", () => {
     // eslint-disable-next-line mocha/no-setup-in-describe
     pv.countCashPlanArray().forEach((row_no) => {
       it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
-        // Scenario:
-        // 1. Go to Payment Verification page
-        // 2. Choose and open cash plan
-        // 3. Check if all elements on page exist
-
+        pv.scenario([
+          "Go to Payment Verification page",
+          "Choose and open cash plan",
+          "Check if all elements on page exist",
+        ]);
         pv.chooseCashPlan(row_no).click();
         pvd.checkPaymentVerificationTitle();
         pvd.checkGridPaymentDetails();
@@ -53,16 +53,16 @@ describe("Payment Verification", () => {
         pvd.deleteVerificationPlan(0);
       });
       it("Create Verification Plan using random sampling", () => {
-        // Scenario:
-        // 1. Search Pending cash plans
-        // 2. Select first Pending cash plan
-        // 3. Check if Payment Verification title exists
-        // 4. Press Create Verification Plan button
-        // 5. Check if Create Verification Plan title occurs
-        // 6. Choose Random Sampling tab
-        // 7. Press Save button
-        // 8. Check if Verification Plan was created
-
+        pv.scenario([
+          "Search Pending cash plans",
+          "Select first Pending cash plan",
+          "Check if Payment Verification title exists",
+          "Press Create Verification Plan button",
+          "Check if Create Verification Plan title occurs",
+          "Choose Random Sampling tab",
+          "Press Save button",
+          "Check if Verification Plan was created",
+        ]);
         pv.selectStatus("Pending");
         pv.getStatusOption().contains("Pending").type("{esc}");
         pv.getCashPlanRows().should("have.length", 1);
@@ -122,13 +122,13 @@ describe("Payment Verification", () => {
         pvd.deleteVerificationPlan(0);
       });
       it("Activate Verification Plan", () => {
-        // Scenario:
-        // 1. Press Activation button
-        // 2. Press Activate button on pop-up
-        // 2. Check if Summary status = ACTIVE
-        // 2. Check if Activation Date was set
-        // 3. Check if verification plan has status Active
-
+        pv.scenario([
+          "Press Activation button",
+          "Press Activate button on pop-up",
+          "Check if Summary status = ACTIVE",
+          "Check if Activation Date was set",
+          "Check if verification plan has status Active",
+        ]);
         pvd.getActivatePlan().click();
         pvd.getActivate().click();
         pvd.getStatusVP().contains("ACTIVE");
