@@ -27,7 +27,6 @@ const Container = styled(Paper)`
 `;
 
 interface DashboardFiltersProps {
-  onFilterChange;
   filter;
   setFilter;
   initialFilter;
@@ -36,7 +35,6 @@ interface DashboardFiltersProps {
 }
 
 export const DashboardFilters = ({
-  onFilterChange,
   filter,
   setFilter,
   initialFilter,
@@ -103,8 +101,11 @@ export const DashboardFilters = ({
             fullWidth
             name='administrativeArea'
             value={filter.administrativeArea}
-            onFilterChange={onFilterChange}
             filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
       </Grid>

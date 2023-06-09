@@ -14,7 +14,6 @@ import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 interface IndividualsFilterProps {
-  onFilterChange;
   filter;
   choicesData: IndividualChoiceDataQuery;
   setFilter: (filter) => void;
@@ -33,7 +32,6 @@ const orderOptions = [
 ];
 
 export const IndividualsFilter = ({
-  onFilterChange,
   filter,
   choicesData,
   setFilter,
@@ -82,8 +80,10 @@ export const IndividualsFilter = ({
           <AdminAreaAutocomplete
             name='adminArea'
             value={filter.adminArea}
-            onFilterChange={onFilterChange}
-            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid item xs={3}>

@@ -65,7 +65,6 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
       <PageHeader title={t('Individuals')} />
       <IndividualsFilter
         filter={filter}
-        onFilterChange={setFilter}
         choicesData={individualChoicesData}
         setFilter={setFilter}
         initialFilter={initialFilter}
