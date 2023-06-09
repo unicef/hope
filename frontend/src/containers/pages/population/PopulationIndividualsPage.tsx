@@ -8,7 +8,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { IndividualsFilter } from '../../../components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
@@ -41,8 +40,10 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
-  const debouncedFilter = useDebounce(filter, 500);
   const {
     data: individualChoicesData,
     loading: individualChoicesLoading,
@@ -66,6 +67,10 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
         filter={filter}
         onFilterChange={setFilter}
         choicesData={individualChoicesData}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <Box
         display='flex'
@@ -73,7 +78,7 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
         data-cy='page-details-container'
       >
         <IndividualsListTable
-          filter={debouncedFilter}
+          filter={appliedFilter}
           businessArea={businessArea}
           choicesData={householdChoicesData}
           canViewDetails={hasPermissions(
