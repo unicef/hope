@@ -41,14 +41,15 @@ export function TargetPopulationDetails({
   const programName = program?.name ? program.name : '-';
   return (
     <ContainerColumnWithBorder data-cy='target-population-details-container'>
-      <Title>
+      <Title data-cy='details-title'>
         <Typography variant='h6'>{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
+        <Grid data-cy='details-grid' container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label={t('Status')}>
               <StatusBox
+                dataCy='target-population-status'
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
               />
@@ -56,24 +57,38 @@ export function TargetPopulationDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
+              dataCy='created-by'
               label={t('created by')}
               value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
+              dataCy='close-date'
               label={t('Programme population close date')}
               value={closeDate}
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label={t('Programme')} value={programName} />
+            <LabelizedField
+              dataCy='program-name'
+              label={t('Programme')}
+              value={programName}
+            />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label={t('Send by')} value={sendBy} />
+            <LabelizedField
+              dataCy='send-by'
+              label={t('Send by')}
+              value={sendBy}
+            />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label={t('Send date')} value={sendDate} />
+            <LabelizedField
+              dataCy='send-date'
+              label={t('Send date')}
+              value={sendDate}
+            />
           </Grid>
         </Grid>
       </OverviewContainer>

@@ -75,6 +75,7 @@ export const DeleteTargetPopulation = ({
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
+                  data-cy='button-delete'
                 >
                   {t('Delete')}
                 </LoadingButton>
