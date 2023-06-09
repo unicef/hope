@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { createHandleApplyFilterChange } from '../../utils/utils';
+import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
 
 interface IndividualsFilterProps {
   onFilterChange;

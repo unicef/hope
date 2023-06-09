@@ -5,19 +5,18 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  createHandleApplyFilterChange,
-  createHandleFilterChange,
-  targetPopulationStatusMapping,
-} from '../../utils/utils';
-import {
   ProgramNode,
   TargetPopulationStatus,
 } from '../../__generated__/graphql';
+import {
+  createHandleApplyFilterChange,
+  targetPopulationStatusMapping,
+} from '../../utils/utils';
+import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
 
 interface TargetPopulationFiltersProps {
   filter;
