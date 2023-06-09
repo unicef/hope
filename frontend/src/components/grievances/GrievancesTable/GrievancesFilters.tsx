@@ -180,10 +180,13 @@ export const GrievancesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            onFilterChange={setFilter}
             filter={filter}
-            name='assignedTo'
-            value={filter.assignedTo}
+            name='userId'
+            value={filter.userId}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid item xs={3}>
