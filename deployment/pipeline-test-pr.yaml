@@ -290,7 +290,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run cypress ci-test'
+              dockerComposeCommand: 'run npm test'
               dockerComposeFileArgs: |
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
@@ -304,4 +304,4 @@ stages:
               searchFolder: './cypress-results/'
               mergeTestResults: true
               failTaskOnFailedTests: true
-              testRunTitle: 'TEST Results'
+              testRunTitle: 'TEST E2E Results'
