@@ -19,7 +19,7 @@ from admin_extra_buttons.decorators import button
 from constance import config
 from requests import Response
 
-from ..models import User
+from hct_mis_api.apps.account.models import User
 
 logger = logging.getLogger(__name__)
 

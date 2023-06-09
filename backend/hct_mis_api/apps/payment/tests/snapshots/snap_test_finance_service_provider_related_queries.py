@@ -87,3 +87,36 @@ snapshots['TestFSPRelatedSchema::test_query_all_financial_service_providers 1'] 
         }
     }
 }
+
+snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider 1'] = {
+    'data': {
+        'financialServiceProvider': {
+            'distributionLimit': 10000.0,
+            'name': 'FSP_1',
+            'visionVendorNumber': '149-69-3686'
+        }
+    }
+}
+
+snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider_xlsx_report 1'] = {
+    'data': {
+        'financialServiceProviderXlsxReport': {
+            'financialServiceProvider': {
+                'name': 'FSP_1'
+            },
+            'status': 2
+        }
+    }
+}
+
+snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider_xlsx_template 1'] = {
+    'data': {
+        'financialServiceProviderXlsxTemplate': {
+            'columns': [
+                'column_1',
+                'column_2'
+            ],
+            'name': 'FSP_template_1'
+        }
+    }
+}

@@ -237,12 +237,15 @@ export function CreateVerificationPlan({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Create Verification Plan')}</DialogTitle>
+              <DialogTitle data-cy='dialog-title'>
+                {t('Create Verification Plan')}
+              </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <TabsContainer>
                   <StyledTabs
+                    data-cy='tabs'
                     value={selectedTab}
                     onChange={(
                       event: React.ChangeEvent<{}>,
@@ -323,6 +326,7 @@ export function CreateVerificationPlan({
                       max={99}
                       component={FormikSliderField}
                       suffix='%'
+                      dataCy='slider-confidence-interval'
                     />
                     <Field
                       name='marginOfError'
@@ -331,6 +335,7 @@ export function CreateVerificationPlan({
                       max={9}
                       component={FormikSliderField}
                       suffix='%'
+                      dataCy='slider-margin-of-error'
                     />
                     <Typography variant='caption'>
                       {t('Cluster Filters')}
