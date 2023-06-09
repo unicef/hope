@@ -20,7 +20,7 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const AssigneeAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   name,
   onFilterChange,
   filter,

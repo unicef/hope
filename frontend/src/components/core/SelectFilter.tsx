@@ -14,7 +14,7 @@ export const SelectFilter = ({
   children,
   onChange,
   icon = null,
-  fullWidth = false,
+  fullWidth = true,
   ...otherProps
 }): React.ReactElement => {
   return (
@@ -37,6 +37,7 @@ export const SelectFilter = ({
               }
             : null
         }
+        fullWidth={fullWidth}
         {...otherProps}
       >
         {children}

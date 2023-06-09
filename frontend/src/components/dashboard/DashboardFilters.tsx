@@ -1,4 +1,4 @@
-import { Button, Grid, MenuItem, Paper } from '@material-ui/core';
+import { Grid, MenuItem, Paper } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { createHandleApplyFilterChange } from '../../utils/utils';
+import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
@@ -60,7 +61,6 @@ export const DashboardFilters = ({
     applyFilterChanges,
     clearFilter,
   } = createHandleApplyFilterChange(
-    onFilterChange,
     initialFilter,
     history,
     location,
@@ -108,23 +108,10 @@ export const DashboardFilters = ({
           />
         </Grid>
       </Grid>
-      <Grid container justifyContent='flex-end'>
-        <Button
-          color='primary'
-          onClick={() => {
-            handleClearFilter();
-          }}
-        >
-          {t('Clear')}
-        </Button>
-        <Button
-          color='primary'
-          variant='outlined'
-          onClick={() => handleApplyFilter()}
-        >
-          {t('Apply')}
-        </Button>
-      </Grid>
+      <ClearApplyButtons
+        applyHandler={handleApplyFilter}
+        clearHandler={handleClearFilter}
+      />
     </Container>
   );
 };
