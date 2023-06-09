@@ -42,13 +42,13 @@ class Command(BaseCommand):
         subparsers.add_parser("list")
 
     def _list(self, *args: Any, **options: Any) -> None:
-        from ...models import Query as PowerQuery
+        from hct_mis_api.apps.power_query.models import Query as PowerQuery
 
         for q in PowerQuery.objects.all():
             self.stdout.write(f"#{q.id:>5}   {q.name[:30]:<32} {q.last_run}")
 
     def _test(self, *args: Any, **options: Any) -> None:
-        from ...models import Query as PowerQuery
+        from hct_mis_api.apps.power_query.models import Query as PowerQuery
 
         code = Path(options["filename"]).read_text()
         target = options["target"]
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             print(type(entry), entry)
 
     def _run(self, *args: Any, **options: Any) -> None:
-        from ...models import Query as PowerQuery
+        from hct_mis_api.apps.power_query.models import Query as PowerQuery
 
         query_args: Dict[str, str] = {}
         try:
@@ -79,7 +79,7 @@ class Command(BaseCommand):
             self.stdout.write(str(e))
 
     def _execute(self, *args: Any, **options: Any) -> None:
-        from ...models import Query as PowerQuery
+        from hct_mis_api.apps.power_query.models import Query as PowerQuery
 
         try:
             pq = PowerQuery.objects.get(pk=options["id"])

@@ -47,6 +47,7 @@ export const PaymentFilters = ({
         <Grid item xs={4}>
           <SearchTextField
             value={filter.search}
+            data-cy='filter-search'
             label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
             fullWidth
@@ -60,6 +61,7 @@ export const PaymentFilters = ({
             label='Status'
             multiple
             fullWidth
+            data-cy='filter-status'
             value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
@@ -74,6 +76,7 @@ export const PaymentFilters = ({
         <Grid item xs={2}>
           <SearchTextField
             value={filter.serviceProvider}
+            data-cy='filter-fsp'
             label='FSP'
             fullWidth
             onChange={(e) =>
@@ -85,6 +88,7 @@ export const PaymentFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
             label='Modality'
+            data-cy='filter-Modality'
             value={filter.deliveryType}
             fullWidth
             icon={<MonetizationOnIcon />}
@@ -103,6 +107,7 @@ export const PaymentFilters = ({
           <DatePickerFilter
             label='Start Date'
             fullWidth
+            data-cy='filter-start-date'
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -118,6 +123,7 @@ export const PaymentFilters = ({
           <DatePickerFilter
             label='End Date'
             fullWidth
+            data-cy='filter-end-date'
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -134,6 +140,7 @@ export const PaymentFilters = ({
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label='Programme'
             fullWidth
+            data-cy='filter-program'
             value={filter.program}
             icon={<FlashOnIcon />}
           >
