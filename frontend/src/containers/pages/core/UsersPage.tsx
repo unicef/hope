@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
-import { useDebounce } from '../../../hooks/useDebounce';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { UsersTable } from '../../tables/UsersTable';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { UsersListFilters } from '../../../components/core/UsersListFilters';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { getFilterFromQueryParams } from '../../../utils/utils';
+import { UsersTable } from '../../tables/UsersTable';
 
 const initialFilter = {
   search: '',
@@ -28,8 +27,9 @@ export const UsersPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 500);
-
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.USER_MANAGEMENT_VIEW_LIST, permissions))
@@ -51,8 +51,14 @@ export const UsersPage = (): React.ReactElement => {
           </Button>
         </>
       </PageHeader>
-      <UsersListFilters filter={filter} onFilterChange={setFilter} />
-      <UsersTable filter={debouncedFilter} />
+      <UsersListFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <UsersTable filter={appliedFilter} />
     </>
   );
 };
