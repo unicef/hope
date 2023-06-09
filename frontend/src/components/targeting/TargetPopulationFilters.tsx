@@ -5,6 +5,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
+  createHandleApplyFilterChange,
   createHandleFilterChange,
   targetPopulationStatusMapping,
 } from '../../utils/utils';
@@ -16,31 +17,53 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { ClearApplyButtons } from '../core/ClearApplyButtons';
 
 interface TargetPopulationFiltersProps {
-  onFilterChange;
   filter;
   programs: ProgramNode[];
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export const TargetPopulationFilters = ({
-  onFilterChange,
   filter,
   programs,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: TargetPopulationFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -48,7 +71,7 @@ export const TargetPopulationFilters = ({
             data-cy='filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -66,7 +89,7 @@ export const TargetPopulationFilters = ({
               ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
@@ -84,7 +107,7 @@ export const TargetPopulationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Number of Households')}
             value={filter.numIndividualsMin}
@@ -96,7 +119,7 @@ export const TargetPopulationFilters = ({
             data-cy='filters-num-individuals-min'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             value={filter.numIndividualsMax}
             placeholder={t('To')}
@@ -108,6 +131,10 @@ export const TargetPopulationFilters = ({
           />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };
