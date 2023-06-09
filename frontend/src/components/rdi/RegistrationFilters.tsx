@@ -84,9 +84,12 @@ export const RegistrationFilters = ({
           <AssigneeAutocomplete
             name='importedBy'
             value={filter.importedBy}
-            onFilterChange={setFilter}
             filter={filter}
             label={t('Imported By')}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
             data-cy='filter-imported-by'
           />
         </Grid>
