@@ -42,6 +42,7 @@ context("Program", () => {
   it("Edit Program", () => {
     cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
     cy.get('[data-value="ACTIVE"]').click({ force: true });
+    cy.get('[data-cy="button-filters-apply"]').click();
     cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
     cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
     cy.contains("EDIT PROGRAMME").click({ force: true });
