@@ -24,7 +24,7 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const LookUpAdminAreaAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   onFilterChange,
   name,
   value,

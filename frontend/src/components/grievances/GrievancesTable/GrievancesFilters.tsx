@@ -1,52 +1,74 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
-import { useHistory, useLocation } from 'react-router-dom';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
-  GrievanceTypes,
+  GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GrievanceSearchTypes,
-  ISSUE_TYPE_CATEGORIES,
-  GRIEVANCE_CATEGORIES,
   GrievanceStatuses,
+  GrievanceTypes,
+  ISSUE_TYPE_CATEGORIES,
 } from '../../../utils/constants';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
-import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
-import { createHandleFilterChange } from '../../../utils/utils';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 
 interface GrievancesFiltersProps {
-  onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
   selectedTab: number;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export const GrievancesFilters = ({
-  onFilterChange,
   filter,
   choicesData,
   selectedTab,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -61,6 +83,11 @@ export const GrievancesFilters = ({
       : choicesData.grievanceTicketSystemCategoryChoices;
   }, [choicesData, filter.grievanceType]);
 
+  const showIssueType =
+    filter.category === ISSUE_TYPE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
+    filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT;
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -71,7 +98,6 @@ export const GrievancesFilters = ({
               label='Search'
               onChange={(e) => handleFilterChange('search', e.target.value)}
               data-cy='filters-search'
-              fullWidth
               borderRadius='4px 0px 0px 4px'
             />
           </Grid>
@@ -111,7 +137,7 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid container item xs={3}>
+        <Grid item xs={3}>
           <SearchTextField
             value={filter.fsp}
             label='FSP'
@@ -170,9 +196,7 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        {(filter.category === ISSUE_TYPE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-          filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
-          filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT) && (
+        {showIssueType && (
           <Grid item>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
@@ -199,20 +223,24 @@ export const GrievancesFilters = ({
         )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='admin'
             value={filter.admin}
-            fullWidth
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='assignedTo'
             value={filter.assignedTo}
-            fullWidth
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
@@ -238,20 +266,24 @@ export const GrievancesFilters = ({
         )}
         <Grid item xs={3}>
           <RdiAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='registrationDataImport'
             value={filter.registrationDataImport}
-            fullWidth
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
           />
         </Grid>
         <Grid item xs={3}>
           <LanguageAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='preferredLanguage'
             value={filter.preferredLanguage}
-            fullWidth
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
           />
         </Grid>
         <Grid item container xs={3}>
@@ -310,6 +342,10 @@ export const GrievancesFilters = ({
           </SelectFilter>
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

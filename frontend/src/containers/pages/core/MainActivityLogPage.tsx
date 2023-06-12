@@ -1,22 +1,21 @@
 import { Paper } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  LogEntryNode,
+  useAllLogEntriesQuery,
+} from '../../../__generated__/graphql';
 import { ActivityLogPageFilters } from '../../../components/core/ActivityLogPageFilters';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { EmptyTable } from '../../../components/core/Table/EmptyTable';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import {
-  LogEntryNode,
-  useAllLogEntriesQuery,
-} from '../../../__generated__/graphql';
 import { MainActivityLogTable } from '../../tables/MainActivityLogTable/MainActivityLogTable';
 
 export const StyledPaper = styled(Paper)`
@@ -24,7 +23,7 @@ export const StyledPaper = styled(Paper)`
 `;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function filtersToVariables(filters) {
-  const variables: { module?: string; search?: string, userId?: string } = {};
+  const variables: { module?: string; search?: string; userId?: string } = {};
   if (filters.userId !== '') {
     variables.userId = filters.userId;
   } else {
@@ -62,8 +61,9 @@ export const ActivityLogPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 700);
-
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
@@ -71,7 +71,7 @@ export const ActivityLogPage = (): React.ReactElement => {
       last: undefined,
       after: undefined,
       before: undefined,
-      ...filtersToVariables(debouncedFilter),
+      ...filtersToVariables(appliedFilter),
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
@@ -91,10 +91,10 @@ export const ActivityLogPage = (): React.ReactElement => {
         last: undefined,
         after: undefined,
         before: undefined,
-        ...filtersToVariables(debouncedFilter),
+        ...filtersToVariables(appliedFilter),
       });
     }
-  }, [debouncedFilter, businessArea, refetch, permissions, rowsPerPage]);
+  }, [appliedFilter, businessArea, refetch, permissions, rowsPerPage]);
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
@@ -110,7 +110,13 @@ export const ActivityLogPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Activity Log')} />
-      <ActivityLogPageFilters filter={filter} onFilterChange={setFilter} />
+      <ActivityLogPageFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
       <StyledPaper>
         <MainActivityLogTable
           totalCount={data.allLogEntries.totalCount}
@@ -119,14 +125,14 @@ export const ActivityLogPage = (): React.ReactElement => {
           actionChoices={logEntryActionChoices}
           page={page}
           loading={loading}
-          onChangePage={(event, newPage) => {
+          onChangePage={(_event, newPage) => {
             const variables = {
               businessArea,
               first: undefined,
               last: undefined,
               after: undefined,
               before: undefined,
-              ...filtersToVariables(debouncedFilter),
+              ...filtersToVariables(appliedFilter),
             };
             if (newPage < page) {
               variables.last = rowsPerPage;
@@ -148,7 +154,7 @@ export const ActivityLogPage = (): React.ReactElement => {
               after: undefined,
               last: undefined,
               before: undefined,
-              ...filtersToVariables(debouncedFilter),
+              ...filtersToVariables(appliedFilter),
             };
             refetch(variables);
           }}

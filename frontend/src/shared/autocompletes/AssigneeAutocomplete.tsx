@@ -7,7 +7,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleFilterChange } from '../../utils/utils';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
 
@@ -20,20 +20,26 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const AssigneeAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   name,
-  onFilterChange,
   filter,
   value,
   label,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+  setFilter,
 }: {
   disabled?;
   fullWidth?: boolean;
   name: string;
-  onFilterChange: (filters: { [key: string]: string }) => void;
   filter;
   value: string;
   label?: string;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
+  setFilter: (filter) => void;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -63,11 +69,14 @@ export const AssigneeAutocomplete = ({
     loadData();
   }, [loadData]);
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const { handleFilterChange } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
 
   if (!data) return null;

@@ -45,7 +45,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
     <Grid container spacing={5}>
       <Grid item xs={4}>
         <StyledBox disabled={disabled}>
-          <Grid container alignItems='center' justify='space-between'>
+          <Grid container alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Box display='flex'>
                 {t('Household ID')}:
@@ -73,7 +73,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
       </Grid>
       <Grid item xs={4}>
         <StyledBox disabled={disabled}>
-          <Grid container alignItems='center' justify='space-between'>
+          <Grid container alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Box display='flex'>
                 {t('Individual ID')}:

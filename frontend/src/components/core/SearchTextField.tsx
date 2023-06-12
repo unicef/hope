@@ -15,8 +15,8 @@ const StyledTextField = styled(TextField)`
 `;
 export const SearchTextField = ({
   icon = null,
-  fullWidth = false,
   borderRadius = '4px',
+  fullWidth = true,
   ...props
 }): React.ReactElement => {
   return (

@@ -15,7 +15,7 @@ export const SelectFilter = ({
   onChange,
   icon = null,
   borderRadius = '4px',
-  fullWidth = false,
+  fullWidth = true,
   ...otherProps
 }): React.ReactElement => {
   return (

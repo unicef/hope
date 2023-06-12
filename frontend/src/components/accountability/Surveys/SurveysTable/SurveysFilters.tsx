@@ -8,21 +8,28 @@ import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleFilterChange } from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 
 interface SurveysFiltersProps {
-  onFilterChange;
   filter;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export const SurveysFilters = ({
-  onFilterChange,
   filter,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: SurveysFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
@@ -33,12 +40,27 @@ export const SurveysFilters = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   if (programsLoading) return <LoadingComponent />;
 
@@ -77,22 +99,26 @@ export const SurveysFilters = ({
         </Grid>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete
-            onFilterChange={onFilterChange}
             name='targetPopulation'
             value={filter.targetPopulation}
             filter={filter}
-            fullWidth
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid container item xs={12} spacing={3} alignItems='flex-end'>
           <Grid item xs={4}>
             <AssigneeAutocomplete
-              onFilterChange={onFilterChange}
               name='createdBy'
               label={t('Created by')}
               value={filter.createdBy}
               filter={filter}
-              fullWidth
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
             />
           </Grid>
           <Grid item xs={4}>
@@ -126,6 +152,10 @@ export const SurveysFilters = ({
           </Grid>
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };
