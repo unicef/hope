@@ -12,10 +12,9 @@ from elasticsearch.helpers import bulk
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-from .models import GrievanceTicket
 
 logger = logging.getLogger(__name__)
 

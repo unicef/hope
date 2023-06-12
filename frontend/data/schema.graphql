@@ -283,6 +283,7 @@ type BusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   isPaymentPlanApplicable: Boolean!
+  isAccountabilityApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -4745,6 +4746,7 @@ type UserBusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   isPaymentPlanApplicable: Boolean!
+  isAccountabilityApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
