@@ -54,6 +54,7 @@ export const TargetPopulationFilters = ({
             value={filter.status}
             label={t('Status')}
             icon={<Person />}
+            data-cy='filters-status'
           >
             <MenuItem value=''>None</MenuItem>
             {Object.values(TargetPopulationStatus)
@@ -71,6 +72,7 @@ export const TargetPopulationFilters = ({
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            data-cy='filters-program'
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -91,6 +93,7 @@ export const TargetPopulationFilters = ({
               handleFilterChange('numIndividualsMin', e.target.value)
             }
             icon={<Group />}
+            data-cy='filters-num-individuals-min'
           />
         </Grid>
         <Grid item>
@@ -101,6 +104,7 @@ export const TargetPopulationFilters = ({
               handleFilterChange('numIndividualsMax', e.target.value)
             }
             icon={<Group />}
+            data-cy='filters-num-individuals-max'
           />
         </Grid>
       </Grid>

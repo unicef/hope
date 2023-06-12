@@ -30,6 +30,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               variant='outlined'
               fullWidth
               component={FormikDecimalField}
+              data-cy='decimal-from'
             />
           </InlineField>
           <InlineField>
@@ -39,6 +40,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               variant='outlined'
               fullWidth
               component={FormikDecimalField}
+              data-cy='decimal-to'
             />
           </InlineField>
         </FlexWrapper>
@@ -53,6 +55,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               fullWidth
               component={FormikDateField}
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              data-cy='date-from'
             />
           </InlineField>
           <InlineField>
@@ -62,6 +65,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               fullWidth
               component={FormikDateField}
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              data-cy='date-to'
             />
           </InlineField>
         </FlexWrapper>
@@ -78,6 +82,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               variant='outlined'
               fullWidth
               component={FormikTextField}
+              data-cy='integer-from'
             />
           </InlineField>
           <InlineField>
@@ -89,6 +94,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               variant='outlined'
               fullWidth
               component={FormikTextField}
+              data-cy='integer-to'
             />
           </InlineField>
         </FlexWrapper>
@@ -101,6 +107,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           choices={field.fieldAttribute.choices}
           index={index}
           component={FormikAutocomplete}
+          data-cy='select-one-autocomplete'
         />
       ) : (
         <Field
@@ -109,6 +116,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           choices={field.fieldAttribute.choices}
           index={index}
           component={FormikSelectField}
+          data-cy='select-one-select'
         />
       );
     case 'SELECT_MANY':
@@ -120,6 +128,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           index={index}
           multiple
           component={FormikSelectField}
+          data-cy='select-many'
         />
       );
     case 'STRING':
@@ -130,6 +139,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           fullWidth
           variant='outlined'
           component={FormikTextField}
+          data-cy='string-textfield'
         />
       );
     case 'BOOL':
@@ -155,6 +165,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           ]}
           index={index}
           component={FormikSelectField}
+          data-cy='bool-field'
         />
       );
     default:
