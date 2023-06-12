@@ -1,21 +1,25 @@
-/// <reference types="cypress" />
-
 context("RDI", () => {
   beforeEach(() => {
-    cy.adminLogin()
+    cy.adminLogin();
     cy.visit("/");
-  cy.get("span").contains("Registration Data Import").click();
+    cy.get("span").contains("Registration Data Import").click();
   });
   it("RDI - Download Template", () => {
     cy.get("span").contains("IMPORT").click({ force: true });
-    cy.window().document().then(function (doc) {
-      doc.addEventListener('click', () => {
-        setTimeout(function () { doc.location.reload() }, 5000)
-      })
-      cy.get('span').contains('DOWNLOAD TEMPLATE').click()
-    })
-    cy.verifyDownload('registration_data_import_template.xlsx',{timeout:20000});
-  })
+    cy.window()
+      .document()
+      .then(function (doc) {
+        doc.addEventListener("click", () => {
+          setTimeout(function () {
+            doc.location.reload();
+          }, 5000);
+        });
+        cy.get("span").contains("DOWNLOAD TEMPLATE").click();
+      });
+    cy.verifyDownload("registration_data_import_template.xlsx", {
+      timeout: 20000,
+    });
+  });
   it("Registration Data Import", () => {
     uploadRDIFile();
 
@@ -69,7 +73,7 @@ function verifyMergedData() {
 }
 
 function uploadRDIFile() {
-  cy.createExcel()
+  cy.createExcel();
   cy.get("h5").contains("Registration Data Import");
   cy.get("button > span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
@@ -84,13 +88,13 @@ function uploadRDIFile() {
       cy.get('[data-cy="file-input"]').attachFile({
         fileContent,
         fileName,
-        mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         encoding: "base64",
       });
     });
   });
 }
-
 
 function mergeRDIFile() {
   cy.get('[data-cy="number-of-households"]').contains(
@@ -122,4 +126,3 @@ function mergeRDIFile() {
 
   cy.get("div").contains("MERGED");
 }
-
