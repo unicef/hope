@@ -7,14 +7,13 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
 const initialFilter = {
-  search: null,
+  search: '',
   dispersionStartDate: null,
   dispersionEndDate: null,
   status: [],
@@ -32,8 +31,9 @@ export const PaymentModulePage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
@@ -54,10 +54,16 @@ export const PaymentModulePage = (): React.ReactElement => {
           </Button>
         )}
       </PageHeader>
-      <PaymentPlansFilters filter={filter} onFilterChange={setFilter} />
+      <PaymentPlansFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
       <TableWrapper>
         <PaymentPlansTable
-          filter={debouncedFilter}
+          filter={appliedFilter}
           businessArea={businessArea}
           canViewDetails={hasPermissions(
             PERMISSIONS.PM_VIEW_DETAILS,

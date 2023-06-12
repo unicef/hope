@@ -14,10 +14,11 @@ export const SelectFilter = ({
   children,
   onChange,
   icon = null,
+  fullWidth = true,
   ...otherProps
 }): React.ReactElement => {
   return (
-    <StyledFormControl variant='outlined' margin='dense'>
+    <StyledFormControl fullWidth={fullWidth} variant='outlined' margin='dense'>
       <InputLabel>{label}</InputLabel>
       <Select
         /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
@@ -36,6 +37,7 @@ export const SelectFilter = ({
               }
             : null
         }
+        fullWidth={fullWidth}
         {...otherProps}
       >
         {children}
