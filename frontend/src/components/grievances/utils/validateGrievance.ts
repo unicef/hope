@@ -229,26 +229,29 @@ export function validateUsingSteps(
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
   const errors: { [key: string]: string | { [key: string]: string } } = {};
-  const verficationStepFields = [
-    'size',
-    'maleChildrenCount',
-    'femaleChildrenCount',
-    'childrenDisabledCount',
-    'headOfHousehold',
-    'countryOrigin',
-    'address',
-    'village',
-    'admin1',
-    'admin2',
-    'admin3',
-    'unhcrId',
-    'months_displaced_h_f',
-    'fullName',
-    'birthDate',
-    'phoneNo',
-    'relationship',
-    'sex',
-  ];
+
+  //TODO: enable this when questionnaire verification is required
+  // const verficationStepFields = [
+  //   'size',
+  //   'maleChildrenCount',
+  //   'femaleChildrenCount',
+  //   'childrenDisabledCount',
+  //   'headOfHousehold',
+  //   'countryOrigin',
+  //   'address',
+  //   'village',
+  //   'admin1',
+  //   'admin2',
+  //   'admin3',
+  //   'unhcrId',
+  //   'months_displaced_h_f',
+  //   'fullName',
+  //   'birthDate',
+  //   'phoneNo',
+  //   'relationship',
+  //   'sex',
+  // ];
+
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
@@ -467,13 +470,13 @@ export function validateUsingSteps(
     (values.selectedHousehold ||
       (values.selectedIndividual && !values.verificationRequired))
   ) {
-    const MIN_SELECTED_ITEMS = 5;
-    const selectedItems = verficationStepFields.filter((item) => values[item]);
-
-    if (selectedItems.length < MIN_SELECTED_ITEMS) {
-      setValidateData(true);
-      errors.verificationRequired = 'Select correctly minimum 5 questions';
-    }
+    // const MIN_SELECTED_ITEMS = 5;
+    // const selectedItems = verficationStepFields.filter((item) => values[item]);
+    //TODO: enable this when questionnaire verification is required
+    // if (selectedItems.length < MIN_SELECTED_ITEMS) {
+    //   setValidateData(true);
+    //   errors.verificationRequired = 'Select correctly minimum 5 questions';
+    // }
   }
   if (activeStep === GrievanceSteps.Description) {
     if (
