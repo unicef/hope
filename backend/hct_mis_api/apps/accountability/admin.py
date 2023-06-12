@@ -6,9 +6,8 @@ from django.http import HttpRequest
 from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
+from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-
-from .models import Message
 
 
 class MessageRecipientMapInline(admin.TabularInline):

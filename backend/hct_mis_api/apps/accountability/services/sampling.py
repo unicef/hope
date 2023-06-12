@@ -4,12 +4,11 @@ from typing import Any, Dict, Optional, Tuple
 
 from django.db.models import QuerySet
 
+from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.utils import get_number_of_samples
-
-from ..models import Message
 
 
 class BaseSampling(abc.ABC):
