@@ -3,7 +3,7 @@ from typing import Dict
 
 from graphql import GraphQLError
 
-from ..models import Message
+from hct_mis_api.apps.accountability.models import Message
 
 logger = logging.getLogger(__name__)
 

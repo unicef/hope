@@ -417,6 +417,7 @@ export type BusinessAreaNode = Node & {
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
   isPaymentPlanApplicable: Scalars['Boolean'],
+  isAccountabilityApplicable: Scalars['Boolean'],
   active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -7768,6 +7769,7 @@ export type UserBusinessAreaNode = Node & {
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
   isPaymentPlanApplicable: Scalars['Boolean'],
+  isAccountabilityApplicable: Scalars['Boolean'],
   active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -10455,7 +10457,7 @@ export type BusinessAreaDataQuery = (
   { __typename?: 'Query' }
   & { businessArea: Maybe<(
     { __typename?: 'BusinessAreaNode' }
-    & Pick<BusinessAreaNode, 'id' | 'screenBeneficiary' | 'isPaymentPlanApplicable'>
+    & Pick<BusinessAreaNode, 'id' | 'screenBeneficiary' | 'isPaymentPlanApplicable' | 'isAccountabilityApplicable'>
   )> }
 );
 
@@ -19034,6 +19036,7 @@ export const BusinessAreaDataDocument = gql`
     id
     screenBeneficiary
     isPaymentPlanApplicable
+    isAccountabilityApplicable
   }
 }
     `;
@@ -27660,6 +27663,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isAccountabilityApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
@@ -30750,6 +30754,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isAccountabilityApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,

@@ -130,6 +130,13 @@ export const menuItems = [
         icon: <Assessment />,
         permissionModule: 'INDIVIDUALS',
       },
+      {
+        name: 'Feedback',
+        href: '/accountability/feedback',
+        selectedRegexp: /^\/accountability\/feedback.*$/,
+        icon: <RateReviewIcon />,
+        permissionModule: 'FEEDBACK',
+      },
     ],
   },
   {
@@ -139,6 +146,7 @@ export const menuItems = [
     icon: <ForumIcon />,
     collapsable: true,
     permissionModule: 'ACCOUNTABILITY',
+    flag: 'isAccountabilityApplicable',
     secondaryActions: [
       {
         name: 'Communication',
