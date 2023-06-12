@@ -104,47 +104,49 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
   return Yup.object().shape(datum);
 };
 
-export function validateUsingSteps(
-  values,
-  activeStep,
-  setValidateData,
-): { [key: string]: string | { [key: string]: string } } {
-  const errors: { [key: string]: string | { [key: string]: string } } = {};
-  const verficationStepFields = [
-    'size',
-    'maleChildrenCount',
-    'femaleChildrenCount',
-    'childrenDisabledCount',
-    'headOfHousehold',
-    'countryOrigin',
-    'address',
-    'village',
-    'admin1',
-    'admin2',
-    'admin3',
-    'unhcrId',
-    'months_displaced_h_f',
-    'fullName',
-    'birthDate',
-    'phoneNo',
-    'relationship',
-  ];
+// export function validateUsingSteps(
+//   values,
+//   activeStep,
+//   setValidateData,
+// ): { [key: string]: string | { [key: string]: string } } {
+//   const errors: { [key: string]: string | { [key: string]: string } } = {};
+// const verficationStepFields = [
+//   'size',
+//   'maleChildrenCount',
+//   'femaleChildrenCount',
+//   'childrenDisabledCount',
+//   'headOfHousehold',
+//   'countryOrigin',
+//   'address',
+//   'village',
+//   'admin1',
+//   'admin2',
+//   'admin3',
+//   'unhcrId',
+//   'months_displaced_h_f',
+//   'fullName',
+//   'birthDate',
+//   'phoneNo',
+//   'relationship',
+// ];
 
-  if (
-    activeStep === FeedbackSteps.Verification &&
-    (values.selectedHousehold ||
-      (values.selectedIndividual && !values.verificationRequired))
-  ) {
-    const MIN_SELECTED_ITEMS = 5;
-    const selectedItems = verficationStepFields.filter((item) => values[item]);
+// if (
+//   activeStep === FeedbackSteps.Verification &&
+//   (values.selectedHousehold ||
+//     (values.selectedIndividual && !values.verificationRequired))
+// ) {
+// const MIN_SELECTED_ITEMS = 5;
+// const selectedItems = verficationStepFields.filter((item) => values[item]);
 
-    if (selectedItems.length < MIN_SELECTED_ITEMS) {
-      setValidateData(true);
-      errors.verificationRequired = 'Select correctly minimum 5 questions';
-    }
-  }
-  return errors;
-}
+//TODO: enable this when questionnaire verification is required
+
+// if (selectedItems.length < MIN_SELECTED_ITEMS) {
+//   setValidateData(true);
+//   errors.verificationRequired = 'Select correctly minimum 5 questions';
+// }
+// }
+//   return errors;
+// }
 
 export const CreateFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -259,9 +261,9 @@ export const CreateFeedbackPage = (): React.ReactElement => {
       validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
       validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
       validationSchema={validationSchemaWithSteps(activeStep)}
-      validate={(values) =>
-        validateUsingSteps(values, activeStep, setValidateData)
-      }
+      // validate={(values) =>
+      //   validateUsingSteps(values, activeStep, setValidateData)
+      // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
         return (
