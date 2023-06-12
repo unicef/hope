@@ -1,0 +1,22 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    <div style="padding: 10px;">
+        <form method="post" id="formatter-form">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit">
+        </form>
+    </div>
+    <div class="results">
+        {{ results}}
+    </div>
+        
+<style>
+    .results {
+      overflow: auto;
+      white-space: nowrap;
+    }
+</style>
+{% endblock %}

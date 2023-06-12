@@ -33,13 +33,13 @@ from hct_mis_api.apps.household.models import (
     Household,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
+from power_query.mixin import PowerQueryMixin
 
 logger = logging.getLogger(__name__)
 
