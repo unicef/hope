@@ -38,7 +38,7 @@ export function LookUpIndividualFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -46,7 +46,7 @@ export function LookUpIndividualFilters({
             data-cy='filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
@@ -63,7 +63,7 @@ export function LookUpIndividualFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -79,7 +79,7 @@ export function LookUpIndividualFilters({
             value={filter.lastRegistrationDate.min}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -94,7 +94,7 @@ export function LookUpIndividualFilters({
             value={filter.lastRegistrationDate.max}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             multiple
@@ -114,14 +114,14 @@ export function LookUpIndividualFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
             value={filter.sex}
@@ -142,7 +142,7 @@ export function LookUpIndividualFilters({
           </SelectFilter>
         </Grid>
         {household && (
-          <Grid item>
+          <Grid item xs={3}>
             <FormControlLabel
               control={
                 <Checkbox
