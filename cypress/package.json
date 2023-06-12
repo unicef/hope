@@ -25,7 +25,7 @@
     "lint": "eslint .",
     "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*",
     "pretest": "npm run clean:reports",
-    "scripts": "cypress run",
+    "scripts": "cypress run --headless --config baseUrl=http://proxy,video=false",
     "clean:reports": "rm -R -f cypress/reports && mkdir cypress/reports && mkdir cypress/reports/mochareports ",
     "combine-reports": "mochawesome-merge cypress/reports/mocha/*.json > cypress/reports/mochareports/report.json",
     "generate-report": "marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports -- inline",
