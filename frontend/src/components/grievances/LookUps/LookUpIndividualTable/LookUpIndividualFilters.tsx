@@ -50,7 +50,7 @@ export function LookUpIndividualFilters({
             fullWidth
           />
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
@@ -68,7 +68,7 @@ export function LookUpIndividualFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -84,7 +84,7 @@ export function LookUpIndividualFilters({
             value={filter.lastRegistrationDate.min}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -128,7 +128,7 @@ export function LookUpIndividualFilters({
             fullWidth
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
             value={filter.sex}
@@ -150,7 +150,7 @@ export function LookUpIndividualFilters({
           </SelectFilter>
         </Grid>
         {household && (
-          <Grid item>
+          <Grid item xs={3}>
             <FormControlLabel
               control={
                 <Checkbox

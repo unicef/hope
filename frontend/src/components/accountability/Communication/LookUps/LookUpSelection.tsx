@@ -1,15 +1,18 @@
 import { Box, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { CommunicationTabsValues } from '../../../../utils/constants';
 import {
   ProgramNode,
-  RegistrationDataImportStatus,
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { LookUpSelectionFilters } from './LookUpSelectionFilters';
+import { CommunicationTabsValues } from '../../../../utils/constants';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { HouseholdFilters } from '../../../population/HouseholdFilter';
+import { RegistrationFilters } from '../../../rdi/RegistrationFilters';
+import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
 import { LookUpSelectionTables } from './LookUpSelectionTables';
 
 const communicationTabs = ['Household', 'Target Population', 'RDI'];
@@ -34,24 +37,57 @@ export const LookUpSelection = ({
   selectedTab;
   setSelectedTab;
 }): React.ReactElement => {
-  const filtersInitial = {
-    lastRegistrationDate: { min: undefined, max: undefined },
-    createdAtRange: { min: undefined, max: undefined },
-    size: { min: undefined, max: undefined },
-    numIndividuals: { min: undefined, max: undefined },
-    importDateRange: { min: undefined, max: undefined },
+  const location = useLocation();
+
+  const initialFilterRDI = {
+    search: '',
+    importedBy: '',
+    status: '',
+    sizeMin: '',
+    sizeMax: '',
+    importDateRangeMin: '',
+    importDateRangeMax: '',
   };
-  const [filtersHouseholdApplied, setFiltersHouseholdApplied] = useState(
-    filtersInitial,
+
+  const [filterRDI, setFilterRDI] = useState(
+    getFilterFromQueryParams(location, initialFilterRDI),
   );
-  const [
-    filtersTargetPopulationApplied,
-    setFiltersTargetPopulationApplied,
-  ] = useState(filtersInitial);
-  const [filtersRDIApplied, setFiltersRDIApplied] = useState({
-    ...filtersInitial,
-    status: RegistrationDataImportStatus.Merged,
-  });
+  const [appliedFilterRDI, setAppliedFilterRDI] = useState(
+    getFilterFromQueryParams(location, initialFilterRDI),
+  );
+
+  const initialFilterTP = {
+    name: '',
+    status: '',
+    program: '',
+    numIndividualsMin: null,
+    numIndividualsMax: null,
+  };
+
+  const [filterTP, setFilterTP] = useState(
+    getFilterFromQueryParams(location, initialFilterTP),
+  );
+  const [appliedFilterTP, setAppliedFilterTP] = useState(
+    getFilterFromQueryParams(location, initialFilterTP),
+  );
+
+  const initialFilterHH = {
+    text: '',
+    program: '',
+    residenceStatus: '',
+    admin2: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+    withdrawn: null,
+  };
+
+  const [filterHH, setFilterHH] = useState(
+    getFilterFromQueryParams(location, initialFilterHH),
+  );
+  const [appliedFilterHH, setAppliedFilterHH] = useState(
+    getFilterFromQueryParams(location, initialFilterHH),
+  );
 
   const { t } = useTranslation();
 
@@ -123,22 +159,45 @@ export const LookUpSelection = ({
         </RadioGroup>
       </BoxWithBorderBottom>
       <Box p={4} mt={4}>
-        <LookUpSelectionFilters
-          programs={programs as ProgramNode[]}
-          choicesData={choicesData}
-          setFiltersHouseholdApplied={setFiltersHouseholdApplied}
-          setFiltersTargetPopulationApplied={setFiltersTargetPopulationApplied}
-          setFiltersRDIApplied={setFiltersRDIApplied}
-          selectedTab={selectedTab}
-          filtersInitial={filtersInitial}
-        />
+        {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
+          <HouseholdFilters
+            programs={programs as ProgramNode[]}
+            filter={filterHH}
+            choicesData={choicesData}
+            setFilter={setFilterHH}
+            initialFilter={initialFilterHH}
+            appliedFilter={appliedFilterHH}
+            setAppliedFilter={setAppliedFilterHH}
+          />
+        )}
+        {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
+          <TargetPopulationFilters
+            filter={filterTP}
+            programs={programs as ProgramNode[]}
+            setFilter={setFilterTP}
+            initialFilter={initialFilterTP}
+            appliedFilter={appliedFilterTP}
+            setAppliedFilter={setAppliedFilterTP}
+            addBorder={false}
+          />
+        )}
+        {selectedTab === CommunicationTabsValues.RDI && (
+          <RegistrationFilters
+            filter={filterRDI}
+            setFilter={setFilterRDI}
+            initialFilter={initialFilterRDI}
+            appliedFilter={appliedFilterRDI}
+            setAppliedFilter={setAppliedFilterRDI}
+            addBorder={false}
+          />
+        )}
       </Box>
       <LookUpSelectionTables
         selectedTab={selectedTab}
         choicesData={choicesData}
-        filtersHouseholdApplied={filtersHouseholdApplied}
-        filtersTargetPopulationApplied={filtersTargetPopulationApplied}
-        filtersRDIApplied={filtersRDIApplied}
+        filtersHouseholdApplied={appliedFilterHH}
+        filtersTargetPopulationApplied={appliedFilterTP}
+        filtersRDIApplied={appliedFilterRDI}
         businessArea={businessArea}
         onValueChange={onValueChange}
         values={values}

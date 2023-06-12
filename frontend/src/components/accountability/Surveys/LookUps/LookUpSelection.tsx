@@ -1,14 +1,17 @@
 import { Box, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { SurveyTabsValues } from '../../../../utils/constants';
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
   useProgrammeChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { LookUpSelectionFilters } from './LookUpSelectionFilters';
+import { ProgrammesFilters } from '../../../../containers/tables/ProgrammesTable/ProgrammesFilter';
+import { SurveyTabsValues } from '../../../../utils/constants';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
 import { LookUpSelectionTables } from './LookUpSelectionTables';
 
 const surveysTabs = ['Programme', 'Target Population'];
@@ -33,37 +36,40 @@ export const LookUpSelection = ({
   selectedTab;
   setSelectedTab;
 }): React.ReactElement => {
-  const filtersProgramInitial = {
-    sector: [],
-    status: [],
+  const location = useLocation();
+  const initialFilterP = {
+    search: '',
     startDate: undefined,
     endDate: undefined,
-    numberOfHouseholds: {
-      min: undefined,
-      max: undefined,
-    },
-    budget: {
-      min: undefined,
-      max: undefined,
-    },
-  };
-  const filtersTargetPopulationInitial = {
-    numIndividuals: {
-      min: undefined,
-      max: undefined,
-    },
-    createdAtRange: { min: undefined, max: undefined },
-    name: '',
     status: '',
+    sector: [],
+    numberOfHouseholdsMin: '',
+    numberOfHouseholdsMax: '',
+    budgetMin: '',
+    budgetMax: '',
   };
 
-  const [filtersProgramApplied, setFiltersProgramApplied] = useState(
-    filtersProgramInitial,
+  const [filterP, setFilterP] = useState(
+    getFilterFromQueryParams(location, initialFilterP),
   );
-  const [
-    filtersTargetPopulationApplied,
-    setFiltersTargetPopulationApplied,
-  ] = useState(filtersTargetPopulationInitial);
+  const [appliedFilterP, setAppliedFilterP] = useState(
+    getFilterFromQueryParams(location, initialFilterP),
+  );
+
+  const initialFilterTP = {
+    name: '',
+    status: '',
+    program: '',
+    numIndividualsMin: null,
+    numIndividualsMax: null,
+  };
+
+  const [filterTP, setFilterTP] = useState(
+    getFilterFromQueryParams(location, initialFilterTP),
+  );
+  const [appliedFilterTP, setAppliedFilterTP] = useState(
+    getFilterFromQueryParams(location, initialFilterTP),
+  );
 
   const { t } = useTranslation();
 
@@ -130,21 +136,35 @@ export const LookUpSelection = ({
         </RadioGroup>
       </BoxWithBorderBottom>
       <Box p={4} mt={4}>
-        <LookUpSelectionFilters
-          programs={programs as ProgramNode[]}
-          choicesData={choicesData}
-          setFiltersProgramApplied={setFiltersProgramApplied}
-          setFiltersTargetPopulationApplied={setFiltersTargetPopulationApplied}
-          selectedTab={selectedTab}
-          filtersProgramInitial={filtersProgramInitial}
-          filtersTargetPopulationInitial={filtersTargetPopulationInitial}
-        />
+        <Box>
+          {selectedTab === SurveyTabsValues.PROGRAM && (
+            <ProgrammesFilters
+              filter={filterP}
+              choicesData={choicesData}
+              setFilter={setFilterP}
+              initialFilter={initialFilterP}
+              appliedFilter={appliedFilterP}
+              setAppliedFilter={setAppliedFilterP}
+            />
+          )}
+          {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
+            <TargetPopulationFilters
+              filter={filterTP}
+              programs={programs as ProgramNode[]}
+              setFilter={setFilterTP}
+              initialFilter={initialFilterTP}
+              appliedFilter={appliedFilterTP}
+              setAppliedFilter={setAppliedFilterTP}
+              addBorder={false}
+            />
+          )}
+        </Box>
       </Box>
       <LookUpSelectionTables
         selectedTab={selectedTab}
         choicesData={choicesData}
-        filtersProgramApplied={filtersProgramApplied}
-        filtersTargetPopulationApplied={filtersTargetPopulationApplied}
+        filtersProgramApplied={appliedFilterP}
+        filtersTargetPopulationApplied={appliedFilterTP}
         businessArea={businessArea}
         onValueChange={onValueChange}
         values={values}

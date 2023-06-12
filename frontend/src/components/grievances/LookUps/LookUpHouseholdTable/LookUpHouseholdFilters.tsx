@@ -49,7 +49,7 @@ export function LookUpHouseholdFilters({
             fullWidth
           />
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
@@ -67,7 +67,7 @@ export function LookUpHouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -83,7 +83,7 @@ export function LookUpHouseholdFilters({
             value={filter.lastRegistrationDate.min}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -122,7 +122,7 @@ export function LookUpHouseholdFilters({
             fullWidth
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Household Size')}
             value={filter.size.min}
@@ -139,7 +139,7 @@ export function LookUpHouseholdFilters({
             }
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <NumberTextField
             value={filter.size.max}
             placeholder='To'

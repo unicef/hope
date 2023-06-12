@@ -32,7 +32,7 @@ export function CommunicationMessageDetails({
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              <Grid item container justify='space-between' xs={12}>
+              <Grid item container justifyContent='space-between' xs={12}>
                 <Typography variant='subtitle2'>
                   {renderUserName(message.createdBy)}
                 </Typography>
