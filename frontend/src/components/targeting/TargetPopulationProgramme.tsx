@@ -44,7 +44,9 @@ export function TargetPopulationProgramme({
   return (
     <PaperContainer data-cy='target-population-program-container'>
       <Title>
-        <Typography variant='h6'>{t('Programme')}</Typography>
+        <Typography data-cy='program-title' variant='h6'>
+          {t('Programme')}
+        </Typography>
       </Title>
       <OverviewContainer>
         <Box display='flex' flexDirection='column'>
