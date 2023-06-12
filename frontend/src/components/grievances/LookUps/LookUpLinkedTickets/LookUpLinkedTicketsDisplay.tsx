@@ -35,7 +35,7 @@ export const LookUpLinkedTicketsDisplay = ({
   };
   return (
     <StyledBox disabled={disabled}>
-      <Grid container justify='space-between'>
+      <Grid container justifyContent='space-between'>
         <Grid item>
           <Box display='flex' flexDirection='column'>
             {t('Ticket ID')}:{renderLinkedTickets()}

@@ -4,29 +4,51 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleFilterChange } from '../../utils/utils';
+import { createHandleApplyFilterChange } from '../../utils/utils';
+import { ClearApplyButtons } from './ClearApplyButtons';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
 
 interface ActivityLogPageFiltersProps {
-  onFilterChange;
   filter;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export function ActivityLogPageFilters({
-  onFilterChange,
   filter,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: ActivityLogPageFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   const modules = {
     program: 'Programme',
@@ -40,7 +62,7 @@ export function ActivityLogPageFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -48,7 +70,7 @@ export function ActivityLogPageFilters({
             data-cy='filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('module', e.target.value)}
             label={t('Module')}
@@ -73,16 +95,23 @@ export function ActivityLogPageFilters({
               ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <AssigneeAutocomplete
             label='User'
-            onFilterChange={onFilterChange}
             filter={filter}
             name='userId'
             value={filter.userId}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 }

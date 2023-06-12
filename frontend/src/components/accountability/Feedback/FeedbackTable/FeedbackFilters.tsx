@@ -9,15 +9,22 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { createHandleFilterChange } from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 
 interface FeedbackFiltersProps {
-  onFilterChange;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
   filter;
 }
 export const FeedbackFilters = ({
-  onFilterChange,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
   filter,
 }: FeedbackFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -28,33 +35,46 @@ export const FeedbackFilters = ({
     loading: choicesLoading,
   } = useFeedbackIssueTypeChoicesQuery();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   if (choicesLoading) return <LoadingComponent />;
 
   return (
     <ContainerWithBorder>
-      <Grid container alignItems='center' spacing={3}>
-        <Grid item xs={4}>
+      <Grid container alignItems='flex-end' spacing={3}>
+        <Grid item xs={3}>
           <SearchTextField
             value={filter.feedbackId}
             label='Search'
             onChange={(e) => handleFilterChange('feedbackId', e.target.value)}
             data-cy='filters-search'
-            fullWidth
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
             label={t('Issue Type')}
             value={filter.issueType}
-            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -66,48 +86,52 @@ export const FeedbackFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <AssigneeAutocomplete
-            onFilterChange={onFilterChange}
             name='createdBy'
             filter={filter}
             value={filter.createdBy}
             label={t('Created by')}
-            fullWidth
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid container item xs={6} spacing={3} alignItems='flex-end'>
-          <Grid item xs={6}>
-            <DatePickerFilter
-              topLabel={t('Creation Date')}
-              label='From'
-              onChange={(date) =>
-                handleFilterChange(
-                  'createdAtRangeMin',
-                  moment(date)
-                    .startOf('day')
-                    .toISOString(),
-                )
-              }
-              value={filter.createdAtRangeMin}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <DatePickerFilter
-              label={t('To')}
-              onChange={(date) =>
-                handleFilterChange(
-                  'createdAtRangeMax',
-                  moment(date)
-                    .endOf('day')
-                    .toISOString(),
-                )
-              }
-              value={filter.createdAtRangeMax}
-            />
-          </Grid>
+        <Grid item xs={3}>
+          <DatePickerFilter
+            topLabel={t('Creation Date')}
+            label='From'
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMin',
+                moment(date)
+                  .startOf('day')
+                  .toISOString(),
+              )
+            }
+            value={filter.createdAtRangeMin}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <DatePickerFilter
+            label={t('To')}
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMax',
+                moment(date)
+                  .endOf('day')
+                  .toISOString(),
+              )
+            }
+            value={filter.createdAtRangeMax}
+          />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

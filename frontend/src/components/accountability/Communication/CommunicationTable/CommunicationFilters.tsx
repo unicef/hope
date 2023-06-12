@@ -3,36 +3,59 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleFilterChange } from '../../../../utils/utils';
 import {
   useAllProgramsForChoicesQuery,
   useAllTargetPopulationForChoicesQuery,
 } from '../../../../__generated__/graphql';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SelectFilter } from '../../../core/SelectFilter';
 
 interface CommunicationFiltersProps {
-  onFilterChange;
   filter;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export const CommunicationFilters = ({
-  onFilterChange,
   filter,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: CommunicationFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
+
   const businessArea = useBusinessArea();
   const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
@@ -64,7 +87,6 @@ export const CommunicationFilters = ({
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
-            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -83,7 +105,6 @@ export const CommunicationFilters = ({
             }
             label={t('Target Population')}
             value={filter.targetPopulation}
-            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -97,12 +118,14 @@ export const CommunicationFilters = ({
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            onFilterChange={onFilterChange}
-            name='createdBy'
-            value={filter.createdBy}
+            label='User'
             filter={filter}
-            label={t('Created by')}
-            fullWidth
+            name='userId'
+            value={filter.userId}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
         <Grid container item xs={6} spacing={3} alignItems='flex-end'>
@@ -137,6 +160,10 @@ export const CommunicationFilters = ({
           </Grid>
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

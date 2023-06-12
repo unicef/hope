@@ -1,21 +1,20 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  hasPermissionInModule,
-  PERMISSIONS,
-} from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../../hooks/useDebounce';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { Link, useLocation } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
-import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
+import {
+  PERMISSIONS,
+  hasPermissionInModule,
+} from '../../../../config/permissions';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
 
 const initialFilter = {
   createdBy: '',
@@ -34,7 +33,9 @@ export const CommunicationPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -64,9 +65,15 @@ export const CommunicationPage = (): React.ReactElement => {
           {t('New message')}
         </Button>
       </PageHeader>
-      <CommunicationFilters filter={filter} onFilterChange={setFilter} />
+      <CommunicationFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
       <CommunicationTable
-        filter={debouncedFilter}
+        filter={appliedFilter}
         canViewDetails={hasPermissionInModule(
           PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
           permissions,

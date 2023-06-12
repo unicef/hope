@@ -7,7 +7,6 @@ import {
   PERMISSIONS,
 } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../../hooks/useDebounce';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
@@ -32,8 +31,9 @@ export const FeedbackPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
   if (permissions === null) return null;
   if (
@@ -61,8 +61,14 @@ export const FeedbackPage = (): React.ReactElement => {
           {t('Submit New Feedback')}
         </Button>
       </PageHeader>
-      <FeedbackFilters filter={filter} onFilterChange={setFilter} />
-      <FeedbackTable filter={debouncedFilter} canViewDetails={canViewDetails} />
+      <FeedbackFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <FeedbackTable filter={appliedFilter} canViewDetails={canViewDetails} />
     </>
   );
 };

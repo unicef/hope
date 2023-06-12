@@ -10,7 +10,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
@@ -37,8 +36,10 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const [isInfoOpen, setToggleInfo] = useState(false);
-  const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
@@ -84,10 +85,13 @@ export const TargetPopulationsPage = (): React.ReactElement => {
       <TargetPopulationFilters
         filter={filter}
         programs={programs as ProgramNode[]}
-        onFilterChange={setFilter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <TargetPopulationTable
-        filter={debouncedFilter}
+        filter={appliedFilter}
         canViewDetails={hasPermissions(
           PERMISSIONS.TARGETING_VIEW_DETAILS,
           permissions,

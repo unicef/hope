@@ -1,6 +1,7 @@
 import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -8,16 +9,14 @@ import { GrievancesFilters } from '../../../components/grievances/GrievancesTabl
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
+  GRIEVANCE_TICKETS_TYPES,
   GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
-  GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 
 export const GrievancesTablePage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
@@ -54,8 +53,9 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -99,13 +99,16 @@ export const GrievancesTablePage = (): React.ReactElement => {
       <GrievancesFilters
         choicesData={choicesData}
         filter={filter}
-        onFilterChange={setFilter}
-        selectedTab={selectedTab}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+        selectedTab={0}
       />
       <GrievancesTable
-        filter={debouncedFilter}
+        filter={appliedFilter}
         businessArea={businessArea}
-        selectedTab={selectedTab}
+        selectedTab={undefined}
       />
     </>
   );
