@@ -103,12 +103,12 @@ export const GrievancesTablePage = (): React.ReactElement => {
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
         setAppliedFilter={setAppliedFilter}
-        selectedTab={0}
+        selectedTab={selectedTab}
       />
       <GrievancesTable
         filter={appliedFilter}
         businessArea={businessArea}
-        selectedTab={undefined}
+        selectedTab={selectedTab}
       />
     </>
   );
