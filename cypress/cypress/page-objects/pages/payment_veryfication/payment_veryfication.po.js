@@ -95,7 +95,7 @@ export default class PaymentVerification extends BaseComponent {
   }
 
   countCashPlanArray() {
-    return Array.from(Array(2).keys());
+    return Array.from(Array(1).keys());
   }
 
   chooseCashPlan(row) {
