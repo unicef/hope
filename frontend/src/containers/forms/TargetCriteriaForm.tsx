@@ -235,7 +235,9 @@ export function TargetCriteriaForm({
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle disableTypography>
-                <Typography variant='h6'>{t('Add Filter')}</Typography>
+                <Typography data-cy='title-add-filter' variant='h6'>
+                  {t('Add Filter')}
+                </Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>

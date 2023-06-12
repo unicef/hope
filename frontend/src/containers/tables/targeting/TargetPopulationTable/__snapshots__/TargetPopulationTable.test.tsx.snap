@@ -78,6 +78,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
               >
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="name"
                   scope="col"
                 >
                   <span
@@ -102,6 +103,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="status"
                   scope="col"
                 >
                   <span
@@ -126,6 +128,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="program"
                   scope="col"
                 >
                   <span
@@ -150,6 +153,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="num-of-households"
                   scope="col"
                 >
                   <span
@@ -174,6 +178,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="date-created"
                   scope="col"
                 >
                   <span
@@ -198,6 +203,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="last-edited"
                   scope="col"
                 >
                   <span
@@ -222,6 +228,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  data-cy="created-by"
                   scope="col"
                 >
                   <span

@@ -7,9 +7,8 @@ export const DISCARD_CASH_PLAN_PAYMENT_VERIFICATION = gql`
     ) {
       paymentPlan {
         id
-        # status
-        # statusDate
         verificationPlans {
+          totalCount
           edges {
             node {
               id
@@ -23,6 +22,10 @@ export const DISCARD_CASH_PLAN_PAYMENT_VERIFICATION = gql`
               activationDate
             }
           }
+        }
+        paymentVerificationSummary {
+          id
+          status
         }
       }
     }
