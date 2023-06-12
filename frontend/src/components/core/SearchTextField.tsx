@@ -10,10 +10,14 @@ const StyledTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
-export const SearchTextField = ({ ...props }): React.ReactElement => {
+export const SearchTextField = ({
+  fullWidth = true,
+  ...props
+}): React.ReactElement => {
   return (
     <StyledTextField
       {...props}
+      fullWidth={fullWidth}
       variant='outlined'
       margin='dense'
       inputProps={{ maxLength: 200 }}
