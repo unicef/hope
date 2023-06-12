@@ -78,9 +78,10 @@ export const IndividualsFilter = ({
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            name='adminArea'
-            value={filter.adminArea}
+            name='admin2'
+            value={filter.admin2}
             setFilter={setFilter}
+            filter={filter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
