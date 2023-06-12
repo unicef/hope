@@ -35,8 +35,8 @@ export const AdminAreaAutocomplete = ({
   disabled?: boolean;
   fullWidth?: boolean;
   name: string;
-  filter?;
-  value?: string;
+  filter;
+  value: string;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;

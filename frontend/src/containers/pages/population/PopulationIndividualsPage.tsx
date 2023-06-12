@@ -18,7 +18,7 @@ import { IndividualsListTable } from '../../tables/population/IndividualsListTab
 
 const initialFilter = {
   text: '',
-  adminArea: '',
+  admin2: '',
   sex: '',
   ageMin: '',
   ageMax: '',

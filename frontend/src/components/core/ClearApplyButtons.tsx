@@ -17,6 +17,7 @@ export const ClearApplyButtons = ({
       <Box mt={4}>
         <Button
           color='primary'
+          data-cy='button-filters-clear'
           onClick={() => {
             clearHandler();
           }}
@@ -26,6 +27,7 @@ export const ClearApplyButtons = ({
         <Button
           color='primary'
           variant='outlined'
+          data-cy='button-filters-apply'
           onClick={() => applyHandler()}
         >
           {t('Apply')}

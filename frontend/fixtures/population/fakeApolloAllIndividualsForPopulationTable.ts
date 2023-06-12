@@ -9,7 +9,7 @@ export const fakeApolloAllIndividualsForPopulationTable = [
         businessArea: 'afghanistan',
         sex: [''],
         search: '',
-        adminArea: '',
+        admin2: [''],
         flags: [],
         first: 10,
         orderBy: 'unicef_id',
