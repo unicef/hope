@@ -1,6 +1,6 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { LocationState, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useRdiAutocompleteLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
-import { createHandleFilterChange } from '../../utils/utils';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -20,21 +20,29 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 export const RdiAutocomplete = ({
   disabled,
-  fullWidth,
+  fullWidth = true,
   name,
-  onFilterChange,
   filter,
   value,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+  setFilter,
 }: {
   disabled?;
   fullWidth?: boolean;
   name: string;
-  onFilterChange: (filters: { [key: string]: string }) => void;
   filter?;
   value?: string;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
+  setFilter: (filter) => void;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const history = useHistory();
+  const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
@@ -57,11 +65,14 @@ export const RdiAutocomplete = ({
     loadData();
   }, [loadData]);
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
+  const { handleFilterChange } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
     filter,
-    useHistory<LocationState>(),
-    useLocation(),
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
 
   if (!data) return null;

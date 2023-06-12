@@ -808,6 +808,83 @@ export const createHandleFilterChange = (
   return handleFilterChange;
 };
 
+type HandleFilterChange = (key: string, value: FilterValue) => void;
+type HandleApplyFilterChanges = () => void;
+type HandleClearFilter = () => void;
+
+interface HandleFilterChangeFunctions {
+  handleFilterChange: HandleFilterChange;
+  applyFilterChanges: HandleApplyFilterChanges;
+  clearFilter: HandleClearFilter;
+}
+
+export const createHandleApplyFilterChange = (
+  initialFilter: Filter,
+  history: useHistory<LocationState>,
+  location: Location,
+  filter: Filter,
+  setFilter: (filter: { [key: string]: FilterValue }) => void,
+  appliedFilter: Filter,
+  setAppliedFilter: (filter: Filter) => void,
+): HandleFilterChangeFunctions => {
+  const handleFilterChange = (key: string, value: FilterValue): void => {
+    const newFilter = {
+      ...filter,
+      [key]: value,
+    };
+
+    setFilter(newFilter);
+  };
+
+  const applyFilterChanges = (): void => {
+    setAppliedFilter(filter);
+
+    const params = new URLSearchParams(location.search);
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          params.delete(key);
+          value.forEach((val) => {
+            if (val !== null && val !== undefined) {
+              params.append(key, val);
+            }
+          });
+        } else {
+          const paramValue =
+            typeof value === 'boolean' ? value.toString() : value;
+          params.set(key, paramValue);
+        }
+      } else {
+        params.delete(key);
+      }
+    });
+
+    const search = params.toString();
+    history.push({ search });
+
+    setFilter(filter);
+  };
+
+  const clearFilter = (): void => {
+    const params = new URLSearchParams(location.search);
+    Object.keys(appliedFilter).forEach((key) => {
+      params.delete(key);
+    });
+
+    const search = params.toString();
+    history.push({ search });
+
+    setFilter(initialFilter);
+    setAppliedFilter(initialFilter);
+  };
+
+  return {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  };
+};
+
 export const tomorrow = new Date().setDate(new Date().getDate() + 1);
 export const today = new Date();
 today.setHours(0, 0, 0, 0);

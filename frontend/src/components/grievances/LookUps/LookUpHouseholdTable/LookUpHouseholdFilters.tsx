@@ -37,7 +37,7 @@ export function LookUpHouseholdFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -45,7 +45,7 @@ export function LookUpHouseholdFilters({
             data-cy='filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
@@ -62,7 +62,7 @@ export function LookUpHouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -78,7 +78,7 @@ export function LookUpHouseholdFilters({
             value={filter.lastRegistrationDate.min}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -93,7 +93,7 @@ export function LookUpHouseholdFilters({
             value={filter.lastRegistrationDate.max}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Status')}
@@ -108,14 +108,14 @@ export function LookUpHouseholdFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Household Size')}
             value={filter.size.min}
@@ -132,7 +132,7 @@ export function LookUpHouseholdFilters({
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             value={filter.size.max}
             placeholder='To'

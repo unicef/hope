@@ -1,42 +1,64 @@
 import { Box, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
-import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
-import { createHandleFilterChange } from '../../../utils/utils';
 
 interface GrievancesFiltersProps {
-  onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export const GrievancesFilters = ({
-  onFilterChange,
   filter,
   choicesData,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -46,7 +68,7 @@ export const GrievancesFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             value={filter.search}
             label='Search'
@@ -54,7 +76,7 @@ export const GrievancesFilters = ({
             data-cy='filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -72,14 +94,14 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             value={filter.fsp}
             label='FSP'
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder='From'
@@ -94,7 +116,7 @@ export const GrievancesFilters = ({
             value={filter.createdAtRangeMin}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder='To'
             onChange={(date) =>
@@ -108,7 +130,7 @@ export const GrievancesFilters = ({
             value={filter.createdAtRangeMax}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
@@ -128,7 +150,7 @@ export const GrievancesFilters = ({
         </Grid>
         {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
         filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-          <Grid item>
+          <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label='Issue Type'
@@ -148,23 +170,29 @@ export const GrievancesFilters = ({
           </Grid>
         ) : null}
 
-        <Grid item>
+        <Grid item xs={3}>
           <AdminAreaAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='admin'
             value={filter.admin}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <AssigneeAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
-            name='assignedTo'
-            value={filter.assignedTo}
+            name='userId'
+            value={filter.userId}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Similarity Score')}
             value={filter.scoreMin}
@@ -172,7 +200,7 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <Box display='flex' flexDirection='column'>
             <NumberTextField
               value={filter.scoreMax}
@@ -181,23 +209,33 @@ export const GrievancesFilters = ({
             />
           </Box>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <RdiAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='registrationDataImport'
             value={filter.registrationDataImport}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <LanguageAutocomplete
-            onFilterChange={onFilterChange}
             filter={filter}
             name='preferredLanguage'
             value={filter.preferredLanguage}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
           />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

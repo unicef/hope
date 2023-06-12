@@ -7,7 +7,6 @@ import { CreateProgram } from '../../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { ProgrammesTable } from '../../tables/ProgrammesTable/ProgrammesTable';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -32,7 +31,9 @@ export const ProgramsPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -62,13 +63,16 @@ export const ProgramsPage = (): React.ReactElement => {
       {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
       <ProgrammesFilters
         filter={filter}
-        onFilterChange={setFilter}
         choicesData={choicesData}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <ProgrammesTable
         businessArea={businessArea}
         choicesData={choicesData}
-        filter={debouncedFilter}
+        filter={appliedFilter}
       />
     </div>
   );
