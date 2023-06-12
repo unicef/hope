@@ -151,7 +151,7 @@ export const GrievancesFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
