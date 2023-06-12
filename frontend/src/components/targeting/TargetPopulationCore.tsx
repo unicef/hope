@@ -44,7 +44,7 @@ export function TargetPopulationCore({
       ) : null}
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
-          <Typography variant='h6'>
+          <Typography data-cy='title-excluded-entries' variant='h6'>
             {t(
               'Excluded Target Population Entries (Households or Individuals)',
             )}
@@ -77,7 +77,7 @@ export function TargetPopulationCore({
         />
       ) : (
         <PaperContainer>
-          <Typography variant='h6'>
+          <Typography data-cy='target-population-building' variant='h6'>
             {t('Target Population is building')}
           </Typography>
           <Label>
