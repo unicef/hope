@@ -49,7 +49,9 @@ export const GrievancesTablePage = (): React.ReactElement => {
   };
 
   const [selectedTab, setSelectedTab] = useState(
-    GRIEVANCE_TICKETS_TYPES.userGenerated,
+    isUserGenerated
+      ? GRIEVANCE_TICKETS_TYPES.userGenerated
+      : GRIEVANCE_TICKETS_TYPES.systemGenerated,
   );
 
   const [filter, setFilter] = useState(
@@ -64,8 +66,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery();
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
-  const userGeneratedPath = `/${businessArea}/grievance-and-feedback/user-generated`;
-  const systemGeneratedPath = `/${businessArea}/grievance-and-feedback/system-generated`;
+  const userGeneratedPath = `/${businessArea}/grievance-and-feedback/tickets/user-generated`;
+  const systemGeneratedPath = `/${businessArea}/grievance-and-feedback/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
     <Tab key={el} label={el} />
