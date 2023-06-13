@@ -1,5 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
@@ -55,9 +56,14 @@ export function GrievancesTableRow({
   setInputValue,
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement {
+  const location = useLocation();
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
-  const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
+  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
+
+  const detailsPath = `/${businessArea}/grievance-and-feedback/tickets/${
+    isUserGenerated ? 'user-generated' : 'system-generated'
+  }/${ticket.id}`;
 
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);

@@ -1,6 +1,6 @@
 import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -23,6 +23,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
+  const history = useHistory();
+  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const initialFilter = {
     search: '',
@@ -39,7 +41,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
-    grievanceType: GrievanceTypes[0],
+    grievanceType: isUserGenerated ? GrievanceTypes[0] : GrievanceTypes[1],
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
@@ -47,7 +49,9 @@ export const GrievancesTablePage = (): React.ReactElement => {
   };
 
   const [selectedTab, setSelectedTab] = useState(
-    GRIEVANCE_TICKETS_TYPES.userGenerated,
+    isUserGenerated
+      ? GRIEVANCE_TICKETS_TYPES.userGenerated
+      : GRIEVANCE_TICKETS_TYPES.systemGenerated,
   );
 
   const [filter, setFilter] = useState(
@@ -62,6 +66,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery();
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
+  const userGeneratedPath = `/${businessArea}/grievance-and-feedback/tickets/user-generated`;
+  const systemGeneratedPath = `/${businessArea}/grievance-and-feedback/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
     <Tab key={el} label={el} />
@@ -76,6 +82,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
           grievanceType: GrievanceTypes[newValue],
           category: '',
         });
+        history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
       indicatorColor='primary'
       textColor='primary'
