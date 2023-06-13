@@ -70,7 +70,7 @@ from hct_mis_api.apps.payment.filters import (
     payment_record_and_payment_filter,
     payment_record_and_payment_ordering,
 )
-from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput, AvailableFspsForDeliveryMechanismsInput
 from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -609,10 +609,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         model = LogEntry
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-
-class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
 
 
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
