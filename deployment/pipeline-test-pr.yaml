@@ -296,10 +296,6 @@ stages:
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
-          - task: PublishHtmlReport@1
-            displayName: 'Publish HTML Report'
-            inputs:
-              reportDir: './cypress-reports/mochareports/report.html'
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
