@@ -893,10 +893,8 @@ export const createHandleApplyFilterChange = (
     Object.keys(appliedFilter).forEach((key) => {
       params.delete(key);
     });
-
     const search = params.toString();
     history.push({ search });
-
     setFilter(initialFilter);
     setAppliedFilter(initialFilter);
   };
