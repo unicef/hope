@@ -35,6 +35,9 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditPaymentVerificationInput,
     UpdatePaymentPlanInput,
+    ChooseDeliveryMechanismsForPaymentPlanInput,
+    FSPToDeliveryMechanismMappingInput,
+    AssignFspToDeliveryMechanismInput,
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
@@ -817,11 +820,6 @@ class DeletePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    delivery_mechanisms = graphene.List(graphene.String, required=True)
-
-
 class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -912,17 +910,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             )
 
         return cls(payment_plan=payment_plan)
-
-
-class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
-    fsp_id = graphene.ID(required=True)
-    delivery_mechanism = graphene.String(required=True)
-    order = graphene.Int(required=True)
-
-
-class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
 
 
 class AssignFspToDeliveryMechanismMutation(PermissionMutation):
