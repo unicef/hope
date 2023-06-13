@@ -14,8 +14,8 @@ import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTabl
 
 const initialFilter = {
   search: '',
-  dispersionStartDate: null,
-  dispersionEndDate: null,
+  dispersionStartDate: undefined,
+  dispersionEndDate: undefined,
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
