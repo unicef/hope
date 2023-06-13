@@ -31,13 +31,12 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
+    AssignFspToDeliveryMechanismInput,
+    ChooseDeliveryMechanismsForPaymentPlanInput,
     CreatePaymentPlanInput,
     CreatePaymentVerificationInput,
     EditPaymentVerificationInput,
     UpdatePaymentPlanInput,
-    ChooseDeliveryMechanismsForPaymentPlanInput,
-    FSPToDeliveryMechanismMappingInput,
-    AssignFspToDeliveryMechanismInput,
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
