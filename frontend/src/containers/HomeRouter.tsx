@@ -201,6 +201,12 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
             <EditGrievancePage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated/:id'>
+            <GrievancesDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated/:id'>
+            <GrievancesDetailsPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
@@ -208,16 +214,13 @@ export function HomeRouter(): React.ReactElement {
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated'>
-            <GrievancesTablePage key='all' />
+            <GrievancesTablePage key='user' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated'>
-            <GrievancesTablePage key='all' />
+            <GrievancesTablePage key='system' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
             <GrievancesDashboardPage key='all' />
-          </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
-            <GrievancesDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/communication/create'>
             <CreateCommunicationPage />
