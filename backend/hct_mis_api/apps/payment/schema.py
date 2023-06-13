@@ -1,5 +1,4 @@
 import json
-from base64 import b64decode
 from decimal import Decimal
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -94,7 +93,10 @@ from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.payment.utils import (
+    get_payment_items_for_dashboard,
+    get_payment_plan_object,
+)
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
@@ -997,9 +999,8 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
-        node_name, obj_id = b64decode(input["cash_or_payment_plan_id"]).decode().split(":")
-        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(  # type: ignore
-            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
+            input["cash_or_payment_plan_id"]
         )
 
         def get_payment_records(
