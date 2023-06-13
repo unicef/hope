@@ -56,4 +56,7 @@ describe("Registration Data Import", () => {
       });
     });
   });
+  describe.skip("E2E tests Registration Data Import", () => {});
+
+  describe.skip("Regression tests Registration Data Import", () => {});
 });

@@ -8,7 +8,7 @@ let tcn = new CreateNew();
 
 let programName = "TargetingProgram";
 
-describe("Grievance", () => {
+describe("Targeting", () => {
   beforeEach(() => {
     cy.initScenario("targeting");
     // cy.visit("/api/unicorn/");
@@ -19,14 +19,14 @@ describe("Grievance", () => {
     cy.navigateToHomePage();
   });
 
-  describe("Smoke tests Grievance", () => {
-    it.skip("Check Grievance page", () => {
+  describe("Smoke tests Targeting", () => {
+    it.skip("Check Targeting page", () => {
       // Scenario:
       // 1. Go to Grievance page
       // 2. Check if all elements on page exist
     });
-    it.skip("Check Grievance Details page", () => {});
-    it.skip("Check Grievance New Ticket page", () => {});
+    it.skip("Check Targeting Details page", () => {});
+    it.skip("Check Targeting New Ticket page", () => {});
   });
 
   describe("Component tests Targeting", () => {
@@ -88,13 +88,13 @@ describe("Grievance", () => {
       it.skip("Targeting Search filter", () => {
         // ToDo
       });
-      it.skip("Grievance Status filter", () => {
+      it.skip("Targeting Status filter", () => {
         // ToDo
       });
-      it.skip("Grievance Programme filter", () => {
+      it.skip("Targeting Programme filter", () => {
         // ToDo
       });
-      it.skip("Grievance Number of Households filter", () => {
+      it.skip("Targeting Number of Households filter", () => {
         // ToDo
       });
     });
@@ -124,4 +124,7 @@ describe("Grievance", () => {
       });
     });
   });
+  describe.skip("E2E tests Targeting", () => {});
+
+  describe.skip("Regression tests Targeting", () => {});
 });

@@ -148,7 +148,7 @@ describe("Program Management", () => {
       });
     });
   });
-  describe.skip("E2E tests Grievance", () => {});
+  describe.skip("E2E tests Program Management", () => {});
 
-  describe.skip("Regression tests Grievance", () => {});
+  describe.skip("Regression tests Program Management", () => {});
 });
