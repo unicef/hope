@@ -325,8 +325,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
-    # TODO I don't think this is being used now, add permission if in use
+class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
     payment_verification = graphene.Field(PaymentVerificationNode)
 
     class Arguments:
@@ -355,6 +354,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
