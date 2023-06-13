@@ -283,6 +283,7 @@ stages:
               containerRegistry: $(Docker.registryConnection)
           - script: |
               mkdir -p cypress-results
+              mkdir -p cypress-reports
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
