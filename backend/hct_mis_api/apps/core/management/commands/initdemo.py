@@ -4,6 +4,7 @@ from typing import Any
 
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
+from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
@@ -27,6 +28,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
+        start_time = timezone.now()
         db_connection = connections["default"]
         connected = False
 
@@ -122,3 +124,5 @@ class Command(BaseCommand):
                 user.is_superuser = True
             user.set_unusable_password()
             user.save()
+
+        print(f"Done in {timezone.now()- start_time}")
