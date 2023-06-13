@@ -1,17 +1,19 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 
 interface IndividualsFilterProps {
   filter;
@@ -20,6 +22,7 @@ interface IndividualsFilterProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
+  isOnPaper?: boolean;
 }
 
 const orderOptions = [
@@ -38,6 +41,7 @@ export const IndividualsFilter = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
+  isOnPaper = true,
 }: IndividualsFilterProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -65,14 +69,14 @@ export const IndividualsFilter = ({
     clearFilter();
   };
 
-  return (
-    <ContainerWithBorder>
+  const filtersComponent = (
+    <>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
-            value={filter.text}
-            onChange={(e) => handleFilterChange('text', e.target.value)}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='ind-filters-search'
           />
         </Grid>
@@ -190,11 +194,46 @@ export const IndividualsFilter = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
+        <Grid item xs={3}>
+          <DatePickerFilter
+            topLabel={t('Registration Date')}
+            placeholder={t('From')}
+            onChange={(date) =>
+              handleFilterChange(
+                'lastRegistrationDateMin',
+                moment(date)
+                  .startOf('day')
+                  .toISOString(),
+              )
+            }
+            value={filter.lastRegistrationDateMin}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <DatePickerFilter
+            placeholder={t('To')}
+            onChange={(date) =>
+              handleFilterChange(
+                'lastRegistrationDateMax',
+                moment(date)
+                  .endOf('day')
+                  .toISOString(),
+              )
+            }
+            value={filter.lastRegistrationDateMax}
+          />
+        </Grid>
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}
         applyHandler={handleApplyFilter}
       />
-    </ContainerWithBorder>
+    </>
+  );
+
+  return isOnPaper ? (
+    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
+  ) : (
+    filtersComponent
   );
 };

@@ -1,18 +1,22 @@
 import { Box, Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
+  useIndividualChoiceDataQuery,
 } from '../../../../__generated__/graphql';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { TabPanel } from '../../../core/TabPanel';
-import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
+import { HouseholdFilters } from '../../../population/HouseholdFilter';
+import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
-import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 
 const StyledTabs = styled(Tabs)`
@@ -39,51 +43,69 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   redirectedFromRelatedTicket?: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [selectedTab, setSelectedTab] = useState(0);
-  const householdFilterInitial = {
+  const initialFilterHH = {
     search: '',
-    programs: [],
-    lastRegistrationDate: { min: undefined, max: undefined },
+    program: '',
     residenceStatus: '',
-    size: { min: undefined, max: undefined },
-    admin2: null,
+    admin2: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+    withdrawn: null,
   };
-  const [filterHouseholdApplied, setFilterHouseholdApplied] = useState(
-    householdFilterInitial,
-  );
-  const [filterHousehold, setFilterHousehold] = useState(
-    householdFilterInitial,
-  );
-
-  const individualFilterInitial = {
+  const initialFilterIND = {
     search: '',
-    programs: '',
-    lastRegistrationDate: { min: undefined, max: undefined },
-    status: '',
-    admin2: null,
+    admin2: '',
     sex: '',
+    ageMin: '',
+    ageMax: '',
+    flags: [],
+    orderBy: 'unicef_id',
+    status: '',
   };
-  const [filterIndividualApplied, setFilterIndividualApplied] = useState(
-    individualFilterInitial,
-  );
-  const [filterIndividual, setFilterIndividual] = useState(
-    individualFilterInitial,
-  );
 
   const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsForChoicesQuery({
+  const {
+    data: programsData,
+    loading: programsLoading,
+  } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
   });
   const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
-  if (loading || choicesLoading) return null;
+    data: householdChoicesData,
+    loading: householdChoicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
-  const { allPrograms } = data;
+  const [filterIND, setFilterIND] = useState(
+    getFilterFromQueryParams(location, initialFilterIND),
+  );
+  const [appliedFilterIND, setAppliedFilterIND] = useState(
+    getFilterFromQueryParams(location, initialFilterIND),
+  );
+
+  const [filterHH, setFilterHH] = useState(
+    getFilterFromQueryParams(location, initialFilterHH),
+  );
+  const [appliedFilterHH, setAppliedFilterHH] = useState(
+    getFilterFromQueryParams(location, initialFilterHH),
+  );
+
+  const {
+    data: individualChoicesData,
+    loading: individualChoicesLoading,
+  } = useIndividualChoiceDataQuery();
+
+  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
+    return <LoadingComponent />;
+
+  if (!individualChoicesData || !householdChoicesData || !programsData) {
+    return null;
+  }
+
+  const { allPrograms } = programsData;
   const programs = allPrograms.edges.map((edge) => edge.node);
 
   const onSelect = (key, value): void => {
@@ -96,7 +118,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
         <Box id='scroll-dialog-title'>
           <StyledTabs
             value={selectedTab}
-            onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+            onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
               setSelectedTab(newValue);
             }}
             indicatorColor='primary'
@@ -119,19 +141,22 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
       </Box>
       <Box>
         <TabPanel value={selectedTab} index={0}>
-          <LookUpHouseholdFilters
-            programs={programs as ProgramNode[]}
-            filter={filterHousehold}
-            onFilterChange={setFilterHousehold}
-            setFilterHouseholdApplied={setFilterHouseholdApplied}
-            householdFilterInitial={householdFilterInitial}
-            choicesData={choicesData}
-            addBorder={false}
-          />
+          <Box mt={2}>
+            <HouseholdFilters
+              programs={programs as ProgramNode[]}
+              filter={filterHH}
+              choicesData={householdChoicesData}
+              setFilter={setFilterHH}
+              initialFilter={initialFilterHH}
+              appliedFilter={appliedFilterHH}
+              setAppliedFilter={setAppliedFilterHH}
+              isOnPaper={false}
+            />
+          </Box>
           <LookUpHouseholdTable
-            filter={filterHouseholdApplied}
+            filter={appliedFilterHH}
             businessArea={businessArea}
-            choicesData={choicesData}
+            choicesData={householdChoicesData}
             setFieldValue={onSelect}
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
@@ -141,16 +166,17 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
           />
         </TabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <LookUpIndividualFilters
-            programs={programs as ProgramNode[]}
-            filter={filterIndividual}
-            onFilterChange={setFilterIndividual}
-            setFilterIndividualApplied={setFilterIndividualApplied}
-            individualFilterInitial={individualFilterInitial}
-            addBorder={false}
+          <IndividualsFilter
+            filter={filterIND}
+            choicesData={individualChoicesData}
+            setFilter={setFilterIND}
+            initialFilter={initialFilterIND}
+            appliedFilter={appliedFilterIND}
+            setAppliedFilter={setAppliedFilterIND}
+            isOnPaper={false}
           />
           <LookUpIndividualTable
-            filter={filterIndividualApplied}
+            filter={appliedFilterIND}
             businessArea={businessArea}
             setFieldValue={onSelect}
             valuesInner={initialValues}
@@ -158,7 +184,6 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             setSelectedHousehold={setSelectedHousehold}
             selectedIndividual={selectedIndividual}
             setSelectedIndividual={setSelectedIndividual}
-            withdrawn={false}
             noTableStyling
           />
         </TabPanel>
