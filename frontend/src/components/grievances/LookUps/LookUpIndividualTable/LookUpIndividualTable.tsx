@@ -44,7 +44,6 @@ export const LookUpIndividualTable = ({
   setSelectedHousehold,
   ticket,
   excludedId,
-  withdrawn,
   noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const [getHousehold, results] = useHouseholdLazyQuery();
@@ -73,20 +72,25 @@ export const LookUpIndividualTable = ({
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null;
   }
+
   const initialVariables: AllIndividualsQueryVariables = {
     businessArea,
     search: filter.search,
-    programs: [decodeIdString(filter.programs)],
-    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
-    status: filter.status,
     admin2: [decodeIdString(filter?.admin2?.node?.id)],
     sex: [filter.sex],
+    age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+    flags: [],
+    programs: [decodeIdString(filter.programs)],
+    lastRegistrationDate: JSON.stringify({
+      min: filter.lastRegistrationDateMin,
+      max: filter.lastRegistrationDateMax,
+    }),
+    status: filter.status,
+    orderBy: filter.orderBy,
     householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
   };
-  if (withdrawn !== null && withdrawn !== undefined) {
-    initialVariables.withdrawn = withdrawn;
-  }
+
   const renderTable = (): React.ReactElement => {
     return (
       <UniversalTable<

@@ -9,12 +9,16 @@ import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtu
 
 describe('containers/tables/population/IndividualsListTable', () => {
   const initialFilter = {
-    text: '',
-    admin2: '',
-    sex: '',
     ageMin: '',
     ageMax: '',
+    businessArea: 'afghanistan',
+    sex: '',
+    search: '',
+    admin2: '',
     flags: [],
+    status: '',
+    lastRegistrationDateMin: '',
+    lastRegistrationDateMax: '',
     orderBy: 'unicef_id',
   };
 
