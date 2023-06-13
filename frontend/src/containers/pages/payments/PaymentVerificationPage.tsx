@@ -12,7 +12,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   ProgramNodeEdge,
-  useAllProgramsForChoicesQuery
+  useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
@@ -23,8 +23,8 @@ const initialFilter = {
   program: '',
   serviceProvider: '',
   deliveryType: '',
-  startDate: null,
-  endDate: null,
+  startDate: undefined,
+  endDate: undefined,
 };
 
 export const PaymentVerificationPage = (): React.ReactElement => {
