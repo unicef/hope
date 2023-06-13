@@ -12,7 +12,7 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 
 const initialFilter = {
   search: '',
-  importDate: null,
+  importDate: undefined,
   importedBy: '',
   status: '',
 };
