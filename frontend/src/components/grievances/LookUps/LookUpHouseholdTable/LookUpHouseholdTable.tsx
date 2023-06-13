@@ -43,24 +43,33 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
+  const matchWithdrawnValue = (): boolean | undefined => {
+    if (filter.withdrawn === 'true') {
+      return true;
+    }
+    if (filter.withdrawn === 'false') {
+      return false;
+    }
+    return undefined;
+  };
+
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
+    familySize: JSON.stringify({
+      min: filter.householdSizeMin,
+      max: filter.householdSizeMax,
+    }),
     search: filter.search,
-    programs: [filter.programs],
-    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
+    admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
-    admin2: filter?.admin2?.node?.id,
-    familySize: JSON.stringify(filter.size),
-    withdrawn: false,
-    headOfHouseholdPhoneNoValid: true,
+    withdrawn: matchWithdrawnValue(),
   };
-  const [selected, setSelected] = useState<string[]>(
-    householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
-  );
-
   if (filter.program) {
     initialVariables.programs = [filter.program];
   }
+  const [selected, setSelected] = useState<string[]>(
+    householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
+  );
 
   const handleCheckboxClick = (
     _event:
