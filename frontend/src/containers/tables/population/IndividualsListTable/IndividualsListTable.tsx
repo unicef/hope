@@ -30,7 +30,7 @@ export const IndividualsListTable = ({
     businessArea,
     sex: [filter.sex],
     search: filter.text,
-    adminArea: filter.adminArea,
+    admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,
   };

@@ -8,7 +8,6 @@ import {
   PERMISSIONS,
 } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -44,7 +43,9 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -73,9 +74,12 @@ export const GrievancesTablePage = (): React.ReactElement => {
       <GrievancesFilters
         choicesData={choicesData}
         filter={filter}
-        onFilterChange={setFilter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
-      <GrievancesTable filter={debouncedFilter} businessArea={businessArea} />
+      <GrievancesTable filter={appliedFilter} businessArea={businessArea} />
     </>
   );
 };

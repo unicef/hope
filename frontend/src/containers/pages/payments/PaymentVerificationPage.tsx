@@ -8,7 +8,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
@@ -24,8 +23,8 @@ const initialFilter = {
   program: '',
   serviceProvider: '',
   deliveryType: '',
-  startDate: null,
-  endDate: null,
+  startDate: undefined,
+  endDate: undefined,
 };
 
 export const PaymentVerificationPage = (): React.ReactElement => {
@@ -37,7 +36,9 @@ export const PaymentVerificationPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
@@ -58,11 +59,14 @@ export const PaymentVerificationPage = (): React.ReactElement => {
       <PaymentFilters
         programs={programs}
         filter={filter}
-        onFilterChange={setFilter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <TableWrapper>
         <PaymentVerificationTable
-          filter={debouncedFilter}
+          filter={appliedFilter}
           businessArea={businessArea}
           canViewDetails={hasPermissions(
             PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
