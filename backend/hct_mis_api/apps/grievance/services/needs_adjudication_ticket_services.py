@@ -1,4 +1,3 @@
-import logging
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from django.contrib.auth.models import AbstractUser
@@ -79,15 +78,12 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
         return
 
     if ticket_details.is_multiple_duplicates_version:
-        for individual in ticket_details.selected_individuals.all():
-            traverse_sibling_tickets(grievance_ticket, individual)
+        selected_individuals = ticket_details.selected_individuals.all()
+        traverse_sibling_tickets(grievance_ticket, selected_individuals)
 
         close_needs_adjudication_new_ticket(ticket_details, user)
     else:
         close_needs_adjudication_old_ticket(ticket_details, user)
-
-
-logger = logging.getLogger(__name__)
 
 
 def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
