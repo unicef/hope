@@ -18,6 +18,8 @@ describe("Grievance", () => {
       // 1. Go to Grievance page
       // 2. Check if all elements on page exist
     });
+    it.skip("Check Grievance Details page", () => {});
+    it.skip("Check Grievance New Ticket page", () => {});
   });
 
   describe("Component tests Grievance", () => {
