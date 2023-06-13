@@ -72,7 +72,7 @@ export const LookUpSelection = ({
   );
 
   const initialFilterHH = {
-    text: '',
+    search: '',
     program: '',
     residenceStatus: '',
     admin2: '',
