@@ -12,10 +12,15 @@ interface VerificationPlansSummaryProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export function VerificationPlansSummary({
+export const VerificationPlansSummary = ({
   planNode,
-}: VerificationPlansSummaryProps): React.ReactElement {
+}: VerificationPlansSummaryProps): React.ReactElement => {
   const { t } = useTranslation();
+
+  if (!planNode?.paymentVerificationSummary) {
+    return null;
+  }
+
   const {
     status,
     activationDate,
@@ -76,4 +81,4 @@ export function VerificationPlansSummary({
       </Grid>
     </Grid>
   );
-}
+};
