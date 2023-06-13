@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 class XlsxExportBaseService:
+    text_template = "payment/xlsx_file_generated_email.txt"
+    html_template = "payment/xlsx_file_generated_email.html"
+
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_active = wb.active
@@ -78,8 +81,8 @@ class XlsxExportBaseService:
         return ""
 
     def send_email(self, context: Dict) -> None:
-        text_body = render_to_string("payment/xlsx_file_generated_email.txt", context=context)
-        html_body = render_to_string("payment/xlsx_file_generated_email.html", context=context)
+        text_body = render_to_string(self.text_template, context=context)
+        html_body = render_to_string(self.html_template, context=context)
 
         email = EmailMultiAlternatives(
             subject=context["title"],
