@@ -5,7 +5,7 @@ repos:
       - id: isort
         stages: [commit]
   - repo: https://github.com/ambv/black
-    rev: 23.1.0
+    rev: 22.3.0
     hooks:
       - id: black
         args: [--config=backend/pyproject.toml]

@@ -9,13 +9,13 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 interface HouseholdFiltersProps {
   filter;
@@ -25,6 +25,7 @@ interface HouseholdFiltersProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
+  isOnPaper?: boolean;
 }
 
 const orderOptions = [
@@ -43,6 +44,7 @@ export const HouseholdFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
+  isOnPaper = true,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -70,14 +72,15 @@ export const HouseholdFilters = ({
     clearFilter();
   };
 
-  return (
-    <ContainerWithBorder>
+  const filtersComponent = (
+    <>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
-            value={filter.text}
-            onChange={(e) => handleFilterChange('text', e.target.value)}
+            value={filter.search}
+            fullWidth
+            onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='hh-filters-search'
           />
         </Grid>
@@ -87,6 +90,7 @@ export const HouseholdFilters = ({
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -104,6 +108,7 @@ export const HouseholdFilters = ({
               handleFilterChange('residenceStatus', e.target.value)
             }
             label={t('Residence Status')}
+            fullWidth
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
             SelectDisplayProps={{
@@ -137,6 +142,7 @@ export const HouseholdFilters = ({
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
+            fullWidth
             onChange={(e) =>
               handleFilterChange('householdSizeMin', e.target.value)
             }
@@ -147,6 +153,7 @@ export const HouseholdFilters = ({
             value={filter.householdSizeMax}
             placeholder={t('To')}
             icon={<GroupIcon />}
+            fullWidth
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
             }
@@ -172,7 +179,7 @@ export const HouseholdFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
-            value={filter.status}
+            value={filter.withdrawn}
           >
             <MenuItem key='all' value='null'>
               All
@@ -190,6 +197,12 @@ export const HouseholdFilters = ({
         clearHandler={handleClearFilter}
         applyHandler={handleApplyFilter}
       />
-    </ContainerWithBorder>
+    </>
+  );
+
+  return isOnPaper ? (
+    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
+  ) : (
+    filtersComponent
   );
 };

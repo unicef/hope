@@ -126,6 +126,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         cls.ticket = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
         cls.ticket.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         cls.ticket.ticket.save()
+        cls.maxDiff = None
 
     @parameterized.expand(
         [
