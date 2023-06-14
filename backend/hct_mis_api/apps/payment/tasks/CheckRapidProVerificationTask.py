@@ -38,10 +38,10 @@ class CheckRapidProVerificationTask:
             "payment_obj__head_of_household"
         )
         business_area = payment_verification_plan.payment_plan_obj.business_area
-        # FIXME: payment_verification.payment_obj.head_of_household nullable field
         payment_record_verifications_phone_number_dict = {
             str(payment_verification.payment_obj.head_of_household.phone_no): payment_verification
             for payment_verification in payment_record_verifications
+            if payment_verification.payment_obj.head_of_household is not None
         }
         api = RapidProAPI(business_area.slug)
         rapid_pro_results = api.get_mapped_flow_runs(payment_verification_plan.rapid_pro_flow_start_uuids)
