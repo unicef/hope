@@ -4,7 +4,7 @@ import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LookUpAdminAreaAutocomplete } from '../../../../shared/LookUpAdminAreaAutocomplete';
+import { LookUpAdminAreaAutocomplete } from '../../../../shared/autocompletes/LookUpAdminAreaAutocomplete';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -22,6 +22,7 @@ interface LookUpHouseholdFiltersProps {
   choicesData: HouseholdChoiceDataQuery;
   setFilterHouseholdApplied?;
   householdFilterInitial?;
+  addBorder?: boolean;
 }
 export function LookUpHouseholdFilters({
   onFilterChange,
@@ -30,12 +31,14 @@ export function LookUpHouseholdFilters({
   choicesData,
   setFilterHouseholdApplied,
   householdFilterInitial,
+  addBorder = true,
 }: LookUpHouseholdFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  return (
-    <ContainerWithBorder>
+
+  const renderTable = (): React.ReactElement => {
+    return (
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -43,6 +46,7 @@ export function LookUpHouseholdFilters({
             value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -51,6 +55,7 @@ export function LookUpHouseholdFilters({
             label={t('Programme')}
             value={filter.programs || []}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -98,6 +103,7 @@ export function LookUpHouseholdFilters({
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Status')}
             value={filter.residenceStatus}
+            fullWidth
           >
             {choicesData.residenceStatusChoices?.map((item) => {
               return (
@@ -113,6 +119,7 @@ export function LookUpHouseholdFilters({
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -148,25 +155,32 @@ export function LookUpHouseholdFilters({
             }
           />
         </Grid>
-        <Grid container justifyContent='flex-end'>
-          <Button
-            color='primary'
-            onClick={() => {
-              setFilterHouseholdApplied(householdFilterInitial);
-              onFilterChange(householdFilterInitial);
-            }}
-          >
-            {t('Clear')}
-          </Button>
-          <Button
-            color='primary'
-            variant='outlined'
-            onClick={() => setFilterHouseholdApplied(filter)}
-          >
-            {t('Apply')}
-          </Button>
-        </Grid>
+        {householdFilterInitial && (
+          <Grid container justifyContent='flex-end'>
+            <Button
+              color='primary'
+              onClick={() => {
+                setFilterHouseholdApplied(householdFilterInitial);
+                onFilterChange(householdFilterInitial);
+              }}
+            >
+              {t('Clear')}
+            </Button>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={() => setFilterHouseholdApplied(filter)}
+            >
+              {t('Apply')}
+            </Button>
+          </Grid>
+        )}
       </Grid>
-    </ContainerWithBorder>
+    );
+  };
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 }

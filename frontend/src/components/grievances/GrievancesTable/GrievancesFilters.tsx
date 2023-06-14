@@ -1,14 +1,23 @@
-import { Box, Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
+import { AccountBalance } from '@material-ui/icons';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
-import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
-import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
+import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_TICKETS_TYPES,
+  GrievanceSearchTypes,
+  GrievanceStatuses,
+  GrievanceTypes,
+  ISSUE_TYPE_CATEGORIES,
+} from '../../../utils/constants';
 import { createHandleApplyFilterChange } from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
@@ -16,11 +25,11 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
 
 interface GrievancesFiltersProps {
   filter;
   choicesData: GrievancesChoiceDataQuery;
+  selectedTab: number;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -29,6 +38,7 @@ interface GrievancesFiltersProps {
 export const GrievancesFilters = ({
   filter,
   choicesData,
+  selectedTab,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -65,39 +75,74 @@ export const GrievancesFilters = ({
     'category',
     '*',
   );
+
+  const categoryChoices = useMemo(() => {
+    return filter.grievanceType ===
+      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
+      ? choicesData.grievanceTicketManualCategoryChoices
+      : choicesData.grievanceTicketSystemCategoryChoices;
+  }, [choicesData, filter.grievanceType]);
+
+  const showIssueType =
+    filter.category === ISSUE_TYPE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
+    filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT;
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={3}>
-          <SearchTextField
-            value={filter.search}
-            label='Search'
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
-          />
+        <Grid container item xs={6} spacing={0}>
+          <Grid item xs={8}>
+            <SearchTextField
+              value={filter.search}
+              label='Search'
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              data-cy='filters-search'
+              borderRadius='4px 0px 0px 4px'
+            />
+          </Grid>
+          <Grid container item xs={4}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('searchType', e.target.value)}
+              label={undefined}
+              value={filter.searchType}
+              borderRadius='0px 4px 4px 0px'
+              fullWidth
+            >
+              {Object.keys(GrievanceSearchTypes).map((key) => (
+                <MenuItem
+                  key={GrievanceSearchTypes[key]}
+                  value={GrievanceSearchTypes[key]}
+                >
+                  {key.replace(/\B([A-Z])\B/g, ' $1')}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
         </Grid>
-        <Grid item xs={3}>
+        <Grid container item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
+            fullWidth
           >
             <MenuItem value=''>
               <em>None</em>
             </MenuItem>
-            {choicesData.grievanceTicketStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.grievanceTicketStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <SearchTextField
             value={filter.fsp}
             label='FSP'
+            icon={<AccountBalance style={{ color: '#5f6368' }} />}
+            fullWidth
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
           />
         </Grid>
@@ -114,6 +159,7 @@ export const GrievancesFilters = ({
               )
             }
             value={filter.createdAtRangeMin}
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -128,6 +174,7 @@ export const GrievancesFilters = ({
               )
             }
             value={filter.createdAtRangeMax}
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -135,11 +182,12 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
             value={filter.category}
+            fullWidth
           >
             <MenuItem value=''>
               <em>None</em>
             </MenuItem>
-            {choicesData.grievanceTicketCategoryChoices.map((item) => {
+            {categoryChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -148,18 +196,22 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-          <Grid item xs={3}>
+        {showIssueType && (
+          <Grid item>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label='Issue Type'
               value={filter.issueType}
+              fullWidth
             >
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {issueTypeDict[filter.category].subCategories.map((item) => {
+              {issueTypeDict[
+                GRIEVANCE_CATEGORIES[
+                  filter.category.replace(/\s/g, '_').toUpperCase()
+                ]
+              ].subCategories.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
@@ -168,8 +220,7 @@ export const GrievancesFilters = ({
               })}
             </SelectFilter>
           </Grid>
-        ) : null}
-
+        )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             filter={filter}
@@ -184,31 +235,35 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <AssigneeAutocomplete
             filter={filter}
-            name='userId'
-            value={filter.userId}
+            name='assignedTo'
+            value={filter.assignedTo}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={3}>
-          <NumberTextField
-            topLabel={t('Similarity Score')}
-            value={filter.scoreMin}
-            placeholder={t('From')}
-            onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <Box display='flex' flexDirection='column'>
-            <NumberTextField
-              value={filter.scoreMax}
-              placeholder='To'
-              onChange={(e) => handleFilterChange('scoreMax', e.target.value)}
-            />
-          </Box>
-        </Grid>
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
+          <Grid container item xs={6} spacing={3} alignItems='flex-end'>
+            <Grid item xs={6}>
+              <NumberTextField
+                topLabel={t('Similarity Score')}
+                value={filter.scoreMin}
+                placeholder='From'
+                onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <NumberTextField
+                value={filter.scoreMax}
+                placeholder='To'
+                onChange={(e) => handleFilterChange('scoreMax', e.target.value)}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
+        )}
         <Grid item xs={3}>
           <RdiAutocomplete
             filter={filter}
@@ -230,6 +285,61 @@ export const GrievancesFilters = ({
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
           />
+        </Grid>
+        <Grid item container xs={3}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('priority', e.target.value)}
+            label={t('Priority')}
+            value={filter.priority}
+            fullWidth
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketPriorityChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        <Grid item container xs={3}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('urgency', e.target.value)}
+            label={t('Urgency')}
+            value={filter.urgency}
+            fullWidth
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketUrgencyChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        <Grid item container xs={3}>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('grievanceStatus', e.target.value)
+            }
+            label={undefined}
+            value={filter.grievanceStatus}
+            fullWidth
+          >
+            <MenuItem value={GrievanceStatuses.Active}>
+              {t('Active Tickets')}
+            </MenuItem>
+            <MenuItem value={GrievanceStatuses.All}>
+              {t('All Tickets')}
+            </MenuItem>
+          </SelectFilter>
         </Grid>
       </Grid>
       <ClearApplyButtons

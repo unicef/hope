@@ -1,6 +1,7 @@
 import datetime
 import json
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
@@ -24,7 +25,7 @@ class TestUkrainianRegistrationService(TestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(self) -> None:

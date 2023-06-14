@@ -72,6 +72,7 @@ export const PaymentFilters = ({
             data-cy='filter-search'
             label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -81,6 +82,7 @@ export const PaymentFilters = ({
             }
             label='Status'
             multiple
+            fullWidth
             data-cy='filter-status'
             value={filter.verificationStatus}
           >
@@ -98,6 +100,7 @@ export const PaymentFilters = ({
             value={filter.serviceProvider}
             data-cy='filter-fsp'
             label='FSP'
+            fullWidth
             onChange={(e) =>
               handleFilterChange('serviceProvider', e.target.value)
             }
@@ -109,6 +112,7 @@ export const PaymentFilters = ({
             label='Modality'
             data-cy='filter-Modality'
             value={filter.deliveryType}
+            fullWidth
             icon={<MonetizationOnIcon />}
           >
             <MenuItem value=''>
@@ -124,6 +128,7 @@ export const PaymentFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label='Start Date'
+            fullWidth
             data-cy='filter-start-date'
             onChange={(date) =>
               handleFilterChange(
@@ -139,6 +144,7 @@ export const PaymentFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label='End Date'
+            fullWidth
             data-cy='filter-end-date'
             onChange={(date) =>
               handleFilterChange(
@@ -155,6 +161,7 @@ export const PaymentFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label='Programme'
+            fullWidth
             data-cy='filter-program'
             value={filter.program}
             icon={<FlashOnIcon />}

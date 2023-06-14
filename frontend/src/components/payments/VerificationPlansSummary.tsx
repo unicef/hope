@@ -16,17 +16,6 @@ export const VerificationPlansSummary = ({
   planNode,
 }: VerificationPlansSummaryProps): React.ReactElement => {
   const { t } = useTranslation();
-
-  if (!planNode?.paymentVerificationSummary) {
-    return null;
-  }
-
-  const {
-    status,
-    activationDate,
-    completionDate,
-  } = planNode.paymentVerificationSummary;
-
   return (
     <Grid container>
       <Grid data-cy='grid-verification-plans-summary' item xs={9}>
@@ -41,7 +30,7 @@ export const VerificationPlansSummary = ({
               <LabelizedField label={t('Status')}>
                 <StatusBox
                   dataCy='verification-plans-summary-status'
-                  status={status}
+                  status={planNode.paymentVerificationSummary?.status}
                   statusToColor={paymentVerificationStatusToColor}
                 />
               </LabelizedField>
@@ -53,7 +42,9 @@ export const VerificationPlansSummary = ({
                 dataCy='summary-activation-date'
                 label={t('Activation Date')}
               >
-                <UniversalMoment>{activationDate}</UniversalMoment>
+                <UniversalMoment>
+                  {planNode.paymentVerificationSummary?.activationDate}
+                </UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
@@ -63,7 +54,9 @@ export const VerificationPlansSummary = ({
                 dataCy='summary-completion-date'
                 label={t('Completion Date')}
               >
-                <UniversalMoment>{completionDate}</UniversalMoment>
+                <UniversalMoment>
+                  {planNode.paymentVerificationSummary?.completionDate}
+                </UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>

@@ -6,6 +6,7 @@ export const BusinessAreaData = gql`
       id
       screenBeneficiary
       isPaymentPlanApplicable
+      isAccountabilityApplicable
     }
   }
 `;
