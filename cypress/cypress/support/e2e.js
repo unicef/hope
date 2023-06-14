@@ -49,6 +49,7 @@ Cypress.Commands.add("initScenario", (scenario) => {
     );
   });
 });
+
 Cypress.on("fail", (error, runnable) => {
   Cypress.once("test:after:run", (test) => {
     addContext(
