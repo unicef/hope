@@ -216,7 +216,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                     documents.append(tax)
                     bank_infos.append(bank_account_info)
 
-                    if rows_count == 1000:
+                    if rows_count % 1000 == 0:
                         Individual.objects.bulk_create(individuals)
                         Document.objects.bulk_create(documents)
                         BankAccountInfo.objects.bulk_create(bank_infos)
