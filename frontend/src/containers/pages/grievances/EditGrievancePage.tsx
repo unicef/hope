@@ -8,7 +8,7 @@ import {
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
@@ -84,6 +84,9 @@ const BoxWithBottomBorders = styled.div`
 
 export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
+  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -270,7 +273,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'), {
-            pathname: `/${businessArea}/grievance-and-feedback/${ticket.id}`,
+            pathname: `/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`,
             historyMethod: 'push',
           });
         } catch (e) {
@@ -310,7 +313,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
+                    to={`/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`}
                   >
                     {t('Cancel')}
                   </Button>

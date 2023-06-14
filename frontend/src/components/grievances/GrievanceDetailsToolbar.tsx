@@ -2,7 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useParams, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -73,6 +73,9 @@ export const GrievanceDetailsToolbar = ({
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
   const history = useHistory();
+  const location = useLocation();
+  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
+  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -340,7 +343,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${userOrSystem}/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >

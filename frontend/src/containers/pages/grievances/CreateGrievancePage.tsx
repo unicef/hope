@@ -4,6 +4,15 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
+  useAllProgramsQuery,
+  useAllUsersQuery,
+  useCreateGrievanceMutation,
+  useGrievancesChoiceDataQuery,
+  useUserChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
@@ -25,33 +34,24 @@ import { prepareVariables } from '../../../components/grievances/utils/createGri
 import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
 import {
+  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
-  PERMISSIONS,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GrievanceSteps,
 } from '../../../utils/constants';
 import {
   decodeIdString,
   isInvalid,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
-import {
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllProgramsQuery,
-  useAllUsersQuery,
-  useCreateGrievanceMutation,
-  useGrievancesChoiceDataQuery,
-  useUserChoiceDataQuery,
-} from '../../../__generated__/graphql';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -268,7 +268,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
               );
             } else {
               showMessage(t('Grievance Ticket created.'), {
-                pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                pathname: `/${businessArea}/grievance-and-feedback/user-generated/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
                 historyMethod: 'push',
               });
             }
