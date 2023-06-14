@@ -369,6 +369,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         }
         document_complex_types: Dict[str, Callable] = {}
         for document_type in ImportedDocumentType.objects.all():
+            document_complex_types[f"{document_type.key}_i_c"] = self._handle_document_fields
             document_complex_types[f"{document_type.key}_no_i_c"] = self._handle_document_fields
             document_complex_types[f"{document_type.key}_photo_i_c"] = self._handle_document_photo_fields
             document_complex_types[f"{document_type.key}_issuer_i_c"] = self._handle_document_issuing_country_fields
