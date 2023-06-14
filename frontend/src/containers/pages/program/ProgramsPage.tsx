@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { PageHeader } from '../../../components/core/PageHeader';
+import { useLocation } from 'react-router-dom';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
-import { CreateProgram } from '../../dialogs/programs/CreateProgram';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { ProgrammesTable } from '../../tables/ProgrammesTable/ProgrammesTable';
-import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
+import { CreateProgram } from '../../dialogs/programs/CreateProgram';
+import { ProgrammesTable } from '../../tables/ProgrammesTable';
+import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
 
 const initialFilter = {
   search: '',

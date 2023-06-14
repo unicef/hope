@@ -15,8 +15,12 @@ import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
+import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
+import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
+import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
 import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
@@ -48,6 +52,13 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
+import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
+import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
+import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
+import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
+import { CreateSurveyPage } from './pages/accountability/surveys/CreateSurveyPage';
+import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsPage';
 import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
 import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
@@ -187,8 +198,17 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
-            <EditGrievancePage />
+          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/user-generated/:id'>
+            <EditGrievancePage key='user' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/system-generated/:id'>
+            <EditGrievancePage key='system' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated/:id'>
+            <GrievancesDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated/:id'>
+            <GrievancesDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
             <GrievancesTablePage key='rdi' />
@@ -196,11 +216,44 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
-            <GrievancesDetailsPage />
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated'>
+            <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback'>
-            <GrievancesTablePage key='all' />
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated'>
+            <GrievancesTablePage key='system' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
+            <GrievancesDashboardPage key='all' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication/create'>
+            <CreateCommunicationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication/:id'>
+            <CommunicationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication'>
+            <CommunicationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback/create'>
+            <CreateFeedbackPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback/edit-ticket/:id'>
+            <EditFeedbackPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback/:id'>
+            <FeedbackDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback'>
+            <FeedbackPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/surveys/create'>
+            <CreateSurveyPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/surveys/:id'>
+            <SurveyDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/surveys'>
+            <SurveysPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />

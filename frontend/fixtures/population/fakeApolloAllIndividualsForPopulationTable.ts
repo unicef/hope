@@ -11,6 +11,8 @@ export const fakeApolloAllIndividualsForPopulationTable = [
         search: '',
         admin2: [''],
         flags: [],
+        status: '',
+        lastRegistrationDate: '{"min":"","max":""}',
         first: 10,
         orderBy: 'unicef_id',
       },

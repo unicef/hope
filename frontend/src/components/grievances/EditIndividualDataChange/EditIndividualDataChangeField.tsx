@@ -22,6 +22,8 @@ export const EditIndividualDataChangeField = ({
 }: EditIndividualDataChangeField): React.ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   let fieldProps;
   if (!field) return null;
 
@@ -100,6 +102,8 @@ export const EditIndividualDataChangeField = ({
           variant='outlined'
           label={field.labelEn}
           required={field.required}
+          data-cy={`input-individual-data-${field.labelEn}`}
+          disabled={isEditTicket}
           {...fieldProps}
         />
       </Grid>

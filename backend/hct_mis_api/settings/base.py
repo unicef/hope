@@ -69,6 +69,15 @@ MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DI
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 
+GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
+GRIEVANCE_UPLOAD_CONTENT_TYPES = (
+    "image/jpeg",
+    "image/png",
+    "image/tiff",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+)
+
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 STATIC_URL = "/api/static/"
 STATIC_ROOT = f"{DATA_VOLUME}/staticserve"
@@ -312,6 +321,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
     "hct_mis_api.aurora.apps.Config",
+    "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
 ]
 
 DJANGO_APPS = [
@@ -525,6 +535,10 @@ ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
 }
 
+GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", True)
+
+ELASTICSEARCH_BASE_SETTINGS = {"number_of_shards": 1, "number_of_replicas": 0}
+
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
@@ -550,6 +564,28 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         {
             "widget": "django.forms.widgets.NumberInput",
             "validators": [MinValueValidator(0)],
+        },
+    ),
+    "priority_choices": (
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (
+                (1, _("High")),
+                (2, _("Medium")),
+                (3, _("Low")),
+            ),
+        },
+    ),
+    "urgency_choices": (
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (
+                (1, _("Very urgent")),
+                (2, _("Urgent")),
+                (3, _("Not urgent")),
+            ),
         },
     ),
 }

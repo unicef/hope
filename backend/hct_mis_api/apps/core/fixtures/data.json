@@ -3924,7 +3924,7 @@
       "deduplication_golden_record_duplicates_percentage": 50,
       "deduplication_golden_record_duplicates_allowed": 5,
       "screen_beneficiary": false,
-      "countries": [],
+      "countries": ["b902840f-68d3-40a0-b74d-0fb14096a11e"],
       "is_payment_plan_applicable": true
     }
   },

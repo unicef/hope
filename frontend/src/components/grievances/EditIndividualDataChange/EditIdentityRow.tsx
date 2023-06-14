@@ -1,5 +1,6 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import Close from '@material-ui/icons/Close';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
@@ -34,6 +35,8 @@ export function EditIdentityRow({
   addIndividualFieldsData,
   id,
 }: EditIdentityRowProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const identitiesToRemove =
@@ -94,31 +97,33 @@ export function EditIdentityRow({
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
-          <Box display='flex' align-items='center'>
-            <IconButton
-              onClick={() => {
-                setFieldValue(
-                  `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
-                  identity.node.id,
-                );
-              }}
-            >
-              <Delete />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                arrayHelpers.push({
-                  id: identity.node.id,
-                  country: identity.node.countryIso3,
-                  partner: identity.node.partner,
-                  number: identity.node.number,
-                });
-                setEdit(true);
-              }}
-            >
-              <Edit />
-            </IconButton>
-          </Box>
+          !isEditTicket && (
+            <Box display='flex' align-items='center'>
+              <IconButton
+                onClick={() => {
+                  setFieldValue(
+                    `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
+                    identity.node.id,
+                  );
+                }}
+              >
+                <Delete />
+              </IconButton>
+              <IconButton
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: identity.node.id,
+                    country: identity.node.countryIso3,
+                    partner: identity.node.partner,
+                    number: identity.node.number,
+                  });
+                  setEdit(true);
+                }}
+              >
+                <Edit />
+              </IconButton>
+            </Box>
+          )
         ) : (
           <Box display='flex' alignItems='center' height={48} color='red'>
             {t('REMOVED')}

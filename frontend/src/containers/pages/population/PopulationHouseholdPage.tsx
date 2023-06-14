@@ -19,7 +19,7 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 const initialFilter = {
-  text: '',
+  search: '',
   program: '',
   residenceStatus: '',
   admin2: '',
