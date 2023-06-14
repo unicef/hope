@@ -588,7 +588,10 @@
       "status": "PENDING",
       "activation_date": null,
       "completion_date": null,
-      "payment_plan_content_type": 73,
+      "payment_plan_content_type": [
+        "payment",
+        "paymentplan"
+      ],
       "payment_plan_object_id": "a953712b-1e71-4e50-93a0-78a8e653c79a"
     }
   },

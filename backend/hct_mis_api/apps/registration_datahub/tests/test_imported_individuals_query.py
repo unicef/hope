@@ -1,5 +1,7 @@
 from typing import Any, List
 
+from django.conf import settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -71,7 +73,7 @@ query ImportedIndividual($id: ID!) {
 
 class TestImportedIndividualQuery(APITestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     # IMPORTANT!
     # FREEZGUN doesn't work this snapshot have to be updated once a year

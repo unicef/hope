@@ -10,7 +10,7 @@ import WcIcon from '@material-ui/icons/Wc';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LookUpAdminAreaAutocomplete } from '../../../../shared/LookUpAdminAreaAutocomplete';
+import { LookUpAdminAreaAutocomplete } from '../../../../shared/autocompletes/LookUpAdminAreaAutocomplete';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
@@ -23,6 +23,7 @@ interface LookUpIndividualFiltersProps {
   setFilterIndividualApplied?;
   individualFilterInitial?;
   household?;
+  addBorder?: boolean;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
@@ -31,12 +32,14 @@ export function LookUpIndividualFilters({
   setFilterIndividualApplied,
   individualFilterInitial,
   household,
+  addBorder = true,
 }: LookUpIndividualFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  return (
-    <ContainerWithBorder>
+
+  const renderTable = (): React.ReactElement => {
+    return (
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -44,6 +47,7 @@ export function LookUpIndividualFilters({
             value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -52,6 +56,7 @@ export function LookUpIndividualFilters({
             label={t('Programme')}
             value={filter.programs || []}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -100,6 +105,7 @@ export function LookUpIndividualFilters({
             multiple
             label={t('Status')}
             value={filter.status || []}
+            fullWidth
           >
             {[
               { value: 'ACTIVE', name: 'Active' },
@@ -119,6 +125,7 @@ export function LookUpIndividualFilters({
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -133,6 +140,7 @@ export function LookUpIndividualFilters({
             MenuProps={{
               'data-cy': 'filters-sex-options',
             }}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -161,7 +169,6 @@ export function LookUpIndividualFilters({
             />
           </Grid>
         )}
-
         <Grid container justifyContent='flex-end'>
           <Button
             color='primary'
@@ -181,6 +188,11 @@ export function LookUpIndividualFilters({
           </Button>
         </Grid>
       </Grid>
-    </ContainerWithBorder>
+    );
+  };
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 }

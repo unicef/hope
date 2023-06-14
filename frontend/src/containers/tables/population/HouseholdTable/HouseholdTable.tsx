@@ -25,17 +25,26 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
+  const matchWithdrawnValue = (): boolean | undefined => {
+    if (filter.withdrawn === 'true') {
+      return true;
+    }
+    if (filter.withdrawn === 'false') {
+      return false;
+    }
+    return undefined;
+  };
+
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     familySize: JSON.stringify({
       min: filter.householdSizeMin,
       max: filter.householdSizeMax,
     }),
-    search: filter.text,
+    search: filter.search,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
-    // eslint-disable-next-line no-nested-ternary
-    withdrawn: filter.withdrawn === 'true' ? true : filter.withdrawn === 'false' ? false : undefined,
+    withdrawn: matchWithdrawnValue(),
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];

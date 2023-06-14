@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';

@@ -101,6 +101,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_ignore_withdraw = models.BooleanField(default=False)
 
     is_payment_plan_applicable = models.BooleanField(default=False)
+    is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
