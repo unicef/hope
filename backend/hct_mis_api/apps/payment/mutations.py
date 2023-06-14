@@ -1,6 +1,5 @@
 import io
 import logging
-from base64 import b64decode
 from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -67,7 +66,11 @@ from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.payment.utils import (
+    calculate_counts,
+    from_received_to_status,
+    get_payment_plan_object,
+)
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -99,11 +102,8 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
-        cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
-        node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")  # type: ignore # FIXME
-
-        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
-            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
+            input["cash_or_payment_plan_id"]
         )
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
@@ -327,8 +327,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
-    # TODO I don't think this is being used now, add permission if in use
+class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
     payment_verification = graphene.Field(PaymentVerificationNode)
 
     class Arguments:
@@ -357,6 +356,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
