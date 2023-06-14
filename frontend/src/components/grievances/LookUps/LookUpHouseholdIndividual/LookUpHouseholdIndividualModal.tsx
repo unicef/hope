@@ -218,7 +218,7 @@ export const LookUpHouseholdIndividualModal = ({
                 setSelectedHousehold={setSelectedHousehold}
                 selectedIndividual={selectedIndividual}
                 setSelectedIndividual={setSelectedIndividual}
-                withdrawn={false}
+                withdrawn={null}
               />
             </TabPanel>
           </DialogContent>
