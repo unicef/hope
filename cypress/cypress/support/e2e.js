@@ -50,6 +50,22 @@ Cypress.Commands.add("initScenario", (scenario) => {
   });
 });
 
+Cypress.Commands.add("scenario", (steps: Array) => {
+  let outputText = "";
+  steps.forEach((step, index) => {
+    outputText += index + 1 + ". " + step + "\n";
+  });
+  Cypress.once("test:after:run", (test) => {
+    addContext(
+      { test },
+      {
+        title: "Scenario",
+        value: outputText,
+      }
+    );
+  });
+});
+
 Cypress.on("fail", (error, runnable) => {
   Cypress.once("test:after:run", (test) => {
     addContext(

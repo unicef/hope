@@ -11,19 +11,17 @@ let programName = "TargetingProgram";
 describe("Targeting", () => {
   beforeEach(() => {
     cy.initScenario("targeting");
-    // cy.visit("/api/unicorn/");
-    // cy.get('input[name="username"]').type(Cypress.env("username"));
-    // cy.get('input[name="password"]').type(Cypress.env("password"));
-    // cy.get("input").contains("Log in").click();
     cy.adminLogin();
     cy.navigateToHomePage();
+    t.clickMenuButtonTargeting();
   });
 
   describe("Smoke tests Targeting", () => {
-    it.skip("Check Targeting page", () => {
-      // Scenario:
-      // 1. Go to Grievance page
-      // 2. Check if all elements on page exist
+    it.only("Check Targeting page", () => {
+      cy.scenario([
+        "Go to Payment Targeting page",
+        "Check if all elements on page exist",
+      ]);
     });
     it.skip("Check Targeting Details page", () => {});
     it.skip("Check Targeting New Ticket page", () => {});

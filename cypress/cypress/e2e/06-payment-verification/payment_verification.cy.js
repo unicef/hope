@@ -14,7 +14,7 @@ describe("Payment Verification", () => {
 
   describe("Smoke tests Payment Verification", () => {
     it("Check Payment Verification page", () => {
-      pv.scenario([
+      cy.scenario([
         "Go to Payment Verification page",
         "Check if all elements on page exist",
       ]);
