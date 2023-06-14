@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -67,107 +67,21 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_negative_feedback_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_create_negative_feedback_ticket_not_supported(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._prepare_input()
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user},
-            variables=input_data,
+            variables={
+                "input": {
+                    "description": "Test Feedback",
+                    "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                    "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                    "admin": self.admin_area.p_code,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "businessArea": "afghanistan",
+                }
+            },
         )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_negative_feedback_ticket_with_household_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_negative_feedback_ticket_with_individual_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_negative_feedback_ticket_with_household_and_individual_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
-            variables=input_data,
-        )
-
-    def _prepare_input(self, extras: Optional[Any] = None) -> Dict:
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-            }
-        }
-
-        if extras:
-            input_data["input"]["extras"] = {"category": {"negativeFeedbackTicketExtras": extras}}
-
-        return input_data

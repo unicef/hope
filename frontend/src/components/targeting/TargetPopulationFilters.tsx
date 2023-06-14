@@ -1,6 +1,7 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { Group, Person } from '@material-ui/icons';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -14,6 +15,7 @@ import {
 } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
@@ -21,6 +23,7 @@ import { SelectFilter } from '../core/SelectFilter';
 interface TargetPopulationFiltersProps {
   filter;
   programs: ProgramNode[];
+  addBorder?: boolean;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -29,6 +32,7 @@ interface TargetPopulationFiltersProps {
 export const TargetPopulationFilters = ({
   filter,
   programs,
+  addBorder = true,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -59,8 +63,9 @@ export const TargetPopulationFilters = ({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  return (
-    <ContainerWithBorder>
+
+  const renderTable = (): React.ReactElement => (
+    <>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -68,6 +73,7 @@ export const TargetPopulationFilters = ({
             value={filter.name}
             onChange={(e) => handleFilterChange('name', e.target.value)}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
@@ -76,6 +82,7 @@ export const TargetPopulationFilters = ({
             value={filter.status}
             label={t('Status')}
             icon={<Person />}
+            fullWidth
             data-cy='filters-status'
           >
             <MenuItem value=''>None</MenuItem>
@@ -94,6 +101,7 @@ export const TargetPopulationFilters = ({
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            fullWidth
             data-cy='filters-program'
           >
             <MenuItem value=''>
@@ -129,11 +137,42 @@ export const TargetPopulationFilters = ({
             data-cy='filters-num-individuals-max'
           />
         </Grid>
+        <Grid item xs={3}>
+          <DatePickerFilter
+            topLabel={t('Date Created')}
+            placeholder={t('From')}
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMin',
+                moment(date).format('YYYY-MM-DD'),
+              )
+            }
+            value={filter.createdAtRangeMin}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <DatePickerFilter
+            placeholder={t('To')}
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMax',
+                moment(date).format('YYYY-MM-DD'),
+              )
+            }
+            value={filter.createdAtRangeMax}
+          />
+        </Grid>
       </Grid>
       <ClearApplyButtons
-        clearHandler={handleClearFilter}
         applyHandler={handleApplyFilter}
+        clearHandler={handleClearFilter}
       />
-    </ContainerWithBorder>
+    </>
+  );
+
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 };

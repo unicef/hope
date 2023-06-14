@@ -12,9 +12,12 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 
 const initialFilter = {
   search: '',
-  importDate: undefined,
   importedBy: '',
   status: '',
+  sizeMin: '',
+  sizeMax: '',
+  importDateRangeMin: undefined,
+  importDateRangeMax: undefined,
 };
 
 export const RegistrationDataImportPage = (): React.ReactElement => {

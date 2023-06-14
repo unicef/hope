@@ -6,11 +6,11 @@ import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;

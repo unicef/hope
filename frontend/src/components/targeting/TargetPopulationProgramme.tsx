@@ -56,13 +56,13 @@ export function TargetPopulationProgramme({
           <Field
             name='program'
             label={t('Programme')}
+            data-cy="input-program"
             fullWidth
             variant='outlined'
             required
             choices={mappedPrograms}
             component={FormikSelectFieldConfirmProgram}
             allProgramsEdges={allProgramsEdges}
-            data-cy='input-program'
             program={program}
             setFieldValue={setFieldValue}
             values={values}
