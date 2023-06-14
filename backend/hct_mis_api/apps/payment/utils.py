@@ -155,8 +155,8 @@ def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan"
 
     payment_plan_object: Union["CashPlan", "PaymentPlan"]
     if node_name == "CashPlanNode":
-        payment_plan_object = get_object_or_404(CashPlan, obj_id)
+        payment_plan_object = get_object_or_404(CashPlan, pk=obj_id)
     else:
-        payment_plan_object = get_object_or_404(PaymentPlan, obj_id)
+        payment_plan_object = get_object_or_404(PaymentPlan, pk=obj_id)
 
     return payment_plan_object
