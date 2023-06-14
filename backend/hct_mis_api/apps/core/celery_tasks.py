@@ -215,7 +215,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                     documents.append(passport)
                     documents.append(tax)
                     bank_infos.append(bank_account_info)
-                    # TODO refactor chunking
+
                     if rows_count % 1000 == 0:
                         Individual.objects.bulk_create(individuals)
                         Document.objects.bulk_create(documents)
