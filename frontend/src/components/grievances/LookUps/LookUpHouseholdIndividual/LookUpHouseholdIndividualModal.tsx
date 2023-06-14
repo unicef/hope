@@ -12,22 +12,24 @@ import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import {
+  ProgramNode,
+  useAllProgramsForChoicesQuery,
+  useHouseholdChoiceDataQuery,
+  useIndividualChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { TabPanel } from '../../../core/TabPanel';
-import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
+import { HouseholdFilters } from '../../../population/HouseholdFilter';
+import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
-import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 
 const StyledTabs = styled(Tabs)`
@@ -57,52 +59,69 @@ export const LookUpHouseholdIndividualModal = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState(0);
-  const householdFilterInitial = {
+  const initialFilterHH = {
     search: '',
-    programs: [],
-    lastRegistrationDate: { min: undefined, max: undefined },
+    program: '',
     residenceStatus: '',
-    size: { min: '', max: '' },
-    admin2: null,
+    admin2: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+    withdrawn: null,
   };
-  const [filterHouseholdApplied, setFilterHouseholdApplied] = useState(
-    householdFilterInitial,
-  );
-  const [filterHousehold, setFilterHousehold] = useState(
-    householdFilterInitial,
-  );
-
-  const individualFilterInitial = {
+  const initialFilterIND = {
     search: '',
-    programs: '',
-    lastRegistrationDate: { min: undefined, max: undefined },
-    status: '',
-    admin2: null,
+    admin2: '',
     sex: '',
-    household: null,
+    ageMin: '',
+    ageMax: '',
+    flags: [],
+    program: '',
+    lastRegistrationDate: '',
+    status: '',
+    orderBy: 'unicef_id',
   };
-  const [filterIndividualApplied, setFilterIndividualApplied] = useState(
-    individualFilterInitial,
-  );
-  const [filterIndividual, setFilterIndividual] = useState(
-    individualFilterInitial,
-  );
 
   const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsForChoicesQuery({
+  const {
+    data: programsData,
+    loading: programsLoading,
+  } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
   });
   const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
-  if (!data || !choicesData) return null;
-  if (loading || choicesLoading) return <LoadingComponent />;
+    data: householdChoicesData,
+    loading: householdChoicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
-  const { allPrograms } = data;
+  const [filterIND, setFilterIND] = useState(
+    getFilterFromQueryParams(location, initialFilterIND),
+  );
+  const [appliedFilterIND, setAppliedFilterIND] = useState(
+    getFilterFromQueryParams(location, initialFilterIND),
+  );
+
+  const [filterHH, setFilterHH] = useState(
+    getFilterFromQueryParams(location, initialFilterHH),
+  );
+  const [appliedFilterHH, setAppliedFilterHH] = useState(
+    getFilterFromQueryParams(location, initialFilterHH),
+  );
+
+  const {
+    data: individualChoicesData,
+    loading: individualChoicesLoading,
+  } = useIndividualChoiceDataQuery();
+
+  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
+    return <LoadingComponent />;
+
+  if (!individualChoicesData || !householdChoicesData || !programsData) {
+    return null;
+  }
+
+  const { allPrograms } = programsData;
   const programs = allPrograms.edges.map((edge) => edge.node);
 
   const handleCancel = (): void => {
@@ -183,18 +202,19 @@ export const LookUpHouseholdIndividualModal = ({
           </DialogTitleWrapper>
           <DialogContent>
             <TabPanel value={selectedTab} index={0}>
-              <LookUpHouseholdFilters
+              <HouseholdFilters
                 programs={programs as ProgramNode[]}
-                filter={filterHousehold}
-                onFilterChange={setFilterHousehold}
-                setFilterHouseholdApplied={setFilterHouseholdApplied}
-                householdFilterInitial={householdFilterInitial}
-                choicesData={choicesData}
+                filter={filterHH}
+                choicesData={householdChoicesData}
+                setFilter={setFilterHH}
+                initialFilter={initialFilterHH}
+                appliedFilter={appliedFilterHH}
+                setAppliedFilter={setAppliedFilterHH}
               />
               <LookUpHouseholdTable
-                filter={filterHouseholdApplied}
+                filter={appliedFilterHH}
                 businessArea={businessArea}
-                choicesData={choicesData}
+                choicesData={householdChoicesData}
                 setFieldValue={setFieldValue}
                 selectedHousehold={selectedHousehold}
                 setSelectedHousehold={setSelectedHousehold}
@@ -202,15 +222,16 @@ export const LookUpHouseholdIndividualModal = ({
               />
             </TabPanel>
             <TabPanel value={selectedTab} index={1}>
-              <LookUpIndividualFilters
-                programs={programs as ProgramNode[]}
-                filter={filterIndividual}
-                onFilterChange={setFilterIndividual}
-                setFilterIndividualApplied={setFilterIndividualApplied}
-                individualFilterInitial={individualFilterInitial}
+              <IndividualsFilter
+                filter={filterIND}
+                choicesData={individualChoicesData}
+                setFilter={setFilterIND}
+                initialFilter={initialFilterIND}
+                appliedFilter={appliedFilterIND}
+                setAppliedFilter={setAppliedFilterIND}
               />
               <LookUpIndividualTable
-                filter={filterIndividualApplied}
+                filter={appliedFilterIND}
                 businessArea={businessArea}
                 setFieldValue={setFieldValue}
                 valuesInner={values}
@@ -218,7 +239,6 @@ export const LookUpHouseholdIndividualModal = ({
                 setSelectedHousehold={setSelectedHousehold}
                 selectedIndividual={selectedIndividual}
                 setSelectedIndividual={setSelectedIndividual}
-                withdrawn={false}
               />
             </TabPanel>
           </DialogContent>

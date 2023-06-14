@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,6 @@ import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
 
@@ -37,6 +37,8 @@ export const EditIndividualDataChange = ({
   setFieldValue,
 }: EditIndividualDataChangeProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const {
@@ -84,17 +86,17 @@ export const EditIndividualDataChange = ({
 
   return (
     <>
-      <BoxWithBorders>
-        <Title>
-          <Typography variant='h6'>{t('Bio Data')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <FieldArray
-            name='individualDataUpdateFields'
-            render={(arrayHelpers) => (
-              <>
-                {(values.individualDataUpdateFields || []).map(
-                  (item, index) => (
+      {!isEditTicket && (
+        <BoxWithBorders>
+          <Title>
+            <Typography variant='h6'>{t('Bio Data')}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            <FieldArray
+              name='individualDataUpdateFields'
+              render={(arrayHelpers) => (
+                <>
+                  {values.individualDataUpdateFields.map((item, index) => (
                     <EditIndividualDataChangeFieldRow
                       // eslint-disable-next-line react/no-array-index-key
                       key={`${index}-${item?.fieldName}`}
@@ -108,66 +110,78 @@ export const EditIndividualDataChange = ({
                       onDelete={() => arrayHelpers.remove(index)}
                       values={values}
                     />
-                  ),
-                )}
-                <Grid item xs={4}>
-                  <Button
-                    color='primary'
-                    onClick={() => {
-                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                    }}
-                    startIcon={<AddCircleOutline />}
-                  >
-                    {t('Add new field')}
-                  </Button>
-                </Grid>
-              </>
-            )}
+                  ))}
+                  <Grid item xs={4}>
+                    <Button
+                      color='primary'
+                      onClick={() => {
+                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                      }}
+                      startIcon={<AddCircleOutline />}
+                      data-cy='button-add-new-field'
+                      disabled={isEditTicket}
+                    >
+                      {t('Add new field')}
+                    </Button>
+                  </Grid>
+                </>
+              )}
+            />
+          </Grid>
+        </BoxWithBorders>
+      )}
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant='h6'>{t('Documents')}</Typography>
+          </Title>
+          <ExistingDocumentFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={individual}
+            addIndividualFieldsData={addIndividualFieldsData}
           />
-        </Grid>
+          {!isEditTicket && (
+            <NewDocumentFieldArray
+              values={values}
+              addIndividualFieldsData={addIndividualFieldsData}
+              setFieldValue={setFieldValue}
+            />
+          )}
+        </Box>
       </BoxWithBorders>
-      <Box mt={3}>
-        <Title>
-          <Typography variant='h6'>{t('Documents')}</Typography>
-        </Title>
-        <ExistingDocumentFieldArray
-          values={values}
-          setFieldValue={setFieldValue}
-          individual={individual}
-          addIndividualFieldsData={addIndividualFieldsData}
-        />
-        <NewDocumentFieldArray
-          values={values}
-          addIndividualFieldsData={addIndividualFieldsData}
-          setFieldValue={setFieldValue}
-        />
-      </Box>
-      <Box mt={3}>
-        <Title>
-          <Typography variant='h6'>{t('Identities')}</Typography>
-        </Title>
-        <ExistingIdentityFieldArray
-          values={values}
-          setFieldValue={setFieldValue}
-          individual={individual}
-          addIndividualFieldsData={addIndividualFieldsData}
-        />
-        <NewIdentityFieldArray
-          values={values}
-          addIndividualFieldsData={addIndividualFieldsData}
-        />
-      </Box>
-      <Box mt={3}>
-        <Title>
-          <Typography variant='h6'>{t('Payment Channel')}</Typography>
-        </Title>
-        <ExistingPaymentChannelFieldArray
-          values={values}
-          setFieldValue={setFieldValue}
-          individual={individual}
-        />
-        <NewPaymentChannelFieldArray values={values} />
-      </Box>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant='h6'>{t('Identities')}</Typography>
+          </Title>
+          <ExistingIdentityFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={individual}
+            addIndividualFieldsData={addIndividualFieldsData}
+          />
+          {!isEditTicket && (
+            <NewIdentityFieldArray
+              values={values}
+              addIndividualFieldsData={addIndividualFieldsData}
+            />
+          )}
+        </Box>
+      </BoxWithBorders>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant='h6'>{t('Payment Channels')}</Typography>
+          </Title>
+          <ExistingPaymentChannelFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={individual}
+          />
+          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
+        </Box>
+      </BoxWithBorders>
     </>
   );
 };

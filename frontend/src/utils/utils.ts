@@ -1,7 +1,7 @@
+import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
-import camelCase from 'lodash/camelCase';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -325,6 +325,25 @@ export function grievanceTicketStatusToColor(
       return theme.hctPalette.darkBrown;
     case 'Closed':
       return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function grievanceTicketBadgeColors(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Not urgent':
+    case 'Low':
+      return theme.hctPalette.green;
+    case 'Very urgent':
+    case 'High':
+      return theme.palette.error.main;
+    case 'Urgent':
+    case 'Medium':
+      return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
   }
@@ -691,6 +710,10 @@ export async function clearCache(apolloClient = null): Promise<void> {
   await localForage.clear();
 }
 
+export const round = (value: number, decimals = 2): number => {
+  return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
+};
+
 type Location = ReturnType<typeof useLocation>;
 type FilterValue = string | string[] | boolean | null | undefined;
 type Filter = { [key: string]: FilterValue };
@@ -870,10 +893,8 @@ export const createHandleApplyFilterChange = (
     Object.keys(appliedFilter).forEach((key) => {
       params.delete(key);
     });
-
     const search = params.toString();
     history.push({ search });
-
     setFilter(initialFilter);
     setAppliedFilter(initialFilter);
   };

@@ -60,6 +60,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
+    fetchPolicy: 'cache-and-network',
   });
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
   const history = useHistory();
@@ -84,9 +85,13 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
 
   menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
 
-  const { isPaymentPlanApplicable } = businessAreaData.businessArea;
+  const {
+    isPaymentPlanApplicable,
+    isAccountabilityApplicable,
+  } = businessAreaData.businessArea;
   const flags = {
     isPaymentPlanApplicable,
+    isAccountabilityApplicable,
   };
 
   const getInitialHrefForCollapsible = (secondaryActions): string => {

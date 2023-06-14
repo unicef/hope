@@ -7,7 +7,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Ticket Id',
-    id: 'id',
+    id: 'unicef_id',
     numeric: false,
     dataCy: 'ticket-id',
   },
@@ -48,8 +48,22 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
+    label: 'Priority',
+    id: 'priority',
+    numeric: false,
+    dataCy: 'priority',
+  },
+  {
+    disablePadding: false,
+    label: 'Urgency',
+    id: 'urgency',
+    numeric: false,
+    dataCy: 'urgency',
+  },
+  {
+    disablePadding: false,
     label: 'Linked Tickets',
-    id: '',
+    id: 'linked_tickets',
     numeric: false,
     dataCy: 'linkedTickets',
   },
@@ -66,5 +80,12 @@ export const headCells: HeadCell<
     id: 'user_modified',
     numeric: false,
     dataCy: 'userModified',
+  },
+  {
+    disablePadding: false,
+    label: 'Total days',
+    id: 'total_days',
+    numeric: false,
+    dataCy: 'totalDays',
   },
 ];

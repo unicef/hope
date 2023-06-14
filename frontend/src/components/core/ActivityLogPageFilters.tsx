@@ -3,7 +3,7 @@ import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete';
+import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from './ClearApplyButtons';
 import { ContainerWithBorder } from './ContainerWithBorder';

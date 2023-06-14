@@ -2,8 +2,8 @@ from datetime import date
 from typing import Any, Dict, List, Optional
 from unittest import mock
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 
 from factory import Factory
 from parameterized import parameterized
@@ -50,6 +50,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestUpdateGrievanceTickets(APITestCase):
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
     UPDATE_GRIEVANCE_TICKET_MUTATION = """
     mutation UpdateGrievanceTicket(
       $input: UpdateGrievanceTicketInput!
@@ -83,7 +85,6 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
@@ -701,26 +702,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
             }
         }
-        self.graphql_request(
+        self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
             context={"user": self.user},
             variables=input_data,
         )
-        self.positive_feedback_grievance_ticket.refresh_from_db()
-
-        # TODO: test shouldn't use conditional logic
-        if name == "with_permission":
-            self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
-            self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, self.admin_area_1.name)
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
-        else:
-            self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
-            self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
-            self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
 
     @parameterized.expand(
         [

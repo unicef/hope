@@ -7,6 +7,7 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -138,3 +139,8 @@ class TicketNegativeFeedbackDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase)
 @admin.register(TicketReferralDetails)
 class TicketReferralDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household", "individual")
+
+
+@admin.register(GrievanceDocument)
+class GrievanceDocumentAdmin(HOPEModelAdminBase):
+    list_display = ("file_name",)

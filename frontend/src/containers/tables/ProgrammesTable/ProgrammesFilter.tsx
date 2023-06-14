@@ -8,9 +8,9 @@ import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
-import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
+import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
 
 interface ProgrammesFilterProps {
   filter;

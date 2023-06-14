@@ -39,6 +39,10 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),),
     )
     target_population_status_choices = graphene.List(ChoiceObject)
+    all_active_target_populations = DjangoPermissionFilterConnectionField(
+        TargetPopulationNode,
+        permission_classes=(hopePermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
+    )
 
     def resolve_target_population_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(target_models.TargetPopulation.STATUS_CHOICES)
