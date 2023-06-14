@@ -8,6 +8,13 @@ export const GrievanceTicket = gql`
       status
       category
       consent
+      partner {
+        id
+        name
+      }
+      businessArea {
+        postponeDeduplication
+      }
       createdBy {
         id
         firstName
@@ -366,6 +373,29 @@ export const GrievanceTicket = gql`
             }
           }
         }
+      }
+      priority
+      urgency
+      programme {
+        name
+        id
+      }
+      comments
+      documentation {
+        id
+        createdAt
+        updatedAt
+        name
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
+        fileSize
+        contentType
+        filePath
+        fileName
       }
     }
   }

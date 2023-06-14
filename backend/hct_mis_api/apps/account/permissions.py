@@ -166,6 +166,7 @@ class Permissions(Enum):
     GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR = auto()
     GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER = auto()
     GRIEVANCE_ASSIGN = auto()
+    GRIEVANCE_DOCUMENTS_UPLOAD = auto()
 
     # Reporting
     REPORTING_EXPORT = auto()
@@ -180,6 +181,26 @@ class Permissions(Enum):
     # Core
     UPLOAD_STORAGE_FILE = auto()
     DOWNLOAD_STORAGE_FILE = auto()
+
+    # Communication
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS = auto()
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE = auto()
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR = auto()
+
+    # Feedback
+    ACCOUNTABILITY_FEEDBACK_VIEW_CREATE = auto()
+    ACCOUNTABILITY_FEEDBACK_VIEW_LIST = auto()
+    ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS = auto()
+    ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE = auto()
+
+    # Feedback
+    ACCOUNTABILITY_SURVEY_VIEW_CREATE = auto()
+    ACCOUNTABILITY_SURVEY_VIEW_LIST = auto()
+    ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
+
+    # FeedbackMessage
+    ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE = auto()
 
     # Django Admin
     # ...
@@ -355,6 +376,8 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         permission_classes: List,
     ) -> Any:
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
+        if business_area := info.context.headers.get("Business-Area"):
+            filter_kwargs["business_area"] = business_area
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:

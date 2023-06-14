@@ -17,7 +17,7 @@ import {
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
 const initialFilter = {
-  text: '',
+  search: '',
   admin2: '',
   sex: '',
   ageMin: '',

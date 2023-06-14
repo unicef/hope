@@ -10,7 +10,9 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+    create_needs_adjudication_tickets,
+)
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (

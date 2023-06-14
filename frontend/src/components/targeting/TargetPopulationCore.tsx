@@ -86,7 +86,6 @@ export function TargetPopulationCore({
           </Label>
         </PaperContainer>
       )}
-
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={targetPopulation.id} />
       )}

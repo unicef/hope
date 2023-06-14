@@ -1,5 +1,6 @@
 from typing import List
 
+from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test.utils import CaptureQueriesContext
@@ -29,7 +30,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
