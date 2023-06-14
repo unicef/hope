@@ -195,7 +195,11 @@ export function Drawer({
         )}
         {resourcesItems.map((item) => (
           <ListItem button key={item.name + item.href}>
-            <StyledLink target='_blank' href={item.href}>
+            <StyledLink
+              data-cy={`nav-resources-${item.name}`}
+              target='_blank'
+              href={item.href}
+            >
               <Box display='flex'>
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />

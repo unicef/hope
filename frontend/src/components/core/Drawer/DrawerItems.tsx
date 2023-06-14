@@ -133,6 +133,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
             <div key={item.name + hrefForCollapsibleItem}>
               <ListItem
                 button
+                data-cy={`nav-${item.name}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -165,6 +166,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                           <ListItem
                             button
                             component={Link}
+                            data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
                             to={`/${businessArea}${secondary.href}`}
                             selected={Boolean(
@@ -182,7 +184,11 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
           );
         }
         return item.external ? (
-          <ListItem button key={item.name + item.href}>
+          <ListItem
+            data-cy={`nav-${item.name}`}
+            button
+            key={item.name + item.href}
+          >
             <StyledLink target='_blank' href={item.href}>
               <Box display='flex'>
                 <Icon>{item.icon}</Icon>
@@ -193,6 +199,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
         ) : (
           <ListItem
             button
+            data-cy={`nav-${item.name}`}
             component={Link}
             key={item.name + item.href}
             to={`/${businessArea}${item.href}`}
