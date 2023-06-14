@@ -102,7 +102,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
                 reduced_submission = rename_dict_keys(individual_data, get_field_name)
                 for field_name in fields:
                     fields[field_name] = str(reduced_submission.get(field_name))
-                hash_key = sha256(";".join(list(fields.values())).encode()).hexdigest()  # type: ignore # TODO: "list" has incompatible type "dict_values[str, Optional[str]]"; expected "Iterable[str]"
+                hash_key = sha256(";".join(fields.values()).encode()).hexdigest()  # type: ignore
                 seen_hash_keys.append(hash_key)
                 total_individuals_count += 1
                 if (
