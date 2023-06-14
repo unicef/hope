@@ -198,8 +198,11 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
-            <EditGrievancePage />
+          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/user-generated/:id'>
+            <EditGrievancePage key='user' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/system-generated/:id'>
+            <EditGrievancePage key='system' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated/:id'>
             <GrievancesDetailsPage />
