@@ -37,9 +37,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
-            <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
-            >
+            <ContentLink href={`/${businessArea}/grievance/${edge.node.id}`}>
               {edge.node.unicefId}
             </ContentLink>
           </Box>

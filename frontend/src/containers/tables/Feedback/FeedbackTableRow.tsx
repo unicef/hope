@@ -24,7 +24,7 @@ export const FeedbackTableRow = ({
   const businessArea = useBusinessArea();
   const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
   const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup?.id}`;
-  const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
+  const grievanceDetailsPath = `/${businessArea}/grievance/${feedback.linkedGrievance?.id}`;
 
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);

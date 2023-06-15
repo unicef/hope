@@ -84,13 +84,11 @@ export const LinkedGrievancesModal = ({
     return (
       <ClickableTableRow
         hover
-        onClick={() =>
-          history.push(`/${businessArea}/grievance-and-feedback/${row.id}`)
-        }
+        onClick={() => history.push(`/${businessArea}/grievance/${row.id}`)}
         key={row.id}
       >
         <TableCell align='left'>
-          <BlackLink to={`/${businessArea}/grievance-and-feedback/${row.id}`}>
+          <BlackLink to={`/${businessArea}/grievance/${row.id}`}>
             {row.unicefId}
           </BlackLink>
         </TableCell>
@@ -111,9 +109,7 @@ export const LinkedGrievancesModal = ({
     return allGrievances.length
       ? allGrievances.map((el) => (
           <span key={el.node.id}>
-            <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${el.node.id}`}
-            >
+            <ContentLink href={`/${businessArea}/grievance/${el.node.id}`}>
               {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${
                 statusChoices[el.node.status]
               }`}
