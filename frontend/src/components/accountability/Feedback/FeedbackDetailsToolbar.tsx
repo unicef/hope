@@ -32,6 +32,8 @@ export const FeedbackDetailsToolbar = ({
   const canCreateLinkedGrievance =
     feedback.householdLookup && feedback.individualLookup;
 
+  const hasLinkedGrievance = Boolean(feedback.linkedGrievance?.id);
+
   return (
     <PageHeader
       title={`Feedback ID: ${feedback.unicefId}`}
@@ -52,7 +54,7 @@ export const FeedbackDetailsToolbar = ({
             </Button>
           </Box>
         )}
-        {canCreateLinkedGrievance && (
+        {canCreateLinkedGrievance && !hasLinkedGrievance && (
           <Box mr={3}>
             <Button
               onClick={() =>
@@ -67,7 +69,6 @@ export const FeedbackDetailsToolbar = ({
               }
               variant='contained'
               color='primary'
-              disabled={Boolean(feedback.linkedGrievance?.id)}
             >
               {t('Create Linked Ticket')}
             </Button>
