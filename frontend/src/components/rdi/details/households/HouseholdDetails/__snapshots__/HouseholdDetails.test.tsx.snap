@@ -102,7 +102,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-Head of Household"
             >
               <a
-                class="sc-bwzfXH kvzhbg"
+                class="sc-bwzfXH kQovbV"
                 href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
               >
                 Agata Kowalska
