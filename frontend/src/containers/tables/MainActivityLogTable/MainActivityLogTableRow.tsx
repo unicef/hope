@@ -66,7 +66,7 @@ function ObjectRepresentations({
     targetpopulation: `/${businessArea}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
-    grievanceticket: `/${businessArea}/grievance-and-feedback/${btoa(
+    grievanceticket: `/${businessArea}/grievance/${btoa(
       'GrievanceTicketNode:' + id,
     )}`,
     household: `/${businessArea}/population/household/${btoa(

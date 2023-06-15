@@ -29,9 +29,7 @@ export const OtherRelatedTickets = ({
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.id} mb={1}>
-            <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${edge.id}`}
-            >
+            <ContentLink href={`/${businessArea}/grievance/${edge.id}`}>
               {edge.unicefId}
             </ContentLink>
           </Box>

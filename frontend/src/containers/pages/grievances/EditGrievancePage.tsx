@@ -215,7 +215,7 @@ export const EditGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance-and-feedback/${ticket.id}`,
+      to: `/${businessArea}/grievance/${ticket.id}`,
     },
   ];
 
@@ -273,7 +273,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'), {
-            pathname: `/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`,
+            pathname: `/${businessArea}/grievance/tickets/${userOrSystem}/${ticket.id}`,
             historyMethod: 'push',
           });
         } catch (e) {
@@ -313,7 +313,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`}
+                    to={`/${businessArea}/grievance/tickets/${userOrSystem}/${ticket.id}`}
                   >
                     {t('Cancel')}
                   </Button>

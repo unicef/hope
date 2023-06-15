@@ -79,7 +79,7 @@ export const GrievanceDetailsToolbar = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance-and-feedback/tickets`,
+      to: `/${businessArea}/grievance/tickets`,
     },
   ];
   const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
@@ -343,7 +343,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${userOrSystem}/${id}`}
+              to={`/${businessArea}/grievance/edit-ticket/${userOrSystem}/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >
@@ -494,7 +494,7 @@ export const GrievanceDetailsToolbar = ({
                 <Button
                   onClick={() =>
                     history.push({
-                      pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                      pathname: `/${businessArea}/grievance/new-ticket`,
                       state: {
                         category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
                         selectedIndividual: ticket.individual,
