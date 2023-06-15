@@ -32,8 +32,20 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
     ticketsByCategory,
     ticketsByLocationAndCategory,
     ticketsByStatus,
-    ticketsByType,
+    ticketsByType: {
+      userGeneratedCount,
+      systemGeneratedCount,
+      closedUserGeneratedCount,
+      closedSystemGeneratedCount,
+      userGeneratedAvgResolution,
+      systemGeneratedAvgResolution
+    },
   } = data;
+
+  // use weighted average to calculate average resolution time
+  const userWeightedTime = userGeneratedAvgResolution * closedUserGeneratedCount;
+  const systemWeightedTime = systemGeneratedAvgResolution * closedSystemGeneratedCount;
+  const numberOfClosedTickets = closedUserGeneratedCount + closedSystemGeneratedCount;
 
   return (
     <>
@@ -44,32 +56,27 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
             <Box>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF TICKETS')}
-                topNumber={
-                  ticketsByType.systemGeneratedCount +
-                  ticketsByType.userGeneratedCount
-                }
-                systemGenerated={ticketsByType.systemGeneratedCount}
-                userGenerated={ticketsByType.userGeneratedCount}
+                topNumber={systemGeneratedCount + userGeneratedCount}
+                systemGenerated={systemGeneratedCount}
+                userGenerated={userGeneratedCount}
               />
             </Box>
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
-                topNumber={
-                  ticketsByType.closedSystemGeneratedCount +
-                  ticketsByType.closedUserGeneratedCount
-                }
-                systemGenerated={ticketsByType.closedSystemGeneratedCount}
-                userGenerated={ticketsByType.closedUserGeneratedCount}
+                topNumber={numberOfClosedTickets}
+                systemGenerated={closedSystemGeneratedCount}
+                userGenerated={closedUserGeneratedCount}
               />
             </Box>
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
-                topNumber={`${ticketsByType.systemGeneratedAvgResolution +
-                  ticketsByType.userGeneratedAvgResolution} days`}
-                systemGenerated={`${ticketsByType.systemGeneratedAvgResolution} days`}
-                userGenerated={`${ticketsByType.userGeneratedAvgResolution} days`}
+                topNumber={`${
+                  ((userWeightedTime + systemWeightedTime)/numberOfClosedTickets).toFixed(2)
+                } days`}
+                systemGenerated={`${systemGeneratedAvgResolution} days`}
+                userGenerated={`${userGeneratedAvgResolution} days`}
               />
             </Box>
             <Box mt={5}>
