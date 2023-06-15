@@ -817,17 +817,17 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         assert data[2]["volumeUsd"] == 0
 
         # Simulate applying steficon formula
-        PaymentFactory(
+        payment_1 = PaymentFactory(
             parent=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_2[0],
-            entitlement_quantity=450,
+            entitlement_quantity=500,
             entitlement_quantity_usd=100,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
         )
-        PaymentFactory(
+        payment_2 = PaymentFactory(
             parent=self.payment_plan,
             financial_service_provider=self.santander_fsp,
             collector=self.individuals_3[0],
@@ -837,6 +837,14 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
         )
+
+        # check created payments
+        payment_1.refresh_from_db()
+        payment_2.refresh_from_db()
+        assert payment_1.entitlement_quantity == 500
+        assert payment_1.entitlement_quantity_usd == 100
+        assert payment_2.entitlement_quantity == 1000
+        assert payment_2.entitlement_quantity_usd == 200
 
         new_get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
@@ -855,7 +863,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         self.assertEqual(new_data[0]["volumeUsd"], 200)
         self.assertEqual(new_data[1]["volume"], 0)
         self.assertEqual(new_data[1]["volumeUsd"], 0)
-        self.assertEqual(new_data[2]["volume"], 450)
+        self.assertEqual(new_data[2]["volume"], 500)
         self.assertEqual(new_data[2]["volumeUsd"], 100)
 
 
