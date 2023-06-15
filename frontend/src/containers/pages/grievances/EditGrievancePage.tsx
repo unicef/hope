@@ -8,8 +8,20 @@ import {
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  GrievanceTicketDocument,
+  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
+  useAllProgramsQuery,
+  useAllUsersQuery,
+  useGrievanceTicketQuery,
+  useGrievanceTicketStatusChangeMutation,
+  useGrievancesChoiceDataQuery,
+  useMeQuery,
+  useUpdateGrievanceMutation,
+} from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
@@ -25,18 +37,19 @@ import { NewDocumentationFieldArray } from '../../../components/grievances/Docum
 import { LookUpLinkedTickets } from '../../../components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
 import {
-  dataChangeComponentDict,
   EmptyComponent,
+  dataChangeComponentDict,
   prepareInitialValues,
   prepareVariables,
 } from '../../../components/grievances/utils/editGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import {
+  PERMISSIONS,
   hasCreatorOrOwnerPermissions,
   hasPermissions,
-  PERMISSIONS,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -56,18 +69,6 @@ import {
   isPermissionDeniedError,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
-import {
-  GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllProgramsQuery,
-  useAllUsersQuery,
-  useGrievancesChoiceDataQuery,
-  useGrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-  useMeQuery,
-  useUpdateGrievanceMutation,
-} from '../../../__generated__/graphql';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
 const BoxPadding = styled.div`
@@ -84,9 +85,6 @@ const BoxWithBottomBorders = styled.div`
 
 export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
-  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -215,7 +213,7 @@ export const EditGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance/${ticket.id}`,
+      to: getGrievanceDetailsPath(ticket.id, ticket.category, businessArea),
     },
   ];
 
@@ -273,7 +271,11 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'), {
-            pathname: `/${businessArea}/grievance/tickets/${userOrSystem}/${ticket.id}`,
+            pathname: getGrievanceDetailsPath(
+              ticket.id,
+              ticket.category,
+              businessArea,
+            ),
             historyMethod: 'push',
           });
         } catch (e) {
@@ -313,7 +315,11 @@ export const EditGrievancePage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/grievance/tickets/${userOrSystem}/${ticket.id}`}
+                    to={getGrievanceDetailsPath(
+                      ticket.id,
+                      ticket.category,
+                      businessArea,
+                    )}
                   >
                     {t('Cancel')}
                   </Button>

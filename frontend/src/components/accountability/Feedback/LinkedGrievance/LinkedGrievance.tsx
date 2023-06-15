@@ -7,6 +7,7 @@ import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBord
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
+import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
@@ -29,7 +30,11 @@ export const LinkedGrievance = ({
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
                 <BlackLink
-                  to={`/${businessArea}/grievance/${feedback.linkedGrievance.id}`}
+                  to={getGrievanceDetailsPath(
+                    feedback.linkedGrievance.id,
+                    feedback.linkedGrievance.category,
+                    businessArea,
+                  )}
                 >
                   {feedback.linkedGrievance.unicefId}
                 </BlackLink>
