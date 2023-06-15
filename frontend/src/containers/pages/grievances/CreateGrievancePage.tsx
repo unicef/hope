@@ -30,7 +30,10 @@ import { EditIndividualDataChange } from '../../../components/grievances/EditInd
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
-import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  prepareVariables,
+} from '../../../components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
 import {
@@ -268,7 +271,12 @@ export const CreateGrievancePage = (): React.ReactElement => {
               );
             } else {
               showMessage(t('Grievance Ticket created.'), {
-                pathname: `/${businessArea}/grievance/user-generated/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                pathname: getGrievanceDetailsPath(
+                  response.data.createGrievanceTicket.grievanceTickets[0].id,
+                  response.data.createGrievanceTicket.grievanceTickets[0]
+                    .category,
+                  businessArea,
+                ),
                 historyMethod: 'push',
               });
             }

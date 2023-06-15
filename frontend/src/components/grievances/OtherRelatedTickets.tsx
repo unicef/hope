@@ -2,9 +2,9 @@ import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
@@ -12,6 +12,7 @@ import {
   ApproveBox,
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 export const OtherRelatedTickets = ({
   ticket,
@@ -29,7 +30,13 @@ export const OtherRelatedTickets = ({
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.id} mb={1}>
-            <ContentLink href={`/${businessArea}/grievance/${edge.id}`}>
+            <ContentLink
+              href={getGrievanceDetailsPath(
+                edge.id,
+                edge.category,
+                businessArea,
+              )}
+            >
               {edge.unicefId}
             </ContentLink>
           </Box>
