@@ -32,6 +32,7 @@ export const DocumentationField = ({
           label={t('Document Name')}
           component={FormikTextField}
           required
+          maxLength={100}
         />
       </Grid>
       <Grid item xs={3}>

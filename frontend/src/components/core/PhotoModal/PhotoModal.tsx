@@ -11,6 +11,11 @@ import { PhotoModalHeader } from './PhotoModalHeader';
 
 export const StyledLink = styled(Link)`
   color: #000;
+  width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
 `;
 
 export const StyledImage = styled.img`
