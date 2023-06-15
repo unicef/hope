@@ -195,7 +195,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance-and-feedback/tickets/`,
+      to: `/${businessArea}/grievance/tickets/`,
     },
   ];
 
@@ -262,13 +262,13 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   'Grievance Tickets created',
                 )}.`,
                 {
-                  pathname: `/${businessArea}/grievance-and-feedback/tickets`,
+                  pathname: `/${businessArea}/grievance/tickets`,
                   historyMethod: 'push',
                 },
               );
             } else {
               showMessage(t('Grievance Ticket created.'), {
-                pathname: `/${businessArea}/grievance-and-feedback/user-generated/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                pathname: `/${businessArea}/grievance/user-generated/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
                 historyMethod: 'push',
               });
             }
@@ -388,7 +388,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${businessArea}/grievance-and-feedback/tickets`}
+                            to={`/${businessArea}/grievance/tickets`}
                           >
                             {t('Cancel')}
                           </Button>

@@ -110,7 +110,7 @@ export const menuItems = [
   },
   {
     name: 'Grievance',
-    href: '/grievance-and-feedback/tickets',
+    href: '/grievance/tickets',
     selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
     icon: <Feedback />,
     collapsable: true,
@@ -118,14 +118,14 @@ export const menuItems = [
     secondaryActions: [
       {
         name: 'Grievance Tickets',
-        href: '/grievance-and-feedback/tickets/user-generated',
+        href: '/grievance/tickets/user-generated',
         selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
       },
       {
         name: 'Grievance Dashboard',
-        href: '/grievance-and-feedback/dashboard',
+        href: '/grievance/dashboard',
         selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
         icon: <Assessment />,
         permissionModule: 'GRIEVANCES',

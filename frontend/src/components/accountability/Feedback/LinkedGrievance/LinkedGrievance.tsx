@@ -29,7 +29,7 @@ export const LinkedGrievance = ({
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
                 <BlackLink
-                  to={`/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance.id}`}
+                  to={`/${businessArea}/grievance/${feedback.linkedGrievance.id}`}
                 >
                   {feedback.linkedGrievance.unicefId}
                 </BlackLink>

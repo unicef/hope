@@ -98,17 +98,14 @@ export const LinkedTicketsModal = ({
         hover
         onClick={
           canViewDetails
-            ? () =>
-                history.push(
-                  `/${businessArea}/grievance-and-feedback/${row.id}`,
-                )
+            ? () => history.push(`/${businessArea}/grievance/${row.id}`)
             : undefined
         }
         key={row.id}
       >
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={`/${businessArea}/grievance-and-feedback/${row.id}`}>
+            <BlackLink to={`/${businessArea}/grievance/${row.id}`}>
               {row.unicefId}
             </BlackLink>
           ) : (

@@ -57,7 +57,7 @@ export const FeedbackDetailsToolbar = ({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                  pathname: `/${businessArea}/grievance/new-ticket`,
                   state: {
                     selectedHousehold: feedback.householdLookup,
                     selectedIndividual: feedback.individualLookup,

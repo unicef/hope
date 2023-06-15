@@ -353,3 +353,15 @@ export function prepareVariables(businessArea, values) {
   );
   return prepareFunction(requiredVariables, values);
 }
+
+export const matchGrievanceUrlByCategory = (category: string): string => {
+  const systemGeneratedGrievanceCategories = [
+    GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION,
+    GRIEVANCE_CATEGORIES.DEDUPLICATION,
+    GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
+  ];
+  if (systemGeneratedGrievanceCategories.includes(category)) {
+    return 'system-generated';
+  }
+  return 'user-generated';
+};

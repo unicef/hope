@@ -51,7 +51,7 @@ export function LookUpLinkedTicketsTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}>
+        <BlackLink to={`/${businessArea}/grievance/${ticket.id}`}>
           {ticket.unicefId}
         </BlackLink>
       </TableCell>

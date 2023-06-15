@@ -61,7 +61,7 @@ export function GrievancesTableRow({
   const { showMessage } = useSnackbar();
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
   const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
-  const detailsPath = `/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`;
+  const detailsPath = `/${businessArea}/grievance/tickets/${userOrSystem}/${ticket.id}`;
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType

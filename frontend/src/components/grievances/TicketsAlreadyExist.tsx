@@ -46,9 +46,7 @@ export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
   const { edges } = data.existingGrievanceTickets;
   const mappedTickets = edges?.map((edge) => (
     <Box key={edge.node.id} mb={1}>
-      <ContentLink
-        href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
-      >
+      <ContentLink href={`/${businessArea}/grievance/${edge.node.id}`}>
         {edge.node.unicefId}
       </ContentLink>
     </Box>
