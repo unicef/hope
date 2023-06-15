@@ -10713,7 +10713,7 @@ export type AllFeedbacksQuery = (
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )>, linkedGrievance: Maybe<(
           { __typename?: 'GrievanceTicketNode' }
-          & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
+          & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'category'>
         )> }
       )> }
     )>> }
@@ -19821,6 +19821,7 @@ export const AllFeedbacksDocument = gql`
         linkedGrievance {
           id
           unicefId
+          category
         }
       }
     }

@@ -24,7 +24,7 @@ export const FeedbackTableRow = ({
   const history = useHistory();
   const businessArea = useBusinessArea();
   const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup?.id}`;
+  const householdDetailsPath = `/${businessArea}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
         feedback.linkedGrievance?.id,
