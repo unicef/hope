@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../../../hooks/useDebounce';
 import TextField from '../../../shared/TextField';
-import { renderUserName } from '../../../utils/utils';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '180px')}
@@ -75,7 +74,12 @@ export const AssignedToDropdown = ({
       getOptionSelected={(option, value1) => {
         return option.node.id === value1.id;
       }}
-      getOptionLabel={(option) => `${renderUserName(option.node || value)}`}
+      getOptionLabel={(option) => {
+        if (option.node) {
+          return `${option.node.email}`;
+        }
+        return `${value?.email}`;
+      }}
       value={value}
       options={optionsData}
       renderInput={(params) => (
