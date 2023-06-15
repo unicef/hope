@@ -24,6 +24,7 @@ export const FormikTextField = ({
   type,
   precision,
   integer,
+  maxLength,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -74,6 +75,7 @@ export const FormikTextField = ({
         // eslint-disable-next-line react/jsx-no-duplicate-props
         inputProps={{
           'data-cy': `input-${field.name}`,
+          maxLength: maxLength || null,
         }}
       />
     </>
