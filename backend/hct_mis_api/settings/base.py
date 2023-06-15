@@ -516,46 +516,6 @@ def extend_list_avoid_repeats(list_to_extend: List, extend_with: List) -> None:
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
-LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
-LOGGING: Dict[str, Any] = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
-        "verbose": {
-            "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
-        },
-    },
-    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {
-        "default": {
-            "level": LOG_LEVEL,
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
-        "file": {
-            "level": LOG_LEVEL,
-            "class": "logging.FileHandler",
-            "filename": "debug.log",
-        },
-    },
-    "loggers": {
-        "": {"handlers": ["default"], "level": "INFO", "propagate": True},
-        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-        "django.request": {
-            "handlers": ["default"],
-            "level": "DEBUG" if DEBUG else "ERROR",
-            "propagate": False,
-        },
-        "django.security.DisallowedHost": {
-            # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
-            "handlers": ["default"],
-            "propagate": False,
-        },
-        "elasticsearch": {"handlers": ["file"], "level": "CRITICAL", "propagate": True},
-    },
-}
-
 GIT_VERSION = env("GIT_VERSION", default="UNKNOWN")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 
@@ -1085,7 +1045,7 @@ SHELL_PLUS_DONT_LOAD = [
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
 
-if CYPRESS_TESTING and (ENV != "dev" or (AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)):
+if CYPRESS_TESTING and ENV != "dev":
     from django.core.exceptions import ImproperlyConfigured
 
     raise ImproperlyConfigured(f"CYPRESS_TESTING can only be used in development env: ENV={ENV}")
@@ -1101,25 +1061,55 @@ FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 LOGGING_DISABLED = env.bool("LOGGING_DISABLED", default=False)
 
+LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
+
+LOGGING: Dict[str, Any] = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
+        "verbose": {
+            "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
+        },
+    },
+    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+    "handlers": {
+        "default": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": LOG_LEVEL,
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+        },
+    },
+    "loggers": {
+        "": {"handlers": ["default"], "level": "INFO", "propagate": True},
+        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+        "django.request": {
+            "handlers": ["default"],
+            "level": "DEBUG" if DEBUG else "ERROR",
+            "propagate": False,
+        },
+        "django.security.DisallowedHost": {
+            # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
+            "handlers": ["default"],
+            "propagate": False,
+        },
+        "elasticsearch": {"handlers": ["file"], "level": "CRITICAL", "propagate": True},
+    },
+}
+
+# overwrite Azure logs
+logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
+logger_azure.setLevel(logging.WARNING)
+
+
 if LOGGING_DISABLED:
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
-            "verbose": {
-                "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
-            },
-        },
-        "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-        "handlers": {
-            "default": {
-                "level": LOG_LEVEL,
-                "class": "logging.StreamHandler",
-                "formatter": "standard",
-            }
-        },
-        "loggers": {
+    LOGGING["loggers"].update(
+        {
             "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
             "registration_datahub.tasks.deduplicate": {
                 "handlers": ["default"],
@@ -1152,8 +1142,8 @@ if LOGGING_DISABLED:
                 "level": "CRITICAL",
                 "propagate": True,
             },
-        },
-    }
+        }
+    )
 
     logging.disable(logging.CRITICAL)
 
