@@ -40,7 +40,7 @@ class GrievanceNotification:
         self.emails = self._prepare_emails()
 
     def _prepare_default_context(self, user_recipient: "User") -> Dict[str, Any]:
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         context = {
             "first_name": user_recipient.first_name,
             "last_name": user_recipient.last_name,
