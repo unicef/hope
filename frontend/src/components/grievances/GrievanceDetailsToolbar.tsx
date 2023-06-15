@@ -2,8 +2,13 @@ import { Box, Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  GrievanceTicketDocument,
+  GrievanceTicketQuery,
+  useGrievanceTicketStatusChangeMutation,
+} from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
@@ -12,16 +17,12 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-} from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../core/BreadCrumbs';
 import { ButtonDialog } from '../core/ButtonDialog';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LoadingButton } from '../core/LoadingButton';
 import { PageHeader } from '../core/PageHeader';
+import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 
 const Separator = styled.div`
   width: 1px;
@@ -68,14 +69,10 @@ export const GrievanceDetailsToolbar = ({
   canAssign: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const { id } = useParams();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
   const history = useHistory();
-  const location = useLocation();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
-  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -343,7 +340,11 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/grievance/edit-ticket/${userOrSystem}/${id}`}
+              to={getGrievanceEditPath(
+                ticket.id,
+                ticket.category,
+                businessArea,
+              )}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >

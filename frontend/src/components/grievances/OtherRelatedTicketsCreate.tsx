@@ -1,10 +1,10 @@
 import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
@@ -13,6 +13,7 @@ import {
   ApproveBox,
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const { t } = useTranslation();
@@ -37,7 +38,13 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
-            <ContentLink href={`/${businessArea}/grievance/${edge.node.id}`}>
+            <ContentLink
+              href={getGrievanceDetailsPath(
+                edge.node.id,
+                edge.node.category,
+                businessArea,
+              )}
+            >
               {edge.node.unicefId}
             </ContentLink>
           </Box>
