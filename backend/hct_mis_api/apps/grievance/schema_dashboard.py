@@ -115,8 +115,8 @@ class Query(graphene.ObjectType):
                 system_generated_count=Count("category_name", filter=system_generated),
                 closed_user_generated_count=Count("category_name", filter=user_generated & Q(status=6)),
                 closed_system_generated_count=Count("category_name", filter=system_generated & Q(status=6)),
-                user_generated_avg_resolution=Avg("days_diff", filter=user_generated),
-                system_generated_avg_resolution=Avg("days_diff", filter=system_generated),
+                user_generated_avg_resolution=Avg("days_diff", filter=user_generated & Q(status=6)),
+                system_generated_avg_resolution=Avg("days_diff", filter=system_generated & Q(status=6)),
             )
         )
 
