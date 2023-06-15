@@ -821,7 +821,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             parent=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_2[0],
-            entitlement_quantity=500,
+            entitlement_quantity=450,
             entitlement_quantity_usd=100,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
@@ -855,7 +855,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         self.assertEqual(new_data[0]["volumeUsd"], 200)
         self.assertEqual(new_data[1]["volume"], 0)
         self.assertEqual(new_data[1]["volumeUsd"], 0)
-        self.assertEqual(new_data[2]["volume"], 500)
+        self.assertEqual(new_data[2]["volume"], 450)
         self.assertEqual(new_data[2]["volumeUsd"], 100)
 
 
