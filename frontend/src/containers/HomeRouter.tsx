@@ -66,10 +66,14 @@ import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpP
 
 const Root = styled.div`
   display: flex;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
   overflow: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
