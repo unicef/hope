@@ -50,6 +50,7 @@ export const AllFeedbacks = gql`
           linkedGrievance {
             id
             unicefId
+            category
           }
         }
       }
