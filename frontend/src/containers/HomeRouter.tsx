@@ -110,6 +110,8 @@ export function HomeRouter(): React.ReactElement {
     return <Redirect to='/' noThrow />;
   }
 
+  console.log('🤪🤪🤪🤪🤪🤪');
+
   return (
     <Root>
       <CssBaseline />
