@@ -149,9 +149,7 @@ export const ReassignMultipleRoleBox = ({
         <OrangeTitle>
           <Typography variant='h6'>
             <WarnIcon />
-            {t(
-              'Individual is the HOH or the external collector for a household',
-            )}
+            {t('Individual is the HOH or the collector for the household')}
           </Typography>
         </OrangeTitle>
         <Typography variant='body2'>
