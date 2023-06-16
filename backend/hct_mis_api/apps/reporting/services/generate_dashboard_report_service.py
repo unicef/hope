@@ -962,7 +962,7 @@ class GenerateDashboardReportService:
 
     def _send_email(self) -> None:
         path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         context = {
             "report_type": self._report_types_to_joined_str(),
             "created_at": self._format_date(self.report.created_at),
