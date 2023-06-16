@@ -396,7 +396,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${businessArea}/grievance/tickets`}
+                            to={`/${businessArea}/grievance/tickets/user-generated`}
                           >
                             {t('Cancel')}
                           </Button>
