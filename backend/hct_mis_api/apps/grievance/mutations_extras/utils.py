@@ -40,6 +40,15 @@ def handle_role(role: "IndividualRoleInHousehold", household: Household, individ
         IndividualRoleInHousehold,
     )
 
+    if already_has_another_role := IndividualRoleInHousehold.objects.filter(
+        household=household,
+        individual=individual,
+    ).first():
+        if already_has_another_role.role == ROLE_PRIMARY:
+            raise ValidationError("Ticket cannot be closed, primary collector role has to be reassigned")
+        else:
+            already_has_another_role.delete()
+
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
         if already_existing_role:
@@ -567,7 +576,7 @@ def reassign_roles_on_disable_individual(
         and individual_to_remove.is_head()
         and not is_one_individual
     ):
-        raise ValidationError("Ticket cannot be closed head of household has not been reassigned")
+        raise ValidationError("Ticket cannot be closed, head of household has not been reassigned")
 
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])

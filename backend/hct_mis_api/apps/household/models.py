@@ -718,7 +718,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     )
 
     class Meta:
-        unique_together = ("role", "household")
+        unique_together = [("role", "household"), ("individual", "household")]
 
     def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"
