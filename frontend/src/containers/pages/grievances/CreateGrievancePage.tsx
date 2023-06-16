@@ -52,7 +52,6 @@ import {
 } from '../../../utils/constants';
 import {
   decodeIdString,
-  isInvalid,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 
@@ -202,24 +201,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
     },
   ];
 
-  const dataChangeErrors = (errors, touched): ReactElement[] =>
-    [
+  const dataChangeErrors = (errors): ReactElement[] => {
+    return [
       'householdDataUpdateFields',
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
       'verificationRequired',
-    ]
-      .filter(
-        (fieldname) =>
-          isInvalid(fieldname, errors, touched) ||
-          fieldname === 'verificationRequired',
-      )
-      .map((fieldname) => (
-        <FormHelperText key={fieldname} error>
-          {errors[fieldname]}
-        </FormHelperText>
-      ));
+    ].map((fieldname) => (
+      <FormHelperText key={fieldname} error>
+        {errors[fieldname]}
+      </FormHelperText>
+    ));
+  };
 
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -391,7 +385,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           />
                         </>
                       )}
-                      {dataChangeErrors(errors, touched)}
+                      {dataChangeErrors(errors)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
                           <Button
