@@ -40,14 +40,14 @@ def handle_role(role: "IndividualRoleInHousehold", household: Household, individ
         IndividualRoleInHousehold,
     )
 
-    if already_has_another_role := IndividualRoleInHousehold.objects.filter(
+    if already_with_another_role := IndividualRoleInHousehold.objects.filter(
         household=household,
         individual=individual,
     ).first():
-        if already_has_another_role.role == ROLE_PRIMARY:
+        if already_with_another_role.role == ROLE_PRIMARY:
             raise ValidationError("Ticket cannot be closed, primary collector role has to be reassigned")
         else:
-            already_has_another_role.delete()
+            already_with_another_role.delete()
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
