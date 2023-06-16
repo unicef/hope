@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export const StyledLink = styled(Link)`
   color: #000;
-  width: 200px;
+  max-width: 150px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
