@@ -130,7 +130,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bdVaJa gpPYLI"
+                  class="sc-bdVaJa doNFlh"
                   href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6YTI2ODYyMTAtYjBhNi00NTI1LWI4YTAtYTFmY2FlMWIwMjE5"
                 >
                   IND-42-0000.0001
@@ -188,7 +188,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bdVaJa gpPYLI"
+                  class="sc-bdVaJa doNFlh"
                   href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
                 >
                   IND-88-0000.0005
@@ -246,7 +246,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bdVaJa gpPYLI"
+                  class="sc-bdVaJa doNFlh"
                   href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6YWI5YWZhNzUtMTg0Yy00NDIxLWJmMGUtNTIzZGUxNWMyOGFm"
                 >
                   IND-88-0000.0006
