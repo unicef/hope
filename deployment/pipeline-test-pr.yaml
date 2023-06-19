@@ -2,7 +2,7 @@ trigger: none
 pr:
   - master
   - develop
-  - new_gf # TODO remove this line after merge to develop
+  - global-program-filter
   - feature/*
 resources:
   - repo: self
