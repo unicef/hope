@@ -30,7 +30,10 @@ import { EditIndividualDataChange } from '../../../components/grievances/EditInd
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
-import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  prepareVariables,
+} from '../../../components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
 import {
@@ -48,7 +51,6 @@ import {
 } from '../../../utils/constants';
 import {
   decodeIdString,
-  isInvalid,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
@@ -195,28 +197,23 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${baseUrl}/grievance-and-feedback/tickets/`,
+      to: `/${baseUrl}/grievance/tickets/`,
     },
   ];
 
-  const dataChangeErrors = (errors, touched): ReactElement[] =>
-    [
+  const dataChangeErrors = (errors): ReactElement[] => {
+    return [
       'householdDataUpdateFields',
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
       'verificationRequired',
-    ]
-      .filter(
-        (fieldname) =>
-          isInvalid(fieldname, errors, touched) ||
-          fieldname === 'verificationRequired',
-      )
-      .map((fieldname) => (
-        <FormHelperText key={fieldname} error>
-          {errors[fieldname]}
-        </FormHelperText>
-      ));
+    ].map((fieldname) => (
+      <FormHelperText key={fieldname} error>
+        {errors[fieldname]}
+      </FormHelperText>
+    ));
+  };
 
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -262,13 +259,18 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   'Grievance Tickets created',
                 )}.`,
                 {
-                  pathname: `/${baseUrl}/grievance-and-feedback/tickets`,
+                  pathname: `/${baseUrl}/grievance/tickets`,
                   historyMethod: 'push',
                 },
               );
             } else {
               showMessage(t('Grievance Ticket created.'), {
-                pathname: `/${baseUrl}/grievance-and-feedback/user-generated/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                pathname: getGrievanceDetailsPath(
+                  response.data.createGrievanceTicket.grievanceTickets[0].id,
+                  response.data.createGrievanceTicket.grievanceTickets[0]
+                    .category,
+                  baseUrl,
+                ),
                 historyMethod: 'push',
               });
             }
@@ -383,12 +385,12 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           />
                         </>
                       )}
-                      {dataChangeErrors(errors, touched)}
+                      {dataChangeErrors(errors)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${baseUrl}/grievance-and-feedback/tickets`}
+                            to={`/${baseUrl}/grievance/tickets/user-generated`}
                           >
                             {t('Cancel')}
                           </Button>

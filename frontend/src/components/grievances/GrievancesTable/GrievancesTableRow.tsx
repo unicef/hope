@@ -20,6 +20,7 @@ import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';
 
 interface GrievancesTableRowProps {
@@ -42,7 +43,7 @@ interface GrievancesTableRowProps {
   initialVariables;
 }
 
-export function GrievancesTableRow({
+export const GrievancesTableRow = ({
   ticket,
   statusChoices,
   categoryChoices,
@@ -55,13 +56,14 @@ export function GrievancesTableRow({
   optionsData,
   setInputValue,
   initialVariables,
-}: GrievancesTableRowProps): React.ReactElement {
-  const location = useLocation();
+}: GrievancesTableRowProps): React.ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
-  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
-  const detailsPath = `/${baseUrl}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`;
+  const detailsPath = getGrievanceDetailsPath(
+    ticket.id,
+    ticket.category,
+    businessArea,
+  );
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType
@@ -179,4 +181,4 @@ export function GrievancesTableRow({
       <TableCell align='left'>{ticket.totalDays}</TableCell>
     </ClickableTableRow>
   );
-}
+};

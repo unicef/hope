@@ -8,7 +8,7 @@ import {
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
@@ -37,6 +37,7 @@ import { NewDocumentationFieldArray } from '../../../components/grievances/Docum
 import { LookUpLinkedTickets } from '../../../components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
 import {
   EmptyComponent,
   dataChangeComponentDict,
@@ -84,9 +85,6 @@ const BoxWithBottomBorders = styled.div`
 
 export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
-  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -215,7 +213,7 @@ export const EditGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${baseUrl}/grievance-and-feedback/${ticket.id}`,
+      to: getGrievanceDetailsPath(ticket.id, ticket.category, baseUrl),
     },
   ];
 
@@ -257,6 +255,12 @@ export const EditGrievancePage = (): React.ReactElement => {
     permissions,
   );
 
+  const grievanceDetailsPath = getGrievanceDetailsPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+  );
+
   return (
     <Formik
       initialValues={initialValues}
@@ -273,7 +277,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'), {
-            pathname: `/${baseUrl}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`,
+            pathname: grievanceDetailsPath,
             historyMethod: 'push',
           });
         } catch (e) {
@@ -311,10 +315,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             >
               <Box display='flex' alignContent='center'>
                 <Box mr={3}>
-                  <Button
-                    component={Link}
-                    to={`/${baseUrl}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`}
-                  >
+                  <Button component={Link} to={grievanceDetailsPath}>
                     {t('Cancel')}
                   </Button>
                 </Box>

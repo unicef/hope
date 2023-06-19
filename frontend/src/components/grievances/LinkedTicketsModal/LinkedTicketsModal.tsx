@@ -15,18 +15,19 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   useRelatedGrievanceTicketsLazyQuery,
 } from '../../../__generated__/graphql';
+import { Dialog } from '../../../containers/dialogs/Dialog';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { grievanceTicketStatusToColor } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -98,14 +99,19 @@ export const LinkedTicketsModal = ({
         hover
         onClick={
           canViewDetails
-            ? () => history.push(`/${baseUrl}/grievance-and-feedback/${row.id}`)
+            ? () =>
+                history.push(
+                  getGrievanceDetailsPath(row.id, row.category, baseUrl),
+                )
             : undefined
         }
         key={row.id}
       >
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={`/${baseUrl}/grievance-and-feedback/${row.id}`}>
+            <BlackLink
+              to={getGrievanceDetailsPath(row.id, row.category, baseUrl)}
+            >
               {row.unicefId}
             </BlackLink>
           ) : (

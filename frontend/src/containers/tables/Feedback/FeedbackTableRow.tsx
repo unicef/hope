@@ -10,6 +10,7 @@ import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackNode;
@@ -24,8 +25,13 @@ export const FeedbackTableRow = ({
   const { baseUrl } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/accountability/feedback/${feedback.id}`;
   const householdDetailsPath = `/${baseUrl}/population/households/${feedback.householdLookup?.id}`;
-  const grievanceDetailsPath = `/${baseUrl}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
-
+  const grievanceDetailsPath = feedback.linkedGrievance
+    ? getGrievanceDetailsPath(
+        feedback.linkedGrievance?.id,
+        feedback.linkedGrievance?.category,
+        baseUrl,
+      )
+    : null;
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);
   };

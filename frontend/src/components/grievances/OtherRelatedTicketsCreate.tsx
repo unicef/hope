@@ -13,6 +13,7 @@ import {
   ApproveBox,
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const { t } = useTranslation();
@@ -38,7 +39,11 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
             <ContentLink
-              href={`/${baseUrl}/grievance-and-feedback/${edge.node.id}`}
+              href={getGrievanceDetailsPath(
+                edge.node.id,
+                edge.node.category,
+                baseUrl,
+              )}
             >
               {edge.node.unicefId}
             </ContentLink>
