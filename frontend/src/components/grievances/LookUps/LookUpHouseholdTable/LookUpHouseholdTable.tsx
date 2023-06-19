@@ -37,7 +37,6 @@ export const LookUpHouseholdTable = ({
     residenceStatus: filter.residenceStatus,
     admin2: filter?.admin2?.node?.id,
     familySize: JSON.stringify(filter.size),
-    withdrawn: false,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
