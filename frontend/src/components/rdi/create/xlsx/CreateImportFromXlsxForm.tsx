@@ -1,23 +1,23 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { CircularProgress } from '@material-ui/core';
+import { Field, FormikProvider, useFormik } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { CircularProgress } from '@material-ui/core';
-import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { handleValidationErrors } from '../../../../utils/utils';
-import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
-import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
+import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
+import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
+import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -42,7 +42,7 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const businessAreaSlug = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const history = useHistory();
@@ -55,12 +55,12 @@ export function CreateImportFromXlsxForm({
             importDataId: xlsxImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
-            businessAreaSlug,
+            businessAreaSlug: businessArea,
           },
         },
       });
       history.push(
-        `/${businessAreaSlug}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
     } catch (error) {
       const { nonValidationErrors } = handleValidationErrors(
@@ -93,7 +93,7 @@ export function CreateImportFromXlsxForm({
     setSubmitDisabled(true);
     stopPollingImportData();
     await saveAndStartPolling({
-      businessAreaSlug,
+      businessAreaSlug: businessArea,
       file: formik.values.file,
     });
   };

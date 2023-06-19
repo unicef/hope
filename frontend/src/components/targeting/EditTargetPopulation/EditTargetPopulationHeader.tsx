@@ -1,10 +1,10 @@
 import { Box, Button } from '@material-ui/core';
 import { Field } from 'formik';
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { Link, useParams } from 'react-router-dom';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
@@ -12,7 +12,7 @@ import { PageHeader } from '../../core/PageHeader';
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
   values;
-  businessArea: string;
+  baseUrl: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   loading: boolean;
 }
@@ -20,7 +20,7 @@ interface EditTargetPopulationProps {
 export const EditTargetPopulationHeader = ({
   handleSubmit,
   values,
-  businessArea,
+  baseUrl,
   targetPopulation,
   loading,
 }: EditTargetPopulationProps): React.ReactElement => {
@@ -30,7 +30,7 @@ export const EditTargetPopulationHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Targeting'),
-      to: `/${businessArea}/target-population/${id}`,
+      to: `/${baseUrl}/target-population/${id}`,
     },
   ];
 
@@ -64,7 +64,7 @@ export const EditTargetPopulationHeader = ({
               color='primary'
               component={Link}
               data-cy='button-cancel'
-              to={`/${businessArea}/target-population/${targetPopulation.id}`}
+              to={`/${baseUrl}/target-population/${targetPopulation.id}`}
             >
               {t('Cancel')}
             </Button>

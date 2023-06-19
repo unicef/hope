@@ -23,13 +23,6 @@ export function PaymentVerificationTable({
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
     businessArea,
     ...(filter || {}),
-    // program: filter.program,
-    // search: filter.search,
-    // serviceProvider: filter.serviceProvider,
-    // deliveryType: filter.deliveryType,
-    // verificationStatus: filter.verificationStatus,
-    // startDateGte: filter.startDate,
-    // endDateLte: filter.endDate,
   };
   return (
     <UniversalTable<

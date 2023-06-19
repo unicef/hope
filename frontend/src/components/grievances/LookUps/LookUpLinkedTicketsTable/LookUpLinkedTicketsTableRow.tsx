@@ -1,7 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { Checkbox } from '@material-ui/core';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { StatusBox } from '../../../core/StatusBox';
 import {
@@ -10,6 +9,7 @@ import {
 } from '../../../../utils/utils';
 import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpLinkedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -31,7 +31,7 @@ export function LookUpLinkedTicketsTableRow({
   statusChoices,
   categoryChoices,
 }: LookUpLinkedTicketsTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);
 
@@ -51,7 +51,7 @@ export function LookUpLinkedTicketsTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}>
+        <BlackLink to={`/${baseUrl}/grievance-and-feedback/${ticket.id}`}>
           {ticket.unicefId}
         </BlackLink>
       </TableCell>

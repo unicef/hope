@@ -5,11 +5,11 @@ import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -47,7 +47,7 @@ export const TargetPopulationAutocomplete = ({
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
 
   const [
     loadData,

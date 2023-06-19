@@ -4,7 +4,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
@@ -22,6 +21,7 @@ import { ButtonDialog } from '../core/ButtonDialog';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LoadingButton } from '../core/LoadingButton';
 import { PageHeader } from '../core/PageHeader';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const Separator = styled.div`
   width: 1px;
@@ -70,7 +70,7 @@ export const GrievanceDetailsToolbar = ({
   const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
   const history = useHistory();
   const location = useLocation();
@@ -79,7 +79,7 @@ export const GrievanceDetailsToolbar = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance-and-feedback/tickets`,
+      to: `/${baseUrl}/grievance-and-feedback/tickets`,
     },
   ];
   const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
@@ -343,7 +343,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${userOrSystem}/${id}`}
+              to={`/${baseUrl}/grievance-and-feedback/edit-ticket/${userOrSystem}/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >
@@ -494,7 +494,7 @@ export const GrievanceDetailsToolbar = ({
                 <Button
                   onClick={() =>
                     history.push({
-                      pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                      pathname: `/${baseUrl}/grievance-and-feedback/new-ticket`,
                       state: {
                         category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
                         selectedIndividual: ticket.individual,

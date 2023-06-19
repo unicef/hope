@@ -11,7 +11,6 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -20,6 +19,7 @@ import {
   useCashPlanQuery,
 } from '../../../__generated__/graphql';
 import { PaymentRecordTable } from '../../tables/payments/PaymentRecordTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   && {
@@ -40,9 +40,8 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const {
     data: caData,
     loading: caPrefixLoading,
-  } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
-  const businessArea = useBusinessArea();
-
+  } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
+  const { baseUrl } = useBaseUrl();
   if (loading || caPrefixLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !caData || permissions === null) return null;
@@ -50,11 +49,11 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Programme Management'),
-      to: `/${businessArea}/programs/`,
+      to: `/${baseUrl}/programs/`,
     },
     {
       title: data.cashPlan.program.name,
-      to: `/${businessArea}/programs/${data.cashPlan.program.id}/`,
+      to: `/${baseUrl}/programs/${data.cashPlan.program.id}/`,
     },
   ];
   const cashPlan = data.cashPlan as CashPlanNode;
@@ -84,9 +83,9 @@ export function CashPlanDetailsPage(): React.ReactElement {
         </Button>
       </PageHeader>
       <Container>
-        <CashPlanDetails cashPlan={cashPlan} businessArea={businessArea} />
+        <CashPlanDetails cashPlan={cashPlan} baseUrl={baseUrl} />
         <TableWrapper>
-          <PaymentRecordTable cashPlan={cashPlan} businessArea={businessArea} />
+          <PaymentRecordTable cashPlan={cashPlan} />
         </TableWrapper>
       </Container>
     </div>

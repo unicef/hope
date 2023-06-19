@@ -2,7 +2,6 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
@@ -20,11 +20,11 @@ export function CashPlanTableRow({
   cashAndPaymentPlan,
 }: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const objectPath =
     cashAndPaymentPlan.objType === 'PaymentPlan'
-      ? `/${businessArea}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
-      : `/${businessArea}/cashplans/${cashAndPaymentPlan.id}`;
+      ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
+      : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
 
   const handleClick = (): void => {
     history.push(objectPath);

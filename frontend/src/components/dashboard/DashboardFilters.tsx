@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const Container = styled(Paper)`
   display: flex;
@@ -42,7 +42,7 @@ export const DashboardFilters = ({
   setAppliedFilter,
 }: DashboardFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
   const { data, loading } = useAllProgramsForChoicesQuery({

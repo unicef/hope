@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { programCompare } from '../../../utils/utils';
 import {
@@ -17,6 +16,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface FinishProgramProps {
   program: ProgramNode;
@@ -28,7 +28,7 @@ export function FinishProgram({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
@@ -62,7 +62,7 @@ export function FinishProgram({
     });
     if (!response.errors && response.data.updateProgram) {
       showMessage(t('Programme finished.'), {
-        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        pathname: `/${baseUrl}/programs/${response.data.updateProgram.program.id}`,
         dataCy: 'snackbar-program-finish-success',
       });
       setOpen(false);

@@ -3,13 +3,13 @@ import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { countPercentage } from '../../utils/utils';
 import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const ChartContainer = styled.div`
   width: 150px;
@@ -30,7 +30,7 @@ export const CashPlanDetailsSection = ({
   planNode,
 }: CashPlanDetailsSectionProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const bankReconciliationSuccessPercentage = countPercentage(
     planNode.bankReconciliationSuccess,
@@ -54,9 +54,7 @@ export const CashPlanDetailsSection = ({
             {
               label: t('PROGRAMME ID'),
               value: (
-                <BlackLink
-                  to={`/${businessArea}/programs/${planNode.program.id}`}
-                >
+                <BlackLink to={`/${baseUrl}/programs/${planNode.program.id}`}>
                   {planNode.program?.caId}
                 </BlackLink>
               ),
@@ -85,7 +83,9 @@ export const CashPlanDetailsSection = ({
       <Grid data-cy='grid-bank-reconciliation' item xs={3}>
         <BorderLeftBox>
           <Title>
-            <Typography variant='h6' data-cy='table-label'>{t('Bank reconciliation')}</Typography>
+            <Typography variant='h6' data-cy='table-label'>
+              {t('Bank reconciliation')}
+            </Typography>
           </Title>
           <Grid container>
             <Grid item xs={6}>

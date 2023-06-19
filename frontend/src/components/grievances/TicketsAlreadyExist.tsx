@@ -3,11 +3,11 @@ import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
 import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -29,7 +29,7 @@ const WarnIcon = styled(WarningIcon)`
 `;
 
 export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const { data, loading } = useExistingGrievanceTicketsQuery({
     variables: {
@@ -46,9 +46,7 @@ export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
   const { edges } = data.existingGrievanceTickets;
   const mappedTickets = edges?.map((edge) => (
     <Box key={edge.node.id} mb={1}>
-      <ContentLink
-        href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
-      >
+      <ContentLink href={`/${baseUrl}/grievance-and-feedback/${edge.node.id}`}>
         {edge.node.unicefId}
       </ContentLink>
     </Box>

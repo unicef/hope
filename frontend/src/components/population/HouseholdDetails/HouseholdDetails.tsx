@@ -54,12 +54,14 @@ const Label = styled.span`
 interface HouseholdDetailsProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
+  baseUrl: string;
   businessArea: string;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 export const HouseholdDetails = ({
   household,
   choicesData,
+  baseUrl,
   businessArea,
   grievancesChoices,
 }: HouseholdDetailsProps): React.ReactElement => {
@@ -88,7 +90,7 @@ export const HouseholdDetails = ({
             <Grid item xs={6}>
               <LabelizedField label={t('Head of Household')}>
                 <ContentLink
-                  href={`/${businessArea}/population/individuals/${household?.headOfHousehold?.id}`}
+                  href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
                 >
                   {household?.headOfHousehold?.fullName}
                 </ContentLink>
@@ -171,6 +173,7 @@ export const HouseholdDetails = ({
               {household?.unicefId && (
                 <LinkedGrievancesModal
                   household={household}
+                  baseUrl={baseUrl}
                   businessArea={businessArea}
                   grievancesChoices={grievancesChoices}
                 />
@@ -205,9 +208,7 @@ export const HouseholdDetails = ({
                 <Box key={item.id} mb={2}>
                   <Grid container key={item.id}>
                     <Grid item xs={6}>
-                      <ContentLink
-                        href={`/${businessArea}/programs/${item.id}`}
-                      >
+                      <ContentLink href={`/${baseUrl}/programs/${item.id}`}>
                         {item.name}
                       </ContentLink>
                     </Grid>

@@ -11,7 +11,7 @@ import { PageHeader } from '../../core/PageHeader';
 interface CreateTargetPopulationHeaderProps {
   handleSubmit: () => Promise<void>;
   values;
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
   loading: boolean;
 }
@@ -19,7 +19,7 @@ interface CreateTargetPopulationHeaderProps {
 export function CreateTargetPopulationHeader({
   handleSubmit,
   values,
-  businessArea,
+  baseUrl,
   permissions,
   loading,
 }: CreateTargetPopulationHeaderProps): React.ReactElement {
@@ -28,7 +28,7 @@ export function CreateTargetPopulationHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Targeting'),
-      to: `/${businessArea}/target-population/`,
+      to: `/${baseUrl}/target-population/`,
     },
   ];
 

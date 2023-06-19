@@ -198,10 +198,10 @@ export const LookUpSelection = ({
         filtersHouseholdApplied={appliedFilterHH}
         filtersTargetPopulationApplied={appliedFilterTP}
         filtersRDIApplied={appliedFilterRDI}
-        businessArea={businessArea}
         onValueChange={onValueChange}
         values={values}
         handleChange={handleChange}
+        businessArea={businessArea}
       />
     </Box>
   );
