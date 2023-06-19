@@ -363,7 +363,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 270px;"
+                style="height: 54px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"

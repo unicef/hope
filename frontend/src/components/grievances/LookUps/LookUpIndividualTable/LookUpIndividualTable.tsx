@@ -23,7 +23,6 @@ interface LookUpIndividualTableProps {
   setSelectedHousehold;
   ticket?;
   excludedId?;
-  withdrawn?: boolean;
   noTableStyling?;
 }
 

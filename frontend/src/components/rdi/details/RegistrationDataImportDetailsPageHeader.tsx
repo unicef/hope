@@ -83,7 +83,7 @@ export function RegistrationDataImportDetailsPageHeader({
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/grievance-and-feedback/rdi/${registration.id}`}
+            to={`/${businessArea}/grievance/rdi/${registration.id}`}
           >
             {t('View Tickets')}
           </Button>
