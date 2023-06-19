@@ -75,6 +75,7 @@ export const GrievanceTicket = gql`
       linkedTickets {
         id
         unicefId
+        category
         status
         household {
           id
@@ -83,6 +84,7 @@ export const GrievanceTicket = gql`
       }
       existingTickets {
         id
+        category
         unicefId
         status
         household {

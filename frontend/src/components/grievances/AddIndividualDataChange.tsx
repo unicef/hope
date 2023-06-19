@@ -166,53 +166,6 @@ export const AddIndividualDataChange = ({
             render={(arrayHelpers) => {
               return (
                 <>
-                  {values.individualData?.documents?.map((item) => (
-                    <DocumentField
-                      id={item.node.id}
-                      onDelete={() =>
-                        removeItemById(
-                          values.individualData.documents,
-                          item.node.id,
-                          arrayHelpers,
-                        )
-                      }
-                      countryChoices={data.countriesChoices}
-                      documentTypeChoices={data.documentTypeChoices}
-                      baseName='individualData.documents'
-                      setFieldValue={setFieldValue}
-                      values={values}
-                    />
-                  ))}
-
-                  <Grid item xs={8} />
-                  <Grid item xs={12}>
-                    <Button
-                      color='primary'
-                      onClick={() => {
-                        arrayHelpers.push({
-                          country: null,
-                          type: null,
-                          number: '',
-                        });
-                      }}
-                      disabled={isEditTicket}
-                      startIcon={<AddCircleOutline />}
-                    >
-                      {t('Add Document')}
-                    </Button>
-                  </Grid>
-                </>
-              );
-            }}
-          />
-          ))
-        </Grid>
-        <Grid container spacing={3}>
-          <FieldArray
-            name='individualData.documents'
-            render={(arrayHelpers) => {
-              return (
-                <>
                   {values.individualData?.documents?.map((item) => {
                     const existingOrNewId = item.node?.id || item.id;
                     return (
@@ -240,6 +193,7 @@ export const AddIndividualDataChange = ({
                     <Button
                       color='primary'
                       startIcon={<AddCircleOutline />}
+                      disabled={isEditTicket}
                       onClick={() => {
                         arrayHelpers.push({
                           id: uuidv4(),

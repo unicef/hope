@@ -387,7 +387,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 486px;"
+                style="height: 54px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"

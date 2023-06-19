@@ -3,13 +3,17 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
 import { Redirect, Switch, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAllBusinessAreasQuery } from '../__generated__/graphql';
 import { AppBar } from '../components/core/AppBar';
 import { Drawer } from '../components/core/Drawer/Drawer';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { SentryRoute } from '../components/core/SentryRoute';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { MiśTheme } from '../theme';
-import { useAllBusinessAreasQuery } from '../__generated__/graphql';
+import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
+import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
+import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
+import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -18,15 +22,16 @@ import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
-import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
-import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
-import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpPaymentPlanPage';
+import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
 import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import { PaymentDetailsPage } from './pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
 import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
@@ -52,24 +57,17 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
-import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
-import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
-import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
-import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
-import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
-import { CreateSurveyPage } from './pages/accountability/surveys/CreateSurveyPage';
-import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsPage';
-import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
-import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
-import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
-import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpPaymentPlanPage';
 
 const Root = styled.div`
   display: flex;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
   overflow: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
@@ -197,36 +195,37 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
+          <SentryRoute path='/:businessArea/grievance/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/user-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/edit-ticket/user-generated/:id'>
             <EditGrievancePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/system-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/edit-ticket/system-generated/:id'>
             <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/tickets/user-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/tickets/system-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
+          <SentryRoute path='/:businessArea/grievance/rdi/:id'>
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
+          <SentryRoute path='/:businessArea/grievance/payment-verification/:cashPlanId'>
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated'>
+          <SentryRoute path='/:businessArea/grievance/tickets/user-generated'>
             <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated'>
+          <SentryRoute path='/:businessArea/grievance/tickets/system-generated'>
             <GrievancesTablePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
+          <SentryRoute path='/:businessArea/grievance/dashboard'>
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
+          {/* TODO: uncomment when ready for deployment
           <SentryRoute path='/:businessArea/accountability/communication/create'>
             <CreateCommunicationPage />
           </SentryRoute>
@@ -235,7 +234,7 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/communication'>
             <CommunicationPage />
-          </SentryRoute>
+          </SentryRoute> */}
           <SentryRoute path='/:businessArea/accountability/feedback/create'>
             <CreateFeedbackPage />
           </SentryRoute>
@@ -248,6 +247,7 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/accountability/feedback'>
             <FeedbackPage />
           </SentryRoute>
+          {/* TODO: uncomment when ready for deployment
           <SentryRoute path='/:businessArea/accountability/surveys/create'>
             <CreateSurveyPage />
           </SentryRoute>
@@ -256,7 +256,7 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/surveys'>
             <SurveysPage />
-          </SentryRoute>
+          </SentryRoute> */}
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
           </SentryRoute>
