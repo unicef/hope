@@ -1,25 +1,25 @@
+import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Checkbox } from '@material-ui/core';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { StatusBox } from '../../core/StatusBox';
-import {
-  grievanceTicketStatusToColor,
-  grievanceTicketBadgeColors,
-  renderUserName,
-} from '../../../utils/utils';
-import { UniversalMoment } from '../../core/UniversalMoment';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../__generated__/graphql';
-import { BlackLink } from '../../core/BlackLink';
-import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import {
+  grievanceTicketBadgeColors,
+  grievanceTicketStatusToColor,
+  renderUserName,
+} from '../../../utils/utils';
+import { BlackLink } from '../../core/BlackLink';
+import { StatusBox } from '../../core/StatusBox';
+import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../core/UniversalMoment';
+import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';
 
 interface GrievancesTableRowProps {
@@ -42,7 +42,7 @@ interface GrievancesTableRowProps {
   initialVariables;
 }
 
-export function GrievancesTableRow({
+export const GrievancesTableRow = ({
   ticket,
   statusChoices,
   categoryChoices,
@@ -55,13 +55,14 @@ export function GrievancesTableRow({
   optionsData,
   setInputValue,
   initialVariables,
-}: GrievancesTableRowProps): React.ReactElement {
-  const location = useLocation();
+}: GrievancesTableRowProps): React.ReactElement => {
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
-  const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
-  const detailsPath = `/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`;
+  const detailsPath = getGrievanceDetailsPath(
+    ticket.id,
+    ticket.category,
+    businessArea,
+  );
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType
@@ -179,4 +180,4 @@ export function GrievancesTableRow({
       <TableCell align='left'>{ticket.totalDays}</TableCell>
     </ClickableTableRow>
   );
-}
+};

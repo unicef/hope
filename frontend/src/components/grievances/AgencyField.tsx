@@ -45,7 +45,7 @@ export function AgencyField({
           name={`${agencyFieldName}.partner`}
           fullWidth
           variant='outlined'
-          label={t('Agency')}
+          label={t('Partner')}
           component={FormikSelectField}
           choices={identityTypeChoices}
           required
