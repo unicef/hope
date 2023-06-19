@@ -217,7 +217,7 @@ export const GrievancesTable = ({
                   variant='contained'
                   color='primary'
                   component={Link}
-                  to={`/${baseUrl}/grievance-and-feedback/new-ticket`}
+                  to={`/${baseUrl}/grievance/new-ticket`}
                   data-cy='button-new-ticket'
                 >
                   {t('NEW TICKET')}
@@ -231,7 +231,7 @@ export const GrievancesTable = ({
             AllGrievanceTicketQueryVariables
           >
             headCells={headCells}
-            title={t('Grievance and Feedback List')}
+            title={t('Grievance Tickets List')}
             rowsPerPageOptions={[10, 15, 20]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}

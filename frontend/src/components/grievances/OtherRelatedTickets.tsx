@@ -12,6 +12,7 @@ import {
   ApproveBox,
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 export const OtherRelatedTickets = ({
   ticket,
@@ -29,7 +30,9 @@ export const OtherRelatedTickets = ({
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.id} mb={1}>
-            <ContentLink href={`/${baseUrl}/grievance-and-feedback/${edge.id}`}>
+            <ContentLink
+              href={getGrievanceDetailsPath(edge.id, edge.category, baseUrl)}
+            >
               {edge.unicefId}
             </ContentLink>
           </Box>

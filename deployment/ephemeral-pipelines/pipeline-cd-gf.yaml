@@ -6,7 +6,7 @@ resources:
     source: '[CI] HOPE'
     trigger: 
       branches:
-      - new_gf
+      - global-program-filter
 
 
 variables:

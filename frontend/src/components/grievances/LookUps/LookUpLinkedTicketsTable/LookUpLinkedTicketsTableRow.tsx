@@ -10,6 +10,7 @@ import {
 import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { getGrievanceDetailsPath } from '../../utils/createGrievanceUtils';
 
 interface LookUpLinkedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -51,7 +52,9 @@ export function LookUpLinkedTicketsTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${baseUrl}/grievance-and-feedback/${ticket.id}`}>
+        <BlackLink
+          to={getGrievanceDetailsPath(ticket.id, ticket.category, baseUrl)}
+        >
           {ticket.unicefId}
         </BlackLink>
       </TableCell>

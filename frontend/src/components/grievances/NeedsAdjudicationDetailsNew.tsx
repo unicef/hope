@@ -204,7 +204,7 @@ export function NeedsAdjudicationDetailsNew({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${baseUrl}/grievance-and-feedback/new-ticket`,
+                  pathname: `/${baseUrl}/grievance/new-ticket`,
                   state: { linkedTicketId: ticket.id },
                 })
               }
