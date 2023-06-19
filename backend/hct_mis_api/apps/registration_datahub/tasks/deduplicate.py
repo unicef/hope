@@ -318,7 +318,12 @@ class DeduplicateTask:
             registration_data_import.save()
             # TODO: add 'program' arg or None
             log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                None,
+                None,
+                old_rdi,
+                registration_data_import,
             )
 
         remove_elasticsearch_documents_by_matching_ids(
@@ -608,7 +613,7 @@ class DeduplicateTask:
         )
         # TODO: add 'program' arg or None
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, None, old_rdi, registration_data_import
         )
 
 
