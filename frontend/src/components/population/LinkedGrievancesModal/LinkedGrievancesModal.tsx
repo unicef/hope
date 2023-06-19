@@ -84,20 +84,19 @@ export const LinkedGrievancesModal = ({
   } = choicesToDict(grievancesChoices.grievanceTicketCategoryChoices);
 
   const renderRow = (row): React.ReactElement => {
+    const grievanceDetailsPath = getGrievanceDetailsPath(
+      row.id,
+      row.category,
+      baseUrl,
+    );
     return (
       <ClickableTableRow
         hover
-        onClick={() =>
-          history.push(getGrievanceDetailsPath(row.id, row.category, baseUrl))
-        }
+        onClick={() => history.push(grievanceDetailsPath)}
         key={row.id}
       >
         <TableCell align='left'>
-          <BlackLink
-            to={getGrievanceDetailsPath(row.id, row.category, baseUrl)}
-          >
-            {row.unicefId}
-          </BlackLink>
+          <BlackLink to={grievanceDetailsPath}>{row.unicefId}</BlackLink>
         </TableCell>
         <TableCell align='left'>{categoryChoices[row.category]}</TableCell>
         <TableCell align='left'>
@@ -114,22 +113,23 @@ export const LinkedGrievancesModal = ({
 
   const renderGrievances = (): Array<React.ReactElement> => {
     return allGrievances.length
-      ? allGrievances.map((el) => (
-          <span key={el.node.id}>
-            <ContentLink
-              href={getGrievanceDetailsPath(
-                el.node.id,
-                el.node.category,
-                baseUrl,
-              )}
-            >
-              {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${
-                statusChoices[el.node.status]
-              }`}
-            </ContentLink>{' '}
-            <br />
-          </span>
-        ))
+      ? allGrievances.map((el) => {
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            el.node.id,
+            el.node.category,
+            baseUrl,
+          );
+          return (
+            <span key={el.node.id}>
+              <ContentLink href={grievanceDetailsPath}>
+                {`${el.node.unicefId} - ${
+                  categoryChoices[el.node.category]
+                } - ${statusChoices[el.node.status]}`}
+              </ContentLink>{' '}
+              <br />
+            </span>
+          );
+        })
       : [<span>-</span>];
   };
 

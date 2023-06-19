@@ -328,6 +328,12 @@ export const GrievanceDetailsToolbar = ({
     ].includes(ticket.issueType?.toString());
   };
 
+  const grievanceEditPath = getGrievanceEditPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+  );
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
@@ -340,7 +346,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={getGrievanceEditPath(ticket.id, ticket.category, baseUrl)}
+              to={grievanceEditPath}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >

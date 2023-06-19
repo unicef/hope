@@ -36,19 +36,20 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const existingTickets = data.existingGrievanceTickets.edges;
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
-      ? tickets.map((edge) => (
-          <Box key={edge.node.id} mb={1}>
-            <ContentLink
-              href={getGrievanceDetailsPath(
-                edge.node.id,
-                edge.node.category,
-                baseUrl,
-              )}
-            >
-              {edge.node.unicefId}
-            </ContentLink>
-          </Box>
-        ))
+      ? tickets.map((edge) => {
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.node.id,
+            edge.node.category,
+            baseUrl,
+          );
+          return (
+            <Box key={edge.node.id} mb={1}>
+              <ContentLink href={grievanceDetailsPath}>
+                {edge.node.unicefId}
+              </ContentLink>
+            </Box>
+          );
+        })
       : '-';
 
   const openExistingTickets = existingTickets.length

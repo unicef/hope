@@ -17,9 +17,6 @@ import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedba
 import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
 import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
-import { CreateSurveyPage } from './pages/accountability/surveys/CreateSurveyPage';
-import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsPage';
-import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
