@@ -19,7 +19,7 @@ describe("Targeting", () => {
   describe("Smoke tests Targeting", () => {
     it("Check Targeting page", () => {
       cy.scenario([
-        "Go to Payment Targeting page",
+        "Go to Targeting page",
         "Check if all elements on page exist",
       ]);
       t.checkElementsOnPage();
