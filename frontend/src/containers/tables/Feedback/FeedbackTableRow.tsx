@@ -10,6 +10,7 @@ import { ClickableTableRow } from '../../../components/core/Table/ClickableTable
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
+import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackNode;
@@ -23,8 +24,14 @@ export const FeedbackTableRow = ({
   const history = useHistory();
   const businessArea = useBusinessArea();
   const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup?.id}`;
-  const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
+  const householdDetailsPath = `/${businessArea}/population/household/${feedback.householdLookup?.id}`;
+  const grievanceDetailsPath = feedback.linkedGrievance
+    ? getGrievanceDetailsPath(
+        feedback.linkedGrievance?.id,
+        feedback.linkedGrievance?.category,
+        businessArea,
+      )
+    : null;
 
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);

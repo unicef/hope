@@ -8,6 +8,11 @@ const Link = styled.a`
   color: #000;
   font-size: 14px;
   line-height: 19px;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
 `;
 
 export const ContentLink = ({
