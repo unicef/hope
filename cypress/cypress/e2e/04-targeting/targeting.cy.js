@@ -17,15 +17,23 @@ describe("Targeting", () => {
   });
 
   describe("Smoke tests Targeting", () => {
-    it.only("Check Targeting page", () => {
+    it("Check Targeting page", () => {
       cy.scenario([
         "Go to Payment Targeting page",
         "Check if all elements on page exist",
       ]);
       t.checkElementsOnPage();
     });
-    it.skip("Check Targeting Details page", () => {});
-    it.skip("Check Targeting New Ticket page", () => {});
+    it("Check Targeting Details page", () => {
+      t.selectStatus("Open");
+      t.getTargetPopulationsRows().should("have.length", 1);
+      t.chooseTargetPopulationRow(0).click();
+      td.checkElementsOnPage("OPEN");
+    });
+    it("Check Targeting New Ticket page", () => {
+      t.getButtonCreateNew().click();
+      tcn.checkElementsOnPage();
+    });
   });
 
   describe("Component tests Targeting", () => {

@@ -11,6 +11,8 @@ export default class Targeting extends BaseComponent {
   buttonCreateNew = 'a[data-cy="button-target-population-create-new"]';
   tabTitle = 'h6[data-cy="table-title"]';
   tabColumnLabel = 'span[data-cy="table-label"]';
+  statusOptions = 'li[role="option"]';
+  rows = 'tr[role="checkbox"]';
 
   // Texts
 
@@ -24,6 +26,7 @@ export default class Targeting extends BaseComponent {
   textTabDateCreated = "Date Created";
   textTabLastEdited = "Last edited";
   textTabCreatedBy = "Created by";
+  buttonApply = 'button[data-cy="button-filters-apply"]';
 
   // Elements
 
@@ -42,6 +45,9 @@ export default class Targeting extends BaseComponent {
   getTabColumnDateCreated = () => cy.get(this.tabColumnLabel).eq(4);
   getTabColumnLastEdited = () => cy.get(this.tabColumnLabel).eq(5);
   getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(6);
+  getStatusOption = () => cy.get(this.statusOptions);
+  getApply = () => cy.get(this.buttonApply);
+  getTargetPopulationsRows = () => cy.get(this.rows);
 
   checkElementsOnPage() {
     this.getTitlePage().should("be.visible").contains(this.textTitlePage);
@@ -72,5 +78,16 @@ export default class Targeting extends BaseComponent {
       .scrollIntoView()
       .should("be.visible")
       .contains(this.textTabCreatedBy);
+  }
+
+  selectStatus(status) {
+    this.getStatusFilter().click();
+    this.getStatusOption().contains(status).click();
+    this.getStatusOption().contains(status).type("{esc}");
+    this.getApply().click();
+  }
+
+  chooseTargetPopulationRow(row) {
+    return this.getTargetPopulationsRows().eq(row);
   }
 }

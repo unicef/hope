@@ -108,6 +108,7 @@ export default class PaymentVerification extends BaseComponent {
   selectStatus(status) {
     this.getStatus().click();
     this.getStatusOption().contains(status).click();
+    this.getStatusOption().contains(status).type("{esc}");
     this.getApply().click();
   }
 }
