@@ -12,6 +12,7 @@ export default class PaymentVerification extends BaseComponent {
   programme = 'div[data-cy="filter-program"]';
   statusOptions = 'li[role="option"]';
   listOfCashPlansTitle = 'h6[data-cy="table-title"]';
+  buttonApply = 'button[data-cy="button-filters-apply"]';
   tableTitle = 'table[data-cy="table-title"]';
   tableColumn = 'span[data-cy="table-label"]';
   rows = 'tr[data-cy="cash-plan-table-row"]';
@@ -52,6 +53,7 @@ export default class PaymentVerification extends BaseComponent {
   getLastModifiedDate = () => cy.get(this.tableColumn).eq(5);
   getCashPlanRows = () => cy.get(this.rows);
   getStatusOption = () => cy.get(this.statusOptions);
+  getApply = () => cy.get(this.buttonApply);
 
   checkPaymentVerificationTitle() {
     return this.getPaymentVerificationTitle().contains(this.textTitle);
@@ -90,6 +92,7 @@ export default class PaymentVerification extends BaseComponent {
       .should("be.visible")
       .contains(this.textColumnProgramme);
     this.getLastModifiedDate()
+      .scrollIntoView()
       .should("be.visible")
       .contains(this.textLastModifiedDate);
   }
@@ -105,5 +108,6 @@ export default class PaymentVerification extends BaseComponent {
   selectStatus(status) {
     this.getStatus().click();
     this.getStatusOption().contains(status).click();
+    this.getApply().click();
   }
 }

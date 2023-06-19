@@ -50,7 +50,7 @@ Cypress.Commands.add("initScenario", (scenario) => {
   });
 });
 
-Cypress.Commands.add("scenario", (steps: Array) => {
+Cypress.Commands.add("scenario", (steps) => {
   let outputText = "";
   steps.forEach((step, index) => {
     outputText += index + 1 + ". " + step + "\n";
@@ -93,5 +93,5 @@ Cypress.on("fail", (error, runnable) => {
 
     addContext({ test }, screenshot);
   });
-  throw new Error();
+  throw error;
 });

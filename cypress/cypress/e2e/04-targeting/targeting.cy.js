@@ -22,6 +22,7 @@ describe("Targeting", () => {
         "Go to Payment Targeting page",
         "Check if all elements on page exist",
       ]);
+      t.checkElementsOnPage();
     });
     it.skip("Check Targeting Details page", () => {});
     it.skip("Check Targeting New Ticket page", () => {});
