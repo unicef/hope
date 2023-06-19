@@ -4,10 +4,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import {
   ProgramStatus,
   TargetPopulationQuery,
@@ -15,11 +11,15 @@ import {
   useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '../../../utils/utils';
+import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { TargetingCriteria } from '../TargetingCriteria';
 import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
-import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
+import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
 const Label = styled.p`
@@ -51,7 +51,7 @@ export const EditTargetPopulation = ({
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const {
     data: allProgramsData,
     loading: loadingPrograms,
@@ -112,7 +112,7 @@ export const EditTargetPopulation = ({
         },
       });
       showMessage(t('Target Population Updated'), {
-        pathname: `/${businessArea}/target-population/${values.id}`,
+        pathname: `/${baseUrl}/target-population/${values.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -141,7 +141,7 @@ export const EditTargetPopulation = ({
               handleSubmit={submitForm}
               values={values}
               loading={loading}
-              businessArea={businessArea}
+              baseUrl={baseUrl}
               targetPopulation={targetPopulation}
             />
             <TargetPopulationProgramme

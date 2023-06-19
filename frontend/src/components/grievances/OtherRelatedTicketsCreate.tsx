@@ -1,10 +1,10 @@
 import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
@@ -16,7 +16,7 @@ import {
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [show, setShow] = useState(false);
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -38,7 +38,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
             <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
+              href={`/${baseUrl}/grievance-and-feedback/${edge.node.id}`}
             >
               {edge.node.unicefId}
             </ContentLink>

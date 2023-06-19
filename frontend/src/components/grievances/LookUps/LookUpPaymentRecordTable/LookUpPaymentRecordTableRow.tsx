@@ -2,7 +2,6 @@ import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
@@ -11,6 +10,7 @@ import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { StatusBox } from '../../../core/StatusBox';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordAndPaymentNode;
@@ -29,7 +29,7 @@ export function LookUpPaymentRecordTableRow({
   selected,
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const isSelected = (name: string): boolean => selected.includes(name);
@@ -38,9 +38,9 @@ export function LookUpPaymentRecordTableRow({
 
   const renderUrl = (objType): string => {
     if (objType === 'Payment') {
-      return `/${businessArea}/payment-module/payments/${paymentRecord.id}`;
+      return `/${baseUrl}/payment-module/payments/${paymentRecord.id}`;
     }
-    return `/${businessArea}/payment-records/${paymentRecord.id}`;
+    return `/${baseUrl}/payment-records/${paymentRecord.id}`;
   };
 
   return (

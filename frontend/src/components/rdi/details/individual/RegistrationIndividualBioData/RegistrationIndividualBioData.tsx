@@ -30,14 +30,14 @@ const BorderBox = styled.div`
 
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
-  businessArea: string;
+  baseUrl: string;
   choicesData: HouseholdChoiceDataQuery;
 }
 
 export function RegistrationIndividualBioData({
   individual,
   choicesData,
-  businessArea,
+  baseUrl,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
@@ -153,7 +153,7 @@ export function RegistrationIndividualBioData({
           <LabelizedField label={t('Household ID')}>
             {individual?.household?.id ? (
               <ContentLink
-                href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
+                href={`/${baseUrl}/registration-data-import/household/${individual?.household?.id}`}
               >
                 {individual?.household.importId}
               </ContentLink>

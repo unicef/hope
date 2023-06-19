@@ -14,7 +14,6 @@ import { CreateVerificationPlan } from '../../../components/payments/CreateVerif
 import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
@@ -26,6 +25,7 @@ import {
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   display: flex;
@@ -51,7 +51,7 @@ const BottomTitle = styled.div`
 export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [filter, setFilter] = useState({
     search: null,
     status: null,
@@ -79,7 +79,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification`,
+      to: `/${baseUrl}/payment-verification`,
     },
   ];
 
@@ -113,7 +113,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink to={`/${businessArea}/cashplans/${cashPlan.id}`}>
+        <BlackLink to={`/${baseUrl}/cashplans/${cashPlan.id}`}>
           {t('Cash Plan')} {cashPlan.caId}
         </BlackLink>
       }
@@ -139,7 +139,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
+            to={`/${baseUrl}/grievance-and-feedback/payment-verification/${decodeIdString(
               cashPlan.id,
             )}`}
           >

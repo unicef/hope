@@ -5,7 +5,6 @@ import { BlackLink } from '../../../components/core/BlackLink';
 import { StatusBox } from '../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   formatCurrency,
@@ -15,6 +14,7 @@ import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface ProgrammesTableRowProps {
   program: ProgramNode;
@@ -26,8 +26,8 @@ export function ProgrammesTableRow({
   choicesData,
 }: ProgrammesTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const programDetailsPath = `/${businessArea}/programs/${program.id}`;
+  const { baseUrl } = useBaseUrl();
+  const programDetailsPath = `/${baseUrl}/programs/${program.id}`;
   const handleClick = (): void => {
     history.push(programDetailsPath);
   };

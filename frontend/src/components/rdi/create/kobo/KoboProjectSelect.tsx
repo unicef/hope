@@ -11,7 +11,7 @@ import {
 import styled from 'styled-components';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useAllKoboProjectsQuery } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const ComboBox = styled(Select)`
   & {
@@ -27,7 +27,7 @@ const StyledInputLabel = styled(InputLabel)`
 
 export function KoboProjectSelect(): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const [field] = useField('koboAssetId');
   const { data: koboProjectsData, loading, error } = useAllKoboProjectsQuery({
     variables: { businessAreaSlug: businessArea },

@@ -51,7 +51,7 @@ interface LinkedTicketsModalProps {
   categoryChoices: { [id: number]: string };
   statusChoices: { [id: number]: string };
   canViewDetails: boolean;
-  businessArea: string;
+  baseUrl: string;
   issueTypeChoicesData;
 }
 
@@ -60,7 +60,7 @@ export const LinkedTicketsModal = ({
   categoryChoices,
   statusChoices,
   canViewDetails,
-  businessArea,
+  baseUrl,
   issueTypeChoicesData,
 }: LinkedTicketsModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -98,17 +98,14 @@ export const LinkedTicketsModal = ({
         hover
         onClick={
           canViewDetails
-            ? () =>
-                history.push(
-                  `/${businessArea}/grievance-and-feedback/${row.id}`,
-                )
+            ? () => history.push(`/${baseUrl}/grievance-and-feedback/${row.id}`)
             : undefined
         }
         key={row.id}
       >
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={`/${businessArea}/grievance-and-feedback/${row.id}`}>
+            <BlackLink to={`/${baseUrl}/grievance-and-feedback/${row.id}`}>
               {row.unicefId}
             </BlackLink>
           ) : (

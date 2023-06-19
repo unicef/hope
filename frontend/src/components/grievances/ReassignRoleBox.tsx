@@ -1,16 +1,16 @@
 import { Box, Paper, Typography } from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
-import isEmpty from 'lodash/isEmpty';
 import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
@@ -46,7 +46,7 @@ export const ReassignRoleBox = ({
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   let { individual } = ticket;
   let { household } = ticket;
   let reassignData;
@@ -100,7 +100,7 @@ export const ReassignRoleBox = ({
           </LabelizedField>
           <LabelizedField label={t('HOUSEHOLD ID')}>
             <ContentLink
-              href={`/${businessArea}/population/household/${el.household.id}`}
+              href={`/${baseUrl}/population/household/${el.household.id}`}
             >
               {el.household.unicefId}
             </ContentLink>
@@ -150,7 +150,7 @@ export const ReassignRoleBox = ({
               </LabelizedField>
               <LabelizedField label={t('HOUSEHOLD ID')}>
                 <ContentLink
-                  href={`/${businessArea}/population/household/${ticket?.household.id}`}
+                  href={`/${baseUrl}/population/household/${ticket?.household.id}`}
                 >
                   {household.unicefId}
                 </ContentLink>

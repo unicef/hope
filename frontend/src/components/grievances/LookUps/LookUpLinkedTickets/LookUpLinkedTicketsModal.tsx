@@ -10,12 +10,12 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const LookUpLinkedTicketsModal = ({
   onValueChange,
@@ -23,7 +23,7 @@ export const LookUpLinkedTicketsModal = ({
   lookUpDialogOpen,
   setLookUpDialogOpen,
 }): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const filterInitial = {
     search: '',

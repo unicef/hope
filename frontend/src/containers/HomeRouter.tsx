@@ -3,13 +3,23 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
 import { Redirect, Switch, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAllBusinessAreasQuery } from '../__generated__/graphql';
 import { AppBar } from '../components/core/AppBar';
 import { Drawer } from '../components/core/Drawer/Drawer';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { SentryRoute } from '../components/core/SentryRoute';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { MiśTheme } from '../theme';
-import { useAllBusinessAreasQuery } from '../__generated__/graphql';
+import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
+import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
+import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
+import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
+import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
+import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
+import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
+import { CreateSurveyPage } from './pages/accountability/surveys/CreateSurveyPage';
+import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsPage';
+import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -18,15 +28,16 @@ import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
-import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
-import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
-import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpPaymentPlanPage';
+import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
 import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import { PaymentDetailsPage } from './pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
 import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
@@ -52,17 +63,6 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
-import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
-import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
-import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
-import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
-import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
-import { CreateSurveyPage } from './pages/accountability/surveys/CreateSurveyPage';
-import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsPage';
-import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
-import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
-import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
-import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpPaymentPlanPage';
 
 const Root = styled.div`
   display: flex;
@@ -87,30 +87,52 @@ export function HomeRouter(): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-  const { data, loading } = useAllBusinessAreasQuery({
+  const {
+    data: businessAreaData,
+    loading: businessAreaLoading,
+  } = useAllBusinessAreasQuery({
     variables: {
       slug: businessArea,
     },
     fetchPolicy: 'cache-first',
   });
-
-  if (!data) {
+  if (!businessAreaData) {
     return null;
   }
 
-  if (loading) {
+  if (businessAreaLoading) {
     return <LoadingComponent />;
   }
-  const allBusinessAreasSlugs = data.allBusinessAreas.edges.map(
+
+  //TODO: uncomment when initial program is set
+
+  // const {
+  //   data: programsData,
+  //   loading: programsLoading,
+  // } = useAllProgramsForChoicesQuery({
+  //   variables: { businessArea, first: 100 },
+  //   fetchPolicy: 'cache-first',
+  // });
+
+  // if (!businessAreaData || !programsData) {
+  //   return null;
+  // }
+
+  // if (businessAreaLoading || programsLoading) {
+  //   return <LoadingComponent />;
+  // }
+  const allBusinessAreasSlugs = businessAreaData.allBusinessAreas.edges.map(
     (el) => el.node.slug,
   );
+  // const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
+  // const isProgramValid = allProgramsIds.includes(programId);
+
+  // if (!isBusinessAreaValid || !isProgramValid) {
 
   if (!isBusinessAreaValid) {
     return <Redirect to='/' noThrow />;
   }
-
-  console.log('🤪🤪🤪🤪🤪🤪');
 
   return (
     <Root>
@@ -125,178 +147,190 @@ export function HomeRouter(): React.ReactElement {
       <MainContent data-cy='main-content'>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <SentryRoute path='/:businessArea/population/household/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/population/household/:id'>
             <PopulationHouseholdDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/population/individuals/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/population/individuals/:id'>
             <PopulationIndividualsDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/cashplans/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/cashplans/:id'>
             <CashPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute exact path='/:businessArea/target-population'>
+          <SentryRoute
+            exact
+            path='/:businessArea/programs/:programId/target-population'
+          >
             <TargetPopulationsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/target-population/create'>
+          <SentryRoute path='/:businessArea/programs/:programId/target-population/create'>
             <CreateTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/target-population/edit-tp/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/target-population/edit-tp/:id'>
             <EditTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/target-population/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/target-population/:id'>
             <TargetPopulationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/verification/payment-record/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/verification/payment-record/:id'>
             <VerificationPaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/verification/payment/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/verification/payment/:id'>
             <VerificationPaymentDetailsPage />
           </SentryRoute>
-          <SentryRoute exact path='/:businessArea/payment-verification'>
+          <SentryRoute
+            exact
+            path='/:businessArea/programs/:programId/payment-verification'
+          >
             <PaymentVerificationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-verification/cash-plan/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-verification/cash-plan/:id'>
             <CashPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-verification/payment-plan/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-verification/payment-plan/:id'>
             <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/csh-payment-verification/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/csh-payment-verification/:id'>
             <CashPlanVerificationRedirectPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/new-plan'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/new-plan'>
             <CreatePaymentPlanPage />
           </SentryRoute>
-          <SentryRoute exact path='/:businessArea/payment-module'>
+          <SentryRoute
+            exact
+            path='/:businessArea/programs/:programId/payment-module'
+          >
             <PaymentModulePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/edit'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id/edit'>
             <EditFollowUpPaymentPlanPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/create'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id/setup-fsp/create'>
             <SetFollowUpUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/edit'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id/setup-fsp/edit'>
             <EditFollowUpSetUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id/setup-fsp/create'>
             <SetUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id/setup-fsp/edit'>
             <EditSetUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id/edit'>
             <EditPaymentPlanPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payments/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payments/:id'>
             <PaymentDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id'>
             <PaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id'>
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/user-generated/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/edit-ticket/user-generated/:id'>
             <EditGrievancePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/system-generated/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/edit-ticket/system-generated/:id'>
             <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/tickets/user-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/tickets/system-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/rdi/:id'>
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/payment-verification/:cashPlanId'>
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/tickets/user-generated'>
             <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/tickets/system-generated'>
             <GrievancesTablePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
+          <SentryRoute path='/:businessArea/programs/:programId/grievance-and-feedback/dashboard'>
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/communication/create'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/communication/create'>
             <CreateCommunicationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/communication/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/communication/:id'>
             <CommunicationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/communication'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/communication'>
             <CommunicationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback/create'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback/create'>
             <CreateFeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback/edit-ticket/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback/edit-ticket/:id'>
             <EditFeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback/:id'>
             <FeedbackDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback'>
             <FeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/surveys/create'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/surveys/create'>
             <CreateSurveyPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/surveys/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/surveys/:id'>
             <SurveyDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/surveys'>
+          <SentryRoute path='/:businessArea/programs/:programId/accountability/surveys'>
             <SurveysPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/population/household'>
+          <SentryRoute path='/:businessArea/programs/:programId/population/household'>
             <PopulationHouseholdPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/population/individuals'>
+          <SentryRoute path='/:businessArea/programs/:programId/population/individuals'>
             <PopulationIndividualsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/programs/:id'>
             <ProgramDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-records/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/payment-records/:id'>
             <PaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs'>
+          <SentryRoute path='/:businessArea/programs/:programId/programs'>
             <ProgramsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/registration-data-import/household/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import/household/:id'>
             <RegistrationHouseholdDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/registration-data-import/individual/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import/individual/:id'>
             <RegistrationIndividualDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/registration-data-import/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import/:id'>
             <RegistrationDataImportDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/registration-data-import'>
+          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import'>
             <RegistrationDataImportPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/reporting/:id'>
+          <SentryRoute path='/:businessArea/programs/:programId/reporting/:id'>
             <ReportingDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/reporting'>
+          <SentryRoute path='/:businessArea/programs/:programId/reporting'>
             <ReportingPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/users-list'>
+          <SentryRoute path='/:businessArea/programs/:programId/users-list'>
             <UsersPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/activity-log'>
+          <SentryRoute path='/:businessArea/programs/:programId/activity-log'>
             <ActivityLogPage />
           </SentryRoute>
-          <SentryRoute label='/ - Dashboard' path='/:businessArea'>
+          <SentryRoute
+            label='/ - Dashboard'
+            path='/:businessArea/programs/:programId'
+          >
             <DashboardPage />
           </SentryRoute>
         </Switch>

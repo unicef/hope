@@ -1,25 +1,25 @@
+import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Checkbox } from '@material-ui/core';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { StatusBox } from '../../core/StatusBox';
-import {
-  grievanceTicketStatusToColor,
-  grievanceTicketBadgeColors,
-  renderUserName,
-} from '../../../utils/utils';
-import { UniversalMoment } from '../../core/UniversalMoment';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../__generated__/graphql';
-import { BlackLink } from '../../core/BlackLink';
-import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import {
+  grievanceTicketBadgeColors,
+  grievanceTicketStatusToColor,
+  renderUserName,
+} from '../../../utils/utils';
+import { BlackLink } from '../../core/BlackLink';
+import { StatusBox } from '../../core/StatusBox';
+import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../core/UniversalMoment';
+import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
 
 interface GrievancesTableRowProps {
@@ -57,11 +57,11 @@ export function GrievancesTableRow({
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement {
   const location = useLocation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
   const userOrSystem = isUserGenerated ? 'user-generated' : 'system-generated';
-  const detailsPath = `/${businessArea}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`;
+  const detailsPath = `/${baseUrl}/grievance-and-feedback/tickets/${userOrSystem}/${ticket.id}`;
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType
@@ -167,7 +167,7 @@ export function GrievancesTableRow({
           statusChoices={statusChoices}
           issueTypeChoicesData={issueTypeChoicesData}
           canViewDetails={canViewDetails}
-          businessArea={businessArea}
+          baseUrl={baseUrl}
         />
       </TableCell>
       <TableCell align='left'>

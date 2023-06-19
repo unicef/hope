@@ -2,11 +2,10 @@ import { MenuItem, Select } from '@material-ui/core';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../hooks/useBusinessArea';
-import { useCachedMe } from '../hooks/useCachedMe';
-import { useGlobalProgram } from '../hooks/useGlobalProgram';
 import { useAllProgramsForChoicesQuery } from '../__generated__/graphql';
 import { LoadingComponent } from '../components/core/LoadingComponent';
+import { useBaseUrl } from '../hooks/useBaseUrl';
+import { useGlobalProgram } from '../hooks/useGlobalProgram';
 
 const CountrySelect = styled(Select)`
   && {
@@ -47,15 +46,15 @@ const CountrySelect = styled(Select)`
 
 export const GlobalProgramSelect = (): React.ReactElement => {
   const program = useGlobalProgram();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
+    variables: { businessArea, first: 100 },
     fetchPolicy: 'cache-and-network',
   });
 
   const onChange = (e): void => {
-    history.push(`/${businessArea}/programs/${e.target.value}`);
+    history.push(`/${baseUrl}/programs/${e.target.value}`);
   };
   if (loading) {
     return <LoadingComponent />;

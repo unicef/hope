@@ -3,7 +3,6 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { Radio } from '@material-ui/core';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import {
@@ -12,6 +11,7 @@ import {
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpTargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
@@ -27,8 +27,8 @@ export function LookUpTargetPopulationTableRow({
   selectedTargetPopulation,
 }: LookUpTargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
+  const { baseUrl } = useBaseUrl();
+  const targetPopulationDetailsPath = `/${baseUrl}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(targetPopulation.id);
