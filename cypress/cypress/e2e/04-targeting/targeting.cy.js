@@ -2,9 +2,9 @@ import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
 
-let t = new Targeting();
-let td = new TDetailsPage();
-let tcn = new CreateNew();
+let targetingPage = new Targeting();
+let targetingDetailsPage = new TDetailsPage();
+let targetingCreateNewPage = new CreateNew();
 
 let programName = "TargetingProgram";
 
@@ -13,7 +13,7 @@ describe("Targeting", () => {
     cy.initScenario("targeting");
     cy.adminLogin();
     cy.navigateToHomePage();
-    t.clickMenuButtonTargeting();
+    targetingPage.clickMenuButtonTargeting();
   });
 
   describe("Smoke tests Targeting", () => {
@@ -22,17 +22,17 @@ describe("Targeting", () => {
         "Go to Targeting page",
         "Check if all elements on page exist",
       ]);
-      t.checkElementsOnPage();
+      targetingPage.checkElementsOnPage();
     });
     it("Check Targeting Details page", () => {
-      t.selectStatus("Open");
-      t.getTargetPopulationsRows().should("have.length", 1);
-      t.chooseTargetPopulationRow(0).click();
-      td.checkElementsOnPage("OPEN");
+      targetingPage.selectStatus("Open");
+      targetingPage.getTargetPopulationsRows().should("have.length", 1);
+      targetingPage.chooseTargetPopulationRow(0).click();
+      targetingDetailsPage.checkElementsOnPage("OPEN");
     });
     it("Check Targeting New Ticket page", () => {
-      t.getButtonCreateNew().click();
-      tcn.checkElementsOnPage();
+      targetingPage.getButtonCreateNew().click();
+      targetingCreateNewPage.checkElementsOnPage();
     });
   });
 
