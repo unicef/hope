@@ -26,10 +26,10 @@ docker-compose run --rm backend sh -c "black . && isort . && flake8 . && mypy ."
 
 ## Testing
 
-To run tests, you call `./manage.py test`. Example invocation:
+To run tests, you call `pytest hct_mis_api`. Example invocation:
 
 ```shell
-docker-compose run --rm backend python3 manage.py test -v3 --keepdb --settings hct_mis_api.settings.test --parallel
+docker-compose run --rm backend pytest hct_mis_api --reuse-db -n logical
 ```
 
 ## Linting

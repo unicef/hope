@@ -2,6 +2,8 @@ from typing import Any, Dict, Tuple
 
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 
 import factory
@@ -9,8 +11,13 @@ from django_webtest import WebTest
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.permissions import Permissions
 
 EXCLUDED_MODELS = []
 
@@ -54,8 +61,15 @@ class TestAdminSite(WebTest):
         "registration_datahub",
     ]
 
-    def setUp(self) -> None:
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+        business_area = BusinessAreaFactory(name="Afghanistan")
+        perm = Permission.objects.create(
+            name=Permissions.DOWNLOAD_STORAGE_FILE.name, content_type=ContentType.objects.first()
+        )
+        role = RoleFactory(subsystem="API", name="c", permissions=[perm.name])
+        cls.superuser.user_roles.create(role=role, business_area=business_area)
 
     @parameterized.expand(model_admins)
     def test_changelist(self, name: str, model_admin: ModelAdmin) -> None:

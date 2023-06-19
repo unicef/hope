@@ -30,6 +30,12 @@ x-django-envs: &django_envs
     - SECURE_CONTENT_TYPE_NOSNIFF=true
     - SECURE_REFERRER_POLICY=same-origin
     - SECURE_HSTS_SECONDS=0
+    - LOGGING_DISABLED=1
+    - CACHE_ENABLED=0
+    - ELASTICSEARCH_INDEX_PREFIX="test_"
+    - EXCHANGE_RATE_CACHE_EXPIRY=0
+    - CELERY_TASK_ALWAYS_EAGER=1
+    - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 
 volumes:
   backend-data:
