@@ -14,6 +14,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
     $businessArea: String
     $importDateRange: String
     $size: String
+    $programId: UUID
   ) {
     allRegistrationDataImports(
       after: $after
@@ -28,6 +29,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       businessArea: $businessArea
       importDateRange: $importDateRange
       size: $size
+      programId: $programId
     ) {
       pageInfo {
         hasNextPage
