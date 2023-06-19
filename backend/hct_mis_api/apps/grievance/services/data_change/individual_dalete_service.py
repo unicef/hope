@@ -55,6 +55,7 @@ class IndividualDeleteService(DataChangeService):
             individual_to_remove, details.role_reassign_data, user
         )
         individual_to_remove.withdraw()
+        # TODO: add 'program' arg or None
         log_create(
             Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual_to_remove, individual_to_remove
         )

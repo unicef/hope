@@ -141,7 +141,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             and not business_area.should_check_against_sanction_list()
         ):
             raise ValidationError("Cannot check against sanction list")
-
+        # TODO: add 'program' arg or None
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
@@ -191,6 +191,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
         rdi_obj.status = RegistrationDataImport.DEDUPLICATION
         rdi_obj.save()
+        # TODO: add 'program' arg or None
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_rdi_obj, rdi_obj
         )
@@ -228,7 +229,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             and not business_area.should_check_against_sanction_list()
         ):
             raise ValidationError("Cannot check against sanction list")
-
+        # TODO: add 'program' arg or None
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
@@ -273,7 +274,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         obj_hct.status = RegistrationDataImport.MERGE_SCHEDULED
         obj_hct.save()
         merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
-
+        # TODO: add 'program' arg or None
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
         )
@@ -317,7 +318,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             list(imported_individuals_to_remove.values_list("id", flat=True)),
             get_imported_individual_doc(obj_hct.business_area.slug),
         )
-
+        # TODO: add 'program' arg or None
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
         )
@@ -388,7 +389,7 @@ class DeleteRegistrationDataImport(graphene.Mutation):
         decoded_id = decode_id_string(kwargs.get("registration_data_import_id"))
         rdi_obj = RegistrationDataImport.objects.get(id=decoded_id)
         rdi_obj.delete()
-
+        # TODO: add 'program' arg or None
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, rdi_obj, None)
         return cls(ok=True)
 

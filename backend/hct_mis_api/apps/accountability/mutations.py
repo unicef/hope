@@ -61,6 +61,7 @@ class CreateCommunicationMessageMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE, business_area)
         message = MessageCrudServices.create(user, business_area, input)
+        # TODO: add 'program' arg or None
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", user, None, message)
         return cls(message=message)
 
@@ -81,6 +82,7 @@ class CreateFeedbackMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE, business_area)
         feedback = FeedbackCrudServices.create(user, business_area, input)
+        # TODO: add 'program' arg or None
         log_create(Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, None, feedback)
         return cls(feedback=feedback)
 
@@ -101,6 +103,7 @@ class UpdateFeedbackMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE, feedback.business_area.slug)
         updated_feedback = FeedbackCrudServices.update(feedback, input)
+        # TODO: add 'program' arg or None
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -146,6 +149,7 @@ class CreateSurveyMutation(PermissionMutation):
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE, business_area)
         survey = SurveyCrudServices.create(info.context.user, business_area, input)
         transaction.on_commit(partial(send_survey_to_users.delay, survey.id, input["flow"], business_area.id))
+        # TODO: add 'program' arg or None
         log_create(
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",

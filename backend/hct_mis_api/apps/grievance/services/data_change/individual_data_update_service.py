@@ -324,6 +324,7 @@ class IndividualDataUpdateService(DataChangeService):
         else:
             new_individual.recalculate_data()
         new_individual.refresh_from_db()
+        # TODO: add 'program' arg or None
         log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual, new_individual)
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
