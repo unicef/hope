@@ -23,7 +23,7 @@ class RegistrationDataImportFilter(FilterSet):
             "status": ["exact"],
             "name": ["exact", "startswith"],
             "business_area": ["exact"],
-            "program_id": ["exact"]
+            "program_id": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
