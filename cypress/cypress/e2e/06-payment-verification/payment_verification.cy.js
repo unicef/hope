@@ -103,7 +103,7 @@ describe("Payment Verification", () => {
         pv.chooseCashPlan(0).click();
         pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
       });
-      it.skip("Delete one Verification Plan", () => {
+      it("Delete Verification Plan", () => {
         pvd.getDeletePlan().click();
         pvd.getDelete().click();
         pvd.getNumberOfPlans().contains(1);
