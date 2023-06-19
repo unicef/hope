@@ -77,11 +77,11 @@ class RdiDiiaCreateTask:
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
     def create_rdi(
-        self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name"
+        self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name", is_open: bool = False
     ) -> RegistrationDataImport:
         number_of_individuals = 0
         number_of_households = 0
-
+        status = RegistrationDataImport.LOADING if is_open else RegistrationDataImport.IMPORTING
         rdi = RegistrationDataImport.objects.create(
             name=rdi_name,
             data_source=RegistrationDataImport.DIIA,
@@ -89,7 +89,7 @@ class RdiDiiaCreateTask:
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
             business_area=self.business_area,
-            status=RegistrationDataImport.IMPORTING,
+            status=status,
         )
 
         import_data = ImportData.objects.create(
