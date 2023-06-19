@@ -90,6 +90,7 @@ export default class PaymentVerification extends BaseComponent {
       .should("be.visible")
       .contains(this.textColumnProgramme);
     this.getLastModifiedDate()
+      .scrollIntoView()
       .should("be.visible")
       .contains(this.textLastModifiedDate);
   }

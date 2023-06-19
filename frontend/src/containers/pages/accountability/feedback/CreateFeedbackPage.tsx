@@ -334,11 +334,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                         <BoxWithBorders>
                           {values.selectedHousehold && (
                             <>
-                              <Typography variant='subtitle1'>
+                              {/* //TODO: Optional for now */}
+                              {/* <Typography variant='subtitle1'>
                                 {t(
                                   'Select correctly answered questions (minimum 5)',
                                 )}
-                              </Typography>
+                              </Typography> */}
                               <Box py={4}>
                                 <Typography variant='subtitle2'>
                                   {t('Household Questionnaire')}

@@ -3,11 +3,12 @@ import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -47,7 +48,11 @@ export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
   const mappedTickets = edges?.map((edge) => (
     <Box key={edge.node.id} mb={1}>
       <ContentLink
-        href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
+        href={getGrievanceDetailsPath(
+          edge.node.id,
+          edge.node.category,
+          businessArea,
+        )}
       >
         {edge.node.unicefId}
       </ContentLink>
