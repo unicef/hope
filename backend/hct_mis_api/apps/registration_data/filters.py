@@ -13,6 +13,7 @@ class RegistrationDataImportFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     import_date_range = DateRangeFilter(field_name="import_date__date")
     size = IntegerRangeFilter(field_name="number_of_households")
+    program_id = CharFilter(field="program_id")
 
     class Meta:
         model = RegistrationDataImport

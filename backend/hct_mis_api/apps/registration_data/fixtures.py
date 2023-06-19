@@ -7,6 +7,7 @@ from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 faker = Faker()
@@ -34,3 +35,4 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     number_of_households = factory.fuzzy.FuzzyInteger(3, 50)
     datahub_id = factory.Faker("uuid4")
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    program_id = factory.LazyAttribute(lambda _: Program.objects.first().id)
