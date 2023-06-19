@@ -9036,7 +9036,7 @@ export type CreateGrievanceMutation = (
     { __typename?: 'CreateGrievanceTicketMutation' }
     & { grievanceTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id'>
+      & Pick<GrievanceTicketNode, 'id' | 'category'>
     )>>> }
   )> }
 );
@@ -10713,7 +10713,7 @@ export type AllFeedbacksQuery = (
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )>, linkedGrievance: Maybe<(
           { __typename?: 'GrievanceTicketNode' }
-          & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
+          & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'category'>
         )> }
       )> }
     )>> }
@@ -10751,7 +10751,7 @@ export type FeedbackQuery = (
       & Pick<AreaNode, 'id' | 'name'>
     )>, linkedGrievance: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
+      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'category'>
     )>, feedbackMessages: (
       { __typename?: 'FeedbackMessageNodeConnection' }
       & { edges: Array<Maybe<(
@@ -10974,14 +10974,14 @@ export type GrievanceTicketQuery = (
       )> }
     )>>>, linkedTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
+      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'category' | 'status'>
       & { household: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
       )> }
     )>>>, existingTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
+      & Pick<GrievanceTicketNode, 'id' | 'category' | 'unicefId' | 'status'>
       & { household: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -15085,6 +15085,7 @@ export const CreateGrievanceDocument = gql`
   createGrievanceTicket(input: $input) {
     grievanceTickets {
       id
+      category
     }
   }
 }
@@ -19820,6 +19821,7 @@ export const AllFeedbacksDocument = gql`
         linkedGrievance {
           id
           unicefId
+          category
         }
       }
     }
@@ -19920,6 +19922,7 @@ export const FeedbackDocument = gql`
     linkedGrievance {
       id
       unicefId
+      category
     }
     feedbackMessages {
       edges {
@@ -20386,6 +20389,7 @@ export const GrievanceTicketDocument = gql`
     linkedTickets {
       id
       unicefId
+      category
       status
       household {
         id
@@ -20394,6 +20398,7 @@ export const GrievanceTicketDocument = gql`
     }
     existingTickets {
       id
+      category
       unicefId
       status
       household {

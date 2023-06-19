@@ -353,3 +353,40 @@ export function prepareVariables(businessArea, values) {
   );
   return prepareFunction(requiredVariables, values);
 }
+
+export const matchGrievanceUrlByCategory = (category: number): string => {
+  if (!category) return null;
+  const categoryString = category.toString();
+  const systemGeneratedGrievanceCategories = [
+    GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION,
+    GRIEVANCE_CATEGORIES.DEDUPLICATION,
+    GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
+  ];
+  if (systemGeneratedGrievanceCategories.includes(categoryString)) {
+    return 'system-generated';
+  }
+  return 'user-generated';
+};
+
+export const getGrievanceDetailsPath = (
+  ticketId: string,
+  category: number,
+  businessArea: string,
+): string => {
+  return `/${businessArea}/grievance/tickets/${matchGrievanceUrlByCategory(
+    category,
+  )}/${ticketId}`;
+};
+
+export const getGrievanceEditPath = (
+  ticketId: string,
+  category: number,
+  businessArea: string,
+): string => {
+  if (!ticketId || !category || !businessArea) {
+    return null;
+  }
+  return `/${businessArea}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
+    category,
+  )}/${ticketId}`;
+};
