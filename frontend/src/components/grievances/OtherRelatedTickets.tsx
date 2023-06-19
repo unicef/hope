@@ -28,15 +28,21 @@ export const OtherRelatedTickets = ({
 
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
-      ? tickets.map((edge) => (
-          <Box key={edge.id} mb={1}>
-            <ContentLink
-              href={getGrievanceDetailsPath(edge.id, edge.category, baseUrl)}
-            >
-              {edge.unicefId}
-            </ContentLink>
-          </Box>
-        ))
+      ? tickets.map((edge) => {
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.id,
+            edge.category,
+            baseUrl,
+          );
+
+          return (
+            <Box key={edge.id} mb={1}>
+              <ContentLink href={grievanceDetailsPath}>
+                {edge.unicefId}
+              </ContentLink>
+            </Box>
+          );
+        })
       : '-';
 
   const openExistingTickets =

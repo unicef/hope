@@ -93,27 +93,22 @@ export const LinkedTicketsModal = ({
 
   const renderRow = (row): React.ReactElement => {
     const issueType = renderIssueTypeName(row);
-
+    const grievanceDetailsPath = getGrievanceDetailsPath(
+      row.id,
+      row.category,
+      baseUrl,
+    );
     return (
       <ClickableTableRow
         hover
         onClick={
-          canViewDetails
-            ? () =>
-                history.push(
-                  getGrievanceDetailsPath(row.id, row.category, baseUrl),
-                )
-            : undefined
+          canViewDetails ? () => history.push(grievanceDetailsPath) : undefined
         }
         key={row.id}
       >
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink
-              to={getGrievanceDetailsPath(row.id, row.category, baseUrl)}
-            >
-              {row.unicefId}
-            </BlackLink>
+            <BlackLink to={grievanceDetailsPath}>{row.unicefId}</BlackLink>
           ) : (
             row.unicefId
           )}

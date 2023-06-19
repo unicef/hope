@@ -371,9 +371,9 @@ export const matchGrievanceUrlByCategory = (category: number): string => {
 export const getGrievanceDetailsPath = (
   ticketId: string,
   category: number,
-  businessArea: string,
+  baseUrl: string,
 ): string => {
-  return `/${businessArea}/grievance/tickets/${matchGrievanceUrlByCategory(
+  return `/${baseUrl}/grievance/tickets/${matchGrievanceUrlByCategory(
     category,
   )}/${ticketId}`;
 };
@@ -381,12 +381,12 @@ export const getGrievanceDetailsPath = (
 export const getGrievanceEditPath = (
   ticketId: string,
   category: number,
-  businessArea: string,
+  baseUrl: string,
 ): string => {
-  if (!ticketId || !category || !businessArea) {
+  if (!ticketId || !category) {
     return null;
   }
-  return `/${businessArea}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
+  return `/${baseUrl}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
     category,
   )}/${ticketId}`;
 };
