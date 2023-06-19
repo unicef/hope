@@ -12,6 +12,7 @@ from hct_mis_api.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import AbstractUser, User
+    from hct_mis_api.apps.program.models import Program
 
 
 class LogEntry(models.Model):
@@ -53,6 +54,7 @@ class LogEntry(models.Model):
         verbose_name=_("actor"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True)
 
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
 
@@ -67,6 +69,7 @@ def log_create(
     mapping: Dict,
     business_area_field: Any,
     user: Optional[Union["AbstractUser", "User"]] = None,
+    program: Optional["Program"] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:
@@ -89,6 +92,7 @@ def log_create(
         action=action,
         content_object=instance,
         user=user,
+        program=program,
         business_area=business_area,
         object_repr=str(instance),
         changes=create_diff(old_object, new_object, mapping)

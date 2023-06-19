@@ -508,6 +508,7 @@ def reassign_roles_on_disable_individual(
             new_individual.relationship = HEAD
             new_individual.save()
             if info:
+                # TODO: add 'program' arg or None
                 log_create(
                     Individual.ACTIVITY_LOG_MAPPING,
                     "business_area",
@@ -566,6 +567,7 @@ def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, i
             new_individual.relationship = HEAD
             new_individual.save()
             if info:
+                # TODO: add 'program' arg or None
                 log_create(
                     Individual.ACTIVITY_LOG_MAPPING,
                     "business_area",
@@ -632,6 +634,7 @@ def log_and_withdraw_household_if_needed(
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
 ) -> None:
+    # TODO: add 'program' arg or None
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
