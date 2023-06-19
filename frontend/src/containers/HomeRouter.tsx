@@ -60,10 +60,14 @@ import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 
 const Root = styled.div`
   display: flex;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
   overflow: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
@@ -189,34 +193,34 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
+          <SentryRoute path='/:businessArea/grievance/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/user-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/edit-ticket/user-generated/:id'>
             <EditGrievancePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/system-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/edit-ticket/system-generated/:id'>
             <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/tickets/user-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated/:id'>
+          <SentryRoute path='/:businessArea/grievance/tickets/system-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
+          <SentryRoute path='/:businessArea/grievance/rdi/:id'>
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
+          <SentryRoute path='/:businessArea/grievance/payment-verification/:cashPlanId'>
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/user-generated'>
+          <SentryRoute path='/:businessArea/grievance/tickets/user-generated'>
             <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets/system-generated'>
+          <SentryRoute path='/:businessArea/grievance/tickets/system-generated'>
             <GrievancesTablePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
+          <SentryRoute path='/:businessArea/grievance/dashboard'>
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
           {/* TODO: uncomment when ready for deployment

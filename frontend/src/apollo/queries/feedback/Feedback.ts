@@ -42,6 +42,7 @@ export const Feedback = gql`
       linkedGrievance {
         id
         unicefId
+        category
       }
       feedbackMessages {
         edges {

@@ -138,7 +138,7 @@ export function TableComponent<T>({
           return renderRow(row);
         })}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 54 * emptyRows }}>
+          <TableRow style={{ height: 54 }}>
             <TableCell colSpan={headCells.length} />
           </TableRow>
         )}

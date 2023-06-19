@@ -5,6 +5,7 @@ export const CREATE_GRIEVANCE_TICKET_MUTATION = gql`
     createGrievanceTicket(input: $input) {
       grievanceTickets {
         id
+        category
       }
     }
   }
