@@ -1,7 +1,6 @@
 import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,

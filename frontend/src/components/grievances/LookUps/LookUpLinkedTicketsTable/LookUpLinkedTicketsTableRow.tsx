@@ -35,6 +35,11 @@ export function LookUpLinkedTicketsTableRow({
   const { baseUrl } = useBaseUrl();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);
+  const grievanceDetailsPath = getGrievanceDetailsPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+  );
 
   return (
     <ClickableTableRow
@@ -52,11 +57,7 @@ export function LookUpLinkedTicketsTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          to={getGrievanceDetailsPath(ticket.id, ticket.category, baseUrl)}
-        >
-          {ticket.unicefId}
-        </BlackLink>
+        <BlackLink to={grievanceDetailsPath}>{ticket.unicefId}</BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusBox
