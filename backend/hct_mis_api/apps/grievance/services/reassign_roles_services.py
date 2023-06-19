@@ -38,6 +38,7 @@ def reassign_roles_on_disable_individual_service(
                 household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
+            # TODO: add 'program' arg or None
             log_create(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
@@ -93,6 +94,7 @@ def reassign_roles_on_update_service(individual: Individual, role_reassign_data:
             household.save()
             new_individual.relationship = HEAD
             new_individual.save()
+            # TODO: add 'program' arg or None
             log_create(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",

@@ -16,6 +16,7 @@ class LogEntryFilter(FilterSet):
     search = CharFilter(method="search_filter")
     module = CharFilter(field_name="content_type__model")
     user_id = CharFilter(method="search_user")
+    program_id = CharFilter(method="search_program")
 
     class Meta:
         model = LogEntry
@@ -36,3 +37,6 @@ class LogEntryFilter(FilterSet):
 
     def search_user(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
         return qs.filter(user__id=decode_id_string_required(value))
+
+    def search_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
+        return qs.filter(program__id=decode_id_string_required(value))
