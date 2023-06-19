@@ -113,7 +113,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_plan_object.get_program,
+            verification_plan.get_program,
             None,
             verification_plan,
         )
@@ -786,6 +786,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
