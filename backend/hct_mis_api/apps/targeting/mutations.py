@@ -153,8 +153,9 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population.full_clean()
         target_population.save()
         transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population.id))
-        # TODO: add 'program' arg or None
-        log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program, target_population
+        )
         return cls(target_population=target_population)
 
 
@@ -232,11 +233,11 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population.save()
         # prevent race between commit transaction and using in task
         transaction.on_commit(lambda: cls.rebuild_tp(should_rebuild_list, should_rebuild_stats, target_population))
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )
@@ -313,11 +314,11 @@ class LockTargetPopulationMutation(ValidatedMutation):
         target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
         target_population.save()
         transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )
@@ -342,11 +343,11 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
         target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
         target_population.save()
         transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )
@@ -387,11 +388,11 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 transaction.on_commit(
                     lambda: send_target_population_task.delay(target_population_id=target_population.id)
                 )
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )
@@ -444,9 +445,13 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_population_copy.save()
             target_population_copy.refresh_from_db()
             transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population_copy.id))
-            # TODO: add 'program' arg or None
             log_create(
-                TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population
+                TargetPopulation.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                info.context.user,
+                target_population.program,
+                None,
+                target_population,
             )
             return CopyTargetPopulationMutation(target_population_copy)
         except ValidationError as e:
@@ -494,11 +499,11 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
         cls.validate_is_finalized(target_population.status)
         target_population.delete()
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             _info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )
@@ -549,11 +554,11 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             for selection in HouseholdSelection.objects.filter(target_population=target_population):
                 selection.vulnerability_score = None
                 selection.save(update_fields=["vulnerability_score"])
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             _info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )
@@ -577,11 +582,11 @@ class RebuildTargetPopulationMutation(ValidatedMutation):
         target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
         target_population.save()
         transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population.id))
-        # TODO: add 'program' arg or None
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            target_population.program,
             old_target_population,
             target_population,
         )

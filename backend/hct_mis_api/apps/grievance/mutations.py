@@ -377,11 +377,11 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
             grievance_ticket = update_extra_method(grievance_ticket, extras, input)
-        # TODO: add 'program' arg or None
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
+            grievance_ticket.programme,
             old_grievance_ticket,
             grievance_ticket,
         )
@@ -596,11 +596,11 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                     approver=user,
                 )
             )
-        # TODO: add 'program' arg or None
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
+            grievance_ticket.programme,
             old_grievance_ticket,
             grievance_ticket,
         )

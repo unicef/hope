@@ -228,6 +228,7 @@ class IndividualDataUpdateService(DataChangeService):
 
     def close(self, user: AbstractUser) -> None:
         ticket_details = self.grievance_ticket.individual_data_update_ticket_details
+        program = self.grievance_ticket.programme
         if not ticket_details:
             return
         details = self.grievance_ticket.individual_data_update_ticket_details
@@ -297,7 +298,7 @@ class IndividualDataUpdateService(DataChangeService):
             household = Household.objects.select_for_update().get(id=household.id)
             household.head_of_household = new_individual
             household.save()
-        reassign_roles_on_update_service(new_individual, details.role_reassign_data, user)
+        reassign_roles_on_update_service(new_individual, details.role_reassign_data, user, program)
         if is_approved(role_data):
             handle_role(role_data.get("value"), household, new_individual)
         documents_to_create = [handle_add_document(document, new_individual) for document in documents]
@@ -324,8 +325,8 @@ class IndividualDataUpdateService(DataChangeService):
         else:
             new_individual.recalculate_data()
         new_individual.refresh_from_db()
-        # TODO: add 'program' arg or None
-        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual, new_individual)
+
+        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, program, old_individual, new_individual)
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
                 lambda: deduplicate_and_check_against_sanctions_list_task.delay(
