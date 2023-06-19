@@ -16,6 +16,7 @@ export const registrationMinimal = gql`
     dataSource
     numberOfHouseholds
     numberOfIndividuals
+    programId
   }
 `;
 

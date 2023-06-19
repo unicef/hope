@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, DateFilter, FilterSet
+from django_filters import CharFilter, DateFilter, FilterSet, UUIDFilter
 
 from hct_mis_api.apps.core.filters import DateRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -13,7 +13,7 @@ class RegistrationDataImportFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     import_date_range = DateRangeFilter(field_name="import_date__date")
     size = IntegerRangeFilter(field_name="number_of_households")
-    program_id = CharFilter(field="program_id")
+    program_id = UUIDFilter(field_name="program_id")
 
     class Meta:
         model = RegistrationDataImport
@@ -23,6 +23,7 @@ class RegistrationDataImportFilter(FilterSet):
             "status": ["exact"],
             "name": ["exact", "startswith"],
             "business_area": ["exact"],
+            "program_id": ["exact"]
         }
 
     order_by = CustomOrderingFilter(
