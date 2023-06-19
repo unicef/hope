@@ -14,7 +14,7 @@ describe("Payment Verification", () => {
 
   describe("Smoke tests Payment Verification", () => {
     it("Check Payment Verification page", () => {
-      pv.scenario([
+      cy.scenario([
         "Go to Payment Verification page",
         "Check if all elements on page exist",
       ]);
@@ -27,7 +27,7 @@ describe("Payment Verification", () => {
     // eslint-disable-next-line mocha/no-setup-in-describe
     pv.countCashPlanArray().forEach((row_no) => {
       it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
-        pv.scenario([
+        cy.scenario([
           "Go to Payment Verification page",
           "Choose and open cash plan",
           "Check if all elements on page exist",
@@ -53,7 +53,7 @@ describe("Payment Verification", () => {
         pvd.deleteVerificationPlan(0);
       });
       it("Create Verification Plan using random sampling", () => {
-        pv.scenario([
+        cy.scenario([
           "Search Pending cash plans",
           "Select first Pending cash plan",
           "Check if Payment Verification title exists",
@@ -64,7 +64,6 @@ describe("Payment Verification", () => {
           "Check if Verification Plan was created",
         ]);
         pv.selectStatus("Pending");
-        pv.getStatusOption().contains("Pending").type("{esc}");
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
         pvd.checkPaymentVerificationTitle();
@@ -85,20 +84,22 @@ describe("Payment Verification", () => {
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("123-21-CSH-00002");
+        pv.getPaymentPlanID().type("PP-0060-23-00000002");
+        pv.getApply().click();
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
         pvd.createNewVerificationPlan();
       });
       it.skip("Test_1", () => {
         pvd.getEditVP().contains("EDIT").click();
-        pvd.getCVPTitle;
+        pvd.getCVPTitle();
       });
     });
 
     context("Delete Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("123-21-CSH-00002");
+        pv.getPaymentPlanID().type("PP-0060-23-00000002");
+        pv.getApply().click();
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
         pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
@@ -112,7 +113,8 @@ describe("Payment Verification", () => {
 
     context("Activate Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("123-21-CSH-00002");
+        pv.getPaymentPlanID().type("PP-0060-23-00000002");
+        pv.getApply().click();
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
         pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
@@ -122,7 +124,7 @@ describe("Payment Verification", () => {
         pvd.deleteVerificationPlan(0);
       });
       it("Activate Verification Plan", () => {
-        pv.scenario([
+        cy.scenario([
           "Press Activation button",
           "Press Activate button on pop-up",
           "Check if Summary status = ACTIVE",
@@ -139,7 +141,8 @@ describe("Payment Verification", () => {
 
     context("Finish Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("123-21-CSH-00001");
+        pv.getPaymentPlanID().type("PP-0060-23-00000002");
+        pv.getApply().click();
         pv.getCashPlanRows().should("have.length", 1);
         pv.chooseCashPlan(0).click();
         pvd.createNewVerificationPlan(defaultNumberOfVPlans016);

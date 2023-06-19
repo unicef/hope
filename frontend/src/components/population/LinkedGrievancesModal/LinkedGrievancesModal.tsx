@@ -32,6 +32,7 @@ import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -87,12 +88,14 @@ export const LinkedGrievancesModal = ({
       <ClickableTableRow
         hover
         onClick={() =>
-          history.push(`/${baseUrl}/grievance-and-feedback/${row.id}`)
+          history.push(getGrievanceDetailsPath(row.id, row.category, baseUrl))
         }
         key={row.id}
       >
         <TableCell align='left'>
-          <BlackLink to={`/${baseUrl}/grievance-and-feedback/${row.id}`}>
+          <BlackLink
+            to={getGrievanceDetailsPath(row.id, row.category, baseUrl)}
+          >
             {row.unicefId}
           </BlackLink>
         </TableCell>
@@ -114,7 +117,11 @@ export const LinkedGrievancesModal = ({
       ? allGrievances.map((el) => (
           <span key={el.node.id}>
             <ContentLink
-              href={`/${baseUrl}/grievance-and-feedback/${el.node.id}`}
+              href={getGrievanceDetailsPath(
+                el.node.id,
+                el.node.category,
+                baseUrl,
+              )}
             >
               {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${
                 statusChoices[el.node.status]

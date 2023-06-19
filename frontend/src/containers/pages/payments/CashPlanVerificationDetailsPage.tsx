@@ -139,7 +139,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${baseUrl}/grievance-and-feedback/payment-verification/${decodeIdString(
+            to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
               cashPlan.id,
             )}`}
           >

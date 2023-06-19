@@ -66,9 +66,8 @@ function ObjectRepresentations({
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
-    grievanceticket: `/${baseUrl}/grievance-and-feedback/${btoa(
-      'GrievanceTicketNode:' + id,
-    )}`,
+    //TODO: add grievance ticket url based on category
+    grievanceticket: `/${baseUrl}/grievance/tickets`,
     household: `/${baseUrl}/population/household/${btoa(
       'HouseholdNode:' + id,
     )}`,

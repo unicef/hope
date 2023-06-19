@@ -5,7 +5,7 @@ trigger:
     - develop
     - staging
     - master
-    - new_gf
+    - global-program-filter
     - ops/*
   paths:
     exclude:

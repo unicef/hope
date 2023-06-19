@@ -66,8 +66,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery();
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
-  const userGeneratedPath = `/${baseUrl}/grievance-and-feedback/tickets/user-generated`;
-  const systemGeneratedPath = `/${baseUrl}/grievance-and-feedback/tickets/system-generated`;
+  const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
+  const systemGeneratedPath = `/${baseUrl}/grievance/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
     <Tab key={el} label={el} />
