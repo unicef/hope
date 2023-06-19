@@ -2,31 +2,38 @@ import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
 
-let t = new Targeting();
-let td = new TDetailsPage();
-let tcn = new CreateNew();
+let targetingPage = new Targeting();
+let targetingDetailsPage = new TDetailsPage();
+let targetingCreateNewPage = new CreateNew();
 
 let programName = "TargetingProgram";
 
 describe("Targeting", () => {
   beforeEach(() => {
     cy.initScenario("targeting");
-    // cy.visit("/api/unicorn/");
-    // cy.get('input[name="username"]').type(Cypress.env("username"));
-    // cy.get('input[name="password"]').type(Cypress.env("password"));
-    // cy.get("input").contains("Log in").click();
     cy.adminLogin();
     cy.navigateToHomePage();
+    targetingPage.clickMenuButtonTargeting();
   });
 
   describe("Smoke tests Targeting", () => {
-    it.skip("Check Targeting page", () => {
-      // Scenario:
-      // 1. Go to Grievance page
-      // 2. Check if all elements on page exist
+    it("Check Targeting page", () => {
+      cy.scenario([
+        "Go to Targeting page",
+        "Check if all elements on page exist",
+      ]);
+      targetingPage.checkElementsOnPage();
     });
-    it.skip("Check Targeting Details page", () => {});
-    it.skip("Check Targeting New Ticket page", () => {});
+    it("Check Targeting Details page", () => {
+      targetingPage.selectStatus("Open");
+      targetingPage.getTargetPopulationsRows().should("have.length", 1);
+      targetingPage.chooseTargetPopulationRow(0).click();
+      targetingDetailsPage.checkElementsOnPage("OPEN");
+    });
+    it("Check Targeting New Ticket page", () => {
+      targetingPage.getButtonCreateNew().click();
+      targetingCreateNewPage.checkElementsOnPage();
+    });
   });
 
   describe("Component tests Targeting", () => {
