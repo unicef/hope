@@ -61,6 +61,7 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -1555,6 +1556,17 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
             return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
         except ObjectDoesNotExist:
             return None
+
+    @property
+    def get_program(self) -> Optional["Program"]:
+        if payment_plan := self.get_payment_plan:
+            program = (
+                payment_plan.program_cycle.program
+                if isinstance(payment_plan, PaymentPlan) and payment_plan.program_cycle
+                else payment_plan.program
+            )
+            return program
+        return None
 
 
 def build_summary(payment_plan: Optional[Any]) -> None:

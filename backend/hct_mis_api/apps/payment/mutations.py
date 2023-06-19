@@ -109,11 +109,11 @@ class CreateVerificationPlanMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
 
         verification_plan = VerificationPlanCrudServices.create(payment_plan_object, input)
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_plan_object.get_program,
             None,
             verification_plan,
         )
@@ -147,11 +147,11 @@ class EditPaymentVerificationMutation(PermissionMutation):
         payment_verification_plan = VerificationPlanCrudServices.update(payment_verification_plan, input)
 
         payment_verification_plan.payment_plan_obj.refresh_from_db()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -180,11 +180,11 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, payment_verification_plan.business_area)
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).activate()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -214,11 +214,11 @@ class FinishPaymentVerificationPlan(PermissionMutation):
             log_and_raise("You can finish only ACTIVE verification")
         VerificationPlanStatusChangeServices(payment_verification_plan).finish()
         payment_verification_plan.refresh_from_db()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -248,11 +248,11 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, payment_verification_plan.business_area)
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).discard()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -282,11 +282,11 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_INVALID, payment_verification_plan.business_area)
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).mark_invalid()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -309,6 +309,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         payment_plan = payment_verification_plan.payment_plan_obj
+        program = payment_verification_plan.get_program
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
@@ -317,11 +318,11 @@ class DeletePaymentVerificationPlan(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DELETE, payment_verification_plan.business_area)
 
         VerificationPlanCrudServices.delete(payment_verification_plan)
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            program,
             old_payment_verification_plan,
             None,
         )
@@ -413,19 +414,19 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
         calculate_counts(payment_verification_plan)
         payment_verification_plan.save()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification,
             payment_verification,
         )
@@ -489,11 +490,11 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         payment_verification_plan = payment_verification.payment_verification_plan
         calculate_counts(payment_verification_plan)
         payment_verification_plan.save()
-        # TODO: add 'program' arg or None
         log_create(
             PaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            payment_verification_plan.get_program,
             old_payment_verification,
             payment_verification,
         )
@@ -706,11 +707,11 @@ class ActionPaymentPlanMutation(PermissionMutation):
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
         )
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -754,11 +755,11 @@ class CreatePaymentPlanMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PM_CREATE, input["business_area_slug"])
 
         payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user)
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
@@ -781,7 +782,6 @@ class UpdatePaymentPlanMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input)
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -810,11 +810,11 @@ class DeletePaymentPlanMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -849,11 +849,11 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         old_payment_plan = copy_model_object(payment_plan)
 
         payment_plan = cls.export_action(payment_plan=payment_plan, user=info.context.user)
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1010,11 +1010,11 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             payment_plan = import_service.create_import_xlsx_file(info.context.user)
 
             transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
-            # TODO: add 'program' arg or None
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
                 user=info.context.user,
+                program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
@@ -1057,11 +1057,11 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
             user=info.context.user, file=file
         )
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1107,11 +1107,11 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan.save()
 
         payment_plan_apply_engine_rule.delay(payment_plan.pk, engine_rule.pk)
-        # TODO: add 'program' arg or None
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
+            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
