@@ -54,12 +54,14 @@ const Bold = styled.span`
 interface LinkedGrievancesModalProps {
   household: HouseholdNode;
   businessArea: string;
+  baseUrl: string;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 
 export const LinkedGrievancesModal = ({
   household,
   businessArea,
+  baseUrl,
   grievancesChoices,
 }: LinkedGrievancesModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -85,12 +87,12 @@ export const LinkedGrievancesModal = ({
       <ClickableTableRow
         hover
         onClick={() =>
-          history.push(`/${businessArea}/grievance-and-feedback/${row.id}`)
+          history.push(`/${baseUrl}/grievance-and-feedback/${row.id}`)
         }
         key={row.id}
       >
         <TableCell align='left'>
-          <BlackLink to={`/${businessArea}/grievance-and-feedback/${row.id}`}>
+          <BlackLink to={`/${baseUrl}/grievance-and-feedback/${row.id}`}>
             {row.unicefId}
           </BlackLink>
         </TableCell>
@@ -112,7 +114,7 @@ export const LinkedGrievancesModal = ({
       ? allGrievances.map((el) => (
           <span key={el.node.id}>
             <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${el.node.id}`}
+              href={`/${baseUrl}/grievance-and-feedback/${el.node.id}`}
             >
               {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${
                 statusChoices[el.node.status]

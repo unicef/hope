@@ -33,11 +33,13 @@ import { GrievancesTableRow } from './GrievancesTableRow';
 interface GrievancesTableProps {
   businessArea: string;
   filter;
+  baseUrl: string;
   selectedTab;
 }
 
 export const GrievancesTable = ({
   businessArea,
+  baseUrl,
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
@@ -215,7 +217,7 @@ export const GrievancesTable = ({
                   variant='contained'
                   color='primary'
                   component={Link}
-                  to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+                  to={`/${baseUrl}/grievance-and-feedback/new-ticket`}
                   data-cy='button-new-ticket'
                 >
                   {t('NEW TICKET')}

@@ -15,14 +15,14 @@ import { UniversalMoment } from '../../../core/UniversalMoment';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];
-  businessArea: string;
+  baseUrl: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
 }
 
 export const FeedbackDetails = ({
   feedback,
-  businessArea,
+  baseUrl,
   canViewHouseholdDetails,
   canViewIndividualDetails,
 }: FeedbackDetailsProps): React.ReactElement => {
@@ -61,7 +61,7 @@ export const FeedbackDetails = ({
                       <BlackLink
                         to={
                           canViewHouseholdDetails
-                            ? `/${businessArea}/population/household/${feedback.householdLookup.id}`
+                            ? `/${baseUrl}/population/household/${feedback.householdLookup.id}`
                             : undefined
                         }
                       >
@@ -82,7 +82,7 @@ export const FeedbackDetails = ({
                       <BlackLink
                         to={
                           canViewIndividualDetails
-                            ? `/${businessArea}/population/individuals/${feedback.individualLookup.id}`
+                            ? `/${baseUrl}/population/individuals/${feedback.individualLookup.id}`
                             : undefined
                         }
                       >

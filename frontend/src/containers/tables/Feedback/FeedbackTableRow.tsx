@@ -5,11 +5,11 @@ import {
   FeedbackIssueType,
   FeedbackNode,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackNode;
@@ -21,10 +21,10 @@ export const FeedbackTableRow = ({
   canViewDetails,
 }: FeedbackTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup?.id}`;
-  const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
+  const { baseUrl } = useBaseUrl();
+  const feedbackDetailsPath = `/${baseUrl}/accountability/feedback/${feedback.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/households/${feedback.householdLookup?.id}`;
+  const grievanceDetailsPath = `/${baseUrl}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
 
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);

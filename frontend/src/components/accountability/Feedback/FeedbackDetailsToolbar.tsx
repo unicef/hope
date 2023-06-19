@@ -3,10 +3,10 @@ import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { FeedbackQuery } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
@@ -19,13 +19,13 @@ export const FeedbackDetailsToolbar = ({
 }: FeedbackDetailsToolbarProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const history = useHistory();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/accountability/feedback`,
+      to: `/${baseUrl}/accountability/feedback`,
     },
   ];
 
@@ -44,7 +44,7 @@ export const FeedbackDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/accountability/feedback/edit-ticket/${id}`}
+              to={`/${baseUrl}/accountability/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >
@@ -57,7 +57,7 @@ export const FeedbackDetailsToolbar = ({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                  pathname: `/${baseUrl}/grievance-and-feedback/new-ticket`,
                   state: {
                     selectedHousehold: feedback.householdLookup,
                     selectedIndividual: feedback.individualLookup,

@@ -1,24 +1,24 @@
 /* eslint-disable prefer-template */
-import React, { ReactElement, useState } from 'react';
-import moment from 'moment';
-import styled from 'styled-components';
 import { IconButton, makeStyles } from '@material-ui/core';
-import clsx from 'clsx';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
+import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
+import clsx from 'clsx';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   AllLogEntriesQuery,
   LogEntryAction,
 } from '../../../__generated__/graphql';
-import { MiśTheme } from '../../../theme';
 import {
   ButtonPlaceHolder,
   Cell,
   Row,
 } from '../../../components/core/ActivityLogTable/TableStyledComponents';
 import { Dashable } from '../../../components/core/Dashable';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { MiśTheme } from '../../../theme';
 import { headCells } from './MainActivityLogTableHeadCells';
 
 const ButtonContainer = styled.div`
@@ -58,30 +58,30 @@ interface ObjectRepresentationsProps {
 function ObjectRepresentations({
   logEntry,
 }: ObjectRepresentationsProps): ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const id = logEntry.objectId;
   const { model } = logEntry.contentType;
   const modelToUrlDict = {
-    program: `/${businessArea}/programs/${btoa('ProgramNode:' + id)}`,
-    targetpopulation: `/${businessArea}/target-population/${btoa(
+    program: `/${baseUrl}/programs/${btoa('ProgramNode:' + id)}`,
+    targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
-    grievanceticket: `/${businessArea}/grievance-and-feedback/${btoa(
+    grievanceticket: `/${baseUrl}/grievance-and-feedback/${btoa(
       'GrievanceTicketNode:' + id,
     )}`,
-    household: `/${businessArea}/population/household/${btoa(
+    household: `/${baseUrl}/population/household/${btoa(
       'HouseholdNode:' + id,
     )}`,
-    individual: `/${businessArea}/population/individuals/${btoa(
+    individual: `/${baseUrl}/population/individuals/${btoa(
       'IndividualNode:' + id,
     )}`,
-    registrationdataimport: `/${businessArea}/registration-data-import/${btoa(
+    registrationdataimport: `/${baseUrl}/registration-data-import/${btoa(
       'RegistrationDataImportNode:' + id,
     )}`,
-    cashplanpaymentverification: `/${businessArea}/csh-payment-verification/${btoa(
+    cashplanpaymentverification: `/${baseUrl}/csh-payment-verification/${btoa(
       'CashPlanPaymentVerificationNode:' + id,
     )}`,
-    paymentverification: `/${businessArea}/verification-records/${btoa(
+    paymentverification: `/${baseUrl}/verification-records/${btoa(
       'PaymentVerificationNode:' + id,
     )}`,
   };

@@ -5,7 +5,6 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
@@ -16,6 +15,7 @@ import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface SurveysFiltersProps {
   filter;
@@ -33,7 +33,7 @@ export const SurveysFilters = ({
 }: SurveysFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },

@@ -1,6 +1,11 @@
 import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import {
+  useGrievancesChoiceDataQuery,
+  useGrievanceTicketQuery,
+  useMeQuery,
+} from '../../../../__generated__/graphql';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { GrievanceDetailsToolbar } from '../../../../components/grievances/GrievanceDetailsToolbar';
@@ -9,14 +14,9 @@ import { GrievancesDetails } from '../../../../components/grievances/GrievancesD
 import { GrievancesSidebar } from '../../../../components/grievances/GrievancesSidebar/GrievancesSidebar';
 import { Notes } from '../../../../components/grievances/Notes/Notes';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
-import {
-  useGrievancesChoiceDataQuery,
-  useGrievanceTicketQuery,
-  useMeQuery,
-} from '../../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 
@@ -32,7 +32,7 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
 
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -87,13 +87,13 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
         <GrievancesDetails
           ticket={ticket}
           choicesData={choicesData}
-          businessArea={businessArea}
+          baseUrl={baseUrl}
           canViewHouseholdDetails={canViewHouseholdDetails}
           canViewIndividualDetails={canViewIndividualDetails}
         />
         <GrievancesApproveSection
           ticket={ticket}
-          businessArea={businessArea}
+          baseUrl={baseUrl}
           canApproveFlagAndAdjudication={canApproveFlagAndAdjudication}
           canApproveDataChange={canApproveDataChange}
           canApprovePaymentVerification={canApprovePaymentVerification}

@@ -14,17 +14,17 @@ import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/Paym
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const {
     data,
     loading,
@@ -71,23 +71,21 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
     <>
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
-        businessArea={businessArea}
+        baseUrl={baseUrl}
         permissions={permissions}
       />
-      <PaymentPlanDetails
-        businessArea={businessArea}
-        paymentPlan={paymentPlan}
-      />
+      <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <AcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
       {shouldDisplayFsp && (
-        <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
+        <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
       )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
+        baseUrl={baseUrl}
         businessArea={businessArea}
         paymentPlan={paymentPlan}
         permissions={permissions}

@@ -8,7 +8,6 @@ import { VerificationPaymentDetails } from '../../../components/payments/Verific
 import { VerifyManual } from '../../../components/payments/VerifyManual';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -16,6 +15,7 @@ import {
   usePaymentQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export function VerificationPaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = usePaymentVerificationChoicesQuery();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
@@ -42,7 +42,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
       ? [
           {
             title: t('Payment Verification'),
-            to: `/${businessArea}/payment-verification`,
+            to: `/${baseUrl}/payment-verification`,
           },
         ]
       : []),
@@ -53,7 +53,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
       ? [
           {
             title: `${t('Payment Plan')} ${decodeIdString(payment.parent.id)}`,
-            to: `/${businessArea}/payment-verification/payment-plan/${payment.parent.id}`,
+            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
           },
         ]
       : []),

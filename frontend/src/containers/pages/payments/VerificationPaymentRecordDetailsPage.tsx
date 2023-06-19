@@ -8,13 +8,13 @@ import { VerificationPaymentRecordDetails } from '../../../components/payments/V
 import { VerifyManual } from '../../../components/payments/VerifyManual';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   usePaymentRecordQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -28,20 +28,19 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = usePaymentVerificationChoicesQuery();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   const { paymentRecord } = data;
   if (!paymentRecord || !choicesData || permissions === null) return null;
 
-  const verification =
-    paymentRecord.parent?.verificationPlans?.edges[0].node;
+  const verification = paymentRecord.parent?.verificationPlans?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
           {
             title: t('Payment Verification'),
-            to: `/${businessArea}/payment-verification`,
+            to: `/${baseUrl}/payment-verification`,
           },
         ]
       : []),
@@ -54,7 +53,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
             title: `${t('Cash Plan')} ${decodeIdString(
               paymentRecord.parent.id,
             )}`,
-            to: `/${businessArea}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
+            to: `/${baseUrl}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
           },
         ]
       : []),

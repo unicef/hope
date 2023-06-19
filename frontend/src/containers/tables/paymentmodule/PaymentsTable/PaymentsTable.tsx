@@ -21,6 +21,7 @@ const StyledBox = styled(Box)`
 `;
 interface PaymentsTableProps {
   businessArea: string;
+  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   permissions: string[];
   canViewDetails?: boolean;
@@ -28,6 +29,7 @@ interface PaymentsTableProps {
 
 export const PaymentsTable = ({
   businessArea,
+  baseUrl,
   paymentPlan,
   permissions,
   canViewDetails = false,
@@ -87,7 +89,7 @@ export const PaymentsTable = ({
         payment={dialogPayment}
         setDialogOpen={() => setDialogPayment(null)}
         canViewDetails={canViewDetails}
-        businessArea={businessArea}
+        baseUrl={baseUrl}
       />
     </>
   );

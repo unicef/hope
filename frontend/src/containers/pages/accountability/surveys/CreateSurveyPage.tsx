@@ -38,7 +38,6 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { TabPanel } from '../../../../components/core/TabPanel';
 import { PaperContainer } from '../../../../components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
@@ -48,6 +47,7 @@ import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
 import { getPercentage } from '../../../../utils/utils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -94,7 +94,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const history = useHistory();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
 
@@ -220,7 +220,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Surveys'),
-      to: `/${businessArea}/accountability/surveys`,
+      to: `/${baseUrl}/accountability/surveys`,
     },
   ];
 
@@ -319,7 +319,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 variables: prepareMutationVariables(values),
               });
               showMessage(t('Survey created.'), {
-                pathname: `/${businessArea}/accountability/surveys/${response.data.createSurvey.survey.id}`,
+                pathname: `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
                 historyMethod: 'push',
               });
             } catch (e) {
@@ -614,7 +614,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/accountability/surveys`}
+                    to={`/${baseUrl}/accountability/surveys`}
                   >
                     {t('Cancel')}
                   </Button>

@@ -9,7 +9,6 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
@@ -18,6 +17,7 @@ import {
 } from '../../../__generated__/graphql';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const initialFilter = {
   name: '',
@@ -32,7 +32,7 @@ const initialFilter = {
 export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const [filter, setFilter] = useState(
@@ -76,7 +76,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
               variant='contained'
               color='primary'
               component={Link}
-              to={`/${businessArea}/target-population/create`}
+              to={`/${baseUrl}/target-population/create`}
               data-cy='button-target-population-create-new'
             >
               Create new

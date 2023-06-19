@@ -10,12 +10,12 @@ import { Title } from '../../../core/Title';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
-  businessArea: string;
+  baseUrl: string;
 }
 
 export const LinkedGrievance = ({
   feedback,
-  businessArea,
+  baseUrl,
 }: LinkedGrievanceProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
@@ -29,7 +29,7 @@ export const LinkedGrievance = ({
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
                 <BlackLink
-                  to={`/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance.id}`}
+                  to={`/${baseUrl}/grievance-and-feedback/${feedback.linkedGrievance.id}`}
                 >
                   {feedback.linkedGrievance.unicefId}
                 </BlackLink>

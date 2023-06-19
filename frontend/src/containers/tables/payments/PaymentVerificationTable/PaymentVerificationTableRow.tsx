@@ -5,7 +5,6 @@ import {
   CashPlanAndPaymentPlanNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import {
   formatCurrencyWithSymbol,
@@ -14,6 +13,7 @@ import {
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentVerificationTableRowProps {
   plan: CashPlanAndPaymentPlanNode;
@@ -25,8 +25,10 @@ export function PaymentVerificationTableRow({
   canViewDetails,
 }: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const planVerificationPath = `/${businessArea}/payment-verification/${plan.objType === "CashPlan" ? "cash-plan" : "payment-plan"}/${plan.id}`;
+  const { baseUrl } = useBaseUrl();
+  const planVerificationPath = `/${baseUrl}/payment-verification/${
+    plan.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
+  }/${plan.id}`;
   const handleClick = (): void => {
     history.push(planVerificationPath);
   };

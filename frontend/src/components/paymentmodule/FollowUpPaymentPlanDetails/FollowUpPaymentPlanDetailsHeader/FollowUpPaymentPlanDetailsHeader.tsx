@@ -25,13 +25,13 @@ const StatusWrapper = styled.div`
 `;
 
 interface FollowUpPaymentPlanDetailsHeaderProps {
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const FollowUpPaymentPlanDetailsHeader = ({
-  businessArea,
+  baseUrl,
   permissions,
   paymentPlan,
 }: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement => {
@@ -39,7 +39,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${baseUrl}/payment-module/`,
     },
   ];
 

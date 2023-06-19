@@ -10,13 +10,13 @@ import { TicketsByCategorySection } from '../../../components/grievances/Grievan
 import { TicketsByLocationAndCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
 import { TicketsByStatusSection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useAllGrievanceDashboardChartsQuery } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const GrievancesDashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { data, loading } = useAllGrievanceDashboardChartsQuery({
     variables: { businessAreaSlug: businessArea },
@@ -38,14 +38,17 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
       closedUserGeneratedCount,
       closedSystemGeneratedCount,
       userGeneratedAvgResolution,
-      systemGeneratedAvgResolution
+      systemGeneratedAvgResolution,
     },
   } = data;
 
   // use weighted average to calculate average resolution time
-  const userWeightedTime = userGeneratedAvgResolution * closedUserGeneratedCount;
-  const systemWeightedTime = systemGeneratedAvgResolution * closedSystemGeneratedCount;
-  const numberOfClosedTickets = closedUserGeneratedCount + closedSystemGeneratedCount;
+  const userWeightedTime =
+    userGeneratedAvgResolution * closedUserGeneratedCount;
+  const systemWeightedTime =
+    systemGeneratedAvgResolution * closedSystemGeneratedCount;
+  const numberOfClosedTickets =
+    closedUserGeneratedCount + closedSystemGeneratedCount;
 
   return (
     <>
@@ -72,9 +75,10 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
-                topNumber={`${
-                  ((userWeightedTime + systemWeightedTime)/numberOfClosedTickets).toFixed(2)
-                } days`}
+                topNumber={`${(
+                  (userWeightedTime + systemWeightedTime) /
+                  numberOfClosedTickets
+                ).toFixed(2)} days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
                 userGenerated={`${userGeneratedAvgResolution} days`}
               />

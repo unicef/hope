@@ -9,7 +9,6 @@ import {
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { LoadingComponent } from '../../../core/LoadingComponent';
@@ -18,6 +17,7 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -66,7 +66,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     status: '',
   };
 
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const {
     data: programsData,
     loading: programsLoading,

@@ -19,7 +19,7 @@ import {
   useDeletePpMutation,
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -30,7 +30,7 @@ export const DeletePaymentPlan = ({
 }: DeletePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const history = useHistory();
   const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
   const { id } = paymentPlan;
@@ -41,7 +41,7 @@ export const DeletePaymentPlan = ({
         paymentPlanId: id,
       },
     });
-    history.push(`/${businessArea}/payment-module`);
+    history.push(`/${baseUrl}/payment-module`);
   };
 
   return (

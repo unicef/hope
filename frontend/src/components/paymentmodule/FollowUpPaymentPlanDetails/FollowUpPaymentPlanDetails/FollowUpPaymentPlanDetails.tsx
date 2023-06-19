@@ -11,12 +11,12 @@ import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 
 interface FollowUpPaymentPlanDetailsProps {
-  businessArea: string;
+  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const FollowUpPaymentPlanDetails = ({
-  businessArea,
+  baseUrl,
   paymentPlan,
 }: FollowUpPaymentPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ export const FollowUpPaymentPlanDetails = ({
             <Grid item xs={3}>
               <LabelizedField label={t('Main Payment Plan')}>
                 <BlackLink
-                  to={`/${businessArea}/payment-module/payment-plans/${sourcePaymentPlanId}`}
+                  to={`/${baseUrl}/payment-module/payment-plans/${sourcePaymentPlanId}`}
                 >
                   {sourcePaymentPlanUnicefId}
                 </BlackLink>
@@ -59,7 +59,7 @@ export const FollowUpPaymentPlanDetails = ({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Programme')}>
-                <BlackLink to={`/${businessArea}/programs/${program.id}`}>
+                <BlackLink to={`/${baseUrl}/programs/${program.id}`}>
                   {program.name}
                 </BlackLink>
               </LabelizedField>
@@ -67,7 +67,7 @@ export const FollowUpPaymentPlanDetails = ({
             <Grid item xs={3}>
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
-                  to={`/${businessArea}/target-population/${targetPopulation.id}`}
+                  to={`/${baseUrl}/target-population/${targetPopulation.id}`}
                 >
                   {targetPopulation.name}
                 </BlackLink>

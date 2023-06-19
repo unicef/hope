@@ -9,7 +9,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './VerificationsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 
-interface Props {
+interface VerificationsTableProps {
   paymentPlanId?: string;
   filter?: AllPaymentVerificationsQueryVariables;
   canViewRecordDetails: boolean;
@@ -21,7 +21,7 @@ export function VerificationsTable({
   filter,
   canViewRecordDetails,
   businessArea,
-}: Props): ReactElement {
+}: VerificationsTableProps): ReactElement {
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {

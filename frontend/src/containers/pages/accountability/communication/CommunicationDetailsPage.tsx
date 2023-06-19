@@ -13,13 +13,13 @@ import { useAccountabilityCommunicationMessageQuery } from '../../../../__genera
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { CommunicationDetails } from '../../../../components/accountability/Communication/CommunicationDetails';
 import { CommunicationMessageDetails } from '../../../../components/accountability/Communication/CommunicationMessageDetails';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export function CommunicationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { data, loading, error } = useAccountabilityCommunicationMessageQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -37,7 +37,7 @@ export function CommunicationDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Communication'),
-      to: `/${businessArea}/accountability/communication`,
+      to: `/${baseUrl}/accountability/communication`,
     },
   ];
   return (

@@ -7,8 +7,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   && {
@@ -54,7 +54,7 @@ export const GlobalProgramAutocomplete = ({
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const history = useHistory();
 
   const [loadData, { data, loading }] = useAllProgramsForChoicesLazyQuery({
@@ -79,7 +79,7 @@ export const GlobalProgramAutocomplete = ({
     }));
 
     if (selectedValue?.node?.id) {
-      history.push(`/${businessArea}/${selectedValue?.node?.id}`);
+      history.push(`/${baseUrl}/${selectedValue?.node?.id}`);
     }
   };
   const programsOptions = [

@@ -9,14 +9,14 @@ import { LoadingButton } from '../../../core/LoadingButton';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
   loadingCreate: boolean;
 }
 
 export const CreatePaymentPlanHeader = ({
   handleSubmit,
-  businessArea,
+  baseUrl,
   permissions,
   loadingCreate,
 }: CreatePaymentPlanHeaderProps): React.ReactElement => {
@@ -25,7 +25,7 @@ export const CreatePaymentPlanHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${baseUrl}/payment-module/`,
     },
   ];
 
@@ -40,7 +40,7 @@ export const CreatePaymentPlanHeader = ({
     >
       <Box display='flex' mt={2} mb={2}>
         <Box mr={3}>
-          <Button component={Link} to={`/${businessArea}/payment-module`}>
+          <Button component={Link} to={`/${baseUrl}/payment-module`}>
             {t('Cancel')}
           </Button>
         </Box>
