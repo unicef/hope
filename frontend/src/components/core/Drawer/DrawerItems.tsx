@@ -18,7 +18,6 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useGlobalProgram } from '../../../hooks/useGlobalProgram';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { menuItems } from './menuItems';
 
@@ -60,16 +59,12 @@ export const DrawerItems = ({
     fetchPolicy: 'cache-first',
   });
   const { baseUrl, businessArea } = useBaseUrl();
-  const programId = useGlobalProgram();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
     fetchPolicy: 'cache-first',
   });
-  const clearLocation = currentLocation.replace(
-    `/${baseUrl}/programs/${programId}`,
-    '',
-  );
+  const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
@@ -148,9 +143,7 @@ export const DrawerItems = ({
                     setExpandedItem(index);
                   }
                   if (hrefForCollapsibleItem) {
-                    history.push(
-                      `/${baseUrl}/programs/${programId}${hrefForCollapsibleItem}`,
-                    );
+                    history.push(`/${baseUrl}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
@@ -177,7 +170,7 @@ export const DrawerItems = ({
                             component={Link}
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
-                            to={`/${baseUrl}/programs/${programId}${secondary.href}`}
+                            to={`/${baseUrl}${secondary.href}`}
                             selected={Boolean(
                               secondary.selectedRegexp.exec(clearLocation),
                             )}
@@ -211,7 +204,7 @@ export const DrawerItems = ({
             data-cy={`nav-${item.name}`}
             component={Link}
             key={item.name + item.href}
-            to={`/${baseUrl}/programs/${programId}${item.href}`}
+            to={`/${baseUrl}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
             }}
