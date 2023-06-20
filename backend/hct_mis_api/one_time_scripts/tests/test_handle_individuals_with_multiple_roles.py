@@ -36,3 +36,9 @@ class TestHandleIndividualsWithMultipleRoles(TestCase):
             household=self.household, individual=self.individuals[0]
         ).count()
         self.assertEqual(roles_count, 1)
+        role = (
+            IndividualRoleInHousehold.objects.filter(household=self.household, individual=self.individuals[0])
+            .first()
+            .role
+        )
+        self.assertEqual(role, ROLE_PRIMARY)
