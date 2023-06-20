@@ -13,10 +13,10 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { HouseholdFilters } from '../../../components/population/HouseholdFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const initialFilter = {
   search: '',
@@ -40,7 +40,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading } = useAllProgramsForChoicesQuery({

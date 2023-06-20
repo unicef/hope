@@ -2,11 +2,11 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
 import { AllIndividualsQuery } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { sexToCapitalize } from '../../../../utils/utils';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { BlackLink } from '../../../core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
@@ -22,7 +22,7 @@ export function LookUpIndividualTableRow({
   radioChangeHandler,
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const renderPrograms = (): string => {
     const programNames = individual?.household?.programs?.edges?.map(
       (edge) => edge.node.name,
@@ -52,9 +52,7 @@ export function LookUpIndividualTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          to={`/${businessArea}/population/individuals/${individual.id}`}
-        >
+        <BlackLink to={`/${baseUrl}/population/individuals/${individual.id}`}>
           {individual.unicefId}
         </BlackLink>
       </TableCell>

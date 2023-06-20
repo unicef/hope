@@ -6,7 +6,7 @@ import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import {
@@ -56,12 +56,12 @@ export const GrievancesTableRow = ({
   setInputValue,
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
     ticket.category,
-    businessArea,
+    baseUrl,
   );
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
@@ -168,7 +168,7 @@ export const GrievancesTableRow = ({
           statusChoices={statusChoices}
           issueTypeChoicesData={issueTypeChoicesData}
           canViewDetails={canViewDetails}
-          businessArea={businessArea}
+          baseUrl={baseUrl}
         />
       </TableCell>
       <TableCell align='left'>

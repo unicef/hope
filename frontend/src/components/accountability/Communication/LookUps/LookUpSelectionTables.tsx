@@ -14,7 +14,7 @@ interface LookUpSelectionTablesProps {
   filtersHouseholdApplied;
   filtersTargetPopulationApplied;
   filtersRDIApplied;
-  businessArea;
+  businessArea: string;
   onValueChange;
   handleChange;
 }

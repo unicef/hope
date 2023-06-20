@@ -10,12 +10,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export interface DeleteTargetPopulation {
   open: boolean;
@@ -30,7 +30,7 @@ export const DeleteTargetPopulation = ({
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const initialValues = {
     id: targetPopulationId,
   };
@@ -50,7 +50,7 @@ export const DeleteTargetPopulation = ({
           });
           setOpen(false);
           showMessage('Target Population Deleted', {
-            pathname: `/${businessArea}/target-population/`,
+            pathname: `/${baseUrl}/target-population/`,
             historyMethod: 'push',
           });
         }}

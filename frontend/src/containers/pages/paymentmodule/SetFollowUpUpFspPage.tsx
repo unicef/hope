@@ -3,11 +3,11 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateSetUpFspHeader } from '../../../components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader';
 import { SetUpFspCore } from '../../../components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const SetFollowUpUpFspPage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
 
   if (permissions === null) return null;
@@ -25,12 +25,9 @@ export const SetFollowUpUpFspPage = (): React.ReactElement => {
 
   return (
     <>
-      <CreateSetUpFspHeader
-        businessArea={businessArea}
-        permissions={permissions}
-      />
+      <CreateSetUpFspHeader baseUrl={baseUrl} permissions={permissions} />
       <SetUpFspCore
-        businessArea={businessArea}
+        baseUrl={baseUrl}
         permissions={permissions}
         initialValues={initialValues}
       />

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
@@ -20,7 +20,7 @@ export const OtherRelatedTickets = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { id } = useParams();
 
   const [show, setShow] = useState(false);
@@ -28,19 +28,21 @@ export const OtherRelatedTickets = ({
 
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
-      ? tickets.map((edge) => (
-          <Box key={edge.id} mb={1}>
-            <ContentLink
-              href={getGrievanceDetailsPath(
-                edge.id,
-                edge.category,
-                businessArea,
-              )}
-            >
-              {edge.unicefId}
-            </ContentLink>
-          </Box>
-        ))
+      ? tickets.map((edge) => {
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.id,
+            edge.category,
+            baseUrl,
+          );
+
+          return (
+            <Box key={edge.id} mb={1}>
+              <ContentLink href={grievanceDetailsPath}>
+                {edge.unicefId}
+              </ContentLink>
+            </Box>
+          );
+        })
       : '-';
 
   const openExistingTickets =

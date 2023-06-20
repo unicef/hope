@@ -3,12 +3,12 @@ import { useHistory } from 'react-router-dom';
 import React from 'react';
 import { Radio } from '@material-ui/core';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -24,8 +24,8 @@ export function RegistrationDataImportTableRow({
   radioChangeHandler,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
+  const { baseUrl } = useBaseUrl();
+  const importDetailsPath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(registrationDataImport.id);

@@ -7,11 +7,11 @@ import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -28,8 +28,8 @@ export const PaymentPlanTableRow = ({
   canViewDetails,
 }: PaymentPlanTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const paymentPlanPath = `/${businessArea}/payment-module/${
+  const { baseUrl } = useBaseUrl();
+  const paymentPlanPath = `/${baseUrl}/payment-module/${
     plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {
@@ -46,7 +46,7 @@ export const PaymentPlanTableRow = ({
     return (
       <Box display='flex' flexDirection='column'>
         {plan.followUps?.edges?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${businessArea}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
+          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
           return (
             <Box mb={1}>
               <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
