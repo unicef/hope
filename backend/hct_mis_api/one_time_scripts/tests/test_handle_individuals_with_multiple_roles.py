@@ -19,20 +19,20 @@ class TestHandleIndividualsWithMultipleRoles(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = create_afghanistan()
-        cls.household, cls.individual = create_household_and_individuals(
+        cls.household, cls.individuals = create_household_and_individuals(
             household_data={"size": 1, "business_area": business_area},
             individuals_data=[{}],
         )
-        IndividualRoleInHouseholdFactory(household=cls.household, individual=cls.individual[0], role=ROLE_PRIMARY)
-        IndividualRoleInHouseholdFactory(household=cls.household, individual=cls.individual[0], role=ROLE_ALTERNATE)
+        IndividualRoleInHouseholdFactory(household=cls.household, individual=cls.individuals[0], role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=cls.household, individual=cls.individuals[0], role=ROLE_ALTERNATE)
 
     def test_handle_individuals_with_multiple_roles_within_household(self) -> None:
         roles_count = IndividualRoleInHousehold.objects.filter(
-            household=self.household, individual=self.individual[0]
+            household=self.household, individual=self.individuals[0]
         ).count()
         self.assertEqual(roles_count, 2)
         update_individuals_with_multiple_roles()
         roles_count = IndividualRoleInHousehold.objects.filter(
-            household=self.household, individual=self.individual[0]
+            household=self.household, individual=self.individuals[0]
         ).count()
         self.assertEqual(roles_count, 1)
