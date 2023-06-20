@@ -1,7 +1,13 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
-import { Redirect, Switch, useLocation, useParams } from 'react-router-dom';
+import {
+  Redirect,
+  Switch,
+  useLocation,
+  useParams,
+  useRouteMatch,
+} from 'react-router-dom';
 import styled from 'styled-components';
 import { useAllBusinessAreasQuery } from '../__generated__/graphql';
 import { AppBar } from '../components/core/AppBar';
@@ -81,6 +87,7 @@ export function HomeRouter(): React.ReactElement {
   const { businessArea } = useParams();
   const classes = useStyles({});
   const location = useLocation();
+  const { path } = useRouteMatch();
   const snackBar = useSnackbar();
   const handleDrawerOpen = (): void => {
     setOpen(true);
@@ -148,191 +155,197 @@ export function HomeRouter(): React.ReactElement {
       <MainContent data-cy='main-content'>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <SentryRoute path='/:businessArea/programs/:programId/population/household/:id'>
+          <SentryRoute path={`${path}/population/household/:id`}>
             <PopulationHouseholdDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/population/individuals/:id'>
+          <SentryRoute path={`${path}/population/individuals/:id`}>
             <PopulationIndividualsDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/cashplans/:id'>
+          <SentryRoute path={`${path}/cashplans/:id`}>
             <CashPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            exact
-            path='/:businessArea/programs/:programId/target-population'
-          >
+          <SentryRoute exact path={`${path}/target-population`}>
             <TargetPopulationsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/target-population/create'>
+          <SentryRoute path={`${path}/target-population/create`}>
             <CreateTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/target-population/edit-tp/:id'>
+          <SentryRoute path={`${path}/target-population/edit-tp/:id`}>
             <EditTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/target-population/:id'>
+          <SentryRoute path={`${path}/target-population/:id`}>
             <TargetPopulationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/verification/payment-record/:id'>
+          <SentryRoute path={`${path}/verification/payment-record/:id`}>
             <VerificationPaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/verification/payment/:id'>
+          <SentryRoute path={`${path}/verification/payment/:id`}>
             <VerificationPaymentDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            exact
-            path='/:businessArea/programs/:programId/payment-verification'
-          >
+          <SentryRoute exact path={`${path}/payment-verification`}>
             <PaymentVerificationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-verification/cash-plan/:id'>
+          <SentryRoute path={`${path}/payment-verification/cash-plan/:id`}>
             <CashPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-verification/payment-plan/:id'>
+          <SentryRoute path={`${path}/payment-verification/payment-plan/:id`}>
             <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/csh-payment-verification/:id'>
+          <SentryRoute path={`${path}/csh-payment-verification/:id`}>
             <CashPlanVerificationRedirectPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/new-plan'>
+          <SentryRoute path={`${path}/payment-module/new-plan`}>
             <CreatePaymentPlanPage />
           </SentryRoute>
-          <SentryRoute
-            exact
-            path='/:businessArea/programs/:programId/payment-module'
-          >
+          <SentryRoute exact path={`${path}/payment-module`}>
             <PaymentModulePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id/edit'>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id/edit`}
+          >
             <EditFollowUpPaymentPlanPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id/setup-fsp/create'>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/create`}
+          >
             <SetFollowUpUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id/setup-fsp/edit'>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`}
+          >
             <EditFollowUpSetUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id/setup-fsp/create'>
+          <SentryRoute
+            path={`${path}/payment-module/payment-plans/:id/setup-fsp/create`}
+          >
             <SetUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id/setup-fsp/edit'>
+          <SentryRoute
+            path={`${path}/payment-module/payment-plans/:id/setup-fsp/edit`}
+          >
             <EditSetUpFspPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id/edit'>
+          <SentryRoute path={`${path}/payment-module/payment-plans/:id/edit`}>
             <EditPaymentPlanPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payments/:id'>
+          <SentryRoute path={`${path}/payment-module/payments/:id`}>
             <PaymentDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/payment-plans/:id'>
+          <SentryRoute path={`${path}/payment-module/payment-plans/:id`}>
             <PaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-module/followup-payment-plans/:id'>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id`}
+          >
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/new-ticket'>
+          <SentryRoute path={`${path}/grievance/new-ticket`}>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/edit-ticket/user-generated/:id'>
+          <SentryRoute
+            path={`${path}/grievance/edit-ticket/user-generated/:id`}
+          >
             <EditGrievancePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/edit-ticket/system-generated/:id'>
+          <SentryRoute
+            path={`${path}/grievance/edit-ticket/system-generated/:id`}
+          >
             <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/tickets/user-generated/:id'>
+          <SentryRoute path={`${path}/grievance/tickets/user-generated/:id`}>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/tickets/system-generated/:id'>
+          <SentryRoute path={`${path}/grievance/tickets/system-generated/:id`}>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/rdi/:id'>
+          <SentryRoute path={`${path}/grievance/rdi/:id`}>
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/payment-verification/:cashPlanId'>
+          <SentryRoute
+            path={`${path}/grievance/payment-verification/:cashPlanId`}
+          >
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/tickets/user-generated'>
+          <SentryRoute path={`${path}/grievance/tickets/user-generated`}>
             <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/tickets/system-generated'>
+          <SentryRoute path={`${path}/grievance/tickets/system-generated`}>
             <GrievancesTablePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/grievance/dashboard'>
+          <SentryRoute path={`${path}/grievance/dashboard`}>
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/communication/create'>
+          <SentryRoute path={`${path}/accountability/communication/create`}>
             <CreateCommunicationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/communication/:id'>
+          <SentryRoute path={`${path}/accountability/communication/:id`}>
             <CommunicationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/communication'>
+          <SentryRoute path={`${path}/accountability/communication`}>
             <CommunicationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback/create'>
+          <SentryRoute path={`${path}/accountability/feedback/create`}>
             <CreateFeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback/edit-ticket/:id'>
+          <SentryRoute path={`${path}/accountability/feedback/edit-ticket/:id`}>
             <EditFeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback/:id'>
+          <SentryRoute path={`${path}/accountability/feedback/:id`}>
             <FeedbackDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/feedback'>
+          <SentryRoute path={`${path}/accountability/feedback`}>
             <FeedbackPage />
           </SentryRoute>
           {/* TODO: uncomment when ready for deployment
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/surveys/create'>
+          <SentryRoute path={`${path}/accountability/surveys/create`}>
             <CreateSurveyPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/surveys/:id'>
+          <SentryRoute path={`${path}/accountability/surveys/:id`}>
             <SurveyDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/accountability/surveys'>
+          <SentryRoute path={`${path}/accountability/surveys`}>
             <SurveysPage />
           </SentryRoute> */}
-          <SentryRoute path='/:businessArea/programs/:programId/population/household'>
+          <SentryRoute path={`${path}/population/household`}>
             <PopulationHouseholdPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/population/individuals'>
+          <SentryRoute path={`${path}/population/individuals`}>
             <PopulationIndividualsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/programs/:id'>
+          <SentryRoute path={`${path}/programs/:id`}>
             <ProgramDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/payment-records/:id'>
+          <SentryRoute path={`${path}/payment-records/:id`}>
             <PaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/programs'>
+          <SentryRoute path={`${path}/programs`}>
             <ProgramsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import/household/:id'>
+          <SentryRoute path={`${path}/registration-data-import/household/:id`}>
             <RegistrationHouseholdDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import/individual/:id'>
+          <SentryRoute path={`${path}/registration-data-import/individual/:id`}>
             <RegistrationIndividualDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import/:id'>
+          <SentryRoute path={`${path}/registration-data-import/:id`}>
             <RegistrationDataImportDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/registration-data-import'>
+          <SentryRoute path={`${path}/registration-data-import`}>
             <RegistrationDataImportPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/reporting/:id'>
+          <SentryRoute path={`${path}/reporting/:id`}>
             <ReportingDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/reporting'>
+          <SentryRoute path={`${path}/reporting`}>
             <ReportingPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/users-list'>
+          <SentryRoute path={`${path}/users-list`}>
             <UsersPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/programs/:programId/activity-log'>
+          <SentryRoute path={`${path}/activity-log`}>
             <ActivityLogPage />
           </SentryRoute>
-          <SentryRoute
-            label='/ - Dashboard'
-            path='/:businessArea/programs/:programId'
-          >
+          <SentryRoute label='/ - Dashboard' path={`${path}/`}>
             <DashboardPage />
           </SentryRoute>
         </Switch>

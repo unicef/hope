@@ -8,6 +8,7 @@ export function useBaseUrl(): {
 } {
   const businessArea = useBusinessArea();
   const programId = useGlobalProgram();
+
   const baseUrl = `${businessArea}/programs/${programId}`;
   return { businessArea, programId, baseUrl };
 }
