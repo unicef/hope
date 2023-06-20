@@ -11,10 +11,10 @@ import {
   PERMISSIONS,
   hasPermissionInModule,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const initialFilter = {
   createdBy: '',
@@ -25,7 +25,7 @@ const initialFilter = {
 };
 
 export const CommunicationPage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
@@ -59,7 +59,7 @@ export const CommunicationPage = (): React.ReactElement => {
           variant='contained'
           color='primary'
           component={Link}
-          to={`/${businessArea}/accountability/communication/create`}
+          to={`/${baseUrl}/accountability/communication/create`}
           data-cy='button-communication-create-new'
         >
           {t('New message')}

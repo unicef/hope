@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { handleValidationErrors } from '../../../utils/utils';
@@ -15,6 +14,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -39,7 +39,7 @@ export const DuplicateTargetPopulation = ({
   const { t } = useTranslation();
   const [mutate, { loading }] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const initialValues = {
     name: '',
     id: targetPopulationId,
@@ -62,7 +62,7 @@ export const DuplicateTargetPopulation = ({
             });
             setOpen(false);
             showMessage(t('Target Population Duplicated'), {
-              pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+              pathname: `/${baseUrl}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
               historyMethod: 'push',
             });
           } catch (e) {

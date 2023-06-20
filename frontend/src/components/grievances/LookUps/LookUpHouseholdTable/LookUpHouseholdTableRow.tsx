@@ -1,7 +1,6 @@
 import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
@@ -9,6 +8,7 @@ import {
 import { BlackLink } from '../../../core/BlackLink';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpHouseholdTableRowProps {
   household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
@@ -37,7 +37,7 @@ export function LookUpHouseholdTableRow({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
 
@@ -92,7 +92,7 @@ export function LookUpHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${businessArea}/population/household/${household.id}`}>
+        <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
           {household.unicefId}
         </BlackLink>
       </TableCell>

@@ -27,7 +27,7 @@ import { UniversalMoment } from '../../core/UniversalMoment';
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   choicesData: GrievancesChoiceDataQuery;
-  businessArea: string;
+  baseUrl: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
 }
@@ -35,7 +35,7 @@ interface GrievancesDetailsProps {
 export const GrievancesDetails = ({
   ticket,
   choicesData,
-  businessArea,
+  baseUrl,
   canViewHouseholdDetails,
   canViewIndividualDetails,
 }: GrievancesDetailsProps): React.ReactElement => {
@@ -101,7 +101,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return (
         <ContentLink
-          href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
+          href={`/${baseUrl}/payment-records/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -110,7 +110,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'Payment') {
       return (
         <ContentLink
-          href={`/${businessArea}/payment-module/payments/${ticket.paymentRecord.id}`}
+          href={`/${baseUrl}/payment-module/payments/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -194,7 +194,7 @@ export const GrievancesDetails = ({
                       <ContentLink
                         href={
                           canViewHouseholdDetails
-                            ? `/${businessArea}/population/household/${ticket.household.id}`
+                            ? `/${baseUrl}/population/household/${ticket.household.id}`
                             : undefined
                         }
                       >
@@ -215,7 +215,7 @@ export const GrievancesDetails = ({
                       <ContentLink
                         href={
                           canViewIndividualDetails
-                            ? `/${businessArea}/population/individuals/${ticket.individual.id}`
+                            ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
                             : undefined
                         }
                       >

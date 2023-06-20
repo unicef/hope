@@ -11,13 +11,13 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
@@ -35,7 +35,7 @@ export function NeedsAdjudicationDetailsOld({
   canApprove: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -109,7 +109,7 @@ export function NeedsAdjudicationDetailsOld({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance/new-ticket`,
+                  pathname: `/${baseUrl}/grievance/new-ticket`,
                   state: { linkedTicketId: ticket.id },
                 })
               }
@@ -194,14 +194,14 @@ export function NeedsAdjudicationDetailsOld({
 
             <TableCell align='left'>
               <BlackLink
-                to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+                to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
               >
                 {details.goldenRecordsIndividual?.unicefId}
               </BlackLink>
             </TableCell>
             <TableCell align='left'>
               <BlackLink
-                to={`/${businessArea}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
               >
                 {details.goldenRecordsIndividual?.household?.unicefId || '-'}
               </BlackLink>
@@ -260,14 +260,14 @@ export function NeedsAdjudicationDetailsOld({
             </TableCell>
             <TableCell align='left'>
               <BlackLink
-                to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
+                to={`/${baseUrl}/population/individuals/${details.possibleDuplicate?.id}`}
               >
                 {details.possibleDuplicate?.unicefId}
               </BlackLink>
             </TableCell>
             <TableCell align='left'>
               <BlackLink
-                to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
+                to={`/${baseUrl}/population/household/${details.possibleDuplicate?.household?.id}`}
               >
                 {details.possibleDuplicate?.household?.unicefId || '-'}
               </BlackLink>

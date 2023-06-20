@@ -12,7 +12,6 @@ import { TargetingCriteria } from '../../../components/targeting/TargetingCriter
 import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { TargetPopulationProgramme } from '../../../components/targeting/TargetPopulationProgramme';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
@@ -25,6 +24,7 @@ import {
 } from '../../../__generated__/graphql';
 import { PaperContainer } from '../../../components/targeting/PaperContainer';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -43,7 +43,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
@@ -99,7 +99,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Target Population Created'), {
-        pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+        pathname: `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -120,7 +120,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             handleSubmit={submitForm}
             loading={loading}
             values={values}
-            businessArea={businessArea}
+            baseUrl={baseUrl}
             permissions={permissions}
           />
           <TargetPopulationProgramme

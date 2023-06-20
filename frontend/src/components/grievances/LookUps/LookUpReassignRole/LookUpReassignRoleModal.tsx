@@ -17,7 +17,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
@@ -25,6 +24,7 @@ import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const LookUpReassignRoleModal = ({
   onValueChange,
@@ -82,7 +82,7 @@ export const LookUpReassignRoleModal = ({
     getFilterFromQueryParams(location, initialFilterIND),
   );
 
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const {
     data: individualChoicesData,
     loading: individualChoicesLoading,

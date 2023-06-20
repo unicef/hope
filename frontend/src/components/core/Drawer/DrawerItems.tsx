@@ -10,15 +10,15 @@ import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  hasPermissionInModule,
-  hasPermissions,
-} from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../hooks/usePermissions';
-import {
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
+import {
+  hasPermissionInModule,
+  hasPermissions,
+} from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -49,20 +49,22 @@ export const StyledLink = styled.a`
   text-decoration: none;
 `;
 
-interface Props {
+interface DrawerItemsProps {
   currentLocation: string;
 }
-export function DrawerItems({ currentLocation }: Props): React.ReactElement {
+export const DrawerItems = ({
+  currentLocation,
+}: DrawerItemsProps): React.ReactElement => {
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   });
-  const clearLocation = currentLocation.replace(`/${businessArea}`, '');
+  const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
@@ -141,7 +143,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                     setExpandedItem(index);
                   }
                   if (hrefForCollapsibleItem) {
-                    history.push(`/${businessArea}${hrefForCollapsibleItem}`);
+                    history.push(`/${baseUrl}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
@@ -168,7 +170,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                             component={Link}
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
-                            to={`/${businessArea}${secondary.href}`}
+                            to={`/${baseUrl}${secondary.href}`}
                             selected={Boolean(
                               secondary.selectedRegexp.exec(clearLocation),
                             )}
@@ -202,7 +204,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
             data-cy={`nav-${item.name}`}
             component={Link}
             key={item.name + item.href}
-            to={`/${businessArea}${item.href}`}
+            to={`/${baseUrl}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
             }}
@@ -215,4 +217,4 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
       })}
     </div>
   );
-}
+};

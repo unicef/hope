@@ -17,7 +17,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -38,6 +37,7 @@ import { ButtonTooltip } from '../core/ButtonTooltip';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -123,7 +123,7 @@ export function CreateVerificationPlan({
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const [formValues, setFormValues] = useState(initialValues);
 
   const [

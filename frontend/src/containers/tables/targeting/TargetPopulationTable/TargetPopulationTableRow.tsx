@@ -6,9 +6,9 @@ import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { targetPopulationStatusToColor } from '../../../../utils/utils';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
@@ -24,8 +24,8 @@ export function TargetPopulationTableRow({
   selectedTargetPopulation,
 }: TargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
+  const { baseUrl } = useBaseUrl();
+  const targetPopulationDetailsPath = `/${baseUrl}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(targetPopulation.id);

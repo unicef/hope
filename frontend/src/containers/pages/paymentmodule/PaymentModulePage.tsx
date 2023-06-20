@@ -6,11 +6,11 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const initialFilter = {
   search: '',
@@ -24,7 +24,7 @@ const initialFilter = {
 
 export const PaymentModulePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 
@@ -47,7 +47,7 @@ export const PaymentModulePage = (): React.ReactElement => {
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/payment-module/new-plan`}
+            to={`/${baseUrl}/payment-module/new-plan`}
             data-cy='button-new-payment-plan'
           >
             {t('NEW PAYMENT PLAN')}

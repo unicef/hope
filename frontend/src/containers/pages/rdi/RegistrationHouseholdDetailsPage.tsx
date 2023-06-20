@@ -9,7 +9,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails/HouseholdDetails';
 import { RegistrationDetails } from '../../../components/rdi/details/households/RegistrationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -17,6 +16,7 @@ import {
   useImportedHouseholdQuery,
 } from '../../../__generated__/graphql';
 import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImportedIndividualsTable/HouseholdImportedIndividualsTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -30,7 +30,7 @@ const Container = styled.div`
 export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { data, loading, error } = useImportedHouseholdQuery({
     variables: { id },
@@ -52,13 +52,13 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
       ? [
           {
             title: t('Registration Data import'),
-            to: `/${businessArea}/registration-data-import/`,
+            to: `/${baseUrl}/registration-data-import/`,
           },
         ]
       : []),
     {
       title: importedHousehold.registrationDataImport.name,
-      to: `/${businessArea}/registration-data-import/${btoa(
+      to: `/${baseUrl}/registration-data-import/${btoa(
         `RegistrationDataImportNode:${importedHousehold.registrationDataImport.hctId}`,
       )}`,
     },
@@ -71,7 +71,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails
-        businessArea={businessArea}
+        baseUrl={baseUrl}
         choicesData={choicesData}
         household={importedHousehold}
       />

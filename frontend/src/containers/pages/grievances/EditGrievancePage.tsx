@@ -52,7 +52,7 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
@@ -85,7 +85,7 @@ const BoxWithBottomBorders = styled.div`
 
 export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -213,7 +213,7 @@ export const EditGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: getGrievanceDetailsPath(ticket.id, ticket.category, businessArea),
+      to: getGrievanceDetailsPath(ticket.id, ticket.category, baseUrl),
     },
   ];
 
@@ -255,6 +255,12 @@ export const EditGrievancePage = (): React.ReactElement => {
     permissions,
   );
 
+  const grievanceDetailsPath = getGrievanceDetailsPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+  );
+
   return (
     <Formik
       initialValues={initialValues}
@@ -271,11 +277,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'), {
-            pathname: getGrievanceDetailsPath(
-              ticket.id,
-              ticket.category,
-              businessArea,
-            ),
+            pathname: grievanceDetailsPath,
             historyMethod: 'push',
           });
         } catch (e) {
@@ -313,14 +315,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             >
               <Box display='flex' alignContent='center'>
                 <Box mr={3}>
-                  <Button
-                    component={Link}
-                    to={getGrievanceDetailsPath(
-                      ticket.id,
-                      ticket.category,
-                      businessArea,
-                    )}
-                  >
+                  <Button component={Link} to={grievanceDetailsPath}>
                     {t('Cancel')}
                   </Button>
                 </Box>
@@ -369,7 +364,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 <ContentLink
                                   href={
                                     canViewHouseholdDetails
-                                      ? `/${businessArea}/population/household/${ticket.household.id}`
+                                      ? `/${baseUrl}/population/household/${ticket.household.id}`
                                       : undefined
                                   }
                                 >
@@ -388,7 +383,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 <ContentLink
                                   href={
                                     canViewIndividualDetails
-                                      ? `/${businessArea}/population/individuals/${ticket.individual.id}`
+                                      ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
                                       : undefined
                                   }
                                 >

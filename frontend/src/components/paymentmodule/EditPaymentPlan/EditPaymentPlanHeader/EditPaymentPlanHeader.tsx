@@ -20,14 +20,14 @@ const StatusWrapper = styled.div`
 
 interface EditPaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const EditPaymentPlanHeader = ({
   handleSubmit,
-  businessArea,
+  baseUrl,
   permissions,
   paymentPlan,
 }: EditPaymentPlanHeaderProps): React.ReactElement => {
@@ -37,7 +37,7 @@ export const EditPaymentPlanHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/${
+      to: `/${baseUrl}/payment-module/${
         isFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },
@@ -75,7 +75,7 @@ export const EditPaymentPlanHeader = ({
         <Box mr={3}>
           <Button
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}`}
+            to={`/${baseUrl}/payment-module/payment-plans/${id}`}
           >
             {t('Cancel')}
           </Button>
