@@ -3,17 +3,17 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export function CreateProgram(): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [mutate, { loading }] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
@@ -33,7 +33,7 @@ export function CreateProgram(): ReactElement {
         },
       });
       showMessage('Programme created.', {
-        pathname: `/${businessArea}/programs/${response.data.createProgram.program.id}`,
+        pathname: `/${baseUrl}/programs/${response.data.createProgram.program.id}`,
         historyMethod: 'push',
       });
     } catch (error) {

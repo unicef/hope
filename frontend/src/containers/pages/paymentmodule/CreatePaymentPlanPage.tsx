@@ -9,7 +9,6 @@ import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/Creat
 import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
@@ -18,12 +17,13 @@ import {
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { today } from '../../../utils/utils';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const {
@@ -100,7 +100,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Payment Plan Created'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
+        pathname: `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -121,7 +121,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}
-            businessArea={businessArea}
+            baseUrl={baseUrl}
             permissions={permissions}
             loadingCreate={loadingCreate}
           />

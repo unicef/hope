@@ -1,7 +1,6 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { choicesToDict, renderUserName } from '../../../utils/utils';
 import {
   SurveyQuery,
@@ -13,6 +12,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface SurveyDetailsProps {
   survey: SurveyQuery['survey'];
@@ -24,7 +24,7 @@ export const SurveyDetails = ({
   choicesData,
 }: SurveyDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const {
     category,
     title,
@@ -67,7 +67,7 @@ export const SurveyDetails = ({
             <LabelizedField label={t('Target Population')}>
               {targetPopulation ? (
                 <BlackLink
-                  to={`/${businessArea}/target-population/${targetPopulation.id}`}
+                  to={`/${baseUrl}/target-population/${targetPopulation.id}`}
                 >
                   {targetPopulation.name}
                 </BlackLink>
@@ -79,7 +79,7 @@ export const SurveyDetails = ({
           <Grid item xs={3}>
             <LabelizedField label={t('Programme')}>
               {program ? (
-                <BlackLink to={`/${businessArea}/programmes/${program.id}`}>
+                <BlackLink to={`/${baseUrl}/programmes/${program.id}`}>
                   {program.name}
                 </BlackLink>
               ) : (

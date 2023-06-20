@@ -46,7 +46,7 @@ export interface DescriptionProps {
   values;
   showIssueType: (values) => boolean;
   selectedIssueType: (values) => string;
-  businessArea: string;
+  baseUrl: string;
   choicesData: GrievancesChoiceDataQuery;
   userChoices: UserChoiceDataQuery;
   mappedPrograms: {
@@ -62,7 +62,7 @@ export const Description = ({
   values,
   showIssueType,
   selectedIssueType,
-  businessArea,
+  baseUrl,
   choicesData,
   userChoices,
   mappedPrograms,
@@ -103,7 +103,7 @@ export const Description = ({
                   <span>
                     {values.selectedHousehold?.id ? (
                       <ContentLink
-                        href={`/${businessArea}/population/household/${values.selectedHousehold.id}`}
+                        href={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </ContentLink>
@@ -120,7 +120,7 @@ export const Description = ({
                   <span>
                     {values.selectedIndividual?.id ? (
                       <ContentLink
-                        href={`/${businessArea}/population/individuals/${values.selectedIndividual.id}`}
+                        href={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </ContentLink>

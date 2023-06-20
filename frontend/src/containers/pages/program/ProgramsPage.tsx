@@ -6,7 +6,7 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { CreateProgram } from '../../dialogs/programs/CreateProgram';
@@ -34,7 +34,7 @@ export const ProgramsPage = (): React.ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const {

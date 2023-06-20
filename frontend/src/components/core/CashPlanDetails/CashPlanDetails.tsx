@@ -29,12 +29,12 @@ const NumberOfHouseHoldsValue = styled.div`
 `;
 interface CashPlanProps {
   cashPlan: CashPlanNode;
-  businessArea: string;
+  baseUrl: string;
 }
 
 export function CashPlanDetails({
   cashPlan,
-  businessArea,
+  baseUrl,
 }: CashPlanProps): React.ReactElement {
   const { t } = useTranslation();
 
@@ -62,7 +62,7 @@ export function CashPlanDetails({
     return filteredTps().length ? (
       filteredTps().map((el) => (
         <span key={el.id}>
-          <ContentLink href={`/${businessArea}/target-population/${el.id}`}>
+          <ContentLink href={`/${baseUrl}/target-population/${el.id}`}>
             {el.name}
           </ContentLink>{' '}
         </span>

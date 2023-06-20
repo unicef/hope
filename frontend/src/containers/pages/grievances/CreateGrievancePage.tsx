@@ -42,7 +42,6 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
@@ -54,6 +53,7 @@ import {
   decodeIdString,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -82,7 +82,7 @@ export const dataChangeComponentDict = {
 export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -197,7 +197,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance/tickets/`,
+      to: `/${baseUrl}/grievance/tickets/`,
     },
   ];
 
@@ -259,7 +259,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   'Grievance Tickets created',
                 )}.`,
                 {
-                  pathname: `/${businessArea}/grievance/tickets`,
+                  pathname: `/${baseUrl}/grievance/tickets`,
                   historyMethod: 'push',
                 },
               );
@@ -269,7 +269,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   response.data.createGrievanceTicket.grievanceTickets[0].id,
                   response.data.createGrievanceTicket.grievanceTickets[0]
                     .category,
-                  businessArea,
+                  baseUrl,
                 ),
                 historyMethod: 'push',
               });
@@ -371,7 +371,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             values={values}
                             showIssueType={showIssueType}
                             selectedIssueType={selectedIssueType}
-                            businessArea={businessArea}
+                            baseUrl={baseUrl}
                             choicesData={choicesData}
                             userChoices={userChoices}
                             mappedPrograms={mappedPrograms}
@@ -390,7 +390,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${businessArea}/grievance/tickets/user-generated`}
+                            to={`/${baseUrl}/grievance/tickets/user-generated`}
                           >
                             {t('Cancel')}
                           </Button>

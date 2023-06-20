@@ -9,7 +9,6 @@ import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
@@ -22,6 +21,7 @@ import { ButtonDialog } from '../core/ButtonDialog';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LoadingButton } from '../core/LoadingButton';
 import { PageHeader } from '../core/PageHeader';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 
 const Separator = styled.div`
@@ -70,13 +70,13 @@ export const GrievanceDetailsToolbar = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
   const history = useHistory();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance/tickets`,
+      to: `/${baseUrl}/grievance/tickets`,
     },
   ];
   const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
@@ -328,6 +328,12 @@ export const GrievanceDetailsToolbar = ({
     ].includes(ticket.issueType?.toString());
   };
 
+  const grievanceEditPath = getGrievanceEditPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+  );
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
@@ -340,11 +346,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={getGrievanceEditPath(
-                ticket.id,
-                ticket.category,
-                businessArea,
-              )}
+              to={grievanceEditPath}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >
@@ -495,7 +497,7 @@ export const GrievanceDetailsToolbar = ({
                 <Button
                   onClick={() =>
                     history.push({
-                      pathname: `/${businessArea}/grievance/new-ticket`,
+                      pathname: `/${baseUrl}/grievance/new-ticket`,
                       state: {
                         category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
                         selectedIndividual: ticket.individual,

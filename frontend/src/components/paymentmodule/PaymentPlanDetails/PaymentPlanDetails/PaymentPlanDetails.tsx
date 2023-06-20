@@ -13,12 +13,12 @@ import { FieldBorder } from '../../../core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 
 interface PaymentPlanDetailsProps {
-  businessArea: string;
+  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const PaymentPlanDetails = ({
-  businessArea,
+  baseUrl,
   paymentPlan,
 }: PaymentPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -50,7 +50,7 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid item xs={3}>
                 <LabelizedField label={t('Programme')}>
-                  <BlackLink to={`/${businessArea}/programs/${program.id}`}>
+                  <BlackLink to={`/${baseUrl}/programs/${program.id}`}>
                     {program.name}
                   </BlackLink>
                 </LabelizedField>
@@ -58,7 +58,7 @@ export const PaymentPlanDetails = ({
               <Grid item xs={3}>
                 <LabelizedField label={t('Target Population')}>
                   <BlackLink
-                    to={`/${businessArea}/target-population/${targetPopulation.id}`}
+                    to={`/${baseUrl}/target-population/${targetPopulation.id}`}
                   >
                     {targetPopulation.name}
                   </BlackLink>
@@ -95,7 +95,7 @@ export const PaymentPlanDetails = ({
                 <FieldBorder color='#84A1CA'>
                   <RelatedFollowUpPaymentPlans
                     followUps={followUps}
-                    businessArea={businessArea}
+                    baseUrl={baseUrl}
                   />
                 </FieldBorder>
               </Grid>

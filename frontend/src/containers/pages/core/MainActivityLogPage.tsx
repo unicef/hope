@@ -13,10 +13,10 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { EmptyTable } from '../../../components/core/Table/EmptyTable';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { MainActivityLogTable } from '../../tables/MainActivityLogTable/MainActivityLogTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -55,7 +55,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const [filter, setFilter] = useState(

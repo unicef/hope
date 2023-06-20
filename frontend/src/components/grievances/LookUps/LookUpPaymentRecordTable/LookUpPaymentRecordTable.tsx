@@ -7,7 +7,7 @@ import {
   useLookUpPaymentRecordsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 
@@ -21,7 +21,7 @@ export function LookUpPaymentRecordTable({
   setFieldValue,
   initialValues,
 }: LookUpPaymentRecordTableProps): ReactElement {
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {

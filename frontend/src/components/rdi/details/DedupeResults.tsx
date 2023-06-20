@@ -15,7 +15,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BlackLink } from '../../core/BlackLink';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MiśTheme } from '../../../theme';
 import { decodeIdString } from '../../../utils/utils';
 import {
@@ -25,6 +24,7 @@ import {
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -52,7 +52,7 @@ export function DedupeResults({
 }: DedupeResultsProps): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const useStyles = makeStyles(() => ({
     table: {
       minWidth: 100,
@@ -87,12 +87,12 @@ export function DedupeResults({
     );
   });
   const handleClickBatch = (id): string => {
-    const path = `/${businessArea}/registration-data-import/individual/${id}`;
+    const path = `/${baseUrl}/registration-data-import/individual/${id}`;
     return path;
   };
 
   const handleClickGoldenRecord = (id): string => {
-    const path = `/${businessArea}/population/individuals/${id}`;
+    const path = `/${baseUrl}/population/individuals/${id}`;
     return path;
   };
   return (
