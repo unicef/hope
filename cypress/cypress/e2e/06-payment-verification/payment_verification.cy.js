@@ -1,15 +1,15 @@
 import PaymentVerification from "../../page-objects/pages/payment_veryfication/payment_veryfication.po";
 import PVDetailsPage from "../../page-objects/pages/payment_veryfication/details_page.po";
 
-let pv = new PaymentVerification();
-let pvd = new PVDetailsPage();
+let paymentVerificationPage = new PaymentVerification();
+let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
 describe("Payment Verification", () => {
   beforeEach(() => {
     cy.adminLogin();
     cy.navigateToHomePage();
-    pv.clickMenuButtonPaymentVerification();
+    paymentVerificationPage.clickMenuButtonPaymentVerification();
   });
 
   describe("Smoke tests Payment Verification", () => {
@@ -18,27 +18,27 @@ describe("Payment Verification", () => {
         "Go to Payment Verification page",
         "Check if all elements on page exist",
       ]);
-      pv.checkPaymentVerificationTitle();
-      pv.checkListOfCashPlansTitle();
-      pv.checkAllSearchFieldsVisible();
-      pv.checkCashPlansTableVisible();
+      paymentVerificationPage.checkPaymentVerificationTitle();
+      paymentVerificationPage.checkListOfCashPlansTitle();
+      paymentVerificationPage.checkAllSearchFieldsVisible();
+      paymentVerificationPage.checkCashPlansTableVisible();
     });
 
     // eslint-disable-next-line mocha/no-setup-in-describe
-    pv.countCashPlanArray().forEach((row_no) => {
+    paymentVerificationPage.countCashPlanArray().forEach((row_no) => {
       it(`Check Cash Plan Details Page - Row: ${row_no}`, () => {
         cy.scenario([
           "Go to Payment Verification page",
           "Choose and open cash plan",
           "Check if all elements on page exist",
         ]);
-        pv.chooseCashPlan(row_no).click();
-        pvd.checkPaymentVerificationTitle();
-        pvd.checkGridPaymentDetails();
-        pvd.checkBankReconciliationTitle();
-        pvd.checkGridBankReconciliation();
-        pvd.checkVerificationPlansSummaryTitle();
-        pvd.checkGridVerificationPlansSummary();
+        paymentVerificationPage.chooseCashPlan(row_no).click();
+        paymentVerificationDetailsPage.checkPaymentVerificationTitle();
+        paymentVerificationDetailsPage.checkGridPaymentDetails();
+        paymentVerificationDetailsPage.checkBankReconciliationTitle();
+        paymentVerificationDetailsPage.checkGridBankReconciliation();
+        paymentVerificationDetailsPage.checkVerificationPlansSummaryTitle();
+        paymentVerificationDetailsPage.checkGridVerificationPlansSummary();
       });
     });
 
@@ -50,7 +50,7 @@ describe("Payment Verification", () => {
   describe("Component tests Payment Verification", () => {
     context("Create Verification Plan", () => {
       afterEach(() => {
-        pvd.deleteVerificationPlan(0);
+        paymentVerificationDetailsPage.deleteVerificationPlan(0);
       });
       it("Create Verification Plan using random sampling", () => {
         cy.scenario([
@@ -63,16 +63,18 @@ describe("Payment Verification", () => {
           "Press Save button",
           "Check if Verification Plan was created",
         ]);
-        pv.selectStatus("Pending");
-        pv.getCashPlanRows().should("have.length", 1);
-        pv.chooseCashPlan(0).click();
-        pvd.checkPaymentVerificationTitle();
-        pvd.getCreateVerificationPlan().click();
-        pvd.checkCVPTitle();
-        pvd.getRandomSampling().click();
-        pvd.getCVPConfidenceInterval().should("be.visible");
-        pvd.getCVPSave().click();
-        pvd.checkVerificationPlan();
+        paymentVerificationPage.selectStatus("Pending");
+        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
+        paymentVerificationPage.chooseCashPlan(0).click();
+        paymentVerificationDetailsPage.checkPaymentVerificationTitle();
+        paymentVerificationDetailsPage.getCreateVerificationPlan().click();
+        paymentVerificationDetailsPage.checkCVPTitle();
+        paymentVerificationDetailsPage.getRandomSampling().click();
+        paymentVerificationDetailsPage
+          .getCVPConfidenceInterval()
+          .should("be.visible");
+        paymentVerificationDetailsPage.getCVPSave().click();
+        paymentVerificationDetailsPage.checkVerificationPlan();
       });
     });
 
@@ -84,25 +86,27 @@ describe("Payment Verification", () => {
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("PP-0060-23-00000002");
-        pv.getApply().click();
-        pv.getCashPlanRows().should("have.length", 1);
-        pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan();
+        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
+        paymentVerificationPage.getApply().click();
+        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
+        paymentVerificationPage.chooseCashPlan(0).click();
+        paymentVerificationDetailsPage.createNewVerificationPlan();
       });
       it.skip("Test_1", () => {
-        pvd.getEditVP().contains("EDIT").click();
-        pvd.getCVPTitle();
+        paymentVerificationDetailsPage.getEditVP().contains("EDIT").click();
+        paymentVerificationDetailsPage.getCVPTitle();
       });
     });
 
     context("Delete Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("PP-0060-23-00000002");
-        pv.getApply().click();
-        pv.getCashPlanRows().should("have.length", 1);
-        pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
+        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
+        paymentVerificationPage.getApply().click();
+        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
+        paymentVerificationPage.chooseCashPlan(0).click();
+        paymentVerificationDetailsPage.createNewVerificationPlan(
+          defaultNumberOfVPlans016
+        );
       });
       it("Delete Verification Plan", () => {
         cy.scenario([
@@ -110,23 +114,25 @@ describe("Payment Verification", () => {
           "Press Delete button on pop-up",
           "Check if Verification Plan was deleted",
         ]);
-        pvd.getDeletePlan().click();
-        pvd.getDelete().click();
-        pvd.getNumberOfPlans().contains(1);
+        paymentVerificationDetailsPage.getDeletePlan().click();
+        paymentVerificationDetailsPage.getDelete().click();
+        paymentVerificationDetailsPage.getNumberOfPlans().contains(1);
       });
     });
 
     context("Activate Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("PP-0060-23-00000002");
-        pv.getApply().click();
-        pv.getCashPlanRows().should("have.length", 1);
-        pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
+        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
+        paymentVerificationPage.getApply().click();
+        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
+        paymentVerificationPage.chooseCashPlan(0).click();
+        paymentVerificationDetailsPage.createNewVerificationPlan(
+          defaultNumberOfVPlans016
+        );
       });
       afterEach(() => {
-        pvd.discardVerificationPlan(0);
-        pvd.deleteVerificationPlan(0);
+        paymentVerificationDetailsPage.discardVerificationPlan(0);
+        paymentVerificationDetailsPage.deleteVerificationPlan(0);
       });
       it("Activate Verification Plan", () => {
         cy.scenario([
@@ -136,29 +142,31 @@ describe("Payment Verification", () => {
           "Check if Activation Date was set",
           "Check if verification plan has status Active",
         ]);
-        pvd.getActivatePlan().click();
-        pvd.getActivate().click();
-        pvd.getStatusVP().contains("ACTIVE");
-        pvd.getActivationDate().find("div").not("-");
-        pvd.getStatus().contains("ACTIVE");
+        paymentVerificationDetailsPage.getActivatePlan().click();
+        paymentVerificationDetailsPage.getActivate().click();
+        paymentVerificationDetailsPage.getStatusVP().contains("ACTIVE");
+        paymentVerificationDetailsPage.getActivationDate().find("div").not("-");
+        paymentVerificationDetailsPage.getStatus().contains("ACTIVE");
       });
     });
 
     context("Finish Verification Plan", () => {
       beforeEach(() => {
-        pv.getPaymentPlanID().type("PP-0060-23-00000002");
-        pv.getApply().click();
-        pv.getCashPlanRows().should("have.length", 1);
-        pv.chooseCashPlan(0).click();
-        pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
+        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
+        paymentVerificationPage.getApply().click();
+        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
+        paymentVerificationPage.chooseCashPlan(0).click();
+        paymentVerificationDetailsPage.createNewVerificationPlan(
+          defaultNumberOfVPlans016
+        );
       });
       it.skip("Finish Verification Plan", () => {
-        pvd.getActivatePlan().click();
-        pvd.getActivate().click();
-        pvd.getStatusVP().contains("ACTIVE");
-        pvd.getFinishPlan().click();
-        pvd.getFinish().click();
-        pvd.getStatusVP().contains("FINISHED");
+        paymentVerificationDetailsPage.getActivatePlan().click();
+        paymentVerificationDetailsPage.getActivate().click();
+        paymentVerificationDetailsPage.getStatusVP().contains("ACTIVE");
+        paymentVerificationDetailsPage.getFinishPlan().click();
+        paymentVerificationDetailsPage.getFinish().click();
+        paymentVerificationDetailsPage.getStatusVP().contains("FINISHED");
       });
     });
 
@@ -182,7 +190,7 @@ describe("Payment Verification", () => {
   });
   describe("E2E tests Payment Verification", () => {
     // eslint-disable-next-line mocha/no-setup-in-describe
-    pv.countCashPlanArray().forEach((row_no) => {
+    paymentVerificationPage.countCashPlanArray().forEach((row_no) => {
       it.skip(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
         // pv.chooseCashPlan(row_no).click()
         cy.get('[data-cy="cash-plan-table-row"]').first().click();
