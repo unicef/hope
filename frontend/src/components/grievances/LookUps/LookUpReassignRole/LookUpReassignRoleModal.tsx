@@ -36,6 +36,7 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  shouldUseMultiple,
   individual,
   household,
 }: {
@@ -48,6 +49,7 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold;
   setSelectedIndividual;
   setSelectedHousehold;
+  shouldUseMultiple;
   individual;
   household?;
 }): React.ReactElement => {
@@ -118,14 +120,13 @@ export const LookUpReassignRoleModal = ({
           role: values.role,
         };
 
-        const shouldUseMultiple =
-          ticket.needsAdjudicationTicketDetails.selectedIndividuals?.length;
+        const variables = shouldUseMultiple
+          ? multipleRolesVariables
+          : singleRoleVariables;
 
         try {
           await mutate({
-            variables: shouldUseMultiple
-              ? multipleRolesVariables
-              : singleRoleVariables,
+            variables,
             refetchQueries: () => [
               {
                 query: GrievanceTicketDocument,
