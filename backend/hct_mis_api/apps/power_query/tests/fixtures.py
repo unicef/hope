@@ -1,6 +1,6 @@
 import operator
 from functools import reduce
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -13,7 +13,14 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User, UserGroup
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
-from hct_mis_api.apps.power_query.models import Formatter, Parametrizer, Query, Report
+from hct_mis_api.apps.power_query.models import (
+    Dataset,
+    Formatter,
+    Parametrizer,
+    Query,
+    Report,
+    ReportDocument,
+)
 
 
 class GroupFactory(DjangoModelFactory):
@@ -39,6 +46,21 @@ class QueryFactory(DjangoModelFactory):
     class Meta:
         model = Query
         # django_get_or_create = ("name",)
+
+
+class DatasetFactory(DjangoModelFactory):
+    query = factory.SubFactory(QueryFactory)
+
+    class Meta:
+        model = Dataset
+        # django_get_or_create = ("name",)
+
+    @classmethod
+    def create(cls, **kwargs: Dict) -> Dataset:
+        # ret = super().create(**kwargs)
+        q: Query = cls.query.get_factory().create()
+        q.run(persist=True)
+        return q.datasets.first()
 
 
 class FormatterFactory(DjangoModelFactory):
@@ -71,6 +93,21 @@ class ParametrizerFactory(DjangoModelFactory):
     class Meta:
         model = Parametrizer
         django_get_or_create = ("code",)
+
+
+class ReportDocumentFactory(DjangoModelFactory):
+    report = factory.SubFactory(ReportFactory)
+    value = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["value"])
+
+    class Meta:
+        model = ReportDocument
+
+    @classmethod
+    def create(cls, **kwargs: Dict) -> ReportDocument:
+        fmt = Formatter.objects.get(name="Queryset To HTML")
+        r: Report = ReportFactory(query=QueryFactory(), formatter=fmt)
+        r.execute(run_query=True)
+        return r.documents.first()
 
 
 def get_group(name: str = "Group1", permissions: Optional[List[Permission]] = None) -> Group:
