@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from django_countries.fields import Country
 
@@ -33,9 +33,6 @@ from hct_mis_api.apps.registration_datahub.services.base_flex_registration_servi
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
-    BUSINESS_AREA_SLUG: str = "sri-lanka"
-    REGISTRATION_ID: Tuple = (17,)
-
     HOUSEHOLD_MAPPING_DICT = {
         "admin2": "admin2_h_c",
         "admin3": "admin3_h_c",
@@ -173,10 +170,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        self._check_registration_id(record.registration, "Sri-Lanka data is processed only from registration 17!")
-
         record_data_dict = record.get_data()
-
         localization_dict = record_data_dict.get("localization-info", [])[0]
         head_of_household_dict = record_data_dict.get("caretaker-info", [])[0]
         collector_dict = record_data_dict.get("collector-info", [])[0]
