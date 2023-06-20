@@ -1,9 +1,18 @@
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory, create_household_and_individuals
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
-from hct_mis_api.one_time_scripts.handle_individuals_with_multiple_roles import update_individuals_with_multiple_roles
+from hct_mis_api.apps.household.fixtures import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.one_time_scripts.handle_individuals_with_multiple_roles import (
+    update_individuals_with_multiple_roles,
+)
 
 
 class TestHandleIndividualsWithMultipleRoles(TestCase):
@@ -18,8 +27,12 @@ class TestHandleIndividualsWithMultipleRoles(TestCase):
         IndividualRoleInHouseholdFactory(household=cls.household, individual=cls.individual[0], role=ROLE_ALTERNATE)
 
     def test_handle_individuals_with_multiple_roles_within_household(self) -> None:
-        roles = IndividualRoleInHousehold.objects.filter(household=self.household, individual=self.individual[0]).count()
-        self.assertEqual(roles, 2)
+        roles_count = IndividualRoleInHousehold.objects.filter(
+            household=self.household, individual=self.individual[0]
+        ).count()
+        self.assertEqual(roles_count, 2)
         update_individuals_with_multiple_roles()
-        roles = IndividualRoleInHousehold.objects.filter(household=self.household, individual=self.individual[0]).count()
-        self.assertEqual(roles, 1)
+        roles_count = IndividualRoleInHousehold.objects.filter(
+            household=self.household, individual=self.individual[0]
+        ).count()
+        self.assertEqual(roles_count, 1)
