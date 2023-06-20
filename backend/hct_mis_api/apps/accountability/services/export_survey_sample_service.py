@@ -42,7 +42,7 @@ class ExportSurveySampleService:
             self.survey.store_sample_file(filename, File(tmp))
 
     def send_email(self) -> None:
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         survey_id = encode_id_base64(self.survey.id, "Survey")
         api = reverse("download-survey-sample", args=[survey_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
