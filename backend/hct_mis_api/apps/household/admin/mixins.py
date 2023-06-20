@@ -18,7 +18,6 @@ from hct_mis_api.apps.household.forms import (
     CreateTargetPopulationForm,
     MassRestoreForm,
     MassWithdrawForm,
-    RestoreForm,
     WithdrawForm,
 )
 from hct_mis_api.apps.household.models import Household
@@ -143,7 +142,7 @@ class HouseholdWithDrawnMixin:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
-            context["form"] = RestoreForm(
+            context["form"] = MassRestoreForm(
                 initial={
                     "reopen_tickets": True,
                     "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
