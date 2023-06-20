@@ -71,6 +71,7 @@ stages:
                 postgresql.password=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                pgadmin.password=$(PGADMIN_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
           - script: |
               timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/job=upgrade \
