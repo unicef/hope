@@ -35,7 +35,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader should ren
             >
               <a
                 class="sc-bdVaJa eFfWno"
-                href="/afghanistan/payment-module/payment-plans/undefined"
+                href="/afghanistan/programs/all/payment-module/payment-plans/undefined"
               >
                 Payment Module
               </a>
