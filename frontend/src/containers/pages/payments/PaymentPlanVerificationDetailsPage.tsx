@@ -115,7 +115,8 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
       title={
         <BlackLink
           data-cy='plan-link'
-          to={`/${businessArea}/paymentplans/${paymentPlan.id}`}
+          fullWidth
+          to={`/${businessArea}/payment-plans/${paymentPlan.id}`}
         >
           {t('Payment Plan')}{' '}
           <span data-cy='plan-id'>{paymentPlan.unicefId}</span>

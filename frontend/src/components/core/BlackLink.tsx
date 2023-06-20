@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export const StyledLink = styled(Link)`
   color: #000;
-  max-width: 150px;
+  max-width: ${(props) => (props.fullWidth ? '100%' : '150px')}
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
