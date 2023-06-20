@@ -30,7 +30,7 @@ export const App: React.FC = () => {
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
-          <Route path='/:businessArea/'>
+          <Route path='/:businessArea/programs/:programId'>
             <HomeRouter />
           </Route>
           <Route path='/'>

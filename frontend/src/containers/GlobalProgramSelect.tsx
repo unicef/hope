@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../__generated__/graphql';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
-import { useGlobalProgram } from '../hooks/useGlobalProgram';
 
 const CountrySelect = styled(Select)`
   && {
@@ -45,8 +44,7 @@ const CountrySelect = styled(Select)`
 `;
 
 export const GlobalProgramSelect = (): React.ReactElement => {
-  const program = useGlobalProgram();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea, first: 100 },
@@ -54,7 +52,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   });
 
   const onChange = (e): void => {
-    history.push(`/${baseUrl}/programs/${e.target.value}`);
+    history.push(`/${businessArea}/programs/${e.target.value}`);
   };
   if (loading) {
     return <LoadingComponent />;
@@ -64,7 +62,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   }
 
   return (
-    <CountrySelect variant='filled' value={program} onChange={onChange}>
+    <CountrySelect variant='filled' value={programId} onChange={onChange}>
       {data.allPrograms.edges.map((each) => (
         <MenuItem key={each.node.id} value={each.node.id}>
           {each.node.name}
