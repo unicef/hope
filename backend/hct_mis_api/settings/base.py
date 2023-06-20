@@ -1146,5 +1146,3 @@ if LOGGING_DISABLED:
     )
 
     logging.disable(logging.CRITICAL)
-
-    del DATABASES["read_only"]
