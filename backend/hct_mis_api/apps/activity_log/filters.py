@@ -36,7 +36,7 @@ class LogEntryFilter(FilterSet):
         return qs.filter(q_obj)
 
     def search_user(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
-        return qs.filter(user__id=decode_id_string_required(value))
+        return qs.filter(user_id=decode_id_string_required(value))
 
     def search_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
-        return qs.filter(program__id=decode_id_string_required(value))
+        return qs.filter(program_id=decode_id_string_required(value))
