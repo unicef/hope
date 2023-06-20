@@ -46,7 +46,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
       to: `/${baseUrl}/payment-module/`,
     },
     {
-      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : null} Payment Plan ${
+      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${
         payment.parent.unicefId
       }`,
       to: `/${baseUrl}/payment-module/${

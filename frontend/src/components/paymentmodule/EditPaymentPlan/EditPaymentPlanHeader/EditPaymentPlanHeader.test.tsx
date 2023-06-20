@@ -3,13 +3,14 @@ import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fak
 import { PERMISSIONS } from '../../../../config/permissions';
 import { render } from '../../../../testUtils/testUtils';
 import { EditPaymentPlanHeader } from './EditPaymentPlanHeader';
+import { fakeBaseUrl } from '../../../../../fixtures/core/fakeBaseUrl';
 
 describe('components/paymentmodule/EditPaymentPlanHeader', () => {
   it('should render', () => {
     const { container } = render(
       <EditPaymentPlanHeader
         handleSubmit={jest.fn()}
-        businessArea='afghanistan'
+        baseUrl={fakeBaseUrl}
         permissions={[PERMISSIONS.PM_VIEW_LIST]}
         paymentPlan={fakeApolloPaymentPlan}
       />,

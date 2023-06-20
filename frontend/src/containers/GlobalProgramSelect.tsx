@@ -63,6 +63,9 @@ export const GlobalProgramSelect = (): React.ReactElement => {
 
   return (
     <CountrySelect variant='filled' value={programId} onChange={onChange}>
+      <MenuItem key='all' value='all'>
+        All Programs
+      </MenuItem>
       {data.allPrograms.edges.map((each) => (
         <MenuItem key={each.node.id} value={each.node.id}>
           {each.node.name}
