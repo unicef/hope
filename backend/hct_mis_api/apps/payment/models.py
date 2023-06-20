@@ -882,6 +882,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
+    @property
+    def get_program(self) -> "Program":
+        # TODO will update after add feature with 'program_cycle' and migrate all data
+        return self.program_cycle.program if self.program_cycle else self.program
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
