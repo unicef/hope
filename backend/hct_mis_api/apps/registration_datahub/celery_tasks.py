@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
@@ -19,6 +19,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.aurora.models import Registration
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -299,32 +300,13 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Tuple) -> None:
-    from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
-        CzechRepublicFlexRegistration,
-    )
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        SriLankaRegistrationService,
-    )
-    from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
-        UkraineBaseRegistrationService,
-        UkraineRegistrationService,
-    )
-
+def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records_ids: List) -> None:
+    registration = Registration.objects.get(id=reg_id)
     try:
-        # check only first item in tuple registration_ids
-        # TODO: maybe refactor registration_ids arg or add service_name in arg
-        registration_id = next(iter(registration_ids))
-        if registration_id in (2, 3):
-            UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_id == 21:
-            UkraineRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_id == 17:
-            SriLankaRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_id == 25:
-            CzechRepublicFlexRegistration().process_records(rdi_id, records_ids)
+        if service := registration.rdi_parser:
+            service.process_records(rdi_id, records_ids)
         else:
-            logger.exception(f"Not Implemented Service for Registration id(s): {registration_ids}")
+            logger.exception("Not Implemented Service for Registration")
             raise NotImplementedError
     except Exception as e:
         logger.exception("Process Flex Records Task error")
@@ -359,17 +341,19 @@ def automate_rdi_creation_task(
     fix_tax_id: bool = False,
     **filters: Any,
 ) -> List:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        get_registration_to_rdi_service_map,
-    )
-
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as locked:
             if not locked:
                 return []
             output = []
-
-            service: Optional[Any] = get_registration_to_rdi_service_map().get(registration_id)
+            try:
+                registration = Registration.objects.get(id=registration_id)
+            except Registration.DoesNotExist:
+                raise NotImplementedError
+            project = registration.project
+            # programme = project.programme TODO programme refactoring
+            organization = project.organization
+            service: Optional[Any] = registration.rdi_parser
             if service is None:
                 raise NotImplementedError
 
@@ -392,10 +376,10 @@ def automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
                     records=len(records_ids),
-                    business_area_name=service.BUSINESS_AREA_SLUG,
+                    business_area_name=organization.name,
                 )
-                rdi = service().create_rdi(imported_by=None, rdi_name=rdi_name)
-                service().process_records(rdi_id=rdi.id, records_ids=records_ids)
+                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
                     merge_registration_data_import_task.delay(rdi.id)
