@@ -711,7 +711,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -759,7 +759,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
@@ -786,7 +786,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -815,7 +815,7 @@ class DeletePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -854,7 +854,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1015,7 +1015,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
                 user=info.context.user,
-                program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+                program=payment_plan.get_program,
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
@@ -1062,7 +1062,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1112,7 +1112,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.program_cycle.program if payment_plan.program_cycle else payment_plan.program,
+            program=payment_plan.get_program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )

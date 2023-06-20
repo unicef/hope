@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from uuid import UUID
 
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
@@ -13,6 +14,23 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         activity_log_assign_program()
+
+
+def get_program_id(log: "LogEntry") -> UUID:
+    obj = log.content_object
+    class_name = obj.__class__.__name__
+
+    class_name_to_program_id_mapping = {
+        "GrievanceTicket": obj.programme_id,
+        "PaymentPlan": obj.get_program.pk,
+        "CashPlan": obj.program_id,
+        "PaymentVerificationPlan": obj.get_program.pk if obj.get_program else None,
+        "Program": obj.pk,
+        # TODO: add more
+        # "": "",
+    }
+
+    return class_name_to_program_id_mapping.get(class_name)
 
 
 @transaction.atomic
@@ -29,8 +47,7 @@ def activity_log_assign_program() -> None:
         print(f"Loading page {page} of {number_of_pages}")
 
         for log in paginator.page(page).object_list:
-            # TODO: add more logic here
-            # log.program_id = "UUID_here"
+            log.program_id = get_program_id(log)
             to_update.append(log)
 
         LogEntry.objects.bulk_update(to_update, ["program_id"])
