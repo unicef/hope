@@ -105,6 +105,11 @@ describe("Payment Verification", () => {
         pvd.createNewVerificationPlan(defaultNumberOfVPlans016);
       });
       it("Delete Verification Plan", () => {
+        cy.scenario([
+          "Press Delete button",
+          "Press Delete button on pop-up",
+          "Check if Verification Plan was deleted",
+        ]);
         pvd.getDeletePlan().click();
         pvd.getDelete().click();
         pvd.getNumberOfPlans().contains(1);
