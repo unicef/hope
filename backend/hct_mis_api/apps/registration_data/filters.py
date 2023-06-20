@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, DateFilter, FilterSet, UUIDFilter
+from django_filters import CharFilter, DateFilter, FilterSet
 
 from hct_mis_api.apps.core.filters import DateRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
@@ -41,6 +41,7 @@ class RegistrationDataImportFilter(FilterSet):
         qs = super().filter_queryset(queryset)
         return qs.exclude(excluded=True)
 
-    def filter_by_program_id(self, queryset: QuerySet, name: str, value: str):
+    def filter_by_program_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
         if value:
             return queryset.filter(program_id=decode_id_string_required(value))
+        return queryset
