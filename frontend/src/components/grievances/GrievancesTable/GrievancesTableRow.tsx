@@ -61,7 +61,7 @@ export const GrievancesTableRow = ({
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
     ticket.category,
-    businessArea,
+    baseUrl,
   );
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
