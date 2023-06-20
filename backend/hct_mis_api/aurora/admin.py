@@ -48,10 +48,9 @@ class RegistrationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_filter = ("rdi_policy", "project")
 
 
-@smart_register(models.Record)
-class RecordAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     @button()
-    def fetch(self, request: HttpRequest) -> HttpResponse:
+    def fetch_aurora(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request)
         if request.method == "POST":
             form = FetchForm(request.POST)
@@ -59,7 +58,6 @@ class RecordAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             if "detect" in request.POST:
                 ctx["metadata"] = get_metadata(aurora_token)
             elif form.is_valid():
-                aurora_token = request.user.custom_fields.get("aurora_token")
                 filters = {
                     "id": form.cleaned_data.get("from_id", "") or "",
                     "after": form.cleaned_data.get("after_date", "") or "",
