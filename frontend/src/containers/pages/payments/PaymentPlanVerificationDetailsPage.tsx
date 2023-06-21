@@ -48,7 +48,7 @@ const BottomTitle = styled.div`
   padding: 70px;
 `;
 
-export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
+export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
@@ -217,4 +217,4 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
         )}
     </>
   );
-}
+};
