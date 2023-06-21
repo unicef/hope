@@ -56,7 +56,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program, None, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
 
 
@@ -101,7 +101,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
                 setattr(program, attrib, value)
         program.full_clean()
         program.save()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program, old_program, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
 
@@ -123,7 +123,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.validate(program=program)
 
         program.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program, old_program, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
 
 

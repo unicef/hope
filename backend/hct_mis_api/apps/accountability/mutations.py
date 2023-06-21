@@ -64,9 +64,8 @@ class CreateCommunicationMessageMutation(PermissionMutation):
         program = None
         if message.target_population:
             program = message.target_population.program
-        # TODO: uncomment after merge changes for RDI # TODO: add 'program' arg or None
-        # elif message.registration_data_import:
-        #     program = message.registration_data_import.program
+        elif message.registration_data_import:
+            program = message.registration_data_import.program_id
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", user, program, None, message)
         return cls(message=message)
 
