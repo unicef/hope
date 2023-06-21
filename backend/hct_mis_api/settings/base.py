@@ -69,7 +69,6 @@ DEFAULTS = {
     "SECURE_HSTS_SECONDS": (int, 3600),
     "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
     "LOGGING_DISABLED": (bool, False),
-    "CACHE_URL": (str, "redis://redis:6379/1?client_class=django_redis.client.DefaultClient"),
     "CACHE_ENABLED": (bool, True),
 }
 
@@ -523,13 +522,17 @@ REDIS_INSTANCE = env("REDIS_INSTANCE", default="redis:6379")
 
 CACHE_ENABLED = env("CACHE_ENABLED", default=True)
 
+CACHES: Dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
-        "default": f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient",
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient",
+        }
     }
 else:
     CACHES = {
-        "default": {  # type: ignore
+        "default": {
             "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
         }
