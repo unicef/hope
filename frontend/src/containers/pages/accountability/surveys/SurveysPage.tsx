@@ -14,15 +14,6 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 
-const initialFilter = {
-  search: '',
-  program: '',
-  targetPopulation: '',
-  createdBy: '',
-  createdAtRangeMin: null,
-  createdAtRangeMax: null,
-};
-
 export const SurveysPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -30,6 +21,13 @@ export const SurveysPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
   const location = useLocation();
+  const initialFilter = {
+    search: '',
+    targetPopulation: '',
+    createdBy: '',
+    createdAtRangeMin: null,
+    createdAtRangeMax: null,
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

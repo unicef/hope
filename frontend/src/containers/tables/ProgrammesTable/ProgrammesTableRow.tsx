@@ -21,13 +21,13 @@ interface ProgrammesTableRowProps {
   choicesData: ProgrammeChoiceDataQuery;
 }
 
-export function ProgrammesTableRow({
+export const ProgrammesTableRow = ({
   program,
   choicesData,
-}: ProgrammesTableRowProps): React.ReactElement {
+}: ProgrammesTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/programs/${program.id}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.id}`;
   const handleClick = (): void => {
     history.push(programDetailsPath);
   };
@@ -63,4 +63,4 @@ export function ProgrammesTableRow({
       <TableCell align='right'>{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
-}
+};

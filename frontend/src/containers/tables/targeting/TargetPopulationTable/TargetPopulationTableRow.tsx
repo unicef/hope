@@ -70,9 +70,6 @@ export function TargetPopulationTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.program?.name || '-'}
-      </TableCell>
-      <TableCell align='left'>
         {targetPopulation.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align='left'>

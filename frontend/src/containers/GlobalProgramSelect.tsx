@@ -47,12 +47,14 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100 },
+    variables: { businessArea, first: 100, status: ['ACTIVE'] },
     fetchPolicy: 'cache-and-network',
   });
 
   const onChange = (e): void => {
-    history.push(`/${businessArea}/programs/${e.target.value}`);
+    history.push(
+      `/${businessArea}/programs/${e.target.value}/details/${e.target.value}`,
+    );
   };
   if (loading) {
     return <LoadingComponent />;
@@ -64,7 +66,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   return (
     <CountrySelect variant='filled' value={programId} onChange={onChange}>
       <MenuItem key='all' value='all'>
-        All Programs
+        All Programmes
       </MenuItem>
       {data.allPrograms.edges.map((each) => (
         <MenuItem key={each.node.id} value={each.node.id}>

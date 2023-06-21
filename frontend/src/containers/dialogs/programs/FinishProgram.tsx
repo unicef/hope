@@ -62,7 +62,7 @@ export function FinishProgram({
     });
     if (!response.errors && response.data.updateProgram) {
       showMessage(t('Programme finished.'), {
-        pathname: `/${baseUrl}/programs/${response.data.updateProgram.program.id}`,
+        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
         dataCy: 'snackbar-program-finish-success',
       });
       setOpen(false);
