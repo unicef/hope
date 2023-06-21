@@ -1,10 +1,10 @@
-import Grievance from "../../page-objects/pages/grievance/grievance.po";
-import GDetailsPage from "../../page-objects/pages/grievance/details_page.po";
+import Grievance from "../../page-objects/pages/grievance/grievance_tickets.po";
+import GDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
 
-let g = new Grievance();
-let gd = new GDetailsPage();
-let gnt = new NewTicket();
+let grievancePage = new Grievance();
+let grievanceDetailsPage = new GDetailsPage();
+let newTicketPage = new NewTicket();
 
 describe("Grievance", () => {
   beforeEach(() => {
