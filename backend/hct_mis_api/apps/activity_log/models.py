@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.utils import nested_getattr
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import AbstractUser, User
     from hct_mis_api.apps.program.models import Program
+    from uuid import UUID
 
 
 class LogEntry(models.Model):
@@ -69,7 +70,7 @@ def log_create(
     mapping: Dict,
     business_area_field: Any,
     user: Optional[Union["AbstractUser", "User"]] = None,
-    program: Optional["Program"] = None,
+    program_id: Optional["UUID"] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:
@@ -92,7 +93,7 @@ def log_create(
         action=action,
         content_object=instance,
         user=user,
-        program=program,
+        program_id=program_id,
         business_area=business_area,
         object_repr=str(instance),
         changes=create_diff(old_object, new_object, mapping)

@@ -442,9 +442,8 @@ class RdiMergeTask:
                 obj_hct.save()
                 logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                 transaction.on_commit(lambda: deduplicate_documents.delay())
-                # TODO: add 'program' arg or None
                 log_create(
-                    RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, None, old_obj_hct, obj_hct
+                    RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, obj_hct.program_id, old_obj_hct, obj_hct
                 )
 
             self._update_individuals_and_households(individual_ids)
