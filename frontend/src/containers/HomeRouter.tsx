@@ -1,7 +1,13 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
-import { Redirect, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import {
+  Redirect,
+  Switch,
+  useHistory,
+  useLocation,
+  useRouteMatch,
+} from 'react-router-dom';
 import styled from 'styled-components';
 import {
   useAllBusinessAreasQuery,
@@ -79,7 +85,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 
 export const HomeRouter = (): React.ReactElement => {
   const [open, setOpen] = React.useState(true);
-  const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const classes = useStyles({});
   const location = useLocation();
   const { path } = useRouteMatch();
@@ -126,14 +132,12 @@ export const HomeRouter = (): React.ReactElement => {
   const allBusinessAreasSlugs = businessAreaData.allBusinessAreas.edges.map(
     (el) => el.node.slug,
   );
-  const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
+  // const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
-  const isProgramValid = allProgramsIds.includes(programId);
+  // const isProgramValid = allProgramsIds.includes(programId);
 
-  if (!isAllPrograms) {
-    if (!isBusinessAreaValid || !isProgramValid) {
-      return <Redirect to='/' noThrow />;
-    }
+  if (!isBusinessAreaValid) {
+    return <Redirect to='/' noThrow />;
   }
   return (
     <Root>
@@ -157,66 +161,34 @@ export const HomeRouter = (): React.ReactElement => {
           <SentryRoute path={`${path}/cashplans/:id`}>
             <CashPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            exact
-            path={`${path}/target-population`}
-          >
+          <SentryRoute exact path={`${path}/target-population`}>
             <TargetPopulationsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/target-population/create`}
-          >
+          <SentryRoute path={`${path}/target-population/create`}>
             <CreateTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/target-population/edit-tp/:id`}
-          >
+          <SentryRoute path={`${path}/target-population/edit-tp/:id`}>
             <EditTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/target-population/:id`}
-          >
+          <SentryRoute path={`${path}/target-population/:id`}>
             <TargetPopulationDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/verification/payment-record/:id`}
-          >
+          <SentryRoute path={`${path}/verification/payment-record/:id`}>
             <VerificationPaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/verification/payment/:id`}
-          >
+          <SentryRoute path={`${path}/verification/payment/:id`}>
             <VerificationPaymentDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            exact
-            path={`${path}/payment-verification`}
-          >
+          <SentryRoute exact path={`${path}/payment-verification`}>
             <PaymentVerificationPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/payment-verification/cash-plan/:id`}
-          >
+          <SentryRoute path={`${path}/payment-verification/cash-plan/:id`}>
             <CashPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/payment-verification/payment-plan/:id`}
-          >
+          <SentryRoute path={`${path}/payment-verification/payment-plan/:id`}>
             <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={!isAllPrograms}
-            path={`${path}/csh-payment-verification/:id`}
-          >
+          <SentryRoute path={`${path}/csh-payment-verification/:id`}>
             <CashPlanVerificationRedirectPage />
           </SentryRoute>
           <SentryRoute path={`${path}/payment-module/new-plan`}>
@@ -264,89 +236,53 @@ export const HomeRouter = (): React.ReactElement => {
           >
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/new-ticket`}
-          >
+          <SentryRoute path={`${path}/grievance/new-ticket`}>
             <CreateGrievancePage />
           </SentryRoute>
           <SentryRoute
-            shouldRender={isAllPrograms}
             path={`${path}/grievance/edit-ticket/user-generated/:id`}
           >
             <EditGrievancePage key='user' />
           </SentryRoute>
           <SentryRoute
-            shouldRender={isAllPrograms}
             path={`${path}/grievance/edit-ticket/system-generated/:id`}
           >
             <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/tickets/user-generated/:id`}
-          >
+          <SentryRoute path={`${path}/grievance/tickets/user-generated/:id`}>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/tickets/system-generated/:id`}
-          >
+          <SentryRoute path={`${path}/grievance/tickets/system-generated/:id`}>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/rdi/:id`}
-          >
+          <SentryRoute path={`${path}/grievance/rdi/:id`}>
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
           <SentryRoute
-            shouldRender={isAllPrograms}
             path={`${path}/grievance/payment-verification/:cashPlanId`}
           >
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/tickets/user-generated`}
-          >
+          <SentryRoute path={`${path}/grievance/tickets/user-generated`}>
             <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/tickets/system-generated`}
-          >
+          <SentryRoute path={`${path}/grievance/tickets/system-generated`}>
             <GrievancesTablePage key='system' />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/grievance/dashboard`}
-          >
+          <SentryRoute path={`${path}/grievance/dashboard`}>
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
 
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/accountability/feedback/create`}
-          >
+          <SentryRoute path={`${path}/accountability/feedback/create`}>
             <CreateFeedbackPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/accountability/feedback/edit-ticket/:id`}
-          >
+          <SentryRoute path={`${path}/accountability/feedback/edit-ticket/:id`}>
             <EditFeedbackPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/accountability/feedback/:id`}
-          >
+          <SentryRoute path={`${path}/accountability/feedback/:id`}>
             <FeedbackDetailsPage />
           </SentryRoute>
-          <SentryRoute
-            shouldRender={isAllPrograms}
-            path={`${path}/accountability/feedback`}
-          >
+          <SentryRoute path={`${path}/accountability/feedback`}>
             <FeedbackPage />
           </SentryRoute>
           {/* TODO: uncomment when ready for deployment
