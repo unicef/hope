@@ -82,32 +82,24 @@ export const DrawerItems = ({
   if (permissions === null || !businessAreaData) return null;
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
+    //When GlobalProgramFilter not applied
+    if (isAllPrograms) {
+      return null;
+    }
     const updatedMenuItems = [...items];
     const getIndexByName = (name: string): number => {
       return updatedMenuItems.findIndex((item) => item?.name === name);
     };
     const cashAssistIndex = getIndexByName('Cash Assist');
-    const programManagementIndex = getIndexByName('Programme Management');
-    const grievanceIndex = getIndexByName('Grievance');
-    const paymentVerificationIndex = getIndexByName('Payment Verification');
-    const targetingIndex = getIndexByName('Targeting');
+    const programDetailsIndex = getIndexByName('Programme Details');
 
     //Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =
       cashAssistUrlData?.cashAssistUrlPrefix;
 
-    //When GlobalProgramFilter not applied
-    if (isAllPrograms) {
-      delete updatedMenuItems[cashAssistIndex];
-      updatedMenuItems[programManagementIndex].href = '/list';
-      delete updatedMenuItems[paymentVerificationIndex];
-      delete updatedMenuItems[targetingIndex];
-    }
-
     //When GlobalProgramFilter applied
     if (!isAllPrograms) {
-      delete updatedMenuItems[grievanceIndex];
-      updatedMenuItems[programManagementIndex].href = `/details/${programId}`;
+      updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
     }
     return updatedMenuItems;
   };
@@ -139,7 +131,7 @@ export const DrawerItems = ({
 
   return (
     <div>
-      {preparedMenuItems.map((item, index) => {
+      {preparedMenuItems?.map((item, index) => {
         if (
           item.permissionModule &&
           !hasPermissionInModule(item.permissionModule, permissions)

@@ -8,38 +8,36 @@ import {
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import get from 'lodash/get';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import {
+  useCreateReportMutation,
+  useReportChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { ALL_REPORTS_QUERY } from '../../apollo/queries/reporting/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { REPORT_TYPES } from '../../utils/constants';
-import {
-  useAllProgramsQuery,
-  useCreateReportMutation,
-  useReportChoiceDataQuery,
-} from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FieldLabel } from '../core/FieldLabel';
 import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 export const NewReportForm = (): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
 
   const validationSchema = Yup.object().shape({
     reportType: Yup.string().required(t('Report type is required')),
@@ -60,24 +58,12 @@ export const NewReportForm = (): React.ReactElement => {
   });
 
   const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-  const {
     data: choicesData,
     loading: choicesLoading,
   } = useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
-  if (loadingPrograms || choicesLoading) return <LoadingComponent />;
-  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node.name,
-    value: edge.node.id,
-  }));
+  if (choicesLoading) return <LoadingComponent />;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValue: { [key: string]: any } = {
@@ -86,7 +72,7 @@ export const NewReportForm = (): React.ReactElement => {
     dateTo: '',
     adminArea1: '',
     adminArea2: [],
-    program: '',
+    program: programId,
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -167,36 +153,18 @@ export const NewReportForm = (): React.ReactElement => {
         />
       </Grid>
     );
-    const programField = (
-      <Grid item xs={12}>
-        <Field
-          name='program'
-          label={t('Programme')}
-          fullWidth
-          variant='outlined'
-          choices={mappedPrograms}
-          component={FormikSelectField}
-        />
-      </Grid>
-    );
+
     const showOnlyAdminAreaField =
       values.reportType === REPORT_TYPES.INDIVIDUALS ||
       values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
       values.reportType === REPORT_TYPES.PAYMENTS;
-
-    const showOnlyProgramField =
-      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
-      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
-      values.reportType === REPORT_TYPES.CASH_PLAN;
 
     let fields = null;
 
     if (showOnlyAdminAreaField) {
       fields = adminArea2Field;
     }
-    if (showOnlyProgramField) {
-      fields = programField;
-    }
+
     return fields;
   };
   const renderTimeframeLabel = (reportType: string): string => {
@@ -336,16 +304,6 @@ export const NewReportForm = (): React.ReactElement => {
                             variant='outlined'
                             component={FormikAdminAreaAutocompleteMultiple}
                             parentId={values.adminArea1?.node?.id}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Field
-                            name='program'
-                            label={t('Programme')}
-                            fullWidth
-                            variant='outlined'
-                            choices={mappedPrograms}
-                            component={FormikSelectField}
                           />
                         </Grid>
                       </>
