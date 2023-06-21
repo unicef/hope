@@ -3923,7 +3923,8 @@ export type MutationsDeleteProgramArgs = {
 
 export type MutationsUploadImportDataXlsxFileAsyncArgs = {
   businessAreaSlug: Scalars['String'],
-  file: Scalars['Upload']
+  file: Scalars['Upload'],
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -6088,9 +6089,9 @@ export type QueryAllRegistrationDataImportsArgs = {
   name?: Maybe<Scalars['String']>,
   name_Startswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
-  programId?: Maybe<Scalars['UUID']>,
   importDateRange?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6278,7 +6279,7 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
-  programId: Scalars['UUID'],
+  programId?: Maybe<Scalars['UUID']>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -6386,6 +6387,7 @@ export type RegistrationXlsxImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
+  programId?: Maybe<Scalars['String']>,
 };
 
 export type ReportNode = Node & {
@@ -12784,7 +12786,7 @@ export type AllRegistrationDataImportsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   importDateRange?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
-  programId?: Maybe<Scalars['UUID']>
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -24543,7 +24545,7 @@ export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProject
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String, $programId: UUID) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String, $programId: String) {
   allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size, programId: $programId) {
     pageInfo {
       hasNextPage
@@ -29918,7 +29920,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  programId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
