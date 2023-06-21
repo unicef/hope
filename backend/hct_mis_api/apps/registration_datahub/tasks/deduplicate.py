@@ -316,12 +316,11 @@ class DeduplicateTask:
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
             registration_data_import.error_message = ""
             registration_data_import.save()
-            # TODO: add 'program' arg or None
             log_create(
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 None,
-                None,
+                registration_data_import.program_id,
                 old_rdi,
                 registration_data_import,
             )
@@ -611,9 +610,8 @@ class DeduplicateTask:
                 "status",
             )
         )
-        # TODO: add 'program' arg or None
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, None, old_rdi, registration_data_import
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, registration_data_import.program_id, old_rdi, registration_data_import
         )
 
 

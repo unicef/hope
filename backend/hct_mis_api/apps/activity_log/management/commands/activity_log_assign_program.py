@@ -22,12 +22,15 @@ def get_program_id(log: "LogEntry") -> UUID:
 
     class_name_to_program_id_mapping = {
         "GrievanceTicket": obj.programme_id,
+        # "Household": "",
+        # "Individual": "",
         "PaymentPlan": obj.get_program.pk,
         "CashPlan": obj.program_id,
         "PaymentVerificationPlan": obj.get_program.pk if obj.get_program else None,
+        # "PaymentVerification": "",
         "Program": obj.pk,
-        # TODO: add more
-        # "": "",
+        # "TargetPopulation": "",
+        # "RegistrationDataImport": "",
     }
 
     return class_name_to_program_id_mapping.get(class_name)
