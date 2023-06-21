@@ -69,6 +69,7 @@ DEFAULTS = {
     "SECURE_HSTS_SECONDS": (int, 3600),
     "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
     "LOGGING_DISABLED": (bool, False),
+    "CACHE_URL": (str, "redis://redis:6379/1?client_class=django_redis.client.DefaultClient"),
     "CACHE_ENABLED": (bool, True),
 }
 
