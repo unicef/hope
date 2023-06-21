@@ -285,9 +285,9 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  
-                   
-                  
+
+
+
                 </td>
               </tr>
               <tr
@@ -345,7 +345,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   Ashley
-                   
+
                   Smith
                 </td>
               </tr>
@@ -404,7 +404,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   Sophia
-                   
+
                   Goodwin
                 </td>
               </tr>
@@ -463,7 +463,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   James
-                   
+
                   Aguilar
                 </td>
               </tr>
@@ -522,7 +522,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   Root
-                   
+
                   Rootkowski
                 </td>
               </tr>
