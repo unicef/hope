@@ -13,6 +13,7 @@ import { SurveyTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
 import { LookUpSelectionTables } from './LookUpSelectionTables';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const surveysTabs = ['Programme', 'Target Population'];
 
@@ -37,6 +38,7 @@ export const LookUpSelection = ({
   setSelectedTab;
 }): React.ReactElement => {
   const location = useLocation();
+  const { programId } = useBaseUrl();
   const initialFilterP = {
     search: '',
     startDate: undefined,
@@ -59,7 +61,7 @@ export const LookUpSelection = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: '',
+    program: programId,
     numIndividualsMin: null,
     numIndividualsMax: null,
   };
@@ -150,7 +152,6 @@ export const LookUpSelection = ({
           {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
             <TargetPopulationFilters
               filter={filterTP}
-              programs={programs as ProgramNode[]}
               setFilter={setFilterTP}
               initialFilter={initialFilterTP}
               appliedFilter={appliedFilterTP}

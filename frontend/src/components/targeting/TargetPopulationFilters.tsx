@@ -22,7 +22,6 @@ import { SelectFilter } from '../core/SelectFilter';
 
 interface TargetPopulationFiltersProps {
   filter;
-  programs: ProgramNode[];
   addBorder?: boolean;
   setFilter: (filter) => void;
   initialFilter;
@@ -31,7 +30,6 @@ interface TargetPopulationFiltersProps {
 }
 export const TargetPopulationFilters = ({
   filter,
-  programs,
   addBorder = true,
   setFilter,
   initialFilter,
@@ -93,25 +91,6 @@ export const TargetPopulationFilters = ({
                   {targetPopulationStatusMapping(key)}
                 </MenuItem>
               ))}
-          </SelectFilter>
-        </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            fullWidth
-            data-cy='filters-program'
-          >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
