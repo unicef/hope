@@ -37,7 +37,7 @@ export const UsersPage = (): React.ReactElement => {
 
   return (
     <>
-      <PageHeader title={t('User Management')}>
+      <PageHeader title={t('Programme Users')}>
         <>
           <Button
             variant='contained'

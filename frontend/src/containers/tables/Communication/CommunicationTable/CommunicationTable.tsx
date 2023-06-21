@@ -8,6 +8,7 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface CommunicationTableProps {
   filter;
@@ -18,11 +19,12 @@ export const CommunicationTable = ({
   filter,
   canViewDetails,
 }: CommunicationTableProps): ReactElement => {
+  const { programId } = useBaseUrl();
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
       : '',
-    program: filter.program,
+    program: programId,
     targetPopulation: filter.targetPopulation,
     createdBy: filter.createdBy || '',
   };

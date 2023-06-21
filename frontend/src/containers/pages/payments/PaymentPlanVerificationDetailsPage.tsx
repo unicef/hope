@@ -51,7 +51,7 @@ const BottomTitle = styled.div`
 export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const [filter, setFilter] = useState({
     search: null,
     status: null,
@@ -139,18 +139,19 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
           />
         )}
 
-        {isFinished && (
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
-              paymentPlan.id,
-            )}`}
-          >
-            {t('View Tickets')}
-          </Button>
-        )}
+        {isFinished &&
+          (isAllPrograms ? (
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
+                paymentPlan.id,
+              )}`}
+            >
+              {t('View Tickets')}
+            </Button>
+          ) : null)}
       </>
     </PageHeader>
   );

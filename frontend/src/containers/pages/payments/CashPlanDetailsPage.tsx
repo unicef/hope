@@ -41,21 +41,25 @@ export function CashPlanDetailsPage(): React.ReactElement {
     data: caData,
     loading: caPrefixLoading,
   } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   if (loading || caPrefixLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !caData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Programme Management'),
-      to: `/${baseUrl}/programs/`,
-    },
-    {
       title: data.cashPlan.program.name,
-      to: `/${baseUrl}/programs/${data.cashPlan.program.id}/`,
+      to: `/${baseUrl}/details/${data.cashPlan.program.id}/`,
     },
   ];
+
+  if (isAllPrograms) {
+    breadCrumbsItems.unshift({
+      title: t('Programme Management'),
+      to: `/${baseUrl}/list/`,
+    });
+  }
+
   const cashPlan = data.cashPlan as CashPlanNode;
   return (
     <div>

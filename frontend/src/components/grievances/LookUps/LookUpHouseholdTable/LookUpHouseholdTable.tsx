@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   useAllHouseholdsQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
@@ -43,16 +44,16 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
+  const { programId } = useBaseUrl();
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     search: filter.search,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     familySize: JSON.stringify(filter.size),
+    programs: [programId],
   };
-  if (filter.program) {
-    initialVariables.programs = [filter.program];
-  }
+
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
   );

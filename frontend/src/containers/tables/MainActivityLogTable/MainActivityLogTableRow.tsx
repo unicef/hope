@@ -62,7 +62,7 @@ function ObjectRepresentations({
   const id = logEntry.objectId;
   const { model } = logEntry.contentType;
   const modelToUrlDict = {
-    program: `/${baseUrl}/programs/${btoa('ProgramNode:' + id)}`,
+    program: `/${baseUrl}/details/${btoa('ProgramNode:' + id)}`,
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
