@@ -14,7 +14,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
     $businessArea: String
     $importDateRange: String
     $size: String
-    $programId: UUID
+    $programId: String
   ) {
     allRegistrationDataImports(
       after: $after
