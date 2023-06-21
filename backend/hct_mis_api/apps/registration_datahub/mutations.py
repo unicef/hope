@@ -352,6 +352,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
     class Arguments:
         file = Upload(required=True)
         business_area_slug = graphene.String(required=True)
+        program_id = graphene.String()  # TODO when program added to population, this needs to be required
 
     @classmethod
     @transaction.atomic(using="default")
