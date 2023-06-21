@@ -19,7 +19,7 @@ import {
 } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { menuItems } from './menuItems';
+import { MenuItem, menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -81,19 +81,32 @@ export const DrawerItems = ({
   );
   if (permissions === null || !businessAreaData) return null;
 
-  const cashAssistIndex = menuItems.findIndex(
-    (item) => item.name === 'Cash Assist',
-  );
+  const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
+    const updatedMenuItems = [...items];
+    const cashAssistIndex = updatedMenuItems.findIndex(
+      (item) => item.name === 'Cash Assist',
+    );
+    updatedMenuItems[cashAssistIndex].href =
+      cashAssistUrlData?.cashAssistUrlPrefix;
 
-  menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+    //if all programs selected redirect to programs list, else to details page
+    const programManagementIndex = updatedMenuItems.findIndex(
+      (item) => item.name === 'Programme Management',
+    );
+    updatedMenuItems[programManagementIndex].href =
+      programId === 'all' ? '/list' : `/details/${programId}`;
 
-  //if all programs selected redirect to programs list, else to details page
-  const programManagementIndex = menuItems.findIndex(
-    (item) => item.name === 'Programme Management',
-  );
+    //show grievance menu item only if all programs selected
+    const grievanceIndex = updatedMenuItems.findIndex(
+      (item) => item.name === 'Grievance',
+    );
+    if (programId !== 'all') {
+      delete updatedMenuItems[grievanceIndex];
+    }
+    return updatedMenuItems;
+  };
 
-  menuItems[programManagementIndex].href =
-    programId === 'all' ? '/list' : `/details/${programId}`;
+  const preparedMenuItems = prepareMenuItems(menuItems);
 
   const {
     isPaymentPlanApplicable,
@@ -120,7 +133,7 @@ export const DrawerItems = ({
 
   return (
     <div>
-      {menuItems.map((item, index) => {
+      {preparedMenuItems.map((item, index) => {
         if (
           item.permissionModule &&
           !hasPermissionInModule(item.permissionModule, permissions)

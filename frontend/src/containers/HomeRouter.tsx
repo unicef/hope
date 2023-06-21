@@ -80,9 +80,9 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
 }));
 
-export function HomeRouter(): React.ReactElement {
+export const HomeRouter = (): React.ReactElement => {
   const [open, setOpen] = React.useState(true);
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const classes = useStyles({});
   const location = useLocation();
   const { path } = useRouteMatch();
@@ -132,9 +132,8 @@ export function HomeRouter(): React.ReactElement {
   const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
   const isProgramValid = allProgramsIds.includes(programId);
-  const isAllProgramsSet = location.pathname.includes('/programs/all');
 
-  if (!isAllProgramsSet) {
+  if (!isAllPrograms) {
     if (!isBusinessAreaValid || !isProgramValid) {
       return <Redirect to='/' noThrow />;
     }
@@ -236,61 +235,89 @@ export function HomeRouter(): React.ReactElement {
           >
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/new-ticket`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/new-ticket`}
+          >
             <CreateGrievancePage />
           </SentryRoute>
           <SentryRoute
+            shouldRender={isAllPrograms}
             path={`${path}/grievance/edit-ticket/user-generated/:id`}
           >
             <EditGrievancePage key='user' />
           </SentryRoute>
           <SentryRoute
+            shouldRender={isAllPrograms}
             path={`${path}/grievance/edit-ticket/system-generated/:id`}
           >
             <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/tickets/user-generated/:id`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/tickets/user-generated/:id`}
+          >
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/tickets/system-generated/:id`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/tickets/system-generated/:id`}
+          >
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/rdi/:id`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/rdi/:id`}
+          >
             <GrievancesTablePage key='rdi' />
           </SentryRoute>
           <SentryRoute
+            shouldRender={isAllPrograms}
             path={`${path}/grievance/payment-verification/:cashPlanId`}
           >
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/tickets/user-generated`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/tickets/user-generated`}
+          >
             <GrievancesTablePage key='user' />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/tickets/system-generated`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/tickets/system-generated`}
+          >
             <GrievancesTablePage key='system' />
           </SentryRoute>
-          <SentryRoute path={`${path}/grievance/dashboard`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/grievance/dashboard`}
+          >
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
-          <SentryRoute path={`${path}/accountability/communication/create`}>
-            <CreateCommunicationPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/communication/:id`}>
-            <CommunicationDetailsPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/communication`}>
-            <CommunicationPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/feedback/create`}>
+
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/accountability/feedback/create`}
+          >
             <CreateFeedbackPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/accountability/feedback/edit-ticket/:id`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/accountability/feedback/edit-ticket/:id`}
+          >
             <EditFeedbackPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/accountability/feedback/:id`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/accountability/feedback/:id`}
+          >
             <FeedbackDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/accountability/feedback`}>
+          <SentryRoute
+            shouldRender={isAllPrograms}
+            path={`${path}/accountability/feedback`}
+          >
             <FeedbackPage />
           </SentryRoute>
           {/* TODO: uncomment when ready for deployment
@@ -302,7 +329,17 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path={`${path}/accountability/surveys`}>
             <SurveysPage />
-          </SentryRoute> */}
+          </SentryRoute>
+             <SentryRoute path={`${path}/accountability/communication/create`}>
+            <CreateCommunicationPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/accountability/communication/:id`}>
+            <CommunicationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/accountability/communication`}>
+            <CommunicationPage />
+          </SentryRoute>
+          */}
           <SentryRoute path={`${path}/population/household`}>
             <PopulationHouseholdPage />
           </SentryRoute>
@@ -361,4 +398,4 @@ export function HomeRouter(): React.ReactElement {
       )}
     </Root>
   );
-}
+};
