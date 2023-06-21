@@ -139,7 +139,7 @@ class AddIndividualService(DataChangeService):
         else:
             individual.recalculate_data()
         log_create(
-            Individual.ACTIVITY_LOG_MAPPING, "business_area", user, self.grievance_ticket.programme, None, individual
+            Individual.ACTIVITY_LOG_MAPPING, "business_area", user, self.grievance_ticket.programme.pk, None, individual
         )
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(

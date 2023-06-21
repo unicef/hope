@@ -50,7 +50,7 @@ def reassign_roles_on_disable_individual_service(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
-                program,
+                program.pk,
                 old_individual,
                 new_individual,
             )
@@ -108,7 +108,7 @@ def reassign_roles_on_update_service(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
-                program,
+                program.pk,
                 old_individual,
                 new_individual,
             )

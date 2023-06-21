@@ -611,7 +611,12 @@ class DeduplicateTask:
             )
         )
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, registration_data_import.program_id, old_rdi, registration_data_import
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            registration_data_import.program_id,
+            old_rdi,
+            registration_data_import,
         )
 
 
