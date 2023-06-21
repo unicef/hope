@@ -208,7 +208,7 @@ export const HouseholdDetails = ({
                 <Box key={item.id} mb={2}>
                   <Grid container key={item.id}>
                     <Grid item xs={6}>
-                      <ContentLink href={`/${baseUrl}/programs/${item.id}`}>
+                      <ContentLink href={`/${baseUrl}/details/${item.id}`}>
                         {item.name}
                       </ContentLink>
                     </Grid>
