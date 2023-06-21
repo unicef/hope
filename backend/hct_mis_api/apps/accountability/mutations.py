@@ -61,12 +61,12 @@ class CreateCommunicationMessageMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE, business_area)
         message = MessageCrudServices.create(user, business_area, input)
-        program = None
+        program_id = None
         if message.target_population:
-            program = message.target_population.program
+            program_id = message.target_population.program.pk
         elif message.registration_data_import:
-            program = message.registration_data_import.program_id
-        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", user, program, None, message)
+            program_id = message.registration_data_import.program_id
+        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", user, program_id, None, message)
         return cls(message=message)
 
 
@@ -86,7 +86,7 @@ class CreateFeedbackMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE, business_area)
         feedback = FeedbackCrudServices.create(user, business_area, input)
-        log_create(Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, feedback.program, None, feedback)
+        log_create(Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, feedback.program.pk, None, feedback)
         return cls(feedback=feedback)
 
 
@@ -110,7 +110,7 @@ class UpdateFeedbackMutation(PermissionMutation):
             Feedback.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            feedback.program,
+            feedback.program.pk,
             old_feedback,
             updated_feedback,
         )
@@ -156,7 +156,7 @@ class CreateSurveyMutation(PermissionMutation):
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            survey.program,
+            survey.program.pk,
             None,
             survey,
         )

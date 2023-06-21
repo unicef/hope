@@ -31,7 +31,7 @@ def close_system_flagging_ticket_service(grievance_ticket: GrievanceTicket, user
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
         user,
-        grievance_ticket.programme,
+        grievance_ticket.programme.pk,
         old_individual,
         individual,
     )

@@ -1,6 +1,5 @@
 import logging
-from typing import Any
-from uuid import UUID
+from typing import Any, Optional
 
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
@@ -16,7 +15,7 @@ class Command(BaseCommand):
         activity_log_assign_program()
 
 
-def get_program_id(log: "LogEntry") -> UUID:
+def get_program_id(log: "LogEntry") -> Optional[Any]:
     obj = log.content_object
     class_name = obj.__class__.__name__
 

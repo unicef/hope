@@ -62,7 +62,7 @@ class IndividualDeleteService(DataChangeService):
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            self.grievance_ticket.programme,
+            self.grievance_ticket.programme.pk,
             old_individual_to_remove,
             individual_to_remove,
         )

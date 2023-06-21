@@ -148,7 +148,7 @@ class HouseholdDataUpdateService(DataChangeService):
             Household.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            self.grievance_ticket.programme,
+            self.grievance_ticket.programme.pk,
             old_household,
             updated_household,
         )
