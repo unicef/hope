@@ -14,9 +14,6 @@ import { SentryRoute } from '../components/core/SentryRoute';
 import { useBaseUrl } from '../hooks/useBaseUrl';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { MiśTheme } from '../theme';
-import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
-import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
-import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
 import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
@@ -160,16 +157,29 @@ export const HomeRouter = (): React.ReactElement => {
           <SentryRoute path={`${path}/cashplans/:id`}>
             <CashPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute exact path={`${path}/target-population`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            exact
+            path={`${path}/target-population`}
+          >
             <TargetPopulationsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/target-population/create`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/target-population/create`}
+          >
             <CreateTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/target-population/edit-tp/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/target-population/edit-tp/:id`}
+          >
             <EditTargetPopulationPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/target-population/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/target-population/:id`}
+          >
             <TargetPopulationDetailsPage />
           </SentryRoute>
           <SentryRoute
