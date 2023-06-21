@@ -6074,6 +6074,7 @@ export type QueryAllRegistrationDataImportsArgs = {
   name?: Maybe<Scalars['String']>,
   name_Startswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['UUID']>,
   importDateRange?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
@@ -6263,6 +6264,7 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
+  programId: Scalars['UUID'],
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -8519,7 +8521,7 @@ export type PaymentRecordDetailsFragment = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'programId'>
   & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -12767,7 +12769,8 @@ export type AllRegistrationDataImportsQueryVariables = {
   importDate?: Maybe<Scalars['Date']>,
   businessArea?: Maybe<Scalars['String']>,
   importDateRange?: Maybe<Scalars['String']>,
-  size?: Maybe<Scalars['String']>
+  size?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['UUID']>
 };
 
 
@@ -13876,6 +13879,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   dataSource
   numberOfHouseholds
   numberOfIndividuals
+  programId
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -24525,8 +24529,8 @@ export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProject
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String, $programId: UUID) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size, programId: $programId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -24585,6 +24589,7 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      businessArea: // value for 'businessArea'
  *      importDateRange: // value for 'importDateRange'
  *      size: // value for 'size'
+ *      programId: // value for 'programId'
  *   },
  * });
  */
@@ -29896,6 +29901,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  programId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
