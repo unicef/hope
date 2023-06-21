@@ -94,7 +94,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const history = useHistory();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
 
@@ -103,7 +103,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const initialValues = {
     category,
     message: '',
-    program: '',
+    program: programId,
     targetPopulation: '',
     confidenceInterval: 95,
     marginOfError: 5,

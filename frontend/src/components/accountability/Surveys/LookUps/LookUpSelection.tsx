@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  ProgramNode,
   useAllProgramsForChoicesQuery,
   useProgrammeChoiceDataQuery,
 } from '../../../../__generated__/graphql';
@@ -13,7 +12,6 @@ import { SurveyTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
 import { LookUpSelectionTables } from './LookUpSelectionTables';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const surveysTabs = ['Programme', 'Target Population'];
 
@@ -38,7 +36,6 @@ export const LookUpSelection = ({
   setSelectedTab;
 }): React.ReactElement => {
   const location = useLocation();
-  const { programId } = useBaseUrl();
   const initialFilterP = {
     search: '',
     startDate: undefined,
@@ -61,7 +58,6 @@ export const LookUpSelection = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: programId,
     numIndividualsMin: null,
     numIndividualsMax: null,
   };

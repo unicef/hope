@@ -16,13 +16,12 @@ import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTa
 export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
-  const { baseUrl, programId } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
 
   const initialFilter = {
     name: '',
     status: '',
-    program: programId,
     numIndividualsMin: null,
     numIndividualsMax: null,
     createdAtRangeMin: undefined,

@@ -3,16 +3,15 @@ import Assignment from '@material-ui/icons/Assignment';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import BallotIcon from '@material-ui/icons/Ballot';
-import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
 import ForumIcon from '@material-ui/icons/Forum';
 import InfoIcon from '@material-ui/icons/Info';
 import ListIcon from '@material-ui/icons/List';
-import NewReleases from '@material-ui/icons/NewReleases';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
 import MessageIcon from '@material-ui/icons/Message';
+import NewReleases from '@material-ui/icons/NewReleases';
 import PaymentIcon from '@material-ui/icons/Payment';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
@@ -38,13 +37,6 @@ export type MenuItem = {
 };
 export const menuItems: MenuItem[] = [
   {
-    name: 'Country Dashboard',
-    href: '/#',
-    selectedRegexp: /^\/$/,
-    icon: <DashboardIcon />,
-    permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
-  },
-  {
     name: 'Registration Data Import',
     href: '/registration-data-import',
     selectedRegexp: /^\/registration-data-import.*$/,
@@ -52,7 +44,7 @@ export const menuItems: MenuItem[] = [
     permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
   },
   {
-    name: 'Population',
+    name: 'Programme Population',
     href: '/population/household',
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
@@ -77,6 +69,16 @@ export const menuItems: MenuItem[] = [
   },
   {
     name: 'Programme Management',
+    href: '/list',
+    selectedRegexp: /^\/programs.*$/,
+    icon: <Assignment />,
+    permissions: [
+      PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+    ],
+  },
+  {
+    name: 'Programme Details',
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
@@ -191,7 +193,7 @@ export const menuItems: MenuItem[] = [
     permissions: [PERMISSIONS.REPORTING_EXPORT],
   },
   {
-    name: 'Users',
+    name: 'Programme Users',
     href: '/users-list',
     selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,

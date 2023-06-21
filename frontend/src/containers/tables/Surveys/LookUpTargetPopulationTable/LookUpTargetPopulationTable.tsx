@@ -40,7 +40,7 @@ export const LookUpTargetPopulationTable = ({
   noTitle,
 }: LookUpTargetPopulationTableProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
     numberOfHouseholdsMin: filter.numIndividuals.min,
@@ -48,21 +48,12 @@ export const LookUpTargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
+    program: [decodeIdString(programId)],
   };
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
-
-  if (filter.program) {
-    if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) =>
-        decodeIdString(programId),
-      );
-    } else {
-      initialVariables.program = [decodeIdString(filter.program)];
-    }
-  }
 
   const renderTable = (): React.ReactElement => {
     return (

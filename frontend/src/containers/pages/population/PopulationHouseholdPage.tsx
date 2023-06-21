@@ -1,37 +1,30 @@
 import { Box } from '@material-ui/core';
-import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { useHouseholdChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { HouseholdFilters } from '../../../components/population/HouseholdFilter';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-
-const initialFilter = {
-  search: '',
-  program: '',
-  residenceStatus: '',
-  admin2: '',
-  householdSizeMin: '',
-  householdSizeMax: '',
-  orderBy: 'unicef_id',
-  withdrawn: null,
-};
 
 export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const initialFilter = {
+    search: '',
+    residenceStatus: '',
+    admin2: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+    withdrawn: null,
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -43,10 +36,6 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -55,7 +44,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
     fetchPolicy: 'cache-first',
   });
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
@@ -63,14 +52,10 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
 
   if (!choicesData) return null;
 
-  const allPrograms = get(data, 'allPrograms.edges', []);
-  const programs = allPrograms.map((edge) => edge.node);
-
   return (
     <>
       <PageHeader title={t('Households')} />
       <HouseholdFilters
-        programs={programs as ProgramNode[]}
         filter={filter}
         choicesData={choicesData}
         setFilter={setFilter}
