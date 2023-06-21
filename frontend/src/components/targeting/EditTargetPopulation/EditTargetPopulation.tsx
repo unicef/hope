@@ -20,6 +20,7 @@ import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { LoadingComponent } from '../../core/LoadingComponent';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -58,6 +59,13 @@ export const EditTargetPopulation = ({
     variables: { businessArea, status: [ProgramStatus.Active] },
     fetchPolicy: 'cache-and-network',
   });
+
+  if (loadingPrograms) {
+    return <LoadingComponent />;
+  }
+  if (!allProgramsData) {
+    return null;
+  }
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria } = values;

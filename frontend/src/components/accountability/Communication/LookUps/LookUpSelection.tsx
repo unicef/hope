@@ -14,6 +14,7 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { RegistrationFilters } from '../../../rdi/RegistrationFilters';
 import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
 import { LookUpSelectionTables } from './LookUpSelectionTables';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const communicationTabs = ['Household', 'Target Population', 'RDI'];
 
@@ -38,6 +39,7 @@ export const LookUpSelection = ({
   setSelectedTab;
 }): React.ReactElement => {
   const location = useLocation();
+  const { programId } = useBaseUrl();
 
   const initialFilterRDI = {
     search: '',
@@ -59,7 +61,7 @@ export const LookUpSelection = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: '',
+    program: programId,
     numIndividualsMin: null,
     numIndividualsMax: null,
   };
@@ -73,7 +75,7 @@ export const LookUpSelection = ({
 
   const initialFilterHH = {
     search: '',
-    program: '',
+    program: programId,
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -173,7 +175,6 @@ export const LookUpSelection = ({
         {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
           <TargetPopulationFilters
             filter={filterTP}
-            programs={programs as ProgramNode[]}
             setFilter={setFilterTP}
             initialFilter={initialFilterTP}
             appliedFilter={appliedFilterTP}
