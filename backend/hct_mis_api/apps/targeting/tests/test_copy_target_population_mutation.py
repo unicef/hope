@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -59,7 +60,8 @@ class TestCopyTargetPopulationMutation(APITestCase):
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household = household
-        tp = TargetPopulation(name="Original Target Population", status="LOCKED", business_area=cls.business_area)
+        program = ProgramFactory(business_area=cls.business_area)
+        tp = TargetPopulation(name="Original Target Population", status="LOCKED", business_area=cls.business_area, program=program)
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
@@ -68,7 +70,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         tp.households.add(cls.household)
         cls.target_population = tp
         cls.empty_target_population_1 = TargetPopulation(
-            name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area
+            name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area, program=program
         )
         cls.empty_target_population_1.save()
 

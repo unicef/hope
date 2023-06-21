@@ -19,20 +19,21 @@ def get_program_id(log: "LogEntry") -> Optional[Any]:
     obj = log.content_object
     class_name = obj.__class__.__name__
 
+    # TODO: update after changes for Ind and HH collections/representations
     class_name_to_program_id_mapping = {
-        "GrievanceTicket": obj.programme_id,
-        # "Household": "",
-        # "Individual": "",
-        "PaymentPlan": obj.get_program.pk,
-        "CashPlan": obj.program_id,
-        "PaymentVerificationPlan": obj.get_program.pk if obj.get_program else None,
-        # "PaymentVerification": "",
-        "Program": obj.pk,
-        # "TargetPopulation": "",
-        # "RegistrationDataImport": "",
+        "GrievanceTicket": (obj, "programme_id"),
+        # "Household": (obj, "programme_id"),
+        # "Individual": (obj, "programme_id"),
+        "PaymentPlan": (obj.get_program, "pk"),
+        "CashPlan": (obj, "program_id"),
+        "PaymentVerificationPlan": (obj.get_program, "pk"),
+        "PaymentVerification": (obj.payment_verification_plan.get_program, "pk"),
+        "Program": (obj, "pk"),
+        "TargetPopulation": (obj.program, "pk"),
+        "RegistrationDataImport": (obj, "program_id"),
     }
-
-    return class_name_to_program_id_mapping.get(class_name)
+    obj, nested_field = class_name_to_program_id_mapping[class_name]
+    return getattr(obj, nested_field, None)
 
 
 @transaction.atomic

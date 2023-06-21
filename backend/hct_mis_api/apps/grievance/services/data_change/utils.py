@@ -441,9 +441,14 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> No
 def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_remove: Individual, info: Any) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     household = reassign_roles_on_disable_individual(
-        individual_to_remove, ticket_details.role_reassign_data, ticket_details.ticket.programme.pk, info
+        individual_to_remove,
+        ticket_details.role_reassign_data,
+        getattr(ticket_details.ticket.programme, "pk", None),
+        info,
     )
-    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.programme.pk)
+    withdraw_individual(
+        individual_to_remove, info, old_individual, household, getattr(ticket_details.ticket.programme, "pk", None)
+    )
 
 
 def mark_as_duplicate_individual_and_reassign_roles(
@@ -455,15 +460,23 @@ def mark_as_duplicate_individual_and_reassign_roles(
             individual_to_remove,
             ticket_details.role_reassign_data,
             info,
-            ticket_details.ticket.programme.pk,
+            getattr(ticket_details.ticket.programme, "pk", None),
             is_new_ticket=True,
         )
     else:
         household = reassign_roles_on_disable_individual(
-            individual_to_remove, ticket_details.role_reassign_data, ticket_details.ticket.programme.pk, info
+            individual_to_remove,
+            ticket_details.role_reassign_data,
+            getattr(ticket_details.ticket.programme, "pk", None),
+            info,
         )
     mark_as_duplicate_individual(
-        individual_to_remove, info, old_individual, household, unique_individual, ticket_details.ticket.programme.pk
+        individual_to_remove,
+        info,
+        old_individual,
+        household,
+        unique_individual,
+        getattr(ticket_details.ticket.programme, "pk", None),
     )
 
 
@@ -491,7 +504,7 @@ def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], 
 def reassign_roles_on_disable_individual(
     individual_to_remove: Individual,
     role_reassign_data: Dict,
-    program_id: "UUID",
+    program_id: Optional["UUID"],
     info: Optional[Any] = None,
     is_new_ticket: bool = False,
 ) -> Household:
@@ -614,7 +627,7 @@ def withdraw_individual(
     info: Any,
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
-    program_id: "UUID",
+    program_id: Optional["UUID"],
 ) -> None:
     individual_to_remove.withdraw()
 
@@ -636,7 +649,7 @@ def mark_as_duplicate_individual(
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
     unique_individual: Individual,
-    program_id: "UUID",
+    program_id: Optional["UUID"],
 ) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
@@ -649,7 +662,7 @@ def log_and_withdraw_household_if_needed(
     info: Any,
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
-    program_id: "UUID",
+    program_id: Optional["UUID"],
 ) -> None:
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,

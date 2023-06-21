@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -163,6 +164,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 2, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
+        program = ProgramFactory(business_area=cls.business_area)
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             targeting_criteria=cls.get_targeting_criteria_for_rule(
@@ -170,6 +172,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             ),
             created_by=cls.user,
             business_area=cls.business_area,
+            program=program,
         )
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
@@ -180,6 +183,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             status="LOCKED",
             created_by=cls.user,
             business_area=cls.business_area,
+            program=program,
         )
         cls.approved_target_population.save()
         cls.approved_target_population.households.set(Household.objects.all())
