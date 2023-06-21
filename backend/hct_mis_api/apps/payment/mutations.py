@@ -113,7 +113,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            verification_plan.get_program,
+            getattr(verification_plan.get_program, "pk", None),
             None,
             verification_plan,
         )
@@ -151,7 +151,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            getattr(payment_verification_plan.get_program, "pk", None),
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -184,7 +184,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            getattr(payment_verification_plan.get_program, "pk", None),
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -218,7 +218,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            getattr(payment_verification_plan.get_program, "pk", None),
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -252,7 +252,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            getattr(payment_verification_plan.get_program, "pk", None),
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -286,7 +286,7 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            getattr(payment_verification_plan.get_program, "pk", None),
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -309,7 +309,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         payment_plan = payment_verification_plan.payment_plan_obj
-        program = payment_verification_plan.get_program
+        program_id = getattr(payment_verification_plan.get_program, "pk", None)
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
@@ -322,7 +322,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            program,
+            program_id,
             old_payment_verification_plan,
             None,
         )
@@ -414,11 +414,12 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
         calculate_counts(payment_verification_plan)
         payment_verification_plan.save()
+        program_id = getattr(payment_verification_plan.get_program, "pk", None)
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            program_id,
             old_payment_verification_plan,
             payment_verification_plan,
         )
@@ -426,7 +427,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             PaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            program_id,
             old_payment_verification,
             payment_verification,
         )
@@ -494,7 +495,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             PaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            payment_verification_plan.get_program,
+            getattr(payment_verification_plan.get_program, "pk", None),
             old_payment_verification,
             payment_verification,
         )
@@ -711,7 +712,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -759,7 +760,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
@@ -786,7 +787,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -815,7 +816,7 @@ class DeletePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -854,7 +855,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1015,7 +1016,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
                 user=info.context.user,
-                program=payment_plan.get_program,
+                program_id=payment_plan.get_program.pk,
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
@@ -1062,7 +1063,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1112,7 +1113,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program=payment_plan.get_program,
+            program_id=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )

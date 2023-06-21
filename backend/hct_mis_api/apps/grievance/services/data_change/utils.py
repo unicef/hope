@@ -42,7 +42,7 @@ from hct_mis_api.apps.household.models import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.program.models import Program
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -441,9 +441,9 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> No
 def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_remove: Individual, info: Any) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     household = reassign_roles_on_disable_individual(
-        individual_to_remove, ticket_details.role_reassign_data, ticket_details.ticket.programme, info
+        individual_to_remove, ticket_details.role_reassign_data, ticket_details.ticket.programme.pk, info
     )
-    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.programme)
+    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.programme.pk)
 
 
 def mark_as_duplicate_individual_and_reassign_roles(
@@ -455,15 +455,15 @@ def mark_as_duplicate_individual_and_reassign_roles(
             individual_to_remove,
             ticket_details.role_reassign_data,
             info,
-            ticket_details.ticket.programme,
+            ticket_details.ticket.programme.pk,
             is_new_ticket=True,
         )
     else:
         household = reassign_roles_on_disable_individual(
-            individual_to_remove, ticket_details.role_reassign_data, ticket_details.ticket.programme, info
+            individual_to_remove, ticket_details.role_reassign_data, ticket_details.ticket.programme.pk, info
         )
     mark_as_duplicate_individual(
-        individual_to_remove, info, old_individual, household, unique_individual, ticket_details.ticket.programme
+        individual_to_remove, info, old_individual, household, unique_individual, ticket_details.ticket.programme.pk
     )
 
 
@@ -491,7 +491,7 @@ def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], 
 def reassign_roles_on_disable_individual(
     individual_to_remove: Individual,
     role_reassign_data: Dict,
-    program: "Program",
+    program_id: "UUID",
     info: Optional[Any] = None,
     is_new_ticket: bool = False,
 ) -> Household:
@@ -526,7 +526,7 @@ def reassign_roles_on_disable_individual(
                     Individual.ACTIVITY_LOG_MAPPING,
                     "business_area",
                     info.context.user,
-                    program,
+                    program_id,
                     old_new_individual,
                     new_individual,
                 )
@@ -566,7 +566,7 @@ def reassign_roles_on_disable_individual(
 
 
 def reassign_roles_on_update(
-    individual: Individual, role_reassign_data: Dict, program: "Program", info: Optional[Any] = None
+    individual: Individual, role_reassign_data: Dict, program_id: "UUID", info: Optional[Any] = None
 ) -> None:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -587,7 +587,7 @@ def reassign_roles_on_update(
                     Individual.ACTIVITY_LOG_MAPPING,
                     "business_area",
                     info.context.user,
-                    program,
+                    program_id,
                     old_new_individual,
                     new_individual,
                 )
@@ -614,7 +614,7 @@ def withdraw_individual(
     info: Any,
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
-    program: "Program",
+    program_id: "UUID",
 ) -> None:
     individual_to_remove.withdraw()
 
@@ -626,7 +626,7 @@ def withdraw_individual(
         info,
         old_individual_to_remove,
         removed_individual_household,
-        program,
+        program_id,
     )
 
 
@@ -636,11 +636,11 @@ def mark_as_duplicate_individual(
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
     unique_individual: Individual,
-    program: "Program",
+    program_id: "UUID",
 ) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
-        individual_to_remove, info, old_individual_to_remove, removed_individual_household, program
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household, program_id
     )
 
 
@@ -649,13 +649,13 @@ def log_and_withdraw_household_if_needed(
     info: Any,
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
-    program: "Program",
+    program_id: "UUID",
 ) -> None:
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
         info.context.user,
-        program,
+        program_id,
         old_individual_to_remove,
         individual_to_remove,
     )

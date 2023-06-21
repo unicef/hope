@@ -381,7 +381,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            grievance_ticket.programme,
+            grievance_ticket.programme.pk,
             old_grievance_ticket,
             grievance_ticket,
         )
@@ -600,7 +600,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            grievance_ticket.programme,
+            grievance_ticket.programme.pk,
             old_grievance_ticket,
             grievance_ticket,
         )

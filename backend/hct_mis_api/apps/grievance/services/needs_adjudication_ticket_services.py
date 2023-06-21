@@ -232,7 +232,7 @@ def mark_as_duplicate_individual(
     old_individual = Individual.objects.get(id=individual_to_remove.id)
 
     individual_to_remove.mark_as_duplicate(unique_individual)
-    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, program, old_individual, individual_to_remove)
+    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, program.pk, old_individual, individual_to_remove)
     household.refresh_from_db()
     if household.active_individuals.count() == 0:
         household.withdraw()
