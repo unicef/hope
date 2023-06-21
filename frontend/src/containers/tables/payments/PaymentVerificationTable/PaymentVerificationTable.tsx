@@ -8,21 +8,24 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentVerificationTableProps {
   filter?;
   businessArea: string;
   canViewDetails: boolean;
 }
-export function PaymentVerificationTable({
+export const PaymentVerificationTable = ({
   filter,
   canViewDetails,
   businessArea,
-}: PaymentVerificationTableProps): ReactElement {
+}: PaymentVerificationTableProps): ReactElement => {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
     businessArea,
     ...(filter || {}),
+    program: programId,
   };
   return (
     <UniversalTable<
@@ -43,4 +46,4 @@ export function PaymentVerificationTable({
       )}
     />
   );
-}
+};

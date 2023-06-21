@@ -1,31 +1,15 @@
-import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import {
-  ProgramNodeEdge,
-  useAllProgramsForChoicesQuery,
-} from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-
-const initialFilter = {
-  search: '',
-  verificationStatus: [],
-  program: '',
-  serviceProvider: '',
-  deliveryType: '',
-  startDate: undefined,
-  endDate: undefined,
-};
 
 export const PaymentVerificationPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -33,31 +17,30 @@ export const PaymentVerificationPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
 
+  const initialFilter = {
+    search: '',
+    verificationStatus: [],
+    serviceProvider: '',
+    deliveryType: '',
+    startDate: undefined,
+    endDate: undefined,
+  };
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-  if (loading) return <LoadingComponent />;
-  if (!data || permissions === null) return null;
+
+  if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
     return <PermissionDenied />;
-
-  const allPrograms = get(data, 'allPrograms.edges', []);
-  const programs: Array<ProgramNodeEdge['node']> = allPrograms.map(
-    (edge: ProgramNodeEdge) => edge.node,
-  );
 
   return (
     <>
       <PageHeader title={t('Payment Verification')} />
       <PaymentFilters
-        programs={programs}
         filter={filter}
         setFilter={setFilter}
         initialFilter={initialFilter}

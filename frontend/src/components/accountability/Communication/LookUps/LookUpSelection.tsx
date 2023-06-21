@@ -3,11 +3,8 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { useHouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { CommunicationTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
@@ -38,6 +35,7 @@ export const LookUpSelection = ({
   setSelectedTab;
 }): React.ReactElement => {
   const location = useLocation();
+  const { programId } = useBaseUrl();
 
   const initialFilterRDI = {
     search: '',
@@ -59,7 +57,6 @@ export const LookUpSelection = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: '',
     numIndividualsMin: null,
     numIndividualsMax: null,
   };
@@ -73,7 +70,6 @@ export const LookUpSelection = ({
 
   const initialFilterHH = {
     search: '',
-    program: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -98,14 +94,6 @@ export const LookUpSelection = ({
     variables: { businessArea },
   });
 
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({
       ...values,
@@ -125,7 +113,7 @@ export const LookUpSelection = ({
     });
   };
 
-  if (programsLoading || choicesLoading) return null;
+  if (choicesLoading) return null;
 
   return (
     <Box>
@@ -161,7 +149,6 @@ export const LookUpSelection = ({
       <Box p={4} mt={4}>
         {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
           <HouseholdFilters
-            programs={programs as ProgramNode[]}
             filter={filterHH}
             choicesData={choicesData}
             setFilter={setFilterHH}
@@ -173,7 +160,6 @@ export const LookUpSelection = ({
         {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
           <TargetPopulationFilters
             filter={filterTP}
-            programs={programs as ProgramNode[]}
             setFilter={setFilterTP}
             initialFilter={initialFilterTP}
             appliedFilter={appliedFilterTP}

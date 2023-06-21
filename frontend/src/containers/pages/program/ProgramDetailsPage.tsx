@@ -1,19 +1,19 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { useParams } from 'react-router-dom';
 import {
   ProgramNode,
   ProgramStatus,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
@@ -50,7 +50,7 @@ const NoCashPlansSubTitle = styled.div`
   text-align: center;
 `;
 
-export function ProgramDetailsPage(): React.ReactElement {
+export const ProgramDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
@@ -106,4 +106,4 @@ export function ProgramDetailsPage(): React.ReactElement {
       </Container>
     </div>
   );
-}
+};

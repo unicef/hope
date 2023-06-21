@@ -5,7 +5,10 @@ import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms'
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
-import { useCreateProgramMutation } from '../../../__generated__/graphql';
+import {
+  AllProgramsForChoicesDocument,
+  useCreateProgramMutation,
+} from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
@@ -31,9 +34,15 @@ export function CreateProgram(): ReactElement {
             businessAreaSlug: businessArea,
           },
         },
+        refetchQueries: () => [
+          {
+            query: AllProgramsForChoicesDocument,
+            variables: { businessArea, first: 100 },
+          },
+        ],
       });
       showMessage('Programme created.', {
-        pathname: `/${baseUrl}/programs/${response.data.createProgram.program.id}`,
+        pathname: `/${baseUrl}/details/${response.data.createProgram.program.id}`,
         historyMethod: 'push',
       });
     } catch (error) {

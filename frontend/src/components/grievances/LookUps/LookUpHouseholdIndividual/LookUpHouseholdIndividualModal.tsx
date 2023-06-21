@@ -13,13 +13,12 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
@@ -30,7 +29,6 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -58,10 +56,10 @@ export const LookUpHouseholdIndividualModal = ({
   setSelectedHousehold;
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
   const initialFilterHH = {
     search: '',
-    program: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -76,20 +74,11 @@ export const LookUpHouseholdIndividualModal = ({
     ageMin: '',
     ageMax: '',
     flags: [],
-    program: '',
     lastRegistrationDate: '',
     status: '',
     orderBy: 'unicef_id',
   };
 
-  const { businessArea } = useBaseUrl();
-  const {
-    data: programsData,
-    loading: programsLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
   const {
     data: householdChoicesData,
     loading: householdChoicesLoading,
@@ -114,15 +103,12 @@ export const LookUpHouseholdIndividualModal = ({
     loading: individualChoicesLoading,
   } = useIndividualChoiceDataQuery();
 
-  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
+  if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData || !programsData) {
+  if (!individualChoicesData || !householdChoicesData) {
     return null;
   }
-
-  const { allPrograms } = programsData;
-  const programs = allPrograms.edges.map((edge) => edge.node);
 
   const handleCancel = (): void => {
     setLookUpDialogOpen(false);
@@ -203,7 +189,6 @@ export const LookUpHouseholdIndividualModal = ({
           <DialogContent>
             <TabPanel value={selectedTab} index={0}>
               <HouseholdFilters
-                programs={programs as ProgramNode[]}
                 filter={filterHH}
                 choicesData={householdChoicesData}
                 setFilter={setFilterHH}
