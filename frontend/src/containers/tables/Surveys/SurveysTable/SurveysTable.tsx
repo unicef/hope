@@ -10,6 +10,7 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface SurveysTableProps {
   filter;
@@ -22,6 +23,7 @@ export const SurveysTable = ({
   canViewDetails,
   choicesData,
 }: SurveysTableProps): ReactElement => {
+  const { programId } = useBaseUrl();
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
@@ -29,7 +31,7 @@ export const SurveysTable = ({
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
       : '',
-    program: filter.program || '',
+    program: programId,
   };
   const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
 

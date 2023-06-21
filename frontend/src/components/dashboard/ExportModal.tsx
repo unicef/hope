@@ -29,7 +29,7 @@ import { useBaseUrl } from '../../hooks/useBaseUrl';
 export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const numSelected = selected.length;
@@ -101,7 +101,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
           reportTypes: selected,
           year: parseInt(year, 10),
           adminArea: filter.administrativeArea?.node?.id,
-          program: filter.program,
+          program: programId,
         },
       },
     });

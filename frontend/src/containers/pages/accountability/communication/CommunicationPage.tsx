@@ -16,19 +16,18 @@ import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
-const initialFilter = {
-  createdBy: '',
-  createdAtRangeMin: null,
-  createdAtRangeMax: null,
-  program: '',
-  targetPopulation: '',
-};
-
 export const CommunicationPage = (): React.ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
+
+  const initialFilter = {
+    createdBy: '',
+    createdAtRangeMin: null,
+    createdAtRangeMax: null,
+    targetPopulation: '',
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
