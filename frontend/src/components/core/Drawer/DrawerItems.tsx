@@ -58,7 +58,7 @@ export const DrawerItems = ({
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -84,23 +84,29 @@ export const DrawerItems = ({
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     const updatedMenuItems = [...items];
     const cashAssistIndex = updatedMenuItems.findIndex(
-      (item) => item.name === 'Cash Assist',
+      (item) => item?.name === 'Cash Assist',
     );
     updatedMenuItems[cashAssistIndex].href =
       cashAssistUrlData?.cashAssistUrlPrefix;
 
+    //show Cash Assist menu item only if program is selected
+    if (isAllPrograms) {
+      delete updatedMenuItems[cashAssistIndex];
+    }
+
     //if all programs selected redirect to programs list, else to details page
     const programManagementIndex = updatedMenuItems.findIndex(
-      (item) => item.name === 'Programme Management',
+      (item) => item?.name === 'Programme Management',
     );
-    updatedMenuItems[programManagementIndex].href =
-      programId === 'all' ? '/list' : `/details/${programId}`;
+    updatedMenuItems[programManagementIndex].href = isAllPrograms
+      ? '/list'
+      : `/details/${programId}`;
 
     //show grievance menu item only if all programs selected
     const grievanceIndex = updatedMenuItems.findIndex(
-      (item) => item.name === 'Grievance',
+      (item) => item?.name === 'Grievance',
     );
-    if (programId !== 'all') {
+    if (!isAllPrograms) {
       delete updatedMenuItems[grievanceIndex];
     }
     return updatedMenuItems;
@@ -153,10 +159,10 @@ export const DrawerItems = ({
           );
 
           return (
-            <div key={item.name + hrefForCollapsibleItem}>
+            <div key={item?.name + hrefForCollapsibleItem}>
               <ListItem
                 button
-                data-cy={`nav-${item.name}`}
+                data-cy={`nav-${item?.name}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -169,7 +175,7 @@ export const DrawerItems = ({
                 }}
               >
                 <Icon>{item.icon}</Icon>
-                <Text primary={item.name} />
+                <Text primary={item?.name} />
                 {expandedItem !== null && expandedItem === index ? (
                   <ExpandLess />
                 ) : (
@@ -208,23 +214,23 @@ export const DrawerItems = ({
         }
         return item.external ? (
           <ListItem
-            data-cy={`nav-${item.name}`}
+            data-cy={`nav-${item?.name}`}
             button
-            key={item.name + item.href}
+            key={item?.name + item.href}
           >
             <StyledLink target='_blank' href={item.href}>
               <Box display='flex'>
                 <Icon>{item.icon}</Icon>
-                <Text primary={item.name} />
+                <Text primary={item?.name} />
               </Box>
             </StyledLink>
           </ListItem>
         ) : (
           <ListItem
             button
-            data-cy={`nav-${item.name}`}
+            data-cy={`nav-${item?.name}`}
             component={Link}
-            key={item.name + item.href}
+            key={item?.name + item.href}
             to={`/${baseUrl}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
@@ -232,7 +238,7 @@ export const DrawerItems = ({
             selected={Boolean(item.selectedRegexp.exec(clearLocation))}
           >
             <Icon>{item.icon}</Icon>
-            <Text primary={item.name} />
+            <Text primary={item?.name} />
           </ListItem>
         );
       })}
