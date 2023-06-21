@@ -525,7 +525,7 @@ CACHE_ENABLED = env("CACHE_ENABLED", default=True)
 CACHES: Dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
-        "default": f"redis://redis:6379/1?client_class=django_redis.client.DefaultClient",
+        "default": "redis://redis:6379/1?client_class=django_redis.client.DefaultClient",
     }
 else:
     CACHES = {
