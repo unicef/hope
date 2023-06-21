@@ -30,7 +30,7 @@ export const LookUpProgrammesTableRow = ({
   selectedProgram,
 }: LookUpProgrammesTableRowProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/programs/${program.id}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.id}`;
   const handleClick = (): void => {
     radioChangeHandler(program.id);
   };

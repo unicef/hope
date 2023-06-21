@@ -58,7 +58,7 @@ export const DrawerItems = ({
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -86,6 +86,14 @@ export const DrawerItems = ({
   );
 
   menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+
+  //if all programs selected redirect to programs list, else to details page
+  const programManagementIndex = menuItems.findIndex(
+    (item) => item.name === 'Programme Management',
+  );
+
+  menuItems[programManagementIndex].href =
+    programId === 'all' ? '/list' : `/details/${programId}`;
 
   const {
     isPaymentPlanApplicable,

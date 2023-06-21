@@ -1,19 +1,17 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
-import {
-  Redirect,
-  Switch,
-  useLocation,
-  useParams,
-  useRouteMatch,
-} from 'react-router-dom';
+import { Redirect, Switch, useLocation, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAllBusinessAreasQuery } from '../__generated__/graphql';
+import {
+  useAllBusinessAreasQuery,
+  useAllProgramsForChoicesQuery,
+} from '../__generated__/graphql';
 import { AppBar } from '../components/core/AppBar';
 import { Drawer } from '../components/core/Drawer/Drawer';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { SentryRoute } from '../components/core/SentryRoute';
+import { useBaseUrl } from '../hooks/useBaseUrl';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { MiśTheme } from '../theme';
 import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
@@ -84,7 +82,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 
 export function HomeRouter(): React.ReactElement {
   const [open, setOpen] = React.useState(true);
-  const { businessArea } = useParams();
+  const { businessArea, programId } = useBaseUrl();
   const classes = useStyles({});
   const location = useLocation();
   const { path } = useRouteMatch();
@@ -104,6 +102,15 @@ export function HomeRouter(): React.ReactElement {
     },
     fetchPolicy: 'cache-first',
   });
+
+  const {
+    data: programsData,
+    loading: programsLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, first: 100 },
+    fetchPolicy: 'cache-first',
+  });
+
   if (!businessAreaData) {
     return null;
   }
@@ -112,36 +119,26 @@ export function HomeRouter(): React.ReactElement {
     return <LoadingComponent />;
   }
 
-  //TODO: uncomment when initial program is set
+  if (!businessAreaData || !programsData) {
+    return null;
+  }
 
-  // const {
-  //   data: programsData,
-  //   loading: programsLoading,
-  // } = useAllProgramsForChoicesQuery({
-  //   variables: { businessArea, first: 100 },
-  //   fetchPolicy: 'cache-first',
-  // });
-
-  // if (!businessAreaData || !programsData) {
-  //   return null;
-  // }
-
-  // if (businessAreaLoading || programsLoading) {
-  //   return <LoadingComponent />;
-  // }
+  if (businessAreaLoading || programsLoading) {
+    return <LoadingComponent />;
+  }
   const allBusinessAreasSlugs = businessAreaData.allBusinessAreas.edges.map(
     (el) => el.node.slug,
   );
-  // const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
+  const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
-  // const isProgramValid = allProgramsIds.includes(programId);
+  const isProgramValid = allProgramsIds.includes(programId);
+  const isAllProgramsSet = location.pathname.includes('/programs/all');
 
-  // if (!isBusinessAreaValid || !isProgramValid) {
-
-  if (!isBusinessAreaValid) {
-    return <Redirect to='/' noThrow />;
+  if (!isAllProgramsSet) {
+    if (!isBusinessAreaValid || !isProgramValid) {
+      return <Redirect to='/' noThrow />;
+    }
   }
-
   return (
     <Root>
       <CssBaseline />
@@ -312,13 +309,13 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path={`${path}/population/individuals`}>
             <PopulationIndividualsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/programs/:id`}>
+          <SentryRoute path={`${path}/details/:id`}>
             <ProgramDetailsPage />
           </SentryRoute>
           <SentryRoute path={`${path}/payment-records/:id`}>
             <PaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/programs`}>
+          <SentryRoute path={`${path}/list`}>
             <ProgramsPage />
           </SentryRoute>
           <SentryRoute path={`${path}/registration-data-import/household/:id`}>
