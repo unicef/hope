@@ -20,10 +20,10 @@ interface PaymentVerificationTableRowProps {
   canViewDetails: boolean;
 }
 
-export function PaymentVerificationTableRow({
+export const PaymentVerificationTableRow = ({
   plan,
   canViewDetails,
-}: PaymentVerificationTableRowProps): React.ReactElement {
+}: PaymentVerificationTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
   const planVerificationPath = `/${baseUrl}/payment-verification/${
@@ -66,10 +66,9 @@ export function PaymentVerificationTableRow({
         <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{plan.programmeName}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
-}
+};
