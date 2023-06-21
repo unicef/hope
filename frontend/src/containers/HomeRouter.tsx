@@ -172,22 +172,41 @@ export const HomeRouter = (): React.ReactElement => {
           <SentryRoute path={`${path}/target-population/:id`}>
             <TargetPopulationDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/verification/payment-record/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/verification/payment-record/:id`}
+          >
             <VerificationPaymentRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/verification/payment/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/verification/payment/:id`}
+          >
             <VerificationPaymentDetailsPage />
           </SentryRoute>
-          <SentryRoute exact path={`${path}/payment-verification`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            exact
+            path={`${path}/payment-verification`}
+          >
             <PaymentVerificationPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/payment-verification/cash-plan/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/payment-verification/cash-plan/:id`}
+          >
             <CashPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/payment-verification/payment-plan/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/payment-verification/payment-plan/:id`}
+          >
             <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path={`${path}/csh-payment-verification/:id`}>
+          <SentryRoute
+            shouldRender={!isAllPrograms}
+            path={`${path}/csh-payment-verification/:id`}
+          >
             <CashPlanVerificationRedirectPage />
           </SentryRoute>
           <SentryRoute path={`${path}/payment-module/new-plan`}>
