@@ -527,7 +527,8 @@ if CACHE_ENABLED:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
-            "LOCATION": f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient",
+            "LOCATION": f"redis://{REDIS_INSTANCE}/1",
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         }
     }
 else:
