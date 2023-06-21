@@ -35,6 +35,7 @@ export default class PVDetailsPage extends BaseComponent {
 
   // Texts
   textTitle = "Payment Verification";
+  textPaymentPlanDetails = "Payment Plan Details";
   textCreateVerificationPlan = "CREATE VERIFICATION PLAN";
   textProgrammeName = "PROGRAMME NAME";
   textProgrammeID = "PROGRAMME ID";
@@ -55,16 +56,16 @@ export default class PVDetailsPage extends BaseComponent {
   // Elements
   getPaymentVerificationTitle = () => cy.get(this.paymentVerificationTitle);
   getCreateVerificationPlan = () => cy.get(this.createVerificationPlan);
+  getPaymentPlanDetails = () => cy.get(this.divPaymentDetails);
   getProgrammeName = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
+    this.getPaymentPlanDetails().get(this.gridPaymentDetails);
   getProgrammeID = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
+    this.getPaymentPlanDetails().get(this.gridPaymentDetails);
   getPaymentRecords = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
+    this.getPaymentPlanDetails().get(this.gridPaymentDetails);
   getStartDate = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
-  getEndDate = () =>
-    cy.get(this.divPaymentDetails).get(this.gridPaymentDetails);
+    this.getPaymentPlanDetails().get(this.gridPaymentDetails);
+  getEndDate = () => this.getPaymentPlanDetails().get(this.gridPaymentDetails);
   getBankReconciliationTitle = () =>
     cy.get(this.divBankReconciliation).get(this.tableTitle);
   getSuccessful = () =>
@@ -169,6 +170,11 @@ export default class PVDetailsPage extends BaseComponent {
     this.getDeletePlan();
   }
 
+  checkPaymentPlanDetailsTitle() {
+    this.getPaymentPlanDetails()
+      .find("h6")
+      .contains(this.textPaymentPlanDetails);
+  }
   createNewVerificationPlan(num = 0) {
     this.checkPaymentVerificationTitle();
     this.getNumberOfPlans().then(($el) => {
