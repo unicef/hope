@@ -1,12 +1,13 @@
 import * as Sentry from '@sentry/react';
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 
 export interface SentryRouteProps {
   children: React.ReactElement;
   path: string;
   label?: string;
   exact?: boolean;
+  shouldRender?: boolean;
 }
 
 export const SentryRoute = ({
@@ -14,14 +15,23 @@ export const SentryRoute = ({
   children,
   label,
   exact,
+  shouldRender = true,
 }: SentryRouteProps): React.ReactElement => (
-  <Route exact={exact} path={path}>
-    <Sentry.ErrorBoundary
-      beforeCapture={(scope) => {
-        scope.setTag('location', label || path);
-      }}
-    >
-      {children}
-    </Sentry.ErrorBoundary>
-  </Route>
+  <>
+    {shouldRender ? (
+      <>
+        <Route exact={exact} path={path}>
+          <Sentry.ErrorBoundary
+            beforeCapture={(scope) => {
+              scope.setTag('location', label || path);
+            }}
+          >
+            {children}
+          </Sentry.ErrorBoundary>
+        </Route>
+      </>
+    ) : (
+      <Redirect to='/' noThrow />
+    )}
+  </>
 );

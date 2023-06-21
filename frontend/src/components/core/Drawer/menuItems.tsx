@@ -24,7 +24,19 @@ import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
 
-export const menuItems = [
+export type MenuItem = {
+  name: string;
+  href?: string;
+  selectedRegexp: RegExp;
+  icon: JSX.Element;
+  permissions?: string[];
+  collapsable?: boolean;
+  permissionModule?: string;
+  secondaryActions?: MenuItem[];
+  flag?: string;
+  external?: boolean;
+};
+export const menuItems: MenuItem[] = [
   {
     name: 'Country Dashboard',
     href: '/#',
