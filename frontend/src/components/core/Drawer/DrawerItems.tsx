@@ -20,6 +20,7 @@ import {
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { MenuItem, menuItems } from './menuItems';
+import { get } from 'http';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -83,31 +84,28 @@ export const DrawerItems = ({
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     const updatedMenuItems = [...items];
-    const cashAssistIndex = updatedMenuItems.findIndex(
-      (item) => item?.name === 'Cash Assist',
-    );
+    const getIndexByName = (name: string): number => {
+      return updatedMenuItems.findIndex((item) => item?.name === name);
+    };
+    const cashAssistIndex = getIndexByName('Cash Assist');
+    const programManagementIndex = getIndexByName('Programme Management');
+    const grievanceIndex = getIndexByName('Grievance');
+    const paymentVerificationIndex = getIndexByName('Payment Verification');
+
     updatedMenuItems[cashAssistIndex].href =
       cashAssistUrlData?.cashAssistUrlPrefix;
 
-    //show Cash Assist menu item only if program is selected
+    //When GlobalProgramFilter not applied
     if (isAllPrograms) {
       delete updatedMenuItems[cashAssistIndex];
+      updatedMenuItems[programManagementIndex].href = '/list';
+      delete updatedMenuItems[paymentVerificationIndex];
     }
 
-    //if all programs selected redirect to programs list, else to details page
-    const programManagementIndex = updatedMenuItems.findIndex(
-      (item) => item?.name === 'Programme Management',
-    );
-    updatedMenuItems[programManagementIndex].href = isAllPrograms
-      ? '/list'
-      : `/details/${programId}`;
-
-    //show grievance menu item only if all programs selected
-    const grievanceIndex = updatedMenuItems.findIndex(
-      (item) => item?.name === 'Grievance',
-    );
+    //When GlobalProgramFilter applied
     if (!isAllPrograms) {
       delete updatedMenuItems[grievanceIndex];
+      updatedMenuItems[programManagementIndex].href = `/details/${programId}`;
     }
     return updatedMenuItems;
   };
