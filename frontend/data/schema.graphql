@@ -2521,7 +2521,7 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
-  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
+  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
@@ -3441,7 +3441,7 @@ type Query {
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
-  allRegistrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, programId: UUID, importDateRange: String, size: String, orderBy: String): RegistrationDataImportNodeConnection
+  allRegistrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, importDateRange: String, size: String, programId: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]
   _debug: DjangoDebug
 }
@@ -3597,7 +3597,7 @@ type RegistrationDataImportNode implements Node {
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
   excluded: Boolean!
-  programId: UUID!
+  programId: UUID
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3664,6 +3664,7 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: String
 }
 
 type ReportNode implements Node {
