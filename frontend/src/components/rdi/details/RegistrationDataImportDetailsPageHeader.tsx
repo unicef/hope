@@ -27,15 +27,15 @@ const MergeButtonContainer = styled.span`
   margin-left: ${({ theme }) => theme.spacing(4)}px;
 `;
 
-export function RegistrationDataImportDetailsPageHeader({
+export const RegistrationDataImportDetailsPageHeader = ({
   registration,
   canMerge,
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const [mutate, { loading }] = useRefuseRdiMutation();
   let buttons = null;
   // eslint-disable-next-line default-case
@@ -79,14 +79,16 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.Merged:
       buttons = (
         <MergeButtonContainer>
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${baseUrl}/grievance/rdi/${registration.id}`}
-          >
-            {t('View Tickets')}
-          </Button>
+          {isAllPrograms ? (
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/grievance/rdi/${registration.id}`}
+            >
+              {t('View Tickets')}
+            </Button>
+          ) : null}
         </MergeButtonContainer>
       );
       break;
@@ -106,4 +108,4 @@ export function RegistrationDataImportDetailsPageHeader({
       {buttons}
     </PageHeader>
   );
-}
+};

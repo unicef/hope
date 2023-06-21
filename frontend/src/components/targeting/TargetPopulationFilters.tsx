@@ -1,14 +1,10 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { Group, Person } from '@material-ui/icons';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  ProgramNode,
-  TargetPopulationStatus,
-} from '../../__generated__/graphql';
+import { TargetPopulationStatus } from '../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
