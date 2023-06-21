@@ -43,6 +43,7 @@ export const fakeApolloAllRegistrationDataImports = [
                 dataSource: 'XLS',
                 numberOfHouseholds: 3,
                 numberOfIndividuals: 6,
+                programId: "939ff91b-7f89-4e3c-9519-26ed62f51718",
                 __typename: 'RegistrationDataImportNode',
               },
               __typename: 'RegistrationDataImportNodeEdge',

@@ -109,6 +109,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
+    program_id = models.UUIDField(
+        null=True, db_index=True, blank=True
+    )  # TODO temporary null=True until we migrate backward all data
 
     def __str__(self) -> str:
         return self.name
@@ -139,4 +142,4 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         ]
 
     def can_be_merged(self) -> bool:
-        return self.status in [self.IN_REVIEW, self.MERGE_ERROR]
+        return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
