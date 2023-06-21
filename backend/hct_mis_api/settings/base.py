@@ -523,14 +523,13 @@ REDIS_INSTANCE = env("REDIS_INSTANCE", default="redis:6379")
 
 CACHE_ENABLED = env("CACHE_ENABLED", default=True)
 
-CACHES: Dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
         "default": f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient",
     }
 else:
     CACHES = {
-        "default": {
+        "default": {  # type: ignore
             "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
         }
