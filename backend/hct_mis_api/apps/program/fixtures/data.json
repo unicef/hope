@@ -1,0 +1,47 @@
+[
+{
+    "model": "program.program",
+    "pk": "939ff91b-7f89-4e3c-9519-26ed62f51718",
+    "fields": {
+        "is_removed": false,
+        "created_at": "2023-06-19T14:47:53.776Z",
+        "updated_at": "2023-06-19T14:47:57.490Z",
+        "last_sync_at": null,
+        "version": 1687185130805339,
+        "name": "initial_program",
+        "status": "ACTIVE",
+        "start_date": "2023-06-19",
+        "end_date": "2023-12-24",
+        "description": "qwerty",
+        "ca_id": null,
+        "ca_hash_id": null,
+        "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+        "budget": "100000.00",
+        "frequency_of_payments": "REGULAR",
+        "sector": "EDUCATION",
+        "scope": "UNICEF",
+        "cash_plus": false,
+        "population_goal": 0,
+        "administrative_areas_of_implementation": "",
+        "individual_data_needed": false,
+        "admin_areas": []
+    }
+},
+{
+    "model": "program.programcycle",
+    "pk": "135b82e1-4f9f-49a9-a26f-8ff396f2240a",
+    "fields": {
+        "is_removed": false,
+        "created_at": "2023-06-19T14:47:53.780Z",
+        "updated_at": "2023-06-19T14:47:53.780Z",
+        "last_sync_at": null,
+        "version": 1687185127096102,
+        "iteration": 1,
+        "status": "ACTIVE",
+        "start_date": "2023-06-19",
+        "end_date": "2023-12-24",
+        "description": "",
+        "program": "939ff91b-7f89-4e3c-9519-26ed62f51718"
+    }
+}
+]

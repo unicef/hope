@@ -1,14 +1,14 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
 import {
   AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -40,7 +40,7 @@ export const TargetPopulationTable = ({
   noTitle,
 }: TargetPopulationProps): ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
     numberOfHouseholdsMin: filter.numIndividualsMin,

@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import {
   ImportDataStatus,
   UploadImportDataXlsxFileAsyncMutationVariables,
+  XlsxImportDataQueryResult,
   useUploadImportDataXlsxFileAsyncMutation,
   useXlsxImportDataLazyQuery,
-  XlsxImportDataQueryResult,
 } from '../../../../__generated__/graphql';
 import { useLazyInterval } from '../../../../hooks/useInterval';
 

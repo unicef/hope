@@ -1,11 +1,11 @@
 import React from 'react';
 import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
+import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
@@ -23,6 +23,7 @@ export function ProgramDetailsPageHeader({
   canFinish,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons;
+  const { baseUrl } = useBaseUrl();
   switch (program.status) {
     case ProgramStatus.Active:
       buttons = (
@@ -51,11 +52,10 @@ export function ProgramDetailsPageHeader({
         />
       );
   }
-  const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Programme Management',
-      to: `/${businessArea}/programs/`,
+      to: `${baseUrl}/programs/`,
     },
   ];
   return (

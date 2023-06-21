@@ -13,7 +13,6 @@ import { IndividualBioData } from '../../../components/population/IndividualBioD
 import { IndividualPhotoModal } from '../../../components/population/IndividualPhotoModal';
 import { IndividualVulnerabilities } from '../../../components/population/IndividualVulnerabilities/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -24,6 +23,7 @@ import {
   useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -37,7 +37,7 @@ const Container = styled.div`
 export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -84,7 +84,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Individuals',
-      to: `/${businessArea}/population/individuals`,
+      to: `/${baseUrl}/population/individuals`,
     },
   ];
 
@@ -139,6 +139,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
 
       <Container>
         <IndividualBioData
+          baseUrl={baseUrl}
           businessArea={businessArea}
           individual={individual as IndividualNode}
           choicesData={choicesData}

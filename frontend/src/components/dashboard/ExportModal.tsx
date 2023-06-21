@@ -18,18 +18,18 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   useCreateDashboardReportMutation,
   useDashboardReportChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const numSelected = selected.length;

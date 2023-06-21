@@ -6,12 +6,12 @@ import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 
 interface EditFspHeaderProps {
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
 }
 
 export const EditSetUpFspHeader = ({
-  businessArea,
+  baseUrl,
   permissions,
 }: EditFspHeaderProps): React.ReactElement => {
   const location = useLocation();
@@ -22,7 +22,7 @@ export const EditSetUpFspHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/${
+      to: `/${baseUrl}/payment-module/${
         isFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },

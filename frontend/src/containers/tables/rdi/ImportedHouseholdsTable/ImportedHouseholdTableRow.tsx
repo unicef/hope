@@ -6,8 +6,8 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   household: ImportedHouseholdMinimalFragment;
@@ -16,9 +16,9 @@ interface PaymentRecordTableRowProps {
 export function ImportedHouseholdTableRow({
   household,
 }: PaymentRecordTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
-  const householdPath = `/${businessArea}/registration-data-import/household/${household.id}`;
+  const householdPath = `/${baseUrl}/registration-data-import/household/${household.id}`;
   const handleClick = (): void => {
     const win = window.open(householdPath, '_blank');
     if (win != null) {

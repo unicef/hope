@@ -4,6 +4,10 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  useHouseholdChoiceDataQuery,
+  useRegistrationDataImportQuery,
+} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -11,14 +15,10 @@ import { TableWrapper } from '../../../components/core/TableWrapper';
 import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import {
-  useHouseholdChoiceDataQuery,
-  useRegistrationDataImportQuery,
-} from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 
@@ -60,7 +60,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { data, loading, error, stopPolling } = useRegistrationDataImportQuery({
     variables: { id },
     pollInterval: 30000,
