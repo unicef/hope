@@ -3,7 +3,6 @@ import { Info } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { ProgramNode } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';

@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { useLazyInterval } from '../../../hooks/useInterval';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useLazyInterval } from '../../../hooks/useInterval';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
 
 export const EditTargetPopulationPage = (): React.ReactElement => {
   const { id } = useParams();

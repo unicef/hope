@@ -16,11 +16,11 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { LoadingComponent } from '../../core/LoadingComponent';
 
 const Label = styled.p`
   color: #b1b1b5;
