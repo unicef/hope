@@ -20,7 +20,6 @@ import {
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { MenuItem, menuItems } from './menuItems';
-import { get } from 'http';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -91,7 +90,9 @@ export const DrawerItems = ({
     const programManagementIndex = getIndexByName('Programme Management');
     const grievanceIndex = getIndexByName('Grievance');
     const paymentVerificationIndex = getIndexByName('Payment Verification');
+    const targetingIndex = getIndexByName('Targeting');
 
+    //Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =
       cashAssistUrlData?.cashAssistUrlPrefix;
 
@@ -100,6 +101,7 @@ export const DrawerItems = ({
       delete updatedMenuItems[cashAssistIndex];
       updatedMenuItems[programManagementIndex].href = '/list';
       delete updatedMenuItems[paymentVerificationIndex];
+      delete updatedMenuItems[targetingIndex];
     }
 
     //When GlobalProgramFilter applied
