@@ -1,11 +1,11 @@
 import React, { ReactElement, useState } from 'react';
 import { ActivityLogTablePaymentVerification } from '../../components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
 import {
   PaymentVerificationLogEntryNode,
   useAllPaymentVerificationLogEntriesQuery,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 interface UniversalActivityLogTablePaymentVerificationProps {
   objectId: string;
@@ -16,7 +16,7 @@ export function UniversalActivityLogTablePaymentVerification({
   objectType,
 }: UniversalActivityLogTablePaymentVerificationProps): ReactElement {
   const [page, setPage] = useState(0);
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { data, refetch } = useAllPaymentVerificationLogEntriesQuery({
     variables: {

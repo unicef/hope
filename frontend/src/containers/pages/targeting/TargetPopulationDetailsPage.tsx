@@ -13,7 +13,7 @@ import {
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const TargetPopulationDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -29,7 +29,7 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });

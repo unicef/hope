@@ -8,8 +8,8 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { SurveyCategory } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const StyledMenu = withStyles({
   paper: {
@@ -45,7 +45,7 @@ const StyledMenuItem = withStyles((theme) => ({
 export const CreateSurveyMenu = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
@@ -58,7 +58,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
 
   const handleMenuItemClick = (category: string): void => {
     history.push({
-      pathname: `/${businessArea}/accountability/surveys/create`,
+      pathname: `/${baseUrl}/accountability/surveys/create`,
       state: {
         category,
       },

@@ -6,10 +6,10 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { UsersListFilters } from '../../../components/core/UsersListFilters';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { UsersTable } from '../../tables/UsersTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const initialFilter = {
   search: '',
@@ -19,7 +19,7 @@ const initialFilter = {
 };
 
 export const UsersPage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();

@@ -4,7 +4,6 @@ import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../TextField';
 import {
@@ -13,6 +12,7 @@ import {
 } from '../../__generated__/graphql';
 import { FieldLabel } from '../../components/core/FieldLabel';
 import { LoadingComponent } from '../../components/core/LoadingComponent';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;
@@ -38,7 +38,7 @@ export function AdminAreaAutocompleteMultiple({
 
   const debouncedInputText = useDebounce(inputValue, 500);
   const [newValue, setNewValue] = useState([]);
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { data, loading } = useAllAdminAreasQuery({
     variables: {
       first: 100,

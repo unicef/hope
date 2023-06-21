@@ -17,7 +17,6 @@ import {
   hasPermissions,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
@@ -31,6 +30,7 @@ import {
   useFeedbackQuery,
   useUpdateFeedbackTicketMutation,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string()
@@ -49,7 +49,7 @@ export const validationSchema = Yup.object().shape({
 export const EditFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
@@ -105,7 +105,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/accountability/feedback/${id}`,
+      to: `/${baseUrl}/accountability/feedback/${id}`,
     },
   ];
 
@@ -157,7 +157,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
             variables: { input: prepareVariables(values) },
           });
           showMessage(t('Feedback updated'), {
-            pathname: `/${businessArea}/accountability/feedback/${response.data.updateFeedback.feedback.id}`,
+            pathname: `/${baseUrl}/accountability/feedback/${response.data.updateFeedback.feedback.id}`,
             historyMethod: 'push',
           });
         } catch (e) {
@@ -184,7 +184,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/accountability/feedback/${feedback.id}`}
+                    to={`/${baseUrl}/accountability/feedback/${feedback.id}`}
                   >
                     {t('Cancel')}
                   </Button>
@@ -227,7 +227,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                 <BlackLink
                                   to={
                                     canViewHouseholdDetails
-                                      ? `/${businessArea}/population/household/${feedback.householdLookup.id}`
+                                      ? `/${baseUrl}/population/household/${feedback.householdLookup.id}`
                                       : undefined
                                   }
                                 >
@@ -244,7 +244,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                 <BlackLink
                                   to={
                                     canViewIndividualDetails
-                                      ? `/${businessArea}/population/individuals/${feedback.individualLookup.id}`
+                                      ? `/${baseUrl}/population/individuals/${feedback.individualLookup.id}`
                                       : undefined
                                   }
                                 >

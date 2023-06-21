@@ -20,7 +20,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
@@ -31,6 +30,7 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -82,7 +82,7 @@ export const LookUpHouseholdIndividualModal = ({
     orderBy: 'unicef_id',
   };
 
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const {
     data: programsData,
     loading: programsLoading,

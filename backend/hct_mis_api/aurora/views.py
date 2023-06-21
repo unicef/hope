@@ -28,7 +28,7 @@ class FetchDataView(ProcessFormView):
 
 
 class RegistrationDataView(PermissionRequiredMixin, TemplateView):
-    template_name = "registration/dataset_list.html"
+    template_name = "dataset_list.html"
     permission_required = [
         "registration.can_view_data",
         "registration.can_manage_registration",

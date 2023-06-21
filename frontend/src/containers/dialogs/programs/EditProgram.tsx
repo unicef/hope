@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
 import {
@@ -13,6 +12,7 @@ import {
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface EditProgramProps {
   program: ProgramNode;
@@ -22,7 +22,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [mutate, { loading }] = useUpdateProgramMutation({
     refetchQueries: [
       {
@@ -59,7 +59,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
         },
       });
       showMessage(t('Programme edited.'), {
-        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        pathname: `/${baseUrl}/programs/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
     } catch (e) {

@@ -10,11 +10,11 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { NewReportForm } from '../../../components/reporting/NewReportForm';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const initialFilter = {
   type: '',
@@ -26,7 +26,7 @@ const initialFilter = {
 
 export const ReportingPage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 

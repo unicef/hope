@@ -3,12 +3,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useRefuseRdiMutation,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
@@ -35,7 +35,7 @@ export function RegistrationDataImportDetailsPageHeader({
   canRefuse,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const [mutate, { loading }] = useRefuseRdiMutation();
   let buttons = null;
   // eslint-disable-next-line default-case
@@ -83,7 +83,7 @@ export function RegistrationDataImportDetailsPageHeader({
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/grievance/rdi/${registration.id}`}
+            to={`/${baseUrl}/grievance/rdi/${registration.id}`}
           >
             {t('View Tickets')}
           </Button>
@@ -95,7 +95,7 @@ export function RegistrationDataImportDetailsPageHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Registration Data import'),
-      to: `/${businessArea}/registration-data-import/`,
+      to: `/${baseUrl}/registration-data-import/`,
     },
   ];
   return (

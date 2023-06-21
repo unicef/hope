@@ -14,7 +14,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   isPermissionDeniedError,
@@ -33,6 +32,7 @@ import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecord
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
 import { Title } from '../../../components/core/Title';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -61,7 +61,7 @@ const SubTitle = styled(Typography)`
 export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useHouseholdQuery({
@@ -103,7 +103,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Households'),
-      to: `/${businessArea}/population/household`,
+      to: `/${baseUrl}/population/household`,
     },
   ];
 
@@ -152,6 +152,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
+        baseUrl={baseUrl}
         businessArea={businessArea}
         grievancesChoices={grievancesChoices}
       />

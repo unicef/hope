@@ -4,7 +4,7 @@ from django.db.models.functions import Lower
 from django_filters import CharFilter, DateFilter, FilterSet
 
 from hct_mis_api.apps.core.filters import DateRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
@@ -13,6 +13,7 @@ class RegistrationDataImportFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     import_date_range = DateRangeFilter(field_name="import_date__date")
     size = IntegerRangeFilter(field_name="number_of_households")
+    program_id = CharFilter(method="filter_by_program_id")
 
     class Meta:
         model = RegistrationDataImport
@@ -39,3 +40,8 @@ class RegistrationDataImportFilter(FilterSet):
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         qs = super().filter_queryset(queryset)
         return qs.exclude(excluded=True)
+
+    def filter_by_program_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
+        if value:
+            return queryset.filter(program_id=decode_id_string_required(value))
+        return queryset

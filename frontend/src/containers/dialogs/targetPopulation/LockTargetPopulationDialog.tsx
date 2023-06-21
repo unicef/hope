@@ -2,7 +2,6 @@ import { Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useLockTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
@@ -10,6 +9,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;
@@ -22,7 +22,7 @@ export function LockTargetPopulationDialog({
   targetPopulationId,
 }): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useLockTpMutation();
@@ -62,7 +62,7 @@ export function LockTargetPopulationDialog({
                 }).then(() => {
                   setOpen(false);
                   showMessage(t('Target Population Locked'), {
-                    pathname: `/${businessArea}/target-population/${targetPopulationId}`,
+                    pathname: `/${baseUrl}/target-population/${targetPopulationId}`,
                   });
                 });
               }}

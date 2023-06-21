@@ -6,12 +6,12 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -23,7 +23,7 @@ export function ImportedIndividualsTableRow({
   choices,
 }: ImportedIndividualsTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
@@ -34,7 +34,7 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const individualPath = `/${businessArea}/registration-data-import/individual/${individual.id}`;
+  const individualPath = `/${baseUrl}/registration-data-import/individual/${individual.id}`;
   const handleClick = (e): void => {
     e.stopPropagation();
     history.push(individualPath);

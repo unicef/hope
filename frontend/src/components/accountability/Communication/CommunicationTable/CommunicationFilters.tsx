@@ -7,7 +7,7 @@ import {
   useAllProgramsForChoicesQuery,
   useAllTargetPopulationForChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
@@ -56,7 +56,7 @@ export const CommunicationFilters = ({
     clearFilter();
   };
 
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
