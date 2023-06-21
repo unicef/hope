@@ -209,8 +209,8 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-htoDjs fqGFhg"
-                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc="
+                    class="sc-htoDjs jgMSRO"
+                    href="/afghanistan/programs/undefined/population/household/SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc="
                   >
                     HH-20-0000.0001
                   </a>

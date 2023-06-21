@@ -31,7 +31,6 @@ import {
   hasPermissions,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
@@ -46,6 +45,7 @@ import {
   useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const steps = [
   'Category Selection',
@@ -150,7 +150,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 
 export const CreateFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -212,7 +212,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/accountability/feedback/`,
+      to: `/${baseUrl}/accountability/feedback/`,
     },
   ];
 
@@ -247,7 +247,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
               variables: { input: prepareVariables(values) },
             });
             showMessage(t('Feedback created'), {
-              pathname: `/${businessArea}/accountability/feedback/${response.data.createFeedback.feedback.id}`,
+              pathname: `/${baseUrl}/accountability/feedback/${response.data.createFeedback.feedback.id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -472,7 +472,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${businessArea}/accountability/feedback`}
+                            to={`/${baseUrl}/accountability/feedback`}
                           >
                             {t('Cancel')}
                           </Button>

@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   AllProgramsQuery,
@@ -15,6 +14,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const RemoveButton = styled(Button)`
   && {
@@ -46,7 +46,7 @@ export function DeleteProgram({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [mutate] = useDeleteProgramMutation({
     variables: {
       programId: program.id,
@@ -73,7 +73,7 @@ export function DeleteProgram({
     });
     if (!response.errors && response.data.deleteProgram) {
       showMessage(t('Programme removed.'), {
-        pathname: `/${businessArea}/programs/`,
+        pathname: `/${baseUrl}/programs/`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });

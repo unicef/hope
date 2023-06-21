@@ -9,7 +9,6 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { PaymentRecordDetails } from '../../../components/payments/PaymentRecordDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   PaymentRecordNode,
@@ -19,6 +18,7 @@ import {
 } from '../../../__generated__/graphql';
 import { ForceFailedButton } from '../../../components/payments/ForceFailedButton';
 import { RevertForceFailedButton } from '../../../components/payments/RevertForceFailedButton';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
@@ -47,15 +47,15 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Programme Management'),
-      to: `/${businessArea}/programs/`,
+      to: `/${baseUrl}/programs/`,
     },
     {
       title: data.paymentRecord.parent.program.name,
-      to: `/${businessArea}/programs/${data.paymentRecord.parent.program.id}/`,
+      to: `/${baseUrl}/programs/${data.paymentRecord.parent.program.id}/`,
     },
     {
       title: `Cash Plan #${data.paymentRecord.parent.caId}`,
-      to: `/${businessArea}/cashplans/${data.paymentRecord.parent.id}`,
+      to: `/${baseUrl}/cashplans/${data.paymentRecord.parent.id}`,
     },
   ];
   const paymentRecord = data.paymentRecord as PaymentRecordNode;

@@ -45,7 +45,7 @@ interface WarningTooltipTableProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   setDialogOpen: (dialogOpen: boolean) => void;
-  businessArea: string;
+  baseUrl: string;
   canViewDetails: boolean;
 }
 
@@ -53,7 +53,7 @@ export const WarningTooltipTable = ({
   paymentPlan,
   payment,
   setDialogOpen,
-  businessArea,
+  baseUrl,
   canViewDetails = false,
 }: WarningTooltipTableProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -71,7 +71,7 @@ export const WarningTooltipTable = ({
         <TableCell align='left'>
           {canViewDetails ? (
             <BlackLink
-              to={`/${businessArea}/payment-module/payment-plans/${row.paymentPlanId}`}
+              to={`/${baseUrl}/payment-module/payment-plans/${row.paymentPlanId}`}
             >
               {row.paymentPlanUnicefId}
             </BlackLink>

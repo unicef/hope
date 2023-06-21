@@ -8,13 +8,13 @@ import { PageHeader } from '../../../core/PageHeader';
 
 interface EditFspHeaderProps {
   handleSubmit: () => Promise<void>;
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
 }
 
 export function EditFspHeader({
   handleSubmit,
-  businessArea,
+  baseUrl,
   permissions,
 }: EditFspHeaderProps): React.ReactElement {
   const { t } = useTranslation();
@@ -22,7 +22,7 @@ export function EditFspHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${baseUrl}/payment-module/`,
     },
   ];
 
@@ -37,7 +37,7 @@ export function EditFspHeader({
     >
       <Box display='flex' mt={2} mb={2}>
         <Box mr={3}>
-          <Button component={Link} to={`/${businessArea}/payment-module`}>
+          <Button component={Link} to={`/${baseUrl}/payment-module`}>
             {t('Cancel')}
           </Button>
         </Box>

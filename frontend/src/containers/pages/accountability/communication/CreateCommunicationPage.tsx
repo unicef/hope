@@ -24,7 +24,6 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { LookUpSelection } from '../../../../components/accountability/Communication/LookUps/LookUpSelection';
 import { PaperContainer } from '../../../../components/targeting/PaperContainer';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
@@ -48,6 +47,7 @@ import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { FormikEffect } from '../../../../components/core/FormikEffect';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -119,7 +119,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     { loading },
   ] = useCreateAccountabilityCommunicationMessageMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
 
@@ -208,7 +208,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Communication'),
-      to: `/${businessArea}/accountability/communication`,
+      to: `/${baseUrl}/accountability/communication`,
     },
   ];
 
@@ -287,7 +287,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 variables: prepareMutationVariables(values),
               });
               showMessage(t('Communication Ticket created.'), {
-                pathname: `/${businessArea}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
+                pathname: `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
                 historyMethod: 'push',
               });
             } catch (e) {
@@ -574,7 +574,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
               <Box mr={3}>
                 <Button
                   component={Link}
-                  to={`/${businessArea}/accountability/communication`}
+                  to={`/${baseUrl}/accountability/communication`}
                 >
                   {t('Cancel')}
                 </Button>

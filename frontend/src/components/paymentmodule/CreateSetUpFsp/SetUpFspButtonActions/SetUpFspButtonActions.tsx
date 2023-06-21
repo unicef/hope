@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 interface SetUpFspButtonActionsProps {
   step: number;
   submitForm: (values) => void;
-  businessArea: string;
+  baseUrl: string;
   paymentPlanId: string;
   handleBackStep: () => void;
 }
@@ -14,7 +14,7 @@ interface SetUpFspButtonActionsProps {
 export const SetUpFspButtonActions = ({
   step,
   submitForm,
-  businessArea,
+  baseUrl,
   paymentPlanId,
   handleBackStep,
 }: SetUpFspButtonActionsProps): React.ReactElement => {
@@ -28,7 +28,7 @@ export const SetUpFspButtonActions = ({
         {step === 0 && (
           <Button
             component={Link}
-            to={`/${businessArea}/payment-module/${
+            to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${paymentPlanId}`}
           >

@@ -8,12 +8,12 @@ import { FlagTooltip } from '../../../../components/core/FlagTooltip';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   IndividualNode,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -27,14 +27,14 @@ export function IndividualsListTableRow({
   choicesData,
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
 
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
 
-  const individualDetailsPath = `/${businessArea}/population/individuals/${individual.id}`;
+  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
   const handleClick = (): void => {
     history.push(individualDetailsPath);
   };

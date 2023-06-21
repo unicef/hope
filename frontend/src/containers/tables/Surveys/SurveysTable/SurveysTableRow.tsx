@@ -4,9 +4,9 @@ import { useHistory } from 'react-router-dom';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { renderUserName } from '../../../../utils/utils';
 import { SurveyNode } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface SurveysTableRowProps {
   survey: SurveyNode;
@@ -20,8 +20,8 @@ export const SurveysTableRow = ({
   categoryDict,
 }: SurveysTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const surveyDetailsPath = `/${businessArea}/accountability/surveys/${survey.id}`;
+  const { baseUrl } = useBaseUrl();
+  const surveyDetailsPath = `/${baseUrl}/accountability/surveys/${survey.id}`;
 
   const handleClick = (): void => {
     history.push(surveyDetailsPath);

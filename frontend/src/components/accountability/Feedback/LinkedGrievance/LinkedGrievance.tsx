@@ -11,14 +11,19 @@ import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievan
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
-  businessArea: string;
+  baseUrl: string;
 }
 
 export const LinkedGrievance = ({
   feedback,
-  businessArea,
+  baseUrl,
 }: LinkedGrievanceProps): React.ReactElement => {
   const { t } = useTranslation();
+  const grievanceDetailsPath = getGrievanceDetailsPath(
+    feedback.linkedGrievance.id,
+    feedback.linkedGrievance.category,
+    baseUrl,
+  );
   return (
     <Grid item xs={4}>
       {feedback.linkedGrievance ? (
@@ -29,13 +34,7 @@ export const LinkedGrievance = ({
             </Title>
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
-                <BlackLink
-                  to={getGrievanceDetailsPath(
-                    feedback.linkedGrievance.id,
-                    feedback.linkedGrievance.category,
-                    businessArea,
-                  )}
-                >
+                <BlackLink to={grievanceDetailsPath}>
                   {feedback.linkedGrievance.unicefId}
                 </BlackLink>
               </LabelizedField>

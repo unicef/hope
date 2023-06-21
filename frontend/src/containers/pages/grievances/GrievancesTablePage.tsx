@@ -8,7 +8,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
@@ -17,9 +16,10 @@ import {
   GrievanceTypes,
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const GrievancesTablePage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
@@ -66,8 +66,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery();
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
-  const userGeneratedPath = `/${businessArea}/grievance/tickets/user-generated`;
-  const systemGeneratedPath = `/${businessArea}/grievance/tickets/system-generated`;
+  const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
+  const systemGeneratedPath = `/${baseUrl}/grievance/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
     <Tab key={el} label={el} />
@@ -114,6 +114,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
       />
       <GrievancesTable
         filter={appliedFilter}
+        baseUrl={baseUrl}
         businessArea={businessArea}
         selectedTab={selectedTab}
       />
