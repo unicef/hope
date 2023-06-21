@@ -526,7 +526,7 @@ CACHES: Dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         }
