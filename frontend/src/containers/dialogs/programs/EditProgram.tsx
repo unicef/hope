@@ -59,7 +59,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
         },
       });
       showMessage(t('Programme edited.'), {
-        pathname: `/${baseUrl}/programs/${response.data.updateProgram.program.id}`,
+        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
     } catch (e) {
