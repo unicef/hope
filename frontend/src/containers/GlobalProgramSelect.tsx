@@ -68,7 +68,12 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   }
 
   return (
-    <CountrySelect variant='filled' value={programId} onChange={onChange}>
+    <CountrySelect
+      data-cy='global-program-filter'
+      variant='filled'
+      value={programId}
+      onChange={onChange}
+    >
       <MenuItem key='all' value='all'>
         All Programmes
       </MenuItem>
