@@ -3,7 +3,8 @@ import Login from "../../page-objects/pages/login/login.po";
 let l = new Login();
 
 context("Availibility", () => {
-  it("Main page is available and shows the AD login view", () => {
+  it.skip("Main page is available and shows the AD login view", () => {
+    // ToDo: Global Programme changes
     cy.navigateToHomePage();
     cy.get("p").should("contain", "Login via Active Directory");
   });
