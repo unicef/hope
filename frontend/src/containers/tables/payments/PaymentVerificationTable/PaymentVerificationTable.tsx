@@ -2,13 +2,13 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllCashPlansAndPaymentPlansQueryVariables,
-  useAllCashPlansAndPaymentPlansQuery,
   CashPlanAndPaymentPlanNode,
+  useAllCashPlansAndPaymentPlansQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentVerificationTableProps {
   filter?;
