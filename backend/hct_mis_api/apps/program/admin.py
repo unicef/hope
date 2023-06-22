@@ -3,12 +3,12 @@ from django.contrib import admin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 
-from ..utils.admin import (
+from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
-from .models import Program, ProgramCycle
 
 
 @admin.register(ProgramCycle)

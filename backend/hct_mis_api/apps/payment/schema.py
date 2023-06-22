@@ -1,5 +1,4 @@
 import json
-from base64 import b64decode
 from decimal import Decimal
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -70,7 +69,10 @@ from hct_mis_api.apps.payment.filters import (
     payment_record_and_payment_filter,
     payment_record_and_payment_ordering,
 )
-from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.inputs import (
+    AvailableFspsForDeliveryMechanismsInput,
+    GetCashplanVerificationSampleSizeInput,
+)
 from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -94,7 +96,10 @@ from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.payment.utils import (
+    get_payment_items_for_dashboard,
+    get_payment_plan_object,
+)
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
@@ -611,10 +616,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
-class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-
-
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     """
     for CashPlan and PaymentPlan models
@@ -662,7 +663,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     # TODO: do we need this empty fields ??
     def resolve_assistance_measurement(self, info: Any, **kwargs: Any) -> str:
-        return "HH"
+        return ""
 
     def resolve_dispersion_date(self, info: Any, **kwargs: Any) -> str:
         return ""
@@ -915,7 +916,6 @@ class Query(graphene.ObjectType):
     )
 
     payment_plan = relay.Node.Field(PaymentPlanNode)
-    # TODO: Keep or remove??? in favour of all_cash_plans_and_payment_plans
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
@@ -997,9 +997,8 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
-        node_name, obj_id = b64decode(input["cash_or_payment_plan_id"]).decode().split(":")
-        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(  # type: ignore
-            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
+            input["cash_or_payment_plan_id"]
         )
 
         def get_payment_records(

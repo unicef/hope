@@ -5,15 +5,17 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
-  thingForSpecificGrievanceType,
   camelizeArrayObjects,
+  thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
+import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 
 interface EditValuesTypes {
+  priority?: number;
+  urgency?: number;
   description?: string;
   assignedTo?: string;
   issueType?: string | number;
@@ -25,13 +27,20 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
+  paymentRecord?: string;
   selectedLinkedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
+  partner?;
+  comments?;
+  programme?;
+  documentation?;
+  documentationToUpdate?;
+  documentationToDelete?;
 }
 
 function prepareInitialValueAddIndividual(
-  initialValuesArg,
+  initialValuesArg: EditValuesTypes,
   ticket: GrievanceTicketQuery['grievanceTicket'],
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
@@ -44,98 +53,109 @@ function prepareInitialValueAddIndividual(
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
-      previousValue[camelCase(currentValue[0])] = currentValue[1];
+      previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
-    {},
+    {} as EditValuesTypes['individualData'],
   );
   initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
-      previousValue[camelCase(currentValue[0])] = currentValue[1];
+      previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
-    {},
+    {} as EditValuesTypes['individualData']['flexFields'],
   );
   return initialValues;
 }
-function prepareInitialValueEditIndividual(
-  initialValuesArg,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
-): EditValuesTypes {
-  const initialValues = initialValuesArg;
-  initialValues.selectedIndividual = ticket.individual;
-  const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
-  };
-  const documents = individualData?.documents;
-  const documentsToRemove = individualData.documents_to_remove;
-  const documentsEdited = individualData?.documents_to_edit;
-  const identities = individualData?.identities;
-  const identitiesToRemove = individualData?.identities_to_remove;
-  const identitiesEdited = individualData?.identities_to_edit;
-  const paymentChannels = individualData?.payment_channels;
-  const paymentChannelsToRemove = individualData?.payment_channels_to_remove;
-  const paymentChannelsEdited = individualData?.payment_channels_to_edit;
-  const flexFields = individualData.flex_fields;
-  delete individualData.documents;
-  delete individualData.documents_to_remove;
-  delete individualData.documents_to_edit;
-  delete individualData.identities;
-  delete individualData.identities_to_remove;
-  delete individualData.identities_to_edit;
-  delete individualData.payment_channels;
-  delete individualData.payment_channels_to_remove;
-  delete individualData.payment_channels_to_edit;
-  delete individualData.previous_payment_channels;
-  delete individualData.previous_documents;
-  delete individualData.previous_identities;
-  delete individualData.flex_fields;
-  const individualDataArray = Object.entries(individualData).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1].value,
-    }),
-  );
-  const flexFieldsArray = Object.entries(flexFields).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1].value,
-    }),
-  );
-  initialValues.individualDataUpdateFields = [
+
+//eslint-disable-next-line
+function prepareInitialValueEditIndividual(initialValues, ticket) {
+  const {
+    individual,
+    individualDataUpdateTicketDetails: { individualData },
+  } = ticket;
+
+  const initialValuesCopy = { ...initialValues }; // make a copy to avoid modifying the original object
+  initialValuesCopy.selectedIndividual = individual;
+
+  const {
+    documents,
+    documents_to_remove: documentsToRemove,
+    documents_to_edit: documentsToEdit,
+    identities,
+    identities_to_remove: identitiesToRemove,
+    identities_to_edit: identitiesToEdit,
+    payment_channels: paymentChannels,
+    payment_channels_to_remove: paymentChannelsToRemove,
+    payment_channels_to_edit: paymentChannelsToEdit,
+    ...rest
+  } = individualData;
+
+  delete rest.documents;
+  delete rest.flex_fields;
+  delete rest.previous_payment_channels;
+  delete rest.previous_documents;
+  delete rest.previous_identities;
+
+  interface Field {
+    value: string;
+  }
+
+  const individualDataArray = Object.entries(rest)
+    .map(([fieldName, field]: [string, Field]) => {
+      if (field.value !== undefined) {
+        return { fieldName, fieldValue: field.value };
+      }
+      return null;
+    })
+    .filter((field) => field !== null);
+
+  const flexFieldsArray = Object.entries(individualData.flex_fields)
+    .map(([fieldName, field]: [string, Field]) => {
+      if (field.value !== undefined) {
+        return { fieldName, fieldValue: field.value };
+      }
+      return null;
+    })
+    .filter((field) => field !== null);
+
+  initialValuesCopy.individualDataUpdateFields = [
     ...individualDataArray,
     ...flexFieldsArray,
   ];
-  initialValues.individualDataUpdateFieldsDocuments = (documents || []).map(
-    (item) => item.value,
+
+  initialValuesCopy.individualDataUpdateFieldsDocuments = camelizeArrayObjects(
+    documents,
   );
-  initialValues.individualDataUpdateDocumentsToRemove = (
-    documentsToRemove || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateFieldsIdentities = (identities || []).map(
-    (item) => item.value,
+  initialValuesCopy.individualDataUpdateDocumentsToRemove = camelizeArrayObjects(
+    documentsToRemove,
   );
-  initialValues.individualDataUpdateIdentitiesToRemove = (
-    identitiesToRemove || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateDocumentsToEdit = (
-    documentsEdited || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateIdentitiesToEdit = (
-    identitiesEdited || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateFieldsPaymentChannels = (
-    camelizeArrayObjects(paymentChannels) || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdatePaymentChannelsToRemove = (
-    camelizeArrayObjects(paymentChannelsToRemove) || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdatePaymentChannelsToEdit = (
-    camelizeArrayObjects(paymentChannelsEdited) || []
-  ).map((item) => item.value);
-  return initialValues;
+  initialValuesCopy.individualDataUpdateFieldsIdentities = camelizeArrayObjects(
+    identities,
+  );
+  initialValuesCopy.individualDataUpdateIdentitiesToRemove = camelizeArrayObjects(
+    identitiesToRemove,
+  );
+  initialValuesCopy.individualDataUpdateDocumentsToEdit = camelizeArrayObjects(
+    documentsToEdit,
+  );
+  initialValuesCopy.individualDataUpdateIdentitiesToEdit = camelizeArrayObjects(
+    identitiesToEdit,
+  );
+  initialValuesCopy.individualDataUpdateFieldsPaymentChannels = camelizeArrayObjects(
+    paymentChannels,
+  );
+  initialValuesCopy.individualDataUpdatePaymentChannelsToRemove = camelizeArrayObjects(
+    paymentChannelsToRemove,
+  );
+  initialValuesCopy.individualDataUpdatePaymentChannelsToEdit = camelizeArrayObjects(
+    paymentChannelsToEdit,
+  );
+
+  return initialValuesCopy;
 }
+
 function prepareInitialValueEditHousehold(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
@@ -179,6 +199,11 @@ export function prepareInitialValues(
 ): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
+    priority: ticket.priority,
+    urgency: ticket.urgency,
+    partner: ticket.partner?.id,
+    comments: ticket.comments,
+    programme: ticket.programme?.id,
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
@@ -188,12 +213,16 @@ export function prepareInitialValues(
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
     issueType: ticket.issueType || null,
+    paymentRecord: ticket?.paymentRecord?.id || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
       : [],
-    selectedLinkedTickets: ticket.relatedTickets.map(
-      (relatedTicket) => relatedTicket.id,
+    selectedLinkedTickets: ticket.linkedTickets.map(
+      (linkedTicket) => linkedTicket.id,
     ),
+    documentation: null,
+    documentationToUpdate: null,
+    documentationToDelete: null,
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,
@@ -282,6 +311,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+        issueType: values.issueType,
         linkedTickets: values.selectedLinkedTickets,
       },
     },
@@ -450,6 +480,21 @@ const grievanceTypeIssueTypeDict = {
 };
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values, ticket) {
+  const mapDocumentationToUpdate = (
+    documentationToUpdate,
+  ): { id: number; name: string; file: File }[] | null => {
+    if (documentationToUpdate) {
+      return documentationToUpdate
+        .filter((el) => el)
+        .map((doc) => ({
+          id: doc.id,
+          name: doc.name,
+          file: doc.file,
+        }));
+    }
+    return null;
+  };
+
   const requiredVariables = {
     ticketId: ticket.id,
     description: values.description,
@@ -459,6 +504,19 @@ export function prepareVariables(businessArea, values, ticket) {
     area: values.area,
     household: values.selectedHousehold?.id,
     individual: values.selectedIndividual?.id,
+    priority: values.priority,
+    urgency: values.urgency,
+    partner: values.partner,
+    comments: values.comments,
+    programme: values.programme,
+    paymentRecord: values.selectedPaymentRecords
+      ? values.selectedPaymentRecords[0]
+      : null,
+    documentation: values.documentation || null,
+    documentationToUpdate: mapDocumentationToUpdate(
+      values.documentationToUpdate,
+    ),
+    documentationToDelete: values.documentationToDelete || null,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

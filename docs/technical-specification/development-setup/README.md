@@ -20,6 +20,15 @@ docker-compose up
 # once everything is up, in yet another terminal
 docker exec -it <prefix>_backend_1 ./manage.py initdemo
 ```
+
+There are some additional services that are not necessary for the app to run but may help a developer. If you want to e.g. turn on the kibana service, just run
+
+```bash
+docker-compose -f docker-compose.kibana.yml up
+```
+
+For the full list, try `ls -l docker-compose.*.yml`.
+
 ***
 Frontend app is run inside Docker (a lot slower)
 

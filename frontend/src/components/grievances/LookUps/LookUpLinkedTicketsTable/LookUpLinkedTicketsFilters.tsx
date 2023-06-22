@@ -2,7 +2,7 @@ import { Button, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LookUpAdminAreaAutocomplete } from '../../../../shared/LookUpAdminAreaAutocomplete';
+import { LookUpAdminAreaAutocomplete } from '../../../../shared/autocompletes/LookUpAdminAreaAutocomplete';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
@@ -29,7 +29,7 @@ export function LookUpLinkedTicketsFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -37,7 +37,7 @@ export function LookUpLinkedTicketsFilters({
             data-cy='filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
@@ -55,14 +55,14 @@ export function LookUpLinkedTicketsFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('FSP')}
             value={filter.fsp}
             onChange={(e) => handleFilterChange(e, 'fsp')}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label='From'
@@ -80,7 +80,7 @@ export function LookUpLinkedTicketsFilters({
             value={filter.createdAtRange.min}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             label={t('To')}
             onChange={(date) =>
@@ -97,7 +97,7 @@ export function LookUpLinkedTicketsFilters({
             value={filter.createdAtRange.max}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin'

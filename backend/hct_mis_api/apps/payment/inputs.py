@@ -80,3 +80,23 @@ class UpdatePaymentPlanInput(graphene.InputObjectType):
     dispersion_start_date = graphene.Date(required=False)
     dispersion_end_date = graphene.Date(required=False)
     currency = graphene.String(required=False)
+
+
+class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    delivery_mechanisms = graphene.List(graphene.String, required=True)
+
+
+class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
+    fsp_id = graphene.ID(required=True)
+    delivery_mechanism = graphene.String(required=True)
+    order = graphene.Int(required=True)
+
+
+class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
+
+
+class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)

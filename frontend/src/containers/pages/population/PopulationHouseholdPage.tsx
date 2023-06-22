@@ -3,24 +3,23 @@ import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import {
+  ProgramNode,
+  useAllProgramsForChoicesQuery,
+  useHouseholdChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { HouseholdFilters } from '../../../components/population/HouseholdFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 const initialFilter = {
-  text: '',
+  search: '',
   program: '',
   residenceStatus: '',
   admin2: '',
@@ -37,7 +36,10 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const debouncedFilter = useDebounce(filter, 500);
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -70,8 +72,11 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
       <HouseholdFilters
         programs={programs as ProgramNode[]}
         filter={filter}
-        onFilterChange={setFilter}
         choicesData={choicesData}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <Box
         display='flex'
@@ -79,7 +84,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
         data-cy='page-details-container'
       >
         <HouseholdTable
-          filter={debouncedFilter}
+          filter={appliedFilter}
           businessArea={businessArea}
           choicesData={choicesData}
           canViewDetails={hasPermissions(

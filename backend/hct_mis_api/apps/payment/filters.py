@@ -3,7 +3,7 @@ from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, CharField, Count, Q, QuerySet, Value, When
+from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -359,7 +359,7 @@ class PaymentFilter(FilterSet):
             "status",
             "household_id",
             "household__size",
-            "admin2",
+            "household__admin2",
             "collector_id",
             "entitlement_quantity_usd",
             "delivered_quantity",
@@ -370,32 +370,7 @@ class PaymentFilter(FilterSet):
     )
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        # household__admin2
-        queryset = queryset.annotate(
-            admin2=Case(
-                When(
-                    household__admin_area__isnull=True,
-                    then=Value(""),
-                ),
-                When(
-                    household__admin_area__isnull=False,
-                    household__admin_area__area_type__area_level__in=(0, 1),
-                    then=Value(""),
-                ),
-                When(
-                    household__admin_area__isnull=False,
-                    household__admin_area__area_type__area_level__lt=2,
-                    household__admin_area__area_type__area_level__gt=2,
-                    then=Lower("household__admin_area__parent__name"),
-                ),
-                When(
-                    household__admin_area__isnull=False,
-                    then=Lower("household__admin_area__name"),
-                ),
-                default=Value(""),
-                output_field=CharField(),
-            )
-        ).select_related("financial_service_provider")
+        queryset = queryset.select_related("financial_service_provider")
         if not self.form.cleaned_data.get("order_by"):
             queryset = queryset.order_by("unicef_id")
 

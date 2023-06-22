@@ -218,6 +218,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
                                     area.save()
                     except Exception:
                         self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
+
                         raise
 
                 self.message_user(request, f"Updated all areas for {country}")
