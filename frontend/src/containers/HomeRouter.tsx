@@ -1,10 +1,4 @@
-import {
-  Box,
-  makeStyles,
-  Snackbar,
-  SnackbarContent,
-  Typography,
-} from '@material-ui/core';
+import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
 import { Redirect, Switch, useLocation, useRouteMatch } from 'react-router-dom';
@@ -79,18 +73,13 @@ const MainContent = styled.div`
   overflow-x: hidden;
 `;
 
-const StyledBox = styled(Box)`
-  margin-top: 80px !important;
-  margin-left: 20px;
-  font-size: 5rem;
-`;
 const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
 }));
 
 export const HomeRouter = (): React.ReactElement => {
   const [open, setOpen] = React.useState(true);
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const classes = useStyles({});
   const location = useLocation();
   const { path } = useRouteMatch();
