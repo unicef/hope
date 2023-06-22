@@ -154,7 +154,6 @@ class TestLogsAssignProgram(APITestCase):
         assert LogEntry.objects.filter(program__isnull=True).count() == 0
         assert LogEntry.objects.filter(program_id=self.program.pk).count() == 8
 
-    def test_raise_value_error_with_wrong_obj(self) -> None:
         program_uuid = "dfef92b5-472c-478c-91df-53deb79a704a"
         ba = BusinessArea.objects.get(slug="afghanistan")
         user = UserFactory()
