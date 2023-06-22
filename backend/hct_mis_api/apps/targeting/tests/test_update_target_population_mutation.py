@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -11,6 +10,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
