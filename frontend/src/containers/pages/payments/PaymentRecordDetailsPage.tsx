@@ -31,7 +31,7 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
   const permissions = usePermissions();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
@@ -46,18 +46,20 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Programme Management'),
-      to: `/${baseUrl}/programs/`,
-    },
-    {
       title: data.paymentRecord.parent.program.name,
-      to: `/${baseUrl}/programs/${data.paymentRecord.parent.program.id}/`,
+      to: `/${baseUrl}/details/${data.paymentRecord.parent.program.id}/`,
     },
     {
       title: `Cash Plan #${data.paymentRecord.parent.caId}`,
       to: `/${baseUrl}/cashplans/${data.paymentRecord.parent.id}`,
     },
   ];
+  if (isAllPrograms) {
+    breadCrumbsItems.unshift({
+      title: t('Programme Management'),
+      to: `/${baseUrl}/list/`,
+    });
+  }
   const paymentRecord = data.paymentRecord as PaymentRecordNode;
 
   const renderButtons = (): Array<React.ReactElement> => {

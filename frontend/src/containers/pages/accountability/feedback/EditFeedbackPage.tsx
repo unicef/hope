@@ -4,6 +4,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
+import {
+  UpdateFeedbackInput,
+  useAllUsersQuery,
+  useFeedbackIssueTypeChoicesQuery,
+  useFeedbackQuery,
+  useUpdateFeedbackTicketMutation,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../../components/core/ContainerColumnWithBorder';
@@ -13,24 +20,15 @@ import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import {
+  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
-  PERMISSIONS,
 } from '../../../../config/permissions';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import {
-  UpdateFeedbackInput,
-  useAllProgramsQuery,
-  useAllUsersQuery,
-  useFeedbackIssueTypeChoicesQuery,
-  useFeedbackQuery,
-  useUpdateFeedbackTicketMutation,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string()
@@ -49,7 +47,7 @@ export const validationSchema = Yup.object().shape({
 export const EditFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
@@ -70,26 +68,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
 
   const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node?.name,
-    value: edge.node.id,
-  }));
-
-  if (
-    userDataLoading ||
-    choicesLoading ||
-    loadingPrograms ||
-    feedbackDataLoading
-  )
+  if (userDataLoading || choicesLoading || feedbackDataLoading)
     return <LoadingComponent />;
   if (permissions === null) return null;
   if (
@@ -121,7 +100,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
     area: feedback.area || null,
     language: feedback.language || null,
     consent: false,
-    program: feedback.program?.id || null,
+    program: programId,
   };
 
   const prepareVariables = (values): UpdateFeedbackInput => ({
@@ -306,16 +285,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
                             variant='outlined'
                             label={t('Languages Spoken')}
                             component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='program'
-                            fullWidth
-                            variant='outlined'
-                            label={t('Programme Title')}
-                            choices={mappedPrograms}
-                            component={FormikSelectField}
                           />
                         </Grid>
                       </Grid>

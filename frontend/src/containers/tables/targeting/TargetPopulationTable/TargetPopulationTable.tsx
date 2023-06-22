@@ -40,7 +40,7 @@ export const TargetPopulationTable = ({
   noTitle,
 }: TargetPopulationProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
     numberOfHouseholdsMin: filter.numIndividualsMin,
@@ -48,21 +48,11 @@ export const TargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
+    program: [decodeIdString(programId)],
   };
-
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
-
-  if (filter.program) {
-    if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) =>
-        decodeIdString(programId),
-      );
-    } else {
-      initialVariables.program = [decodeIdString(filter.program)];
-    }
-  }
 
   const renderTable = (): React.ReactElement => {
     return (

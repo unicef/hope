@@ -19,7 +19,7 @@ import {
 } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { menuItems } from './menuItems';
+import { MenuItem, menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -58,7 +58,7 @@ export const DrawerItems = ({
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -81,11 +81,30 @@ export const DrawerItems = ({
   );
   if (permissions === null || !businessAreaData) return null;
 
-  const cashAssistIndex = menuItems.findIndex(
-    (item) => item.name === 'Cash Assist',
-  );
+  const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
+    //When GlobalProgramFilter not applied
+    if (isAllPrograms) {
+      return null;
+    }
+    const updatedMenuItems = [...items];
+    const getIndexByName = (name: string): number => {
+      return updatedMenuItems.findIndex((item) => item?.name === name);
+    };
+    const cashAssistIndex = getIndexByName('Cash Assist');
+    const programDetailsIndex = getIndexByName('Programme Details');
 
-  menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+    //Set CashAssist URL
+    updatedMenuItems[cashAssistIndex].href =
+      cashAssistUrlData?.cashAssistUrlPrefix;
+
+    //When GlobalProgramFilter applied
+    if (!isAllPrograms) {
+      updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
+    }
+    return updatedMenuItems;
+  };
+
+  const preparedMenuItems = prepareMenuItems(menuItems);
 
   const {
     isPaymentPlanApplicable,
@@ -112,7 +131,7 @@ export const DrawerItems = ({
 
   return (
     <div>
-      {menuItems.map((item, index) => {
+      {preparedMenuItems?.map((item, index) => {
         if (
           item.permissionModule &&
           !hasPermissionInModule(item.permissionModule, permissions)
@@ -132,10 +151,10 @@ export const DrawerItems = ({
           );
 
           return (
-            <div key={item.name + hrefForCollapsibleItem}>
+            <div key={item?.name + hrefForCollapsibleItem}>
               <ListItem
                 button
-                data-cy={`nav-${item.name}`}
+                data-cy={`nav-${item?.name}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -148,7 +167,7 @@ export const DrawerItems = ({
                 }}
               >
                 <Icon>{item.icon}</Icon>
-                <Text primary={item.name} />
+                <Text primary={item?.name} />
                 {expandedItem !== null && expandedItem === index ? (
                   <ExpandLess />
                 ) : (
@@ -187,23 +206,23 @@ export const DrawerItems = ({
         }
         return item.external ? (
           <ListItem
-            data-cy={`nav-${item.name}`}
+            data-cy={`nav-${item?.name}`}
             button
-            key={item.name + item.href}
+            key={item?.name + item.href}
           >
             <StyledLink target='_blank' href={item.href}>
               <Box display='flex'>
                 <Icon>{item.icon}</Icon>
-                <Text primary={item.name} />
+                <Text primary={item?.name} />
               </Box>
             </StyledLink>
           </ListItem>
         ) : (
           <ListItem
             button
-            data-cy={`nav-${item.name}`}
+            data-cy={`nav-${item?.name}`}
             component={Link}
-            key={item.name + item.href}
+            key={item?.name + item.href}
             to={`/${baseUrl}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
@@ -211,7 +230,7 @@ export const DrawerItems = ({
             selected={Boolean(item.selectedRegexp.exec(clearLocation))}
           >
             <Icon>{item.icon}</Icon>
-            <Text primary={item.name} />
+            <Text primary={item?.name} />
           </ListItem>
         );
       })}

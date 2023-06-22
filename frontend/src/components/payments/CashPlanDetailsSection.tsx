@@ -54,7 +54,7 @@ export const CashPlanDetailsSection = ({
             {
               label: t('PROGRAMME ID'),
               value: (
-                <BlackLink to={`/${baseUrl}/programs/${planNode.program.id}`}>
+                <BlackLink to={`/${baseUrl}/details/${planNode.program.id}`}>
                   {planNode.program?.caId}
                 </BlackLink>
               ),

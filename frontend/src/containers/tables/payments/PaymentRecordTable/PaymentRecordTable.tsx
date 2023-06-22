@@ -20,13 +20,11 @@ export function PaymentRecordTable({
   openInNewTab = false,
 }: PaymentRecordTableProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
-  //TODO: uncomment this
-  // const programId = useGlobalProgram()
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
     cashPlan: cashPlan.id,
     businessArea,
-    // program: programId
+    program: programId,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
