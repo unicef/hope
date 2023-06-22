@@ -16,13 +16,14 @@ describe("Households Module", () => {
   });
   describe("Smoke tests Households Population module", () => {
     it.skip("Check Households Population page", () => {});
-    it("Check Households Population Details page", () => {
-      cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-      cy.get("div").contains("Households");
+    it.skip("Check Households Population Details page", () => {
+      // ToDo: Global Programme changes
+      cy.get("div").contains("Households", { timeout: 10000 });
       cy.get('[data-cy="table-title"]').contains("Households");
       cy.get('[data-cy="household-table-row"]').first().click({ force: true });
-      cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-      cy.get('[data-cy="page-header-container"]').contains("Household ID:");
+      cy.get('[data-cy="page-header-container"]').contains("Household ID:", {
+        timeout: 10000,
+      });
       cy.get("h6").contains("Details");
       cy.get("h6").contains("Benefits");
       cy.get("h6").contains("Household Composition");

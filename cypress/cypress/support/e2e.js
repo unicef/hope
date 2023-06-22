@@ -40,6 +40,11 @@ Cypress.Commands.add("adminLogin", () => {
 
 Cypress.Commands.add("navigateToHomePage", () => {
   cy.visit("/");
+  cy.url().should("include", "/programs/all/list");
+  cy.get('div[data-cy="global-program-filter"]', { timeout: 10000 })
+    .contains("All Programmes", { timeout: 10000 })
+    .click();
+  cy.get('li[role="option"]').contains("Test Program").click();
 });
 
 Cypress.Commands.add("initScenario", (scenario) => {
