@@ -137,9 +137,7 @@ export const HomeRouter = (): React.ReactElement => {
   const allBusinessAreasSlugs = businessAreaData.allBusinessAreas.edges.map(
     (el) => el.node.slug,
   );
-  const allProgramsIds = programsData.allPrograms.edges.map((el) => el.node.id);
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
-  const isProgramValid = allProgramsIds.includes(programId);
 
   if (!isBusinessAreaValid) {
     return <Redirect to='/' noThrow />;
@@ -154,155 +152,143 @@ export const HomeRouter = (): React.ReactElement => {
         currentLocation={location.pathname}
         dataCy='side-nav'
       />
-      {isProgramValid ? (
-        <>
-          <MainContent data-cy='main-content'>
-            <div className={classes.appBarSpacer} />
-            <Switch>
-              <SentryRoute path={`${path}/population/household/:id`}>
-                <PopulationHouseholdDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/population/individuals/:id`}>
-                <PopulationIndividualsDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/cashplans/:id`}>
-                <CashPlanDetailsPage />
-              </SentryRoute>
-              <SentryRoute exact path={`${path}/target-population`}>
-                <TargetPopulationsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/target-population/create`}>
-                <CreateTargetPopulationPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/target-population/edit-tp/:id`}>
-                <EditTargetPopulationPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/target-population/:id`}>
-                <TargetPopulationDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/verification/payment-record/:id`}>
-                <VerificationPaymentRecordDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/verification/payment/:id`}>
-                <VerificationPaymentDetailsPage />
-              </SentryRoute>
-              <SentryRoute exact path={`${path}/payment-verification`}>
-                <PaymentVerificationPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/payment-verification/cash-plan/:id`}>
-                <CashPlanVerificationDetailsPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-verification/payment-plan/:id`}
-              >
-                <PaymentPlanVerificationDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/csh-payment-verification/:id`}>
-                <CashPlanVerificationRedirectPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/payment-module/new-plan`}>
-                <CreatePaymentPlanPage />
-              </SentryRoute>
-              <SentryRoute exact path={`${path}/payment-module`}>
-                <PaymentModulePage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/followup-payment-plans/:id/edit`}
-              >
-                <EditFollowUpPaymentPlanPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/create`}
-              >
-                <SetFollowUpUpFspPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`}
-              >
-                <EditFollowUpSetUpFspPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/payment-plans/:id/setup-fsp/create`}
-              >
-                <SetUpFspPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/payment-plans/:id/setup-fsp/edit`}
-              >
-                <EditSetUpFspPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/payment-plans/:id/edit`}
-              >
-                <EditPaymentPlanPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/payment-module/payments/:id`}>
-                <PaymentDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/payment-module/payment-plans/:id`}>
-                <PaymentPlanDetailsPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/payment-module/followup-payment-plans/:id`}
-              >
-                <FollowUpPaymentPlanDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/grievance/new-ticket`}>
-                <CreateGrievancePage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/grievance/edit-ticket/user-generated/:id`}
-              >
-                <EditGrievancePage key='user' />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/grievance/edit-ticket/system-generated/:id`}
-              >
-                <EditGrievancePage key='system' />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/grievance/tickets/user-generated/:id`}
-              >
-                <GrievancesDetailsPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/grievance/tickets/system-generated/:id`}
-              >
-                <GrievancesDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/grievance/rdi/:id`}>
-                <GrievancesTablePage key='rdi' />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/grievance/payment-verification/:cashPlanId`}
-              >
-                <GrievancesTablePage key='verificationId' />
-              </SentryRoute>
-              <SentryRoute path={`${path}/grievance/tickets/user-generated`}>
-                <GrievancesTablePage key='user' />
-              </SentryRoute>
-              <SentryRoute path={`${path}/grievance/tickets/system-generated`}>
-                <GrievancesTablePage key='system' />
-              </SentryRoute>
-              <SentryRoute path={`${path}/grievance/dashboard`}>
-                <GrievancesDashboardPage key='all' />
-              </SentryRoute>
+      <MainContent data-cy='main-content'>
+        <div className={classes.appBarSpacer} />
+        <Switch>
+          <SentryRoute path={`${path}/population/household/:id`}>
+            <PopulationHouseholdDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/population/individuals/:id`}>
+            <PopulationIndividualsDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/cashplans/:id`}>
+            <CashPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute exact path={`${path}/target-population`}>
+            <TargetPopulationsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/target-population/create`}>
+            <CreateTargetPopulationPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/target-population/edit-tp/:id`}>
+            <EditTargetPopulationPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/target-population/:id`}>
+            <TargetPopulationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/verification/payment-record/:id`}>
+            <VerificationPaymentRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/verification/payment/:id`}>
+            <VerificationPaymentDetailsPage />
+          </SentryRoute>
+          <SentryRoute exact path={`${path}/payment-verification`}>
+            <PaymentVerificationPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-verification/cash-plan/:id`}>
+            <CashPlanVerificationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-verification/payment-plan/:id`}>
+            <PaymentPlanVerificationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/csh-payment-verification/:id`}>
+            <CashPlanVerificationRedirectPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-module/new-plan`}>
+            <CreatePaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute exact path={`${path}/payment-module`}>
+            <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id/edit`}
+          >
+            <EditFollowUpPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/create`}
+          >
+            <SetFollowUpUpFspPage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`}
+          >
+            <EditFollowUpSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/payment-module/payment-plans/:id/setup-fsp/create`}
+          >
+            <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/payment-module/payment-plans/:id/setup-fsp/edit`}
+          >
+            <EditSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-module/payment-plans/:id/edit`}>
+            <EditPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-module/payments/:id`}>
+            <PaymentDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-module/payment-plans/:id`}>
+            <PaymentPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/payment-module/followup-payment-plans/:id`}
+          >
+            <FollowUpPaymentPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/new-ticket`}>
+            <CreateGrievancePage />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/grievance/edit-ticket/user-generated/:id`}
+          >
+            <EditGrievancePage key='user' />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/grievance/edit-ticket/system-generated/:id`}
+          >
+            <EditGrievancePage key='system' />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/tickets/user-generated/:id`}>
+            <GrievancesDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/tickets/system-generated/:id`}>
+            <GrievancesDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/rdi/:id`}>
+            <GrievancesTablePage key='rdi' />
+          </SentryRoute>
+          <SentryRoute
+            path={`${path}/grievance/payment-verification/:cashPlanId`}
+          >
+            <GrievancesTablePage key='verificationId' />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/tickets/user-generated`}>
+            <GrievancesTablePage key='user' />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/tickets/system-generated`}>
+            <GrievancesTablePage key='system' />
+          </SentryRoute>
+          <SentryRoute path={`${path}/grievance/dashboard`}>
+            <GrievancesDashboardPage key='all' />
+          </SentryRoute>
 
-              <SentryRoute path={`${path}/accountability/feedback/create`}>
-                <CreateFeedbackPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/accountability/feedback/edit-ticket/:id`}
-              >
-                <EditFeedbackPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/accountability/feedback/:id`}>
-                <FeedbackDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/accountability/feedback`}>
-                <FeedbackPage />
-              </SentryRoute>
-              {/* TODO: uncomment when ready for deployment
+          <SentryRoute path={`${path}/accountability/feedback/create`}>
+            <CreateFeedbackPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/accountability/feedback/edit-ticket/:id`}>
+            <EditFeedbackPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/accountability/feedback/:id`}>
+            <FeedbackDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/accountability/feedback`}>
+            <FeedbackPage />
+          </SentryRoute>
+          {/* TODO: uncomment when ready for deployment
           <SentryRoute path={`${path}/accountability/surveys/create`}>
             <CreateSurveyPage />
           </SentryRoute>
@@ -322,68 +308,58 @@ export const HomeRouter = (): React.ReactElement => {
             <CommunicationPage />
           </SentryRoute>
           */}
-              <SentryRoute path={`${path}/population/household`}>
-                <PopulationHouseholdPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/population/individuals`}>
-                <PopulationIndividualsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/details/:id`}>
-                <ProgramDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/payment-records/:id`}>
-                <PaymentRecordDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/list`}>
-                <ProgramsPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/registration-data-import/household/:id`}
-              >
-                <RegistrationHouseholdDetailsPage />
-              </SentryRoute>
-              <SentryRoute
-                path={`${path}/registration-data-import/individual/:id`}
-              >
-                <RegistrationIndividualDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/registration-data-import/:id`}>
-                <RegistrationDataImportDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/registration-data-import`}>
-                <RegistrationDataImportPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/reporting/:id`}>
-                <ReportingDetailsPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/reporting`}>
-                <ReportingPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/users-list`}>
-                <UsersPage />
-              </SentryRoute>
-              <SentryRoute path={`${path}/activity-log`}>
-                <ActivityLogPage />
-              </SentryRoute>
-            </Switch>
-          </MainContent>
-          {snackBar.show && (
-            <Snackbar
-              open={snackBar.show}
-              autoHideDuration={5000}
-              onClose={() => snackBar.setShow(false)}
-            >
-              <SnackbarContent
-                message={snackBar.message}
-                data-cy={snackBar.dataCy}
-              />
-            </Snackbar>
-          )}
-        </>
-      ) : (
-        <StyledBox display='flex' mt={6}>
-          <Typography>You need to select a programme</Typography>
-        </StyledBox>
+          <SentryRoute path={`${path}/population/household`}>
+            <PopulationHouseholdPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/population/individuals`}>
+            <PopulationIndividualsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/details/:id`}>
+            <ProgramDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/payment-records/:id`}>
+            <PaymentRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/list`}>
+            <ProgramsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/registration-data-import/household/:id`}>
+            <RegistrationHouseholdDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/registration-data-import/individual/:id`}>
+            <RegistrationIndividualDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/registration-data-import/:id`}>
+            <RegistrationDataImportDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/registration-data-import`}>
+            <RegistrationDataImportPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/reporting/:id`}>
+            <ReportingDetailsPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/reporting`}>
+            <ReportingPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/users-list`}>
+            <UsersPage />
+          </SentryRoute>
+          <SentryRoute path={`${path}/activity-log`}>
+            <ActivityLogPage />
+          </SentryRoute>
+        </Switch>
+      </MainContent>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={5000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent
+            message={snackBar.message}
+            data-cy={snackBar.dataCy}
+          />
+        </Snackbar>
       )}
     </Root>
   );
