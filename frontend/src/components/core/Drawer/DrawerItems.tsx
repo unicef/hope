@@ -82,16 +82,13 @@ export const DrawerItems = ({
   if (permissions === null || !businessAreaData) return null;
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
-    //When GlobalProgramFilter not applied
-    if (isAllPrograms) {
-      return null;
-    }
     const updatedMenuItems = [...items];
     const getIndexByName = (name: string): number => {
       return updatedMenuItems.findIndex((item) => item?.name === name);
     };
     const cashAssistIndex = getIndexByName('Cash Assist');
     const programDetailsIndex = getIndexByName('Programme Details');
+    const programManagementIndex = getIndexByName('Programme Management');
 
     //Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =
@@ -100,6 +97,11 @@ export const DrawerItems = ({
     //When GlobalProgramFilter applied
     if (!isAllPrograms) {
       updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
+    }
+    //When GlobalProgramFilter not applied show Program Management only
+    if (isAllPrograms) {
+      const programManagementOnly = [updatedMenuItems[programManagementIndex]];
+      return programManagementOnly;
     }
     return updatedMenuItems;
   };

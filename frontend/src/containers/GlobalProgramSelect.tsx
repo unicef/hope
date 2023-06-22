@@ -52,9 +52,13 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   });
 
   const onChange = (e): void => {
-    history.push(
-      `/${businessArea}/programs/${e.target.value}/details/${e.target.value}`,
-    );
+    if (e.target.value === 'all') {
+      history.push(`/${businessArea}/programs/${e.target.value}/list`);
+    } else {
+      history.push(
+        `/${businessArea}/programs/${e.target.value}/details/${e.target.value}`,
+      );
+    }
   };
   if (loading) {
     return <LoadingComponent />;
