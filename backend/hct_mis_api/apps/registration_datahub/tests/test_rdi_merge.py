@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from typing import Callable, Generator
 
+from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 
@@ -50,8 +51,8 @@ def capture_on_commit_callbacks(
 class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = [
-        "hct_mis_api/apps/geo/fixtures/data.json",
-        "hct_mis_api/apps/core/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
     ]
 
     @classmethod

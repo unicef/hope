@@ -68,6 +68,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-3"
+            data-cy="table-title"
           >
             <thead
               class="MuiTableHead-root"
@@ -82,6 +83,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   />
                 </th>
                 <th
@@ -91,6 +93,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Household Id
                   </span>
@@ -102,6 +105,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Status
                   </span>
@@ -113,6 +117,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Head of Household
                   </span>
@@ -124,6 +129,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Household Size
                   </span>
@@ -135,6 +141,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Administrative Level 2
                   </span>
@@ -146,6 +153,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Residence Status
                   </span>
@@ -157,6 +165,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Total Cash Received
                   </span>
@@ -168,6 +177,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Registration Date
                   </span>
@@ -199,7 +209,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-htoDjs fzdMAW"
+                    class="sc-htoDjs jgMSRO"
                     href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc="
                   >
                     HH-20-0000.0001
@@ -251,7 +261,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 432px;"
+                style="height: 54px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
@@ -263,6 +273,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
         </div>
         <div
           class="MuiTablePagination-root"
+          data-cy="table-pagination"
         >
           <div
             class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

@@ -1,5 +1,6 @@
 import { Button, Grid, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
@@ -30,6 +31,9 @@ export const AddIndividualDataChangeField = ({
   flexField,
 }: AddIndividualDataChangeFieldProps): React.ReactElement => {
   let fieldProps;
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   switch (field.type) {
     case 'DECIMAL':
       fieldProps = {
@@ -89,7 +93,7 @@ export const AddIndividualDataChangeField = ({
   }
   return (
     <>
-      <Grid item xs={6}>
+      <Grid item xs={8}>
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -98,10 +102,11 @@ export const AddIndividualDataChangeField = ({
           variant='outlined'
           label={field.labelEn}
           required={field.required}
+          disabled={isEditTicket}
           {...fieldProps}
         />
       </Grid>
-      <Grid item xs={6} />
+      <Grid item xs={4} />
     </>
   );
 };
@@ -116,6 +121,9 @@ export const AddIndividualDataChange = ({
   setFieldValue,
 }: AddIndividualDataChangeProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading) {
     return <LoadingComponent />;
@@ -128,127 +136,130 @@ export const AddIndividualDataChange = ({
   );
 
   return (
-    <>
-      <Title>
-        <Typography variant='h6'>{t('Individual Data')}</Typography>
-      </Title>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          {t('Core Fields')}
-        </Grid>
+    !isEditTicket && (
+      <>
+        <Title>
+          <Typography variant='h6'>{t('Individual Data')}</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            {t('Core Fields')}
+          </Grid>
 
-        {coreFields.map((item) => (
-          <AddIndividualDataChangeField key={item.name} field={item} />
-        ))}
-        <Grid item xs={12}>
-          {t('Flex Fields')}
+          {coreFields.map((item) => (
+            <AddIndividualDataChangeField key={item.name} field={item} />
+          ))}
+          <Grid item xs={12}>
+            {t('Flex Fields')}
+          </Grid>
+          {flexFields.map((item) => (
+            <AddIndividualDataChangeField
+              key={item.name}
+              field={item}
+              flexField
+            />
+          ))}
         </Grid>
-        {flexFields.map((item) => (
-          <AddIndividualDataChangeField
-            key={item.name}
-            field={item}
-            flexField
+        <Grid container spacing={3}>
+          <FieldArray
+            name='individualData.documents'
+            render={(arrayHelpers) => {
+              return (
+                <>
+                  {values.individualData?.documents?.map((item) => {
+                    const existingOrNewId = item.node?.id || item.id;
+                    return (
+                      <DocumentField
+                        id={existingOrNewId}
+                        key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
+                        onDelete={() =>
+                          removeItemById(
+                            values.individualData.documents,
+                            existingOrNewId,
+                            arrayHelpers,
+                          )
+                        }
+                        countryChoices={data.countriesChoices}
+                        documentTypeChoices={data.documentTypeChoices}
+                        baseName='individualData.documents'
+                        baseNameArray={values.individualData.documents}
+                        setFieldValue={setFieldValue}
+                        values={values}
+                      />
+                    );
+                  })}
+                  <Grid item xs={8} />
+                  <Grid item xs={12}>
+                    <Button
+                      color='primary'
+                      startIcon={<AddCircleOutline />}
+                      disabled={isEditTicket}
+                      onClick={() => {
+                        arrayHelpers.push({
+                          id: uuidv4(),
+                          country: null,
+                          key: null,
+                          number: '',
+                        });
+                      }}
+                    >
+                      {t('Add Document')}
+                    </Button>
+                  </Grid>
+                </>
+              );
+            }}
           />
-        ))}
-      </Grid>
-      <Grid container spacing={3}>
-        <FieldArray
-          name='individualData.documents'
-          render={(arrayHelpers) => {
-            return (
-              <>
-                {values.individualData?.documents?.map((item) => {
-                  const existingOrNewId = item.node?.id || item.id;
-                  return (
-                    <DocumentField
-                      id={existingOrNewId}
-                      key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
-                      onDelete={() =>
-                        removeItemById(
-                          values.individualData.documents,
-                          existingOrNewId,
-                          arrayHelpers,
-                        )
-                      }
-                      countryChoices={data.countriesChoices}
-                      documentTypeChoices={data.documentTypeChoices}
-                      baseName='individualData.documents'
-                      baseNameArray={values.individualData.documents}
-                      setFieldValue={setFieldValue}
-                      values={values}
-                    />
-                  );
-                })}
-                <Grid item xs={8} />
-                <Grid item xs={12}>
-                  <Button
-                    color='primary'
-                    startIcon={<AddCircleOutline />}
-                    onClick={() => {
-                      arrayHelpers.push({
-                        id: uuidv4(),
-                        country: null,
-                        key: null,
-                        number: '',
-                      });
-                    }}
-                  >
-                    {t('Add Document')}
-                  </Button>
-                </Grid>
-              </>
-            );
-          }}
-        />
-      </Grid>
-      <Grid container spacing={3}>
-        <FieldArray
-          name='individualData.identities'
-          render={(arrayHelpers) => {
-            return (
-              <>
-                {values.individualData?.identities?.map((item) => {
-                  const existingOrNewId = item.node?.id || item.id;
-                  return (
-                    <AgencyField
-                      id={existingOrNewId}
-                      onDelete={() =>
-                        removeItemById(
-                          values.individualData.identities,
-                          existingOrNewId,
-                          arrayHelpers,
-                        )
-                      }
-                      countryChoices={data.countriesChoices}
-                      identityTypeChoices={data.identityTypeChoices}
-                      baseName='individualData.identities'
-                      baseNameArray={values.individualData.identities}
-                      values={values}
-                    />
-                  );
-                })}
-                <Grid item xs={8} />
-                <Grid item xs={12}>
-                  <Button
-                    color='primary'
-                    startIcon={<AddCircleOutline />}
-                    onClick={() => {
-                      arrayHelpers.push({
-                        id: uuidv4(),
-                        country: null,
-                        partner: null,
-                        number: '',
-                      });
-                    }}
-                  >
-                    {t('Add Identity')}
-                  </Button>
-                </Grid>
-              </>
-            );
-          }}
-        />
-      </Grid>
-    </>
+        </Grid>
+        <Grid container spacing={3}>
+          <FieldArray
+            name='individualData.identities'
+            render={(arrayHelpers) => {
+              return (
+                <>
+                  {values.individualData?.identities?.map((item) => {
+                    const existingOrNewId = item.node?.id || item.id;
+                    return (
+                      <AgencyField
+                        id={existingOrNewId}
+                        onDelete={() =>
+                          removeItemById(
+                            values.individualData.identities,
+                            existingOrNewId,
+                            arrayHelpers,
+                          )
+                        }
+                        countryChoices={data.countriesChoices}
+                        identityTypeChoices={data.identityTypeChoices}
+                        baseName='individualData.identities'
+                        baseNameArray={values.individualData.identities}
+                        values={values}
+                      />
+                    );
+                  })}
+                  <Grid item xs={8} />
+                  <Grid item xs={12}>
+                    <Button
+                      color='primary'
+                      startIcon={<AddCircleOutline />}
+                      onClick={() => {
+                        arrayHelpers.push({
+                          id: uuidv4(),
+                          country: null,
+                          partner: null,
+                          number: '',
+                        });
+                      }}
+                    >
+                      {t('Add Identity')}
+                    </Button>
+                  </Grid>
+                </>
+              );
+            }}
+          />
+        </Grid>
+      </>
+    )
   );
 };

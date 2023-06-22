@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString, choicesToDict } from '../../../../utils/utils';
+import { choicesToDict } from '../../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -30,7 +30,7 @@ export const LookUpLinkedTicketsTable = ({
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    admin: [decodeIdString(filter?.admin?.node?.id)],
+    admin: filter?.admin?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
   const {
@@ -48,23 +48,20 @@ export const LookUpLinkedTicketsTable = ({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const handleCheckboxClick = (event, name): void => {
+  const handleCheckboxClick = (
+    _event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    name: string,
+  ): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
+    const newSelected = [...selected];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+      newSelected.push(name);
+    } else {
+      newSelected.splice(selectedIndex, 1);
     }
-
     setSelected(newSelected);
     setFieldValue('selectedLinkedTickets', newSelected);
   };

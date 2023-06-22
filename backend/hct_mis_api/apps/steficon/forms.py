@@ -10,10 +10,10 @@ from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
-from .config import config
-from .interpreters import Interpreter, mapping
-from .models import Rule
-from .widget import ContentTypeChoiceField, PythonEditor
+from hct_mis_api.apps.steficon.config import config
+from hct_mis_api.apps.steficon.interpreters import Interpreter, mapping
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.widget import ContentTypeChoiceField, PythonEditor
 
 if TYPE_CHECKING:
     from django.db.models.fields import _ChoicesCallable

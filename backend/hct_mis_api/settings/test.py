@@ -5,13 +5,8 @@ from .base import *  # noqa: ignore=F403
 
 # dev overrides
 DEBUG = True
-IS_DEV = True
-IS_TEST = True
 TEMPLATES[0]["OPTIONS"]["debug"] = True
 
-# domains/hosts etc.
-DOMAIN_NAME = "localhost:8000"
-WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 
 # other
@@ -98,3 +93,4 @@ CSRF_COOKIE_SECURE = False
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_HSTS_SECONDS = 0
+CACHE_ENABLED = False
