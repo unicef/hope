@@ -1,0 +1,1 @@
+export { CommunicationTable } from './CommunicationTable';

@@ -43,6 +43,8 @@ services:
       - celery_worker
     volumes:
       - ../cypress-results:/code/cypress/results
+      - ../cypress-reports:/code/cypress/reports
+
 
   proxy:
     image: unicef/hct-mis-proxy

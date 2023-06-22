@@ -9,18 +9,23 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import { createHandleFilterChange } from '../../utils/utils';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
+import { createHandleApplyFilterChange } from '../../utils/utils';
+import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 interface HouseholdFiltersProps {
-  onFilterChange;
   filter;
   programs: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
+  isOnPaper?: boolean;
 }
 
 const orderOptions = [
@@ -32,39 +37,60 @@ const orderOptions = [
   { name: 'Household Size: descending', value: '-size' },
 ];
 export const HouseholdFilters = ({
-  onFilterChange,
   filter,
   programs,
   choicesData,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+  isOnPaper = true,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
 
-  return (
-    <ContainerWithBorder>
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
+
+  const filtersComponent = (
+    <>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
-            value={filter.text}
-            onChange={(e) => handleFilterChange('text', e.target.value)}
+            value={filter.search}
+            fullWidth
+            onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='hh-filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -76,12 +102,13 @@ export const HouseholdFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
             }
             label={t('Residence Status')}
+            fullWidth
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
             SelectDisplayProps={{
@@ -98,36 +125,41 @@ export const HouseholdFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <AdminAreaAutocomplete
             name='admin2'
             value={filter.admin2}
-            onFilterChange={onFilterChange}
             filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Household Size')}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
+            fullWidth
             onChange={(e) =>
               handleFilterChange('householdSizeMin', e.target.value)
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
             icon={<GroupIcon />}
+            fullWidth
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -143,21 +175,34 @@ export const HouseholdFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
-            value={filter.status}
+            value={filter.withdrawn}
           >
+            <MenuItem key='all' value='null'>
+              All
+            </MenuItem>
             <MenuItem key='active' value='false'>
               Active
             </MenuItem>
             <MenuItem key='inactive' value='true'>
-              Inactive
+              Withdrawn
             </MenuItem>
           </SelectFilter>
         </Grid>
       </Grid>
-    </ContainerWithBorder>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
+    </>
+  );
+
+  return isOnPaper ? (
+    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
+  ) : (
+    filtersComponent
   );
 };
