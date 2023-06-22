@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  ProgramNode,
   useAllProgramsForChoicesQuery,
   useProgrammeChoiceDataQuery,
 } from '../../../../__generated__/graphql';
@@ -59,7 +58,6 @@ export const LookUpSelection = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: '',
     numIndividualsMin: null,
     numIndividualsMax: null,
   };
@@ -150,7 +148,6 @@ export const LookUpSelection = ({
           {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
             <TargetPopulationFilters
               filter={filterTP}
-              programs={programs as ProgramNode[]}
               setFilter={setFilterTP}
               initialFilter={initialFilterTP}
               appliedFilter={appliedFilterTP}

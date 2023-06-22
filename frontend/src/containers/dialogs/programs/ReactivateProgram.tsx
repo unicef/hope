@@ -67,7 +67,7 @@ export function ReactivateProgram({
     });
     if (!response.errors && response.data.updateProgram) {
       showMessage(t('Programme reactivated.'), {
-        pathname: `/${baseUrl}/programs/${response.data.updateProgram.program.id}`,
+        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
     } else {

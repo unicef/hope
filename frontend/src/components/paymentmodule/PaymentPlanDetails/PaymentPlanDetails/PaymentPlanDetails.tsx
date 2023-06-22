@@ -50,7 +50,7 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid item xs={3}>
                 <LabelizedField label={t('Programme')}>
-                  <BlackLink to={`/${baseUrl}/programs/${program.id}`}>
+                  <BlackLink to={`/${baseUrl}/details/${program.id}`}>
                     {program.name}
                   </BlackLink>
                 </LabelizedField>
