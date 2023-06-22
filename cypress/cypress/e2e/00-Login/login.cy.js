@@ -5,7 +5,7 @@ context("Login", () => {
   it("login with valid username and valid password", () => {
     cy.adminLogin();
     cy.navigateToHomePage();
-    cy.get("h5").should("contain", "Dashboard");
+    cy.get("h6").should("contain", "Programme Details");
   });
   it("Check the login with valid username and Invalid password", () => {
     l.navigateToLoginPage();
