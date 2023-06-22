@@ -73,7 +73,7 @@ export function DeleteProgram({
     });
     if (!response.errors && response.data.deleteProgram) {
       showMessage(t('Programme removed.'), {
-        pathname: `/${baseUrl}/programs/`,
+        pathname: `/${baseUrl}/list`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });

@@ -16,9 +16,9 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
@@ -59,6 +59,13 @@ export const EditTargetPopulation = ({
     variables: { businessArea, status: [ProgramStatus.Active] },
     fetchPolicy: 'cache-and-network',
   });
+
+  if (loadingPrograms) {
+    return <LoadingComponent />;
+  }
+  if (!allProgramsData) {
+    return null;
+  }
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria } = values;
@@ -133,7 +140,7 @@ export const EditTargetPopulation = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm, setFieldValue }) => {
+      {({ values, submitForm }) => {
         return (
           <Form>
             <AutoSubmitFormOnEnter />
@@ -144,14 +151,6 @@ export const EditTargetPopulation = ({
               baseUrl={baseUrl}
               targetPopulation={targetPopulation}
             />
-            <TargetPopulationProgramme
-              allPrograms={allProgramsData}
-              loading={loadingPrograms}
-              program={values.program}
-              setFieldValue={setFieldValue}
-              values={values}
-            />
-
             <FieldArray
               name='targetingCriteria'
               render={(arrayHelpers) => (

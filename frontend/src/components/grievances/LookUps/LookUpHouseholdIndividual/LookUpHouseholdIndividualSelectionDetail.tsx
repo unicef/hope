@@ -1,14 +1,13 @@
 import { Box, Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { LoadingComponent } from '../../../core/LoadingComponent';
@@ -17,7 +16,6 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -44,10 +42,11 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { businessArea, programId } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
   const initialFilterHH = {
     search: '',
-    program: '',
+    program: programId,
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -66,14 +65,6 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     status: '',
   };
 
-  const { businessArea } = useBaseUrl();
-  const {
-    data: programsData,
-    loading: programsLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
   const {
     data: householdChoicesData,
     loading: householdChoicesLoading,
@@ -98,15 +89,12 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     loading: individualChoicesLoading,
   } = useIndividualChoiceDataQuery();
 
-  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
+  if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData || !programsData) {
+  if (!individualChoicesData || !householdChoicesData) {
     return null;
   }
-
-  const { allPrograms } = programsData;
-  const programs = allPrograms.edges.map((edge) => edge.node);
 
   const onSelect = (key, value): void => {
     onValueChange(key, value);
@@ -143,7 +131,6 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
         <TabPanel value={selectedTab} index={0}>
           <Box mt={2}>
             <HouseholdFilters
-              programs={programs as ProgramNode[]}
               filter={filterHH}
               choicesData={householdChoicesData}
               setFilter={setFilterHH}

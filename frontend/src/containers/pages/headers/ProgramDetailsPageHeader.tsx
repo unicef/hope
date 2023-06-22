@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -23,7 +24,8 @@ export function ProgramDetailsPageHeader({
   canFinish,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons;
-  const { baseUrl } = useBaseUrl();
+  const { t } = useTranslation();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   switch (program.status) {
     case ProgramStatus.Active:
       buttons = (
@@ -52,12 +54,14 @@ export function ProgramDetailsPageHeader({
         />
       );
   }
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Programme Management',
-      to: `${baseUrl}/programs/`,
-    },
-  ];
+  const breadCrumbsItems: BreadCrumbsItem[] = [];
+  if (isAllPrograms) {
+    breadCrumbsItems.unshift({
+      title: t('Programme Management'),
+      to: `/${baseUrl}/list/`,
+    });
+  }
+
   return (
     <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>
       {buttons}

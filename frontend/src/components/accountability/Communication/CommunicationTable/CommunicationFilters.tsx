@@ -3,10 +3,7 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  useAllProgramsForChoicesQuery,
-  useAllTargetPopulationForChoicesQuery,
-} from '../../../../__generated__/graphql';
+import { useAllTargetPopulationForChoicesQuery } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
@@ -33,7 +30,7 @@ export const CommunicationFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-
+  const { businessArea } = useBaseUrl();
   const {
     handleFilterChange,
     applyFilterChanges,
@@ -56,12 +53,6 @@ export const CommunicationFilters = ({
     clearFilter();
   };
 
-  const { businessArea } = useBaseUrl();
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
   const {
     data: allTargetPopulationForChoices,
     loading: targetPopulationsLoading,
@@ -70,34 +61,15 @@ export const CommunicationFilters = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
   const allTargetPopulations =
     allTargetPopulationForChoices?.allTargetPopulation?.edges || [];
   const targetPopulations = allTargetPopulations.map((edge) => edge.node);
 
-  if (programsLoading || targetPopulationsLoading) return <LoadingComponent />;
+  if (targetPopulationsLoading) return <LoadingComponent />;
 
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={5}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-          >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
         <Grid item xs={4}>
           <SelectFilter
             onChange={(e) =>
@@ -109,9 +81,9 @@ export const CommunicationFilters = ({
             <MenuItem value=''>
               <em>{t('None')}</em>
             </MenuItem>
-            {targetPopulations.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
+            {targetPopulations.map((tp) => (
+              <MenuItem key={tp.id} value={tp.id}>
+                {tp.name}
               </MenuItem>
             ))}
           </SelectFilter>

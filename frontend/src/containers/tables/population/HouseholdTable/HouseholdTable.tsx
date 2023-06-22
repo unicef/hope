@@ -1,12 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
@@ -25,6 +26,7 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -45,11 +47,8 @@ export const HouseholdTable = ({
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
+    programs: [programId],
   };
-  if (filter.program) {
-    initialVariables.programs = [filter.program];
-  }
-
   return (
     <TableWrapper>
       <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>

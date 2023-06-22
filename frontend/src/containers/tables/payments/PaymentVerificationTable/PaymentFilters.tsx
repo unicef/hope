@@ -1,13 +1,9 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  ProgramNode,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '../../../../__generated__/graphql';
+import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
@@ -17,7 +13,6 @@ import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 interface PaymentFiltersProps {
   filter;
-  programs: ProgramNode[];
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -25,7 +20,6 @@ interface PaymentFiltersProps {
 }
 export const PaymentFilters = ({
   filter,
-  programs,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -156,25 +150,6 @@ export const PaymentFilters = ({
             }
             value={filter.endDate}
           />
-        </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label='Programme'
-            fullWidth
-            data-cy='filter-program'
-            value={filter.program}
-            icon={<FlashOnIcon />}
-          >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
         </Grid>
       </Grid>
       <ClearApplyButtons
