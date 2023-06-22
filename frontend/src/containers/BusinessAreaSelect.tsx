@@ -47,7 +47,7 @@ export function BusinessAreaSelect(): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const history = useHistory();
   const onChange = (e): void => {
-    history.push(`/${e.target.value}`);
+    history.push(`/${e.target.value}/programs/all/list`);
   };
   if (!data) {
     return null;
