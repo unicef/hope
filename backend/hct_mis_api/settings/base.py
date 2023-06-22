@@ -270,7 +270,7 @@ if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = f"{ENV}"
 
 # BACKWARD_COMPATIBILITY SNIPPET
-if "DATABASE_URL" not in os.environ:
+if "DATABASE_URL" not in os.environ:  # set in pipelines
     os.environ["DATABASE_URL"] = (
         f'postgis://{os.getenv("POSTGRES_USER")}'
         f':{os.getenv("POSTGRES_PASSWORD")}'
