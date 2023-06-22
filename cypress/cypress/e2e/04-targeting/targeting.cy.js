@@ -39,7 +39,7 @@ describe("Targeting", () => {
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
       it("Can visit the targeting page and create a target population", () => {
-        cy.visit("/");
+        cy.navigateToHomePage();
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
         cy.get('[data-cy="button-target-population-create-new"]').click({
@@ -50,9 +50,6 @@ describe("Targeting", () => {
           cy.get('[data-cy="input-name"]')
             .eq(1)
             .type(targetPopulationName, { force: true });
-          cy.get('[data-cy="input-program"]').first().click();
-          cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-          cy.get(`[data-cy="select-option-${programName}-${seed}"]`).click();
           cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
           cy.get('[data-cy="button-household-rule"]', {
@@ -96,9 +93,6 @@ describe("Targeting", () => {
         // ToDo
       });
       it.skip("Targeting Status filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Programme filter", () => {
         // ToDo
       });
       it.skip("Targeting Number of Households filter", () => {
