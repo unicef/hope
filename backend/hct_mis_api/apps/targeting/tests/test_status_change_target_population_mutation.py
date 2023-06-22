@@ -65,7 +65,10 @@ class TestApproveTargetPopulationMutation(APITestCase):
         program = ProgramFactory(business_area=cls.business_area)
 
         tp = TargetPopulation(
-            name="Draft Target Population", status=TargetPopulation.STATUS_OPEN, business_area=cls.business_area, program=program
+            name="Draft Target Population",
+            status=TargetPopulation.STATUS_OPEN,
+            business_area=cls.business_area,
+            program=program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -90,7 +93,10 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.target_population_approved_with_final_rule = tp
 
         tp = TargetPopulation(
-            name="Approved Target Population", status=TargetPopulation.STATUS_LOCKED, business_area=cls.business_area, program=program,
+            name="Approved Target Population",
+            status=TargetPopulation.STATUS_LOCKED,
+            business_area=cls.business_area,
+            program=program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -174,7 +180,10 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         program = ProgramFactory(business_area=cls.business_area)
 
         tp = TargetPopulation(
-            name="Draft Target Population", status=TargetPopulation.STATUS_OPEN, business_area=cls.business_area, program=program,
+            name="Draft Target Population",
+            status=TargetPopulation.STATUS_OPEN,
+            business_area=cls.business_area,
+            program=program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -198,7 +207,10 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.target_population_approved_with_final_rule = tp
 
         tp = TargetPopulation(
-            name="Approved Target Population", status=TargetPopulation.STATUS_LOCKED, business_area=cls.business_area, program=program,
+            name="Approved Target Population",
+            status=TargetPopulation.STATUS_LOCKED,
+            business_area=cls.business_area,
+            program=program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -295,7 +307,10 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         program = ProgramFactory(business_area=cls.business_area)
 
         tp = TargetPopulation(
-            name="Draft Target Population", status=TargetPopulation.STATUS_OPEN, business_area=cls.business_area, program=program,
+            name="Draft Target Population",
+            status=TargetPopulation.STATUS_OPEN,
+            business_area=cls.business_area,
+            program=program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
