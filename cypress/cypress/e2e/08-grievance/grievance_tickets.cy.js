@@ -10,14 +10,11 @@ describe("Grievance", () => {
   beforeEach(() => {
     cy.adminLogin();
     cy.navigateToHomePage();
+    grievancePage.clickMenuButtonGrievance();
   });
 
   describe("Smoke tests Grievance", () => {
-    it.skip("Check Grievance page", () => {
-      // Scenario:
-      // 1. Go to Grievance page
-      // 2. Check if all elements on page exist
-    });
+    it.skip("Check Grievance page", () => {});
     it.skip("Check Grievance Details page", () => {});
     it.skip("Check Grievance New Ticket page", () => {});
   });
