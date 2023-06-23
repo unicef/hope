@@ -20,7 +20,7 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class TestLogsAssignProgram(TestCase):
-    databases = {"default", "registration_datahub"}
+    multi_db = True
 
     @classmethod
     def setUpTestData(cls) -> None:
