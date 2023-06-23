@@ -267,23 +267,128 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
+              class="MuiTableRow-root sc-gzVnrw btWNie"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <a
-                  class="sc-iwsKbI lezRMd"
-                  href="/afghanistan/programs/undefined/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmIyNTYzN2VjLWNkYmUtNDEzMC04N2JlLWU1OGIzYzcxMDdkMg=="
+                <div
+                  style="text-overflow: ellipsis;"
+                >
+                  PP-0060-23-00000017
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    style="text-overflow: ellipsis;"
+                    class="sc-dnqmqq QDGnp"
+                    data-cy="status-container"
                   >
-                    PP-0060-22-11223344
+                    PENDING
                   </div>
-                </a>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                2,200.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                1,000.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                1,200.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-gzVnrw btWNie"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  style="text-overflow: ellipsis;"
+                >
+                  PP-0060-23-00000015
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-htoDjs koRFFa"
+                >
+                  <div
+                    class="sc-dnqmqq QDGnp"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                2,800.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                2,800.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                0.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-gzVnrw btWNie"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  style="text-overflow: ellipsis;"
+                >
+                  PP-0060-23-00000005
+                </div>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -304,230 +409,139 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                HH
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                -
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                999.00
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                -
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                -
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
-              data-cy="cash-plan-table-row"
-              role="checkbox"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <a
-                  class="sc-iwsKbI lezRMd"
-                  href="/afghanistan/programs/undefined/cashplans/Q2FzaFBsYW5Ob2RlOmZiY2MxZDY4LWU1YzUtNGM3ZC05ZjA3LTRkZGU4NjU4NTU3Yg=="
-                >
-                  <div
-                    style="text-overflow: ellipsis;"
-                  >
-                    123-21-CSH-00003
-                  </div>
-                </a>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <div
-                  class="sc-htoDjs koRFFa"
-                >
-                  <div
-                    class="sc-dnqmqq QDGnp"
-                    data-cy="status-container"
-                  >
-                    PENDING
-                  </div>
-                </div>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                5
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                HH
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                60,422,683.87
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                71,007,093.19
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                45,476,368.48
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                -
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
-              data-cy="cash-plan-table-row"
-              role="checkbox"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <a
-                  class="sc-iwsKbI lezRMd"
-                  href="/afghanistan/programs/undefined/cashplans/Q2FzaFBsYW5Ob2RlOmE3NmNjNTRhLWE5YWMtNDgyNS05OTg5LTk1ZTYwMTUwODE0MA=="
-                >
-                  <div
-                    style="text-overflow: ellipsis;"
-                  >
-                    123-21-CSH-00002
-                  </div>
-                </a>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <div
-                  class="sc-htoDjs koRFFa"
-                >
-                  <div
-                    class="sc-dnqmqq QDGnp"
-                    data-cy="status-container"
-                  >
-                    PENDING
-                  </div>
-                </div>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                5
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                HH
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                40,010,736.01
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                18,271,344.05
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                18,320,390.85
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                -
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
-              data-cy="cash-plan-table-row"
-              role="checkbox"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <a
-                  class="sc-iwsKbI lezRMd"
-                  href="/afghanistan/programs/undefined/cashplans/Q2FzaFBsYW5Ob2RlOjE3MWMzOWYxLTI3Y2EtNDQ2Zi05OGMyLWNlYjRiMWY2YjhjZg=="
-                >
-                  <div
-                    style="text-overflow: ellipsis;"
-                  >
-                    123-21-CSH-00001
-                  </div>
-                </a>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <div
-                  class="sc-htoDjs koRFFa"
-                >
-                  <div
-                    class="sc-dnqmqq QDGnp"
-                    data-cy="status-container"
-                  >
-                    PENDING
-                  </div>
-                </div>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                5
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                HH
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                49,925,970.55
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                37,836,624.22
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                43,002,539.53
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                -
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root"
-              style="height: 54px;"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body"
-                colspan="8"
               />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                200.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                150.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                50.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-gzVnrw btWNie"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  style="text-overflow: ellipsis;"
+                >
+                  PP-0060-23-00000001
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-htoDjs koRFFa"
+                >
+                  <div
+                    class="sc-dnqmqq QDGnp"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                700.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                600.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                100.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-gzVnrw btWNie"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  style="text-overflow: ellipsis;"
+                >
+                  123-21-CSH-00003
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-htoDjs koRFFa"
+                >
+                  <div
+                    class="sc-dnqmqq QDGnp"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                5
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                2,463,289.03
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                14,923,041.29
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                16,301,871.34
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
             </tr>
           </tbody>
         </table>
@@ -581,7 +595,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-4 of 4
+            1-5 of 7
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -611,9 +625,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             </button>
             <button
               aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
-              disabled=""
-              tabindex="-1"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
+              tabindex="0"
               title="Next page"
               type="button"
             >
@@ -631,6 +644,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   />
                 </svg>
               </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
             </button>
           </div>
         </div>
