@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.celery_tasks import (
@@ -31,7 +32,7 @@ from hct_mis_api.apps.reporting.validators import ReportValidator
 logger = logging.getLogger(__name__)
 
 
-class CreateReport(ReportValidator, PermissionMutation):
+class CreateReport(ReportValidator, CommonValidator, PermissionMutation):
     report = graphene.Field(ReportNode)
 
     class Arguments:
