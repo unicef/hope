@@ -155,8 +155,8 @@ class TestLogsAssignProgram(TestCase):
 
         call_command("activity_log_assign_program")
 
-        self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 0)
         self.assertEquals(LogEntry.objects.filter(program_id=self.program.pk).count(), 8)
+        self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 0)
 
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area, program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003"
