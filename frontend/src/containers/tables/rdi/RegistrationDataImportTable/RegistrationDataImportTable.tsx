@@ -31,7 +31,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function RegistrationDataImportTable({
+export const RegistrationDataImportTable = ({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -39,9 +39,9 @@ export function RegistrationDataImportTable({
   handleChange,
   noTableStyling,
   noTitle,
-}: RegistrationDataImportProps): ReactElement {
+}: RegistrationDataImportProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
     search: filter.search,
     importDate: filter.importDate
@@ -54,6 +54,7 @@ export function RegistrationDataImportTable({
     businessArea,
     importDateRange: JSON.stringify(filter.importDateRange),
     size: JSON.stringify(filter.size),
+    programId,
   };
 
   const handleRadioChange = (id: string): void => {
@@ -100,4 +101,4 @@ export function RegistrationDataImportTable({
   ) : (
     renderTable()
   );
-}
+};
