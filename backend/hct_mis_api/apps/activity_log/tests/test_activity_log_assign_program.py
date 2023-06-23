@@ -25,7 +25,6 @@ class TestLogsAssignProgram(APITestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory(first_name="User", last_name="WithLastName")
-
         cls.program = ProgramFactory(business_area=cls.business_area)
 
     def test_assign_program_to_existing_logs(self) -> None:
@@ -151,19 +150,9 @@ class TestLogsAssignProgram(APITestCase):
         # )
 
         assert LogEntry.objects.filter(program__isnull=True).count() == 8
-        print(
-            "==> before",
-            LogEntry.objects.filter(program__isnull=True).count(),
-            LogEntry.objects.filter(program_id=self.program.pk).count(),
-        )
 
         call_command("activity_log_assign_program")
 
-        print(
-            "==> after",
-            LogEntry.objects.filter(program__isnull=True).count(),
-            LogEntry.objects.filter(program_id=self.program.pk).count(),
-        )
         assert LogEntry.objects.filter(program__isnull=True).count() == 0
         assert LogEntry.objects.filter(program_id=self.program.pk).count() == 8
 
@@ -190,22 +179,11 @@ class TestLogsAssignProgram(APITestCase):
             object_repr=str(self.user),
             changes=dict(),
         )
-        print(
-            "2==> Before",
-            LogEntry.objects.filter(program__isnull=True).count(),
-            LogEntry.objects.filter(program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003").count(),
-        )
 
         assert LogEntry.objects.filter(program__isnull=True).count() == 2
 
         with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
             call_command("activity_log_assign_program")
-
-        print(
-            "2==> After",
-            LogEntry.objects.filter(program__isnull=True).count(),
-            LogEntry.objects.filter(program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003").count(),
-        )
 
         # check transaction.atomic
         rdi_log.refresh_from_db()
