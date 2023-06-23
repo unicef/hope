@@ -49,6 +49,45 @@ class TestLogsAssignProgram(TestCase):
         # individual = IndividualFactory(household=None, program=cls.program)
         # household = HouseholdFactory(head_of_household=individual, program=cls.program)
 
+        # don't have program_id field in User model
+        log_to_remove = LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=self.user,
+            user=self.user,
+            program=None,
+            business_area=self.business_area,
+            object_repr=str(self.user),
+            changes=dict(),
+        )
+        log_to_remove_id = log_to_remove.pk
+
+        # log for RegistrationDataImport
+        rdi_log = LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=rdi,
+            user=self.user,
+            program=None,
+            business_area=self.business_area,
+            object_repr=str(rdi),
+            changes=dict(),
+        )
+
+        self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 2)
+
+        with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
+            call_command("activity_log_assign_program")
+
+        # check transaction.atomic
+        rdi_log.refresh_from_db()
+
+        self.assertIsNone(rdi_log.program)
+        self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 2)
+        # remove unused wrong log
+        log_to_remove.delete()
+        print("Check if Log was removed >>>>>>>>>>>>>>>>>>>>>> exists:", LogEntry.objects.filter(pk=log_to_remove_id).exists(), log_to_remove)
+        self.assertFalse(LogEntry.objects.filter(pk=log_to_remove_id).exists())
+
+
         # log for Program
         LogEntry.objects.create(
             action=LogEntry.CREATE,
@@ -57,16 +96,6 @@ class TestLogsAssignProgram(TestCase):
             program=None,
             business_area=self.business_area,
             object_repr=str(self.program),
-            changes=dict(),
-        )
-        # log for RegistrationDataImport
-        LogEntry.objects.create(
-            action=LogEntry.CREATE,
-            content_object=rdi,
-            user=self.user,
-            program=None,
-            business_area=self.business_area,
-            object_repr=str(rdi),
             changes=dict(),
         )
         # log for TargetPopulation
@@ -157,37 +186,3 @@ class TestLogsAssignProgram(TestCase):
 
         self.assertEquals(LogEntry.objects.filter(program_id=self.program.pk).count(), 8)
         self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 0)
-
-        rdi = RegistrationDataImportFactory(
-            business_area=self.business_area, program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003"
-        )
-        rdi_log = LogEntry.objects.create(
-            action=LogEntry.CREATE,
-            content_object=rdi,
-            user=self.user,
-            program=None,
-            business_area=self.business_area,
-            object_repr=str(rdi),
-            changes=dict(),
-        )
-        # don't have program_id field in User model
-        LogEntry.objects.create(
-            action=LogEntry.CREATE,
-            content_object=self.user,
-            user=self.user,
-            program=None,
-            business_area=self.business_area,
-            object_repr=str(self.user),
-            changes=dict(),
-        )
-
-        self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 2)
-
-        with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
-            call_command("activity_log_assign_program")
-
-        # check transaction.atomic
-        rdi_log.refresh_from_db()
-
-        self.assertIsNone(rdi_log.program)
-        self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 2)
