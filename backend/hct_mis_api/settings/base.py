@@ -813,7 +813,6 @@ ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_URL = env("SENTRY_URL")
-SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -837,7 +836,7 @@ if SENTRY_DSN:
             "Http404",
             "AuthCanceled",
         ],
-        environment=SENTRY_ENVIRONMENT,
+        environment=env("SENTRY_ENVIRONMENT", default=None),
     )
     ignore_logger("graphql.execution.utils")
 
