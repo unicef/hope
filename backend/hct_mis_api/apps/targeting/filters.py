@@ -9,14 +9,12 @@ from django_filters import (
     CharFilter,
     DateTimeFilter,
     FilterSet,
-    ModelMultipleChoiceFilter,
     NumericRangeFilter,
 )
 
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import DateRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
-from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -105,7 +103,7 @@ class TargetPopulationFilter(FilterSet):
             "updated_at": ["exact", "lte", "gte"],
             "status": ["exact"],
             "households": ["exact"],
-    }
+        }
 
         filter_overrides = {
             IntegerRangeField: {"filter_class": NumericRangeFilter},
