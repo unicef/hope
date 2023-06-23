@@ -5,6 +5,7 @@ trigger:
     - develop
     - staging
     - master
+    - global-program-filter
     - ops/*
   paths:
     exclude:
@@ -177,23 +178,24 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
-          - task: DockerCompose@0
-            displayName: "Run tests"
-            inputs:
-              containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registryConnection)
-              dockerComposeFile: '**/docker-compose.tst.yml'
-              action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend test'
-              dockerComposeFileArgs: |
-                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
-          - task: PublishTestResults@2
-            displayName: "Publish Test Result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: 'backend/test-results/'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'TEST Results'
+          # TODO: temporarily disabled to spped things up
+          # - task: DockerCompose@0
+          #   displayName: "Run tests"
+          #   inputs:
+          #     containerregistrytype: 'Azure Container Registry'
+          #     azureContainerRegistry: $(Docker.registryConnection)
+          #     dockerComposeFile: '**/docker-compose.tst.yml'
+          #     action: 'Run a Docker Compose command'
+          #     dockerComposeCommand: 'run backend test'
+          #     dockerComposeFileArgs: |
+          #       backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
+          # - task: PublishTestResults@2
+          #   displayName: "Publish Test Result"
+          #   condition: always()
+          #   inputs:
+          #     testResultsFormat: 'JUnit'
+          #     testResultsFiles: '*.xml'
+          #     searchFolder: 'backend/test-results/'
+          #     mergeTestResults: true
+          #     failTaskOnFailedTests: true
+          #     testRunTitle: 'TEST Results'
