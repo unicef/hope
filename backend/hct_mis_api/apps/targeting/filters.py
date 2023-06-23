@@ -61,10 +61,7 @@ class TargetPopulationFilter(FilterSet):
         lookup_expr="lte",
     )
     business_area = CharFilter(field_name="business_area__slug")
-    program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
     created_at_range = DateRangeFilter(field_name="created_at__date")
-
-    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
 
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
 
@@ -102,14 +99,13 @@ class TargetPopulationFilter(FilterSet):
 
     class Meta:
         model = target_models.TargetPopulation
-        fields = (
-            "name",
-            "created_by_name",
-            "created_at",
-            "updated_at",
-            "status",
-            "households",
-        )
+        fields = {
+            "program": ["exact"],
+            "created_at": ["exact", "lte", "gte"],
+            "updated_at": ["exact", "lte", "gte"],
+            "status": ["exact"],
+            "households": ["exact"],
+    }
 
         filter_overrides = {
             IntegerRangeField: {"filter_class": NumericRangeFilter},
