@@ -20,6 +20,8 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class TestLogsAssignProgram(APITestCase):
+    databases = {"default", "registration_datahub"}
+
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
