@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 
 export const BaseHomeRouter = ({ children }): React.ReactElement => {
   const [open, setOpen] = React.useState(true);
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const classes = useStyles({});
   const location = useLocation();
   const snackBar = useSnackbar();
