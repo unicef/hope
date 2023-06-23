@@ -142,7 +142,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <a
                   class="sc-bxivhb gxlhVn"
-                  href="/afghanistan/programs/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
+                  href="/afghanistan/programs/all/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
               <td
@@ -189,7 +189,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <a
                   class="sc-bxivhb gxlhVn"
-                  href="/afghanistan/programs/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
+                  href="/afghanistan/programs/all/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
               <td
@@ -236,7 +236,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <a
                   class="sc-bxivhb gxlhVn"
-                  href="/afghanistan/programs/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
+                  href="/afghanistan/programs/all/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
               <td
@@ -491,7 +491,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <a
                   class="sc-bxivhb gxlhVn"
-                  href="/afghanistan/programs/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
+                  href="/afghanistan/programs/all/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
               <td
@@ -543,7 +543,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <a
                   class="sc-bxivhb gxlhVn"
-                  href="/afghanistan/programs/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
+                  href="/afghanistan/programs/all/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
               <td
@@ -595,7 +595,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <a
                   class="sc-bxivhb gxlhVn"
-                  href="/afghanistan/programs/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
+                  href="/afghanistan/programs/all/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
               <td
