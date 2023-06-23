@@ -90,7 +90,7 @@ def activity_log_assign_program() -> None:
 
         for log in paginator.page(page).object_list:
             program_id = GetProgramId(log.content_object)
-            print(f"Program id for {log.content_object.obj.__class__.__name__} is {program_id}")
+            print(f"Program id for {log.content_object.__class__.__name__} is {program_id}")
             log.program_id = program_id.get_id
             to_update.append(log)
 
