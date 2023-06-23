@@ -377,11 +377,11 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
             grievance_ticket = update_extra_method(grievance_ticket, extras, input)
-
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
+            getattr(grievance_ticket.programme, "pk", None),
             old_grievance_ticket,
             grievance_ticket,
         )
@@ -596,11 +596,11 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                     approver=user,
                 )
             )
-
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
+            getattr(grievance_ticket.programme, "pk", None),
             old_grievance_ticket,
             grievance_ticket,
         )

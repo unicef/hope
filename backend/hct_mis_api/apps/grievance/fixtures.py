@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class GrievanceTicketFactory(DjangoModelFactory):
@@ -60,6 +61,7 @@ class GrievanceTicketFactory(DjangoModelFactory):
     language = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
+    programme = factory.SubFactory(ProgramFactory)
 
 
 class SensitiveGrievanceTicketFactory(DjangoModelFactory):

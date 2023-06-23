@@ -144,4 +144,11 @@ class HouseholdDataUpdateService(DataChangeService):
         Household.objects.filter(id=new_household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
         updated_household = Household.objects.get(id=household.id)  # refresh_from_db() doesn't work here
         recalculate_data(new_household)
-        log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", user, old_household, updated_household)
+        log_create(
+            Household.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            getattr(self.grievance_ticket.programme, "pk", None),
+            old_household,
+            updated_household,
+        )
