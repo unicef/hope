@@ -149,14 +149,13 @@ class TestLogsAssignProgram(APITestCase):
         #     changes=dict(),
         # )
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 8
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 8)
 
         call_command("activity_log_assign_program")
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 0
-        assert LogEntry.objects.filter(program_id=self.program.pk).count() == 8
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 0)
+        self.assertEqual(LogEntry.objects.filter(program_id=self.program.pk).count(), 8)
 
-    def test_raise_value_error_with_wrong_model(self) -> None:
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area, program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003"
         )
@@ -180,13 +179,13 @@ class TestLogsAssignProgram(APITestCase):
             changes=dict(),
         )
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 2
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 2)
 
         with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
             call_command("activity_log_assign_program")
 
         # check transaction.atomic
         rdi_log.refresh_from_db()
-        assert rdi_log.program is None
+        self.assertIsNone(rdi_log.program)
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 2
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 2)
