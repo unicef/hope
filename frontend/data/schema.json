@@ -2624,6 +2624,16 @@
                 "defaultValue": null
               },
               {
+                "name": "programId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -2755,6 +2765,16 @@
               },
               {
                 "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "programId",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -3531,6 +3551,16 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "programId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -4273,6 +4303,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "program",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5895,21 +5935,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5925,7 +5955,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -5955,6 +6025,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -6005,20 +6095,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -6229,21 +6305,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -6259,7 +6325,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -6289,6 +6395,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -6339,20 +6465,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -10147,21 +10259,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -10177,7 +10279,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -10207,6 +10349,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -10257,20 +10419,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -10372,21 +10520,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -10402,7 +10540,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -10432,6 +10610,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -10482,20 +10680,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -10597,21 +10781,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -10627,7 +10801,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -10657,6 +10871,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -10707,20 +10941,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -16594,21 +16814,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -16624,7 +16834,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -16654,6 +16904,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -16704,20 +16974,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -20764,21 +21020,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -20794,7 +21040,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -20824,6 +21110,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -20874,20 +21180,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -23791,6 +24083,16 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "programId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -24741,21 +25043,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -24771,7 +25063,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -24801,6 +25133,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -24851,20 +25203,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -26122,6 +26460,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "programId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -29572,21 +29920,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -29602,7 +29940,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -29632,6 +30010,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -29682,20 +30080,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -50182,21 +50566,11 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "createdByName",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -50212,7 +50586,47 @@
                 "defaultValue": null
               },
               {
+                "name": "createdAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdAt_Gte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "updatedAt",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Lte",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "updatedAt_Gte",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -50242,6 +50656,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdByName",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -50292,20 +50726,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -63916,6 +64336,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "programId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
