@@ -27,21 +27,23 @@ class TestLogsAssignProgram(APITestCase):
         cls.user = UserFactory(first_name="User", last_name="WithLastName")
 
         cls.program = ProgramFactory(business_area=cls.business_area)
-        program_cycle = ProgramCycleFactory(program=cls.program, iteration=2)
 
-        rdi = RegistrationDataImportFactory(business_area=cls.business_area, program_id=cls.program.pk)
-        tp = TargetPopulationFactory(program=cls.program, business_area=cls.business_area)
+    def test_assign_program_to_existing_logs(self) -> None:
+        program_cycle = ProgramCycleFactory(program=self.program, iteration=2)
+
+        rdi = RegistrationDataImportFactory(business_area=self.business_area, program_id=self.program.pk)
+        tp = TargetPopulationFactory(program=self.program, business_area=self.business_area)
         payment_plan = PaymentPlanFactory(
-            business_area=cls.business_area, program=cls.program, program_cycle=program_cycle
+            business_area=self.business_area, program=self.program, program_cycle=program_cycle
         )
-        payment = PaymentFactory(parent=payment_plan, business_area=cls.business_area)
-        cash_plan = CashPlanFactory(business_area=cls.business_area, program=cls.program)
+        payment = PaymentFactory(parent=payment_plan, business_area=self.business_area)
+        cash_plan = CashPlanFactory(business_area=self.business_area, program=self.program)
         PaymentVerificationSummaryFactory(generic_fk_obj=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=payment_plan)
         payment_verification = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan, generic_fk_obj=payment
         )
-        grievance_ticket = GrievanceTicketFactory(business_area=cls.business_area, programme=cls.program)
+        grievance_ticket = GrievanceTicketFactory(business_area=self.business_area, programme=self.program)
         # TODO: update after changes for Ind and HH collections/representations
         # individual = IndividualFactory(household=None, program=cls.program)
         # household = HouseholdFactory(head_of_household=individual, program=cls.program)
@@ -49,20 +51,20 @@ class TestLogsAssignProgram(APITestCase):
         # log for Program
         LogEntry.objects.create(
             action=LogEntry.CREATE,
-            content_object=cls.program,
-            user=cls.user,
+            content_object=self.program,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
-            object_repr=str(cls.program),
+            business_area=self.business_area,
+            object_repr=str(self.program),
             changes=dict(),
         )
         # log for RegistrationDataImport
-        cls.rdi_log = LogEntry.objects.create(
+        LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=rdi,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(rdi),
             changes=dict(),
         )
@@ -70,9 +72,9 @@ class TestLogsAssignProgram(APITestCase):
         LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=tp,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(tp),
             changes=dict(),
         )
@@ -80,9 +82,9 @@ class TestLogsAssignProgram(APITestCase):
         LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=payment_plan,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(payment_plan),
             changes=dict(),
         )
@@ -90,9 +92,9 @@ class TestLogsAssignProgram(APITestCase):
         LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=cash_plan,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(cash_plan),
             changes=dict(),
         )
@@ -100,9 +102,9 @@ class TestLogsAssignProgram(APITestCase):
         LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=payment_verification_plan,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(payment_verification_plan),
             changes=dict(),
         )
@@ -110,9 +112,9 @@ class TestLogsAssignProgram(APITestCase):
         LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=payment_verification,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(payment_verification),
             changes=dict(),
         )
@@ -120,9 +122,9 @@ class TestLogsAssignProgram(APITestCase):
         LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=grievance_ticket,
-            user=cls.user,
+            user=self.user,
             program=None,
-            business_area=cls.business_area,
+            business_area=self.business_area,
             object_repr=str(grievance_ticket),
             changes=dict(),
         )
@@ -148,13 +150,17 @@ class TestLogsAssignProgram(APITestCase):
         #     changes=dict(),
         # )
 
-    def test_assign_program_to_existing_logs(self) -> None:
         assert LogEntry.objects.filter(program__isnull=True).count() == 8
+        print(
+            "==> before",
+            LogEntry.objects.filter(program__isnull=True).count(),
+            LogEntry.objects.filter(program_id=self.program.pk).count(),
+        )
 
         call_command("activity_log_assign_program")
 
         print(
-            "==> ",
+            "==> after",
             LogEntry.objects.filter(program__isnull=True).count(),
             LogEntry.objects.filter(program_id=self.program.pk).count(),
         )
@@ -162,6 +168,18 @@ class TestLogsAssignProgram(APITestCase):
         assert LogEntry.objects.filter(program_id=self.program.pk).count() == 8
 
     def test_raise_value_error_with_wrong_model(self) -> None:
+        rdi = RegistrationDataImportFactory(
+            business_area=self.business_area, program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003"
+        )
+        rdi_log = LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=rdi,
+            user=self.user,
+            program=None,
+            business_area=self.business_area,
+            object_repr=str(rdi),
+            changes=dict(),
+        )
         # don't have program_id field in User model
         LogEntry.objects.create(
             action=LogEntry.CREATE,
@@ -172,13 +190,25 @@ class TestLogsAssignProgram(APITestCase):
             object_repr=str(self.user),
             changes=dict(),
         )
+        print(
+            "2==> Before",
+            LogEntry.objects.filter(program__isnull=True).count(),
+            LogEntry.objects.filter(program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003").count(),
+        )
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 9
+        assert LogEntry.objects.filter(program__isnull=True).count() == 2
 
         with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
             call_command("activity_log_assign_program")
 
+        print(
+            "2==> After",
+            LogEntry.objects.filter(program__isnull=True).count(),
+            LogEntry.objects.filter(program_id="ff9c5d66-0136-4ca5-87dc-a22ab959a003").count(),
+        )
+
         # check transaction.atomic
-        self.rdi_log.refresh_from_db()
-        assert self.rdi_log.program is None
-        assert LogEntry.objects.filter(program__isnull=True).count() == 9
+        rdi_log.refresh_from_db()
+        assert rdi_log.program is None
+
+        assert LogEntry.objects.filter(program__isnull=True).count() == 2
