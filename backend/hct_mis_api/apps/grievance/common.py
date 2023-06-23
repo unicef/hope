@@ -41,7 +41,7 @@ def create_grievance_ticket_with_details(
         return None, None
 
     ticket_all_individuals = {main_individual, *possible_duplicates}
-
+    # TODO check time for this
     ticket_already_exists = (
         TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
         .filter(golden_records_individual__in=ticket_all_individuals, possible_duplicates__in=ticket_all_individuals)
@@ -55,7 +55,7 @@ def create_grievance_ticket_with_details(
     admin_level_2 = household.admin2 if household else None
     area = household.village if household else ""
 
-    ticket = GrievanceTicket.objects.create(
+    ticket = GrievanceTicket(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         business_area=business_area,
         admin2=admin_level_2,
@@ -68,7 +68,7 @@ def create_grievance_ticket_with_details(
         "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
     }
     score_min, score_max = _get_min_max_score(golden_records)
-    ticket_details = TicketNeedsAdjudicationDetails.objects.create(
+    ticket_details = TicketNeedsAdjudicationDetails(
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
@@ -96,20 +96,18 @@ def create_needs_adjudication_tickets(
 
     if not individuals_queryset:
         return None
-
+    tickets_to_create = []
     ticket_details_to_create = []
-    linked_tickets = []
-
+    created_tickets_individuals_hashes = []
     for possible_duplicate in individuals_queryset:
-        possible_duplicates = []
-
-        for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
-            duplicate = Individual.objects.filter(id=individual.get("hit_id")).first()
-            if not duplicate:
-                continue
-
-            possible_duplicates.append(duplicate)
-
+        hit_ids = [
+            individual.get("hit_id")
+            for individual in possible_duplicate.deduplication_golden_record_results[results_key]
+        ]
+        possible_duplicates = list(Individual.objects.filter(id__in=hit_ids))
+        possible_duplicates_hash = frozenset(hit_ids + [str(possible_duplicate.id)])
+        if possible_duplicates_hash in created_tickets_individuals_hashes:
+            continue
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
             possible_duplicate=possible_duplicate,  # for backward compatibility
@@ -118,12 +116,12 @@ def create_needs_adjudication_tickets(
             possible_duplicates=possible_duplicates,
             is_multiple_duplicates_version=True,
         )
-
         if ticket and ticket_details:
-            linked_tickets.append(ticket)
+            tickets_to_create.append(ticket)
             ticket_details_to_create.append(ticket_details)
+            created_tickets_individuals_hashes.append(possible_duplicates_hash)
 
-        for ticket in linked_tickets:
-            ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
+    GrievanceTicket.objects.bulk_create(tickets_to_create, batch_size=500)
+    TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create, batch_size=500)
 
     return ticket_details_to_create

@@ -22,7 +22,7 @@ class ArraySubquery(Subquery):
 
 class PaymentQuerySet(SoftDeletableQuerySet):
     def with_payment_plan_conflicts(self) -> QuerySet:
-        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
         def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
             return qs.annotate(
@@ -60,12 +60,18 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             )
 
         soft_conflicting_pps = (
-            self.select_related("parent")
+            self.eligible()
+            .select_related("parent")
             .exclude(id=OuterRef("id"))
             .exclude(parent__id=OuterRef("parent_id"))
+            .exclude(is_follow_up=True)
+            .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
             .filter(
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
+                ~Q(status=Payment.STATUS_ERROR),
+                ~Q(status=Payment.STATUS_NOT_DISTRIBUTED),
+                ~Q(status=Payment.STATUS_FORCE_FAILED),
                 parent__status=PaymentPlan.Status.OPEN,
                 household=OuterRef("household"),
             )
@@ -73,14 +79,20 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         soft_conflicting_pps = _annotate_conflict_data(soft_conflicting_pps)
 
         hard_conflicting_pps = (
-            self.select_related("parent")
+            self.eligible()
+            .select_related("parent")
             .exclude(id=OuterRef("id"))
             .exclude(parent__id=OuterRef("parent_id"))
+            .exclude(is_follow_up=True)
+            .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
             .filter(
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
+                Q(household=OuterRef("household")) & Q(conflicted=False),
                 ~Q(parent__status=PaymentPlan.Status.OPEN),
-                Q(household=OuterRef("household")) & Q(excluded=False),
+                ~Q(status=Payment.STATUS_ERROR),
+                ~Q(status=Payment.STATUS_NOT_DISTRIBUTED),
+                ~Q(status=Payment.STATUS_FORCE_FAILED),
             )
         )
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)
@@ -92,6 +104,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             payment_plan_soft_conflicted_data=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
         )
 
+    def eligible(self) -> QuerySet:
+        return self.exclude(Q(conflicted=True) | Q(excluded=True))
+
 
 class PaymentManager(SoftDeletableManager):
     _queryset_class = PaymentQuerySet
@@ -99,3 +114,6 @@ class PaymentManager(SoftDeletableManager):
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().with_payment_plan_conflicts()
+
+    def eligible(self) -> QuerySet:
+        return self.get_queryset().eligible()

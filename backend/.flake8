@@ -23,10 +23,15 @@ exclude =
 
 ignore =
     # black formatting related
-    E203, # whitespace before ':'
-    E501, # line too long
-    W503, # line break before binary operator
-    F405, # may be undefined, or defined from star imports
-    E731, # lamda expressions
-    #
-    C901, # too complex # TODO: fix this
+    # whitespace before ':'
+    E203,
+    # line too long
+    E501,
+    # line break before binary operator
+    W503,
+    # may be undefined, or defined from star imports
+    F405,
+    # lamda expressions
+    E731,
+    # too complex # TODO: fix this
+    C901,

@@ -78,6 +78,8 @@ export const AllIndividuals = gql`
           age
           sex
           lastRegistrationDate
+          phoneNo
+          birthDate
           documents {
             edges {
               node {
@@ -88,7 +90,7 @@ export const AllIndividuals = gql`
                 photo
                 type {
                   label
-                  type
+                  key
                 }
               }
             }

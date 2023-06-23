@@ -9,7 +9,6 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
-from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -19,6 +18,10 @@ from PIL import Image
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    SheetImageLoader,
+)
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -41,14 +44,20 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 
 
-class ImageLoaderMock:
+def create_document_image() -> File:
+    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    return File(BytesIO(content), name="image.png")
+
+
+class ImageLoaderMock(SheetImageLoader):
+    def __init__(self) -> None:
+        pass
+
     def image_in(self, *args: Any, **kwargs: Any) -> bool:
         return True
 
     def get(self, *args: Any, **kwargs: Any) -> Image:
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-        file = File(BytesIO(content), name="image.png")
-        return Image.open(file)
+        return Image.open(create_document_image())
 
 
 class CellMock:
@@ -57,34 +66,27 @@ class CellMock:
         self.coordinate = coordinate
 
 
-def create_document_image() -> File:
-    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-    return File(BytesIO(content), name="image.png")
-
-
 class TestRdiCreateTask(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
+    databases = {
+        "default",
+        "registration_datahub",
+    }
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
-        call_command("loadcountries")
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
-            RdiKoboCreateTask,
-        )
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+        ).read_bytes()
+        file = File(BytesIO(content), name="new_reg_data_import.xlsx")
+        business_area = create_afghanistan()
+
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
-        cls.RdiKoboCreateTask = RdiKoboCreateTask
 
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
-        ).read_bytes()
-        file = File(BytesIO(content), name="new_reg_data_import.xlsx")
-        business_area = BusinessArea.objects.first()
         cls.import_data = ImportData.objects.create(
             file=file,
             number_of_households=3,
@@ -103,7 +105,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.business_area = BusinessArea.objects.first()
         ImportedDocumentType.objects.create(
             label="Tax Number Identification",
-            type=IDENTIFICATION_TYPE_TAX_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
         super().setUpTestData()
 
@@ -130,6 +132,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "relationship": "HEAD",
             "birth_date": date(1963, 2, 3),
             "marital_status": "MARRIED",
+            "email": "fake_email_123@mail.com",
             # "preferred_language": "pl", # TODO: fix this? (rebase issue?)
         }
         matching_individuals = ImportedIndividual.objects.filter(**individual_data)
@@ -139,10 +142,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         household_data = {
             "residence_status": "REFUGEE",
             "country": "AF",
+            "zip_code": "2153",
             "flex_fields": {},
         }
         household = matching_individuals.first().household
-        household_obj_data = model_to_dict(household, ("residence_status", "country", "flex_fields"))
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
 
         roles = household.individuals_and_roles.all()
         self.assertEqual(roles.count(), 1)
@@ -181,34 +185,14 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         expected = {
             "individual_14_birth_certificate_i_c": {
                 "individual": individual,
-                "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
+                "key": "birth_certificate",
                 "value": value,
             }
         }
+
         self.assertEqual(task.documents, expected)
 
-        # other_id_type_i_c
         number = "CD1247246Q12W"
-        name = "Some Doc"
-        header = "other_id_type_i_c"
-        task._handle_document_fields(
-            name,
-            header,
-            row_num,
-            individual,
-        )
-        expected = {
-            "individual_14_birth_certificate_i_c": {
-                "individual": individual,
-                "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
-                "value": value,
-            },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER"},
-        }
-        self.assertEqual(task.documents, expected)
-        # other_id_no_i_c
         header = "other_id_no_i_c"
         task._handle_document_fields(
             number,
@@ -219,11 +203,10 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         expected = {
             "individual_14_birth_certificate_i_c": {
                 "individual": individual,
-                "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
+                "key": "birth_certificate",
                 "value": value,
             },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER", "value": number},
+            "individual_14_other_id_i_c": {"individual": individual, "key": "other_id", "value": number},
         }
         self.assertEqual(task.documents, expected)
 
@@ -294,13 +277,13 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
             label="Birth Certificate",
-            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
         task.documents = {
             "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
+                "key": "birth_certificate",
                 "value": "CD1247246Q12W",
                 "issuing_country": Country("AFG"),
                 "photo": create_document_image(),
@@ -364,11 +347,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         households = ImportedHousehold.objects.all()
         for household in households:
-            self.assertTrue(household.row_id in [3, 4, 5])
+            self.assertTrue(household.row_id in [3, 4, 6])
 
         individuals = ImportedIndividual.objects.all()
         for individual in individuals:
-            self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8])
+            self.assertTrue(individual.row_id in [3, 4, 5, 7, 8, 9])
 
     def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
@@ -378,7 +361,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
         )
 
-        bank_account_info = ImportedBankAccountInfo.objects.filter(individual__row_id=6).first()
+        bank_account_info = ImportedBankAccountInfo.objects.get(individual__row_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
@@ -392,13 +375,27 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         )
 
         document = ImportedDocument.objects.filter(individual__row_id=5).first()
-        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
+        self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         self.assertEqual(document.document_number, "CD1247246Q12W")
+
+    def test_import_empty_cell_as_blank_cell(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        individual = ImportedIndividual.objects.get(row_id=3)
+        self.assertEqual(individual.seeing_disability, "")
+        self.assertEqual(individual.hearing_disability, "")
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
+    databases = {
+        "default",
+        "registration_datahub",
+    }
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @staticmethod
@@ -413,17 +410,13 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
-            RdiXlsxCreateTask,
-        )
 
-        cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(ImportedDocumentType(label=label, type=doc_type))
+            document_types.append(ImportedDocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
@@ -453,10 +446,10 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         country = geo_models.Country.objects.first()
 
         admin1_type = geo_models.AreaType.objects.create(name="Bakool", area_level=1, country=country)
-        admin1_new = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
+        admin1 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
 
         admin2_type = geo_models.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
-        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type)
+        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
@@ -603,6 +596,39 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     def test_cast_and_assign(self) -> None:
         pass
 
+    def test_cast_boolean_value(self) -> None:
+        task = self.RdiKoboCreateTask()
+
+        result = task._cast_value("FALSE", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("false", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("False", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("0", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("TRUE", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("true", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("True", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("1", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value(True, "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value(False, "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
@@ -665,11 +691,11 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertIsInstance(photo, ImageFieldFile)
         self.assertTrue(photo.name.startswith("signature-14_59_24"))
 
-        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.type
-        national_passport = ImportedDocument.objects.get(document_number=444111123).type.type
+        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.key
+        national_passport = ImportedDocument.objects.get(document_number=444111123).type.key
 
-        self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
-        self.assertEqual(national_passport, "NATIONAL_PASSPORT")
+        self.assertEqual(birth_certificate, "birth_certificate")
+        self.assertEqual(national_passport, "national_passport")
 
     def _generate_huge_file(self) -> None:
         base_form = {

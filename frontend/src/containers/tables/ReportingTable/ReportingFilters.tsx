@@ -1,34 +1,65 @@
 import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 
 interface ReportingFiltersProps {
-  onFilterChange;
   filter;
   choicesData;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 
 export const ReportingFilters = ({
-  onFilterChange,
   filter,
   choicesData,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: ReportingFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             label={t('Report Type')}
-            onChange={(e) => handleFilterChange(e, 'type')}
-            value={filter.type || ''}
+            onChange={(e) => handleFilterChange('type', e.target.value)}
+            value={filter.type}
           >
             <MenuItem value=''>
               <em>None</em>
@@ -42,44 +73,40 @@ export const ReportingFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
-            label={t('From')}
+            placeholder={t('From')}
             onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdFrom: date
-                  ? moment(date)
-                      .startOf('day')
-                      .toISOString()
-                  : null,
-              })
+              handleFilterChange(
+                'createdFrom',
+                moment(date)
+                  .startOf('day')
+                  .toISOString(),
+              )
             }
             value={filter.createdFrom}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
-            label={t('To')}
+            placeholder={t('To')}
             onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdTo: date
-                  ? moment(date)
-                      .endOf('day')
-                      .toISOString()
-                  : null,
-              })
+              handleFilterChange(
+                'createdTo',
+                moment(date)
+                  .endOf('day')
+                  .toISOString(),
+              )
             }
             value={filter.createdTo}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             label='Status'
-            onChange={(e) => handleFilterChange(e, 'status')}
-            value={filter.status || ''}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            value={filter.status}
           >
             <MenuItem value=''>
               <em>None</em>
@@ -98,11 +125,8 @@ export const ReportingFilters = ({
             control={
               <Checkbox
                 checked={filter.onlyMy}
-                onChange={(e, checked) =>
-                  onFilterChange({
-                    ...filter,
-                    onlyMy: checked,
-                  })
+                onChange={(_e, checked) =>
+                  handleFilterChange('onlyMy', checked)
                 }
                 value={filter.onlyMy}
                 color='primary'
@@ -112,6 +136,10 @@ export const ReportingFilters = ({
           />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

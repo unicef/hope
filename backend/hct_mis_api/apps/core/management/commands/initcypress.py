@@ -5,30 +5,6 @@ from django.core.management import BaseCommand, call_command
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import (
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-)
-from hct_mis_api.apps.payment.models import GenericPayment
-
-
-def create_fsps() -> None:
-    fsp_template = FinancialServiceProviderXlsxTemplateFactory(
-        name="TEST",
-    )
-    for delivery_mechanism in GenericPayment.DELIVERY_TYPE_CHOICE:
-        dm = delivery_mechanism[0]
-        fsp = FinancialServiceProviderFactory(
-            name=f"Test FSP {dm}",
-            delivery_mechanisms=[dm],
-            distribution_limit=None,
-        )
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            xlsx_template=fsp_template,
-            financial_service_provider=fsp,
-            delivery_mechanism=dm,
-        )
 
 
 class Command(BaseCommand):
@@ -54,16 +30,30 @@ class Command(BaseCommand):
         call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/apps/core/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
+        call_command("loaddata", "hct_mis_api/apps/registration_data/fixtures/data-cypress.json")
         call_command(
-            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
+            "loaddata",
+            "hct_mis_api/apps/registration_datahub/fixtures/data-cypress.json",
+            database="registration_datahub",
         )
+        call_command("loaddata", "hct_mis_api/apps/household/fixtures/data-cypress.json")
+        call_command("loaddata", "hct_mis_api/apps/program/fixtures/data-cypress.json")
+        call_command("loaddata", "hct_mis_api/apps/targeting/fixtures/data-cypress.json")
+        call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data-cypress.json")
+        call_command("loaddata", "hct_mis_api/apps/payment/fixtures/data-cypress.json")
+        call_command("loaddata", "hct_mis_api/apps/grievance/fixtures/data-cypress.json")
 
         UserRole.objects.create(
-            user=User.objects.create_superuser("cypress-username", "cypress@cypress.com", "cypress-password"),
+            user=User.objects.create_superuser(
+                "cypress-username",
+                "cypress@cypress.com",
+                "cypress-password",
+                first_name="Cypress",
+                last_name="User",
+                status="ACTIVE",
+            ),
             role=Role.objects.get(name="Role with all permissions"),
             business_area=BusinessArea.objects.get(name="Afghanistan"),
         )
-
-        create_fsps()
 
         call_command("search_index", "--rebuild", "-f")

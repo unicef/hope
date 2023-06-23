@@ -8,6 +8,13 @@ export const GrievanceTicket = gql`
       status
       category
       consent
+      partner {
+        id
+        name
+      }
+      businessArea {
+        postponeDeduplication
+      }
       createdBy {
         id
         firstName
@@ -68,6 +75,7 @@ export const GrievanceTicket = gql`
       linkedTickets {
         id
         unicefId
+        category
         status
         household {
           id
@@ -76,6 +84,7 @@ export const GrievanceTicket = gql`
       }
       existingTickets {
         id
+        category
         unicefId
         status
         household {
@@ -134,7 +143,8 @@ export const GrievanceTicket = gql`
               node {
                 id
                 type {
-                  type
+                  label
+                  key
                 }
                 documentNumber
               }
@@ -210,6 +220,7 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
+                  key
                 }
                 documentNumber
                 photo
@@ -244,6 +255,7 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
+                  key
                 }
                 documentNumber
                 photo
@@ -280,6 +292,7 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
+                  key
                 }
                 documentNumber
                 photo
@@ -362,6 +375,29 @@ export const GrievanceTicket = gql`
             }
           }
         }
+      }
+      priority
+      urgency
+      programme {
+        name
+        id
+      }
+      comments
+      documentation {
+        id
+        createdAt
+        updatedAt
+        name
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
+        fileSize
+        contentType
+        filePath
+        fileName
       }
     }
   }

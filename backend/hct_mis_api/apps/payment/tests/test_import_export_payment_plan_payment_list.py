@@ -25,8 +25,10 @@ from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import (
+    FinancialServiceProvider,
     FspXlsxTemplatePerDeliveryMechanism,
     GenericPayment,
+    Payment,
     PaymentPlan,
     ServiceProvider,
 )
@@ -70,9 +72,24 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             ServiceProviderFactory.create_batch(3)
         program = RealProgramFactory()
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
+        fsp_1 = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            vision_vendor_number=123456789,
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+        )
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=cls.payment_plan,
+            financial_service_provider=fsp_1,
+            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=1,
+        )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(parent=cls.payment_plan, household=household, excluded=False)
+            PaymentFactory(parent=cls.payment_plan, household=household, financial_service_provider=fsp_1)
 
         cls.user = UserFactory()
         cls.payment_plan = PaymentPlan.objects.all()[0]
@@ -104,7 +121,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
         # override imported sheet payment id
-        wb.active["A3"].value = str(self.payment_plan.not_excluded_payments[1].unicef_id)
+        wb.active["A3"].value = str(self.payment_plan.eligible_payments[1].unicef_id)
 
         service.validate()
         self.assertEqual(service.errors, error_msg)
@@ -112,7 +129,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
     @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
-        not_excluded_payments = self.payment_plan.not_excluded_payments.all()
+        not_excluded_payments = self.payment_plan.eligible_payments.all()
         # override imported payment id
         payment_id_1 = str(not_excluded_payments[0].unicef_id)
         payment_id_2 = str(not_excluded_payments[1].unicef_id)
@@ -144,7 +161,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.has_export_file)
 
         wb = export_service.generate_workbook()
-        payment = self.payment_plan.not_excluded_payments.order_by("unicef_id").first()
+        payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
         self.assertEqual(wb.active["I2"].value, payment.entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)
@@ -169,26 +186,38 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
+            delivery_mechanism_order=2,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
             financial_service_provider=financial_service_provider2,
+            delivery_mechanism_order=3,
         )
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
+
+        payment = self.payment_plan.eligible_payments.first()
+        self.assertEqual(payment.token_number, None)
+        self.assertEqual(payment.order_number, None)
 
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
+        payment.refresh_from_db(fields=["token_number", "order_number"])
+        self.assertEqual(len(str(payment.token_number)), 7)
+        self.assertEqual(len(str(payment.order_number)), 9)
+
         self.assertTrue(self.payment_plan.has_export_file)
         self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
         self.assertTrue(
-            self.payment_plan.export_file.file.name.startswith(
+            self.payment_plan.export_file_per_fsp.file.name.startswith(
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
         fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
-        with zipfile.ZipFile(self.payment_plan.export_file.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
             fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(

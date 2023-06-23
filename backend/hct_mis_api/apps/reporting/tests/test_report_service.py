@@ -2,6 +2,7 @@ import datetime
 from typing import Any
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
@@ -29,7 +30,7 @@ from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(self) -> None:
@@ -178,7 +179,6 @@ class TestGenerateReportService(TestCase):
     def test_report_types(
         self, _: Any, report_type: str, should_set_admin_area: bool, should_set_program: bool, number_of_records: int
     ) -> None:
-
         report = ReportFactory.create(
             created_by=self.user,
             business_area=self.business_area,

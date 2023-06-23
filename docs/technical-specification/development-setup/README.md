@@ -20,6 +20,15 @@ docker-compose up
 # once everything is up, in yet another terminal
 docker exec -it <prefix>_backend_1 ./manage.py initdemo
 ```
+
+There are some additional services that are not necessary for the app to run but may help a developer. If you want to e.g. turn on the kibana service, just run
+
+```bash
+docker-compose -f docker-compose.kibana.yml up
+```
+
+For the full list, try `ls -l docker-compose.*.yml`.
+
 ***
 Frontend app is run inside Docker (a lot slower)
 
@@ -29,7 +38,7 @@ docker-compose -f docker-compose.yml -f docker-compose.frontend.yml up
 docker-compose -f docker-compose.yml -f docker-compose.frontend.yml run --rm backend bash
 
 # in docker container
-./manage.py initdemo
+./manage.py initdemo --skip-drop
 ```
 
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
@@ -42,7 +51,7 @@ When running locally, you don't neet to provide AD credentials - you can go stra
 Go to cypress_testing_service catalog
 Create cypress.env.json file based on cypress.env.json.example file
 Run yarn install
-In seperate terminal tab run docker-compose run --rm backend ./manage.py initcypress
+In separate terminal tab run docker-compose run --rm backend ./manage.py initcypress
 Run yarn cy:open
 
 
@@ -131,3 +140,14 @@ The following are the code branches and their CI / CD usage.
 | feature/\* or bug/\* | no | n/a |  |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
+
+
+# E2E test run locally
+
+1) Need to create images for **cypress**, **frontend** and **backend** 
+   2) for example for cypress go to directory `cd cypress` and run `docker build -t cy_image_name .`
+   3) `cd backend` and run `docker build -t be_image_name .`
+   4) `cd frontend` and run `docker build -t fe_image_name .`
+       
+2) `cd deployment` 
+3) `FRONTEND_IMAGE=fe_image_name BACKEND_IMAGE=be_image_name CYPRESS_IMAGE=cy_image_name docker-compose -f docker-compose.cy.yml run cypress ci-test`

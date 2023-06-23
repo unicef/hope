@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from constance import config
 
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSystemFlaggingDetails,
@@ -42,7 +43,11 @@ class CheckAgainstSanctionListPreMergeTask:
                 "bool": {
                     "must": [
                         {"match": {"documents.number": doc.document_number}},
-                        {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
+                        {
+                            "match": {
+                                "documents.key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+                            }
+                        },
                         {"match": {"documents.country": getattr(doc.issuing_country, "iso_code3", "")}},
                     ],
                     "boost": 2,
@@ -100,8 +105,7 @@ class CheckAgainstSanctionListPreMergeTask:
         for individual in individuals:
             for document in documents:
                 query_dict = cls._get_query_dict(individual)
-                query = document.search().from_dict(query_dict)
-                query._index = document._index._name
+                query = document.search().update_from_dict(query_dict)
 
                 results = query.execute()
 
@@ -114,6 +118,7 @@ class CheckAgainstSanctionListPreMergeTask:
                             household = marked_individual.household
                             admin_level_2 = household.admin2 if household else ""
                             area = household.village if household else ""
+
                             ticket = GrievanceTicket(
                                 category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                                 business_area=marked_individual.business_area,

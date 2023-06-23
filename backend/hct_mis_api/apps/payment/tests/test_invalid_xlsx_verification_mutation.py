@@ -23,7 +23,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestXlsxVerificationMarkAsInvalid(APITestCase):
-
     INVALID_MUTATION = """
         mutation invalidPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
           invalidPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
@@ -85,7 +84,6 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.INVALID_MUTATION,
             context={"user": self.user},
-            # TODO: upd vars after update inputs
             variables={
                 "paymentVerificationPlanId": self.id_to_base64(
                     self.payment_verification_plan.id, "PaymentVerificationPlanNode"

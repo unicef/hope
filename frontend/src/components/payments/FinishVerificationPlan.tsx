@@ -12,7 +12,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
@@ -22,14 +21,11 @@ import {
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
-  cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
   verificationPlan,
-  cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -39,8 +35,8 @@ export function FinishVerificationPlan({
     try {
       await mutate({
         variables: { paymentVerificationPlanId: verificationPlan.id },
-        refetchQueries,
       });
+      setFinishDialogOpen(false);
       showMessage(t('Verification plan has been finished'));
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -65,6 +61,16 @@ export function FinishVerificationPlan({
       return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
     }
     return null;
+  };
+
+  const generateModalPrefixText = (): string => {
+    const beneficiariesFloat = parseFloat(beneficiariesPercent());
+    if (beneficiariesFloat) {
+      return beneficiariesFloat < 100
+        ? `Only ${beneficiariesPercent()}`
+        : 'All';
+    }
+    return 'None';
   };
 
   return (
@@ -94,9 +100,9 @@ export function FinishVerificationPlan({
             <Box>
               {beneficiariesPercent() && (
                 <Typography variant='body2' style={{ marginTop: '20px' }}>
-                  {t('Only')} {beneficiariesPercent()}{' '}
+                  {generateModalPrefixText()}
                   {t(
-                    'of the beneficiaries have responded to this payment verification.',
+                    ' of the beneficiaries have responded to this payment verification.',
                   )}
                 </Typography>
               )}

@@ -2,6 +2,7 @@ trigger: none
 pr:
   - master
   - develop
+  - global-program-filter
   - feature/*
 resources:
   - repo: self
@@ -56,7 +57,7 @@ stages:
             inputs:
               versionSpec: "3.9"
             displayName: "Use Python 3.9"
-          - script: pip install black==22.8.0 isort==5.10.1
+          - script: pip install black==23.1 isort==5.12
           # remember to update this if you change the version of black/isort in pyproject.toml
             displayName: "Install tools"
           - script: black --check .
@@ -282,7 +283,7 @@ stages:
               command: login
               containerRegistry: $(Docker.registryConnection)
           - script: |
-              mkdir -p cypress-results
+              mkdir -p cypress-results cypress-reports
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
@@ -292,9 +293,9 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run cypress ci-test'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
-               frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(tag)
-               cypress_image=$(Docker.url)/$(Docker.cypress.repository):$(tag)
+               BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
+               CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
@@ -304,4 +305,4 @@ stages:
               searchFolder: './cypress-results/'
               mergeTestResults: true
               failTaskOnFailedTests: true
-              testRunTitle: 'TEST Results'
+              testRunTitle: 'TEST E2E Results'

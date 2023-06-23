@@ -1,18 +1,19 @@
-import { Checkbox } from '@material-ui/core';
+import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentRecordNode } from '../../../../__generated__/graphql';
+import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { StatusBox } from '../../../core/StatusBox';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 
 interface LookUpPaymentRecordTableRowProps {
-  paymentRecord: PaymentRecordNode;
+  paymentRecord: PaymentRecordAndPaymentNode;
   openInNewTab: boolean;
   selected: Array<string>;
   checkboxClickHandler: (
@@ -29,9 +30,19 @@ export function LookUpPaymentRecordTableRow({
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
   const received = paymentRecord?.verification?.receivedAmount;
+
+  const renderUrl = (objType): string => {
+    if (objType === 'Payment') {
+      return `/${businessArea}/payment-module/payments/${paymentRecord.id}`;
+    }
+    return `/${businessArea}/payment-records/${paymentRecord.id}`;
+  };
+
   return (
     <ClickableTableRow
       onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
@@ -40,29 +51,38 @@ export function LookUpPaymentRecordTableRow({
       key={paymentRecord.id}
     >
       <TableCell padding='checkbox'>
-        <Checkbox
-          color='primary'
-          onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
-          checked={isItemSelected}
-          inputProps={{ 'aria-labelledby': paymentRecord.id }}
-        />
+        {isEditTicket ? (
+          <Radio
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          />
+        ) : (
+          <Checkbox
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          />
+        )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${businessArea}/payment-records/${paymentRecord.id}`}>
+        <BlackLink to={renderUrl(paymentRecord.objType)}>
           {paymentRecord.caId}
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        {paymentRecord.verification?.status ? (
+        {paymentRecord.status ? (
           <StatusBox
-            status={paymentRecord.verification?.status}
+            status={paymentRecord.status}
             statusToColor={verificationRecordsStatusToColor}
           />
         ) : (
           '-'
         )}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.parent.name}</TableCell>
+      <TableCell align='left'>{paymentRecord.parent.programmeName}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,

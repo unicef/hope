@@ -1,5 +1,6 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import Close from '@material-ui/icons/Close';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
@@ -11,6 +12,7 @@ import {
 } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../core/LabelizedField';
 import { AgencyField } from '../AgencyField';
+import { removeItemById } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -22,7 +24,7 @@ export interface EditIdentityRowProps {
   identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities']['edges'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
-  index;
+  id: string;
 }
 
 export function EditIdentityRow({
@@ -31,8 +33,10 @@ export function EditIdentityRow({
   identity,
   arrayHelpers,
   addIndividualFieldsData,
-  index,
+  id,
 }: EditIdentityRowProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const identitiesToRemove =
@@ -41,13 +45,20 @@ export function EditIdentityRow({
   return isEdited ? (
     <>
       <AgencyField
-        index={index}
-        key={`${index}-${identity?.node?.number}-${identity?.node?.partner}`}
-        onDelete={() => arrayHelpers.remove(index)}
+        id={id}
+        key={`${id}-${identity?.node?.number}-${identity?.node?.partner}`}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdateDocumentsToEdit,
+            identity.node.id,
+            arrayHelpers,
+          )
+        }
         countryChoices={addIndividualFieldsData.countriesChoices}
         identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
         baseName='individualDataUpdateIdentitiesToEdit'
         isEdited={isEdited}
+        values={values}
       />
       <Box display='flex' alignItems='center'>
         <IconButton
@@ -86,31 +97,33 @@ export function EditIdentityRow({
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
-          <Box display='flex' align-items='center'>
-            <IconButton
-              onClick={() => {
-                setFieldValue(
-                  `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
-                  identity.node.id,
-                );
-              }}
-            >
-              <Delete />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                arrayHelpers.push({
-                  id: identity.node.id,
-                  country: identity.node.countryIso3,
-                  partner: identity.node.partner,
-                  number: identity.node.number,
-                });
-                setEdit(true);
-              }}
-            >
-              <Edit />
-            </IconButton>
-          </Box>
+          !isEditTicket && (
+            <Box display='flex' align-items='center'>
+              <IconButton
+                onClick={() => {
+                  setFieldValue(
+                    `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
+                    identity.node.id,
+                  );
+                }}
+              >
+                <Delete />
+              </IconButton>
+              <IconButton
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: identity.node.id,
+                    country: identity.node.countryIso3,
+                    partner: identity.node.partner,
+                    number: identity.node.number,
+                  });
+                  setEdit(true);
+                }}
+              >
+                <Edit />
+              </IconButton>
+            </Box>
+          )
         ) : (
           <Box display='flex' alignItems='center' height={48} color='red'>
             {t('REMOVED')}

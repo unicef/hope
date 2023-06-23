@@ -9,14 +9,13 @@ import {
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
-import { HouseHoldTableRow } from './HouseholdTableRow';
+import { HouseholdTableRow } from './HouseholdTableRow';
 
 interface HouseholdTableProps {
   businessArea: string;
   filter;
   choicesData: HouseholdChoiceDataQuery;
   canViewDetails: boolean;
-  filterOrderBy: string;
 }
 
 export const HouseholdTable = ({
@@ -24,15 +23,28 @@ export const HouseholdTable = ({
   filter,
   choicesData,
   canViewDetails,
-  filterOrderBy,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
+  const matchWithdrawnValue = (): boolean | undefined => {
+    if (filter.withdrawn === 'true') {
+      return true;
+    }
+    if (filter.withdrawn === 'false') {
+      return false;
+    }
+    return undefined;
+  };
+
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-    familySize: JSON.stringify(filter.householdSize),
-    search: filter.text,
-    adminArea: filter.adminArea?.node?.id,
+    familySize: JSON.stringify({
+      min: filter.householdSizeMin,
+      max: filter.householdSizeMax,
+    }),
+    search: filter.search,
+    admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
+    withdrawn: matchWithdrawnValue(),
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
@@ -48,9 +60,9 @@ export const HouseholdTable = ({
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
         allowSort={false}
-        filterOrderBy={filterOrderBy}
+        filterOrderBy={filter.orderBy}
         renderRow={(row) => (
-          <HouseHoldTableRow
+          <HouseholdTableRow
             key={row.id}
             household={row}
             choicesData={choicesData}

@@ -9,7 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
 def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Optional[List]:
@@ -24,10 +24,9 @@ def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, sep
     else:
         list_of_households = list(map(str.strip, text.split(separator)))
     if target_field == "unicef_id":
-        return Household.objects.filter(withdrawn=False, business_area=ba, unicef_id__in=list_of_households)
+        return Household.objects.filter(business_area=ba, unicef_id__in=list_of_households)
     elif target_field == "unique_id":
         return Household.objects.filter(
-            withdrawn=False,
             business_area=ba,
             id__in=list_of_households,
         )
@@ -92,7 +91,6 @@ class UpdateIndividualsIBANFromXlsxForm(forms.Form):
 
 
 class WithdrawForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     tag = forms.SlugField(
         max_length=100,
@@ -102,13 +100,16 @@ class WithdrawForm(forms.Form):
 
 
 class RestoreForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     reopen_tickets = forms.BooleanField(required=False, help_text="Restore all previously closed tickets")
 
 
 class MassWithdrawForm(WithdrawForm):
-    pass
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+
+
+class MassRestoreForm(RestoreForm):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
 
 
 class AddToTargetPopulationForm(forms.Form):
@@ -149,6 +150,7 @@ class CreateTargetPopulationTextForm(forms.Form):
     action = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField()
     target_field = forms.ChoiceField(choices=(("unicef_id", _("Unicef ID")), ("unique_id", _("UUID"))))
+    targeting_criteria = forms.ModelChoiceField(widget=forms.HiddenInput, queryset=TargetingCriteria.objects.all())
     separator = forms.ChoiceField(
         choices=(
             (",", _("Comma")),
@@ -177,6 +179,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["criteria"].widget = HiddenInput()
             self.fields["target_field"].widget = HiddenInput()
             self.fields["separator"].widget = HiddenInput()
+            self.fields["targeting_criteria"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
         try:

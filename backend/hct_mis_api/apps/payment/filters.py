@@ -3,12 +3,13 @@ from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, CharField, Count, Q, QuerySet, Value, When
+from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     ChoiceFilter,
     DateFilter,
@@ -298,6 +299,8 @@ class PaymentPlanFilter(FilterSet):
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    is_follow_up = BooleanFilter(field_name="is_follow_up")
+    source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
 
     class Meta:
         fields = tuple()
@@ -327,6 +330,9 @@ class PaymentPlanFilter(FilterSet):
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
 
+    def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
+
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
@@ -337,7 +343,10 @@ class PaymentFilter(FilterSet):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
-            q &= ~Q(excluded=True)
+            qs = qs.eligible()
+        else:
+            qs = qs.exclude(excluded=True)
+
         return qs.filter(q)
 
     class Meta:
@@ -350,41 +359,18 @@ class PaymentFilter(FilterSet):
             "status",
             "household_id",
             "household__size",
-            "admin2",
+            "household__admin2",
             "collector_id",
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",
+            "parent__program__name",
+            "delivery_date",
         )
     )
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        # household__admin2
-        queryset = queryset.annotate(
-            admin2=Case(
-                When(
-                    household__admin_area__isnull=True,
-                    then=Value(""),
-                ),
-                When(
-                    household__admin_area__isnull=False,
-                    household__admin_area__area_type__area_level__in=(0, 1),
-                    then=Value(""),
-                ),
-                When(
-                    household__admin_area__isnull=False,
-                    household__admin_area__area_type__area_level__lt=2,
-                    household__admin_area__area_type__area_level__gt=2,
-                    then=Lower("household__admin_area__parent__name"),
-                ),
-                When(
-                    household__admin_area__isnull=False,
-                    then=Lower("household__admin_area__name"),
-                ),
-                default=Value(""),
-                output_field=CharField(),
-            )
-        ).select_related("financial_service_provider")
+        queryset = queryset.select_related("financial_service_provider")
         if not self.form.cleaned_data.get("order_by"):
             queryset = queryset.order_by("unicef_id")
 
@@ -465,8 +451,15 @@ def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, orde
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
-    if order_by == "unicef_id":
+    if order_by == "ca_id":
         qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+    elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
+        order_by_dict = {f"{order_by}__isnull": True}
+        qs_null = list(queryset.filter(**order_by_dict))
+        if reverse:
+            qs = list(queryset.exclude(**order_by_dict).order_by(f"-{order_by}")) + qs_null
+        else:
+            qs = qs_null + list(queryset.exclude(**order_by_dict).order_by(order_by))
     else:
         qs = queryset.order_by(reverse + order_by)
 

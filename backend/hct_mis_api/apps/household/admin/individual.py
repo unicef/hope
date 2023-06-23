@@ -22,21 +22,23 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.household.celery_tasks import (
+    revalidate_phone_number_task,
+    update_individuals_iban_from_xlsx_task,
+)
+from hct_mis_api.apps.household.forms import UpdateIndividualsIBANFromXlsxForm
+from hct_mis_api.apps.household.models import (
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+    XlsxUpdateFile,
+)
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
-
-from ..celery_tasks import update_individuals_iban_from_xlsx_task
-from ..forms import UpdateIndividualsIBANFromXlsxForm
-from ..models import (
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-    XlsxUpdateFile,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +130,7 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
-    actions = ["count_queryset"]
+    actions = ["count_queryset", "revalidate_phone_number_sync", "revalidate_phone_number_async"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -208,6 +210,23 @@ class IndividualAdmin(
                     "admin/household/individual/individuals_iban_xlsx_update.html",
                     context,
                 )
+
+    def revalidate_phone_number_sync(self, request: HttpRequest, queryset: QuerySet) -> None:
+        try:
+            ids = queryset.values_list("id", flat=True)
+            revalidate_phone_number_task(ids)
+            self.message_user(request, f"Updated {len(ids)} records", messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
+
+    revalidate_phone_number_sync.short_description = "Re-validate phone number (sync)"
+
+    def revalidate_phone_number_async(self, request: HttpRequest, queryset: QuerySet) -> None:
+        ids = list(queryset.values_list("id", flat=True))
+        revalidate_phone_number_task.delay(ids)
+        self.message_user(request, "Updating in progress", messages.SUCCESS)
+
+    revalidate_phone_number_async.short_description = "Re-validate phone number (async)"
 
 
 @admin.register(IndividualRoleInHousehold)

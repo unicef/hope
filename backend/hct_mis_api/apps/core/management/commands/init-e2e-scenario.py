@@ -28,6 +28,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 faker = Faker()
 
@@ -92,7 +93,9 @@ def init_payment_plan(seed: str) -> None:
     create_household_with_individual_for_payment_plan(address=addresses[0])
     create_household_with_individual_for_payment_plan(address=addresses[1])
     create_household_with_individual_for_payment_plan(address=addresses[2])
-    program = ProgramFactory(name=f"PaymentPlanProgram-{seed}", status=Program.ACTIVE)
+    program = ProgramFactory(
+        name=f"PaymentPlanProgram-{seed}", status=Program.ACTIVE, start_date="2022-12-12", end_date="2042-12-12"
+    )
 
     targeting_criteria = TargetingCriteria.objects.create()
     TargetingCriteriaRuleFilter.objects.create(
@@ -128,7 +131,7 @@ def init_payment_plan(seed: str) -> None:
         program=program,
         created_by=root,
     )
-    target_population.full_rebuild()
+    full_rebuild(target_population)
     target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
     target_population.save()
 

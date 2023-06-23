@@ -38,28 +38,22 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/appgw-ssl-certificate: cert-ictd-hope-dev-aks-unitst-tls
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: kv-cert-unitst
   host: stg-hope.unitst.org
 
 
 postgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-    user: stgcashubusr
-    password: #secret-variables: POSTGRES_PASSWORD
-    db: stg_hope_appdb_datahubdb
+  host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
+  username: stgcashubusr
+  password: #secret-variables: POSTGRES_PASSWORD
+  database: stg_hope_appdb_datahubdb
 registrationdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-    user: stgreghubusr
-    password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
-    db: stg_registration_datahubdb
+  host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
+  username: stgreghubusr
+  password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
+  database: stg_registration_datahubdb
 cashassistdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-    user: stgcashubusr
-    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
-    db: stg_cashassist_datahubdb
+  host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
+  username: stgcashubusr
+  password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+  database: stg_cashassist_datahubdb

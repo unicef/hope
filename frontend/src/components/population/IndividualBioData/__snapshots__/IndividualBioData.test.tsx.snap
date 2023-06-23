@@ -222,7 +222,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Household ID"
           >
             <a
-              class="sc-bdVaJa eeAMoW"
+              class="sc-bdVaJa hqCmJD"
               href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowMTk1YTEzYi0wYThkLTRiYTEtYjM0OS00MDY4YWNmOTViNDE="
             >
               HH-20-0000.0002
@@ -501,12 +501,29 @@ exports[`components/population/IndividualBioData should render 1`] = `
             class="sc-bwzfXH eoWrid"
             color="textSecondary"
           >
+            Email
+          </span>
+          <div
+            data-cy="label-Email"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+      >
+        <div>
+          <span
+            class="sc-bwzfXH eoWrid"
+            color="textSecondary"
+          >
             Phone Number
           </span>
           <div
             data-cy="label-Phone Number"
           >
-            Invalid Phone Number
+            +48734123423
           </div>
         </div>
       </div>

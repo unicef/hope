@@ -61,6 +61,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -74,7 +75,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -97,7 +99,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -120,7 +123,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -143,7 +147,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -166,7 +171,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -189,7 +195,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -212,7 +219,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -235,7 +243,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -258,7 +267,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -281,7 +291,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -304,7 +315,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -334,7 +346,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6NzBjYmU4ZjgtNzUxYy00NTliLTlmZjEtZDg4M2Y4ZTFjNGFj"
                 >
                   RCPT-0060-22-0.000.005
@@ -354,10 +366,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eEdtvm"
+                    class="sc-dnqmqq cdnWIn"
                     data-cy="status-container"
                   >
                     PENDING
@@ -373,10 +385,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -412,7 +424,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6ZmI4NjIzM2EtNWRiOS00NjQ2LWJiN2UtN2Q3OTVhNWI3Njc2"
                 >
                   RCPT-0060-22-0.000.007
@@ -432,10 +444,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eEdtvm"
+                    class="sc-dnqmqq cdnWIn"
                     data-cy="status-container"
                   >
                     PENDING
@@ -451,10 +463,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -490,7 +502,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6M2UyZTQ4NjktZWRmNC00NTA4LWI4ZjAtY2YwZjZmNmUzNzY3"
                 >
                   RCPT-0060-22-0.000.003
@@ -510,10 +522,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eEdtvm"
+                    class="sc-dnqmqq cdnWIn"
                     data-cy="status-container"
                   >
                     PENDING
@@ -529,10 +541,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -568,7 +580,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6ZTE2YTUxNWUtNjlhOC00NTM2LTg0MGMtMjczN2FmMjgyYmQw"
                 >
                   RCPT-0060-22-0.000.004
@@ -588,10 +600,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eEdtvm"
+                    class="sc-dnqmqq cdnWIn"
                     data-cy="status-container"
                   >
                     PENDING
@@ -607,10 +619,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -646,7 +658,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6ZjI3NTQxNzMtZjdjMC00NWJhLTgxNDctMmE4MTVjNWZmZmI3"
                 >
                   RCPT-0060-22-0.000.006
@@ -666,10 +678,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eEdtvm"
+                    class="sc-dnqmqq cdnWIn"
                     data-cy="status-container"
                   >
                     PENDING
@@ -685,10 +697,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -718,7 +730,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
             </tr>
             <tr
               class="MuiTableRow-root"
-              style="height: 162px;"
+              style="height: 54px;"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
@@ -730,6 +742,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

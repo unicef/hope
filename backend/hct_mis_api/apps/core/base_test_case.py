@@ -1,12 +1,16 @@
 import base64
 import os
 import random
+import shutil
 import sys
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from functools import reduce
+from io import BytesIO
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 
@@ -16,6 +20,7 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -86,9 +91,16 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user: Optional["User"] = None, files: Optional[Dict] = None) -> WSGIRequest:
+    def generate_context(
+        self, user: Optional["User"] = None, files: Optional[Dict] = None, headers: Optional[Dict[str, str]] = None
+    ) -> WSGIRequest:
         request = RequestFactory()
-        context_value = request.get("/api/graphql/")
+        prepared_headers: Dict = reduce(
+            lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
+            (headers or {}).items(),
+            {},
+        )
+        context_value = request.get("/api/graphql/", **prepared_headers)
         context_value.user = user or AnonymousUser()
         self.__set_context_files(context_value, files or {})
         return context_value
@@ -98,7 +110,7 @@ class APITestCase(SnapshotTestTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(DocumentType(label=label, type=doc_type))
+            document_types.append(DocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
 
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
@@ -113,7 +125,9 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def create_user_role_with_permissions(user: "User", permissions: List, business_area: "BusinessArea") -> UserRole:
+    def create_user_role_with_permissions(
+        user: "User", permissions: Iterable, business_area: "BusinessArea"
+    ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
@@ -135,3 +149,21 @@ class BaseElasticSearchTestCase(TestCase):
     @classmethod
     def rebuild_search_index(cls) -> None:
         rebuild_search_index()
+
+
+class UploadDocumentsBase(APITestCase):
+    TEST_DIR = "test_data"
+
+    @staticmethod
+    def create_fixture_file(name: str, size: int, content_type: str) -> InMemoryUploadedFile:
+        return InMemoryUploadedFile(
+            name=name, file=BytesIO(b"xxxxxxxxxxx"), charset=None, field_name="0", size=size, content_type=content_type
+        )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            shutil.rmtree(cls.TEST_DIR)
+        except OSError:
+            pass
+        super().tearDownClass()

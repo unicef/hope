@@ -5,10 +5,15 @@ from django.urls import reverse
 
 from parameterized import parameterized
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ..defaults import create_defaults
-from ..models import Query, Report
-from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, ReportFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Query, Report
+from hct_mis_api.apps.power_query.tests.fixtures import (
+    FormatterFactory,
+    ParametrizerFactory,
+    QueryFactory,
+    ReportFactory,
+)
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
@@ -37,6 +42,12 @@ class TestPowerQueryViews(TestCase):
             name="Report2", formatter=cls.formatter_html, query=cls.query, owner=cls.user2
         )
         cls.report2.execute()
+        cls.report3: Report = ReportFactory(
+            name="Report3", formatter=cls.formatter_html, query=cls.query, owner=cls.user1
+        )
+        cls.report3.limit_access_to.add(cls.user2)
+        cls.report3.save()
+        cls.report3.execute()
 
     def test_valid_report(self) -> None:
         url = reverse("power_query:report", args=[self.report2.pk])
@@ -68,6 +79,21 @@ class TestPowerQueryViews(TestCase):
             self.client.login(username=self.report1.owner.username, password="password")
             response = self.client.get(url)
             self.assertEqual(response.status_code, 403)
+
+    def test_permission_limit_access_to(self) -> None:
+        url = reverse("power_query:report", args=[self.report3.pk])
+        self.client.login(username=self.report2.owner.username, password="password")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, b">Report3<")
+        url = reverse("power_query:document", args=[self.report3.pk, self.report3.documents.first().pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+        self.report3.documents.first().limit_access_to.add(self.user2)
+        self.report3.documents.first().save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

@@ -14,6 +14,7 @@ export const individualMinimal = gql`
     maritalStatus
     phoneNo
     phoneNoValid
+    email
     sanctionListPossibleMatch
     sanctionListConfirmedMatch
     deduplicationGoldenRecordStatus
@@ -31,7 +32,7 @@ export const individualMinimal = gql`
           photo
           type {
             label
-            type
+            key
           }
         }
       }
@@ -93,6 +94,7 @@ export const individualDetailed = gql`
     whoAnswersPhone
     phoneNoAlternative
     phoneNoAlternativeValid
+    email
     hearingDisability
     observedDisability
     individualId
@@ -110,6 +112,7 @@ export const individualDetailed = gql`
           photo
           type {
             label
+            key
           }
           documentNumber
         }

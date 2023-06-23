@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Dict, Optional, Type, Union
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -7,9 +7,13 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
-
-from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
 RelatedInstanceType = Union[Document, Household, IndividualIdentity, IndividualRoleInHousehold]
 
@@ -47,44 +51,12 @@ class IndividualDocument(Document):
     household = fields.ObjectField(
         properties={
             "unicef_id": fields.TextField(),
-            # "residence_status": fields.KeywordField(similarity="boolean"),
-            # "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
-            # "size": fields.IntegerField(),
-            # "address": fields.TextField(),
-            # "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
-            # "female_age_group_0_5_count": fields.IntegerField(),
-            # "female_age_group_6_11_count": fields.IntegerField(),
-            # "female_age_group_12_17_count": fields.IntegerField(),
-            # "female_age_group_18_59_count": fields.IntegerField(),
-            # "female_age_group_60_count": fields.IntegerField(),
-            # "pregnant_count": fields.IntegerField(),
-            # "male_age_group_0_5_count": fields.IntegerField(),
-            # "male_age_group_6_11_count": fields.IntegerField(),
-            # "male_age_group_12_17_count": fields.IntegerField(),
-            # "male_age_group_18_59_count": fields.IntegerField(),
-            # "male_age_group_60_count": fields.IntegerField(),
-            # "female_age_group_0_5_disabled_count": fields.IntegerField(),
-            # "female_age_group_6_11_disabled_count": fields.IntegerField(),
-            # "female_age_group_12_17_disabled_count": fields.IntegerField(),
-            # "female_age_group_18_59_disabled_count": fields.IntegerField(),
-            # "female_age_group_60_disabled_count": fields.IntegerField(),
-            # "male_age_group_0_5_disabled_count": fields.IntegerField(),
-            # "male_age_group_6_11_disabled_count": fields.IntegerField(),
-            # "male_age_group_12_17_disabled_count": fields.IntegerField(),
-            # "male_age_group_18_59_disabled_count": fields.IntegerField(),
-            # "male_age_group_60_disabled_count": fields.IntegerField(),
-            # "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
-            # "returnee": fields.BooleanField(),
-            # "registration_method": fields.KeywordField(similarity="boolean"),
-            # "collect_individual_data": fields.KeywordField(similarity="boolean"),
-            # "currency": fields.KeywordField(similarity="boolean"),
-            # "unhcr_id": fields.KeywordField(similarity="boolean"),
         }
     )
     documents = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
-            "type": fields.KeywordField(attr="type.type", similarity="boolean"),
+            "key": fields.KeywordField(attr="type.key", similarity="boolean"),
             "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
         }
     )
@@ -174,11 +146,14 @@ class IndividualDocumentOthers(IndividualDocument):
         return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
-def get_individual_doc(business_area_slug: str) -> Type:
-    return {
+def get_individual_doc(
+    business_area_slug: str,
+) -> Type[IndividualDocument]:
+    documents: Dict[str, Type[IndividualDocument]] = {
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,
-    }.get(business_area_slug, IndividualDocumentOthers)
+    }
+    return documents.get(business_area_slug, IndividualDocumentOthers)
 
 
 @registry.register_document
@@ -214,9 +189,7 @@ class HouseholdDocument(Document):
 
     class Django:
         model = Household
-
         fields = []
-
         related_models = [Individual]
 
     def get_instances_from_related(self, related_instance: Individual) -> Household:

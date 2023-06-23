@@ -81,8 +81,8 @@ class HouseholdFilter(FilterSet):
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
+    head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=Area.objects.filter(area_type__area_level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
 
@@ -94,6 +94,7 @@ class HouseholdFilter(FilterSet):
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
+            "admin2": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
@@ -120,11 +121,27 @@ class HouseholdFilter(FilterSet):
         )
     )
 
+    def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        """
+        Filter households by phone_no_valid
+        True: get households with valid phone_no or valid phone_no_alternative
+        False: get households with invalid both phone_no and invalid phone_no_alternative
+        """
+        if value is True:
+            return qs.exclude(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        elif value is False:
+            return qs.filter(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        return qs
+
     def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
-            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
 
@@ -140,6 +157,9 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        hh_id_regex = r"^HH-\d{2}-\d{4}\.\d{4}$"
+        if re.match(hh_id_regex, value):
+            return qs.filter(unicef_id=value)
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
@@ -162,7 +182,7 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
             if value.startswith(("HOPE-", "KOBO-")):
-                _value = self._prepare_kobo_asset_id_value(value)
+                _value = _prepare_kobo_asset_id_value(value)
                 # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                 # will filter by '111222' like 111222 is ID
                 inner_query |= Q(kobo_asset_id__endswith=_value)
@@ -232,7 +252,7 @@ class IndividualFilter(FilterSet):
             get_individual_doc(business_area)
             .search()
             .params(search_type="dfs_query_then_fetch")
-            .from_dict(query_dict)
+            .update_from_dict(query_dict)
             .execute()
         )
 
@@ -240,6 +260,8 @@ class IndividualFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids)).distinct()
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        if value.upper().startswith("IND-"):
+            return qs.filter(unicef_id__istartswith=value)
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)

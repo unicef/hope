@@ -4,6 +4,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { removeIdPropertyFromObjects } from './helpers';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function preparePositiveFeedbackVariables(requiredVariables, values) {
@@ -71,6 +72,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
@@ -92,14 +94,14 @@ function prepareSesitiveVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
+        partner: parseInt(values.partner, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             sensitiveGrievanceTicketExtras: {
               household: values.selectedHousehold?.id,
               individual: values.selectedIndividual?.id,
-              paymentRecord: values.selectedPaymentRecords,
             },
           },
         },
@@ -119,6 +121,15 @@ function prepareAddIndividualVariables(requiredVariables, values) {
       }
     }
   }
+
+  const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+    values.individualData.documents,
+  );
+
+  const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+    values.individualData.identities,
+  );
+
   return {
     variables: {
       input: {
@@ -129,7 +140,12 @@ function prepareAddIndividualVariables(requiredVariables, values) {
           issueType: {
             addIndividualIssueTypeExtras: {
               household: values.selectedHousehold?.id,
-              individualData: { ...values.individualData, flexFields },
+              individualData: {
+                ...values.individualData,
+                documents: newlyAddedDocumentsWithoutIds,
+                identities: newlyAddedIdentitiesWithoutIds,
+                flexFields,
+              },
             },
           },
         },
@@ -195,6 +211,19 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
+
+  const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsDocuments,
+  );
+
+  const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsIdentities,
+  );
+
+  const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsPaymentChannels,
+  );
+
   return {
     variables: {
       input: {
@@ -207,15 +236,14 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               individual: values.selectedIndividual?.id,
               individualData: {
                 ...individualData,
-                documents: values.individualDataUpdateFieldsDocuments,
+                documents: newlyAddedDocumentsWithoutIds,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
                 documentsToEdit: values.individualDataUpdateDocumentsToEdit,
-                identities: values.individualDataUpdateFieldsIdentities,
+                identities: newlyAddedIdentitiesWithoutIds,
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-                paymentChannels:
-                  values.individualDataUpdateFieldsPaymentChannels,
+                paymentChannels: newlyAddedPaymentChannelsWithoutIds,
                 paymentChannelsToRemove:
                   values.individualDataUpdatePaymentChannelsToRemove,
                 paymentChannelsToEdit:
@@ -294,7 +322,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.REFERRAL]: false,
-  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
@@ -309,6 +337,13 @@ export function prepareVariables(businessArea, values) {
     language: values.language,
     admin: values?.admin?.node?.pCode,
     area: values.area,
+    priority: values.priority,
+    urgency: values.urgency,
+    partner: values.partner,
+    comments: values.comments,
+    programme: values.programme,
+    linkedFeedbackId: values.linkedFeedbackId,
+    documentation: values.documentation,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
@@ -318,3 +353,40 @@ export function prepareVariables(businessArea, values) {
   );
   return prepareFunction(requiredVariables, values);
 }
+
+export const matchGrievanceUrlByCategory = (category: number): string => {
+  if (!category) return null;
+  const categoryString = category.toString();
+  const systemGeneratedGrievanceCategories = [
+    GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION,
+    GRIEVANCE_CATEGORIES.DEDUPLICATION,
+    GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
+  ];
+  if (systemGeneratedGrievanceCategories.includes(categoryString)) {
+    return 'system-generated';
+  }
+  return 'user-generated';
+};
+
+export const getGrievanceDetailsPath = (
+  ticketId: string,
+  category: number,
+  businessArea: string,
+): string => {
+  return `/${businessArea}/grievance/tickets/${matchGrievanceUrlByCategory(
+    category,
+  )}/${ticketId}`;
+};
+
+export const getGrievanceEditPath = (
+  ticketId: string,
+  category: number,
+  businessArea: string,
+): string => {
+  if (!ticketId || !category || !businessArea) {
+    return null;
+  }
+  return `/${businessArea}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
+    category,
+  )}/${ticketId}`;
+};

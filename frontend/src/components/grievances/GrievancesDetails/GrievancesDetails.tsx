@@ -1,7 +1,12 @@
-import { Grid, GridSize, Typography } from '@material-ui/core';
+import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../../utils/constants';
+import {
+  grievanceTicketBadgeColors,
   choicesToDict,
   grievanceTicketStatusToColor,
   renderUserName,
@@ -14,6 +19,7 @@ import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder'
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
+import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -38,6 +44,9 @@ export const GrievancesDetails = ({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
+  const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
+  const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
+
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
@@ -50,11 +59,49 @@ export const GrievancesDetails = ({
         )[0].name
     : '-';
 
+  const showIssueType =
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
+  const showProgramme =
+    ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
+  const showPartner =
+    ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
+
+  const mappedDocumentation = (): React.ReactElement => {
+    return (
+      <Box display='flex' flexDirection='column'>
+        {ticket.documentation?.length
+          ? ticket.documentation.map((doc) => {
+              if (doc.contentType.includes('image')) {
+                return (
+                  <PhotoModal
+                    key={doc.id}
+                    src={doc.filePath}
+                    variant='link'
+                    linkText={doc.name}
+                  />
+                );
+              }
+              return (
+                <ContentLink key={doc.id} download href={doc.filePath}>
+                  {doc.name}
+                </ContentLink>
+              );
+            })
+          : '-'}
+      </Box>
+    );
+  };
+
   const renderPaymentUrl = (): React.ReactElement => {
     if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return (
         <ContentLink
-          href={`/${businessArea}/verification/payment-record/${ticket.paymentRecord.id}`}
+          href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -63,7 +110,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'Payment') {
       return (
         <ContentLink
-          href={`/${businessArea}/verification/payment/${ticket.paymentRecord.id}`}
+          href={`/${businessArea}/payment-module/payments/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -83,7 +130,7 @@ export const GrievancesDetails = ({
           <Grid container spacing={6}>
             {[
               {
-                label: t('STATUS'),
+                label: t('Status'),
                 value: (
                   <StatusBox
                     status={statusChoices[ticket.status]}
@@ -93,17 +140,54 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
-                label: t('CATEGORY'),
-                value: <span>{categoryChoices[ticket.category]}</span>,
+                label: t('Priority'),
+                value: (
+                  <StatusBox
+                    status={
+                      priorityChoicesData[
+                        priorityChoicesData.findIndex(
+                          (obj) => obj.value === ticket.priority,
+                        )
+                      ]?.name || '-'
+                    }
+                    statusToColor={grievanceTicketBadgeColors}
+                  />
+                ),
                 size: 3,
               },
               {
-                label: t('Issue Type'),
-                value: <span>{issueType}</span>,
-                size: 6,
+                label: t('Urgency'),
+                value: (
+                  <StatusBox
+                    status={
+                      urgencyChoicesData[
+                        urgencyChoicesData.findIndex(
+                          (obj) => obj.value === ticket.urgency,
+                        )
+                      ]?.name || '-'
+                    }
+                    statusToColor={grievanceTicketBadgeColors}
+                  />
+                ),
+                size: 3,
               },
               {
-                label: t('HOUSEHOLD ID'),
+                label: t('Assigned to'),
+                value: renderUserName(ticket.assignedTo),
+                size: 3,
+              },
+              {
+                label: t('Category'),
+                value: <span>{categoryChoices[ticket.category]}</span>,
+                size: 3,
+              },
+              showIssueType && {
+                label: t('Issue Type'),
+                value: <span>{issueType}</span>,
+                size: 3,
+              },
+              {
+                label: t('Household ID'),
                 value: (
                   <span>
                     {ticket.household?.id ? (
@@ -124,7 +208,7 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
-                label: t('INDIVIDUAL ID'),
+                label: t('Individual ID'),
                 value: (
                   <span>
                     {ticket.individual?.id ? (
@@ -142,63 +226,75 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: showIssueType ? 3 : 6,
               },
               {
-                label: t('PAYMENT ID'),
+                label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
+                size: showProgramme || showPartner ? 3 : 12,
+              },
+              showProgramme && {
+                label: t('Programme'),
+                value: ticket.programme?.name,
+                size: showPartner ? 3 : 9,
+              },
+              showPartner && {
+                label: t('Partner'),
+                value: ticket.partner?.name,
                 size: 6,
               },
               {
-                label: t('CONSENT'),
-                value: ticket.consent ? 'Yes' : 'No',
-                size: 3,
-              },
-              {
-                label: t('CREATED BY'),
+                label: t('Created By'),
                 value: renderUserName(ticket.createdBy),
                 size: 3,
               },
               {
-                label: t('DATE CREATED'),
+                label: t('Date Created'),
                 value: <UniversalMoment>{ticket.createdAt}</UniversalMoment>,
                 size: 3,
               },
               {
-                label: t('LAST MODIFIED DATE'),
+                label: t('Last Modified Date'),
                 value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
-                size: 3,
-              },
-              {
-                label: t('DESCRIPTION'),
-                value: ticket.description,
                 size: 6,
               },
               {
-                label: t('ASSIGNED TO'),
-                value: renderUserName(ticket.assignedTo),
-                size: 6,
-              },
-              {
-                label: t('ADMINISTRATIVE LEVEL 2'),
+                label: t('Administrative Level 2'),
                 value: ticket.admin,
                 size: 3,
               },
               {
-                label: t('AREA / VILLAGE / PAY POINT'),
+                label: t('Area / Village / Pay point'),
                 value: ticket.area,
                 size: 3,
               },
               {
-                label: t('LANGUAGES SPOKEN'),
+                label: t('Languages Spoken'),
                 value: ticket.language,
                 size: 3,
               },
-            ].map((el) => (
-              <Grid key={el.label} item xs={el.size as GridSize}>
-                <LabelizedField label={el.label}>{el.value}</LabelizedField>
-              </Grid>
-            ))}
+              {
+                label: t('Documentation'),
+                value: mappedDocumentation(),
+                size: 3,
+              },
+              {
+                label: t('Description'),
+                value: ticket.description,
+                size: 12,
+              },
+              {
+                label: t('Comments'),
+                value: ticket.comments,
+                size: 12,
+              },
+            ]
+              .filter((el) => el)
+              .map((el) => (
+                <Grid key={el.label} item xs={el.size as GridSize}>
+                  <LabelizedField label={el.label}>{el.value}</LabelizedField>
+                </Grid>
+              ))}
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>

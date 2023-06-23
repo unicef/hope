@@ -1,33 +1,46 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
-import { Switch, useLocation } from 'react-router-dom';
+import { Redirect, Switch, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAllBusinessAreasQuery } from '../__generated__/graphql';
 import { AppBar } from '../components/core/AppBar';
 import { Drawer } from '../components/core/Drawer/Drawer';
+import { LoadingComponent } from '../components/core/LoadingComponent';
 import { SentryRoute } from '../components/core/SentryRoute';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { MiśTheme } from '../theme';
+import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
+import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
+import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
+import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
+import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditFollowUpPaymentPlanPage } from './pages/paymentmodule/EditFollowUpPaymentPlanPage';
+import { EditFollowUpSetUpFspPage } from './pages/paymentmodule/EditFollowUpSetUpFspPage';
 import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
+import { PaymentDetailsPage } from './pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetFollowUpUpFspPage } from './pages/paymentmodule/SetFollowUpUpFspPage';
 import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
-import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
-import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
 import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
+import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentPlanVerificationDetailsPage } from './pages/payments/PaymentPlanVerificationDetailsPage';
+import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
 import { VerificationPaymentDetailsPage } from './pages/payments/VerificationPaymentDetailsPage';
+import { VerificationPaymentRecordDetailsPage } from './pages/payments/VerificationPaymentRecordDetailsPage';
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
@@ -44,16 +57,17 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
-import { VerificationPaymentRecordDetailsPage } from './pages/payments/VerificationPaymentRecordDetailsPage';
-import {PaymentDetailsPage} from "./pages/paymentmodule/PaymentDetailsPage";
 
 const Root = styled.div`
   display: flex;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
-  height: 100vh;
   overflow: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
@@ -61,6 +75,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 
 export function HomeRouter(): React.ReactElement {
   const [open, setOpen] = React.useState(true);
+  const { businessArea } = useParams();
   const classes = useStyles({});
   const location = useLocation();
   const snackBar = useSnackbar();
@@ -70,6 +85,29 @@ export function HomeRouter(): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
+  const { data, loading } = useAllBusinessAreasQuery({
+    variables: {
+      slug: businessArea,
+    },
+    fetchPolicy: 'cache-first',
+  });
+
+  if (!data) {
+    return null;
+  }
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
+  const allBusinessAreasSlugs = data.allBusinessAreas.edges.map(
+    (el) => el.node.slug,
+  );
+  const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
+
+  if (!isBusinessAreaValid) {
+    return <Redirect to='/' noThrow />;
+  }
+
   return (
     <Root>
       <CssBaseline />
@@ -128,6 +166,15 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute exact path='/:businessArea/payment-module'>
             <PaymentModulePage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/edit'>
+            <EditFollowUpPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/create'>
+            <SetFollowUpUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/edit'>
+            <EditFollowUpSetUpFspPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
             <SetUpFspPage />
           </SentryRoute>
@@ -143,24 +190,71 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
             <PaymentPlanDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
+            <FollowUpPaymentPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
-            <EditGrievancePage />
+          <SentryRoute path='/:businessArea/grievance/edit-ticket/user-generated/:id'>
+            <EditGrievancePage key='user' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
-            <GrievancesTablePage key='rdi' />
+          <SentryRoute path='/:businessArea/grievance/edit-ticket/system-generated/:id'>
+            <EditGrievancePage key='system' />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
-            <GrievancesTablePage key='verificationId' />
-          </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
+          <SentryRoute path='/:businessArea/grievance/tickets/user-generated/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback'>
-            <GrievancesTablePage key='all' />
+          <SentryRoute path='/:businessArea/grievance/tickets/system-generated/:id'>
+            <GrievancesDetailsPage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/rdi/:id'>
+            <GrievancesTablePage key='rdi' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/payment-verification/:cashPlanId'>
+            <GrievancesTablePage key='verificationId' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/tickets/user-generated'>
+            <GrievancesTablePage key='user' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/tickets/system-generated'>
+            <GrievancesTablePage key='system' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/dashboard'>
+            <GrievancesDashboardPage key='all' />
+          </SentryRoute>
+          {/* TODO: uncomment when ready for deployment
+          <SentryRoute path='/:businessArea/accountability/communication/create'>
+            <CreateCommunicationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication/:id'>
+            <CommunicationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication'>
+            <CommunicationPage />
+          </SentryRoute> */}
+          <SentryRoute path='/:businessArea/accountability/feedback/create'>
+            <CreateFeedbackPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback/edit-ticket/:id'>
+            <EditFeedbackPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback/:id'>
+            <FeedbackDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback'>
+            <FeedbackPage />
+          </SentryRoute>
+          {/* TODO: uncomment when ready for deployment
+          <SentryRoute path='/:businessArea/accountability/surveys/create'>
+            <CreateSurveyPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/surveys/:id'>
+            <SurveyDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/surveys'>
+            <SurveysPage />
+          </SentryRoute> */}
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
           </SentryRoute>

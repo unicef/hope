@@ -101,6 +101,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_ignore_withdraw = models.BooleanField(default=False)
 
     is_payment_plan_applicable = models.BooleanField(default=False)
+    is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -127,10 +128,6 @@ class BusinessArea(TimeStampedUUIDModel):
     @property
     def cash_assist_code(self) -> str:
         return self.code_to_cash_assist_mapping.get(self.code, self.code)
-
-    @cash_assist_code.setter
-    def cash_assist_code(self, value: Any) -> None:
-        self.code = self.cash_assist_to_code_mapping.get(value, value)
 
     @property
     def can_import_ocha_response_plans(self) -> bool:

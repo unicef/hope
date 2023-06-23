@@ -17,7 +17,7 @@ from django.db import models
 
 import graphene
 from constance import config
-from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
+from graphene import Boolean, Connection, ConnectionField, DateTime, Int, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -47,7 +47,16 @@ class ChoiceObject(graphene.ObjectType):
     value = String()
 
 
+class ChoiceObjectInt(graphene.ObjectType):
+    name = String()
+    value = Int()
+
+
 class BusinessAreaNode(DjangoObjectType):
+    @classmethod
+    def get_queryset(cls, queryset: "QuerySet", info: Any) -> "QuerySet":
+        return queryset.filter(is_split=False)
+
     class Meta:
         model = BusinessArea
         filter_fields = ["id", "slug"]
@@ -311,9 +320,6 @@ class Query(graphene.ObjectType):
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
-
-    def resolve_all_business_areas(parent, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX

@@ -14,12 +14,37 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+)
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
     PaymentPlan,
 )
+
+
+def create_child_payment_plans(pp: PaymentPlan) -> None:
+    PaymentPlanFactory(
+        id="56aca38c-dc16-48a9-ace4-70d88b41d462",
+        dispersion_start_date=datetime(2020, 8, 10),
+        dispersion_end_date=datetime(2020, 12, 10),
+        start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+        end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+        is_follow_up=True,
+        source_payment_plan=pp,
+    )
+    PaymentPlanFactory(
+        id="5b04f7c3-579a-48dd-a232-424daaefffe7",
+        dispersion_start_date=datetime(2020, 8, 10),
+        dispersion_end_date=datetime(2020, 12, 10),
+        start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+        end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+        is_follow_up=True,
+        source_payment_plan=pp,
+    )
 
 
 class TestPaymentPlanQueries(APITestCase):
@@ -34,34 +59,9 @@ class TestPaymentPlanQueries(APITestCase):
 
     ALL_PAYMENT_PLANS_QUERY = """
     query AllPaymentPlans($businessArea: String!) {
-      allPaymentPlans(businessArea: $businessArea) {
+      allPaymentPlans(businessArea: $businessArea, orderBy: "unicef_id") {
         edges {
           node {
-            status
-            startDate
-            dispersionStartDate
-            dispersionEndDate
-            endDate
-            exchangeRate
-            paymentsConflictsCount
-            totalEntitledQuantity
-            totalEntitledQuantityUsd
-            totalEntitledQuantityRevised
-            totalEntitledQuantityRevisedUsd
-            totalDeliveredQuantity
-            totalDeliveredQuantityUsd
-            totalUndeliveredQuantity
-            totalUndeliveredQuantityUsd
-            unicefId
-            femaleChildrenCount
-            maleChildrenCount
-            femaleAdultsCount
-            maleAdultsCount
-            totalHouseholdsCount
-            totalIndividualsCount
-            paymentItems{
-              totalCount
-            }
             approvalProcess{
               totalCount
               edges {
@@ -72,7 +72,32 @@ class TestPaymentPlanQueries(APITestCase):
                 }
               }
             }
+            canCreateFollowUp
+            dispersionEndDate
+            dispersionStartDate
+            endDate
+            exchangeRate
+            femaleAdultsCount
+            femaleChildrenCount
+            maleAdultsCount
+            maleChildrenCount
+            paymentItems{
+              totalCount
+            }
             paymentsConflictsCount
+            startDate
+            status
+            totalDeliveredQuantity
+            totalDeliveredQuantityUsd
+            totalEntitledQuantity
+            totalEntitledQuantityRevised
+            totalEntitledQuantityRevisedUsd
+            totalEntitledQuantityUsd
+            totalHouseholdsCount
+            totalIndividualsCount
+            totalUndeliveredQuantity
+            totalUndeliveredQuantityUsd
+            unicefId
           }
         }
       }
@@ -81,56 +106,83 @@ class TestPaymentPlanQueries(APITestCase):
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
     query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, orderBy: "unicef_id") {
         edges {
           node {
-            status
-            dispersionStartDate
             dispersionEndDate
-            unicefId
+            dispersionStartDate
+            status
             totalEntitledQuantity
+            unicefId
           }
         }
       }
     }
     """
 
+    ALL_PAYMENT_PLANS_FILTER_QUERY_2 = """
+        query AllPaymentPlans($businessArea: String!, $isFollowUp: Boolean, $sourcePaymentPlanId: String) {
+            allPaymentPlans(businessArea: $businessArea, isFollowUp: $isFollowUp, sourcePaymentPlanId: $sourcePaymentPlanId, orderBy: "unicef_id") {
+            edges {
+              node {
+                unicefId
+                dispersionStartDate
+                dispersionEndDate
+                isFollowUp
+                sourcePaymentPlan {
+                  unicefId
+                }
+                followUps {
+                  totalCount
+                  edges {
+                      node {
+                          unicefId
+                      }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """
+
     ALL_PAYMENTS_QUERY = """
     query AllPayments($paymentPlanId: String!, $businessArea: String!) {
-      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
+      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id") {
         edgeCount
-        totalCount
         edges {
           node {
-            unicefId
-            entitlementQuantity
-            entitlementQuantityUsd
+            conflicted
             deliveredQuantity
             deliveredQuantityUsd
+            entitlementQuantity
+            entitlementQuantityUsd
             parent {
               unicefId
             }
             paymentPlanHardConflicted
-            paymentPlanSoftConflicted
             paymentPlanHardConflictedData {
               paymentPlanStatus
               paymentPlanStartDate
               paymentPlanEndDate
             }
+            paymentPlanSoftConflicted
             paymentPlanSoftConflictedData {
               paymentPlanStatus
               paymentPlanStartDate
               paymentPlanEndDate
             }
-            excluded
+            unicefId
           }
         }
+        totalCount
       }
     }
     """
 
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.maxDiff = None
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
@@ -138,11 +190,16 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
+            program = RealProgramFactory()
+            program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
+                program=program,
+                program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
                 start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
                 end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+                is_follow_up=False,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -153,7 +210,7 @@ class TestPaymentPlanQueries(APITestCase):
             hh2 = HouseholdFactory(head_of_household=hoh2)
             PaymentFactory(
                 parent=cls.pp,
-                excluded=False,
+                conflicted=False,
                 household=hh1,
                 head_of_household=hoh1,
                 entitlement_quantity=100.00,
@@ -163,7 +220,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
             p2 = PaymentFactory(
                 parent=cls.pp,
-                excluded=True,
+                conflicted=True,
                 household=hh2,
                 head_of_household=hoh2,
                 entitlement_quantity=100.00,
@@ -174,6 +231,8 @@ class TestPaymentPlanQueries(APITestCase):
 
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
+                program=program,
+                program_cycle=program_cycle,
                 start_date=cls.pp.start_date,
                 end_date=cls.pp.end_date,
                 status=PaymentPlan.Status.LOCKED,
@@ -186,7 +245,7 @@ class TestPaymentPlanQueries(APITestCase):
             PaymentFactory(
                 parent=cls.pp_conflicted,
                 household=p2.household,
-                excluded=False,
+                conflicted=False,
                 entitlement_quantity=100.00,
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
@@ -194,7 +253,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
             PaymentFactory(
                 parent=cls.pp_conflicted,
-                excluded=True,
+                conflicted=True,
                 entitlement_quantity=00.00,
                 entitlement_quantity_usd=00.00,
                 delivered_quantity=00.00,
@@ -225,12 +284,6 @@ class TestPaymentPlanQueries(APITestCase):
                 cls.pp_conflicted.update_population_count_fields()
                 cls.pp_conflicted.update_money_fields()
 
-    def test_fetch_payment_plan_status_choices(self) -> None:
-        self.snapshot_graphql_request(
-            request_string=self.PAYMENT_PLAN_STATUS_CHOICES_QUERY,
-            context={"user": self.user},
-        )
-
     @freeze_time("2020-10-10")
     def test_fetch_all_payment_plans(self) -> None:
         self.snapshot_graphql_request(
@@ -239,6 +292,14 @@ class TestPaymentPlanQueries(APITestCase):
             variables={
                 "businessArea": "afghanistan",
             },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_fetch_all_payments_for_open_payment_plan(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "paymentPlanId": encode_id_base64(self.pp.pk, "PaymentPlan")},
         )
 
     @freeze_time("2020-10-10")
@@ -262,16 +323,21 @@ class TestPaymentPlanQueries(APITestCase):
             )
 
     @freeze_time("2020-10-10")
-    def test_fetch_all_payments_for_open_payment_plan(self) -> None:
+    def test_filter_payment_plans_with_source_id(self) -> None:
+        create_child_payment_plans(self.pp)
+
         self.snapshot_graphql_request(
-            request_string=self.ALL_PAYMENTS_QUERY,
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
             context={"user": self.user},
-            variables={"businessArea": "afghanistan", "paymentPlanId": encode_id_base64(self.pp.pk, "PaymentPlan")},
+            variables={
+                "businessArea": "afghanistan",
+                "sourcePaymentPlanId": encode_id_base64(self.pp.id, "PaymentPlan"),
+            },
         )
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payments_for_locked_payment_plan(self) -> None:
-        """Conflicting payment are excluded"""
+        """Conflicting payment are conflicted"""
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENTS_QUERY,
             context={"user": self.user},
@@ -279,4 +345,43 @@ class TestPaymentPlanQueries(APITestCase):
                 "businessArea": "afghanistan",
                 "paymentPlanId": encode_id_base64(self.pp_conflicted.pk, "PaymentPlan"),
             },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_filter_payment_plans_with_follow_up_flag(self) -> None:
+        create_child_payment_plans(self.pp)
+
+        resp_data = self.graphql_request(
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "isFollowUp": False,
+            },
+        )["data"]
+
+        pp_query = resp_data["allPaymentPlans"]["edges"]
+
+        assert len(pp_query) == 2
+
+        for parent_pp_id in ["PP-01", "PP-02"]:
+            parent_pp = [pp for pp in pp_query if pp["node"]["unicefId"] == parent_pp_id][0]["node"]
+            assert parent_pp["isFollowUp"] is False
+            assert parent_pp["sourcePaymentPlan"] is None
+
+            # check followUps
+            follow_ups = parent_pp["followUps"]
+
+            if parent_pp_id == "PP-01":
+                assert follow_ups["totalCount"] == 2
+                for unicef_id in ["PP-0060-20-00000003", "PP-0060-20-00000004"]:
+                    assert len([i for i in follow_ups["edges"] if i["node"]["unicefId"] == unicef_id]) == 1
+
+            if parent_pp_id == "PP-02":
+                assert follow_ups["totalCount"] == 0
+
+    def test_fetch_payment_plan_status_choices(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_STATUS_CHOICES_QUERY,
+            context={"user": self.user},
         )

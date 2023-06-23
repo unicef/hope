@@ -25,6 +25,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 1
                         },
+                        'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
                         'endDate': '2020-11-10',
@@ -59,6 +60,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 0
                         },
+                        'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
                         'endDate': '2020-11-10',
@@ -179,11 +181,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
             'edges': [
                 {
                     'node': {
+                        'conflicted': False,
                         'deliveredQuantity': 50.0,
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
                         'parent': {
                             'unicefId': 'PP-02'
                         },
@@ -209,11 +211,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
             'edges': [
                 {
                     'node': {
+                        'conflicted': False,
                         'deliveredQuantity': 50.0,
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
                         'parent': {
                             'unicefId': 'PP-01'
                         },
@@ -228,11 +230,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                 },
                 {
                     'node': {
+                        'conflicted': True,
                         'deliveredQuantity': 50.0,
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': True,
                         'parent': {
                             'unicefId': 'PP-01'
                         },
@@ -290,7 +292,52 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Open',
                 'value': 'OPEN'
+            },
+            {
+                'name': 'Preparing',
+                'value': 'PREPARING'
             }
         ]
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'followUps': {
+                            'edges': [
+                            ],
+                            'totalCount': 0
+                        },
+                        'isFollowUp': True,
+                        'sourcePaymentPlan': {
+                            'unicefId': 'PP-01'
+                        },
+                        'unicefId': 'PP-0060-20-00000005'
+                    }
+                },
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'followUps': {
+                            'edges': [
+                            ],
+                            'totalCount': 0
+                        },
+                        'isFollowUp': True,
+                        'sourcePaymentPlan': {
+                            'unicefId': 'PP-01'
+                        },
+                        'unicefId': 'PP-0060-20-00000006'
+                    }
+                }
+            ]
+        }
     }
 }

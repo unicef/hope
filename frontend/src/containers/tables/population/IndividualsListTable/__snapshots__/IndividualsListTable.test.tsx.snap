@@ -68,6 +68,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-3"
+            data-cy="table-title"
           >
             <thead
               class="MuiTableHead-root"
@@ -81,7 +82,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   />
                 </th>
                 <th
@@ -90,7 +92,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Individual ID
                   </span>
@@ -101,7 +104,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Individual
                   </span>
@@ -112,7 +116,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Household ID
                   </span>
@@ -123,7 +128,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Relationship to HoH
                   </span>
@@ -134,7 +140,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Age
                   </span>
@@ -145,7 +152,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Gender
                   </span>
@@ -156,7 +164,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
+                    data-cy="table-label"
                   >
                     Administrative Level 2
                   </span>
@@ -167,7 +176,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-bZQynM IAXmQ MuiTableRow-hover"
+                class="MuiTableRow-root sc-iwsKbI jVTAHI MuiTableRow-hover"
                 data-cy="individual-table-row"
                 role="checkbox"
               >
@@ -179,7 +188,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   >
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root sc-gzVnrw ehdClQ"
+                      class="MuiSvgIcon-root sc-gZMcBi ehqlMD"
                       confirmed="0"
                       focusable="false"
                       title="Possible Duplicate"
@@ -201,7 +210,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-ifAKCX hQSvGu"
+                    class="sc-htoDjs jgMSRO"
                     href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2VkZDRiNDktNTRlMC00NDA4LThmZDItMTAzMGYwNWE3YTZh"
                   >
                     IND-74-0000.0006
@@ -235,7 +244,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 216px;"
+                style="height: 54px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
@@ -247,6 +256,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
         </div>
         <div
           class="MuiTablePagination-root"
+          data-cy="table-pagination"
         >
           <div
             class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

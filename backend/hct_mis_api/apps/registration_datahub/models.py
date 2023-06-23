@@ -30,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DISABILITY_CHOICES,
-    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     NOT_PROVIDED,
@@ -95,6 +94,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
+    zip_code = models.CharField(max_length=12, blank=True, null=True)
     """location contains lowest administrative area info"""
     admin_area = models.CharField(max_length=255, blank=True, default=BLANK)
     admin_area_title = models.CharField(max_length=255, blank=True, default=BLANK)
@@ -155,6 +155,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
+    enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
         related_name="imported_households",
@@ -225,9 +226,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
-    phone_no_valid = models.BooleanField(default=False)
+    phone_no_valid = models.BooleanField(null=True)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
-    phone_no_alternative_valid = models.BooleanField(default=False)
+    phone_no_alternative_valid = models.BooleanField(null=True)
+    email = models.CharField(max_length=255, blank=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -367,7 +369,6 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         null=True,
     )
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
-    # TODO: Add business_area FK field instead
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:
@@ -439,7 +440,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
-    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    key = models.CharField(max_length=50, unique=True)
     is_identity_document = models.BooleanField(default=True)
 
     def __str__(self) -> str:
@@ -457,6 +458,8 @@ class ImportedDocument(TimeStampedUUIDModel):
     )
     country = CountryField(default="U")
     doc_date = models.DateField(blank=True, null=True, default=None)
+    issuance_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True, db_index=True)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -514,7 +517,7 @@ class Record(models.Model):
         (STATUS_ERROR, "Error"),
     )
 
-    registration = models.IntegerField()
+    registration = models.IntegerField(db_index=True)
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
     registration_data_import = models.ForeignKey(
@@ -662,6 +665,7 @@ class DiiaIndividual(models.Model):
     doc_serie = models.CharField(max_length=64, blank=True, null=True)
     doc_number = models.CharField(max_length=64, blank=True, null=True)
     doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",

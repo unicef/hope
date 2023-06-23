@@ -13,16 +13,16 @@ from django.utils import timezone
 
 from admin_extra_buttons.decorators import button
 
-from ...targeting.services.targeting_stats_refresher import refresh_stats
-from ..forms import (
+from hct_mis_api.apps.household.forms import (
     AddToTargetPopulationForm,
     CreateTargetPopulationForm,
+    MassRestoreForm,
     MassWithdrawForm,
-    RestoreForm,
     WithdrawForm,
 )
-from ..models import Household
-from ..services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class HouseholdWithDrawnMixin:
@@ -48,11 +48,11 @@ class HouseholdWithDrawnMixin:
         service = HouseholdWithdraw(hh)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
-            hh.unwithdraw()
+            service.unwithdraw()
             message = "{target} has been restored by {user}. {comment}"
             ticket_message = "Ticket reopened due to Household restore"
         else:
-            hh.withdraw(tag=tag)
+            service.withdraw(tag=tag)
             message = "{target} has been withdrawn by {user}. {comment}"
             ticket_message = "Ticket closed due to Household withdrawn"
 
@@ -120,7 +120,7 @@ class HouseholdWithDrawnMixin:
         context["queryset"] = qs
         results = 0
         if "apply" in request.POST:
-            form = RestoreForm(request.POST)
+            form = MassRestoreForm(request.POST)
             if form.is_valid():
                 with atomic():
                     if form.cleaned_data["reopen_tickets"]:
@@ -142,7 +142,7 @@ class HouseholdWithDrawnMixin:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
-            context["form"] = RestoreForm(
+            context["form"] = MassRestoreForm(
                 initial={
                     "reopen_tickets": True,
                     "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),

@@ -12,13 +12,67 @@ from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from environ.environ import Env
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
 from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
-from .config import env
+DEFAULTS = {
+    "AURORA_SERVER": (str, ""),
+    "AURORA_TOKEN": (str, ""),
+    "AURORA_USER": (str, ""),
+    "DEBUG": (bool, False),
+    "ENV": (str, "dev"),
+    "DOMAIN": (str, "localhost:8000"),
+    "DJANGO_ALLOWED_HOSTS": (list, "*"),
+    "HCT_MIS_FRONTEND_HOST": (str, ""),
+    "ALERTS_EMAIL": (str, "admin@hct-mis.com"),
+    "SECRET_KEY": (str, ""),
+    "DATA_VOLUME": (str, "/data"),
+    "HCT_MIS_UPLOADS_PATH": (str, ""),
+    "DEFAULT_FROM_EMAIL": (str, "HCT-MIS Stage <noreply@hct-mis.org>"),
+    "EMAIL_BACKEND": (str, "django.core.mail.backends.smtp.EmailBackend"),
+    "EMAIL_HOST": (str, ""),
+    "EMAIL_PORT": (str, ""),
+    "EMAIL_HOST_USER": (str, ""),
+    "EMAIL_HOST_PASSWORD": (str, ""),
+    "EMAIL_USE_TLS": (bool, True),
+    "KOBO_KF_URL": (str, "https://kf-hope.unitst.org"),
+    "KOBO_KC_URL": (str, "https://kc-hope.unitst.org"),
+    "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
+    "AZURE_CLIENT_ID": (str, ""),
+    "AZURE_CLIENT_SECRET": (str, ""),
+    "AZURE_TENANT_KEY": (str, ""),
+    "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
+    "ELASTICSEARCH_HOST": (str, "elasticsearch:9200"),
+    "RAPID_PRO_URL": (str, "https://rapidpro.io"),
+    "DATAMART_USER": (str, ""),
+    "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
+    "DATAMART_PASSWORD": (str, ""),
+    "POWER_QUERY_DB_ALIAS": (str, "read_only"),
+    "ROOT_ACCESS_TOKEN": (str, ""),
+    "SENTRY_DSN": (str, ""),
+    "SENTRY_URL": (str, ""),
+    "CELERY_BROKER_URL": (str, ""),
+    "CELERY_RESULT_BACKEND": (str, ""),
+    "CELERY_TASK_ALWAYS_EAGER": (bool, False),
+    "ADMIN_PANEL_URL": (str, "unicorn"),
+    "SESSION_COOKIE_SECURE": (bool, True),
+    "SESSION_COOKIE_HTTPONLY": (bool, True),
+    "CSRF_COOKIE_HTTPONLY": (bool, True),
+    "CSRF_COOKIE_SECURE": (bool, True),
+    "SECURE_CONTENT_TYPE_NOSNIFF": (bool, True),
+    "SECURE_REFERRER_POLICY": (str, "same-origin"),
+    "SESSION_COOKIE_NAME": (str, "sessionid"),
+    "SECURE_HSTS_SECONDS": (int, 3600),
+    "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
+    "LOGGING_DISABLED": (bool, False),
+    "CACHE_ENABLED": (bool, True),
+}
+
+env = Env(**DEFAULTS)
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -31,12 +85,13 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 
+
 ####
 # Other settings
 ####
 ADMINS = (
     ("Alerts", env("ALERTS_EMAIL")),
-    ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
+    ("Kellton", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@kellton.com"),
 )
 
 SITE_ID = 1
@@ -70,6 +125,15 @@ MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DI
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 
+GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
+GRIEVANCE_UPLOAD_CONTENT_TYPES = (
+    "image/jpeg",
+    "image/png",
+    "image/tiff",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+)
+
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 STATIC_URL = "/api/static/"
 STATIC_ROOT = f"{DATA_VOLUME}/staticserve"
@@ -81,13 +145,113 @@ STATICFILES_FINDERS = (
     "compressor.finders.CompressorFinder",
 )
 
-DEBUG = True
-IS_DEV = False
-IS_STAGING = False
-IS_PROD = False
+AZURE_ACCOUNT_NAME = env("STORAGE_AZURE_ACCOUNT_NAME", default="")
+AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")
+
+if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
+    # STORAGE
+    STATIC_LOCATION = "static"
+    MEDIA_LOCATION = "media"
+
+    MEDIA_STORAGE_AZURE_ACCOUNT_NAME = env("MEDIA_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
+    MEDIA_STORAGE_AZURE_ACCOUNT_KEY = env("MEDIA_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
+    STATIC_STORAGE_AZURE_ACCOUNT_NAME = env("STATIC_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
+    STATIC_STORAGE_AZURE_ACCOUNT_KEY = env("STATIC_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
+
+    AZURE_URL_EXPIRATION_SECS = 10800
+
+    AZURE_STATIC_CUSTOM_DOMAIN = f"{STATIC_STORAGE_AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+    AZURE_MEDIA_CUSTOM_DOMAIN = f"{MEDIA_STORAGE_AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+    STATIC_URL = f"https://{AZURE_STATIC_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
+    MEDIA_URL = f"https://{AZURE_MEDIA_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
+
+    DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
+    STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
+
+
+SENTRY_DSN = env("SENTRY_DSN")
+if SENTRY_DSN:
+    import re
+
+    sentry_key = re.search(r"//(.*)@", SENTRY_DSN).group(1)
+    sentry_id = re.search(r"@.*/(\d*)$", SENTRY_DSN).group(1)
+    CSP_REPORT_URI = (f"https://excubo.unicef.io/api/{sentry_id}/security/?sentry_key={sentry_key}",)
+    CSP_REPORT_ONLY = True  # TODO: change to False after testing
+CSP_REPORT_PERCENTAGE = 0.1
+
+# default source as self
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "fonts.googleapis.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "maxcdn.bootstrapcdn.com",
+    "unpkg.com",
+    "hctmisdev.blob.core.windows.net",  # dev
+    "saunihopestg.blob.core.windows.net",  # stg
+    "saunihopetrn.blob.core.windows.net",  # trn
+    "saunihopeprd.blob.core.windows.net",  # prod
+)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+    "gov-bam.nr-data.net",
+    "js-agent.newrelic.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "unpkg.com",
+)
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+    "cdn.datatables.net",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+    "map1a.vis.earthdata.nasa.gov",
+    "map1b.vis.earthdata.nasa.gov",
+    "map1c.vis.earthdata.nasa.gov",
+)
+CSP_FONT_SRC = (
+    "'self'",
+    "data:",
+    "fonts.gstatic.com",
+    "maxcdn.bootstrapcdn.com",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+)
+CSP_MEDIA_SRC = ("'self'",)
+CSP_CONNECT_SRC = (
+    "excubo.unicef.io",
+    "sentry.io",
+    "gov-bam.nr-data.net",
+    "cdn.jsdelivr.net",
+    "hope.unicef.org",  # prod
+    "trn-hope.unitst.org",  # trn
+    "stg-hope.unitst.org",  # stg
+    "dev-hope.unitst.org",  # dev
+)
+
+DEBUG = env.bool("DEBUG", default=False)
+
+if DEBUG:
+    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
+EMAIL_BACKEND = env("EMAIL_BACKEND")
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
@@ -106,7 +270,7 @@ if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = f"{ENV}"
 
 # BACKWARD_COMPATIBILITY SNIPPET
-if "DATABASE_URL" not in os.environ:
+if "DATABASE_URL" not in os.environ:  # set in pipelines
     os.environ["DATABASE_URL"] = (
         f'postgis://{os.getenv("POSTGRES_USER")}'
         f':{os.getenv("POSTGRES_PASSWORD")}'
@@ -163,6 +327,32 @@ DATABASES = {
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
+if env("POSTGRES_SSL", default=False):
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
+    DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=mis",
+    }
+    DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=ca",
+    }
+    DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=erp",
+    }
+    DATABASES["registration_datahub"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
+
+
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
@@ -176,20 +366,22 @@ DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
+    "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
 ]
 
 TEMPLATES: List[Dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(PROJECT_ROOT, "apps", "administration", "templates"),
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
@@ -209,6 +401,7 @@ TEMPLATES: List[Dict[str, Any]] = [
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
             ],
+            "debug": DEBUG,
         },
     },
 ]
@@ -235,6 +428,8 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
+    "hct_mis_api.aurora.apps.Config",
+    "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
 ]
 
 DJANGO_APPS = [
@@ -320,62 +515,33 @@ def extend_list_avoid_repeats(list_to_extend: List, extend_with: List) -> None:
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
-LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
-LOGGING: Dict[str, Any] = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
-        "verbose": {
-            "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
-        },
-    },
-    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {
-        "default": {
-            "level": LOG_LEVEL,
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
-        "file": {
-            "level": LOG_LEVEL,
-            "class": "logging.FileHandler",
-            "filename": "debug.log",
-        },
-    },
-    "loggers": {
-        "": {"handlers": ["default"], "level": "INFO", "propagate": True},
-        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-        "django.request": {
-            "handlers": ["default"],
-            "level": "ERROR",
-            "propagate": False,
-        },
-        "django.security.DisallowedHost": {
-            # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
-            "handlers": ["default"],
-            "propagate": False,
-        },
-        "elasticsearch": {"handlers": ["file"], "level": "CRITICAL", "propagate": True},
-    },
-}
-
-GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
+GIT_VERSION = env("GIT_VERSION", default="UNKNOWN")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 
-REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
-if "CACHE_URL" not in os.environ:
-    if REDIS_INSTANCE:
-        os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
-    else:
-        os.environ["CACHE_URL"] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
+REDIS_INSTANCE = env("REDIS_INSTANCE", default="redis:6379")
 
-CACHES = {
-    "default": env.cache(),
-}
+CACHE_ENABLED = env("CACHE_ENABLED", default=True)
 
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
+CACHES: Dict[str, Any]
+if CACHE_ENABLED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": f"redis://{REDIS_INSTANCE}/1",
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
+            "TIMEOUT": 1800,
+        }
+    }
+
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
+SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY")
+SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 
@@ -425,6 +591,7 @@ SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_SCOPE = [
 ]
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool("SOCIAL_AUTH_REDIRECT_IS_HTTPS", default=True)
 
 LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 
@@ -442,10 +609,14 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
-ELASTICSEARCH_INDEX_PREFIX = ""
+ELASTICSEARCH_INDEX_PREFIX = env("ELASTICSEARCH_INDEX_PREFIX", default="")
 ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
 }
+
+GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", True)
+
+ELASTICSEARCH_BASE_SETTINGS = {"number_of_shards": 1, "number_of_replicas": 0}
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
@@ -474,10 +645,37 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0)],
         },
     ),
+    "priority_choices": (
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (
+                (1, _("High")),
+                (2, _("Medium")),
+                (3, _("Low")),
+            ),
+        },
+    ),
+    "urgency_choices": (
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (
+                (1, _("Very urgent")),
+                (2, _("Urgent")),
+                (3, _("Not urgent")),
+            ),
+        },
+    ),
 }
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
+    "AURORA_SERVER": (
+        "",
+        "",
+        str,
+    ),
     "DEDUPLICATION_DUPLICATE_SCORE": (
         6.0,
         "Results equal or above this score are considered duplicates",
@@ -545,13 +743,14 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "QUICK_LINKS": (
-        """Kobo,https://kf-hope.unitst.org/;
-CashAssist,https://cashassist-trn.crm4.dynamics.com/;
-Sentry,https://excubo.unicef.io/sentry/;
-elasticsearch,hope-elasticsearch-coordinating-only:9200;
-Datamart,https://datamart.unicef.io;
-Flower,https://stg-hope.unitst.org/flower/;
-Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
+        """Kobo,https://kf-hope.unitst.org/
+CashAssist,https://cashassist-trn.crm4.dynamics.com/
+Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
+elasticsearch,hope-elasticsearch-coordinating-only:9200
+Datamart,https://datamart.unicef.io
+Flower,https://stg-hope.unitst.org/flower/
+Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/
+Clear Cache,clear-cache/
 """,
         "",
         str,
@@ -577,7 +776,7 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         bool,
     ),
     "RECALCULATE_POPULATION_FIELDS_CHUNK": (
-        100000,
+        50000,
         "recalculate_population_fields_task Household table pagination value",
         "positive_integers",
     ),
@@ -716,7 +915,7 @@ SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
 SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
 
-EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
+EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY", default=1 * 60 * 60 * 24)
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 
@@ -732,7 +931,7 @@ def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
 def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
-    from ..apps.utils.security import is_root
+    from ..apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
         return mark_safe(value.replace(":", r":<br>"))
@@ -793,6 +992,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
+MAX_STORAGE_FILE_SIZE = 30
 USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
@@ -850,9 +1050,104 @@ SHELL_PLUS_DONT_LOAD = [
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
 
-if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
+if CYPRESS_TESTING and ENV != "dev":
     from django.core.exceptions import ImproperlyConfigured
 
-    raise ImproperlyConfigured(
-        f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
+    raise ImproperlyConfigured(f"CYPRESS_TESTING can only be used in development env: ENV={ENV}")
+
+CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
+
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
+SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
+
+FLOWER_ADDRESS = env("FLOWER_ADDRESS")
+
+LOGGING_DISABLED = env.bool("LOGGING_DISABLED", default=False)
+
+LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
+
+LOGGING: Dict[str, Any] = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
+        "verbose": {
+            "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
+        },
+    },
+    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+    "handlers": {
+        "default": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": LOG_LEVEL,
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+        },
+    },
+    "loggers": {
+        "": {"handlers": ["default"], "level": "INFO", "propagate": True},
+        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+        "django.request": {
+            "handlers": ["default"],
+            "level": "DEBUG" if DEBUG else "ERROR",
+            "propagate": False,
+        },
+        "django.security.DisallowedHost": {
+            # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
+            "handlers": ["default"],
+            "propagate": False,
+        },
+        "elasticsearch": {"handlers": ["file"], "level": "CRITICAL", "propagate": True},
+    },
+}
+
+# overwrite Azure logs
+logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
+logger_azure.setLevel(logging.WARNING)
+
+
+if LOGGING_DISABLED:
+    LOGGING["loggers"].update(
+        {
+            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+            "registration_datahub.tasks.deduplicate": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+            "elasticsearch": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "elasticsearch-dsl-django": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+        }
     )
+
+    logging.disable(logging.CRITICAL)

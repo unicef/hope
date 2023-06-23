@@ -1,21 +1,29 @@
 import operator
 from functools import reduce
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 import factory
+from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User, UserGroup
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
-from hct_mis_api.apps.power_query.models import Formatter, Parametrizer, Query, Report
+from hct_mis_api.apps.power_query.models import (
+    Dataset,
+    Formatter,
+    Parametrizer,
+    Query,
+    Report,
+    ReportDocument,
+)
 
 
-class GroupFactory(factory.DjangoModelFactory):
+class GroupFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Group%s" % x)
 
     class Meta:
@@ -23,13 +31,13 @@ class GroupFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class ContentTypeFactory(factory.DjangoModelFactory):
+class ContentTypeFactory(DjangoModelFactory):
     class Meta:
         model = ContentType
         django_get_or_create = ("app_label", "model")
 
 
-class QueryFactory(factory.DjangoModelFactory):
+class QueryFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Query%s" % x)
     owner = factory.SubFactory(UserFactory, is_superuser=True, is_staff=True)
     target = factory.Iterator(ContentType.objects.filter(app_label="auth", model="permission"))
@@ -40,7 +48,22 @@ class QueryFactory(factory.DjangoModelFactory):
         # django_get_or_create = ("name",)
 
 
-class FormatterFactory(factory.DjangoModelFactory):
+class DatasetFactory(DjangoModelFactory):
+    query = factory.SubFactory(QueryFactory)
+
+    class Meta:
+        model = Dataset
+        # django_get_or_create = ("name",)
+
+    @classmethod
+    def create(cls, **kwargs: Dict) -> Dataset:
+        # ret = super().create(**kwargs)
+        q: Query = cls.query.get_factory().create()
+        q.run(persist=True)
+        return q.datasets.first()
+
+
+class FormatterFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Formatter%s" % x)
     content_type = "html"
 
@@ -49,25 +72,42 @@ class FormatterFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class ReportFactory(factory.DjangoModelFactory):
+class ReportFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Report%s" % x)
     query = factory.Iterator(Query.objects.all())
     formatter = factory.Iterator(Formatter.objects.all())
     owner = factory.SubFactory(UserFactory, is_superuser=True, is_staff=True, password="123")
+    frequence = "mon,tue,wed,thu,fri,sat,sun"
 
     class Meta:
         model = Report
         django_get_or_create = ("name",)
 
 
-class ParametrizerFactory(factory.DjangoModelFactory):
+class ParametrizerFactory(DjangoModelFactory):
     code = "active-business-areas"
     name = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["name"])
     value = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["value"])
+    source = None
 
     class Meta:
         model = Parametrizer
         django_get_or_create = ("code",)
+
+
+class ReportDocumentFactory(DjangoModelFactory):
+    report = factory.SubFactory(ReportFactory)
+    value = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["value"])
+
+    class Meta:
+        model = ReportDocument
+
+    @classmethod
+    def create(cls, **kwargs: Dict) -> ReportDocument:
+        fmt = Formatter.objects.get(name="Queryset To HTML")
+        r: Report = ReportFactory(query=QueryFactory(), formatter=fmt)
+        r.execute(run_query=True)
+        return r.documents.first()
 
 
 def get_group(name: str = "Group1", permissions: Optional[List[Permission]] = None) -> Group:

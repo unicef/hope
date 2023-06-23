@@ -45,7 +45,8 @@ class HouseholdUploadMixin:
             photo=get_photo_from_stream(doc.get("image", None)),
             doc_date=doc["doc_date"],
             individual=member,
-            type=ImportedDocumentType.objects.get(type=doc["type"]),
+            country=doc["country"],
+            type=ImportedDocumentType.objects.get(key=doc["type"]),
         )
 
     def save_member(

@@ -23,6 +23,7 @@ from typing import (
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
+from django.http import Http404
 from django.utils import timezone
 
 import pytz
@@ -434,7 +435,20 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optional[Any]:
+def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[Any]:
+    from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
+
+    if required or encoded_id is not None:
+        decoded_id = decode_id_string(encoded_id)
+        qs = get_payment_items_sequence_qs()
+        try:
+            return qs.get(id=decoded_id)
+        except Exception:
+            raise Http404
+    return None
+
+
+def decode_and_get_object(encoded_id: Optional[str], model: Type, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -741,7 +755,6 @@ def fix_flex_type_fields(items: Any, flex_fields: Dict) -> List[Dict]:
                     item.flex_fields[key] = float(value)
                 else:
                     item.flex_fields[key] = None
-
     return items
 
 
@@ -802,7 +815,36 @@ def clear_cache_for_dashboard_totals() -> None:
         "resolve_chart_total_transferred_by_month",
     )
     # we need skip remove cache for test and because LocMemCache don't have .keys()
-    if not getattr(settings, "IS_TEST", False):
+    if getattr(settings, "CACHE_ENABLED", False):
         all_cache_keys = cache.keys("*")
         for k in [key for key in all_cache_keys if key.startswith(keys)]:
             cache.delete(k)
+
+
+"""Constants for the identification type field to key mapping, used until other systems are updated to use the new keys"""
+
+IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
+IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
+IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
+IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
+IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
+IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
+IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
+IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
+IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE = "DISABILITY_CERTIFICATE"
+IDENTIFICATION_TYPE_OTHER = "OTHER"
+IDENTIFICATION_TYPE_FOSTER_CHILD = "FOSTER_CHILD"
+
+IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "birth_certificate",
+    IDENTIFICATION_TYPE_DRIVERS_LICENSE: "drivers_license",
+    IDENTIFICATION_TYPE_NATIONAL_ID: "national_id",
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "national_passport",
+    IDENTIFICATION_TYPE_ELECTORAL_CARD: "electoral_card",
+    IDENTIFICATION_TYPE_TAX_ID: "tax_id",
+    IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: "residence_permit_no",
+    IDENTIFICATION_TYPE_BANK_STATEMENT: "bank_statement",
+    IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE: "disability_certificate",
+    IDENTIFICATION_TYPE_OTHER: "other_id",
+    IDENTIFICATION_TYPE_FOSTER_CHILD: "foster_child",
+}

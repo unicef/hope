@@ -12,7 +12,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { handleValidationErrors } from '../../../utils/utils';
+import { handleValidationErrors, today } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
@@ -20,9 +20,6 @@ import {
 } from '../../../__generated__/graphql';
 import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
 
 export const EditPaymentPlanPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -52,19 +49,20 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
+  const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlanData.paymentPlan.targetPopulation.id,
-    startDate: paymentPlanData.paymentPlan.startDate,
-    endDate: paymentPlanData.paymentPlan.endDate,
+    targetingId: paymentPlan.targetPopulation.id,
+    startDate: paymentPlan.startDate,
+    endDate: paymentPlan.endDate,
     currency: {
-      name: paymentPlanData.paymentPlan.currencyName,
-      value: paymentPlanData.paymentPlan.currency,
+      name: paymentPlan.currencyName,
+      value: paymentPlan.currency,
     },
-    dispersionStartDate: paymentPlanData.paymentPlan.dispersionStartDate,
-    dispersionEndDate: paymentPlanData.paymentPlan.dispersionEndDate,
+    dispersionStartDate: paymentPlan.dispersionStartDate,
+    dispersionEndDate: paymentPlan.dispersionEndDate,
   };
 
   const validationSchema = Yup.object().shape({
@@ -148,7 +146,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
         <Form>
           <AutoSubmitFormOnEnter />
           <EditPaymentPlanHeader
-            paymentPlan={paymentPlanData.paymentPlan}
+            paymentPlan={paymentPlan}
             handleSubmit={submitForm}
             businessArea={businessArea}
             permissions={permissions}
@@ -158,7 +156,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
             loading={loadingTargetPopulations}
             disabled
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
         </Form>
       )}
     </Formik>

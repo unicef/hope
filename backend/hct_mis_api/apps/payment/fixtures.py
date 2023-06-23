@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 import factory
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -46,7 +47,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.payment.utils import to_decimal
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -59,9 +61,18 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
-class PaymentGFKFactory(factory.django.DjangoModelFactory):
+def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
+    currency = kwargs.get("currency", "USD")
+    if currency == "USD":
+        kwargs["entitlement_quantity"] = kwargs["entitlement_quantity_usd"]
+        kwargs["delivered_quantity"] = kwargs["delivered_quantity_usd"]
+    return kwargs
+
+
+class PaymentGFKFactory(DjangoModelFactory):
     payment_object_id = factory.SelfAttribute("generic_fk_obj.id")
     payment_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
 
@@ -70,7 +81,7 @@ class PaymentGFKFactory(factory.django.DjangoModelFactory):
         abstract = True
 
 
-class PaymentPlanGFKFactory(factory.django.DjangoModelFactory):
+class PaymentPlanGFKFactory(DjangoModelFactory):
     payment_plan_object_id = factory.SelfAttribute("generic_fk_obj.id")
     payment_plan_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
 
@@ -86,7 +97,7 @@ class PaymentVerificationSummaryFactory(PaymentPlanGFKFactory):
         model = PaymentVerificationSummary
 
 
-class CashPlanFactory(factory.DjangoModelFactory):
+class CashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
@@ -160,7 +171,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
-class ServiceProviderFactory(factory.DjangoModelFactory):
+class ServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = ServiceProvider
 
@@ -172,7 +183,7 @@ class ServiceProviderFactory(factory.DjangoModelFactory):
     vision_id = factory.fuzzy.FuzzyInteger(1342342, 9999999932)
 
 
-class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
+class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
 
@@ -180,7 +191,7 @@ class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
     columns = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
 
 
-class FinancialServiceProviderFactory(factory.DjangoModelFactory):
+class FinancialServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProvider
 
@@ -201,7 +212,7 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     data_transfer_configuration = factory.Faker("json")
 
 
-class FspXlsxTemplatePerDeliveryMechanismFactory(factory.DjangoModelFactory):
+class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
     class Meta:
         model = FspXlsxTemplatePerDeliveryMechanism
 
@@ -213,14 +224,14 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(factory.DjangoModelFactory):
     xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
-class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
+class FinancialServiceProviderXlsxReportFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProviderXlsxReport
 
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
 
 
-class PaymentRecordFactory(factory.DjangoModelFactory):
+class PaymentRecordFactory(DjangoModelFactory):
     class Meta:
         model = PaymentRecord
 
@@ -265,6 +276,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     currency = factory.Faker("currency_code")
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
+    entitlement_quantity_usd = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivered_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivery_date = factory.Faker(
@@ -275,6 +287,12 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     service_provider = factory.SubFactory(ServiceProviderFactory)
     registration_ca_id = factory.Faker("uuid4")
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "PaymentRecord":
+        instance = model_class(**update_kwargs_with_usd_currency(kwargs))
+        instance.save()
+        return instance
 
 
 class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
@@ -315,7 +333,7 @@ class PaymentVerificationFactory(PaymentGFKFactory):
         model = PaymentVerification
 
 
-class RealProgramFactory(factory.DjangoModelFactory):
+class RealProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
 
@@ -367,8 +385,15 @@ class RealProgramFactory(factory.DjangoModelFactory):
     )
     individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
 
+    @factory.post_generation
+    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
 
-class RealCashPlanFactory(factory.DjangoModelFactory):
+        ProgramCycleFactory(program=self)
+
+
+class RealCashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
@@ -441,7 +466,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
-class RealPaymentRecordFactory(factory.DjangoModelFactory):
+class RealPaymentRecordFactory(DjangoModelFactory):
     class Meta:
         model = PaymentRecord
 
@@ -498,7 +523,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-class PaymentPlanFactory(factory.DjangoModelFactory):
+class PaymentPlanFactory(DjangoModelFactory):
     class Meta:
         model = PaymentPlan
 
@@ -532,6 +557,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
+    program_cycle = factory.LazyAttribute(lambda o: o.program.cycles.first())
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
@@ -549,7 +575,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
 
 
-class PaymentFactory(factory.DjangoModelFactory):
+class PaymentFactory(DjangoModelFactory):
     class Meta:
         model = Payment
 
@@ -596,9 +622,16 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
+    conflicted = False
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "Payment":
+        instance = model_class(**update_kwargs_with_usd_currency(kwargs))
+        instance.save()
+        return instance
 
 
-class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
+class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
     class Meta:
         model = DeliveryMechanismPerPaymentPlan
 
@@ -627,6 +660,7 @@ def create_payment_verification_plan_with_status(
     target_population: "TargetPopulation",
     status: str,
     verification_channel: Optional[str] = None,
+    create_failed_payments: bool = False,
 ) -> PaymentVerificationPlan:
     if not cash_plan.payment_verification_summary.exists():
         PaymentVerificationSummary.objects.create(
@@ -638,7 +672,7 @@ def create_payment_verification_plan_with_status(
         payment_verification_plan.verification_channel = verification_channel
     payment_verification_plan.save(update_fields=("status", "verification_channel"))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    for _ in range(5):
+    for n in range(5):
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
@@ -649,16 +683,35 @@ def create_payment_verification_plan_with_status(
 
         household.programs.add(program)
 
+        currency = getattr(cash_plan, "currency", None)
+        if currency is None:
+            currency = "USD"
+
         if isinstance(cash_plan, CashPlan):
             payment_record = PaymentRecordFactory(
-                parent=cash_plan,
-                household=household,
-                target_population=target_population,
+                parent=cash_plan, household=household, target_population=target_population, currency=currency
             )
         else:
+            additional_args = {}
+            if create_failed_payments:  # create only two failed Payments
+                if n == 2:
+                    additional_args = {
+                        "delivered_quantity": to_decimal(0),
+                        "delivered_quantity_usd": to_decimal(0),
+                        "status": Payment.STATUS_NOT_DISTRIBUTED,
+                    }
+                if n == 3:
+                    additional_args = {
+                        "delivered_quantity": None,
+                        "delivered_quantity_usd": None,
+                        "status": Payment.STATUS_ERROR,
+                    }
+
             payment_record = PaymentFactory(
                 parent=cash_plan,
                 household=household,
+                currency=currency,
+                **additional_args,
             )
 
         pv = PaymentVerificationFactory(
@@ -690,7 +743,7 @@ def generate_real_cash_plans() -> None:
             status=TargetPopulation.STATUS_OPEN,
             targeting_criteria=targeting_criteria,
         )
-        target_population.full_rebuild()
+        full_rebuild(target_population)
         target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
         target_population.save()
         RealPaymentRecordFactory.create_batch(
@@ -755,7 +808,9 @@ def generate_reconciled_payment_plan() -> None:
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
         program=tp.program,
+        program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
+        is_follow_up=False,
     )[0]
     # update status
     payment_plan.status_finished()
@@ -777,6 +832,7 @@ def generate_reconciled_payment_plan() -> None:
         tp,
         PaymentVerificationPlan.STATUS_ACTIVE,
         PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        True,  # create failed payments
     )
     payment_plan.update_population_count_fields()
 
@@ -863,6 +919,9 @@ def generate_payment_plan() -> None:
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
     )[0]
+    program_cycle = ProgramCycleFactory(
+        program=program,
+    )
 
     targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
     targeting_criteria = TargetingCriteria.objects.update_or_create(
@@ -894,7 +953,7 @@ def generate_payment_plan() -> None:
         program=program,
         created_by=root,
     )[0]
-    target_population.full_rebuild()
+    full_rebuild(target_population)
     target_population.save()
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
@@ -910,6 +969,7 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program=program,
+        program_cycle=program_cycle,
     )[0]
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -918,7 +978,12 @@ def generate_payment_plan() -> None:
         name="Test FSP 1",
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        vision_vendor_number=123456789,
     )[0]
+
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+    )
 
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
@@ -931,7 +996,6 @@ def generate_payment_plan() -> None:
     Payment.objects.update_or_create(
         pk=payment_1_pk,
         parent=payment_plan,
-        excluded=False,
         business_area=afghanistan,
         currency="USD",
         household=household_1,
@@ -946,7 +1010,6 @@ def generate_payment_plan() -> None:
     Payment.objects.update_or_create(
         pk=payment_2_pk,
         parent=payment_plan,
-        excluded=False,
         business_area=afghanistan,
         currency="USD",
         household=household_2,

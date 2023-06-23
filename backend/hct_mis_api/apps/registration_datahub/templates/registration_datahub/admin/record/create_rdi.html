@@ -1,0 +1,44 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load smart_register %}
+{% block action-content %}
+        <form method="post">
+            {% csrf_token %}
+    {% if qs %}
+        <table>
+            <tr>
+                <th>Filters:</th>
+                <td>{{ filters }}</td>
+            </tr>
+            <tr>
+                <th>Skipped:</th>
+                <td>{{ skipped|join:", " }}</td>
+            </tr>
+        </table>
+        <table>
+                <tr>
+                    {% for fname in all_fields %}
+                    <th>
+                        {{ fname }}
+                    </th>
+                    {% endfor %}
+                </tr>
+            {% for r in qs %}
+                <tr>
+                    {% for fname in all_fields %}
+                    <td>
+                        {{ r|lookup:fname }}
+                    </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" name="export" value="Export">
+    {% else %}
+
+    {% endif %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit" name="filter" value="Filter">
+            <input type="button" value="Back" onclick="location.href='.'">
+        </form>
+{% endblock %}

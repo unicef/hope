@@ -2,9 +2,9 @@ import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
@@ -12,6 +12,7 @@ import {
   ApproveBox,
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 export const OtherRelatedTickets = ({
   ticket,
@@ -30,7 +31,11 @@ export const OtherRelatedTickets = ({
       ? tickets.map((edge) => (
           <Box key={edge.id} mb={1}>
             <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${edge.id}`}
+              href={getGrievanceDetailsPath(
+                edge.id,
+                edge.category,
+                businessArea,
+              )}
             >
               {edge.unicefId}
             </ContentLink>
@@ -66,7 +71,7 @@ export const OtherRelatedTickets = ({
       )
     : [];
 
-  return linkedTickets.length || existingTickets.length ? (
+  return linkedTickets.length > 0 || existingTickets.length > 0 ? (
     <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
@@ -81,7 +86,7 @@ export const OtherRelatedTickets = ({
           <>{renderIds(openLinkedTickets)}</>
         </LabelizedField>
         {!show &&
-        (closedLinkedTickets.length || closedExistingTickets.length) ? (
+        (closedLinkedTickets.length > 0 || closedExistingTickets.length > 0) ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
               {t('SHOW CLOSED TICKETS')} (
@@ -104,7 +109,7 @@ export const OtherRelatedTickets = ({
           </Box>
         )}
         {show &&
-        (closedLinkedTickets.length || closedExistingTickets.length) ? (
+        (closedLinkedTickets.length > 0 || closedExistingTickets.length > 0) ? (
           <BlueBold onClick={() => setShow(false)}>
             {t('HIDE CLOSED TICKETS')} (
             {closedLinkedTickets.length + closedExistingTickets.length})

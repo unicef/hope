@@ -25,6 +25,9 @@ import { resourcesItems } from './menuItems';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
+  if (window.location.hostname === 'localhost') {
+    return '#FF6600';
+  }
   if (url.includes('trn')) {
     return '#BF360C';
   }
@@ -57,7 +60,8 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     opacity: 0.54,
   },
   drawerPaper: {
-    position: 'relative',
+    height: '100vh',
+    position: 'sticky',
     whiteSpace: 'nowrap',
     width: theme.drawer.width,
     transition: theme.transitions.create('width', {
@@ -182,14 +186,20 @@ export function Drawer({
         <Box mb={2}>
           <Divider />
         </Box>
-        <Box mb={2}>
-          <Typography variant='subtitle2' align='center'>
-            {t('Resources')}
-          </Typography>
-        </Box>
+        {open && (
+          <Box mb={2}>
+            <Typography variant='subtitle2' align='center'>
+              {t('Resources')}
+            </Typography>
+          </Box>
+        )}
         {resourcesItems.map((item) => (
           <ListItem button key={item.name + item.href}>
-            <StyledLink target='_blank' href={item.href}>
+            <StyledLink
+              data-cy={`nav-resources-${item.name}`}
+              target='_blank'
+              href={item.href}
+            >
               <Box display='flex'>
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />
@@ -199,10 +209,12 @@ export function Drawer({
         ))}
       </ResourcesBox>
       <BorderBox />
-      <div className={classes.version}>
-        <div>Backend Version: {backendVersion}</div>
-        <div>Frontend Version: {frontendVersion}</div>
-      </div>
+      {open && (
+        <div className={classes.version}>
+          <div>Backend Version: {backendVersion}</div>
+          <div>Frontend Version: {frontendVersion}</div>
+        </div>
+      )}
       <AlertDialog
         show={showMismatchedDialog}
         message={t('Version mismatch, please refresh page')}

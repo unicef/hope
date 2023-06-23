@@ -1,5 +1,6 @@
 import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
+import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
@@ -7,7 +8,9 @@ import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus, PaymentRecordStatus, PaymentStatus,
+  PaymentPlanStatus,
+  PaymentRecordStatus,
+  PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -235,6 +238,7 @@ export function paymentPlanStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    [PaymentPlanStatus.Preparing]: theme.hctPalette.gray,
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
     [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
     [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
@@ -321,6 +325,25 @@ export function grievanceTicketStatusToColor(
       return theme.hctPalette.darkBrown;
     case 'Closed':
       return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function grievanceTicketBadgeColors(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Not urgent':
+    case 'Low':
+      return theme.hctPalette.green;
+    case 'Very urgent':
+    case 'High':
+      return theme.palette.error.main;
+    case 'Urgent':
+    case 'Medium':
+      return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
   }
@@ -542,13 +565,13 @@ export function renderUserName(user): string {
 
 export const getPhoneNoLabel = (
   phoneNo: string,
-  phoneNoValid: boolean,
+  phoneNoValid?: boolean,
 ): string => {
   if (!phoneNo) return '-';
-  if (phoneNoValid) {
-    return phoneNo;
+  if (phoneNoValid === false) {
+    return 'Invalid Phone Number';
   }
-  return 'Invalid Phone Number';
+  return phoneNo;
 };
 
 const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
@@ -686,3 +709,209 @@ export async function clearCache(apolloClient = null): Promise<void> {
   localStorage.clear();
   await localForage.clear();
 }
+
+export const round = (value: number, decimals = 2): number => {
+  return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
+};
+
+type Location = ReturnType<typeof useLocation>;
+type FilterValue = string | string[] | boolean | null | undefined;
+type Filter = { [key: string]: FilterValue };
+
+export const getFilterFromQueryParams = (
+  location: Location,
+  initialFilter: Filter = {},
+): Filter => {
+  const filter: Filter = { ...initialFilter };
+  const searchParams = new URLSearchParams(location.search);
+  for (const [key, value] of searchParams.entries()) {
+    if (key in filter) {
+      const existingValue = filter[key];
+      if (Array.isArray(existingValue)) {
+        const values = value.split(',');
+        filter[key] = [...existingValue, ...values];
+      } else {
+        filter[key] =
+          value !== 'true' && value !== 'false' ? value : value === 'true';
+      }
+    }
+  }
+  return filter;
+};
+
+export const setQueryParam = (
+  key: string,
+  value: string,
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  const params = new URLSearchParams(location.search);
+
+  // Remove all existing values for the given key
+  params.delete(key);
+
+  // Add the new value for the given key
+  params.append(key, value);
+
+  history.push({ search: params.toString() });
+};
+
+export const setFilterToQueryParams = (
+  filter: { [key: string]: FilterValue },
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  const params = new URLSearchParams(location.search);
+  Object.entries(filter).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        // remove all existing params for this key
+        params.delete(key);
+
+        // add each value as a separate param
+        value.forEach((val) => {
+          if (val !== null && val !== undefined) {
+            params.append(key, val);
+          }
+        });
+      } else {
+        const paramValue =
+          typeof value === 'boolean' ? value.toString() : value;
+        params.set(key, paramValue);
+      }
+    } else {
+      params.delete(key);
+    }
+  });
+  const search = params.toString();
+  history.push({ search });
+};
+
+export const createHandleFilterChange = (
+  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
+  initialFilter: Filter,
+  history: useHistory<LocationState>,
+  location: Location,
+): ((key: string, value: FilterValue) => void) => {
+  let filterFromQueryParams = getFilterFromQueryParams(location, initialFilter);
+
+  const handleFilterChange = (key: string, value: FilterValue): void => {
+    const newFilter = {
+      ...filterFromQueryParams,
+      [key]: value,
+    };
+
+    filterFromQueryParams = newFilter;
+    onFilterChange(newFilter);
+
+    const params = new URLSearchParams(location.search);
+    const isEmpty = (v: FilterValue): boolean =>
+      v === '' ||
+      v === null ||
+      v === undefined ||
+      (Array.isArray(v) && v.length === 0);
+
+    if (isEmpty(value)) {
+      params.delete(key);
+    } else if (Array.isArray(value)) {
+      const filteredValues = value.filter((v) => !isEmpty(v));
+      if (filteredValues.length > 0) {
+        params.set(key, filteredValues.join(','));
+      } else {
+        params.delete(key);
+      }
+    } else {
+      params.set(key, value.toString());
+    }
+
+    const search = params.toString();
+    history.push({ search });
+  };
+
+  return handleFilterChange;
+};
+
+type HandleFilterChange = (key: string, value: FilterValue) => void;
+type HandleApplyFilterChanges = () => void;
+type HandleClearFilter = () => void;
+
+interface HandleFilterChangeFunctions {
+  handleFilterChange: HandleFilterChange;
+  applyFilterChanges: HandleApplyFilterChanges;
+  clearFilter: HandleClearFilter;
+}
+
+export const createHandleApplyFilterChange = (
+  initialFilter: Filter,
+  history: useHistory<LocationState>,
+  location: Location,
+  filter: Filter,
+  setFilter: (filter: { [key: string]: FilterValue }) => void,
+  appliedFilter: Filter,
+  setAppliedFilter: (filter: Filter) => void,
+): HandleFilterChangeFunctions => {
+  const handleFilterChange = (key: string, value: FilterValue): void => {
+    const newFilter = {
+      ...filter,
+      [key]: value,
+    };
+
+    setFilter(newFilter);
+  };
+
+  const applyFilterChanges = (): void => {
+    setAppliedFilter(filter);
+
+    const params = new URLSearchParams(location.search);
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          params.delete(key);
+          value.forEach((val) => {
+            if (val !== null && val !== undefined) {
+              params.append(key, val);
+            }
+          });
+        } else {
+          const paramValue =
+            typeof value === 'boolean' ? value.toString() : value;
+          params.set(key, paramValue);
+        }
+      } else {
+        params.delete(key);
+      }
+    });
+
+    const search = params.toString();
+    history.push({ search });
+
+    setFilter(filter);
+  };
+
+  const clearFilter = (): void => {
+    const params = new URLSearchParams(location.search);
+    Object.keys(appliedFilter).forEach((key) => {
+      params.delete(key);
+    });
+    const search = params.toString();
+    history.push({ search });
+    setFilter(initialFilter);
+    setAppliedFilter(initialFilter);
+  };
+
+  return {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  };
+};
+
+export const tomorrow = new Date().setDate(new Date().getDate() + 1);
+export const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+export const removeBracketsAndQuotes = (str: string): string => {
+  let modifiedStr = str;
+  modifiedStr = modifiedStr.replace(/\[|\]|"|'/g, '');
+  return modifiedStr;
+};

@@ -1,5 +1,8 @@
+from django.conf import settings
+
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -24,12 +27,13 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 
 class TestBatchDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    databases = {"default", "registration_datahub"}
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -64,7 +68,10 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         cls.registration_data_import_datahub.save()
 
         registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
-        (cls.household, cls.individuals,) = create_imported_household_and_individuals(
+        (
+            cls.household,
+            cls.individuals,
+        ) = create_imported_household_and_individuals(
             household_data={"registration_data_import": cls.registration_data_import_datahub},
             individuals_data=[
                 {
@@ -214,9 +221,10 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_batch_deduplication(self) -> None:
-        task = DeduplicateTask()
-        task.business_area = self.business_area.slug
-        task.deduplicate_imported_individuals(self.registration_data_import_datahub)
+        task = DeduplicateTask(self.business_area.slug)
+
+        with self.assertNumQueries(9):
+            task.deduplicate_imported_individuals(self.registration_data_import_datahub)
         duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
         )
@@ -282,9 +290,8 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    databases = {"default", "registration_datahub"}
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -390,11 +397,35 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_golden_record_deduplication(self) -> None:
-        task = DeduplicateTask()
-        task.business_area = self.business_area.slug
-        task.deduplicate_individuals(self.registration_data_import)
+        task = DeduplicateTask(self.business_area.slug)
+        individuals = evaluate_qs(
+            Individual.objects.filter(registration_data_import=self.registration_data_import)
+            .select_for_update()
+            .order_by("pk")
+        )
+        populate_index(individuals, get_individual_doc(self.business_area.slug))
+
+        with self.assertNumQueries(4):
+            task.deduplicate_individuals_against_population(individuals)
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
         self.assertEqual(needs_adjudication.count(), 0)
         self.assertEqual(duplicate.count(), 4)
+
+    def test_deduplicate_individuals_from_other_source(self) -> None:
+        task = DeduplicateTask(self.business_area.slug)
+        individuals = evaluate_qs(
+            Individual.objects.filter(registration_data_import=self.registration_data_import)
+            .select_for_update()
+            .order_by("pk")
+        )
+        populate_index(individuals, get_individual_doc(self.business_area.slug))
+
+        with self.assertNumQueries(4):
+            task.deduplicate_individuals_from_other_source(individuals)
+        needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+        duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
+
+        self.assertEqual(needs_adjudication.count(), 0)
+        self.assertEqual(duplicate.count(), 2)

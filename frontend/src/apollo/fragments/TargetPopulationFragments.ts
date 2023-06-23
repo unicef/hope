@@ -55,13 +55,18 @@ export const targetPopulationDetailed = gql`
       id
       name
       status
+      startDate
+      endDate
     }
     createdBy {
       id
+      email
       firstName
       lastName
     }
     targetingCriteria {
+      flagExcludeIfActiveAdjudicationTicket
+      flagExcludeIfOnSanctionList
       rules {
         id
         individualsFiltersBlocks {

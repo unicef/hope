@@ -90,7 +90,6 @@ class XLSXValidator(BaseValidator):
 
 
 class ImportDataInstanceValidator:
-    BUSINESS_AREA_SLUG = None
     business_area_code = None
     DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
         "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
@@ -550,9 +549,17 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 },
                 "other_id_no_i_c": {},
             }
+
+            def has_value(cell: Cell) -> bool:
+                if cell.value is None:
+                    return False
+                if isinstance(cell.value, str):
+                    return cell.value.strip() != ""
+                return True
+
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
-                if not any([cell.value for cell in row]):
+                if not any(has_value(cell) for cell in row):
                     continue
                 row_number = 0
                 for cell, header in zip(row, first_row):
@@ -904,7 +911,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # Important! if value == 0 or 1 it's also evaluated to True
                 # checking for int values even tho Kobo returns everything as str
                 # to no not break import if they start returning integers
-                if value in ("True", "False", True, False, "0", "1"):
+                if value in ("True", "False", True, False, "0", "1", "TRUE", "FALSE", "true", "false"):
                     return None
                 return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type bool"
         except Exception as e:

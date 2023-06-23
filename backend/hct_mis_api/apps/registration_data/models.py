@@ -36,8 +36,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         ]
     )
     LOADING = "LOADING"
+    IMPORT_SCHEDULED = "IMPORT_SCHEDULED"
     IMPORTING = "IMPORTING"
     IN_REVIEW = "IN_REVIEW"
+    MERGE_SCHEDULED = "MERGE_SCHEDULED"
     MERGING = "MERGING"
     MERGED = "MERGED"
     DEDUPLICATION_FAILED = "DEDUPLICATION_FAILED"
@@ -49,9 +51,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         (LOADING, _("Loading")),
         (DEDUPLICATION, _("Deduplication")),
         (DEDUPLICATION_FAILED, _("Deduplication Failed")),
+        (IMPORT_SCHEDULED, _("Import Scheduled")),
         (IMPORTING, _("Importing")),
         (IMPORT_ERROR, _("Import Error")),
         (IN_REVIEW, _("In Review")),
+        (MERGE_SCHEDULED, _("Merge Scheduled")),
         (MERGED, _("Merged")),
         (MERGING, _("Merging")),
         (MERGE_ERROR, _("Merge Error")),
@@ -104,6 +108,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     pull_pictures = models.BooleanField(default=True)
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
+    excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
 
     def __str__(self) -> str:
         return self.name

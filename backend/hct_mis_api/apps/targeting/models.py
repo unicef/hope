@@ -9,12 +9,10 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, JSONField, Q
-from django.utils import timezone
+from django.db.models import JSONField, Q
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
-from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -22,7 +20,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -90,6 +88,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_STEFICON_RUN = "STEFICON_RUN"
     STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
     STATUS_STEFICON_ERROR = "STEFICON_ERROR"
+    STATUS_SENDING_TO_CASH_ASSIST = "SENDING_TO_CASH_ASSIST"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
     STATUS_READY_FOR_PAYMENT_MODULE = "READY_FOR_PAYMENT_MODULE"
     STATUS_ASSIGNED = "ASSIGNED"
@@ -102,6 +101,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         (STATUS_STEFICON_COMPLETED, _("Rule Engine Completed")),
         (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
+        (STATUS_SENDING_TO_CASH_ASSIST, _("Sending to Cash Assist")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
         (STATUS_READY_FOR_PAYMENT_MODULE, _("Ready for payment module")),
         (STATUS_ASSIGNED, _("Assigned")),
@@ -238,7 +238,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
-    # todo move to StorageFile
+    # TODO: move to StorageFile
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
@@ -257,38 +257,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if self.vulnerability_score_min is not None:
             params["vulnerability_score__gte"] = self.vulnerability_score_min
         return Household.objects.filter(selections__in=HouseholdSelection.objects.filter(**params))
-
-    def refresh_stats(self) -> None:
-        households = self.household_list.only("id")
-        delta18 = relativedelta(years=+18)
-        date18ago = timezone.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__in=households).aggregate(
-            child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-        )
-        self.child_male_count = targeted_individuals.get("child_male_count")
-        self.child_female_count = targeted_individuals.get("child_female_count")
-        self.adult_male_count = targeted_individuals.get("adult_male_count")
-        self.adult_female_count = targeted_individuals.get("adult_female_count")
-        self.total_households_count = households.count()
-        self.total_individuals_count = (
-            targeted_individuals.get("child_male_count")
-            + targeted_individuals.get("child_female_count")
-            + targeted_individuals.get("adult_male_count")
-            + targeted_individuals.get("adult_female_count")
-        )
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
-
-    def full_rebuild(self) -> None:
-        household_queryset = Household.objects.filter(business_area=self.business_area)
-        household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
-        self.households.set(household_queryset)
-        self.refresh_stats()
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
 
     def get_criteria_string(self) -> str:
         try:
@@ -366,10 +334,21 @@ class HouseholdSelection(TimeStampedUUIDModel):
 
 class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     """
-    This is a set of ORed Rules. These are either applied for a candidate list
-    (against Golden Record) or for a final list (against the approved candidate
-    list).
+    Class with filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
+    (against Golden Record) or for a final list (against the approved candidate list).
+    If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
     """
+
+    flag_exclude_if_active_adjudication_ticket = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Exclude households with individuals (members or collectors) that have active adjudication ticket(s)."
+        ),
+    )
+    flag_exclude_if_on_sanction_list = models.BooleanField(
+        default=False,
+        help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
+    )
 
     def get_rules(self) -> "QuerySet":
         return self.rules.all()

@@ -68,7 +68,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Head of Household"
             >
               <a
-                class="sc-bdVaJa eeAMoW"
+                class="sc-bdVaJa hqCmJD"
                 href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
               >
                 Agata Kowalska
@@ -174,6 +174,23 @@ Jameschester, SC 24934
             </span>
             <div
               data-cy="label-Village"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Zip code
+            </span>
+            <div
+              data-cy="label-Zip code"
             >
               -
             </div>
@@ -394,7 +411,7 @@ Jameschester, SC 24934
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <a
-                class="sc-bdVaJa eeAMoW"
+                class="sc-bdVaJa hqCmJD"
                 href="/afghanistan/programs/c4d5657d-1a29-46e1-8190-df7f85a0d2ef"
               >
                 Surface campaign practice actually about about will what.

@@ -86,13 +86,14 @@ class Permissions(Enum):
     PM_LOCK_AND_UNLOCK = auto()
     PM_LOCK_AND_UNLOCK_FSP = auto()
     PM_SEND_FOR_APPROVAL = auto()
+    PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP = auto()
     PM_ACCEPTANCE_PROCESS_APPROVE = auto()
     PM_ACCEPTANCE_PROCESS_AUTHORIZE = auto()
     PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW = auto()
     PM_IMPORT_XLSX_WITH_RECONCILIATION = auto()
     PM_EXPORT_XLSX_FOR_FSP = auto()
     PM_DOWNLOAD_XLSX_FOR_FSP = auto()
-    PM_SENDING_PAYMENT_PLAN_TO_FSP = auto()
+    PM_MARK_PAYMENT_AS_FAILED = auto()
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
@@ -165,6 +166,7 @@ class Permissions(Enum):
     GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR = auto()
     GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER = auto()
     GRIEVANCE_ASSIGN = auto()
+    GRIEVANCE_DOCUMENTS_UPLOAD = auto()
 
     # Reporting
     REPORTING_EXPORT = auto()
@@ -179,6 +181,26 @@ class Permissions(Enum):
     # Core
     UPLOAD_STORAGE_FILE = auto()
     DOWNLOAD_STORAGE_FILE = auto()
+
+    # Communication
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS = auto()
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE = auto()
+    ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR = auto()
+
+    # Feedback
+    ACCOUNTABILITY_FEEDBACK_VIEW_CREATE = auto()
+    ACCOUNTABILITY_FEEDBACK_VIEW_LIST = auto()
+    ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS = auto()
+    ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE = auto()
+
+    # Feedback
+    ACCOUNTABILITY_SURVEY_VIEW_CREATE = auto()
+    ACCOUNTABILITY_SURVEY_VIEW_LIST = auto()
+    ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
+
+    # FeedbackMessage
+    ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE = auto()
 
     # Django Admin
     # ...
@@ -260,8 +282,11 @@ class BaseNodePermissionMixin:
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Any) -> None:
-        business_area = object_instance.business_area
-        if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
+        business_area = getattr(object_instance, "business_area", None)  # not every object has business_area attr
+        if (
+            business_area
+            and not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)
+        ) or not (business_area or info.context.user.is_authenticated):
             raise PermissionDenied("Permission Denied")
 
     @classmethod
@@ -351,6 +376,8 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         permission_classes: List,
     ) -> Any:
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
+        if business_area := info.context.headers.get("Business-Area"):
+            filter_kwargs["business_area"] = business_area
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:

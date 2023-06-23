@@ -8,6 +8,20 @@ import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHou
 import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllIndividualsForPopulationTable';
 
 describe('containers/tables/population/IndividualsListTable', () => {
+  const initialFilter = {
+    ageMin: '',
+    ageMax: '',
+    businessArea: 'afghanistan',
+    sex: '',
+    search: '',
+    admin2: '',
+    flags: [],
+    status: '',
+    lastRegistrationDateMin: '',
+    lastRegistrationDateMax: '',
+    orderBy: 'unicef_id',
+  };
+
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider
@@ -16,7 +30,7 @@ describe('containers/tables/population/IndividualsListTable', () => {
       >
         <IndividualsListTable
           businessArea='afghanistan'
-          filter={{}}
+          filter={initialFilter}
           canViewDetails={true}
           choicesData={fakeHouseholdChoices}
         />
@@ -36,7 +50,7 @@ describe('containers/tables/population/IndividualsListTable', () => {
       >
         <IndividualsListTable
           businessArea='afghanistan'
-          filter={{}}
+          filter={initialFilter}
           canViewDetails={true}
           choicesData={fakeHouseholdChoices}
         />

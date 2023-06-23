@@ -1,31 +1,37 @@
-import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { TargetPopulationNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import {
-  targetPopulationStatusToColor,
-  targetPopulationStatusMapping,
-} from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { Radio } from '@material-ui/core';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { targetPopulationStatusToColor } from '../../../../utils/utils';
+import { TargetPopulationNode } from '../../../../__generated__/graphql';
 
 interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
   canViewDetails: boolean;
+  selectedTargetPopulation?;
+  radioChangeHandler?: (id: string) => void;
 }
 
 export function TargetPopulationTableRow({
   targetPopulation,
   canViewDetails,
+  radioChangeHandler,
+  selectedTargetPopulation,
 }: TargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
-    history.push(targetPopulationDetailsPath);
+    if (radioChangeHandler !== undefined) {
+      radioChangeHandler(targetPopulation.id);
+    } else {
+      history.push(targetPopulationDetailsPath);
+    }
   };
   return (
     <ClickableTableRow
@@ -34,6 +40,20 @@ export function TargetPopulationTableRow({
       role='checkbox'
       key={targetPopulation.id}
     >
+      {radioChangeHandler && (
+        <TableCell padding='checkbox'>
+          <Radio
+            color='primary'
+            checked={selectedTargetPopulation === targetPopulation.id}
+            onChange={() => {
+              radioChangeHandler(targetPopulation.id);
+            }}
+            value={targetPopulation.id}
+            name='radio-button-household'
+            inputProps={{ 'aria-label': targetPopulation.id }}
+          />
+        </TableCell>
+      )}
       <TableCell align='left'>
         {canViewDetails ? (
           <BlackLink to={targetPopulationDetailsPath}>
@@ -47,7 +67,6 @@ export function TargetPopulationTableRow({
         <StatusBox
           status={targetPopulation.status}
           statusToColor={targetPopulationStatusToColor}
-          statusNameMapping={targetPopulationStatusMapping}
         />
       </TableCell>
       <TableCell align='left'>

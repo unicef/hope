@@ -1,10 +1,11 @@
 import io
 from decimal import Decimal
-from typing import List
+from typing import Dict, List
 
 import openpyxl
 from graphql import GraphQLError
-from xlwt import Row
+from openpyxl.utils import get_column_letter
+from xlwt import Row, Worksheet
 
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import from_received_yes_no_to_status, to_decimal
@@ -16,15 +17,12 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
-
     def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: io.BytesIO) -> None:
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
         self.current_row = 0
         self.errors: List[XlsxError] = []
-        self.cashplan_payment_verification = cashplan_payment_verification
         payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
         self.payment_record_verifications = payment_record_verification_obj.all()  # .prefetch_related("payment")
         self.payment_record_ids = [str(x.payment_object_id) for x in self.payment_record_verifications]
@@ -34,6 +32,21 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.payment_records_dict = {str(x.payment_object_id): x.payment_obj for x in self.payment_record_verifications}
         self.payment_verifications_to_save = []
         self.was_validation_run = False
+
+        # Get mandatory column indices as order of columns might be different in each ws
+        self.PAYMENT_RECORD_ID_COLUMN_INDEX = 0
+        self.RECEIVED_COLUMN_INDEX = 0
+        self.RECEIVED_AMOUNT_COLUMN_INDEX = 0
+
+        self.COLUMN_DICT_TYPES = {}
+
+    @staticmethod
+    def get_columns_from_worksheet(ws: Worksheet) -> Dict:
+        return {
+            cell.value: {"letter": get_column_letter(cell.column), "number": cell.column - 1}
+            for cell in ws[1]
+            if cell.value
+        }
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -73,46 +86,51 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
 
     def _validate_headers(self) -> None:
-        headers_row = self.ws_verifications[1]
-        accepted_headers = XlsxVerificationExportService.HEADERS
-        if len(headers_row) != len(accepted_headers):
+        headers = self.get_columns_from_worksheet(self.ws_verifications)
+
+        for header_name, header_attrs in headers.items():
+            if header_name == "payment_record_id":
+                self.PAYMENT_RECORD_ID_COLUMN_INDEX = header_attrs["number"]
+            elif header_name == "received":
+                self.RECEIVED_COLUMN_INDEX = header_attrs["number"]
+            elif header_name == "received_amount":
+                self.RECEIVED_AMOUNT_COLUMN_INDEX = header_attrs["number"]
+
+        missing_headers = []
+
+        if self.PAYMENT_RECORD_ID_COLUMN_INDEX is None:
+            missing_headers.append("payment_record_id")
+        if self.RECEIVED_COLUMN_INDEX is None:
+            missing_headers.append("received")
+        if self.RECEIVED_AMOUNT_COLUMN_INDEX is None:
+            missing_headers.append("received_amount")
+
+        if missing_headers:
             self.errors.append(
                 XlsxError(
                     "Payment Verifications",
                     None,
-                    f"Different count of headers. Acceptable headers count in file version "
-                    f"{XlsxVerificationExportService.VERSION}: {len(accepted_headers)}",
+                    f"Missing mandatory headers: {' '.join(missing_headers)}",
                 )
             )
-        column = 0
-        for header in headers_row:
-            if column >= len(accepted_headers):
-                self.errors.append(
-                    XlsxError(
-                        "Payment Verifications",
-                        header.coordinate,
-                        f"Unexpected header {header.value}",
-                    )
-                )
-            elif header.value != accepted_headers[column]:
-                self.errors.append(
-                    XlsxError(
-                        "Payment Verifications",
-                        header.coordinate,
-                        f"Unexpected header {header.value} expected {accepted_headers[column]}",
-                    )
-                )
-            column += 1
+        else:
+            self.COLUMN_DICT_TYPES = {
+                self.PAYMENT_RECORD_ID_COLUMN_INDEX: "s",
+                self.RECEIVED_COLUMN_INDEX: "s",
+                self.RECEIVED_AMOUNT_COLUMN_INDEX: "n",
+            }
 
-    def _validate_row_types(self, row: Row) -> None:
+    def _validate_mandatory_row_types(self, row: Row) -> None:
+        mandatory_columns = self.COLUMN_DICT_TYPES.keys()
+
         column = 0
         for cell in row:
             if cell.value is None:
                 column += 1
                 continue
-            if cell.data_type != XlsxVerificationImportService.COLUMNS_TYPES[column]:
+            if column in mandatory_columns and cell.data_type != self.COLUMN_DICT_TYPES[column]:
                 readable_cell_error = XlsxVerificationImportService.TYPES_READABLE_MAPPING[
-                    XlsxVerificationImportService.COLUMNS_TYPES[column]
+                    self.COLUMN_DICT_TYPES[column]
                 ]
                 self.errors.append(
                     XlsxError(
@@ -125,7 +143,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             column += 1
 
     def _validate_payment_record_id(self, row: Row) -> None:
-        cell = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX]
+        cell = row[self.PAYMENT_RECORD_ID_COLUMN_INDEX]
         if cell.value not in self.payment_record_ids:
             self.errors.append(
                 XlsxError(
@@ -136,8 +154,8 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
 
     def _validate_row_received(self, row: Row) -> None:
-        valid_received = [None, "YES", "NO"]
-        cell = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX]
+        valid_received = (None, "YES", "NO")
+        cell = row[self.RECEIVED_COLUMN_INDEX]
         if cell.value not in valid_received:
             self.errors.append(
                 XlsxError(
@@ -149,16 +167,16 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
 
     def _validate_received_to_received_amount(self, row: Row) -> None:
-        payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
+        payment_record_id = row[self.PAYMENT_RECORD_ID_COLUMN_INDEX].value
         payment_record = self.payment_records_dict.get(payment_record_id)
         if payment_record is None:
             return
-        received_amount = row[XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_INDEX].value
+        received_amount = row[self.RECEIVED_AMOUNT_COLUMN_INDEX].value
         if received_amount is not None:
-            if not isinstance(received_amount, float) and not isinstance(received_amount, int):
+            if not isinstance(received_amount, (int, float)):
                 return
             received_amount = Decimal(format(round(received_amount, 2), ".2f"))
-        received_cell = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX]
+        received_cell = row[self.RECEIVED_COLUMN_INDEX]
         received = received_cell.value
         if received is None and received_amount is not None and received_amount == 0:
             self.errors.append(
@@ -197,16 +215,16 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         for row in self.ws_verifications.iter_rows(min_row=2):
             if not any([cell.value for cell in row]):
                 continue
-            self._validate_row_types(row)
+            self._validate_mandatory_row_types(row)
             self._validate_payment_record_id(row)
             self._validate_row_received(row)
             self._validate_received_to_received_amount(row)
 
     def _import_row(self, row: Row) -> None:
+        payment_record_id = row[self.PAYMENT_RECORD_ID_COLUMN_INDEX].value
+        received = row[self.RECEIVED_COLUMN_INDEX].value
+        received_amount = row[self.RECEIVED_AMOUNT_COLUMN_INDEX].value
 
-        payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
-        received = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX].value
-        received_amount = row[XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_INDEX].value
         payment_verification = self.payment_record_verifications_dict[payment_record_id]
         payment_record = self.payment_records_dict.get(payment_record_id)
         delivered_amount = payment_record.delivered_quantity

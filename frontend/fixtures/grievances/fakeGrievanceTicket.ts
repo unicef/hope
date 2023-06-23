@@ -7,6 +7,8 @@ export const fakeGrievanceTicket = {
   status: 3,
   category: 2,
   consent: true,
+  priority: 1,
+  urgency: 1,
   createdBy: {
     id: 'VXNlck5vZGU6OTEyZjg1MGItOWQwMS00ZTdmLWFiZDgtNjJkZTcwMjhjODY1',
     firstName: 'Maciej',
@@ -59,7 +61,7 @@ export const fakeGrievanceTicket = {
             photo: null,
             type: {
               label: 'National ID',
-              type: 'NATIONAL_ID',
+              key: 'NATIONAL_ID',
               __typename: 'DocumentTypeNode',
             },
             __typename: 'DocumentNode',
@@ -262,7 +264,7 @@ export const fakeGrievanceTicket = {
                     photo: null,
                     type: {
                       label: 'National ID',
-                      type: 'NATIONAL_ID',
+                      key: 'NATIONAL_ID',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
@@ -314,7 +316,7 @@ export const fakeGrievanceTicket = {
                     photo: null,
                     type: {
                       label: 'National ID',
-                      type: 'NATIONAL_ID',
+                      key: 'NATIONAL_ID',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
@@ -403,7 +405,7 @@ export const fakeGrievanceTicket = {
                     photo: null,
                     type: {
                       label: 'National ID',
-                      type: 'NATIONAL_ID',
+                      key: 'NATIONAL_ID',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',

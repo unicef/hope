@@ -61,6 +61,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -74,7 +75,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -97,7 +99,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -120,7 +123,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -143,7 +147,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -166,7 +171,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -189,7 +195,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -212,7 +219,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -235,7 +243,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -258,7 +267,8 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -281,14 +291,14 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-bZQynM IAXmQ MuiTableRow-hover"
+              class="MuiTableRow-root sc-iwsKbI jVTAHI MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6NWEyZmE4NWYtNTM4YS00M2VjLWEwZTItMzM4ZTBmZDNlODQ1"
                 >
                   123-21-PR-00006
@@ -298,10 +308,10 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
                     DISTRIBUTION SUCCESSFUL
@@ -348,6 +358,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

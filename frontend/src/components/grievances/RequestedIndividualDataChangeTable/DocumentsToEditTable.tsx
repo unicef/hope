@@ -130,12 +130,12 @@ export const DocumentsToEditTable = ({
             <TableCell />
             <TableCell align='left'>{t('Document Type')}</TableCell>
             <TableCell align='left'>
-              {documentTypeDict[document.previous_value.type]}
+              {documentTypeDict[document.previous_value.key]}
             </TableCell>
             <TableCell align='left'>
               {renderNewOrNotUpdated(
-                documentTypeDict[document.previous_value.type],
-                documentTypeDict[document.value.type],
+                documentTypeDict[document.previous_value.key],
+                documentTypeDict[document.value.key],
               )}
             </TableCell>
           </TableRow>

@@ -61,7 +61,6 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_individual_row(self, individual: Individual) -> tuple:
-
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",

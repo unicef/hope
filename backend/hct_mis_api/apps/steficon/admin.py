@@ -33,17 +33,17 @@ from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
-from ..account.models import User
-from ..administration.widgets import JsonWidget
-from ..utils.admin import HOPEModelAdminBase
-from ..utils.security import is_root
-from .forms import (
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.steficon.forms import (
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
     RuleForm,
     RuleTestForm,
 )
-from .models import MONITORED_FIELDS, Rule, RuleCommit
+from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
@@ -79,28 +79,24 @@ class AutocompleteWidget(forms.Widget):
             if i18n_name
             else []
         )
-        js = (
-            tuple(
-                [
-                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
-                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
-                ]
-                + i18n_file
-                + [
-                    "admin/js/jquery.init.js",
-                    "admin/js/autocomplete.js",
-                    "adminfilters/adminfilters{}.js".format(extra),
-                ]
-            ),
+        js = tuple(
+            [
+                "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                "admin/js/vendor/select2/select2.full{}.js".format(extra),
+            ]
+            + i18n_file
+            + [
+                "admin/js/jquery.init.js",
+                "admin/js/autocomplete.js",
+                "adminfilters/adminfilters{}.js".format(extra),
+            ]
         )
-        css = (
-            {
-                "screen": (
-                    "admin/css/vendor/select2/select2{}.css".format(extra),
-                    "adminfilters/adminfilters.css",
-                ),
-            },
-        )
+        css = {
+            "screen": [
+                "admin/css/vendor/select2/select2{}.css".format(extra),
+                "adminfilters/adminfilters.css",
+            ]
+        }
 
     def get_url(self) -> str:
         return reverse("admin:autocomplete")

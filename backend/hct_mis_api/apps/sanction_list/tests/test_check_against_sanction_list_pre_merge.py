@@ -4,7 +4,9 @@ from constance.test import override_config
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -24,7 +26,7 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 
@@ -113,7 +115,9 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
 
         ind = Individual.objects.get(full_name="Abdul Afghanistan")
         country = geo_models.Country.objects.get(iso_code3="AFG")
-        doc_type = DocumentTypeFactory(label="National ID", type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        doc_type = DocumentTypeFactory(
+            label="National ID", key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
         DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country)
         super().setUpTestData()
 
@@ -134,3 +138,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
 
         self.assertEqual(result, expected)
+
+    def test_create_system_flag_tickets(self) -> None:
+        CheckAgainstSanctionListPreMergeTask.execute()
+        self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 3)

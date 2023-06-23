@@ -66,7 +66,7 @@ export const MessageDialog = ({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>{t('Comment')}</DialogTitle>
+          <DialogTitle>{t('Comment')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

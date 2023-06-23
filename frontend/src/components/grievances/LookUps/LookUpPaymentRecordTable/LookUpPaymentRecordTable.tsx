@@ -1,11 +1,13 @@
 import React, { ReactElement, useState } from 'react';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useLocation } from 'react-router-dom';
 import {
   LookUpPaymentRecordsQueryVariables,
-  PaymentRecordNode,
+  PaymentRecordAndPaymentNode,
+  useAllPaymentRecordsAndPaymentsQuery,
   useLookUpPaymentRecordsQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 
@@ -20,6 +22,8 @@ export function LookUpPaymentRecordTable({
   initialValues,
 }: LookUpPaymentRecordTableProps): ReactElement {
   const businessArea = useBusinessArea();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
     household: initialValues?.selectedHousehold?.id,
     businessArea,
@@ -28,23 +32,20 @@ export function LookUpPaymentRecordTable({
     initialValues.selectedPaymentRecords,
   );
 
-  const handleCheckboxClick = (event, name): void => {
+  const handleCheckboxClick = (
+    _event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    name: string,
+  ): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
+    const newSelected = [...selected];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+      newSelected.push(name);
+    } else {
+      newSelected.splice(selectedIndex, 1);
     }
-
     setSelected(newSelected);
     setFieldValue('selectedPaymentRecords', newSelected);
   };
@@ -60,11 +61,36 @@ export function LookUpPaymentRecordTable({
     setFieldValue('selectedPaymentRecords', []);
   };
   const numSelected = selected.length;
+  if (isEditTicket) {
+    return (
+      <UniversalTable<
+        PaymentRecordAndPaymentNode,
+        LookUpPaymentRecordsQueryVariables
+      >
+        headCells={headCells}
+        query={useLookUpPaymentRecordsQuery}
+        queriedObjectName='allPaymentRecords'
+        initialVariables={initialVariables}
+        renderRow={(row) => (
+          <LookUpPaymentRecordTableRow
+            openInNewTab={openInNewTab}
+            key={row.id}
+            paymentRecord={row}
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
+          />
+        )}
+      />
+    );
+  }
   return (
-    <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
+    <UniversalTable<
+      PaymentRecordAndPaymentNode,
+      LookUpPaymentRecordsQueryVariables
+    >
       headCells={headCells}
-      query={useLookUpPaymentRecordsQuery}
-      queriedObjectName='allPaymentRecords'
+      query={useAllPaymentRecordsAndPaymentsQuery}
+      queriedObjectName='allPaymentRecordsAndPayments'
       initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}

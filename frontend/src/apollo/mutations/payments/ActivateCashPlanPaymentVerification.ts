@@ -7,8 +7,6 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
     ) {
       paymentPlan {
         id
-        # status
-        # statusDate
         verificationPlans {
           edges {
             node {
@@ -21,6 +19,7 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         paymentVerificationSummary {
           id
           status
+          activationDate
         }
       }
       validationErrors

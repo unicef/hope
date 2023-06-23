@@ -9,8 +9,8 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.cache import get_conditional_response
 from django.utils.http import http_date
 
-from .models import Report, ReportDocument
-from .utils import basicauth
+from hct_mis_api.apps.power_query.models import Report, ReportDocument, mimetype_map
+from hct_mis_api.apps.power_query.utils import basicauth
 
 
 @login_required()
@@ -44,7 +44,9 @@ def document(request: HttpRequest, report: ReportDocument, pk: UUID) -> HttpResp
         last_modified=res_last_modified,
     )
     if response is None:
-        response = HttpResponse(doc.data, content_type=doc.content_type)
+        response = HttpResponse(doc.data, content_type=mimetype_map[doc.content_type])
+        response.headers["X-PQ-Report"] = doc.report.pk
+        response.headers["X-PQ-Document"] = doc.pk
         if doc.content_type == "xls":
             response["Content-Disposition"] = f"attachment; filename={doc.title}.xls"
         else:

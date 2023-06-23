@@ -18,7 +18,7 @@ def create_mapping_dict(simple_mapping: List, complex_mapping: Optional[Dict] = 
 
 def create_diff(old_object: Any, new_object: Any, mapping: Dict) -> Dict:
     changes_dict = {}
-    for (field_name, repr_name) in mapping.items():
+    for field_name, repr_name in mapping.items():
         old_value = None
         new_value = None
         if old_object:

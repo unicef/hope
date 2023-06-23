@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
 import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
@@ -19,7 +19,17 @@ interface LookUpHouseholdTableProps {
   selectedHousehold?;
   setSelectedIndividual?;
   setSelectedHousehold?;
+  noTableStyling?;
+  householdMultiSelect?: boolean;
+  redirectedFromRelatedTicket?: boolean;
 }
+
+const NoTableStyling = styled.div`
+  .MuiPaper-elevation1 {
+    box-shadow: none;
+    padding: 0 !important;
+  }
+`;
 
 export const LookUpHouseholdTable = ({
   businessArea,
@@ -29,20 +39,58 @@ export const LookUpHouseholdTable = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  noTableStyling = false,
+  householdMultiSelect,
+  redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     search: filter.search,
-    programs: [filter.programs],
-    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
+    admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
-    admin2: [decodeIdString(filter?.admin2?.node?.id)],
     familySize: JSON.stringify(filter.size),
-    withdrawn: false,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
   }
+  const [selected, setSelected] = useState<string[]>(
+    householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
+  );
+
+  const handleCheckboxClick = (
+    _event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    name: string,
+  ): void => {
+    const selectedIndex = selected.indexOf(name);
+    const newSelected = [...selected];
+
+    if (selectedIndex === -1) {
+      newSelected.push(name);
+    } else {
+      newSelected.splice(selectedIndex, 1);
+    }
+
+    if (setSelectedIndividual === undefined && householdMultiSelect) {
+      setSelectedHousehold(newSelected);
+    }
+    setSelected(newSelected);
+  };
+
+  const handleSelectAllCheckboxesClick = (event, rows): void => {
+    event.preventDefault();
+    let newSelecteds = [];
+    if (!selected.length) {
+      newSelecteds = rows.map((row) => row.id);
+      setSelected(newSelecteds);
+    } else {
+      setSelected([]);
+    }
+    if (setSelectedIndividual === undefined && householdMultiSelect) {
+      setSelectedHousehold(newSelecteds);
+    }
+  };
 
   const handleRadioChange = (
     household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
@@ -50,20 +98,27 @@ export const LookUpHouseholdTable = ({
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
-    setSelectedIndividual(null);
+    if (setSelectedIndividual !== undefined) {
+      setSelectedIndividual(null);
+    }
     setFieldValue('identityVerified', false);
   };
-  return (
-    <TableWrapper>
+
+  const renderTable = (): React.ReactElement => {
+    return (
       <UniversalTable<
         AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
         AllHouseholdsQueryVariables
       >
-        headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
+        headCells={householdMultiSelect ? headCells.slice(1) : headCells}
+        rowsPerPageOptions={[5, 10, 15, 20]}
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        onSelectAllClick={
+          householdMultiSelect && handleSelectAllCheckboxesClick
+        }
+        numSelected={householdMultiSelect && selected.length}
         renderRow={(row) => (
           <LookUpHouseholdTableRow
             key={row.id}
@@ -71,9 +126,18 @@ export const LookUpHouseholdTable = ({
             radioChangeHandler={handleRadioChange}
             selectedHousehold={selectedHousehold}
             choicesData={choicesData}
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
+            householdMultiSelect={householdMultiSelect}
+            redirectedFromRelatedTicket={redirectedFromRelatedTicket}
           />
         )}
       />
-    </TableWrapper>
+    );
+  };
+  return noTableStyling ? (
+    <NoTableStyling>{renderTable()}</NoTableStyling>
+  ) : (
+    <TableWrapper>{renderTable()}</TableWrapper>
   );
 };

@@ -28,6 +28,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
 def base_setup(cls: Any) -> None:
@@ -89,7 +90,7 @@ def payment_plan_setup(cls: Any) -> None:
         business_area=cls.business_area,
         status=TargetPopulation.STATUS_LOCKED,
     )
-    target_population.full_rebuild()
+    full_rebuild(target_population)
     target_population.save()
     cls.payment_plan = PaymentPlanFactory(
         total_households_count=4, target_population=target_population, status=PaymentPlan.Status.LOCKED
@@ -667,7 +668,6 @@ class TestFSPAssignment(APITestCase):
             entitlement_quantity_usd=200000,  # a lot
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -817,7 +817,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         assert data[2]["volumeUsd"] == 0
 
         # Simulate applying steficon formula
-        PaymentFactory(
+        payment_1 = PaymentFactory(
             parent=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_2[0],
@@ -826,9 +826,8 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
         )
-        PaymentFactory(
+        payment_2 = PaymentFactory(
             parent=self.payment_plan,
             financial_service_provider=self.santander_fsp,
             collector=self.individuals_3[0],
@@ -837,8 +836,15 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_type=GenericPayment.DELIVERY_TYPE_TRANSFER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            excluded=False,
         )
+
+        # check created payments
+        payment_1.refresh_from_db()
+        payment_2.refresh_from_db()
+        assert payment_1.entitlement_quantity == 500
+        assert payment_1.entitlement_quantity_usd == 100
+        assert payment_2.entitlement_quantity == 1000
+        assert payment_2.entitlement_quantity_usd == 200
 
         new_get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
@@ -939,7 +945,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=500,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -950,7 +955,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=500,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -961,7 +965,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=1000,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_1,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -1018,7 +1021,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=1000,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -1029,7 +1031,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=1000,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )

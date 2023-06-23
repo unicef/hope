@@ -90,9 +90,9 @@ export function AddIndividualGrievanceDetails({
   const documentLabels =
     documents?.map((item) => {
       return (
-        <Grid key={item.country + item.type} item xs={6}>
+        <Grid key={item.country + item.key} item xs={6}>
           <LabelizedField
-            label={item.type.replace(/_/g, ' ')}
+            label={item.key.replace(/_/g, ' ')}
             value={item.number}
           />
         </Grid>

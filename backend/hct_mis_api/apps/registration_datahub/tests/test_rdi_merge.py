@@ -1,3 +1,8 @@
+from contextlib import contextmanager
+from typing import Callable, Generator
+
+from django.conf import settings
+from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 
 from freezegun import freeze_time
@@ -22,11 +27,32 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
+@contextmanager
+def capture_on_commit_callbacks(
+    *, using: str = DEFAULT_DB_ALIAS, execute: bool = False
+) -> Generator[list[Callable[[], None]], None, None]:
+    callbacks: list[Callable[[], None]] = []
+    start_count = len(connections[using].run_on_commit)
+    try:
+        yield callbacks
+    finally:
+        while True:
+            callback_count = len(connections[using].run_on_commit)
+            for _, callback in connections[using].run_on_commit[start_count:]:
+                callbacks.append(callback)
+                if execute:
+                    callback()
+
+            if callback_count == len(connections[using].run_on_commit):
+                break
+            start_count = callback_count
+
+
 class TestRdiMergeTask(BaseElasticSearchTestCase):
-    databases = "__all__"
+    databases = {"default", "registration_datahub"}
     fixtures = [
-        "hct_mis_api/apps/geo/fixtures/data.json",
-        "hct_mis_api/apps/core/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
     ]
 
     @classmethod
@@ -75,6 +101,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_1@com",
             },
             {
                 "full_name": "Robin Ford",
@@ -85,6 +112,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_2@com",
             },
             {
                 "full_name": "Timothy Perry",
@@ -95,6 +123,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_3@com",
             },
             {
                 "full_name": "Eric Torres",
@@ -105,6 +134,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_4@com",
             },
             {
                 "full_name": "Baz Bush",
@@ -115,6 +145,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_5@com",
             },
             {
                 "full_name": "Liz Female",
@@ -129,6 +160,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
                 "household": imported_household,
+                "email": "fake_email_6@com",
             },
             {
                 "full_name": "Jenna Franklin",
@@ -143,6 +175,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
                 "household": imported_household,
+                "email": "fake_email_7@com",
             },
             {
                 "full_name": "Bob Jackson",
@@ -153,6 +186,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "",
             },
         ]
 
@@ -167,10 +201,12 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin_area_title=self.area4.name,
             admin4=self.area4.p_code,
             admin4_title=self.area4.name,
+            zip_code="00-123",
+            enumerator_rec_id=1234567890,
         )
         self.set_imported_individuals(imported_household)
-
-        RdiMergeTask().execute(self.rdi.pk)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
@@ -178,6 +214,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(1, households.count())
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
+        self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
@@ -187,6 +224,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
         self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
         self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
+
+        self.assertEqual(Individual.objects.filter(full_name="Baz Bush").first().email, "fake_email_5@com")
+        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().email, "fake_email_1@com")
+        self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
 
         household_data = model_to_dict(
             households[0],
@@ -208,6 +249,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "admin2",
                 "admin3",
                 "admin4",
+                "zip_code",
             ),
         )
 
@@ -229,6 +271,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "admin2": self.area2.id,
             "admin3": self.area3.id,
             "admin4": self.area4.id,
+            "zip_code": "00-123",
         }
         self.assertEqual(household_data, expected)
 
@@ -240,7 +283,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         self.set_imported_individuals(imported_household)
 
-        RdiMergeTask().execute(self.rdi.pk)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()

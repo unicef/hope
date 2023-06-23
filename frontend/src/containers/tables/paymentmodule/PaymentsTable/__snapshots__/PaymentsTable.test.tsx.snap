@@ -9,7 +9,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-12 sc-eNQAEJ eAIuLz"
+        class="MuiBox-root MuiBox-root-11 sc-iAyFgw eivOuT"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -17,39 +17,6 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
         >
           Payee List
         </h6>
-        <div
-          class="MuiBox-root MuiBox-root-13"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
-            data-cy="button-import"
-            tabindex="0"
-            type="button"
-          >
-            <span
-              class="MuiButton-label"
-            >
-              <span
-                class="MuiButton-startIcon MuiButton-iconSizeMedium"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root sc-gzVnrw daSVHL"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
-                  />
-                </svg>
-              </span>
-              Upload Reconciliation Info
-            </span>
-            <span
-              class="MuiTouchRipple-root"
-            />
-          </button>
-        </div>
       </div>
       <div
         class="sc-ifAKCX dUzfWD"
@@ -89,7 +56,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-eNQAEJ eAIuLz"
+        class="MuiBox-root MuiBox-root-1 sc-iAyFgw eivOuT"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -97,57 +64,25 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
         >
           Payee List
         </h6>
-        <div
-          class="MuiBox-root MuiBox-root-2"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
-            data-cy="button-import"
-            tabindex="0"
-            type="button"
-          >
-            <span
-              class="MuiButton-label"
-            >
-              <span
-                class="MuiButton-startIcon MuiButton-iconSizeMedium"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root sc-gzVnrw daSVHL"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
-                  />
-                </svg>
-              </span>
-              Upload Reconciliation Info
-            </span>
-            <span
-              class="MuiTouchRipple-root"
-            />
-          </button>
-        </div>
       </div>
       <div
-        class="makeStyles-root-3"
+        class="makeStyles-root-2"
       >
         <div
           class="MuiTableContainer-root"
         >
           <div
-            class="MuiBox-root MuiBox-root-9"
+            class="MuiBox-root MuiBox-root-8"
           >
             <div
-              class="MuiBox-root MuiBox-root-10"
+              class="MuiBox-root MuiBox-root-9"
             />
           </div>
           <table
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
-            class="MuiTable-root makeStyles-table-5"
+            class="MuiTable-root makeStyles-table-4"
+            data-cy="table-title"
           >
             <thead
               class="MuiTableHead-root"
@@ -161,7 +96,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -184,7 +120,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -207,7 +144,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -230,7 +168,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -253,7 +192,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -276,7 +216,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -299,7 +240,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -322,7 +264,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -345,7 +288,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -368,7 +312,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -391,7 +336,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
+                class="MuiTableRow-root sc-fjdhpX gsvsfq MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
@@ -400,17 +345,27 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  RCPT-0060-22-0.000.015
+                  RCPT-0060-23-0.000.010
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  HH-21-0000.0003
+                  HH-23-0000.0012
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  4
+                  5
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  John Latoya Smith
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -420,99 +375,19 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Jan Kowalski
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  Test FSP 1
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  -
+                  USD 2,123.00 (USD 2,123.00)
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                   data-cy="delivered-quantity-cell"
-                >
-                  <div
-                    class="sc-jTzLTM liqwSL"
-                  >
-                    UNSUCCESSFUL
-                  </div>
-                </td>
+                />
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
                 />
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  RCPT-0060-22-0.000.016
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  HH-21-0000.0004
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  4
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  Adam Nowak
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  Test FSP 1
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  PLN 10.00 (USD 20.00)
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                  data-cy="delivered-quantity-cell"
-                >
-                  PLN 10.00
-        (USD 20.00)
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body"
-                >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root sc-cSHVUG gdxzAW"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.88-11.71L10 14.17l-1.88-1.88a.9959.9959 0 00-1.41 0c-.39.39-.39 1.02 0 1.41l2.59 2.59c.39.39 1.02.39 1.41 0L17.3 9.7c.39-.39.39-1.02 0-1.41-.39-.39-1.03-.39-1.42 0z"
-                    />
-                  </svg>
-                </td>
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 162px;"
+                style="height: 54px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
@@ -524,6 +399,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
         </div>
         <div
           class="MuiTablePagination-root"
+          data-cy="table-pagination"
         >
           <div
             class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
@@ -548,13 +424,13 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 role="button"
                 tabindex="0"
               >
-                5
+                10
               </div>
               <input
                 aria-hidden="true"
                 class="MuiSelect-nativeInput"
                 tabindex="-1"
-                value="5"
+                value="10"
               />
               <svg
                 aria-hidden="true"
@@ -570,7 +446,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
             <p
               class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
             >
-              1-2 of 2
+              1-1 of 1
             </p>
             <div
               class="MuiTablePagination-actions"

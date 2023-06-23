@@ -23,15 +23,28 @@ x-django-envs: &django_envs
     - PYTHONUNBUFFERED=1
     - CYPRESS_TESTING=yes
     - DJANGO_ALLOWED_HOSTS=*
+    - SESSION_COOKIE_SECURE=false
+    - SESSION_COOKIE_HTTPONLY=true
+    - CSRF_COOKIE_HTTPONLY=false
+    - CSRF_COOKIE_SECURE=false
+    - SECURE_CONTENT_TYPE_NOSNIFF=true
+    - SECURE_REFERRER_POLICY=same-origin
+    - SECURE_HSTS_SECONDS=0
+
+volumes:
+  backend-data:
 
 services:
   cypress:
-    image: ${cypress_image}
+    image: ${CYPRESS_IMAGE}
     command: "ci-test"
     depends_on:
       - proxy
+      - celery_worker
     volumes:
       - ../cypress-results:/code/cypress/results
+      - ../cypress-reports:/code/cypress/reports
+
 
   proxy:
     image: unicef/hct-mis-proxy
@@ -46,7 +59,7 @@ services:
       - frontend
 
   frontend:
-    image: ${frontend_image}
+    image: ${FRONTEND_IMAGE}
 
   redis:
     restart: unless-stopped
@@ -54,8 +67,10 @@ services:
 
   backend:
     <<: *django_envs
-    image: ${backend_image}
+    image: ${BACKEND_IMAGE}
     command: "cy"
+    volumes:
+      - backend-data:/data
     depends_on:
       - db
       - redis
@@ -87,9 +102,11 @@ services:
 
   celery_worker:
     <<: *django_envs
-    image: ${backend_image}
+    image: ${BACKEND_IMAGE}
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    volumes:
+      - backend-data:/data
     depends_on:
       - backend
 

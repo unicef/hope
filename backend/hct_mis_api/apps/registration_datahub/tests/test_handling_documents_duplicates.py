@@ -1,5 +1,6 @@
 from typing import List
 
+from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test.utils import CaptureQueriesContext
@@ -15,20 +16,21 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_TAX_ID,
     MALE,
     SON_DAUGHTER,
     WIFE_HUSBAND,
     Document,
+    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    HardDocumentDeduplication,
+)
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -110,8 +112,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentTypeFactory(label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        dt_tax_id = DocumentTypeFactory(label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID)
+        dt = DocumentTypeFactory(label="national_id", type="national_id")
+        dt_tax_id = DocumentTypeFactory(label="tax_id", type="tax_id")
         dt.save()
         cls.document1 = Document(
             country=country,
@@ -174,7 +176,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document.refresh_from_db()
 
     def test_hard_documents_deduplication(self) -> None:
-        DeduplicateTask.hard_deduplicate_documents(
+        HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4])
         )
         self.refresh_all_documents()
@@ -188,7 +190,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
 
     def test_hard_documents_deduplication_for_initially_valid(self) -> None:
-        DeduplicateTask.hard_deduplicate_documents(
+        HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
                     self.document5,
@@ -200,10 +202,10 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
     def test_should_create_one_ticket(self) -> None:
-        DeduplicateTask.hard_deduplicate_documents(
+        HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4])
         )
-        DeduplicateTask.hard_deduplicate_documents(
+        HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4])
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
@@ -215,9 +217,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
         with context:
-            DeduplicateTask.hard_deduplicate_documents(documents1)
+            HardDocumentDeduplication().deduplicate(documents1)
             first_dedup_query_count = len(context.captured_queries)
-            DeduplicateTask.hard_deduplicate_documents(documents2, self.registration_data_import)
+            HardDocumentDeduplication().deduplicate(documents2, self.registration_data_import)
             second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
             self.assertEqual(
                 first_dedup_query_count, second_dedup_query_count, "Both queries should use same amount of queries"
@@ -236,13 +238,13 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             self.assertEqual(first_dedup_query_count, 9, "Should only use 9 queries")
 
     def test_ticket_created_correctly(self) -> None:
-        DeduplicateTask.hard_deduplicate_documents(
+        HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         )
         self.refresh_all_documents()
 
         self.assertEqual(GrievanceTicket.objects.count(), 1)
-        DeduplicateTask.hard_deduplicate_documents(
+        HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
                     self.document7,
@@ -251,3 +253,38 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             self.registration_data_import,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
+
+    def test_valid_for_deduplication_doc_type(self) -> None:
+        pl = geo_models.Country.objects.get(iso_code2="PL")
+        dt_tax_id = DocumentType.objects.get(key="tax_id")
+        dt_national_id = DocumentType.objects.get(key="national_id")
+        Document.objects.create(
+            country=pl,
+            type=dt_tax_id,
+            document_number="TAX_ID_DOC_123",
+            individual=self.individuals[2],
+            status=Document.STATUS_VALID,
+        )
+        doc_national_id_1 = Document.objects.create(
+            country=pl,
+            type=dt_national_id,
+            document_number="TAX_ID_DOC_123",  # the same doc number
+            individual=self.individuals[2],
+        )
+        doc_national_id_2 = Document.objects.create(
+            country=pl,
+            type=dt_national_id,
+            document_number="TAX_ID_DOC_123",  # the same doc number
+            individual=self.individuals[2],
+        )
+
+        HardDocumentDeduplication().deduplicate(self.get_documents_query([doc_national_id_1]))
+        doc_national_id_1.refresh_from_db()
+        self.assertEqual(doc_national_id_1.status, Document.STATUS_NEED_INVESTIGATION)
+
+        dt_national_id.valid_for_deduplication = True
+        dt_national_id.save()
+
+        HardDocumentDeduplication().deduplicate(self.get_documents_query([doc_national_id_2]))
+        doc_national_id_2.refresh_from_db()
+        self.assertEqual(doc_national_id_2.status, Document.STATUS_VALID)

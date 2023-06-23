@@ -16,7 +16,6 @@ interface IndividualsListTableProps {
   businessArea: string;
   canViewDetails: boolean;
   choicesData: HouseholdChoiceDataQuery;
-  filterOrderBy: string;
 }
 
 export const IndividualsListTable = ({
@@ -24,16 +23,20 @@ export const IndividualsListTable = ({
   filter,
   canViewDetails,
   choicesData,
-  filterOrderBy,
 }: IndividualsListTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialVariables = {
-    age: JSON.stringify(filter.age),
+    age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
     sex: [filter.sex],
-    search: filter.text,
-    adminArea: filter.adminArea?.node?.id,
+    search: filter.search,
+    admin2: [filter.admin2],
     flags: filter.flags,
+    status: filter.status,
+    lastRegistrationDate: JSON.stringify({
+      min: filter.lastRegistrationDateMin,
+      max: filter.lastRegistrationDateMax,
+    }),
   };
 
   return (
@@ -46,7 +49,7 @@ export const IndividualsListTable = ({
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         allowSort={false}
-        filterOrderBy={filterOrderBy}
+        filterOrderBy={filter.orderBy}
         renderRow={(row) => (
           <IndividualsListTableRow
             key={row.id}

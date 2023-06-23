@@ -2,8 +2,10 @@ import time
 from argparse import ArgumentParser
 from typing import Any
 
+from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
+from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
@@ -27,6 +29,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
+        start_time = timezone.now()
         db_connection = connections["default"]
         connected = False
 
@@ -49,18 +52,23 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
         call_command("flush", "--noinput", database="registration_datahub")
 
-        call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/core/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/registration_data/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/household/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/grievance/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
 
         call_command(
-            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
+            "loaddata",
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data.json",
+            database="registration_datahub",
         )
         call_command(
-            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json", database="registration_datahub"
+            "loaddata",
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/diiadata.json",
+            database="registration_datahub",
         )
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data.json")
 
@@ -71,17 +79,17 @@ class Command(BaseCommand):
         generate_reconciled_payment_plan()
 
         email_list = [
-            "jan.romaniak@tivix.com",
-            "jakub.krasnowski@tivix.com",
-            "bartosz.wozniak@tivix.com",
-            "pavlo.mokiichuk@tivix.com",
-            "kamil.swiechowski@tivix.com",
-            "karolina.sliwinska@tivix.com",
-            "katarzyna.lanecka@tivix.com",
-            "konrad.marzec@tivix.com",
-            "maciej.szewczyk@tivix.com",
-            "marek.biczysko@tivix.com",
-            "patryk.dabrowski@tivix.com",
+            "jan.romaniak@kellton.com",
+            "jakub.krasnowski@kellton.com",
+            "pavlo.mokiichuk@kellton.com",
+            "kamil.swiechowski@kellton.com",
+            "karolina.sliwinska@kellton.com",
+            "katarzyna.lanecka@kellton.com",
+            "konrad.marzec@kellton.com",
+            "maciej.szewczyk@kellton.com",
+            "marek.biczysko@kellton.com",
+            "patryk.dabrowski@kellton.com",
+            "zuzanna.okrutna@kellton.com",
             "gerba@unicef.org",
             "ddinicola@unicef.org",
             "sapostolico@unicef.org",
@@ -106,15 +114,21 @@ class Command(BaseCommand):
             "ilutska@unicef.org",
             "okozyrenko@unicef.org",
         ]
+
+        role_with_all_perms = Role.objects.get(name="Role with all permissions")
+        afghanistan = BusinessArea.objects.get(slug="afghanistan")
+
         for email in email_list + pm_list:
             user = User.objects.create_user(email, email, "password")
             UserRole.objects.create(
                 user=user,
-                role=Role.objects.get(name="Role with all permissions"),
-                business_area=BusinessArea.objects.get(slug="afghanistan"),
+                role=role_with_all_perms,
+                business_area=afghanistan,
             )
             if email in email_list:
                 user.is_staff = True
                 user.is_superuser = True
             user.set_unusable_password()
             user.save()
+
+        print(f"Done in {timezone.now()- start_time}")

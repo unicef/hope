@@ -1,6 +1,11 @@
 trigger: none
 pr: none
 resources:
+  repositories:
+  - repository: hct-mis-helm
+    type: github
+    endpoint: "unicef (2)"
+    name: unicef/hct-mis-helm
   pipelines:
   - pipeline: ci-hope
     source: '[CI] HOPE'
@@ -28,14 +33,13 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
-          - task: HelmDeploy@0
-            displayName: "Update Chart dependencies"
+          - checkout: self
+          - checkout: hct-mis-helm
+          - task: Kubernetes@1
             inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
-              command: package
-              updatedependency: true
-              chartPath: '**/deployment/hope'
+              connectionType: 'Kubernetes Service Connection' 
+              kubernetesServiceEndpoint: $(Kubernetes.serviceConnection)
+              command: 'login'
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -44,14 +48,15 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: '**/deployment/hope'
+              chartPath: 'hct-mis-helm/pkg/hope-$(CHART_VERSION).tgz'
               releaseName: 'hope'
               install: true
               waitForExecution: false
               failOnStderr: false
-              valueFile: '**/deployment/pipeline-cd-stg.values.yaml'
+              valueFile: 'hct-mis/deployment/pipeline-cd-stg.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
+                git.sha=$(Build.SourceVersion),\
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
@@ -66,7 +71,18 @@ stages:
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
-                postgresql.externalDatabase.password=$(POSTGRES_PASSWORD),\
-                registrationdatahubpostgresql.externalDatabase.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                postgresql.password=$(POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                pgadmin.password=$(PGADMIN_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
+          - script: |
+              timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/job=upgrade \
+              --tail=-1 --prefix | awk '/Upgrade succeeded/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL UPGRADE JOB"
+            condition: always()
+          - script: |
+              timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/service=backend \
+              --tail=-1 --prefix | awk '/Worker spawned/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL BACKEND"
+            condition: succeeded()

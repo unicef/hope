@@ -1,7 +1,6 @@
 import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
 
@@ -69,14 +68,12 @@ export function PageHeader({
   hasInputComponent,
   flags,
 }: Props): React.ReactElement {
-  const history = useHistory();
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
-          <BackButton
-            onClick={() => history.push(breadCrumbs[breadCrumbs.length - 1].to)}
-          >
+          // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
+          <BackButton onClick={() => window.history.back()}>
             <ArrowBackRoundedIcon fontSize='large' />
           </BackButton>
         ) : null}
@@ -88,7 +85,9 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Box display='flex' alignItems='center'>
-                  <Typography variant='h5'>{title}</Typography>
+                  <Typography data-cy='page-header-title' variant='h5'>
+                    {title}
+                  </Typography>
                   <Box display='flex' ml={2}>
                     {flags}
                   </Box>

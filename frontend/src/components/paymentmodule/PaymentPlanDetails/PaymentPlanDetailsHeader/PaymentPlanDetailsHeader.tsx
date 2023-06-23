@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
-  paymentPlanBackgroundActionStatusMapping,
   paymentPlanBackgroundActionStatusToColor,
-  paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
@@ -22,7 +20,7 @@ import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPla
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
-  width: 140px;
+  width: 300px;
   margin-left: 30px;
 `;
 
@@ -44,8 +42,6 @@ export const PaymentPlanDetailsHeader = ({
       to: `/${businessArea}/payment-module/`,
     },
   ];
-
-  // TODO: add real values by permissions
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
@@ -186,7 +182,6 @@ export const PaymentPlanDetailsHeader = ({
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
-              statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
           {paymentPlan.backgroundActionStatus && (
@@ -194,7 +189,6 @@ export const PaymentPlanDetailsHeader = ({
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
-                statusNameMapping={paymentPlanBackgroundActionStatusMapping}
               />
             </StatusWrapper>
           )}

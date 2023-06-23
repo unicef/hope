@@ -1,5 +1,6 @@
 import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -7,16 +8,28 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { IndividualsFilter } from '../../../components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
-export function PopulationIndividualsPage(): React.ReactElement {
+const initialFilter = {
+  search: '',
+  admin2: '',
+  sex: '',
+  ageMin: '',
+  ageMax: '',
+  flags: [],
+  orderBy: 'unicef_id',
+  status: '',
+};
+
+export const PopulationIndividualsPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const {
@@ -24,14 +37,13 @@ export function PopulationIndividualsPage(): React.ReactElement {
     loading: householdChoicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  const [filter, setFilter] = useState({
-    text: '',
-    sex: [],
-    age: { min: '', max: '' },
-    flags: [],
-    orderBy: 'unicef_id',
-  });
-  const debouncedFilter = useDebounce(filter, 500);
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
   const {
     data: individualChoicesData,
     loading: individualChoicesLoading,
@@ -53,8 +65,11 @@ export function PopulationIndividualsPage(): React.ReactElement {
       <PageHeader title={t('Individuals')} />
       <IndividualsFilter
         filter={filter}
-        onFilterChange={setFilter}
         choicesData={individualChoicesData}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <Box
         display='flex'
@@ -62,16 +77,15 @@ export function PopulationIndividualsPage(): React.ReactElement {
         data-cy='page-details-container'
       >
         <IndividualsListTable
-          filter={debouncedFilter}
+          filter={appliedFilter}
           businessArea={businessArea}
           choicesData={householdChoicesData}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
           )}
-          filterOrderBy={filter.orderBy}
         />
       </Box>
     </>
   );
-}
+};

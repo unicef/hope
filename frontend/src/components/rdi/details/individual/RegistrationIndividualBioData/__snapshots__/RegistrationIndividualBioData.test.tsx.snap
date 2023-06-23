@@ -445,7 +445,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
               <div
                 data-cy="label-National ID"
               >
-                BSH221315
+                WSH221365
               </div>
             </div>
           </div>
@@ -479,12 +479,29 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             class="sc-bwzfXH eoWrid"
             color="textSecondary"
           >
+            Email
+          </span>
+          <div
+            data-cy="label-Email"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+      >
+        <div>
+          <span
+            class="sc-bwzfXH eoWrid"
+            color="textSecondary"
+          >
             Phone Number
           </span>
           <div
             data-cy="label-Phone Number"
           >
-            Invalid Phone Number
+            +48503123555
           </div>
         </div>
       </div>

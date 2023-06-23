@@ -1,5 +1,7 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import Close from '@material-ui/icons/Close';
+import { useLocation } from 'react-router-dom';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +13,7 @@ import {
 import { LabelizedField } from '../../core/LabelizedField';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
+import { removeItemById } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -22,7 +25,7 @@ export interface EditDocumentRowProps {
   document: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['documents']['edges'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
-  index;
+  id: string;
 }
 
 export function EditDocumentRow({
@@ -31,46 +34,50 @@ export function EditDocumentRow({
   document,
   arrayHelpers,
   addIndividualFieldsData,
-  index,
+  id,
 }: EditDocumentRowProps): React.ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const documentsToRemove = values?.individualDataUpdateDocumentsToRemove || [];
   const removed = documentsToRemove.includes(document.node.id);
 
   return isEdited ? (
     <>
       <DocumentField
-        index={index}
-        key={`${index}-${document.node.country}-${document.node.type.label}`}
-        onDelete={() => arrayHelpers.remove(index)}
+        id={id}
+        key={`${id}-${document.node.country}-${document.node.type.label}`}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdateDocumentsToEdit,
+            document.node.id,
+            arrayHelpers,
+          )
+        }
         countryChoices={addIndividualFieldsData.countriesChoices}
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
         baseName='individualDataUpdateDocumentsToEdit'
         isEdited={isEdited}
         photoSrc={document.node.photo}
         setFieldValue={setFieldValue}
+        values={values}
       />
-      <Box
-        style={{ width: '100%' }}
-        display='flex'
-        alignItems='center'
-        justifyContent='flex-end'
-      >
-        <Button
+      <Box display='flex' alignItems='center'>
+        <IconButton
           onClick={() => {
             arrayHelpers.remove({
               id: document.node.id,
               country: document.node.countryIso3,
-              type: document.node.type.type,
+              key: document.node.type.key,
               number: document.node.documentNumber,
               photo: document.node.photo,
             });
             setEdit(false);
           }}
         >
-          {t('CANCEL')}
-        </Button>
+          <Close />
+        </IconButton>
       </Box>
     </>
   ) : (
@@ -78,17 +85,14 @@ export function EditDocumentRow({
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
-            label={t('ID TYPE1')}
+            label={t('ID TYPE')}
             value={document.node.type.label}
           />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('Country')}
-            value={document.node.country}
-          />
+          <LabelizedField label={t('Country')} value={document.node.country} />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
@@ -104,32 +108,34 @@ export function EditDocumentRow({
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
-          <Box display='flex' align-items='center'>
-            <IconButton
-              onClick={() => {
-                arrayHelpers.push({
-                  id: document.node.id,
-                  country: document.node.countryIso3,
-                  type: document.node.type.type,
-                  number: document.node.documentNumber,
-                  photo: document.node.photo,
-                });
-                setEdit(true);
-              }}
-            >
-              <Edit />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                setFieldValue(
-                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                  document.node.id,
-                );
-              }}
-            >
-              <Delete />
-            </IconButton>
-          </Box>
+          !isEditTicket && (
+            <Box display='flex' align-items='center'>
+              <IconButton
+                onClick={() => {
+                  setFieldValue(
+                    `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
+                    document.node.id,
+                  );
+                }}
+              >
+                <Delete />
+              </IconButton>
+              <IconButton
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: document.node.id,
+                    country: document.node.countryIso3,
+                    key: document.node.type.key,
+                    number: document.node.documentNumber,
+                    photo: document.node.photo,
+                  });
+                  setEdit(true);
+                }}
+              >
+                <Edit />
+              </IconButton>
+            </Box>
+          )
         ) : (
           <Box display='flex' alignItems='center' height={48} color='red'>
             {t('REMOVED')}

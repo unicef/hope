@@ -3,6 +3,7 @@ from random import randint
 
 import factory
 from factory import fuzzy
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
@@ -18,11 +19,11 @@ from hct_mis_api.apps.program import models as program_models
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-class ServiceProviderFactory(factory.DjangoModelFactory):
+class ServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = ServiceProvider
 
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
     ca_id = factory.Faker("uuid4")
     full_name = factory.Faker("company")
     short_name = factory.LazyAttribute(lambda o: o.full_name[0:3])
@@ -30,11 +31,11 @@ class ServiceProviderFactory(factory.DjangoModelFactory):
     vision_id = factory.Faker("uuid4")
 
 
-class PaymentRecordFactory(factory.DjangoModelFactory):
+class PaymentRecordFactory(DjangoModelFactory):
     class Meta:
         model = PaymentRecord
 
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
     status = fuzzy.FuzzyChoice(
         payment_models.PaymentRecord.STATUS_CHOICE,
         getter=lambda c: c[0],
@@ -84,11 +85,11 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     service_provider_ca_id = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first().ca_id)
 
 
-class CashPlanFactory(factory.DjangoModelFactory):
+class CashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
 
     program_mis_id = factory.LazyAttribute(lambda o: program_models.Program.objects.order_by("?").first().id)
     cash_plan_id = factory.Faker("uuid4")
@@ -148,7 +149,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
 
-class ProgrammeFactory(factory.DjangoModelFactory):
+class ProgrammeFactory(DjangoModelFactory):
     mis_id = None
     ca_id = factory.Faker("uuid4")
     ca_hash_id = factory.Faker("uuid4")

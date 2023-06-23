@@ -111,12 +111,10 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
 
 
 def should_run(expression: str) -> bool:
-
     match_expressions = expression.split(",")
     today = datetime.today()
 
     for exp in match_expressions:
-
         if exp.lower() in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
             if exp.lower() == datetime.today().strftime("%a").lower():
                 return True
@@ -127,4 +125,6 @@ def should_run(expression: str) -> bool:
             day, month = exp.split("/")
             if day.isnumeric() and month.isnumeric() and int(day) == today.day and int(month) == today.month:
                 return True
+        else:
+            raise ValueError(f"Invalid expression '{expression}'")
     return False

@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -12,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import (
     Count,
@@ -50,6 +50,7 @@ from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -314,6 +315,33 @@ class GenericPayment(TimeStampedUUIDModel):
             return None
         return verification
 
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        raise NotImplementedError()
+
+    def mark_as_failed(self) -> None:
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
+
+    @property
+    def get_unicef_id(self) -> str:
+        return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -337,6 +365,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
 
     class Status(models.TextChoices):
+        PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -354,6 +383,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
         XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+        EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
+        EXCLUDE_BENEFICIARIES_ERROR = "EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -373,6 +404,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
 
+    program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -395,15 +427,20 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()
     dispersion_end_date = models.DateField()
-    female_children_count = models.PositiveSmallIntegerField(default=0)
-    male_children_count = models.PositiveSmallIntegerField(default=0)
-    female_adults_count = models.PositiveSmallIntegerField(default=0)
-    male_adults_count = models.PositiveSmallIntegerField(default=0)
-    total_households_count = models.PositiveSmallIntegerField(default=0)
-    total_individuals_count = models.PositiveSmallIntegerField(default=0)
+    female_children_count = models.PositiveIntegerField(default=0)
+    male_children_count = models.PositiveIntegerField(default=0)
+    female_adults_count = models.PositiveIntegerField(default=0)
+    male_adults_count = models.PositiveIntegerField(default=0)
+    total_households_count = models.PositiveIntegerField(default=0)
+    total_individuals_count = models.PositiveIntegerField(default=0)
     imported_file_date = models.DateTimeField(blank=True, null=True)
     imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_file_entitlement = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    export_file_per_fsp = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -424,6 +461,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         object_id_field="payment_plan_object_id",
         related_query_name="payment_plan",
     )
+    source_payment_plan = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
+    exclusion_reason = models.TextField(blank=True)
+    exclude_household_error = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -439,6 +482,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def bank_reconciliation_error(self) -> int:
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
+
+    @property
+    def excluded_households_ids(self) -> List[str]:
+        return list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
 
     @transition(
         field=background_action_status,
@@ -521,6 +568,24 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self) -> None:
         self.background_action_status = None  # little hack
+
+    @transition(
+        field=background_action_status,
+        source=[None, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
+        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
+    )
+    def background_action_status_excluding_beneficiaries(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.EXCLUDE_BENEFICIARIES, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
+        target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
+    )
+    def background_action_status_exclude_beneficiaries_error(self) -> None:
+        pass
 
     @transition(
         field=status,
@@ -609,21 +674,29 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
                 payment_plan_obj=self,
             )
 
+    @transition(
+        field=status,
+        source=Status.PREPARING,
+        target=Status.OPEN,
+    )
+    def status_open(self) -> None:
+        self.status_date = timezone.now()
+
     @property
     def currency_exchange_date(self) -> datetime:
         now = timezone.now().date()
         return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
-    def not_excluded_payments(self) -> QuerySet:
-        return self.payment_items.exclude(excluded=True)
+    def eligible_payments(self) -> QuerySet:
+        return self.payment_items.eligible()
 
     @property
     def can_be_locked(self) -> bool:
-        return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
+        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
 
     def update_population_count_fields(self) -> None:
-        households_ids = self.not_excluded_payments.values_list("household_id", flat=True)
+        households_ids = self.eligible_payments.values_list("household_id", flat=True)
 
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
@@ -657,7 +730,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def update_money_fields(self) -> None:
         self.exchange_rate = self.get_exchange_rate()
-        payments = self.not_excluded_payments.aggregate(
+        payments = self.eligible_payments.aggregate(
             total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
             total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
             total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
@@ -687,16 +760,29 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def has_export_file(self) -> bool:
         try:
-            return self.export_file is not None
+            if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
+                return self.export_file_entitlement is not None
+            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+                return self.export_file_per_fsp is not None or FileTemp.objects.filter(object_id=self.id).exists()
+            else:
+                return False
         except FileTemp.DoesNotExist:
             return False
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        return self.export_file.file.url if self.export_file else None
+        if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
+            return self.export_file_entitlement.file.url
+        elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+            if self.export_file_per_fsp:
+                return self.export_file_per_fsp.file.url
+            return FileTemp.objects.filter(object_id=self.id).order_by("-created").first().file.url
+        else:
+            return None
 
     @property
     def imported_file_name(self) -> str:
+        """used for import entitlements"""
         try:
             return self.imported_file.file.name if self.imported_file else ""
         except FileTemp.DoesNotExist:
@@ -706,15 +792,21 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def is_reconciled(self) -> bool:
         # TODO what in case of active grievance tickets?
         return (
-            self.not_excluded_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
-            == self.not_excluded_payments.count()
+            self.eligible_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
+            == self.eligible_payments.count()
         )
 
     def remove_export_file(self) -> None:
-        if self.export_file:
-            self.export_file.file.delete(save=False)
-            self.export_file.delete()
-            self.export_file = None
+        # remove export_file_entitlement
+        if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
+            self.export_file_entitlement.file.delete(save=False)
+            self.export_file_entitlement.delete()
+            self.export_file_entitlement = None
+        # remove export_file_per_fsp
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
+            self.export_file_per_fsp.file.delete(save=False)
+            self.export_file_per_fsp.delete()
+            self.export_file_per_fsp = None
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -754,6 +846,41 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
         return self.acceptance_process_threshold.finance_release_number_required
 
+    def unsuccessful_payments(self) -> "QuerySet":
+        return self.eligible_payments.filter(
+            status__in=[
+                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
+                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
+                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+            ]
+        )
+
+    def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
+        """
+        used for creation FPP
+        need to call from source_payment_plan level
+        like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
+        """
+        payments_qs = (
+            self.unsuccessful_payments()
+            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+        )
+        return payments_qs
+
+    def payments_used_in_follow_payment_plans(self) -> "QuerySet":
+        return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
@@ -767,6 +894,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity", _("Entitlement Quantity")),
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
+        ("delivery_date", _("Delivery Date")),
+        ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
+        ("order_number", _("Order Number")),
+        ("token_number", _("Token Number")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -781,6 +912,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
+        max_length=250,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -821,11 +953,17 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity": (payment, "entitlement_quantity"),
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
+            "delivery_date": (payment, "delivery_date"),
+            "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
+            "order_number": (payment, "order_number"),
+            "token_number": (payment, "token_number"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
         if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
             return float(-1)
+        if column_name == "delivery_date" and payment.delivery_date is not None:
+            return str(payment.delivery_date)
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
 
@@ -1176,22 +1314,8 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     def unicef_id(self) -> str:
         return self.ca_id
 
-    def mark_as_failed(self) -> None:
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
-        self.delivered_quantity = 0
-        self.delivered_quantity_usd = 0
-        self.delivery_date = None
-
-    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
-        if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment record marked as force failed can be reverted")
-        self.status = self.STATUS_SUCCESS
-        self.status_date = timezone.now()
-        self.delivered_quantity = delivered_quantity
-        self.delivery_date = delivery_date
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        return self.STATUS_SUCCESS
 
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
@@ -1200,6 +1324,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         on_delete=models.CASCADE,
         related_name="payment_items",
     )
+    conflicted = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
@@ -1219,9 +1344,46 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         related_query_name="payment",
     )
 
+    source_payment = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
+    reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
+    # use program_id in UniqueConstraint order_number and token_number per Program
+    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
+    order_number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[
+            MinValueValidator(100000000),
+            MaxValueValidator(999999999),
+            payment_token_and_order_number_validator,
+        ],
+    )  # 9 digits
+    token_number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
+    )  # 7 digits
+
     @property
     def full_name(self) -> str:
         return self.collector.full_name
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        if delivered_quantity == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED
+
+        elif delivered_quantity < self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL
+
+        elif delivered_quantity == self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS
+
+        else:
+            raise ValidationError(
+                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
+            )
 
     objects = PaymentManager()
 
@@ -1231,7 +1393,17 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 fields=["parent", "household"],
                 condition=Q(is_removed=False),
                 name="payment_plan_and_household",
-            )
+            ),
+            UniqueConstraint(
+                fields=["program_id", "order_number"],
+                condition=Q(is_removed=False),
+                name="order_number_unique_per_program",
+            ),
+            UniqueConstraint(
+                fields=["program_id", "token_number"],
+                condition=Q(is_removed=False),
+                name="token_number_unique_per_program",
+            ),
         ]
 
 

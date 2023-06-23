@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -137,6 +138,19 @@ export const Entitlement = ({
     permissions,
   );
 
+  const shouldDisableEntitlementSelect =
+    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked;
+
+  const shouldDisableDownloadTemplate =
+    paymentPlan.status !== PaymentPlanStatus.Locked;
+
+  const shouldDisableExportXlsx =
+    loadingExport ||
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.isFollowUp ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting;
+
   return (
     <Box m={5}>
       <ContainerColumnWithBorder>
@@ -150,10 +164,7 @@ export const Entitlement = ({
               <FormControl variant='outlined' margin='dense' fullWidth>
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
-                  disabled={
-                    !canApplySteficonRule ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked
-                  }
+                  disabled={shouldDisableEntitlementSelect}
                   value={steficonRuleValue}
                   data-cy='input-entitlement-formula'
                   labelWidth={180}
@@ -227,17 +238,14 @@ export const Entitlement = ({
                   download
                   data-cy='button-download-template'
                   href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-                  disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
+                  disabled={shouldDisableDownloadTemplate}
                 >
                   {t('DOWNLOAD TEMPLATE')}
                 </Button>
               ) : (
                 <LoadingButton
                   loading={loadingExport}
-                  disabled={
-                    loadingExport ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked
-                  }
+                  disabled={shouldDisableExportXlsx}
                   color='primary'
                   startIcon={<GetApp />}
                   data-cy='button-export-xlsx'

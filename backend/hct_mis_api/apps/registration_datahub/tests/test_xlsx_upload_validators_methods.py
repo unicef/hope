@@ -14,7 +14,8 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 
 class TestXLSXValidatorsMethods(APITestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
     FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
 
     @classmethod
@@ -161,7 +162,6 @@ class TestXLSXValidatorsMethods(APITestCase):
         self.assertEqual(expected, result)
 
     def test_rows_validator(self) -> None:
-
         wb = openpyxl.load_workbook(
             f"{self.FILES_DIR_PATH}/invalid_rows.xlsx",
             data_only=True,

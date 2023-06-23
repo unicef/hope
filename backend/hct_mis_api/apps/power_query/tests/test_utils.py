@@ -3,7 +3,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from ..utils import should_run
+from hct_mis_api.apps.power_query.utils import should_run
 
 
 class TestRunToday(TestCase):
@@ -22,6 +22,9 @@ class TestRunToday(TestCase):
             ("1/3,sat", True),
             ("1/3,Mon", False),
             ("1/3,Mon,3/1", True),
+            ("mon,tue", False),
+            ("mon,sat", True),
+            ("3/1,4/1", True),
         ]
     )
     @freeze_time("1987-01-03")

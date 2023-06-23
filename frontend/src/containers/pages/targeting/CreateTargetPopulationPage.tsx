@@ -16,13 +16,11 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import {
-  getFullNodeFromEdgesById,
-  handleValidationErrors,
-} from '../../../utils/utils';
+import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import {
   ProgramStatus,
   useAllProgramsForChoicesQuery,
+  useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
 import { PaperContainer } from '../../../components/targeting/PaperContainer';
@@ -40,11 +38,17 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     program: null,
     excludedIds: '',
     exclusionReason: '',
+    flagExcludeIfActiveAdjudicationTicket: false,
+    flagExcludeIfOnSanctionList: false,
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
 
   const {
     data: allProgramsData,
@@ -56,6 +60,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
+  if (!allProgramsData || !businessAreaData) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
 
@@ -79,7 +84,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
-  const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
@@ -98,15 +103,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         historyMethod: 'push',
       });
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'createTargetPopulation',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while creating Target Population'));
-      }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -144,6 +141,9 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                     allProgramsData?.allPrograms?.edges,
                     values.program,
                   )}
+                  screenBeneficiary={
+                    businessAreaData?.businessArea?.screenBeneficiary
+                  }
                   isEdit
                 />
               )}

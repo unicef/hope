@@ -26,7 +26,16 @@ from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_tas
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
-from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
+from hct_mis_api.apps.targeting.celery_tasks import (
+    target_population_apply_steficon,
+    target_population_full_rebuild,
+    target_population_rebuild_stats,
+)
+from hct_mis_api.apps.targeting.inputs import (
+    CopyTargetPopulationInput,
+    CreateTargetPopulationInput,
+    UpdateTargetPopulationInput,
+)
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -48,20 +57,7 @@ from hct_mis_api.apps.targeting.validators import (
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
-from .celery_tasks import (
-    target_population_apply_steficon,
-    target_population_full_rebuild,
-    target_population_rebuild_stats,
-)
-
 logger = logging.getLogger(__name__)
-
-
-class CopyTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to create a new entry."""
-
-    id = graphene.ID()
-    name = graphene.String()
 
 
 class ValidatedMutation(PermissionMutation):
@@ -94,31 +90,11 @@ class ValidatedMutation(PermissionMutation):
         return object
 
 
-class UpdateTargetPopulationInput(graphene.InputObjectType):
-
-    id = graphene.ID(required=True)
-    name = graphene.String()
-    targeting_criteria = TargetingCriteriaObjectType()
-    program_id = graphene.ID()
-    vulnerability_score_min = graphene.Decimal()
-    vulnerability_score_max = graphene.Decimal()
-    excluded_ids = graphene.String()
-    exclusion_reason = graphene.String()
-
-
-class CreateTargetPopulationInput(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    targeting_criteria = TargetingCriteriaObjectType(required=True)
-    business_area_slug = graphene.String(required=True)
-    program_id = graphene.ID(required=True)
-    excluded_ids = graphene.String(required=True)
-    exclusion_reason = graphene.String()
-
-
 def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
-    targeting_criteria = TargetingCriteria()
+    rules = targeting_criteria_input.pop("rules", [])
+    targeting_criteria = TargetingCriteria(**targeting_criteria_input)
     targeting_criteria.save()
-    for rule_input in targeting_criteria_input.get("rules"):
+    for rule_input in rules:
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
         for filter_input in rule_input.get("filters", []):
@@ -156,13 +132,17 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
 
+        tp_name = input.get("name", "").strip()
+        if TargetPopulation.objects.filter(name=tp_name).exists():
+            raise ValidationError(f"Target population with name {tp_name} already exists")
+
         targeting_criteria_input = input.get("targeting_criteria")
 
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
-            name=input.get("name", "").strip(),
+            name=tp_name,
             created_by=user,
             business_area=business_area,
             excluded_ids=input.get("excluded_ids", "").strip(),
@@ -196,7 +176,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
-        name = input.get("name")
+        name = input.get("name", "").strip()
         program_id_encoded = input.get("program_id")
         vulnerability_score_min = input.get("vulnerability_score_min")
         vulnerability_score_max = input.get("vulnerability_score_max")
@@ -211,6 +191,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
+        if TargetPopulation.objects.filter(name=name).exclude(id=decode_id_string(id)).exists():
+            raise ValidationError(f"Target population with name {name} already exists")
         if target_population.is_finalized():
             msg = "Finalized Target Population can't be changed"
             logger.error(msg)
@@ -398,8 +380,9 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population.finalized_by = user
                 target_population.finalized_at = timezone.now()
                 target_population.save()
-                transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
-                transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
+                transaction.on_commit(
+                    lambda: send_target_population_task.delay(target_population_id=target_population.id)
+                )
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",

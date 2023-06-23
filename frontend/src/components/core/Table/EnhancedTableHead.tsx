@@ -99,12 +99,13 @@ export function EnhancedTableHead<T>(
           <TableCell
             key={headCell.id.toString()}
             align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
             data-cy={headCell.dataCy}
           >
             {allowSort && !headCell.disableSort ? (
               <TableSortLabelStyled
+                data-cy='table-label'
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
@@ -119,7 +120,7 @@ export function EnhancedTableHead<T>(
                 )}
               </TableSortLabelStyled>
             ) : (
-              <StyledLabel>{headCell.label}</StyledLabel>
+              <StyledLabel data-cy='table-label'>{headCell.label}</StyledLabel>
             )}
           </TableCell>
         ))}

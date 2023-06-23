@@ -1,4 +1,5 @@
-import { Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
+import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
@@ -15,26 +16,30 @@ export function ExistingPaymentChannelFieldArray({
   values,
   individual,
 }: ExistingPaymentChannelFieldArrayProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container spacing={3}>
       <FieldArray
         name='individualDataUpdatePaymentChannelsToEdit'
         render={(arrayHelpers) => {
-          return (
+          return individual?.paymentChannels?.length > 0 ? (
             <>
-              {individual?.paymentChannels?.map((item, index) => {
+              {individual.paymentChannels.map((item) => {
                 return (
                   <EditPaymentChannelRow
                     key={item.id}
                     setFieldValue={setFieldValue}
                     values={values}
                     paymentChannel={item}
-                    index={index}
+                    id={item.id}
                     arrayHelpers={arrayHelpers}
                   />
                 );
               })}
             </>
+          ) : (
+            isEditTicket && <Box ml={2}>-</Box>
           );
         }}
       />

@@ -1,13 +1,18 @@
 import random
+from io import BytesIO
 from typing import Any
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 import factory
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -32,7 +37,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import PaymentVerification
 
 
-class GrievanceTicketFactory(factory.DjangoModelFactory):
+class GrievanceTicketFactory(DjangoModelFactory):
     class Meta:
         model = GrievanceTicket
 
@@ -57,7 +62,7 @@ class GrievanceTicketFactory(factory.DjangoModelFactory):
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
 
 
-class SensitiveGrievanceTicketFactory(factory.DjangoModelFactory):
+class SensitiveGrievanceTicketFactory(DjangoModelFactory):
     class Meta:
         model = TicketSensitiveDetails
 
@@ -70,7 +75,7 @@ class SensitiveGrievanceTicketFactory(factory.DjangoModelFactory):
     )
     household = None
     individual = None
-    payment_record = None
+    payment_obj = None
 
     @factory.post_generation
     def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -79,18 +84,25 @@ class SensitiveGrievanceTicketFactory(factory.DjangoModelFactory):
         )
         obj.household = household
         obj.individual = individuals[0]
-        obj.payment_record = PaymentRecordFactory(household=household)
+        obj.payment_obj = PaymentRecordFactory(household=household)
         obj.save()
 
 
-class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
+class GrievanceComplaintTicketFactory(DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=random.choice(
+            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+        ),
+    )
     household = None
     individual = None
-    payment_record = None
+    payment_object_id = None
+    payment_content_type_id = None
 
     @factory.post_generation
     def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -99,12 +111,13 @@ class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
         )
         obj.household = household
         obj.individual = individuals[0]
-        obj.payment_record = PaymentRecordFactory(household=household)
+        obj.payment_object_id = PaymentRecordFactory(household=household).id
+        obj.payment_content_type_id = 80
 
         obj.save()
 
 
-class SensitiveGrievanceTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+class SensitiveGrievanceTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketSensitiveDetails
 
@@ -117,20 +130,27 @@ class SensitiveGrievanceTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     )
     household = None
     individual = None
-    payment_record = None
+    payment_obj = None
 
 
-class GrievanceComplaintTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=random.choice(
+            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+        ),
+    )
     household = None
     individual = None
-    payment_record = None
+    payment_object_id = None
+    payment_content_type_id = None
 
 
-class TicketNoteFactory(factory.DjangoModelFactory):
+class TicketNoteFactory(DjangoModelFactory):
     class Meta:
         model = TicketNote
 
@@ -148,7 +168,7 @@ class TicketNoteFactory(factory.DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
 
 
-class TicketAddIndividualDetailsFactory(factory.DjangoModelFactory):
+class TicketAddIndividualDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketAddIndividualDetails
 
@@ -162,7 +182,7 @@ class TicketAddIndividualDetailsFactory(factory.DjangoModelFactory):
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
 
 
-class TicketDeleteIndividualDetailsFactory(factory.DjangoModelFactory):
+class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketDeleteIndividualDetails
 
@@ -175,7 +195,7 @@ class TicketDeleteIndividualDetailsFactory(factory.DjangoModelFactory):
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
 
 
-class TicketDeleteHouseholdDetailsFactory(factory.DjangoModelFactory):
+class TicketDeleteHouseholdDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketDeleteHouseholdDetails
 
@@ -188,7 +208,7 @@ class TicketDeleteHouseholdDetailsFactory(factory.DjangoModelFactory):
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
 
 
-class TicketIndividualDataUpdateDetailsFactory(factory.DjangoModelFactory):
+class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketIndividualDataUpdateDetails
 
@@ -201,7 +221,7 @@ class TicketIndividualDataUpdateDetailsFactory(factory.DjangoModelFactory):
     individual_data = {}
 
 
-class TicketHouseholdDataUpdateDetailsFactory(factory.DjangoModelFactory):
+class TicketHouseholdDataUpdateDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketHouseholdDataUpdateDetails
 
@@ -214,7 +234,7 @@ class TicketHouseholdDataUpdateDetailsFactory(factory.DjangoModelFactory):
     household_data = {}
 
 
-class TicketSystemFlaggingDetailsFactory(factory.DjangoModelFactory):
+class TicketSystemFlaggingDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketSystemFlaggingDetails
 
@@ -225,7 +245,7 @@ class TicketSystemFlaggingDetailsFactory(factory.DjangoModelFactory):
     )
 
 
-class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
+class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketNeedsAdjudicationDetails
 
@@ -236,7 +256,7 @@ class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
     )
 
 
-class PositiveFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+class PositiveFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketPositiveFeedbackDetails
 
@@ -245,7 +265,7 @@ class PositiveFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     individual = None
 
 
-class NegativeFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+class NegativeFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketNegativeFeedbackDetails
 
@@ -254,7 +274,7 @@ class NegativeFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     individual = None
 
 
-class ReferralTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+class ReferralTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketReferralDetails
 
@@ -263,7 +283,7 @@ class ReferralTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     individual = None
 
 
-class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
+class TicketPaymentVerificationDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketPaymentVerificationDetails
 
@@ -271,3 +291,21 @@ class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
     payment_verification = factory.SubFactory(
         PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     )
+
+
+class GrievanceDocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = GrievanceDocument
+
+    file = InMemoryUploadedFile(
+        name="xyz.jpg",
+        file=BytesIO(b"xxxxxxxxxxx"),
+        charset=None,
+        field_name="0",
+        size=2 * 1024 * 1024,
+        content_type="image/jpeg",
+    )
+    name = "xyz"
+    file_size = 2 * 1024 * 1024
+    content_type = "image/jpeg"
+    grievance_ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)

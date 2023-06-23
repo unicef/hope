@@ -34,6 +34,18 @@ export const householdMinimal = gql`
       level
       pCode
     }
+    admin3 {
+      id
+      name
+      level
+      pCode
+    }
+    admin4 {
+      id
+      name
+      level
+      pCode
+    }
     headOfHousehold {
       id
       fullName
@@ -61,6 +73,7 @@ export const householdDetailed = gql`
     activeIndividualsCount
     countryOrigin
     country
+    zipCode
     femaleAgeGroup05Count
     femaleAgeGroup611Count
     femaleAgeGroup1217Count

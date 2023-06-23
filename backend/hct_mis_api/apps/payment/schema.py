@@ -1,5 +1,4 @@
 import json
-from base64 import b64decode
 from decimal import Decimal
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -53,7 +52,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
@@ -70,7 +69,10 @@ from hct_mis_api.apps.payment.filters import (
     payment_record_and_payment_filter,
     payment_record_and_payment_ordering,
 )
-from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.inputs import (
+    AvailableFspsForDeliveryMechanismsInput,
+    GetCashplanVerificationSampleSizeInput,
+)
 from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -94,7 +96,10 @@ from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.payment.utils import (
+    get_payment_items_for_dashboard,
+    get_payment_plan_object,
+)
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
@@ -138,6 +143,7 @@ class RapidProFlow(graphene.ObjectType):
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
+    columns = graphene.List(graphene.String)
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -155,6 +161,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
         connection_class = ExtendedConnection
 
     report_url = graphene.String()
+    status = graphene.Int()
 
     def resolve_report_url(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.file.url if self.file else ""
@@ -382,7 +389,7 @@ def _calculate_volume(
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
     # TODO simple volume calculation
-    payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
+    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
@@ -456,6 +463,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
+    excluded_households = graphene.List(HouseholdNode)
+    can_create_follow_up = graphene.Boolean()
+    total_withdrawn_households_count = graphene.Int()
+    unsuccessful_payments_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -466,7 +477,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment_verification_plans
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
-        return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
+        return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
 
     def resolve_currency_name(self, info: Any) -> graphene.String:
         return self.get_currency_display()
@@ -502,9 +513,26 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                     return False
             return True
 
+    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.Int:
+        return (
+            self.eligible_payments.filter(household__withdrawn=True)
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+            .count()
+        )
+
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
-        return parent.not_excluded_payments.aggregate(
+        return parent.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
@@ -513,6 +541,26 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
+
+    def resolve_excluded_households(self, info: Any) -> graphene.List:
+        return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
+
+    def resolve_can_create_follow_up(self, info: Any) -> bool:
+        # Check there are payments in error/not distributed status and excluded withdrawn households
+        if self.is_follow_up:
+            return False
+
+        qs = self.unsuccessful_payments_for_follow_up()
+
+        # Check if all payments are used in FPPs
+        follow_up_payment = self.payments_used_in_follow_payment_plans()
+
+        return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
+            qs.values_list("id", flat=True)
+        )
+
+    def resolve_unsuccessful_payments_count(self, info: Any) -> int:
+        return self.unsuccessful_payments_for_follow_up().count()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -568,10 +616,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
-class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-
-
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     """
     for CashPlan and PaymentPlan models
@@ -619,7 +663,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     # TODO: do we need this empty fields ??
     def resolve_assistance_measurement(self, info: Any, **kwargs: Any) -> str:
-        return "HH"
+        return ""
 
     def resolve_dispersion_date(self, info: Any, **kwargs: Any) -> str:
         return ""
@@ -637,7 +681,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     obj_type = graphene.String()
     id = graphene.String()
     ca_id = graphene.String(source="unicef_id")
-    status = graphene.String(source="status")
+    status = graphene.String()
     full_name = graphene.String(source="full_name")
     parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
     entitlement_quantity = graphene.Float(source="entitlement_quantity")
@@ -645,12 +689,16 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     delivered_quantity_usd = graphene.Float(source="delivered_quantity_usd")
     currency = graphene.String(source="currency")
     delivery_date = graphene.String(source="delivery_date")
+    verification = graphene.Field(PaymentVerificationNode, source="verification")
 
     def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
 
     def resolve_id(self, info: Any, **kwargs: Any) -> str:
         return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+    def resolve_status(self, info: Any, **kwargs: Any) -> str:
+        return self.status.replace(" ", "_").upper()
 
 
 class PageInfoNode(graphene.ObjectType):
@@ -868,7 +916,6 @@ class Query(graphene.ObjectType):
     )
 
     payment_plan = relay.Node.Field(PaymentPlanNode)
-    # TODO: Keep or remove??? in favour of all_cash_plans_and_payment_plans
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
@@ -950,9 +997,8 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
-        node_name, obj_id = b64decode(input["cash_or_payment_plan_id"]).decode().split(":")
-        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(  # type: ignore
-            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
+            input["cash_or_payment_plan_id"]
         )
 
         def get_payment_records(
@@ -1028,7 +1074,7 @@ class Query(graphene.ObjectType):
         additional_filters: Q = chart_create_filter_query_for_payment_verification_gfk(
             filters,
             program_id_path="payment__parent__program__id,payment_record__parent__program__id",
-            administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
+            administrative_area_path="payment__household__admin_area,payment_record__household__admin_area",
         )
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,
@@ -1308,7 +1354,10 @@ class Query(graphene.ObjectType):
         return resp
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
-        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+        """used in Household Page > Payment Records"""
+        qs = ExtendedQuerySetSequence(
+            PaymentRecord.objects.all(), Payment.objects.eligible().exclude(parent__is_removed=True)
+        ).order_by("-updated_at")
 
         qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
 

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.not_excluded_payments.select_related(
+        self.payment_list = payment_plan.eligible_payments.select_related(
             "household", "collector", "financial_service_provider"
         ).order_by("unicef_id")
 
@@ -46,7 +46,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self._create_workbook()
         self._add_headers()
         self._add_payment_list()
-        self._adjust_column_width_from_col(ws=self.ws_export_list, max_col=len(self.HEADERS))
+        self._adjust_column_width_from_col(ws=self.ws_export_list)
         self._add_col_bgcolor(
             [
                 self.HEADERS.index("entitlement_quantity") + 1,
@@ -67,5 +67,5 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
-            self.payment_plan.export_file = xlsx_obj
+            self.payment_plan.export_file_entitlement = xlsx_obj
             self.payment_plan.save()

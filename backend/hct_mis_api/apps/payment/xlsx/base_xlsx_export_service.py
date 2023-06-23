@@ -11,6 +11,7 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 from hct_mis_api.apps.core.utils import encode_id_base64
 
@@ -24,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 class XlsxExportBaseService:
+    text_template = "payment/xlsx_file_generated_email.txt"
+    html_template = "payment/xlsx_file_generated_email.html"
+
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_active = wb.active
@@ -46,27 +50,13 @@ class XlsxExportBaseService:
         self.wb.save(filename=filename)
 
     @staticmethod
-    def _adjust_column_width_from_col(ws: "Worksheet", min_row: int = 0, min_col: int = 1, max_col: int = 1) -> None:
-        column_widths = []
+    def _adjust_column_width_from_col(ws: "Worksheet") -> None:
+        dim_holder = DimensionHolder(worksheet=ws)
 
-        for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
+        for col in range(ws.min_column, ws.max_column + 1):
+            dim_holder[get_column_letter(col)] = ColumnDimension(ws, min=col, max=col, width=20)
 
-            for cell in col:
-                value = cell.value
-                if value is not None:
-
-                    if isinstance(value, str) is False:
-                        value = str(value)
-
-                    try:
-                        column_widths[i] = max(column_widths[i], len(value)) + 1
-                    except IndexError:
-                        column_widths.append(len(value) + 1)
-
-        for i, width in enumerate(column_widths):
-            col_name = get_column_letter(min_col + i)
-            value = width + 2
-            ws.column_dimensions[col_name].width = value
+        ws.column_dimensions = dim_holder
 
     def _add_col_bgcolor(
         self, col: Optional[List] = None, hex_code: str = "A0FDB0", no_of_columns: Optional[int] = None
@@ -84,15 +74,15 @@ class XlsxExportBaseService:
 
     @staticmethod
     def get_link(api_url: Optional[str] = None) -> str:
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
         if api_url:
             return link
         return ""
 
     def send_email(self, context: Dict) -> None:
-        text_body = render_to_string("payment/xlsx_file_generated_email.txt", context=context)
-        html_body = render_to_string("payment/xlsx_file_generated_email.html", context=context)
+        text_body = render_to_string(self.text_template, context=context)
+        html_body = render_to_string(self.html_template, context=context)
 
         email = EmailMultiAlternatives(
             subject=context["title"],

@@ -2,21 +2,32 @@ import { MockedProvider } from '@apollo/react-testing';
 import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
-import { HouseholdTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
-import {
-  fakeApolloAllHouseholdsForPopulationTable
-} from "../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable";
+import { fakeApolloAllHouseholdsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable';
+import { HouseholdTable } from '.';
 
 describe('containers/tables/population/HouseholdTable', () => {
+  const initialFilter = {
+    search: '',
+    program: '',
+    residenceStatus: '',
+    admin2: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+  };
+
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider addTypename={false} mocks={fakeApolloAllHouseholdsForPopulationTable}>
+      <MockedProvider
+        addTypename={false}
+        mocks={fakeApolloAllHouseholdsForPopulationTable}
+      >
         <HouseholdTable
           businessArea='afghanistan'
-          filter={{}}
-          canViewDetails={true}
+          filter={initialFilter}
+          canViewDetails
           choicesData={fakeHouseholdChoices}
         />
       </MockedProvider>,
@@ -35,8 +46,8 @@ describe('containers/tables/population/HouseholdTable', () => {
       >
         <HouseholdTable
           businessArea='afghanistan'
-          filter={{}}
-          canViewDetails={true}
+          filter={initialFilter}
+          canViewDetails
           choicesData={fakeHouseholdChoices}
         />
       </MockedProvider>,

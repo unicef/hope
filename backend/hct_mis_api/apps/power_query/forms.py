@@ -1,8 +1,8 @@
 from django import forms
 
-from ..account.models import User
-from ..steficon.widget import ContentTypeChoiceField, PythonEditor
-from .models import Formatter, Query
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.power_query.models import Formatter, Query
+from hct_mis_api.apps.steficon.widget import ContentTypeChoiceField, PythonEditor
 
 
 class ExportForm(forms.Form):

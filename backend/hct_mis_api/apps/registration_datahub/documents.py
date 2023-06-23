@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Dict, Optional, Type
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -39,59 +39,23 @@ class ImportedIndividualDocument(Document):
     birth_date = fields.DateField(similarity="boolean")
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
-    business_area = fields.KeywordField(similarity="boolean")
+    business_area = fields.KeywordField(similarity="boolean", attr="business_area")
     admin1 = fields.KeywordField()
     admin2 = fields.KeywordField()
-    # household = fields.ObjectField(
-    #     properties={
-    #         "residence_status": fields.KeywordField(similarity="boolean"),
-    #         "country_origin": fields.KeywordField(attr="country_origin.alpha3", similarity="boolean"),
-    #         "size": fields.IntegerField(),
-    #         "address": fields.TextField(),
-    #         "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
-    #         "female_age_group_0_5_count": fields.IntegerField(),
-    #         "female_age_group_6_11_count": fields.IntegerField(),
-    #         "female_age_group_12_17_count": fields.IntegerField(),
-    #         "female_age_group_18_59_count": fields.IntegerField(),
-    #         "female_age_group_60_count": fields.IntegerField(),
-    #         "pregnant_count": fields.IntegerField(),
-    #         "male_age_group_0_5_count": fields.IntegerField(),
-    #         "male_age_group_6_11_count": fields.IntegerField(),
-    #         "male_age_group_12_17_count": fields.IntegerField(),
-    #         "male_age_group_18_59_count": fields.IntegerField(),
-    #         "male_age_group_60_count": fields.IntegerField(),
-    #         "female_age_group_0_5_disabled_count": fields.IntegerField(),
-    #         "female_age_group_6_11_disabled_count": fields.IntegerField(),
-    #         "female_age_group_12_17_disabled_count": fields.IntegerField(),
-    #         "female_age_group_18_59_disabled_count": fields.IntegerField(),
-    #         "female_age_group_60_disabled_count": fields.IntegerField(),
-    #         "male_age_group_0_5_disabled_count": fields.IntegerField(),
-    #         "male_age_group_6_11_disabled_count": fields.IntegerField(),
-    #         "male_age_group_12_17_disabled_count": fields.IntegerField(),
-    #         "male_age_group_18_59_disabled_count": fields.IntegerField(),
-    #         "male_age_group_60_disabled_count": fields.IntegerField(),
-    #         "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
-    #         "returnee": fields.BooleanField(),
-    #         "registration_method": fields.KeywordField(similarity="boolean"),
-    #         "collect_individual_data": fields.KeywordField(similarity="boolean"),
-    #         "currency": fields.KeywordField(similarity="boolean"),
-    #         "unhcr_id": fields.KeywordField(similarity="boolean"),
-    #     }
-    # )
     registration_data_import_id = fields.KeywordField(
         "registration_data_import.id.__str__",
     )
     documents = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
-            "type": fields.KeywordField(attr="type.type", similarity="boolean"),
+            "key ": fields.KeywordField(attr="type.key", similarity="boolean"),
             "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
-            "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
+            "partner": fields.KeywordField(attr="partner", similarity="boolean"),
         }
     )
 
@@ -155,8 +119,9 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         )
 
 
-def get_imported_individual_doc(business_area_slug: str) -> Type[Document]:
-    return {
+def get_imported_individual_doc(business_area_slug: str) -> Type[ImportedIndividualDocument]:
+    documents: Dict[str, Type[ImportedIndividualDocument]] = {
         "afghanistan": ImportedIndividualDocumentAfghanistan,
         "ukraine": ImportedIndividualDocumentUkraine,
-    }.get(business_area_slug, ImportedIndividualDocumentOthers)
+    }
+    return documents.get(business_area_slug, ImportedIndividualDocumentOthers)

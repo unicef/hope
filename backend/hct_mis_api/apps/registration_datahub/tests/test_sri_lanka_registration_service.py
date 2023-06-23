@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.registration_datahub.models import (
@@ -16,12 +17,17 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
     Record,
 )
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
+)
+from hct_mis_api.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
 )
 
 
-class TestUkrainianRegistrationService(TestCase):
+class TestSriLankaRegistrationService(TestCase):
     databases = {
         "default",
         "registration_datahub",
@@ -31,7 +37,7 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_NATIONAL_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
             label=IDENTIFICATION_TYPE_NATIONAL_ID,
         )
 
@@ -92,6 +98,7 @@ class TestUkrainianRegistrationService(TestCase):
                 "bank_name": "7472",
                 "gender_i_c": " male",
                 "phone_no_i_c": "+94788908046",
+                "email": "email999@mail.com",
                 "full_name_i_c": "Dome",
                 "birth_date_i_c": "1980-01-04",
                 "bank_description": "Axis Bank",
@@ -141,9 +148,12 @@ class TestUkrainianRegistrationService(TestCase):
 
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
+        cls.organization = OrganizationFactory.create(slug="sri-lanka")
+        project = ProjectFactory.create(organization=cls.organization)
+        cls.registration = RegistrationFactory.create(project=project)
 
     def test_import_data_to_datahub(self) -> None:
-        service = SriLankaRegistrationService()
+        service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)
@@ -184,9 +194,10 @@ class TestUkrainianRegistrationService(TestCase):
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
             },
         )
+        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
 
     def test_import_record_twice(self) -> None:
-        service = SriLankaRegistrationService()
+        service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
 
         service.process_records(rdi.id, [self.records[0].id])
@@ -199,20 +210,3 @@ class TestUkrainianRegistrationService(TestCase):
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
         self.assertEqual(ImportedHousehold.objects.count(), 1)
-
-    def test_import_record_not_from_registration_17(self) -> None:
-        record = Record.objects.create(
-            registration=666,
-            timestamp=timezone.make_aware(datetime.datetime(2022, 4, 1)),
-            source_id=2,
-            fields={},
-            status=Record.STATUS_TO_IMPORT,
-        )
-
-        service = SriLankaRegistrationService()
-        rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
-        service.process_records(rdi.id, [record.id])
-
-        record.refresh_from_db()
-        self.assertEqual(record.status, Record.STATUS_ERROR)
-        self.assertEqual(ImportedHousehold.objects.count(), 0)

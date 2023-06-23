@@ -1,14 +1,15 @@
 import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   ProgramNodeEdge,
   useAllProgramsForChoicesQuery,
@@ -16,21 +17,28 @@ import {
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
 
-export function PaymentVerificationPage(): React.ReactElement {
+const initialFilter = {
+  search: '',
+  verificationStatus: [],
+  program: '',
+  serviceProvider: '',
+  deliveryType: '',
+  startDate: undefined,
+  endDate: undefined,
+};
+
+export const PaymentVerificationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const location = useLocation();
 
-  const [filter, setFilter] = useState({
-    search: '',
-    verificationStatus: [],
-    program: '',
-    serviceProvider: '',
-    deliveryType: '',
-    startDate: null,
-    endDate: null,
-  });
-  const debouncedFilter = useDebounce(filter, 500);
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
@@ -51,11 +59,14 @@ export function PaymentVerificationPage(): React.ReactElement {
       <PaymentFilters
         programs={programs}
         filter={filter}
-        onFilterChange={setFilter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
       />
       <TableWrapper>
         <PaymentVerificationTable
-          filter={debouncedFilter}
+          filter={appliedFilter}
           businessArea={businessArea}
           canViewDetails={hasPermissions(
             PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
@@ -65,4 +76,4 @@ export function PaymentVerificationPage(): React.ReactElement {
       </TableWrapper>
     </>
   );
-}
+};

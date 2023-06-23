@@ -58,6 +58,7 @@ from hct_mis_api.apps.core.models import (
     XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
+from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
 from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
@@ -206,8 +207,11 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     )
     search_fields = ("name", "slug")
     list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
-    readonly_fields = ("parent", "is_split")
+    readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
     filter_horizontal = ("countries",)
+
+    def document_types_valid_for_deduplication(self, obj: Any) -> List:
+        return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
@@ -275,7 +279,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
                 user_data["First Name"] = member.user.first_name
                 user_data["Email"] = member.user.email
                 user_data["Business Unit"] = f"UNICEF - {obj.name}"
-                user_data["Partner Instance ID"] = int(obj.code)
+                user_data["Partner Instance ID"] = int(obj.cash_assist_code)
                 user_data["Action"] = ""
                 for role in ca_roles:
                     user_data[role] = {True: "Yes", False: ""}[role in user_roles]

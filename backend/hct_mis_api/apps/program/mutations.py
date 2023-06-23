@@ -15,46 +15,14 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
 from hct_mis_api.apps.core.validators import CommonValidator
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.inputs import CreateProgramInput, UpdateProgramInput
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
     ProgramValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
-
-
-class CreateProgramInput(graphene.InputObjectType):
-    name = graphene.String()
-    start_date = graphene.Date()
-    end_date = graphene.Date()
-    description = graphene.String()
-    budget = graphene.Decimal()
-    frequency_of_payments = graphene.String()
-    sector = graphene.String()
-    scope = graphene.String()
-    cash_plus = graphene.Boolean()
-    population_goal = graphene.Int()
-    administrative_areas_of_implementation = graphene.String()
-    business_area_slug = graphene.String()
-    individual_data_needed = graphene.Boolean()
-
-
-class UpdateProgramInput(graphene.InputObjectType):
-    id = graphene.String(required=True)
-    name = graphene.String()
-    status = graphene.String()
-    start_date = graphene.Date()
-    end_date = graphene.Date()
-    description = graphene.String()
-    budget = graphene.Decimal()
-    frequency_of_payments = graphene.String()
-    sector = graphene.String()
-    scope = graphene.String()
-    cash_plus = graphene.Boolean()
-    population_goal = graphene.Int()
-    administrative_areas_of_implementation = graphene.String()
-    individual_data_needed = graphene.Boolean()
 
 
 class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
@@ -82,6 +50,13 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         )
         program.full_clean()
         program.save()
+        ProgramCycle.objects.create(
+            program=program,
+            start_date=program.start_date,
+            end_date=program.end_date,
+            status=ProgramCycle.ACTIVE,
+        )
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
         return CreateProgram(program=program)
 

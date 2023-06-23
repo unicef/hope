@@ -207,6 +207,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("name", "subsystem")
+        ordering = ("subsystem", "name")
 
     def __str__(self) -> str:
         return f"{self.name} ({self.subsystem})"

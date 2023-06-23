@@ -48,6 +48,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
         aria-label="enhanced table"
         aria-labelledby="tableTitle"
         class="MuiTable-root makeStyles-table-3"
+        data-cy="table-title"
       >
         <thead
           class="MuiTableHead-root"
@@ -61,7 +62,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             >
               <span
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                data-cy="table-label"
                 role="button"
                 tabindex="0"
               >
@@ -84,7 +86,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             >
               <span
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                data-cy="table-label"
                 role="button"
                 tabindex="0"
               >
@@ -107,7 +110,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             >
               <span
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                data-cy="table-label"
                 role="button"
                 tabindex="0"
               >
@@ -130,7 +134,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             >
               <span
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                data-cy="table-label"
                 role="button"
                 tabindex="0"
               >
@@ -153,7 +158,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             >
               <span
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                data-cy="table-label"
                 role="button"
                 tabindex="0"
               >
@@ -176,7 +182,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             >
               <span
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                data-cy="table-label"
                 role="button"
                 tabindex="0"
               >
@@ -199,7 +206,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
           class="MuiTableBody-root"
         >
           <tr
-            class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+            class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
             data-cy="imported-households-row"
             role="checkbox"
           >
@@ -210,7 +217,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
             >
               <a
-                class="sc-bxivhb iRvpKE"
+                class="sc-gzVnrw brxNQI"
                 href="/afghanistan/registration-data-import/household/SW1wb3J0ZWRIb3VzZWhvbGROb2RlOjNlYjE5Y2RiLTBjZTYtNDgwZS1iZTI5LTczYjY0ZWI1ZjI3Mg=="
               />
             </td>
@@ -237,6 +244,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
     </div>
     <div
       class="MuiTablePagination-root"
+      data-cy="table-pagination"
     >
       <div
         class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

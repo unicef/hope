@@ -1,16 +1,21 @@
+import datetime
 import io
 import os
 import tempfile
 from collections import namedtuple
 from datetime import timedelta
 from decimal import Decimal
+from io import BytesIO
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Tuple
 from unittest.mock import patch
 from zipfile import ZipFile
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
+import pytz
 from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
@@ -124,7 +129,7 @@ SET_STEFICON_RULE_MUTATION = """
 mutation SetSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!) {
     setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
         paymentPlan {
-            id
+            unicefId
         }
     }
 }
@@ -209,6 +214,24 @@ mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Uplo
             message
         }
     }
+}
+"""
+
+IMPORT_XLSX_PP_MUTATION = """
+mutation importXlsxPPList($paymentPlanId: ID!, $file: Upload!) {
+importXlsxPaymentPlanPaymentList(
+  paymentPlanId: $paymentPlanId
+  file: $file
+) {
+  paymentPlan {
+    id
+  }
+  errors {
+    sheet
+    coordinates
+    message
+  }
+}
 }
 """
 
@@ -358,8 +381,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "input": {
                     "businessAreaSlug": self.business_area.slug,
                     "targetingId": target_population_id,
-                    "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
-                    "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
+                    "startDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
+                    "endDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
                     "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                     "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "currency": "USD",
@@ -394,7 +417,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
-            excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
 
@@ -507,7 +529,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             == 1
         )
         assert (
-            payment_plan.not_excluded_payments.filter(
+            payment_plan.eligible_payments.filter(
                 financial_service_provider__isnull=False,
                 delivery_type__isnull=False,
             ).count()
@@ -597,7 +619,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
         payment_plan.refresh_from_db()
-        zip_file = payment_plan.export_file
+        zip_file = payment_plan.export_file_per_fsp
         assert zip_file is not None
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -643,6 +665,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity_usd)
             self.assertEqual(sheet.cell(row=1, column=10).value, "delivered_quantity")
             self.assertEqual(sheet.cell(row=2, column=10).value, None)
+            self.assertEqual(sheet.cell(row=1, column=11).value, "delivery_date")
+            self.assertEqual(sheet.cell(row=2, column=11).value, str(payment.delivery_date))
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
@@ -759,7 +783,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=99,
             financial_service_provider=None,
-            excluded=False,
         )
         payment_2 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -772,7 +795,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=2000,
             delivered_quantity_usd=500,
             financial_service_provider=None,
-            excluded=False,
         )
         payment_3 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -785,7 +807,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=3000,
             delivered_quantity_usd=290,
             financial_service_provider=None,
-            excluded=False,
         )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
@@ -806,7 +827,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             received_amount=None,
         )
         import_xlsx_service = XlsxPaymentPlanImportPerFspService(pp, io.BytesIO())
-        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity"]
+        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
+
         import_xlsx_service.payments_dict[str(payment_1.pk)] = payment_1
         import_xlsx_service.payments_dict[str(payment_2.pk)] = payment_2
         import_xlsx_service.payments_dict[str(payment_3.pk)] = payment_3
@@ -817,9 +839,15 @@ class TestPaymentPlanReconciliation(APITestCase):
             ],
         )
 
-        import_xlsx_service._import_row([row(str(payment_1.id)), row(999)], 1)
-        import_xlsx_service._import_row([row(str(payment_2.id)), row(100)], 1)
-        import_xlsx_service._import_row([row(str(payment_3.id)), row(2999)], 1)
+        import_xlsx_service._import_row(
+            [row(str(payment_1.id)), row(999), row(pytz.utc.localize(datetime.datetime(2023, 5, 12)))], 1
+        )
+        import_xlsx_service._import_row(
+            [row(str(payment_2.id)), row(100), row(pytz.utc.localize(datetime.datetime(2022, 12, 14)))], 1
+        )
+        import_xlsx_service._import_row(
+            [row(str(payment_3.id)), row(2999), row(pytz.utc.localize(datetime.datetime(2021, 7, 25)))], 1
+        )
         payment_1.save()
         payment_2.save()
         payment_3.save()
@@ -864,7 +892,6 @@ class TestPaymentPlanReconciliation(APITestCase):
                 delivered_quantity=999,
                 delivered_quantity_usd=10,
                 financial_service_provider=None,
-                excluded=False,
             )
         payment_plan.status_finished()
         payment_plan.save()
@@ -873,7 +900,33 @@ class TestPaymentPlanReconciliation(APITestCase):
             all(
                 [
                     payment.entitlement_quantity == payment.delivered_quantity
-                    for payment in payment_plan.not_excluded_payments
+                    for payment in payment_plan.eligible_payments
                 ]
             )
+        )
+
+    def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, unicef_id="unicef_id_12345_2023")
+        rule = RuleFactory(name="SomeRule")
+
+        self.snapshot_graphql_request(
+            request_string=SET_STEFICON_RULE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+                "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+            },
+        )
+
+    def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
+        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+
+        self.snapshot_graphql_request(
+            request_string=IMPORT_XLSX_PP_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+                "file": BytesIO(content),
+            },
         )

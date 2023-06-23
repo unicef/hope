@@ -1,3 +1,4 @@
+import datetime
 import logging
 from decimal import Decimal
 from functools import partial
@@ -5,7 +6,7 @@ from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -15,11 +16,13 @@ from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    prepare_follow_up_payment_plan_task,
+    prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -117,7 +120,7 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
+        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(conflicted=True)
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -144,6 +147,9 @@ class PaymentPlanService:
             msg = "There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
             logging.exception(msg)
             raise GraphQLError(msg)
+
+        if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
+            raise GraphQLError("All Payments must have assigned FSP")
 
         dm_to_fsp_mapping = [
             {
@@ -267,43 +273,56 @@ class PaymentPlanService:
             self.payment_plan.save()
 
     @staticmethod
-    def _create_payments(payment_plan: PaymentPlan) -> None:
+    def create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
-        for household in payment_plan.target_population.households.all():
-            try:
-                collector = household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual
-            except AttributeError as exception:
-                msg = f"Couldn't find a primary collector in {household}"
+        households = (
+            payment_plan.target_population.households.annotate(
+                collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
+                    "individual"
+                )[:1]
+            )
+            .all()
+            .values("pk", "collector", "unicef_id", "head_of_household")
+        )
+
+        for household in households:
+            collector_id = household["collector"]
+            if not collector_id:
+                msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
-                raise GraphQLError(msg) from exception
+                raise GraphQLError(msg)
 
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
-                    business_area=payment_plan.business_area,
+                    program_id=payment_plan.program_id,
+                    business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
-                    household=household,
-                    head_of_household=household.head_of_household,
-                    collector=collector,
+                    household_id=household["pk"],
+                    head_of_household_id=household["head_of_household"],
+                    collector_id=collector_id,
                     currency=payment_plan.currency,
                 )
             )
         try:
             Payment.objects.bulk_create(payments_to_create)
-        except IntegrityError:
-            raise GraphQLError("Duplicated Households in provided Targeting")
+        except IntegrityError as e:
+            raise GraphQLError("Duplicated Households in provided Targeting") from e
 
     @staticmethod
     def create(input_data: Dict, user: "User") -> PaymentPlan:
-        business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
+        business_area_slug = input_data["business_area_slug"]
+        business_area = BusinessArea.objects.only("is_payment_plan_applicable").get(slug=business_area_slug)
         if not business_area.is_payment_plan_applicable:
             raise GraphQLError("PaymentPlan can not be created in provided Business Area")
 
         targeting_id = decode_id_string(input_data["targeting_id"])
         try:
-            target_population = TargetPopulation.objects.get(
-                id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+            target_population = (
+                TargetPopulation.objects.select_related("program")
+                .only("program", "program__start_date", "program__end_date")
+                .get(id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
             )
         except TargetPopulation.DoesNotExist:
             raise GraphQLError(
@@ -316,26 +335,36 @@ class PaymentPlanService:
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
+        start_date = input_data["start_date"]
+        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
+        if start_date < target_population.program.start_date:
+            raise GraphQLError("Start date cannot be earlier than start date in the program")
+
+        end_date = input_data["end_date"]
+        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
+        if end_date > target_population.program.end_date:
+            raise GraphQLError("End date cannot be later that end date in the program")
+
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
             created_by=user,
             target_population=target_population,
             program=target_population.program,
+            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
             currency=input_data["currency"],
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
             status_date=timezone.now(),
             start_date=input_data["start_date"],
             end_date=input_data["end_date"],
+            status=PaymentPlan.Status.PREPARING,
         )
 
-        PaymentPlanService._create_payments(payment_plan)
-        payment_plan.refresh_from_db()
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
+        TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
+            status=TargetPopulation.STATUS_ASSIGNED
+        )
 
-        payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
-        payment_plan.target_population.save()
+        prepare_payment_plan_task.delay(payment_plan.id)
 
         return payment_plan
 
@@ -346,7 +375,15 @@ class PaymentPlanService:
         recreate_payments = False
         recalculate_payments = False
 
-        basic_fields = ["start_date", "end_date", "dispersion_start_date"]
+        basic_fields = ["start_date", "end_date"]
+
+        if self.payment_plan.is_follow_up:
+            # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
+            # remove not editable fields
+            input_data.pop("targeting_id", None)
+            input_data.pop("currency", None)
+            input_data.pop("start_date", None)
+            input_data.pop("end_date", None)
 
         for basic_field in basic_fields:
             if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):
@@ -376,6 +413,13 @@ class PaymentPlanService:
                 raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
 
         if (
+            input_data.get("dispersion_start_date")
+            and input_data["dispersion_start_date"] != self.payment_plan.dispersion_start_date
+        ):
+            self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
+            recalculate_payments = True
+
+        if (
             input_data.get("dispersion_end_date")
             and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
         ):
@@ -389,11 +433,21 @@ class PaymentPlanService:
             recreate_payments = True
             recalculate_payments = True
 
+        start_date = input_data.get("start_date")
+        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
+        if start_date and start_date < self.payment_plan.target_population.program.start_date:
+            raise GraphQLError("Start date cannot be earlier than start date in the program")
+
+        end_date = input_data.get("end_date")
+        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
+        if end_date and end_date > self.payment_plan.target_population.program.end_date:
+            raise GraphQLError("End date cannot be later that end date in the program")
+
         self.payment_plan.save()
 
         if recreate_payments:
             self.payment_plan.payment_items.all().delete()
-            self._create_payments(self.payment_plan)
+            self.create_payments(self.payment_plan)
 
         if recalculate_payments:
             self.payment_plan.refresh_from_db()
@@ -406,8 +460,11 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be deleted")
 
-        self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        self.payment_plan.target_population.save()
+        if not self.payment_plan.is_follow_up:
+            self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+            self.payment_plan.target_population.save()
+
+        self.payment_plan.payment_items.all().delete()
         self.payment_plan.delete()
         return self.payment_plan
 
@@ -415,7 +472,8 @@ class PaymentPlanService:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx.delay(self.payment_plan.pk, user.pk)
+        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user.pk)
+        self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
     def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
@@ -423,6 +481,7 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
+        self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
@@ -465,7 +524,7 @@ class PaymentPlanService:
                     raise GraphQLError(f"{fsp} cannot accept any volume")
 
                 payments_for_delivery_mechanism = (
-                    self.payment_plan.not_excluded_payments.exclude(
+                    self.payment_plan.eligible_payments.exclude(
                         id__in=[processed_payment.id for processed_payment in processed_payments]
                     )
                     .distinct()
@@ -503,5 +562,61 @@ class PaymentPlanService:
                     delivery_mechanism_per_payment_plan.financial_service_provider = fsp
                     delivery_mechanism_per_payment_plan.save()
 
-            if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
+            if set(processed_payments) != set(self.payment_plan.eligible_payments):
                 raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
+
+    def create_follow_up_payments(self) -> None:
+        payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
+
+        follow_up_payments = [
+            Payment(
+                parent=self.payment_plan,
+                source_payment=payment,
+                program_id=self.payment_plan.program_id,
+                is_follow_up=True,
+                business_area_id=payment.business_area_id,
+                status=Payment.STATUS_PENDING,
+                status_date=timezone.now(),
+                household_id=payment.household_id,
+                head_of_household_id=payment.head_of_household_id,
+                collector_id=payment.collector_id,
+                currency=payment.currency,
+                entitlement_quantity=payment.entitlement_quantity,
+                entitlement_quantity_usd=payment.entitlement_quantity_usd,
+            )
+            for payment in payments_to_copy
+        ]
+        Payment.objects.bulk_create(follow_up_payments)
+
+    @transaction.atomic
+    def create_follow_up(
+        self, user: "User", dispersion_start_date: datetime.date, dispersion_end_date: datetime.date
+    ) -> PaymentPlan:
+        source_pp = self.payment_plan
+
+        if source_pp.is_follow_up:
+            raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
+
+        if not source_pp.unsuccessful_payments().exists():
+            raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
+
+        follow_up_pp = PaymentPlan.objects.create(
+            status=PaymentPlan.Status.PREPARING,
+            status_date=timezone.now(),
+            is_follow_up=True,
+            source_payment_plan=source_pp,
+            business_area=source_pp.business_area,
+            created_by=user,
+            target_population=source_pp.target_population,
+            program=source_pp.program,
+            program_cycle=source_pp.program_cycle,
+            currency=source_pp.currency,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+            start_date=source_pp.start_date,
+            end_date=source_pp.end_date,
+        )
+
+        transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
+
+        return follow_up_pp

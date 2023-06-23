@@ -1,27 +1,39 @@
 import { Tab, Tabs, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
-import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
-import { ExportModal } from '../../../components/dashboard/ExportModal';
+import { useLocation } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
+import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
+import { ExportModal } from '../../../components/dashboard/ExportModal';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
 import { DashboardYearPage } from './DashboardYearPage';
 
-export function DashboardPage(): React.ReactElement {
+const initialFilter = {
+  program: '',
+  administrativeArea: '',
+};
+
+export const DashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filter, setFilter] = useState({
-    program: '',
-    administrativeArea: '',
-  });
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
   const { data, loading } = useDashboardYearsChoiceDataQuery({
     variables: { businessArea },
   });
@@ -59,13 +71,19 @@ export function DashboardPage(): React.ReactElement {
     <>
       <PageHeader tabs={tabs} title={t('Dashboard')}>
         {hasPermissionToExport && (
-          <ExportModal filter={filter} year={years[selectedTab]} />
+          <ExportModal filter={appliedFilter} year={years[selectedTab]} />
         )}
       </PageHeader>
       {hasPermissionToView ? (
         <>
           {businessArea !== 'global' ? (
-            <DashboardFilters filter={filter} onFilterChange={setFilter} />
+            <DashboardFilters
+              filter={filter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
           ) : (
             <DashboardPaper noMarginTop extraPaddingLeft color='#6f6f6f'>
               <Typography variant='body2'>
@@ -78,7 +96,7 @@ export function DashboardPage(): React.ReactElement {
           <DashboardYearPage
             selectedTab={selectedTab}
             year={years[selectedTab]}
-            filter={filter}
+            filter={appliedFilter}
           />
         </>
       ) : (
@@ -86,4 +104,4 @@ export function DashboardPage(): React.ReactElement {
       )}
     </>
   );
-}
+};

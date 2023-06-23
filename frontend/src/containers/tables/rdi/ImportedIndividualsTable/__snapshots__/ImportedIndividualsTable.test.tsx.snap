@@ -55,6 +55,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -68,7 +69,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -91,7 +93,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -114,7 +117,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -137,7 +141,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -160,7 +165,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -183,7 +189,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -206,7 +213,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -229,7 +237,8 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                  data-cy="table-label"
                   role="button"
                   tabindex="0"
                 >
@@ -252,14 +261,14 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw brxNQI"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY="
                 />
               </td>
@@ -303,6 +312,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

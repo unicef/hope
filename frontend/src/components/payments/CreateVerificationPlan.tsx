@@ -29,7 +29,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { getPercentage } from '../../utils/utils';
 import {
   useAllAdminAreasQuery,
-  useAllRapidProFlowsQuery,
+  useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
@@ -64,7 +64,12 @@ const initialValues = {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(cashOrPaymentPlanId, selectedTab, values, businessArea) {
+function prepareVariables(
+  cashOrPaymentPlanId,
+  selectedTab,
+  values,
+  businessArea,
+) {
   const variables = {
     input: {
       cashOrPaymentPlanId,
@@ -121,7 +126,10 @@ export function CreateVerificationPlan({
   const businessArea = useBusinessArea();
   const [formValues, setFormValues] = useState(initialValues);
 
-  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
+  const [
+    loadRapidProFlows,
+    { data: rapidProFlows },
+  ] = useAllRapidProFlowsLazyQuery({
     variables: {
       businessAreaSlug: businessArea,
     },
@@ -144,9 +152,13 @@ export function CreateVerificationPlan({
   });
 
   useEffect(() => {
-    loadSampleSize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues, open]);
+    if (open) {
+      loadSampleSize();
+      if (formValues.verificationChannel === 'RAPIDPRO') {
+        loadRapidProFlows();
+      }
+    }
+  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -225,12 +237,15 @@ export function CreateVerificationPlan({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Create Verification Plan')}</DialogTitle>
+              <DialogTitle data-cy='dialog-title'>
+                {t('Create Verification Plan')}
+              </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <TabsContainer>
                   <StyledTabs
+                    data-cy='tabs'
                     value={selectedTab}
                     onChange={(
                       event: React.ChangeEvent<{}>,
@@ -311,6 +326,7 @@ export function CreateVerificationPlan({
                       max={99}
                       component={FormikSliderField}
                       suffix='%'
+                      dataCy='slider-confidence-interval'
                     />
                     <Field
                       name='marginOfError'
@@ -319,6 +335,7 @@ export function CreateVerificationPlan({
                       max={9}
                       component={FormikSliderField}
                       suffix='%'
+                      dataCy='slider-margin-of-error'
                     />
                     <Typography variant='caption'>
                       {t('Cluster Filters')}

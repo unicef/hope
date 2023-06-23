@@ -5,22 +5,22 @@ from typing import Dict
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.api.models import Grant
+from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     COLLECT_TYPE_FULL,
     ImportedDocumentType,
     ImportedHousehold,
     RegistrationDataImportDatahub,
 )
-
-from ...apps.registration_data.models import RegistrationDataImport
-from ..models import Grant
-from .base import HOPEApiTestCase
 
 
 class CreateRDITests(HOPEApiTestCase):
@@ -55,7 +55,9 @@ class PushToRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
+        ImportedDocumentType.objects.create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+        )
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
@@ -80,7 +82,7 @@ class PushToRDITests(HOPEApiTestCase):
                                 "image": base64_encoded_data,
                                 "doc_date": "2010-01-01",
                                 "country": "AF",
-                                "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
                         ],
                     },

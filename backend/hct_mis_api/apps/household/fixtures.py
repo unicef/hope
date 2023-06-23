@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import factory
 from factory import enums, fuzzy
+from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
@@ -75,7 +76,7 @@ def flex_field_individual(o: Any) -> Dict:
     }
 
 
-class HouseholdFactory(factory.DjangoModelFactory):
+class HouseholdFactory(DjangoModelFactory):
     class Meta:
         model = Household
 
@@ -127,19 +128,19 @@ class HouseholdFactory(factory.DjangoModelFactory):
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
 
-class IndividualIdentityFactory(factory.DjangoModelFactory):
+class IndividualIdentityFactory(DjangoModelFactory):
     class Meta:
         model = IndividualIdentity
 
     number = factory.Faker("pystr", min_chars=None, max_chars=20)
 
 
-class IndividualRoleInHouseholdFactory(factory.DjangoModelFactory):
+class IndividualRoleInHouseholdFactory(DjangoModelFactory):
     class Meta:
         model = IndividualRoleInHousehold
 
 
-class IndividualFactory(factory.DjangoModelFactory):
+class IndividualFactory(DjangoModelFactory):
     class Meta:
         model = Individual
 
@@ -160,6 +161,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
+    email = factory.Faker("email")
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -171,7 +173,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     unicef_id = factory.Sequence(lambda n: f"IND-{n}")
 
 
-class BankAccountInfoFactory(factory.DjangoModelFactory):
+class BankAccountInfoFactory(DjangoModelFactory):
     class Meta:
         model = BankAccountInfo
 
@@ -180,15 +182,15 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
     bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
-class DocumentTypeFactory(factory.DjangoModelFactory):
+class DocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = DocumentType
-        django_get_or_create = ("type",)
+        django_get_or_create = ("key",)
 
-    type = factory.fuzzy.FuzzyChoice([value for value, _ in IDENTIFICATION_TYPE_CHOICE])
+    key = factory.fuzzy.FuzzyChoice([value.lower() for value, _ in IDENTIFICATION_TYPE_CHOICE])
 
 
-class DocumentFactory(factory.DjangoModelFactory):
+class DocumentFactory(DjangoModelFactory):
     class Meta:
         model = Document
         django_get_or_create = ("document_number", "type", "country")
@@ -199,7 +201,7 @@ class DocumentFactory(factory.DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
-class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
+class DocumentAllowDuplicatesFactory(DjangoModelFactory):
     class Meta:
         model = Document
 
@@ -209,7 +211,7 @@ class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
-class EntitlementCardFactory(factory.DjangoModelFactory):
+class EntitlementCardFactory(DjangoModelFactory):
     class Meta:
         model = EntitlementCard
 

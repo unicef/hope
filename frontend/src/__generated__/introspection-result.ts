@@ -18,19 +18,7 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "AreaNode"
-          },
-          {
-            "name": "AreaTypeNode"
-          },
-          {
-            "name": "HouseholdNode"
-          },
-          {
-            "name": "IndividualNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
+            "name": "CommunicationMessageNode"
           },
           {
             "name": "UserNode"
@@ -39,7 +27,25 @@
             "name": "IndividualIdentityNode"
           },
           {
+            "name": "IndividualNode"
+          },
+          {
+            "name": "HouseholdNode"
+          },
+          {
+            "name": "AreaNode"
+          },
+          {
+            "name": "AreaTypeNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
+          },
+          {
             "name": "UserBusinessAreaNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "PaymentPlanNode"
@@ -66,10 +72,7 @@
             "name": "SteficonRuleNode"
           },
           {
-            "name": "TicketComplaintDetailsNode"
-          },
-          {
-            "name": "TicketSensitiveDetailsNode"
+            "name": "SurveyNode"
           },
           {
             "name": "PaymentVerificationNode"
@@ -81,16 +84,19 @@
             "name": "PaymentVerificationSummaryNode"
           },
           {
+            "name": "TicketComplaintDetailsNode"
+          },
+          {
+            "name": "TicketSensitiveDetailsNode"
+          },
+          {
             "name": "PaymentVerificationLogEntryNode"
           },
           {
             "name": "TicketPaymentVerificationDetailsNode"
           },
           {
-            "name": "ReportNode"
-          },
-          {
-            "name": "DeliveryMechanismNode"
+            "name": "PaymentNode"
           },
           {
             "name": "FinancialServiceProviderNode"
@@ -102,16 +108,22 @@
             "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
-            "name": "PaymentNode"
+            "name": "DeliveryMechanismNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "FeedbackNode"
+          },
+          {
+            "name": "FeedbackMessageNode"
           },
           {
             "name": "ApprovalProcessNode"
           },
           {
             "name": "VolumeByDeliveryMechanismNode"
-          },
-          {
-            "name": "GrievanceTicketNode"
           },
           {
             "name": "TicketNoteNode"
@@ -165,10 +177,19 @@
             "name": "TicketReferralDetailsNode"
           },
           {
+            "name": "GrievanceDocumentNode"
+          },
+          {
             "name": "DocumentNode"
           },
           {
             "name": "BankAccountInfoNode"
+          },
+          {
+            "name": "CommunicationMessageRecipientMapNode"
+          },
+          {
+            "name": "RecipientNode"
           },
           {
             "name": "LogEntryNode"

@@ -1,22 +1,55 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
+import { ClearApplyButtons } from './ClearApplyButtons';
 
 interface UsersListFiltersProps {
-  onFilterChange;
   filter;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
-export function UsersListFilters({
-  onFilterChange,
+
+export const UsersListFilters = ({
   filter,
-}: UsersListFiltersProps): React.ReactElement {
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+}: UsersListFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
+
   const { data: choices } = useUserChoiceDataQuery();
   if (!choices) {
     return null;
@@ -25,16 +58,16 @@ export function UsersListFilters({
   return (
     <ContainerWithBorder>
       <Grid container spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
-            onChange={(e) => handleFilterChange(e, 'search')}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'partner')}
+            onChange={(e) => handleFilterChange('partner', e.target.value)}
             label={t('Partner')}
             value={filter.partner}
           >
@@ -50,9 +83,9 @@ export function UsersListFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'roles')}
+            onChange={(e) => handleFilterChange('roles', e.target.value)}
             label={t('Role')}
             value={filter.roles}
           >
@@ -68,9 +101,9 @@ export function UsersListFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
           >
@@ -87,6 +120,10 @@ export function UsersListFilters({
           </SelectFilter>
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
-}
+};

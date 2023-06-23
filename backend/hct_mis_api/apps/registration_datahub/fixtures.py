@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 from django.contrib.gis.geos import Point
 
 import factory.fuzzy
+from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
@@ -28,7 +29,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 faker = Faker()
 
 
-class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
+class RegistrationDataImportDatahubFactory(DjangoModelFactory):
     class Meta:
         model = RegistrationDataImportDatahub
 
@@ -42,7 +43,7 @@ class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     )
 
 
-class ImportedHouseholdFactory(factory.DjangoModelFactory):
+class ImportedHouseholdFactory(DjangoModelFactory):
     class Meta:
         model = ImportedHousehold
 
@@ -70,7 +71,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     admin2_title = ""
     admin3_title = ""
     admin4_title = ""
-    geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
+    geopoint = factory.LazyAttribute(lambda o: Point(faker.latlng()))
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
@@ -101,9 +102,10 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     )
     org_name_enumerator = "Partner Organization"
     village = factory.Faker("city")
+    enumerator_rec_id = factory.fuzzy.FuzzyInteger(9999999, 99999999)
 
 
-class ImportedIndividualFactory(factory.DjangoModelFactory):
+class ImportedIndividualFactory(DjangoModelFactory):
     class Meta:
         model = ImportedIndividual
 
@@ -123,6 +125,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     )
     phone_no = factory.LazyFunction(faker.phone_number)
     phone_no_alternative = ""
+    email = factory.Faker("email")
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
     household = factory.SubFactory(ImportedHouseholdFactory)
@@ -162,7 +165,7 @@ def create_imported_household_and_individuals(
     return household, individuals
 
 
-class ImportedDocumentFactory(factory.DjangoModelFactory):
+class ImportedDocumentFactory(DjangoModelFactory):
     class Meta:
         model = ImportedDocument
 
@@ -171,8 +174,8 @@ class ImportedDocumentFactory(factory.DjangoModelFactory):
     individual = factory.SubFactory(ImportedIndividualFactory)
 
 
-class ImportedDocumentTypeFactory(factory.DjangoModelFactory):
+class ImportedDocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = ImportedDocumentType
 
-    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+    key = random.choice(["birth_certificate", "tax_id", "drivers_license"])

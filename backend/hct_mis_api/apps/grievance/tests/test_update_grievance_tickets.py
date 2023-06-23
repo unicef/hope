@@ -2,8 +2,8 @@ from datetime import date
 from typing import Any, Dict, List, Optional
 from unittest import mock
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 
 from factory import Factory
 from parameterized import parameterized
@@ -14,6 +14,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -49,6 +50,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestUpdateGrievanceTickets(APITestCase):
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
     UPDATE_GRIEVANCE_TICKET_MUTATION = """
     mutation UpdateGrievanceTicket(
       $input: UpdateGrievanceTicketInput!
@@ -82,7 +85,6 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
@@ -134,8 +136,12 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         first_individual = cls.individuals[0]
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
+        birth_certificate_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+        )
         cls.national_id = DocumentFactory(
             country=country_pl, type=national_id_type, document_number="789-789-645", individual=first_individual
         )
@@ -166,7 +172,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [
+                    {
+                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                        "country": "POL",
+                        "number": "123-123-UX-321",
+                    }
+                ],
             },
             approve_status=True,
         )
@@ -194,7 +206,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                            "number": "999-888-777",
+                        },
                         "approve_status": True,
                     },
                 ],
@@ -290,7 +306,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "role": ROLE_PRIMARY,
                             "documents": [
                                 {
-                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "USA",
                                     "number": "321-321-UX-321",
                                     "photo": SimpleUploadedFile(name="test.jpg", content=b""),
@@ -329,7 +345,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": "PRIMARY",
                 "documents": [
                     {
-                        "type": "NATIONAL_ID",
+                        "key": "national_id",
                         "number": "321-321-UX-321",
                         "country": "USA",
                         "photo": "test_file_name.jpg",
@@ -364,7 +380,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": "1980-02-01",
                 "marital_status": "SINGLE",
                 "role": "PRIMARY",
-                "documents": [{"type": "NATIONAL_ID", "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [{"key": "national_id", "country": "POL", "number": "123-123-UX-321"}],
                 "relationship": "UNKNOWN",
                 "estimated_birth_date": False,
             }
@@ -417,7 +433,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "documents": [
                                 {
                                     "country": "POL",
-                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "number": "111-222-777",
                                     "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 },
@@ -459,7 +475,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "documents": [
                     {
                         "value": {
-                            "type": "NATIONAL_ID",
+                            "key": "national_id",
                             "number": "111-222-777",
                             "country": "POL",
                             "photo": "test_file_name.jpg",
@@ -516,7 +532,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [
                     {
-                        "value": {"type": "NATIONAL_ID", "number": "999-888-777", "country": "POL"},
+                        "value": {"key": "national_id", "number": "999-888-777", "country": "POL"},
                         "approve_status": True,
                     }
                 ],
@@ -538,21 +554,12 @@ class TestUpdateGrievanceTickets(APITestCase):
         else:
             self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
-            ),
-            (
-                "with_partial_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_update_change_household(self, name: str, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_update_change_household_with_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            self.business_area,
+        )
 
         input_data = {
             "input": {
@@ -580,34 +587,98 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
-
-        # TODO: test shouldn't use conditional logic
-        if name == "with_permission":
-            expected_result = {
-                "size": {"value": 3, "approve_status": False, "previous_value": 2},
-                "country": {
-                    "value": "AFG",
-                    "approve_status": False,
-                    "previous_value": self.household_one.country.iso_code3,
-                },
-                "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
-                "flex_fields": {},
-            }
-        else:
-            expected_result = {
-                "village": {"value": "Test Village", "approve_status": True},
-                "size": {"value": 19, "approve_status": True},
-                "country": "AFG",
-            }
+        expected_result = {
+            "size": {"value": 3, "approve_status": False, "previous_value": 2},
+            "country": {
+                "value": "AFG",
+                "approve_status": False,
+                "previous_value": self.household_one.country.iso_code3,
+            },
+            "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
+            "flex_fields": {},
+        }
         self.assertEqual(result, expected_result)
-        if name in ["with_permission", "with_partial_permission"]:
-            self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-            self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
-        else:
-            self.assertNotEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-            self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
+        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
+        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+
+    def test_update_change_household_with_partial_permission(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
+
+        input_data = {
+            "input": {
+                "description": "this is new description",
+                "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
+                "admin": self.household_data_change_grievance_ticket.admin2.p_code,
+                "language": self.household_data_change_grievance_ticket.language,
+                "area": self.household_data_change_grievance_ticket.area,
+                "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
+                "extras": {
+                    "householdDataUpdateIssueTypeExtras": {
+                        "householdData": {
+                            "village": "Test Town",
+                            "size": 3,
+                            "country": "AFG",
+                        }
+                    }
+                },
+            }
+        }
+        self.graphql_request(
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
+        )
+        self.household_data_change_grievance_ticket.refresh_from_db()
+        result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
+        expected_result = {
+            "village": {"value": "Test Village", "approve_status": True},
+            "size": {"value": 19, "approve_status": True},
+            "country": "AFG",
+        }
+        self.assertEqual(result, expected_result)
+        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
+        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
+        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+
+    def test_update_change_household_without_permission(self) -> None:
+        self.create_user_role_with_permissions(self.user, [], self.business_area)
+
+        input_data = {
+            "input": {
+                "description": "this is new description",
+                "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
+                "admin": self.household_data_change_grievance_ticket.admin2.p_code,
+                "language": self.household_data_change_grievance_ticket.language,
+                "area": self.household_data_change_grievance_ticket.area,
+                "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
+                "extras": {
+                    "householdDataUpdateIssueTypeExtras": {
+                        "householdData": {
+                            "village": "Test Town",
+                            "size": 3,
+                            "country": "AFG",
+                        }
+                    }
+                },
+            }
+        }
+        self.graphql_request(
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
+        )
+        self.household_data_change_grievance_ticket.refresh_from_db()
+        result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
+        expected_result = {
+            "village": {"value": "Test Village", "approve_status": True},
+            "size": {"value": 19, "approve_status": True},
+            "country": "AFG",
+        }
+        self.assertEqual(result, expected_result)
+        self.assertNotEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
+        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
+        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
 
     @parameterized.expand(
         [
@@ -631,26 +702,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
             }
         }
-        self.graphql_request(
+        self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
             context={"user": self.user},
             variables=input_data,
         )
-        self.positive_feedback_grievance_ticket.refresh_from_db()
-
-        # TODO: test shouldn't use conditional logic
-        if name == "with_permission":
-            self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
-            self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, self.admin_area_1.name)
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
-        else:
-            self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
-            self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
-            self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
 
     @parameterized.expand(
         [

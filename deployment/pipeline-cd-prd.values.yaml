@@ -29,9 +29,24 @@ backend:
 
 frontend:
   image: #from-pipeline
-
+elasticsearch:
+  data:
+    resources:
+      limits:
+        cpu: '4'
+        memory: 5000Mi
+      requests:
+        cpu: 500m
+        memory: 2Gi      
 celery:
   image: #from-pipeline
+  resources:
+    requests:
+      cpu: 300m
+      memory: 500Mi
+    limits:
+      cpu: 1500m
+      memory: 2Gi
   replicaCount: 2
 
 celeryflower:
@@ -39,32 +54,35 @@ celeryflower:
     FLOWER_BASIC_AUTH: #secret-variables: FLOWER_BASIC_AUTH
 
 ingress:
-  tls: true
-  tlsSecret: aks-unicef-tls
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: kv-cert-hope
   host: hope.unicef.org
+
+elasticsearch:
+  data:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2048Mi
+      limits:
+        cpu: 4
+        memory: 5000Mi
 
 
 postgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
-    user: hctappprdusr
-    password: #secret-variables: POSTGRES_PASSWORD
-    db: prd_hctmis_appdb
+  host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+  username: hctappprdusr
+  password: #secret-variables: POSTGRES_PASSWORD
+  database: prd_hctmis_appdb
 registrationdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
-    user: reghubprdusr
-    password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
-    db: prd_registration_datahubdb
+  host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+  username: reghubprdusr
+  password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
+  database: prd_registration_datahubdb
 cashassistdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
-    user: cahubprdusr
-    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
-    db: prd_cashassist_datahubdb
+  host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+  username: cahubprdusr
+  password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+  database: prd_cashassist_datahubdb

@@ -11,6 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -136,8 +137,12 @@ class TestCloseDataChangeTickets(APITestCase):
 
         first_individual = cls.individuals[0]
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
+        birth_certificate_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+        )
         cls.national_id = DocumentFactory(
             type=national_id_type, document_number="789-789-645", individual=first_individual, country=country_pl
         )
@@ -178,7 +183,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "role": ROLE_PRIMARY,
                 "documents": [
                     {
-                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                         "country": "POL",
                         "number": "123-123-UX-321",
                         "photo": "test_file_name.jpg",
@@ -219,7 +224,7 @@ class TestCloseDataChangeTickets(APITestCase):
                     {
                         "value": {
                             "country": "POL",
-                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                             "number": "999-888-777",
                             "photo": "test_file_name.jpg",
                             "photoraw": "test_file_name.jpg",
@@ -354,7 +359,7 @@ class TestCloseDataChangeTickets(APITestCase):
             document = Document.objects.get(document_number="999-888-777")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
             cls.assertEqual(document.country, country_pl)
-            cls.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+            cls.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
             cls.assertEqual(document.photo, "test_file_name.jpg")
 
             cls.assertFalse(Document.objects.filter(id=cls.national_id.id).exists())
@@ -369,7 +374,9 @@ class TestCloseDataChangeTickets(APITestCase):
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
         national_id = DocumentFactory(
             type=national_id_type,
             document_number="999-888-777",
@@ -395,7 +402,7 @@ class TestCloseDataChangeTickets(APITestCase):
                         "value": {
                             "id": cls.id_to_base64(national_id.id, "DocumentNode"),
                             "country": "POL",
-                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                             "number": "999-888-777",
                             "photo": "new_test_file_name.jpg",
                             "photoraw": "new_test_file_name.jpg",
@@ -403,7 +410,7 @@ class TestCloseDataChangeTickets(APITestCase):
                         "previous_value": {
                             "id": cls.id_to_base64(national_id.id, "DocumentNode"),
                             "country": "POL",
-                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                             "number": "999-888-777",
                             "photo": "test_file_name.jpg",
                             "photoraw": "test_file_name.jpg",
@@ -427,7 +434,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
         document = Document.objects.get(document_number="999-888-777")
         cls.assertEqual(document.country, country_pl)
-        cls.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+        cls.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
         cls.assertEqual(document.photo.name, "new_test_file_name.jpg")
 
     @parameterized.expand(

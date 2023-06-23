@@ -11,6 +11,7 @@ import debug_toolbar
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
+import hct_mis_api.apps.accountability.views
 import hct_mis_api.apps.household.views
 import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
@@ -73,6 +74,11 @@ api_patterns = [
         hct_mis_api.apps.targeting.views.download_xlsx_households,
         name="admin-download-target-population",
     ),
+    path(
+        "download-survey-sample/<str:survey_id>",
+        hct_mis_api.apps.accountability.views.download_cash_plan_payment_verification,
+        name="download-survey-sample",
+    ),
     path(f"{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
     path(f"{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
     path(
@@ -90,6 +96,7 @@ api_patterns = [
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
     path("upload-file/", UploadFile.as_view(), name="upload-file"),
+    path("aurora/", include("hct_mis_api.aurora.urls", namespace="aurora")),
 ]
 
 if settings.PROFILING:
