@@ -14,7 +14,14 @@ describe("Grievance", () => {
   });
 
   describe("Smoke tests Grievance", () => {
-    it.skip("Check Grievance page", () => {});
+    it("Check Grievance page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Elements of Grievance menu are visible",
+        "Check if all elements on page exist",
+      ]);
+      grievancePage.checkGrievanceMenu();
+    });
     it.skip("Check Grievance Details page", () => {});
     it.skip("Check Grievance New Ticket page", () => {});
   });
