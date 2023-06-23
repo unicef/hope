@@ -42,7 +42,7 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const history = useHistory();
@@ -56,6 +56,7 @@ export function CreateImportFromXlsxForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
+            programId,
           },
         },
       });
