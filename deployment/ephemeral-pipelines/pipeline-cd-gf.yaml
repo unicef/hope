@@ -1,12 +1,9 @@
-trigger:
-  branches:
-    include:
-      - global-program-filter
+trigger: none
 pr: none
 resources:
   pipelines:
-  - pipeline: ci-hope
-    source: '[CI] HOPE'
+  - pipeline: pr-hope
+    source: '[PR] HOPE'
     trigger: 
       branches:
       - global-program-filter
