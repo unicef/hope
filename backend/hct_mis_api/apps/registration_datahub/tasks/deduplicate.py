@@ -316,9 +316,13 @@ class DeduplicateTask:
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
             registration_data_import.error_message = ""
             registration_data_import.save()
-
             log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                None,
+                registration_data_import.program_id,
+                old_rdi,
+                registration_data_import,
             )
 
         remove_elasticsearch_documents_by_matching_ids(
@@ -607,7 +611,12 @@ class DeduplicateTask:
             )
         )
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            registration_data_import.program_id,
+            old_rdi,
+            registration_data_import,
         )
 
 
