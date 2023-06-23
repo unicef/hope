@@ -105,8 +105,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, orderBy: "unicef_id") {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: ID) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id") {
         edges {
           node {
             dispersionEndDate
@@ -319,7 +319,7 @@ class TestPaymentPlanQueries(APITestCase):
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
                 context={"user": self.user},
-                variables={"businessArea": "afghanistan", **filter_data},
+                variables={"businessArea": "afghanistan", "program": encode_id_base64(self.pp.program.pk, "Program"), **filter_data},
             )
 
     @freeze_time("2020-10-10")
