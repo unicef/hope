@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -24,6 +24,9 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import Program
 
 
 def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -> None:
@@ -207,23 +210,36 @@ def mark_as_duplicate_individual_and_reassign_roles(
             individual_to_remove,
             ticket_details.role_reassign_data,
             user,
+            ticket_details.ticket.programme,
             "new_individual",
         )
     else:
         household = reassign_roles_on_disable_individual_service(
-            individual_to_remove, ticket_details.role_reassign_data, user
+            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programme
         )
-    mark_as_duplicate_individual(individual_to_remove, unique_individual, household, user)
+    mark_as_duplicate_individual(
+        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programme
+    )
 
 
 def mark_as_duplicate_individual(
-    individual_to_remove: Individual, unique_individual: Individual, household: Household, user: AbstractUser
+    individual_to_remove: Individual,
+    unique_individual: Individual,
+    household: Household,
+    user: AbstractUser,
+    program: "Program",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
 
     individual_to_remove.mark_as_duplicate(unique_individual)
-
-    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual, individual_to_remove)
+    log_create(
+        Individual.ACTIVITY_LOG_MAPPING,
+        "business_area",
+        user,
+        getattr(program, "pk", None),
+        old_individual,
+        individual_to_remove,
+    )
     household.refresh_from_db()
     if household.active_individuals.count() == 0:
         household.withdraw()
