@@ -1,7 +1,4 @@
-trigger:
-  branches:
-    include:
-      - global-program-filter
+trigger: none
 pr: none
 resources:
   pipelines:
