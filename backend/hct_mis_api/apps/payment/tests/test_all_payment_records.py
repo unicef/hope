@@ -92,6 +92,6 @@ class TestAllPaymentRecords(APITestCase):
                     "household": encode_id_base64(household.pk, "Household"),
                     "cashPlan": encode_id_base64(cash_plan.pk, "CashPlan"),
                     "businessArea": "afghanistan",
-                    "programId": encode_id_base64(cash_plan.program.pk, "Household")
+                    "programId": encode_id_base64(cash_plan.program.pk, "Household"),
                 },
             )

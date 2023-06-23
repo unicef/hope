@@ -319,7 +319,11 @@ class TestPaymentPlanQueries(APITestCase):
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
                 context={"user": self.user},
-                variables={"businessArea": "afghanistan", "program": encode_id_base64(self.pp.program.pk, "Program"), **filter_data},
+                variables={
+                    "businessArea": "afghanistan",
+                    "program": encode_id_base64(self.pp.program.pk, "Program"),
+                    **filter_data,
+                },
             )
 
     @freeze_time("2020-10-10")
