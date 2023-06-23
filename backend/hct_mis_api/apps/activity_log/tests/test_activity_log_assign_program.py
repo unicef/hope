@@ -1,8 +1,8 @@
 from django.core.management import call_command
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.activity_log.models import LogEntry
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
@@ -19,7 +19,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
-class TestLogsAssignProgram(APITestCase):
+class TestLogsAssignProgram(TestCase):
     databases = {"default", "registration_datahub"}
 
     @classmethod
