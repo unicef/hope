@@ -1,12 +1,14 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 import { AutoLogout } from './components/core/AutoLogout';
+import { SentryRoute } from './components/core/SentryRoute';
 import { DefaultRoute } from './containers/DefaultRoute';
-import { HomeRouter } from './containers/HomeRouter';
 import { LoginPage } from './containers/pages/core/LoginPage';
 import { ProfilePage } from './containers/pages/core/ProfilePage';
+import { AllProgramsRoutesSwitch } from './containers/routers/AllProgramsRoutesSwitch';
+import { BaseHomeRouter } from './containers/routers/BaseHomeRouter';
+import { SelectedProgramRoutesSwitch } from './containers/routers/SelectedProgramRoutesSwitch';
 import { Providers } from './providers';
-import { SentryRoute } from './components/core/SentryRoute';
 
 export const App: React.FC = () => {
   return (
@@ -30,8 +32,15 @@ export const App: React.FC = () => {
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
+          <Route path='/:businessArea/programs/all'>
+            <BaseHomeRouter>
+              <AllProgramsRoutesSwitch />
+            </BaseHomeRouter>
+          </Route>
           <Route path='/:businessArea/programs/:programId'>
-            <HomeRouter />
+            <BaseHomeRouter>
+              <SelectedProgramRoutesSwitch />
+            </BaseHomeRouter>
           </Route>
           <Route path='/'>
             <DefaultRoute />
