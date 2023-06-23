@@ -6,7 +6,6 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
       query: AllHouseholdsForPopulationTableDocument,
       variables: {
         businessArea: 'afghanistan',
-        programs: [null],
         familySize: '{"min":"","max":""}',
         search: '',
         admin2: '',

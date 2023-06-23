@@ -10,6 +10,7 @@ export const AllPaymentRecords = gql`
     $first: Int
     $last: Int
     $businessArea: String
+    $programId: String
   ) {
     allPaymentRecords(
       parent: $parent
