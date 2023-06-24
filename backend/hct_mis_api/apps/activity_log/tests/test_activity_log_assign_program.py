@@ -1,8 +1,8 @@
 from django.core.management import call_command
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.activity_log.models import LogEntry
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
@@ -19,7 +19,9 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
-class TestLogsAssignProgram(APITestCase):
+class TestLogsAssignProgram(TestCase):
+    multi_db = True
+
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -38,7 +40,7 @@ class TestLogsAssignProgram(APITestCase):
         payment = PaymentFactory(parent=payment_plan, business_area=self.business_area)
         cash_plan = CashPlanFactory(business_area=self.business_area, program=self.program)
         PaymentVerificationSummaryFactory(generic_fk_obj=payment_plan)
-        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=payment_plan)
         payment_verification = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan, generic_fk_obj=payment
         )
@@ -149,12 +151,12 @@ class TestLogsAssignProgram(APITestCase):
         #     changes=dict(),
         # )
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 8
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 8)
 
         call_command("activity_log_assign_program")
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 0
-        assert LogEntry.objects.filter(program_id=self.program.pk).count() == 8
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 0)
+        self.assertEqual(LogEntry.objects.filter(program_id=self.program.pk).count(), 8)
 
     def test_raise_value_error_with_wrong_model(self) -> None:
         rdi = RegistrationDataImportFactory(
@@ -180,13 +182,13 @@ class TestLogsAssignProgram(APITestCase):
             changes=dict(),
         )
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 2
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 2)
 
         with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
             call_command("activity_log_assign_program")
 
         # check transaction.atomic
         rdi_log.refresh_from_db()
-        assert rdi_log.program is None
+        self.assertIsNone(rdi_log.program)
 
-        assert LogEntry.objects.filter(program__isnull=True).count() == 2
+        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 2)
