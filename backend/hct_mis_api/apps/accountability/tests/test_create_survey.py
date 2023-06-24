@@ -10,6 +10,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProFlowResponse
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
@@ -43,7 +44,9 @@ class TestCreateSurvey(APITestCase):
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Doe")
-        cls.tp = TargetPopulationFactory(business_area=cls.business_area)
+        cls.tp = TargetPopulationFactory(
+            business_area=cls.business_area, program=ProgramFactory(business_area=cls.business_area)
+        )
 
     def test_create_survey_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
@@ -57,6 +60,7 @@ class TestCreateSurvey(APITestCase):
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_RANDOM,
                     "flow": "flow123",
+                    "targetPopulation": self.id_to_base64(str(self.tp.pk), "TargetPopulationNode"),
                 }
             },
         )
@@ -96,7 +100,7 @@ class TestCreateSurvey(APITestCase):
                     "title": "Test survey",
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_FULL_LIST,
-                    "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                    "targetPopulation": self.id_to_base64(str(self.tp.id), "TargetPopulationNode"),
                     "fullListArguments": {
                         "excludedAdminAreas": [],
                     },
