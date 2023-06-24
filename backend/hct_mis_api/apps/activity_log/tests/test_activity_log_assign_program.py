@@ -40,7 +40,7 @@ class TestLogsAssignProgram(TestCase):
         payment = PaymentFactory(parent=payment_plan, business_area=self.business_area)
         cash_plan = CashPlanFactory(business_area=self.business_area, program=self.program)
         PaymentVerificationSummaryFactory(generic_fk_obj=payment_plan)
-        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=payment_plan)
         payment_verification = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan, generic_fk_obj=payment
         )
@@ -86,7 +86,6 @@ class TestLogsAssignProgram(TestCase):
         log_to_remove.delete()
         print("Check if Log was removed >>>>>>>>>>>>>>>>>>>>>> exists:", LogEntry.objects.filter(pk=log_to_remove_id).exists(), log_to_remove)
         self.assertFalse(LogEntry.objects.filter(pk=log_to_remove_id).exists())
-
 
         # log for Program
         LogEntry.objects.create(
