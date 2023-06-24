@@ -20,7 +20,6 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class TestLogsAssignProgram(TestCase):
-    # business_area = BusinessArea.objects.get(slug="afghanistan")
     multi_db = True
 
     @classmethod
