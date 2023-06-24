@@ -3420,6 +3420,7 @@ export type LogEntryNode = Node & {
   changes?: Maybe<Scalars['Arg']>,
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
+  program?: Maybe<ProgramNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
 };
 
@@ -4579,6 +4580,7 @@ export type PaymentVerificationLogEntryNode = Node & {
   changes?: Maybe<Scalars['Arg']>,
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
+  program?: Maybe<ProgramNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
   contentObject?: Maybe<PaymentVerificationPlanNode>,
 };
@@ -4813,6 +4815,7 @@ export type ProgramNode = Node & {
   grievanceticketSet: GrievanceTicketNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
+  logentrySet: PaymentVerificationLogEntryNodeConnection,
   feedbackSet: FeedbackNodeConnection,
   surveys: SurveyNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -4902,6 +4905,15 @@ export type ProgramNodeTargetpopulationSetArgs = {
 
 
 export type ProgramNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeLogentrySetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5255,7 +5267,8 @@ export type QueryAllLogEntriesArgs = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>,
-  userId?: Maybe<Scalars['String']>
+  userId?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -5624,6 +5637,7 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>,
   userId?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>,
   objectType?: Maybe<Scalars['String']>
 };
 
@@ -29093,6 +29107,7 @@ export type LogEntryNodeResolvers<ContextType = any, ParentType extends Resolver
   changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
 };
 
@@ -29461,6 +29476,7 @@ export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentTy
   changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   contentObject?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType>,
 };
@@ -29607,6 +29623,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceticketSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
+  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeLogentrySetArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, ProgramNodeFeedbackSetArgs>,
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, ProgramNodeSurveysArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,

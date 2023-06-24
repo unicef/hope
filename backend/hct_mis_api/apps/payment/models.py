@@ -61,6 +61,7 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -881,6 +882,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
+    @property
+    def get_program(self) -> "Program":
+        # TODO will update after add feature with 'program_cycle' and migrate all data
+        return self.program_cycle.program if self.program_cycle else self.program
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
@@ -1552,9 +1558,21 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     @property
     def get_payment_plan(self) -> Union["PaymentPlan", "CashPlan", None]:
         try:
-            return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+            # use GFK instead of self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+            return self.payment_plan_obj
         except ObjectDoesNotExist:
             return None
+
+    @property
+    def get_program(self) -> Optional["Program"]:
+        if payment_plan := self.get_payment_plan:
+            program = (
+                payment_plan.program_cycle.program
+                if isinstance(payment_plan, PaymentPlan) and payment_plan.program_cycle
+                else payment_plan.program
+            )
+            return program
+        return None
 
 
 def build_summary(payment_plan: Optional[Any]) -> None:
