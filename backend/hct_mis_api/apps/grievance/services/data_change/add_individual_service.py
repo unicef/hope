@@ -138,7 +138,14 @@ class AddIndividualService(DataChangeService):
             recalculate_data(household)
         else:
             individual.recalculate_data()
-        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, None, individual)
+        log_create(
+            Individual.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            getattr(self.grievance_ticket.programme, "pk", None),
+            None,
+            individual,
+        )
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
                 lambda: deduplicate_and_check_against_sanctions_list_task.delay(

@@ -22,12 +22,12 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
-        program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
+        cls.program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
 
         cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program_one)
+        cls.household.programs.add(cls.program_one)
 
         cls.primary_collector_individual = IndividualFactory(household=None)
         cls.household.head_of_household = cls.primary_collector_individual
@@ -74,7 +74,10 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         reassign_roles_on_disable_individual_service(
-            self.primary_collector_individual, role_reassign_data, UserFactory()
+            self.primary_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         individual.refresh_from_db()
@@ -96,7 +99,10 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
 
         with self.assertRaises(ValidationError) as context:
             reassign_roles_on_disable_individual_service(
-                self.alternate_collector_individual, role_reassign_data, UserFactory()
+                self.alternate_collector_individual,
+                role_reassign_data,
+                UserFactory(),
+                self.program_one,
             )
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
@@ -115,7 +121,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory()
+            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
         )
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
