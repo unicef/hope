@@ -1558,7 +1558,8 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     @property
     def get_payment_plan(self) -> Union["PaymentPlan", "CashPlan", None]:
         try:
-            return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+            # use GFK instead of self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+            return self.payment_plan_obj
         except ObjectDoesNotExist:
             return None
 
