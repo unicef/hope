@@ -84,7 +84,11 @@ class TestLogsAssignProgram(TestCase):
         self.assertEquals(LogEntry.objects.filter(program__isnull=True).count(), 2)
         # remove unused wrong log
         log_to_remove.delete()
-        print("Check if Log was removed >>>>>>>>>>>>>>>>>>>>>> exists:", LogEntry.objects.filter(pk=log_to_remove_id).exists(), log_to_remove)
+        print(
+            "Check if Log was removed >>>>>>>>>>>>>>>>>>>>>> exists:",
+            LogEntry.objects.filter(pk=log_to_remove_id).exists(),
+            log_to_remove,
+        )
         self.assertFalse(LogEntry.objects.filter(pk=log_to_remove_id).exists())
 
         # log for Program
