@@ -52,11 +52,19 @@ class IndividualDeleteService(DataChangeService):
         individual_to_remove = Individual.objects.select_for_update().get(id=individual_to_remove.id)
         old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
         household_to_remove = reassign_roles_on_disable_individual_service(
-            individual_to_remove, details.role_reassign_data, user
+            individual_to_remove,
+            details.role_reassign_data,
+            user,
+            self.grievance_ticket.programme,
         )
         individual_to_remove.withdraw()
         log_create(
-            Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual_to_remove, individual_to_remove
+            Individual.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            getattr(self.grievance_ticket.programme, "pk", None),
+            old_individual_to_remove,
+            individual_to_remove,
         )
         household_to_remove.refresh_from_db()
         if household_to_remove.active_individuals.count() == 0:
