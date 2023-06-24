@@ -117,6 +117,7 @@ class TicketCreatorService:
                 GrievanceTicket.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
+                getattr(grievance_ticket.programme, "pk", None),
                 None,
                 grievance,
             )
