@@ -96,7 +96,7 @@
     "resolve": "1.12.2",
     "resolve-url-loader": "3.1.1",
     "sass-loader": "8.0.0",
-    "semver": "6.3.0",
+    "semver": "7.5.2",
     "style-loader": "1.0.0",
     "styled-components": "4.4.1",
     "styled-jss": "^2.2.3",
