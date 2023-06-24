@@ -89,9 +89,7 @@ def activity_log_assign_program() -> None:
         print(f"Loading page {page} of {number_of_pages}")
 
         for log in paginator.page(page).object_list:
-            program_id = GetProgramId(log.content_object).get_id
-            print(f"Program id for {log.content_object.__class__.__name__} is {str(program_id)}")
-            log.program_id = program_id
+            log.program_id = GetProgramId(log.content_object).get_id
             to_update.append(log)
 
         LogEntry.objects.bulk_update(to_update, ["program_id"])
