@@ -21,6 +21,7 @@ export const AllPaymentRecords = gql`
       last: $last
       orderBy: $orderBy
       businessArea: $businessArea
+      programId: $programId
     ) {
       pageInfo {
         hasNextPage
