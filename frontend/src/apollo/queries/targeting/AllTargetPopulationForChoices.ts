@@ -12,7 +12,7 @@ export const AllTargetPopulationForChoices = gql`
     $numberOfHouseholdsMin: Int
     $numberOfHouseholdsMax: Int
     $businessArea: String
-    $program: [ID]
+    $program: ID
   ) {
     allTargetPopulation(
       after: $after
