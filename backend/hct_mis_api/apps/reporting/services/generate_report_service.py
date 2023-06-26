@@ -35,7 +35,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report
 
 if TYPE_CHECKING:
@@ -50,6 +49,7 @@ class GenerateReportContentHelpers:
     def get_individuals(report: Report) -> QuerySet[Individual]:
         filter_vars = {
             "household__business_area": report.business_area,
+            # "household__program": report.program # TODO Uncomment after add program to household
             "withdrawn": False,
             "duplicate": False,
             "last_registration_date__gte": report.date_from,
@@ -98,6 +98,7 @@ class GenerateReportContentHelpers:
     def get_households(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
+            # "program": report.program # TODO Uncomment after add program to household
             "withdrawn": False,
             "last_registration_date__gte": timezone_datetime(report.date_from),
             "last_registration_date__lte": timezone_datetime(report.date_to),
@@ -201,6 +202,7 @@ class GenerateReportContentHelpers:
         filter_vars = {
             "business_area": report.business_area,
             "delivery_date__date__range": (report.date_from, report.date_to),
+            "parent__program": report.program,
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
@@ -269,6 +271,7 @@ class GenerateReportContentHelpers:
     def get_payment_plans(report: Report) -> QuerySet[PaymentPlan]:
         filter_vars = {
             "business_area": report.business_area,
+            "program_cycle__program": report.program,
             "dispersion_start_date__gte": report.date_from,
             "dispersion_end_date__lte": report.date_to,
         }
@@ -292,6 +295,7 @@ class GenerateReportContentHelpers:
     def get_cash_plans(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
+            "program": report.program,
             "end_date__gte": report.date_from,
             "end_date__lte": report.date_to,
         }
@@ -327,34 +331,6 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_programs(report: Report) -> QuerySet:
-        filter_vars = {
-            "business_area": report.business_area,
-            "end_date__gte": report.date_from,
-            "end_date__lte": report.date_to,
-        }
-        return Program.objects.filter(**filter_vars)
-
-    @classmethod
-    def format_program_row(cls, program: Program) -> tuple:
-        return (
-            program.id,
-            program.name,
-            program.scope,
-            program.sector,
-            program.status,
-            program.start_date,
-            program.end_date,
-            program.cash_plus,
-            program.description,
-            program.budget,
-            program.frequency_of_payments,
-            program.administrative_areas_of_implementation,
-            program.population_goal,
-            program.total_number_of_households,
-        )
-
-    @staticmethod
     def get_payments_for_individuals(report: Report) -> QuerySet:
         if isinstance(report.date_to, str):
             report.date_to = datetime.strptime(report.date_to, "%Y-%m-%d").date()
@@ -362,6 +338,7 @@ class GenerateReportContentHelpers:
         date_to_time = datetime.fromordinal(report.date_to.toordinal())
         date_to_time += timedelta(days=1)
         filter_vars = {
+            # "household__program": report.program # TODO Uncomment after add program to household
             "household__paymentrecord__business_area": report.business_area,
             "household__paymentrecord__delivery_date__gte": report.date_from,
             "household__paymentrecord__delivery_date__lt": date_to_time,
@@ -436,6 +413,7 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_grievance_tickets(report: Report) -> QuerySet:
+        # TODO filter tickets based on program
         filter_vars = {
             "business_area": report.business_area,
             "created_at__gte": report.date_from,
@@ -627,22 +605,6 @@ class GenerateReportService:
             "validation alerts count",  # 2
             # "cash plan verification status",  # FINISHED
         ),
-        Report.PROGRAM: (
-            "programme ID",  # e46064c4-d5e2-4990-bb9b-f5cc2dde96f9
-            "name",  # Winterization 2020
-            "scope",  # UNICEF
-            "sector",  # EDUCATION
-            "status",  # ACTIVE
-            "start date",  # 2020-10-13
-            "end date",  # 2020-11-17
-            "cash plus",  # False
-            "description",  # Description goes here
-            "budget in USD",  # 10000.00
-            "frequency of payments",  # REGULAR
-            "administrative areas of implementation",  # Juba, Morobo, Xyz
-            "individual population goal",  # 50
-            "total number of households",  # 4356
-        ),
         Report.INDIVIDUALS_AND_PAYMENT: (
             "household id",
             "country of origin",
@@ -700,7 +662,6 @@ class GenerateReportService:
         Report.PAYMENT_PLAN: ("Dispersion Start Date", "Dispersion End Date"),
         Report.INDIVIDUALS_AND_PAYMENT: ("Delivery Date From", "Delivery Date To"),
         Report.CASH_PLAN: ("End Date From", "End Date To"),
-        Report.PROGRAM: ("End Date From", "End Date To"),
         Report.GRIEVANCES: ("End Date From", "End Date To"),
     }
     ROW_CONTENT_METHODS = {
@@ -729,7 +690,6 @@ class GenerateReportService:
             GenerateReportContentHelpers.get_cash_plans,
             GenerateReportContentHelpers.format_cash_plan_row,
         ),
-        Report.PROGRAM: (GenerateReportContentHelpers.get_programs, GenerateReportContentHelpers.format_program_row),
         Report.INDIVIDUALS_AND_PAYMENT: (
             GenerateReportContentHelpers.get_payments_for_individuals,
             GenerateReportContentHelpers.format_payments_for_individuals_row,
@@ -744,24 +704,21 @@ class GenerateReportService:
 
     def __init__(self, report: Report) -> None:
         self.report = report
-        self.report_type = report.report_type
         self.business_area = report.business_area
 
-    def _create_workbook(self) -> openpyxl.Workbook:
-        wb = openpyxl.Workbook()
-        ws_report = wb.active
-        ws_report.title = f"{self._report_type_to_str()} Report"
-        self.wb = wb
+    def _create_workbook(self) -> None:
+        self.wb = openpyxl.Workbook()
+        ws_report = self.wb.active
+        ws_report.title = f"{self.report.get_report_type_display()} Report"
         self.ws_report = ws_report
-        self.ws_filters = wb.create_sheet(GenerateReportService.FILTERS_SHEET)
-        return wb
+        self.ws_filters = self.wb.create_sheet(GenerateReportService.FILTERS_SHEET)
 
     def _add_filters_info(self) -> None:
         filter_rows = [
-            ("Report type", str(self._report_type_to_str())),
+            ("Report type", str(self.report.get_report_type_display())),
             ("Business area", self.business_area.name),
-            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_from)),
-            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_to)),
+            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report.report_type][0], str(self.report.date_from)),
+            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report.report_type][0], str(self.report.date_to)),
         ]
 
         if self.report.admin_area.all().exists():
@@ -778,14 +735,14 @@ class GenerateReportService:
             self.ws_filters.append(filter_row)
 
     def _add_headers(self) -> None:
-        headers_row = GenerateReportService.HEADERS[self.report_type]
+        headers_row = GenerateReportService.HEADERS[self.report.report_type]
         self.ws_report.append(headers_row)
 
     def _add_rows(self) -> int:
-        get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
+        get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
         all_instances = get_row_methods[0](self.report)
         self.report.number_of_records = all_instances.count()
-        number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report_type])
+        number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report.report_type])
         col_instances_len = 0
         for instance in all_instances:
             row = get_row_methods[1](instance)
@@ -799,7 +756,7 @@ class GenerateReportService:
                 self.ws_report,
                 number_of_columns_based_on_set_headers + 1,
                 col_instances_len,
-                GenerateReportService.OPTIONAL_HEADERS.get(self.report_type, ""),
+                GenerateReportService.OPTIONAL_HEADERS.get(self.report.report_type, ""),
             )
         return col_instances_len
 
@@ -817,7 +774,7 @@ class GenerateReportService:
             self.wb.save(tmp.name)
             tmp.seek(0)
             self.report.file.save(
-                f"{self._report_type_to_str()}-{GenerateReportContentHelpers._format_date(self.report.created_at)}.xlsx",
+                f"{self.report.get_report_type_display()}-{GenerateReportContentHelpers._format_date(self.report.created_at)}.xlsx",
                 File(tmp),
                 save=False,
             )
@@ -837,7 +794,7 @@ class GenerateReportService:
 
     def _send_email(self) -> None:
         context = {
-            "report_type": self._report_type_to_str(),
+            "report_type": self.report.get_report_type_display(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
             "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/reporting/{encode_id_base64(self.report.id, "Report")}',
         }
@@ -880,12 +837,7 @@ class GenerateReportService:
 
         for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
-            value = column_widths[i] + 2
-            value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value
-            ws.column_dimensions[col_name].width = value
-
-    def _report_type_to_str(self) -> str:
-        return [name for value, name in Report.REPORT_TYPES if value == self.report_type][0]
+            ws.column_dimensions[col_name].width = min(column_widths[i] + 2, GenerateReportService.MAX_COL_WIDTH)
 
     def _stringify_all_values(self, row: tuple) -> tuple:
         str_row = []

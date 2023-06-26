@@ -169,7 +169,6 @@ class TestGenerateReportService(TestCase):
             ("payment_verifications_program", Report.PAYMENT_VERIFICATION, False, True, 1),
             ("cash_plans_no_filter", Report.CASH_PLAN, False, False, 2),
             ("cash_plans_program", Report.CASH_PLAN, False, True, 1),
-            ("programs_no_filter", Report.PROGRAM, False, False, 1),
             ("individuals_payments_no_filter", Report.INDIVIDUALS_AND_PAYMENT, False, False, 4),
             ("individuals_payments_admin_area", Report.INDIVIDUALS_AND_PAYMENT, True, False, 2),
             ("individuals_payments_program", Report.INDIVIDUALS_AND_PAYMENT, False, True, 2),
