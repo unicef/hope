@@ -7,12 +7,13 @@ import {
   Typography,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { Field, Form, Formik } from 'formik';
+import { Field, Form, Formik, FormikValues } from 'formik';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
+  CreateReportMutationVariables,
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
@@ -72,57 +73,44 @@ export const NewReportForm = (): React.ReactElement => {
     dateTo: '',
     adminArea1: '',
     adminArea2: [],
-    program: programId,
   };
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const prepareVariables = (values) => {
-    const shouldSendAdminAreaField =
+  const prepareVariables = (
+    values: FormikValues,
+  ): CreateReportMutationVariables['reportData'] => {
+    const shouldSendAdmin2Field =
       values.reportType === REPORT_TYPES.INDIVIDUALS ||
       values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
-      values.reportType === REPORT_TYPES.PAYMENTS;
-
-    const shouldSendProgramField =
-      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
-      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
-      values.reportType === REPORT_TYPES.CASH_PLAN;
-
-    const shouldSendBothFields =
+      values.reportType === REPORT_TYPES.PAYMENTS ||
       values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
 
-    let variables = null;
+    const shouldSendAdmin1Field =
+      values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
 
-    const basicVariables = {
+    let variables: CreateReportMutationVariables['reportData'] = {
       businessAreaSlug: businessArea,
+      program: programId,
       reportType: values.reportType,
       dateFrom: values.dateFrom,
       dateTo: values.dateTo,
     };
 
-    if (shouldSendAdminAreaField) {
+    if (shouldSendAdmin2Field) {
       variables = {
-        ...basicVariables,
+        ...variables,
         adminArea2: values.adminArea2.map((el) => el.node.id),
       };
     }
-    if (shouldSendProgramField) {
+    if (shouldSendAdmin1Field) {
       variables = {
-        ...basicVariables,
-        program: values.program,
-      };
-    }
-    if (shouldSendBothFields) {
-      variables = {
-        ...basicVariables,
-        program: values.program,
+        ...variables,
         adminArea1: values.adminArea1?.node?.id,
-        adminArea2: values.adminArea2?.map((el) => el.node.id),
       };
     }
-    return variables || basicVariables;
+    return variables;
   };
 
-  const submitFormHandler = async (values): Promise<void> => {
+  const submitFormHandler = async (values: FormikValues): Promise<void> => {
     const response = await mutate({
       variables: {
         reportData: prepareVariables(values),
@@ -141,55 +129,106 @@ export const NewReportForm = (): React.ReactElement => {
     }
   };
 
-  const renderConditionalFields = (values): React.ReactElement => {
-    const adminArea2Field = (
-      <Grid item xs={12}>
-        <Field
-          name='adminArea2'
-          label={t('Administrative Level 2')}
-          variant='outlined'
-          component={FormikAdminAreaAutocompleteMultiple}
-          parentId={values.adminArea1?.node?.id}
-        />
-      </Grid>
-    );
+  const renderConditionalFields = (
+    values: FormikValues,
+    setFieldValue,
+  ): React.ReactElement[] => {
+    const fields: React.ReactElement[] = [];
 
-    const showOnlyAdminAreaField =
-      values.reportType === REPORT_TYPES.INDIVIDUALS ||
-      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
-      values.reportType === REPORT_TYPES.PAYMENTS;
-
-    let fields = null;
-
-    if (showOnlyAdminAreaField) {
-      fields = adminArea2Field;
+    switch (values.reportType) {
+      case REPORT_TYPES.INDIVIDUALS:
+      case REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS:
+      case REPORT_TYPES.PAYMENTS:
+        fields.push(
+          <Grid item xs={12}>
+            <Field
+              name='adminArea2'
+              label={t('Administrative Level 2')}
+              variant='outlined'
+              component={FormikAdminAreaAutocompleteMultiple}
+              parentId={values.adminArea1?.node?.id}
+            />
+          </Grid>,
+        );
+        break;
+      case REPORT_TYPES.INDIVIDUALS_AND_PAYMENT:
+        fields.push(
+          <Grid item xs={12}>
+            <Field
+              name='adminArea1'
+              label={t('Administrative Level 1')}
+              variant='outlined'
+              level={1}
+              component={FormikAdminAreaAutocomplete}
+              onClear={() => setFieldValue('adminArea2', [])}
+              additionalOnChange={() => setFieldValue('adminArea2', [])}
+            />
+          </Grid>,
+        );
+        fields.push(
+          <Grid item xs={12}>
+            <Field
+              name='adminArea2'
+              label={t('Administrative Level 2')}
+              variant='outlined'
+              component={FormikAdminAreaAutocompleteMultiple}
+              parentId={values.adminArea1?.node?.id}
+            />
+          </Grid>,
+        );
+        break;
+      default:
+        break;
     }
 
     return fields;
   };
   const renderTimeframeLabel = (reportType: string): string => {
-    let label = '';
     switch (reportType) {
       case REPORT_TYPES.INDIVIDUALS:
       case REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS:
-        label = t('Last Registration Date');
-        break;
+        return t('Last Registration Date');
       case REPORT_TYPES.CASH_PLAN_VERIFICATION:
       case REPORT_TYPES.PAYMENT_VERIFICATION:
-        label = t('Completion Date');
-        break;
+        return t('Completion Date');
       case REPORT_TYPES.PAYMENTS:
       case REPORT_TYPES.INDIVIDUALS_AND_PAYMENT:
-        label = t('Delivery Date');
-        break;
+        return t('Delivery Date');
       case REPORT_TYPES.CASH_PLAN:
-      case REPORT_TYPES.PROGRAM:
-        label = t('End Date');
-        break;
+        return t('End Date');
       default:
-        break;
+        return '';
     }
-    return label;
+  };
+
+  const renderDataFields = (values: FormikValues): React.ReactElement => {
+    return (
+      <Grid container spacing={3}>
+        <Grid item xs={6}>
+          <Field
+            name='dateFrom'
+            label={t('From Date')}
+            component={FormikDateField}
+            required
+            fullWidth
+            decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <Field
+            name='dateTo'
+            label={t('To Date')}
+            component={FormikDateField}
+            required
+            disabled={!values.dateFrom}
+            initialFocusedDate={values.dateFrom}
+            fullWidth
+            decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+            minDate={values.dateFrom}
+          />
+        </Grid>
+      </Grid>
+    );
   };
 
   return (
@@ -250,64 +289,9 @@ export const NewReportForm = (): React.ReactElement => {
                         {renderTimeframeLabel(values.reportType)}
                       </FieldLabel>
 
-                      <Grid container spacing={3}>
-                        <Grid item xs={6}>
-                          <Field
-                            name='dateFrom'
-                            label={t('From Date')}
-                            component={FormikDateField}
-                            required
-                            fullWidth
-                            decoratorEnd={
-                              <CalendarTodayRoundedIcon color='disabled' />
-                            }
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='dateTo'
-                            label={t('To Date')}
-                            component={FormikDateField}
-                            required
-                            disabled={!values.dateFrom}
-                            initialFocusedDate={values.dateFrom}
-                            fullWidth
-                            decoratorEnd={
-                              <CalendarTodayRoundedIcon color='disabled' />
-                            }
-                            minDate={values.dateFrom}
-                          />
-                        </Grid>
-                      </Grid>
+                      {renderDataFields(values)}
                     </Grid>
-                    {renderConditionalFields(values)}
-                    {values.reportType ===
-                      REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
-                      <>
-                        <Grid item xs={12}>
-                          <Field
-                            name='adminArea1'
-                            label={t('Administrative Level 1')}
-                            variant='outlined'
-                            level={1}
-                            component={FormikAdminAreaAutocomplete}
-                            onClear={() => setFieldValue('adminArea2', [])}
-                            additionalOnChange={() =>
-                              setFieldValue('adminArea2', [])
-                            }
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Field
-                            name='adminArea2'
-                            label={t('Administrative Level 2')}
-                            variant='outlined'
-                            component={FormikAdminAreaAutocompleteMultiple}
-                            parentId={values.adminArea1?.node?.id}
-                          />
-                        </Grid>
-                      </>
-                    )}
+                    {renderConditionalFields(values, setFieldValue)}
                   </Grid>
                 </Form>
               </DialogContent>
