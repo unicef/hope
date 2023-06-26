@@ -5,10 +5,11 @@ export const fakeApolloAllRegistrationDataImports = [
     request: {
       query: AllRegistrationDataImportsDocument,
       variables: {
-        first: 10,
         importDate: null,
-        orderBy: '-import_date',
         businessArea: 'afghanistan',
+        programId: null,
+        first: 10,
+        orderBy: '-import_date',
       },
     },
     result: {
@@ -21,29 +22,28 @@ export const fakeApolloAllRegistrationDataImports = [
             endCursor: 'YXJyYXljb25uZWN0aW9uOjk=',
             __typename: 'PageInfo',
           },
-          totalCount: 87,
+          totalCount: 27,
           edges: [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
                 id:
-                  'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6OWJlMjUwNGMtZGQ3YS00ZDZkLWE4OGEtOTU5YWZkZGY3MTgy',
-                createdAt: '2022-01-19T09:53:19.418282',
-                name: 'Adam Row ID Test 2',
-                status: 'MERGED',
-                importDate: '2022-01-19T09:53:19.418319',
+                  'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ZjRmMGY4NjktNTllNS00YWI2LWJkYjEtYWJiMGVkMTU5YTRl',
+                createdAt: '2023-06-12T11:14:35.582648+00:00',
+                name: 'Lol123',
+                status: 'IMPORT_ERROR',
+                importDate: '2023-06-12T11:14:35.582685+00:00',
                 importedBy: {
                   id:
-                    'VXNlck5vZGU6OGYyMDVhZWUtODVjOS00YmQwLTgwMzItYjEzOTcxNjUwMjVj',
-                  firstName: 'Adam',
-                  lastName: 'Fifield',
-                  email: 'afifield@unicef.org',
+                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  firstName: 'Root',
+                  lastName: 'Rootkowski',
+                  email: 'root@root.com',
                   __typename: 'UserNode',
                 },
                 dataSource: 'XLS',
-                numberOfHouseholds: 3,
+                numberOfHouseholds: 2,
                 numberOfIndividuals: 6,
-                programId: "939ff91b-7f89-4e3c-9519-26ed62f51718",
                 __typename: 'RegistrationDataImportNode',
               },
               __typename: 'RegistrationDataImportNodeEdge',

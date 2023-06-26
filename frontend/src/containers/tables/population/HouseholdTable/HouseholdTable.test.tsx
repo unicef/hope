@@ -10,7 +10,6 @@ import { HouseholdTable } from '.';
 describe('containers/tables/population/HouseholdTable', () => {
   const initialFilter = {
     search: '',
-    program: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
