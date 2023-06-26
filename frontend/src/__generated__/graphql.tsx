@@ -2666,6 +2666,7 @@ export type ImportedHouseholdNode = Node & {
   diiaRecId: Scalars['String'],
   enumeratorRecId?: Maybe<Scalars['Int']>,
   misUnicefId?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['UUID']>,
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
   importId?: Maybe<Scalars['String']>,
@@ -2814,6 +2815,7 @@ export type ImportedIndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['UUID']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -11754,8 +11756,7 @@ export type AllPaymentRecordsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>,
-  programId?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -21894,7 +21895,7 @@ export type AllCashPlansAndPaymentPlansQueryHookResult = ReturnType<typeof useAl
 export type AllCashPlansAndPaymentPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansAndPaymentPlansLazyQuery>;
 export type AllCashPlansAndPaymentPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($parent: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String, $programId: String) {
+    query AllPaymentRecords($parent: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(parent: $parent, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
@@ -21979,7 +21980,6 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      businessArea: // value for 'businessArea'
- *      programId: // value for 'programId'
  *   },
  * });
  */
@@ -28802,6 +28802,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -28885,6 +28886,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
