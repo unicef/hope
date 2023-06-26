@@ -267,18 +267,23 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <div
-                  style="text-overflow: ellipsis;"
+                <a
+                  class="sc-iwsKbI lezRMd"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmQ4NDdkZDFlLTkwYmYtNDQzZC1iNWI1LWNiZTcwMDQ5YzYyMA=="
                 >
-                  PP-0060-23-00000017
-                </div>
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    PP-0060-23-00000017
+                  </div>
+                </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -322,18 +327,23 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <div
-                  style="text-overflow: ellipsis;"
+                <a
+                  class="sc-iwsKbI lezRMd"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjQ4YmU4NzVmLWUxYzMtNDM3OS1iMzc1LTgwMzlkYWU4ODQ5MQ=="
                 >
-                  PP-0060-23-00000015
-                </div>
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    PP-0060-23-00000015
+                  </div>
+                </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -377,18 +387,23 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <div
-                  style="text-overflow: ellipsis;"
+                <a
+                  class="sc-iwsKbI lezRMd"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjBkNDVlNjQzLTY1YWMtNDIzOS04ZmI5LWIyNzRhNjlmMmE2ZA=="
                 >
-                  PP-0060-23-00000005
-                </div>
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    PP-0060-23-00000005
+                  </div>
+                </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -432,18 +447,23 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <div
-                  style="text-overflow: ellipsis;"
+                <a
+                  class="sc-iwsKbI lezRMd"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjc3MDQ1YmUwLTUzOTUtNDdlNy1hZWZiLTYwZjNjNDgxNzE5Zg=="
                 >
-                  PP-0060-23-00000001
-                </div>
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    PP-0060-23-00000001
+                  </div>
+                </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -487,18 +507,23 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <div
-                  style="text-overflow: ellipsis;"
+                <a
+                  class="sc-iwsKbI lezRMd"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/cashplans/Q2FzaFBsYW5Ob2RlOjk1NGY3OWE3LTdiZDYtNDU5ZS05ZGE4LTQzNjg3ZDY0NjYyNg=="
                 >
-                  123-21-CSH-00003
-                </div>
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00003
+                  </div>
+                </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
