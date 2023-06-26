@@ -68,7 +68,7 @@ class CommonValidator(BaseValidator):
         end_date = kwargs.get("end_date")
         if start_date and end_date:
             if start_date > end_date:
-                logger.error(
+                logger.info(
                     f"Start date cannot be greater than the end date, "
                     f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
                     f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
