@@ -9,7 +9,7 @@ export const fakeApolloAllTargetPopulation = [
         numberOfHouseholdsMin: null,
         numberOfHouseholdsMax: null,
         status: '',
-        program: [null],
+        program: null,
         businessArea: 'afghanistan',
         first: 10,
         orderBy: '-created_at',
