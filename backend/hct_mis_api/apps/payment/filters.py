@@ -25,6 +25,7 @@ from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
+    decode_id_string_required,
     is_valid_uuid,
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
@@ -41,12 +42,12 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
-from hct_mis_api.apps.program.models import Program
 
 
 class PaymentRecordFilter(FilterSet):
     individual = CharFilter(method="individual_filter")
     business_area = CharFilter(field_name="business_area__slug")
+    program_id = CharFilter(method="filter_by_program_id")
 
     class Meta:
         fields = (
@@ -72,10 +73,13 @@ class PaymentRecordFilter(FilterSet):
         )
     )
 
-    def individual_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
+    def individual_filter(self, qs: "QuerySet", name: str, value: UUID) -> "QuerySet[PaymentRecord]":
         if is_valid_uuid(str(value)):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
+
+    def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentRecord]":
+        return qs.filter(parent__program_id=decode_id_string_required(value))
 
 
 class PaymentVerificationFilter(FilterSet):
@@ -147,9 +151,15 @@ class PaymentVerificationFilter(FilterSet):
 
 
 class PaymentVerificationPlanFilter(FilterSet):
+    program_id = CharFilter(method="filter_by_program_id")
+
     class Meta:
         fields = tuple()
         model = PaymentVerificationPlan
+
+    def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentVerificationPlan]":
+        program_id = decode_id_string_required(value)
+        return qs.filter(Q(payment_plan__program_id=program_id) | Q(cash_plan__program_id=program_id))
 
 
 class PaymentVerificationSummaryFilter(FilterSet):
@@ -303,7 +313,9 @@ class PaymentPlanFilter(FilterSet):
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
 
     class Meta:
-        fields = tuple()
+        fields = {
+            "program": ["exact"],
+        }
         model = PaymentPlan
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
@@ -327,16 +339,17 @@ class PaymentPlanFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
 
-    def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
 
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
+    program_id = CharFilter(field_name="parent__program")
 
     def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         payment_plan_id = decode_id_string(value)
@@ -390,8 +403,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(business_area__slug=business_area)
 
     if program:
-        program_obj = get_object_or_404(Program, id=decode_id_string(program))
-        queryset = queryset.filter(program=program_obj)
+        queryset = queryset.filter(program=decode_id_string(program))
 
     if start_date_gte:
         queryset = queryset.filter(start_date__gte=start_date_gte)
@@ -437,12 +449,16 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
 def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwargs: Any) -> ExtendedQuerySetSequence:
     business_area = kwargs.get("business_area")
     household = kwargs.get("household")
+    program = kwargs.get("program")
 
     if business_area:
         queryset = queryset.filter(business_area__slug=business_area)
 
     if household:
         queryset = queryset.filter(household__id=decode_id_string(household))
+
+    if program:
+        queryset = queryset.filter(parent__program=decode_id_string(program))
 
     return queryset
 

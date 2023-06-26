@@ -5,13 +5,11 @@ export const fakeApolloAllRegistrationDataImports = [
     request: {
       query: AllRegistrationDataImportsDocument,
       variables: {
-        businessArea: 'afghanistan',
-        first: 10,
         importDate: null,
+        businessArea: 'afghanistan',
+        programId: null,
+        first: 10,
         orderBy: '-import_date',
-        programId:
-          'UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm',
-        search: '',
       },
     },
     result: {

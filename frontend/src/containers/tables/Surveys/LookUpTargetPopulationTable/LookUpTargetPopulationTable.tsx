@@ -48,7 +48,7 @@ export const LookUpTargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    program: [decodeIdString(programId)],
+    program: decodeIdString(programId),
   };
 
   const handleRadioChange = (id: string): void => {

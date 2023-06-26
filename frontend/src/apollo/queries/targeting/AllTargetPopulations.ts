@@ -12,7 +12,7 @@ export const AllTargetPopulations = gql`
     $numberOfHouseholdsMin: Int
     $numberOfHouseholdsMax: Int
     $businessArea: String
-    $program: [ID]
+    $program: ID
     $createdAtRange: String
     $paymentPlanApplicable: Boolean
   ) {
