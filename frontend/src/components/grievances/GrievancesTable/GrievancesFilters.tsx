@@ -107,6 +107,7 @@ export const GrievancesFilters = ({
               label={undefined}
               value={filter.searchType}
               borderRadius='0px 4px 4px 0px'
+              data-cy='filters-search-type'
               fullWidth
             >
               {Object.keys(GrievanceSearchTypes).map((key) => (
@@ -126,6 +127,7 @@ export const GrievancesFilters = ({
             label={t('Status')}
             value={filter.status}
             fullWidth
+            data-cy='filters-status'
           >
             <MenuItem value=''>
               <em>None</em>
