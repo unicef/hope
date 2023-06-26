@@ -35,7 +35,7 @@ exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
             >
               <a
                 class="sc-bdVaJa eFfWno"
-                href="/afghanistan/programs/all/payment-module/"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/"
               >
                 Payment Module
               </a>
@@ -67,7 +67,7 @@ exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
               <a
                 aria-disabled="false"
                 class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
-                href="/afghanistan/programs/all/fsp/"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/fsp/"
                 role="button"
                 tabindex="0"
               >

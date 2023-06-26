@@ -38,7 +38,7 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export function RegistrationDataImportCreateDialog(): React.ReactElement {
+export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -149,4 +149,4 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
       </Dialog>
     </span>
   );
-}
+};

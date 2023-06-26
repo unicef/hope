@@ -10,6 +10,7 @@ export const AllPaymentRecords = gql`
     $first: Int
     $last: Int
     $businessArea: String
+    $programId: String
   ) {
     allPaymentRecords(
       parent: $parent
@@ -20,6 +21,7 @@ export const AllPaymentRecords = gql`
       last: $last
       orderBy: $orderBy
       businessArea: $businessArea
+      programId: $programId
     ) {
       pageInfo {
         hasNextPage

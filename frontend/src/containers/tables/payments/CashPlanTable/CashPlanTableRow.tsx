@@ -20,7 +20,7 @@ export function CashPlanTableRow({
   cashAndPaymentPlan,
 }: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const objectPath =
     cashAndPaymentPlan.objType === 'PaymentPlan'
       ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
@@ -31,14 +31,24 @@ export function CashPlanTableRow({
   };
   return (
     <ClickableTableRow
-      hover
-      onClick={handleClick}
+      hover={!isAllPrograms}
+      onClick={!isAllPrograms ? handleClick : undefined}
       role='checkbox'
       key={cashAndPaymentPlan.id}
       data-cy='cash-plan-table-row'
     >
       <TableCell align='left'>
-        <BlackLink to={objectPath}>
+        {!isAllPrograms ? (
+          <BlackLink to={objectPath}>
+            <div
+              style={{
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {cashAndPaymentPlan.unicefId}
+            </div>
+          </BlackLink>
+        ) : (
           <div
             style={{
               textOverflow: 'ellipsis',
@@ -46,7 +56,7 @@ export function CashPlanTableRow({
           >
             {cashAndPaymentPlan.unicefId}
           </div>
-        </BlackLink>
+        )}
       </TableCell>
       <TableCell align='left'>
         <StatusBox
