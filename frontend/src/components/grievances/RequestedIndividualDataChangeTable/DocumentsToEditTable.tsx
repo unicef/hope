@@ -90,6 +90,7 @@ export const DocumentsToEditTable = ({
               {isEdit ? (
                 <Checkbox
                   color='primary'
+                  data-cy='checkboc-document-to-edit'
                   onChange={(): void => {
                     handleSelectDocumentToEdit(index);
                   }}
@@ -101,15 +102,21 @@ export const DocumentsToEditTable = ({
                 />
               ) : (
                 selectedDocumentsToEdit.includes(index) && (
-                  <GreenIcon>
+                  <GreenIcon data-cy='green-check'>
                     <CheckCircleIcon />
                   </GreenIcon>
                 )
               )}
             </TableCell>
-            <TableCell align='left'>{t('Field')}</TableCell>
-            <TableCell align='left'>{t('Current Value')}</TableCell>
-            <TableCell align='left'>{t('New Value')}</TableCell>
+            <TableCell data-cy='table-cell-field' align='left'>
+              {t('Field')}
+            </TableCell>
+            <TableCell data-cy='table-cell-current-value' align='left'>
+              {t('Current Value')}
+            </TableCell>
+            <TableCell data-cy='table-cell-new-value' align='left'>
+              {t('New Value')}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
