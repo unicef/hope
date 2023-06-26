@@ -12,8 +12,8 @@ from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFact
 
 class TestAllPaymentRecords(APITestCase):
     ALL_PAYMENT_RECORDS_QUERY = """
-    query AllPaymentRecords($cashPlan: ID, $household: ID, $businessArea: String) {
-      allPaymentRecords(parent: $cashPlan, household: $household, businessArea: $businessArea) {
+    query AllPaymentRecords($cashPlan: ID, $household: ID, $businessArea: String, $programId: String) {
+      allPaymentRecords(parent: $cashPlan, household: $household, businessArea: $businessArea, programId: $programId) {
         totalCount
         edgeCount
       }
@@ -81,7 +81,7 @@ class TestAllPaymentRecords(APITestCase):
                 },
             )
 
-    def test_fetch_payment_records_filter_by_cash_plan_and_household(self) -> None:
+    def test_fetch_payment_records_filter_by_cash_plan_and_household_and_program(self) -> None:
         households = [self.household1, self.household2, self.household3]
         cash_plans = [self.cash_plan1, self.cash_plan2, self.cash_plan3]
         for household, cash_plan in itertools.product(households, cash_plans):
@@ -92,5 +92,6 @@ class TestAllPaymentRecords(APITestCase):
                     "household": encode_id_base64(household.pk, "Household"),
                     "cashPlan": encode_id_base64(cash_plan.pk, "CashPlan"),
                     "businessArea": "afghanistan",
+                    "programId": encode_id_base64(cash_plan.program.pk, "Household"),
                 },
             )
