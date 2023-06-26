@@ -144,6 +144,7 @@ export const GrievancesFilters = ({
             icon={<AccountBalance style={{ color: '#5f6368' }} />}
             fullWidth
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
+            data-cy='filters-fsp'
           />
         </Grid>
         <Grid item xs={3}>
@@ -160,6 +161,7 @@ export const GrievancesFilters = ({
             }
             value={filter.createdAtRangeMin}
             fullWidth
+            data-cy='filters-creation-date-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -175,6 +177,7 @@ export const GrievancesFilters = ({
             }
             value={filter.createdAtRangeMax}
             fullWidth
+            data-cy='filters-creation-date-to'
           />
         </Grid>
         <Grid item xs={3}>
@@ -183,6 +186,7 @@ export const GrievancesFilters = ({
             label={t('Category')}
             value={filter.category}
             fullWidth
+            data-cy='filters-category'
           >
             <MenuItem value=''>
               <em>None</em>
@@ -230,6 +234,7 @@ export const GrievancesFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filters-admin-level'
           />
         </Grid>
         <Grid item xs={3}>
@@ -241,6 +246,7 @@ export const GrievancesFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filters-assignee'
           />
         </Grid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
@@ -251,6 +257,7 @@ export const GrievancesFilters = ({
                 value={filter.scoreMin}
                 placeholder='From'
                 onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
+                data-cy='filters-similarity-score-from'
                 fullWidth
               />
             </Grid>
@@ -259,6 +266,7 @@ export const GrievancesFilters = ({
                 value={filter.scoreMax}
                 placeholder='To'
                 onChange={(e) => handleFilterChange('scoreMax', e.target.value)}
+                data-cy='filters-similarity-score-to'
                 fullWidth
               />
             </Grid>
@@ -273,6 +281,7 @@ export const GrievancesFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
+            dataCy='filters-registration-data-import'
           />
         </Grid>
         <Grid item xs={3}>
@@ -284,6 +293,7 @@ export const GrievancesFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
+            dataCy='filters-preferred-language'
           />
         </Grid>
         <Grid item container xs={3}>
@@ -291,6 +301,7 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('priority', e.target.value)}
             label={t('Priority')}
             value={filter.priority}
+            data-cy='filters-priority'
             fullWidth
           >
             <MenuItem value=''>
@@ -310,6 +321,7 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
             label={t('Urgency')}
             value={filter.urgency}
+            data-cy='filters-urgency'
             fullWidth
           >
             <MenuItem value=''>
@@ -332,6 +344,7 @@ export const GrievancesFilters = ({
             label={undefined}
             value={filter.grievanceStatus}
             fullWidth
+            data-cy='filters-active-tickets'
           >
             <MenuItem value={GrievanceStatuses.Active}>
               {t('Active Tickets')}

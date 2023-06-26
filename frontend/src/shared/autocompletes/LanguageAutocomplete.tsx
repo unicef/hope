@@ -27,6 +27,7 @@ export const LanguageAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  dataCy,
 }: {
   disabled?;
   fullWidth?: boolean;
@@ -37,6 +38,7 @@ export const LanguageAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
+  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -79,6 +81,7 @@ export const LanguageAutocomplete = ({
     <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
+      data-cy={dataCy}
       open={open}
       filterOptions={(options) => options}
       onChange={(_, selectedValue) =>
