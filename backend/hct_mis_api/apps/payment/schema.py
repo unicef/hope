@@ -623,7 +623,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     permission_classes = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     obj_type = graphene.String()
@@ -675,7 +675,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     obj_type = graphene.String()
@@ -733,7 +733,7 @@ class PaginatedPaymentRecordsAndPaymentsNode(graphene.ObjectType):
 class GenericPaymentPlanNode(graphene.ObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     id = graphene.String()
@@ -804,7 +804,7 @@ class Query(graphene.ObjectType):
     all_payment_records = DjangoPermissionFilterConnectionField(
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
-        permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
+        permission_classes=(hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),),
     )
 
     all_payment_records_and_payments = graphene.Field(

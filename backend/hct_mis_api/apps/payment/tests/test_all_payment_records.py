@@ -56,7 +56,7 @@ class TestAllPaymentRecords(APITestCase):
             parent=cls.cash_plan3,
         )
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")
+            cls.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")
         )
 
     def test_fetch_payment_records_filter_by_household(self) -> None:
