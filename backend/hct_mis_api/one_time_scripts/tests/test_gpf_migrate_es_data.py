@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import Dict, List
+from typing import Dict, Iterator, List
 
 from django.test import TestCase
 
@@ -26,7 +26,7 @@ from hct_mis_api.one_time_scripts.gpf_migrate_es_data import migrate_program_es_
 
 
 @contextmanager
-def use_es() -> None:  # noqa
+def use_es() -> Iterator[None]:
     _populate(models=[Household, Individual], options={"parallel": False, "quiet": True})
     try:
         yield
