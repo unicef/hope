@@ -64,7 +64,7 @@ from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         ),
     )
 
@@ -94,7 +94,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     bank_reconciliation_success = graphene.Int()
@@ -137,7 +137,7 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
@@ -162,7 +162,7 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
             hopePermissionClass(
-                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
             ),
         ),
     )
