@@ -6,13 +6,13 @@ describe("Grievance Dashboard", () => {
   beforeEach(() => {
     cy.adminLogin();
     cy.navigateToHomePage();
+    grievanceDashboard.clickMenuButtonGrievance();
+    grievanceDashboard.clickMenuButtonGrievanceDashboard();
   });
 
   describe("Smoke tests Grievance Dashboard", () => {
-    it.skip("Check Grievance Dashboard page", () => {
-      // Scenario:
-      // 1. Go to Grievance page
-      // 2. Check if all elements on page exist
+    it("Check Grievance Dashboard page", () => {
+      grievanceDashboard.checkElementsOnPage();
     });
   });
 

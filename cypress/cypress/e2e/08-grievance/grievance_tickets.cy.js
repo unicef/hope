@@ -24,7 +24,7 @@ describe("Grievance", () => {
       grievancePage.checkElementsOnUserGeneratedPage();
       grievancePage.checkElementsOnSystemGeneratedPage();
     });
-    it.only("Check Grievance Details page", () => {
+    it("Check Grievance Details page", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press tab: System-Generated",
@@ -33,6 +33,7 @@ describe("Grievance", () => {
       ]);
       grievancePage.getTabSystemGenerated().click();
       cy.url().should("include", "/system-generated");
+      // ToDo: After fix bug: XXX
       grievancePage
         .getTicketListRow()
         .eq(0)
@@ -42,7 +43,15 @@ describe("Grievance", () => {
       grievanceDetailsPage.checkGrievanceMenu();
       grievanceDetailsPage.checkElementsOnPage();
     });
-    it.skip("Check Grievance New Ticket page", () => {});
+    it("Check Grievance New Ticket page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Press New Ticket button",
+        "Check if all elements on details page exists",
+      ]);
+      grievancePage.getButtonNewTicket().click();
+      newTicketPage.checkElementsOnPage();
+    });
   });
 
   describe("Component tests Grievance", () => {
