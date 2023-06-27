@@ -1,3 +1,5 @@
+import logging
+
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -15,6 +17,9 @@ from hct_mis_api.one_time_scripts.gpf_migrate_psql_data import migrate_program_p
 
 class TestGPFMigrationToPSQL(TestCase):
     databases = {"default"}
+
+    logging.disable(logging.INFO)
+    logging.disable(logging.ERROR)
 
     @classmethod
     def setUpTestData(cls) -> None:
