@@ -13,11 +13,7 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
         addTypename={false}
         mocks={fakeApolloAllPaymentPlansForTable}
       >
-        <PaymentPlansTable
-          canViewDetails={false}
-          filter={{}}
-          businessArea='afghanistan'
-        />
+        <PaymentPlansTable canViewDetails={false} filter={{}} />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
@@ -32,11 +28,7 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
         addTypename={false}
         mocks={fakeApolloAllPaymentPlansForTable}
       >
-        <PaymentPlansTable
-          canViewDetails={false}
-          filter={{}}
-          businessArea='afghanistan'
-        />
+        <PaymentPlansTable canViewDetails={false} filter={{}} />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
