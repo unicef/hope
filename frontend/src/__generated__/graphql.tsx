@@ -5673,7 +5673,6 @@ export type QueryAllPaymentPlansArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -5683,6 +5682,7 @@ export type QueryAllPaymentPlansArgs = {
   dispersionEndDate?: Maybe<Scalars['Date']>,
   isFollowUp?: Maybe<Scalars['Boolean']>,
   sourcePaymentPlanId?: Maybe<Scalars['String']>,
+  program?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
