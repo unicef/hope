@@ -48,7 +48,13 @@ export const ProgramsPage = (): React.ReactElement => {
   if (permissions === null || !choicesData) return null;
 
   if (
-    !hasPermissions(PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS, permissions)
+    !hasPermissions(
+      [
+        PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
+      ],
+      permissions,
+    )
   )
     return <PermissionDenied />;
 
