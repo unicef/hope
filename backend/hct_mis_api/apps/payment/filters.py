@@ -311,11 +311,10 @@ class PaymentPlanFilter(FilterSet):
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
+    program = CharFilter(method="filter_by_program")
 
     class Meta:
-        fields = {
-            "program": ["exact"],
-        }
+        fields = tuple()
         model = PaymentPlan
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
@@ -345,11 +344,14 @@ class PaymentPlanFilter(FilterSet):
     def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
 
+    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
+        return qs.filter(program_cycle__program_id=decode_id_string_required(value))
+
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
-    program_id = CharFilter(field_name="parent__program")
+    program_id = CharFilter(method="filter_by_program_id")
 
     def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         payment_plan_id = decode_id_string(value)
@@ -388,6 +390,9 @@ class PaymentFilter(FilterSet):
             queryset = queryset.order_by("unicef_id")
 
         return super().filter_queryset(queryset)
+
+    def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
+        return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
 
 
 def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwargs: Any) -> ExtendedQuerySetSequence:
