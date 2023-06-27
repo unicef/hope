@@ -65,7 +65,9 @@ stages:
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
-                frontend.secret.SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN),\
+                backend.secret.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
+                frontend.config.SENTRY_DSN=$(SENTRY_DSN),\
+                frontend.config.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
