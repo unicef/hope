@@ -165,7 +165,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
           />
         ) : null}
         {hasPermissions(
-          PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+          PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
           <PaymentRecordHouseholdTable
