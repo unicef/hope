@@ -38,14 +38,17 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
       closedUserGeneratedCount,
       closedSystemGeneratedCount,
       userGeneratedAvgResolution,
-      systemGeneratedAvgResolution
+      systemGeneratedAvgResolution,
     },
   } = data;
 
   // use weighted average to calculate average resolution time
-  const userWeightedTime = userGeneratedAvgResolution * closedUserGeneratedCount;
-  const systemWeightedTime = systemGeneratedAvgResolution * closedSystemGeneratedCount;
-  const numberOfClosedTickets = closedUserGeneratedCount + closedSystemGeneratedCount;
+  const userWeightedTime =
+    userGeneratedAvgResolution * closedUserGeneratedCount;
+  const systemWeightedTime =
+    systemGeneratedAvgResolution * closedSystemGeneratedCount;
+  const numberOfClosedTickets =
+    closedUserGeneratedCount + closedSystemGeneratedCount;
 
   return (
     <>
@@ -59,6 +62,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={systemGeneratedCount + userGeneratedCount}
                 systemGenerated={systemGeneratedCount}
                 userGenerated={userGeneratedCount}
+                dataCy='total-number-of-tickets'
               />
             </Box>
             <Box mt={5}>
@@ -67,16 +71,19 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={numberOfClosedTickets}
                 systemGenerated={closedSystemGeneratedCount}
                 userGenerated={closedUserGeneratedCount}
+                dataCy='total-number-of-closed-tickets'
               />
             </Box>
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
-                topNumber={`${
-                  ((userWeightedTime + systemWeightedTime)/numberOfClosedTickets).toFixed(2)
-                } days`}
+                topNumber={`${(
+                  (userWeightedTime + systemWeightedTime) /
+                  numberOfClosedTickets
+                ).toFixed(2)} days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
                 userGenerated={`${userGeneratedAvgResolution} days`}
+                dataCy='tickets-average-resolution'
               />
             </Box>
             <Box mt={5}>
