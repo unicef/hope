@@ -67,7 +67,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
         title={`${t('Cash Plan')} #${data.cashPlan.caId}`}
         breadCrumbs={
           hasPermissions(
-            PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
             permissions,
           )
             ? breadCrumbsItems
