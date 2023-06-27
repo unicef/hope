@@ -29,7 +29,7 @@ def _create(models: Optional[List[Model]]) -> None:
         index.create()
 
 
-def _populate(models: Optional[List[Model]], options: Dict) -> None:
+def _populate(models: Optional[List[Any]], options: Dict) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()

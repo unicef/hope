@@ -43,6 +43,24 @@ def create_ukraine(
     )
 
 
+def create_kenya(
+    is_payment_plan_applicable: bool = False,
+) -> BusinessArea:
+    return BusinessArea.objects.create(
+        **{
+            "code": "2400",
+            "name": "Kenya",
+            "long_name": "THE REPUBLIC OF KENYA",
+            "region_code": "63",
+            "region_name": "ESAR",
+            "slug": "kenya",
+            "has_data_sharing_agreement": True,
+            "is_payment_plan_applicable": is_payment_plan_applicable,
+            "kobo_token": "ZZZ",
+        }
+    )
+
+
 class StorageFileFactory(DjangoModelFactory):
     class Meta:
         model = StorageFile
