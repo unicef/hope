@@ -38,7 +38,8 @@ const Icon = styled(ListItemIcon)`
 `;
 
 const SubList = styled(List)`
-  padding-left: ${({ theme }) => theme.spacing(10)}px !important;
+  padding-left: ${({ theme, open }) =>
+    open ? `${theme.spacing(10)}px !important` : 0};
 `;
 
 export const StyledLink = styled.a`
@@ -49,10 +50,14 @@ export const StyledLink = styled.a`
   text-decoration: none;
 `;
 
-interface Props {
+interface DrawerItemsProps {
   currentLocation: string;
+  open: boolean;
 }
-export function DrawerItems({ currentLocation }: Props): React.ReactElement {
+export const DrawerItems = ({
+  currentLocation,
+  open,
+}: DrawerItemsProps): React.ReactElement => {
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -154,7 +159,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                 )}
               </ListItem>
               <Collapse in={expandedItem !== null && expandedItem === index}>
-                <SubList component='div'>
+                <SubList open={open} component='div'>
                   {item.secondaryActions &&
                     item.secondaryActions.map(
                       (secondary) =>
@@ -215,4 +220,4 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
       })}
     </div>
   );
-}
+};
