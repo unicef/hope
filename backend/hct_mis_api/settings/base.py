@@ -824,7 +824,6 @@ if SENTRY_DSN:
         level=logging.INFO,
         event_level=logging.ERROR,  # Capture info and above as breadcrumbs  # Send errors as events
     )
-
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
@@ -837,6 +836,7 @@ if SENTRY_DSN:
             "Http404",
             "AuthCanceled",
         ],
+        environment=env("SENTRY_ENVIRONMENT", default=None),
     )
     ignore_logger("graphql.execution.utils")
 
