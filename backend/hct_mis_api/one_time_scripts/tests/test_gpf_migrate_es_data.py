@@ -58,26 +58,24 @@ class TestGPFMigrationToES(TestCase):
         cls.program_3 = ProgramFactory(business_area=cls.afghanistan_ba)
         cls.program_4 = ProgramFactory(business_area=cls.kenya_ba)
 
-        cls.individual_1 = IndividualFactory(household=None, program_id=cls.program_1.id, business_area=cls.ukraine_ba)
+        cls.individual_1 = IndividualFactory(household=None, program=cls.program_1, business_area=cls.ukraine_ba)
         cls.household_1 = HouseholdFactory(
-            head_of_household=cls.individual_1, program_id=cls.program_1.id, business_area=cls.ukraine_ba
+            head_of_household=cls.individual_1, program=cls.program_1, business_area=cls.ukraine_ba
         )
 
-        cls.individual_2 = IndividualFactory(household=None, program_id=cls.program_2.id, business_area=cls.ukraine_ba)
+        cls.individual_2 = IndividualFactory(household=None, program=cls.program_2, business_area=cls.ukraine_ba)
         cls.household_2 = HouseholdFactory(
-            head_of_household=cls.individual_2, program_id=cls.program_2.id, business_area=cls.ukraine_ba
+            head_of_household=cls.individual_2, program=cls.program_2, business_area=cls.ukraine_ba
         )
 
-        cls.individual_3 = IndividualFactory(
-            household=None, program_id=cls.program_3.id, business_area=cls.afghanistan_ba
-        )
+        cls.individual_3 = IndividualFactory(household=None, program=cls.program_3, business_area=cls.afghanistan_ba)
         cls.household_3 = HouseholdFactory(
-            head_of_household=cls.individual_3, program_id=cls.program_3.id, business_area=cls.afghanistan_ba
+            head_of_household=cls.individual_3, program=cls.program_3, business_area=cls.afghanistan_ba
         )
 
-        cls.individual_4 = IndividualFactory(household=None, program_id=cls.program_4.id, business_area=cls.kenya_ba)
+        cls.individual_4 = IndividualFactory(household=None, program=cls.program_4, business_area=cls.kenya_ba)
         cls.household_4 = HouseholdFactory(
-            head_of_household=cls.individual_4, program_id=cls.program_4.id, business_area=cls.kenya_ba
+            head_of_household=cls.individual_4, program=cls.program_4, business_area=cls.kenya_ba
         )
 
     def test_migrate_program_id_to_household_es(self) -> None:

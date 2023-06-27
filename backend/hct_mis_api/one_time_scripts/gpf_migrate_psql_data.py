@@ -17,47 +17,39 @@ logger = logging.getLogger(__name__)
 def migrate_program_psql_db(batch_size: int = 500) -> None:
     # Targeting should be at least in READY status
     q_target_population_status = Q(
-        target_population__status__in=[
+        status__in=[
             TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
             TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST,
             TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
         ]
     )
 
-    # Program cannot be DRAFT or FINISHED
-    q_program_status = Q(target_population__program__status=Program.ACTIVE)
+    # Program cannot be in status DRAFT or FINISHED
+    active_programs = Program.objects.filter(status=Program.ACTIVE)
 
-    qs = list(
-        HouseholdSelection.objects.select_related("target_population", "target_population__program")
-        .filter(q_target_population_status & q_program_status)
-        .values_list("household_id", "target_population__program__id")
-    )
+    for program in active_programs:
+        all_program_targeting_ids = list(
+            TargetPopulation.objects.filter(q_target_population_status & Q(program_id=program.id)).values_list(
+                "id", flat=True
+            )
+        )
+        all_household_ids = list(
+            HouseholdSelection.objects.filter(target_population_id__in=all_program_targeting_ids).values_list(
+                "household_id", flat=True
+            )
+        )
 
-    households_to_update = []
-    individuals_to_update = []
+        i, pages = 0, len(all_household_ids) // batch_size + 1
+        try:
+            while i <= pages:
+                logger.info(f"Processing {i}/{pages} page")
+                household_batch_ids = all_household_ids[i * batch_size : (i + 1) * batch_size]
 
-    i, pages = 0, len(qs) // batch_size + 1
-    try:
-        while i <= pages:
-            logger.info(f"Processing {i}/{pages} page")
+                Household.objects.filter(id__in=household_batch_ids).update(program=program)
+                Individual.objects.filter(household_id__in=household_batch_ids).update(program=program)
 
-            for household_id, program_id in qs:
-                household = Household.objects.get(id=household_id)
-                household.program_id = program_id
-                households_to_update.append(household)
+                i += 1
 
-                individuals = Individual.objects.filter(household_id=household_id)
-                for individual in individuals:
-                    individual.program_id = program_id
-                    individuals_to_update.append(individual)
-
-                if i % batch_size == 0:
-                    Household.objects.bulk_update(households_to_update, ["program_id"])
-                    Individual.objects.bulk_update(individuals_to_update, ["program_id"])
-                    households_to_update = []
-                    individuals_to_update = []
-
-            i += 1
-    except Exception:
-        logger.error("Adding program do population failed")
-        raise
+        except Exception:
+            logger.error("Adding program do population failed")
+            raise
