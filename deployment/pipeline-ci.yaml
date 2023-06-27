@@ -22,8 +22,6 @@ variables:
   Docker.frontend.repository: "hope-frontend"
   Docker.registryConnection.trn: "ICTD-HOPE-DEV-ACR"
   Docker.url.trn: "uniappsakshopedev.azurecr.io"
-  Sentry.frontend.dsn: $(SENTRY_FRONTEND_DSN)
-  Sentry.environment: $(SENTRY_ENVIRONMENT)
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
     Docker.url: "uniappsakshopedev.azurecr.io"
@@ -140,7 +138,6 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
               -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.frontend.repository):latest \
-              --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) SENTRY_ENVIRONMENT=$(Sentry.environment) \
               --push \
               ./frontend
             displayName: Docker build
@@ -151,7 +148,6 @@ stages:
               --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
               -t $(Docker.url.trn)/$(Docker.frontend.repository):$(tag) \
               -t $(Docker.url.trn)/$(Docker.frontend.repository):latest \
-              --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn) SENTRY_ENVIRONMENT=$(Sentry.environment) \
               --push \
               ./frontend
             displayName: Docker build trn
