@@ -42,10 +42,4 @@ class RegistrationDataImportFilter(FilterSet):
         return qs.exclude(excluded=True)
 
     def filter_by_program(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.info("*********")
-        logger.info(queryset)
-        logger.info(value)
         return queryset.filter(program_id=decode_id_string_required(value))
