@@ -10,12 +10,36 @@ describe("Grievance - Feedback", () => {
   beforeEach(() => {
     cy.adminLogin();
     cy.navigateToHomePage();
+    feedbackPage.clickMenuButtonGrievance();
+    feedbackPage.clickMenuButtonFeedback();
   });
 
   describe("Smoke tests Feedback", () => {
-    it.skip("Check Feedback page", () => {});
-    it.skip("Check Feedback Details page", () => {});
-    it.skip("Check Feedback New Ticket page", () => {});
+    it.only("Check Feedback page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Go to Feedback page",
+        "Elements of Grievance menu are visible",
+        "Check if all elements on page exist",
+      ]);
+      feedbackPage.checkGrievanceMenu();
+      feedbackPage.checkElementsOnPage();
+    });
+    it.skip("Check Feedback Details page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Go to Feedback page",
+        "Choose first row from Grievance Tickets List",
+        "Check if all elements on details page exists",
+      ]);
+    });
+    it.skip("Check Feedback New Ticket page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Press Submit New Feedback button",
+        "Check if all elements on details page exists",
+      ]);
+    });
   });
 
   describe("Component tests Feedback", () => {
