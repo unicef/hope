@@ -138,7 +138,6 @@ class Query(graphene.ObjectType):
         filterset_class=ProgramFilter,
         permission_classes=(
             hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
-
         ),
     )
     chart_programmes_by_sector = graphene.Field(
