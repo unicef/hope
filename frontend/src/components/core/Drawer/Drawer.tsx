@@ -60,8 +60,7 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     opacity: 0.54,
   },
   drawerPaper: {
-    height: '100vh',
-    position: 'sticky',
+    position: 'relative',
     whiteSpace: 'nowrap',
     width: theme.drawer.width,
     transition: theme.transitions.create('width', {
@@ -180,7 +179,7 @@ export function Drawer({
       </div>
       <Divider />
       <List className={classes.list}>
-        <DrawerItems currentLocation={currentLocation} />
+        <DrawerItems open={open} currentLocation={currentLocation} />
       </List>
       <ResourcesBox>
         <Box mb={2}>
