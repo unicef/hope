@@ -60,12 +60,12 @@ import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 
 const Root = styled.div`
   display: flex;
-  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
   height: 100vh;
   overflow: auto;
+  overflow-x: hidden;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
