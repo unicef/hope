@@ -152,7 +152,7 @@ export default class PVDetailsPage extends BaseComponent {
   }
 
   deleteVerificationPlan(num = 0) {
-    this.getDeletePlan().should("be.visible");
+    this.getDeletePlan().scrollIntoView().should("be.visible");
     this.getDeletePlan().click();
     this.getDelete().should("be.visible");
     this.getDelete().click();
@@ -162,11 +162,11 @@ export default class PVDetailsPage extends BaseComponent {
   }
 
   discardVerificationPlan(num = 0) {
-    this.getDiscardPlan().eq(num).click();
-    this.getDiscard().click();
+    this.getDiscardPlan().eq(num).scrollIntoView().click();
+    this.getDiscard().scrollIntoView().click();
     this.getDiscard().should("not.exist");
     this.getDiscardPlan().should("not.exist");
-    this.getDeletePlan();
+    this.getDeletePlan().scrollIntoView();
   }
 
   createNewVerificationPlan(num = 0) {
