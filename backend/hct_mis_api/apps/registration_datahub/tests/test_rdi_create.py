@@ -28,6 +28,8 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.fixtures import (
@@ -92,6 +94,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             number_of_households=3,
             number_of_individuals=6,
         )
+
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=business_area.slug, hct_id=None
         )
@@ -99,6 +104,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             datahub_id=cls.registration_data_import.id,
             name=cls.registration_data_import.name,
             business_area=business_area,
+            program=cls.program,
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()

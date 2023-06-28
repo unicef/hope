@@ -54,7 +54,7 @@ export const RegistrationDataImportTable = ({
     businessArea,
     importDateRange: JSON.stringify(filter.importDateRange),
     size: JSON.stringify(filter.size),
-    programId,
+    program: programId,
   };
 
   const handleRadioChange = (id: string): void => {

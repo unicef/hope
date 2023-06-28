@@ -73,7 +73,8 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
     permissions: [
-      PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
+      PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
     ],
   },
@@ -83,7 +84,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
     permissions: [
-      PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
     ],
   },
