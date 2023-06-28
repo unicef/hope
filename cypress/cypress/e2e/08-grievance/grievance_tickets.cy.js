@@ -33,7 +33,7 @@ describe("Grievance", () => {
       ]);
       grievancePage.getTabSystemGenerated().click();
       cy.url().should("include", "/system-generated");
-      // ToDo: After fix bug: XXX
+      // ToDo: After fix bug: 164824
       grievancePage
         .getTicketListRow()
         .eq(0)
