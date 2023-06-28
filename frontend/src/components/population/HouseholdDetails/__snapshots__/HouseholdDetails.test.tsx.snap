@@ -375,103 +375,81 @@ Jameschester, SC 24934
       class="MuiGrid-root MuiGrid-container"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
       >
-        <div
-          class="MuiGrid-root MuiGrid-container"
-        >
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        <div>
+          <span
+            class="sc-bwzfXH eoWrid"
+            color="textSecondary"
           >
-            <span
-              class="sc-hMqMXs dCeKbh"
-              color="textSecondary"
-            >
-              PrOgRAmmE(S) ENROLLED
-            </span>
-          </div>
+            Cash received
+          </span>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
-          >
-            <span
-              class="sc-hMqMXs dCeKbh"
-              color="textSecondary"
-            >
-              Cash received
-            </span>
-          </div>
-        </div>
-        <div
-          class="MuiBox-root MuiBox-root-1"
-        >
-          <div
-            class="MuiGrid-root MuiGrid-container"
+            data-cy="label-Cash received"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
-            >
-              <a
-                class="sc-bdVaJa iNmLrH"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/c4d5657d-1a29-46e1-8190-df7f85a0d2ef"
-              >
-                Surface campaign practice actually about about will what.
-              </a>
-            </div>
-            <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiBox-root MuiBox-root-1"
             >
               <div
-                class="MuiBox-root MuiBox-root-2"
+                class="MuiGrid-root MuiGrid-container"
               >
                 <div
-                  class="MuiBox-root MuiBox-root-3"
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
                 >
-                  USD 3,251.00
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-4"
-                >
-                  (BAM 3,048.00)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-5"
-                >
-                  (BND 2,959.00)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-6"
-                >
-                  (ISK 4,904)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-7"
-                >
-                  (LSL 2,505.00)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-8"
-                >
-                  (TMT 115.00)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-9"
-                >
-                  (UAH 484.00)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-10"
-                >
-                  (UGX 2,073)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-11"
-                >
-                  (UZS 895.00)
-                </div>
-                <div
-                  class="MuiBox-root MuiBox-root-12"
-                >
-                  (YER 2,335)
+                  <div
+                    class="MuiBox-root MuiBox-root-2"
+                  >
+                    <div
+                      class="MuiBox-root MuiBox-root-3"
+                    >
+                      USD 3,251.00
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-4"
+                    >
+                      (BAM 3,048.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-5"
+                    >
+                      (BND 2,959.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-6"
+                    >
+                      (ISK 4,904)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-7"
+                    >
+                      (LSL 2,505.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-8"
+                    >
+                      (TMT 115.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-9"
+                    >
+                      (UAH 484.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-10"
+                    >
+                      (UGX 2,073)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-11"
+                    >
+                      (UZS 895.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-12"
+                    >
+                      (YER 2,335)
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -479,7 +457,7 @@ Jameschester, SC 24934
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
       >
         <div
           class="sc-VigVT ZeWFY"
