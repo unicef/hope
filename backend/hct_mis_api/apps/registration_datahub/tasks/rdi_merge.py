@@ -194,6 +194,7 @@ class RdiMergeTask:
                 **household_data,
                 registration_data_import=obj_hct,
                 business_area=obj_hct.business_area,
+                program=obj_hct.program,
             )
             self.merge_admin_areas(imported_household, household)
             households_dict[imported_household.id] = household
@@ -260,6 +261,7 @@ class RdiMergeTask:
                 business_area=obj_hct.business_area,
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
+                program=obj_hct.program,
             )
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:

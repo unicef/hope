@@ -12,6 +12,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.models import ImportData
 
 
@@ -146,6 +148,8 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         ]
     )
     def test_registration_data_import_create(self, _: Any, permissions: List[Permissions]) -> None:
+        program = ProgramFactory(status=Program.ACTIVE)
+
         import_data_obj = ImportData.objects.create(
             file=self.valid_file,
             number_of_households=3,
@@ -160,6 +164,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": self.business_area_slug,
+                    "programId": self.id_to_base64(program.id, "ProgramNode"),
                 }
             },
         )
