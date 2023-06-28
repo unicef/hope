@@ -20,10 +20,7 @@ services:
       context: ./frontend
       dockerfile: ./Dockerfile
       target: dev
-      args:
-        ENV: dev
     ports:
-      - "8088:80"
       - "3000:3000"
     volumes:
       - ./frontend/:/code

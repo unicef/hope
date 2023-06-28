@@ -12,6 +12,7 @@ backend:
     EMAIL_USE_TLS: "false"
     KOBO_KF_URL: "https://kobo.humanitarianresponse.info"
     KOBO_KC_URL: "https://kobo.humanitarianresponse.info"
+    SENTRY_ENVIRONMENT: "dev"
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
