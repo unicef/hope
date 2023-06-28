@@ -20,11 +20,12 @@ const initialFilter = {
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
   isFollowUp: null,
+  program: null,
 };
 
 export const PaymentModulePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 
@@ -64,7 +65,6 @@ export const PaymentModulePage = (): React.ReactElement => {
       <TableWrapper>
         <PaymentPlansTable
           filter={appliedFilter}
-          businessArea={businessArea}
           canViewDetails={hasPermissions(
             PERMISSIONS.PM_VIEW_DETAILS,
             permissions,

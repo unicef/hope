@@ -4328,16 +4328,6 @@
                 "defaultValue": null
               },
               {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "businessArea",
                 "description": null,
                 "type": {
@@ -4427,6 +4417,16 @@
               },
               {
                 "name": "sourcePaymentPlanId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",

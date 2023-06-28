@@ -15,6 +15,7 @@ export const AllPaymentPlansForTable = gql`
     $dispersionStartDate: Date
     $dispersionEndDate: Date
     $isFollowUp: Boolean
+    $program: String
   ) {
     allPaymentPlans(
       after: $after
@@ -30,6 +31,7 @@ export const AllPaymentPlansForTable = gql`
       dispersionStartDate: $dispersionStartDate
       dispersionEndDate: $dispersionEndDate
       isFollowUp: $isFollowUp
+      program: $program
     ) {
       pageInfo {
         hasNextPage
