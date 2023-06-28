@@ -14,7 +14,7 @@ backend:
     EMAIL_USE_TLS: "false"
     KOBO_KF_URL: https://kf.hope.unicef.org
     KOBO_KC_URL: https://kc.hope.unicef.org
-    SENTRY_ENVIRONMENT: "prod"
+    SENTRY_ENVIRONMENT: "production"
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
