@@ -10,7 +10,7 @@ const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 const host = process.env.HOST || '0.0.0.0';
 
 let cspReportUri = null;
-const sentryDsn = window.config.SENTRY_DSN;
+const sentryDsn = process.env.SENTRY_DSN;
 if (process.env.NODE_ENV !== 'development' && sentryDsn) {
   const sentryKey = sentryDsn.split('@')[0].split('//')[1];
   const sentryId = sentryDsn.split('@')[1].split('/')[1];
