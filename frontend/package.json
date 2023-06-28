@@ -11,7 +11,7 @@
     "@material-ui/lab": "^4.0.0-alpha.44",
     "@material-ui/pickers": "^3.2.10",
     "@material-ui/styles": "^4.9.10",
-    "@sentry/react": "^5.29.2",
+    "@sentry/react": "^7.56.0",
     "@svgr/webpack": "4.3.3",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
