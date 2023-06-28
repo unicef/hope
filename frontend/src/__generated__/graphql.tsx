@@ -5705,7 +5705,6 @@ export type QueryAllPaymentPlansArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -5715,6 +5714,7 @@ export type QueryAllPaymentPlansArgs = {
   dispersionEndDate?: Maybe<Scalars['Date']>,
   isFollowUp?: Maybe<Scalars['Boolean']>,
   sourcePaymentPlanId?: Maybe<Scalars['String']>,
+  program?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -11439,7 +11439,8 @@ export type AllPaymentPlansForTableQueryVariables = {
   totalEntitledQuantityTo?: Maybe<Scalars['Float']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
-  isFollowUp?: Maybe<Scalars['Boolean']>
+  isFollowUp?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<Scalars['String']>
 };
 
 
@@ -11791,8 +11792,7 @@ export type AllPaymentRecordsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>,
-  programId?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -21164,8 +21164,8 @@ export type AllDeliveryMechanismsQueryHookResult = ReturnType<typeof useAllDeliv
 export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsLazyQuery>;
 export type AllDeliveryMechanismsQueryResult = ApolloReactCommon.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean) {
-  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, isFollowUp: $isFollowUp) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String) {
+  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, isFollowUp: $isFollowUp, program: $program) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -21266,6 +21266,7 @@ export function withAllPaymentPlansForTable<TProps, TChildProps = {}>(operationO
  *      dispersionStartDate: // value for 'dispersionStartDate'
  *      dispersionEndDate: // value for 'dispersionEndDate'
  *      isFollowUp: // value for 'isFollowUp'
+ *      program: // value for 'program'
  *   },
  * });
  */
@@ -21937,8 +21938,8 @@ export type AllCashPlansAndPaymentPlansQueryHookResult = ReturnType<typeof useAl
 export type AllCashPlansAndPaymentPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansAndPaymentPlansLazyQuery>;
 export type AllCashPlansAndPaymentPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($parent: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String, $programId: String) {
-  allPaymentRecords(parent: $parent, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, programId: $programId) {
+    query AllPaymentRecords($parent: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
+  allPaymentRecords(parent: $parent, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -22022,7 +22023,6 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      businessArea: // value for 'businessArea'
- *      programId: // value for 'programId'
  *   },
  * });
  */
