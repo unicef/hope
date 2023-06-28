@@ -1,9 +1,9 @@
 import Grievance from "../../page-objects/pages/grievance/grievance_tickets.po";
-import GDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
+import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
 
 let grievancePage = new Grievance();
-let grievanceDetailsPage = new GDetailsPage();
+let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
 
 describe("Grievance", () => {
@@ -29,7 +29,7 @@ describe("Grievance", () => {
         "Go to Grievance page",
         "Press tab: System-Generated",
         "Choose first row from Grievance Tickets List",
-        "Check if all elements on details page exists",
+        "Check if all elements on details page exist",
       ]);
       grievancePage.getTabSystemGenerated().click();
       cy.url().should("include", "/system-generated");
@@ -47,7 +47,7 @@ describe("Grievance", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press New Ticket button",
-        "Check if all elements on details page exists",
+        "Check if all elements on details page exist",
       ]);
       grievancePage.getButtonNewTicket().click();
       newTicketPage.checkElementsOnPage();
@@ -72,6 +72,8 @@ describe("Grievance", () => {
       it.skip("Grievance Preferred language filter", () => {});
     });
     context("Create New Ticket", () => {
+      // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
+      // It makes sense to test all different issue types for Data Change tickets as they have different fields.
       it.skip("Create New Ticket - Data Change - Add Individual", () => {});
       it.skip("Create New Ticket - Data Change - Household Data Update", () => {});
       it.skip("Create New Ticket - Data Change - Individual Data Update", () => {});

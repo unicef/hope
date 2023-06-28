@@ -7,8 +7,8 @@ export default class Feedback extends BaseComponent {
   filterSearch = 'div[data-cy="filters-search"]';
   filterIssueType = 'div[data-cy="filters-issue-type"]';
   filterCreatedBy = 'div[data-cy="filters-created-by"]';
-  filterCreationCateFrom = 'div[data-cy="filters-creation-date-from"]';
-  filterCreationCateTo = 'div[data-cy="filters-creation-date-to"]';
+  filterCreationDateFrom = 'div[data-cy="filters-creation-date-from"]';
+  filterCreationDateTo = 'div[data-cy="filters-creation-date-to"]';
   buttonClear = 'button[data-cy="button-filters-clear"]';
   buttonApply = 'button[data-cy="button-filters-apply"]';
   tableTitle = 'h6[data-cy="table-title"]';
@@ -29,8 +29,8 @@ export default class Feedback extends BaseComponent {
   getFilterSearch = () => cy.get(this.filterSearch);
   getFilterIssueType = () => cy.get(this.filterIssueType);
   getFilterCreatedBy = () => cy.get(this.filterCreatedBy);
-  getFilterCreationCateFrom = () => cy.get(this.filterCreationCateFrom);
-  getFilterCreationCateTo = () => cy.get(this.filterCreationCateTo);
+  getFilterCreationDateFrom = () => cy.get(this.filterCreationDateFrom);
+  getFilterCreationDateTo = () => cy.get(this.filterCreationDateTo);
   getButtonClear = () => cy.get(this.buttonClear);
   getButtonApply = () => cy.get(this.buttonApply);
   getTableTitle = () => cy.get(this.tableTitle);
@@ -48,8 +48,8 @@ export default class Feedback extends BaseComponent {
     this.getFilterSearch().should("be.visible");
     this.getFilterIssueType().should("be.visible");
     this.getFilterCreatedBy().should("be.visible");
-    this.getFilterCreationCateFrom().should("be.visible");
-    this.getFilterCreationCateTo().should("be.visible");
+    this.getFilterCreationDateFrom().should("be.visible");
+    this.getFilterCreationDateTo().should("be.visible");
     this.getButtonClear().should("be.visible");
     this.getButtonApply().should("be.visible");
     this.getTableTitle().contains(this.textTableTitle);

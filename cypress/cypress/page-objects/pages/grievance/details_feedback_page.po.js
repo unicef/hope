@@ -1,6 +1,6 @@
 import BaseComponent from "../../base.component";
 
-export default class FDetailsPage extends BaseComponent {
+export default class FeedbackDetailsPage extends BaseComponent {
   // Locators
   titlePage = 'h5[data-cy="page-header-title"]';
   buttonEdit = 'a[data-cy="button-edit"]';

@@ -1,6 +1,6 @@
 import BaseComponent from "../../base.component";
 
-export default class GDetailsPage extends BaseComponent {
+export default class GrievanceDetailsPage extends BaseComponent {
   // Locators
   title = 'h5[data-cy="page-header-title"]';
   buttonEdit = 'a[data-cy="button-edit"]';
@@ -97,14 +97,14 @@ export default class GDetailsPage extends BaseComponent {
     this.getAreaVillage().should("be.visible");
     this.getLanguagesSpoken().should("be.visible");
     this.getDocumentation().should("be.visible");
-    this.getTicketDescription().should("be.visible");
-    this.getCreateLinkedTicket().should("be.visible");
-    this.getMarkDuplicate().should("be.visible");
-    this.getCellIndividualID().should("be.visible");
-    this.getCellHouseholdID().should("be.visible");
-    this.getCellFullName().should("be.visible");
-    this.getCellGender().should("be.visible");
-    this.getCellDateOfBirth().should("be.visible");
+    this.getTicketDescription().scrollIntoView().should("be.visible");
+    this.getCreateLinkedTicket().scrollIntoView().should("be.visible");
+    this.getMarkDuplicate().scrollIntoView().should("be.visible");
+    this.getCellIndividualID().scrollIntoView().should("be.visible");
+    this.getCellHouseholdID().scrollIntoView().should("be.visible");
+    this.getCellFullName().scrollIntoView().should("be.visible");
+    this.getCellGender().scrollIntoView().should("be.visible");
+    this.getCellDateOfBirth().scrollIntoView().should("be.visible");
     this.getCellSimilarityScore().scrollIntoView().should("be.visible");
     this.getCellLastRegistrationDate().scrollIntoView().should("be.visible");
     this.getCellDocType().scrollIntoView().should("be.visible");

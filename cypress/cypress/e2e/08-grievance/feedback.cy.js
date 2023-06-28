@@ -1,9 +1,9 @@
 import Feedback from "../../page-objects/pages/grievance/feedback.po";
-import FDetailsPage from "../../page-objects/pages/grievance/details_feedback_page.po";
+import FeedbackDetailsPage from "../../page-objects/pages/grievance/details_feedback_page.po";
 import NewFeedback from "../../page-objects/pages/grievance/new_feedback.po";
 
 let feedbackPage = new Feedback();
-let feedbackDetailsPage = new FDetailsPage();
+let feedbackDetailsPage = new FeedbackDetailsPage();
 let newFeedbackPage = new NewFeedback();
 
 describe("Grievance - Feedback", () => {
@@ -30,7 +30,7 @@ describe("Grievance - Feedback", () => {
         "Go to Grievance page",
         "Go to Feedback page",
         "Choose first row from Feedbacks List",
-        "Check if all elements on details page exists",
+        "Check if all elements on details page exist",
       ]);
       feedbackPage.chooseTableRow(0);
       feedbackDetailsPage.checkElementsOnPage();
@@ -39,7 +39,7 @@ describe("Grievance - Feedback", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Submit New Feedback button",
-        "Check if all elements on details page exists",
+        "Check if all elements on details page exist",
       ]);
       feedbackPage.clickButtonSubmitNewFeedback();
       newFeedbackPage.checkElementsOnPage();

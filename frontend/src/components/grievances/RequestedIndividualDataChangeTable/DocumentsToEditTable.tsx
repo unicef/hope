@@ -90,7 +90,7 @@ export const DocumentsToEditTable = ({
               {isEdit ? (
                 <Checkbox
                   color='primary'
-                  data-cy='checkboc-document-to-edit'
+                  data-cy='checkbox-document-to-edit'
                   onChange={(): void => {
                     handleSelectDocumentToEdit(index);
                   }}

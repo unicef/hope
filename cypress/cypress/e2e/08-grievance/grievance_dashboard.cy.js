@@ -12,6 +12,11 @@ describe("Grievance Dashboard", () => {
 
   describe("Smoke tests Grievance Dashboard", () => {
     it("Check Grievance Dashboard page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Go to Grievance Dashboard page",
+        "Check if all elements on details page exist",
+      ]);
       grievanceDashboard.checkElementsOnPage();
     });
   });

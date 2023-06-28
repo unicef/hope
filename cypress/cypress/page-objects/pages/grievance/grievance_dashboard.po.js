@@ -2,7 +2,7 @@ import BaseComponent from "../../base.component";
 
 export default class GrievanceDashboard extends BaseComponent {
   // Locators
-  title = 'h5[data-cy="page-header-title"]';
+  titlePage = 'h5[data-cy="page-header-title"]';
   userGenerated = 'div[data-cy="label-USER-GENERATED"]';
   systemGenerated = 'div[data-cy="label-SYSTEM-GENERATED"]';
   averageResolution = 'div[data-cy="tickets-average-resolution-top-number"]';
@@ -11,7 +11,7 @@ export default class GrievanceDashboard extends BaseComponent {
   // Texts
   textTitle = "Grievance Dashboard";
   // Elements
-  getTitle = () => cy.get(this.title);
+  getTitle = () => cy.get(this.titlePage);
   getAverageResolution = () => cy.get(this.averageResolution);
   getTotalClosed = () => cy.get(this.totalClosed);
   getTotalTickets = () => cy.get(this.totalTickets);
@@ -24,14 +24,14 @@ export default class GrievanceDashboard extends BaseComponent {
 
   checkElementsOnPage() {
     this.getTitle().contains(this.textTitle);
-    this.getAverageResolution().should("be.visible");
-    this.getTotalClosed().should("be.visible");
-    this.getTotalTickets().should("be.visible");
-    this.getUserGeneratedResolutions().should("be.visible");
-    this.getUserGeneratedClosed().should("be.visible");
-    this.getUserGeneratedTickets().should("be.visible");
-    this.getSystemGeneratedResolutions().should("be.visible");
-    this.getSystemGeneratedClosed().should("be.visible");
-    this.getSystemGeneratedTickets().should("be.visible");
+    this.getAverageResolution().scrollIntoView().should("be.visible");
+    this.getTotalClosed().scrollIntoView().should("be.visible");
+    this.getTotalTickets().scrollIntoView().should("be.visible");
+    this.getUserGeneratedResolutions().scrollIntoView().should("be.visible");
+    this.getUserGeneratedClosed().scrollIntoView().should("be.visible");
+    this.getUserGeneratedTickets().scrollIntoView().should("be.visible");
+    this.getSystemGeneratedResolutions().scrollIntoView().should("be.visible");
+    this.getSystemGeneratedClosed().scrollIntoView().should("be.visible");
+    this.getSystemGeneratedTickets().scrollIntoView().should("be.visible");
   }
 }
