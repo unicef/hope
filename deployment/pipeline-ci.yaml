@@ -130,8 +130,7 @@ stages:
             inputs:
               containerRegistry: '$(Docker.registryConnection.trn)'
               command: 'login'
-          - displayName: Docker build dev
-            script: |
+          - script: |
               docker buildx create --use
               docker buildx build \
               --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
@@ -144,9 +143,8 @@ stages:
               --build-arg SENTRY_ENVIRONMENT=dev \
               --push \
               ./frontend
-          - displayName: Docker build staging
-            condition: and(succeeded(), eq(variables.isStaging, true))
-            script: |
+            displayName: Docker build dev
+          - script: |
               docker buildx create --use
               docker buildx build \
               --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
@@ -159,9 +157,9 @@ stages:
               --build-arg SENTRY_ENVIRONMENT=staging \
               --push \
               ./frontend
-          - displayName: Docker build trn
-            condition: and(succeeded(), eq(variables.isTraining, true))
-            script: |
+            displayName: Docker build staging
+            condition: and(succeeded(), eq(variables.isStaging, true))
+          - script: |
               docker buildx create --use
               docker buildx build \
               --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
@@ -172,6 +170,8 @@ stages:
               --build-arg SENTRY_ENVIRONMENT=production \
               --push \
               ./frontend
+            displayName: Docker build trn
+            condition: and(succeeded(), eq(variables.isTraining, true))
 
   - stage: test
     displayName: TEST
