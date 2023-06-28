@@ -381,11 +381,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "BOOL": self._handle_bool_field,
         }
 
+        program_id = RegistrationDataImport.objects.get(id=registration_data_import.hct_id).program.id
+
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(ImportedHousehold, registration_data_import=registration_data_import)
+            obj = partial(ImportedHousehold, registration_data_import=registration_data_import, program_id=program_id)
         elif sheet_title == "individuals":
-            obj = partial(ImportedIndividual, registration_data_import=registration_data_import)
+            obj = partial(ImportedIndividual, registration_data_import=registration_data_import, program_id=program_id)
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")
 

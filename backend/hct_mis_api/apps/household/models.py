@@ -475,6 +475,9 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
+    program = models.ForeignKey(
+        "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
+    )  # TODO Add later related name, when no clash with programs
 
     class Meta:
         verbose_name = "Household"
@@ -870,6 +873,9 @@ class Individual(
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
+    program = models.ForeignKey(
+        "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
+    )
 
     vector_column = SearchVectorField(null=True)
 
