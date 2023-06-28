@@ -318,4 +318,4 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             )
         )
         self.document9.refresh_from_db()
-        self.assertEqual(self.document9.status, Document.STATUS_VALID)
+        self.assertEqual(self.document9.status, Document.STATUS_INVALID)
