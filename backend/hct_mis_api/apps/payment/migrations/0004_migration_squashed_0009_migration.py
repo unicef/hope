@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         ('program', '0005_migration'),
         ('program', '0010_migration'),
         ('targeting', '0006_migration'),
-        ('payment', '0003_migration'),
+        ('payment', '0002_migration_squashed_0003_migration'),
     ]
 
     operations = [
