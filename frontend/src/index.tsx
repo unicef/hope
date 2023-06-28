@@ -23,11 +23,11 @@ Chart.defaults.global.plugins.datalabels.font.family = FONT;
 Chart.defaults.global.plugins.datalabels.font.weight = 'bold';
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN)
+if (process.env.NODE_ENV !== 'development' && (window as any).config.SENTRY_DSN)
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: (window as any).config.SENTRY_DSN,
     release: packageJson.version,
-    environment: process.env.SENTRY_ENVIRONMENT,
+    environment: (window as any).config.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
   });
 
