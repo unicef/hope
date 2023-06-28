@@ -100,8 +100,6 @@ describe("Payment Verification", () => {
 
     context("Delete Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getCashPlanRows().should("have.length", 1);
         paymentVerificationPage.chooseCashPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(
@@ -114,16 +112,14 @@ describe("Payment Verification", () => {
           "Press Delete button on pop-up",
           "Check if Verification Plan was deleted",
         ]);
-        paymentVerificationDetailsPage.getDeletePlan().click();
-        paymentVerificationDetailsPage.getDelete().click();
+        paymentVerificationDetailsPage.getDeletePlan().scrollIntoView().click();
+        paymentVerificationDetailsPage.getDelete().scrollIntoView().click();
         paymentVerificationDetailsPage.getNumberOfPlans().contains(1);
       });
     });
 
     context("Activate Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getCashPlanRows().should("have.length", 1);
         paymentVerificationPage.chooseCashPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(

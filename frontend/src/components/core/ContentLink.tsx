@@ -8,7 +8,7 @@ const Link = styled.a`
   color: #000;
   font-size: 14px;
   line-height: 19px;
-  max-width: 150px;
+  max-width: 200px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
