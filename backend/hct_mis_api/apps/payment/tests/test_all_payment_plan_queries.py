@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
@@ -250,6 +251,7 @@ class TestPaymentPlanQueries(APITestCase):
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
+                financial_service_provider=FinancialServiceProviderFactory(name="xxx"),
             )
             PaymentFactory(
                 parent=cls.pp_conflicted,
@@ -258,6 +260,7 @@ class TestPaymentPlanQueries(APITestCase):
                 entitlement_quantity_usd=00.00,
                 delivered_quantity=00.00,
                 delivered_quantity_usd=00.00,
+                financial_service_provider=FinancialServiceProviderFactory(name="yyy"),
             )
 
             IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))

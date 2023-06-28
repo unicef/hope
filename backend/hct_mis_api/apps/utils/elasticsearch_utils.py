@@ -29,7 +29,7 @@ def _create(models: Optional[List[Model]]) -> None:
         index.create()
 
 
-def _populate(models: Optional[List[Model]], options: Dict) -> None:
+def _populate(models: Optional[List[Any]], options: Dict) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
@@ -58,6 +58,10 @@ def rebuild_search_index(models: Optional[List[Model]] = None, options: Optional
 
 def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
+
+
+def delete_all_indexes() -> None:
+    _delete(models=None)
 
 
 def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Type[Document]") -> None:
