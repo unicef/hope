@@ -70,6 +70,8 @@ def create_registration_data_import_objects(
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
+    program_id = decode_id_string(registration_data_import_data.pop("program_id"))
+
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
         business_area_slug=business_area.slug,
         import_data=import_data_obj,
@@ -84,6 +86,7 @@ def create_registration_data_import_objects(
         business_area=business_area,
         pull_pictures=pull_pictures,
         screen_beneficiary=screen_beneficiary,
+        program_id=program_id,
         **registration_data_import_data,
     )
     created_obj_hct.full_clean()
