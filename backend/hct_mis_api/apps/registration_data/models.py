@@ -109,9 +109,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
-    program_id = models.UUIDField(
-        null=True, db_index=True, blank=True
-    )  # TODO temporary null=True until we migrate backward all data
+    program = models.ForeignKey(
+        "program.Program",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="registration_imports",
+        on_delete=models.SET_NULL,
+    )
 
     def __str__(self) -> str:
         return self.name
