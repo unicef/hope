@@ -13,7 +13,7 @@ export default class Feedback extends BaseComponent {
   buttonApply = 'button[data-cy="button-filters-apply"]';
   tableTitle = 'h6[data-cy="table-title"]';
   tableColumns = 'span[data-cy="table-label"]';
-  tableRow = 'tr[data-cy="table-row"]';
+  tableRow = 'tr[role="checkbox"]';
   // Texts
   textTitle = "Feedback";
   textTableTitle = "Feedbacks List";
@@ -40,6 +40,7 @@ export default class Feedback extends BaseComponent {
   getLinkedGrievance = () => cy.get(this.tableColumns).eq(3);
   getCreatedBy = () => cy.get(this.tableColumns).eq(4);
   getCreationDate = () => cy.get(this.tableColumns).eq(5);
+  getRows = () => cy.get(this.tableRow);
 
   checkElementsOnPage() {
     this.getTitlePage().contains(this.textTitle);
@@ -58,5 +59,13 @@ export default class Feedback extends BaseComponent {
     this.getLinkedGrievance().contains(this.textLinkedGrievance);
     this.getCreatedBy().contains(this.textCreatedBy);
     this.getCreationDate().contains(this.textCreationDate);
+  }
+
+  clickButtonSubmitNewFeedback() {
+    this.getButtonSubmitNewFeedback().click();
+  }
+
+  chooseTableRow(num) {
+    this.getRows().eq(num).click();
   }
 }

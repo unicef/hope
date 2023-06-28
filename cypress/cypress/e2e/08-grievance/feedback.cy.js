@@ -15,7 +15,7 @@ describe("Grievance - Feedback", () => {
   });
 
   describe("Smoke tests Feedback", () => {
-    it.only("Check Feedback page", () => {
+    it("Check Feedback page", () => {
       cy.scenario([
         "Go to Grievance page",
         "Go to Feedback page",
@@ -25,20 +25,24 @@ describe("Grievance - Feedback", () => {
       feedbackPage.checkGrievanceMenu();
       feedbackPage.checkElementsOnPage();
     });
-    it.skip("Check Feedback Details page", () => {
+    it("Check Feedback Details page", () => {
       cy.scenario([
         "Go to Grievance page",
         "Go to Feedback page",
-        "Choose first row from Grievance Tickets List",
+        "Choose first row from Feedbacks List",
         "Check if all elements on details page exists",
       ]);
+      feedbackPage.chooseTableRow(0);
+      feedbackDetailsPage.checkElementsOnPage();
     });
-    it.skip("Check Feedback New Ticket page", () => {
+    it("Check Feedback New Ticket page", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Submit New Feedback button",
         "Check if all elements on details page exists",
       ]);
+      feedbackPage.clickButtonSubmitNewFeedback();
+      newFeedbackPage.checkElementsOnPage();
     });
   });
 
