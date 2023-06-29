@@ -29,6 +29,7 @@ variables:
     Docker.registryConnection: "ICTD-HOPE-PRD-ACR"
     Docker.url: "uniappsakshope.azurecr.io"
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
+  isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
 
@@ -138,9 +139,26 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
               -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.frontend.repository):latest \
+              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
+              --build-arg SENTRY_ENVIRONMENT=dev \
               --push \
               ./frontend
-            displayName: Docker build
+            displayName: Docker build dev
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
+              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
+              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.frontend.repository):latest \
+              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
+              --build-arg SENTRY_ENVIRONMENT=staging \
+              --push \
+              ./frontend
+            displayName: Docker build staging
+            condition: and(succeeded(), eq(variables.isStaging, true))
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -148,6 +166,8 @@ stages:
               --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
               -t $(Docker.url.trn)/$(Docker.frontend.repository):$(tag) \
               -t $(Docker.url.trn)/$(Docker.frontend.repository):latest \
+              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
+              --build-arg SENTRY_ENVIRONMENT=production \
               --push \
               ./frontend
             displayName: Docker build trn
