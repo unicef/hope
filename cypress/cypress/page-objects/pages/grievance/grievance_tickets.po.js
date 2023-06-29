@@ -4,7 +4,7 @@ export default class Grievance extends BaseComponent {
   // Locators
   titlePage = 'h5[data-cy="page-header-title"]';
   searchFilter = 'div[data-cy="filters-search"]';
-  ticketIdFilter = 'div[data-cy="filters-search-type"]';
+  ticketTypeFilter = 'div[data-cy="filters-search-type"]';
   ticketId = 'li[data-value="ticket_id"]';
   householdId = 'li[data-value="ticket_hh_id"]';
   lastName = 'li[data-value="last_name"]';
@@ -51,7 +51,7 @@ export default class Grievance extends BaseComponent {
   getGrievanceTitle = () => cy.get(this.titlePage);
   getTabTitle = () => cy.get(this.tabTitle);
   getSearchFilter = () => cy.get(this.searchFilter);
-  getTicketIdFilter = () => cy.get(this.ticketIdFilter);
+  getTicketTypeFilter = () => cy.get(this.ticketTypeFilter);
   getCreationDateFromFilter = () => cy.get(this.creationDateFromFilter);
   getCreationDateToFilter = () => cy.get(this.creationDateToFilter);
   getStatusFilter = () => cy.get(this.statusFilter);
@@ -99,6 +99,11 @@ export default class Grievance extends BaseComponent {
     this.checkAllColumnsVisibility();
   }
 
+  chooseTicketListRow(num = 0, contains = "GRV-0000002") {
+    // ToDo: Use after fix bug: 164824
+    // return this.getTicketListRow().eq(num);
+    return this.getTicketListRow().eq(num).find("a").contains(contains);
+  }
   checkElementsOnSystemGeneratedPage() {
     this.getTabSystemGenerated().click();
     this.getGrievanceTitle().contains(this.textTitle);
@@ -110,8 +115,8 @@ export default class Grievance extends BaseComponent {
     this.getTicketListRow().eq(0).should("be.visible");
   }
 
-  checkElementsOfTicketIdFilter() {
-    this.getTicketIdFilter().click();
+  checkElementsOfTicketTypeFilter() {
+    this.getTicketTypeFilter().click();
     this.getTicketID().should("be.visible");
     this.getHouseholdID().should("be.visible");
     this.getLastName().should("be.visible").type("{esc}");
@@ -119,7 +124,7 @@ export default class Grievance extends BaseComponent {
 
   checkAllSearchFieldsVisible() {
     this.getSearchFilter().should("be.visible");
-    this.getTicketIdFilter().should("be.visible");
+    this.getTicketTypeFilter().should("be.visible");
     this.getCreationDateFromFilter().should("be.visible");
     this.getCreationDateToFilter().should("be.visible");
     this.getStatusFilter().should("be.visible");
@@ -132,7 +137,7 @@ export default class Grievance extends BaseComponent {
     this.getPriorityFilter().should("be.visible");
     this.getUrgencyFilter().should("be.visible");
     this.getActiveTicketsFilter().should("be.visible");
-    this.checkElementsOfTicketIdFilter();
+    this.checkElementsOfTicketTypeFilter();
     this.getButtonApply().should("be.visible");
     this.getButtonClear().should("be.visible");
   }
@@ -149,5 +154,35 @@ export default class Grievance extends BaseComponent {
     this.getTabCreationData().scrollIntoView().should("be.visible");
     this.getTabLastModifiedDate().scrollIntoView().should("be.visible");
     this.getTabTotalDays().scrollIntoView().should("be.visible");
+  }
+
+  useSearchFilter(text) {
+    this.getSearchFilter().type(text);
+    this.getButtonApply().click();
+  }
+  chooseTicketTypeHouseholdID() {
+    this.getTicketTypeFilter().click();
+    this.getHouseholdID().click().type("{esc}");
+    this.getButtonApply().click();
+  }
+
+  chooseTicketTypeTicketID() {
+    this.getTicketTypeFilter().click();
+    this.getTicketID().click().type("{esc}");
+    this.getButtonApply().click();
+  }
+
+  chooseTicketTypeLastName() {
+    this.getTicketTypeFilter().click();
+    this.getLastName().click().type("{esc}");
+    this.getButtonApply().click();
+  }
+
+  checkTicketTypeFilterText(text) {
+    this.getTicketTypeFilter()
+      .find("div")
+      .eq(0)
+      .scrollIntoView()
+      .contains(text);
   }
 }

@@ -58,11 +58,117 @@ describe("Grievance", () => {
     context("Export", () => {
       it.skip("ToDo", () => {});
     });
-
     context("Grievance Filters", () => {
-      it.skip("Grievance Programme filter", () => {});
-      it.skip("Grievance Status filter", () => {});
-      it.skip("Grievance FSP filter", () => {});
+      [
+        ["USER-GENERATED", "GRV-0000002", 1, "Ticket ID: GRV-0000002"],
+        ["SYSTEM-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
+      ].forEach((testData) => {
+        it("Grievance Search filter " + testData[0], () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            'Type in Search filter "Not Exist"',
+            "Press button Apply",
+            "Check if Tickets List is empty",
+            "Press button Clear",
+            "Type in Search filter " + testData[1],
+            "Press button Apply",
+            `Check if Tickets List has ${testData[2]} rows`,
+            "Press first row from Ticket List and check data",
+            "Come back to Grievance Page",
+          ]);
+          cy.get(`button[data-cy="tab-${testData[0]}"]`).click();
+          grievancePage.useSearchFilter("Not Exist");
+          grievancePage.getTicketListRow().should("not.exist");
+          grievancePage.getButtonClear().click();
+          grievancePage.useSearchFilter(testData[1]);
+          grievancePage.getTicketListRow().should("have.length", testData[2]);
+          grievancePage.chooseTicketListRow(0, testData[1]).click();
+          grievanceDetailsPage.getTitle().contains(testData[3]);
+        });
+      });
+      [
+        [
+          "USER-GENERATED",
+          "HH-20-0000.0002",
+          1,
+          "Romaniak",
+          1,
+          "Ticket ID: GRV-0000003",
+          "GRV-0000003",
+        ],
+        [
+          "SYSTEM-GENERATED",
+          "HH-20-0000.0002",
+          1,
+          "Romaniak",
+          1,
+          "Ticket ID: GRV-0000001",
+          "GRV-0000001",
+        ],
+      ].forEach((testData) => {
+        it("Grievance Search Type filter " + testData[0], () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            "Change ticket type filter to Household ID",
+            "Change ticket type filter to Ticket ID",
+            "Change ticket type filter to Last Name",
+            "Change ticket type filter to Household ID",
+            'Type in Search filter "Not Exist"',
+            "Press button Apply",
+            "Check if Tickets List is empty",
+            "Press button Clear",
+            "Change ticket type filter to Household ID",
+            "Type in Search filter " + testData[1],
+            "Press button Apply",
+            `Check if Tickets List has ${testData[2]} rows`,
+            "Press first row from Ticket List and check data",
+            "Come back to Grievance Page",
+            "Change ticket type filter to Last Name",
+            'Type in Search filter "Not Exist"',
+            "Press button Apply",
+            "Check if Tickets List is empty",
+            "Press button Clear",
+            "Change ticket type filter to Household ID",
+            "Type in Search filter " + testData[3],
+            "Press button Apply",
+            `Check if Tickets List has ${testData[4]} rows`,
+            "Press first row from Ticket List and check data",
+            "Come back to Grievance Page",
+          ]);
+          cy.get(`button[data-cy="tab-${testData[0]}"]`).click();
+          grievancePage.checkTicketTypeFilterText("Ticket ID");
+          grievancePage.chooseTicketTypeHouseholdID();
+          grievancePage.checkTicketTypeFilterText("Household ID");
+          grievancePage.chooseTicketTypeTicketID();
+          grievancePage.checkTicketTypeFilterText("Ticket ID");
+          grievancePage.chooseTicketTypeLastName();
+          grievancePage.checkTicketTypeFilterText("Last Name");
+          grievancePage.chooseTicketTypeHouseholdID();
+          grievancePage.useSearchFilter("Not Exist");
+          grievancePage.getTicketListRow().should("not.exist");
+          grievancePage.getButtonClear().click();
+          grievancePage.chooseTicketTypeHouseholdID();
+          grievancePage.useSearchFilter(testData[1]);
+          grievancePage.getTicketListRow().should("have.length", testData[2]);
+          grievancePage.chooseTicketListRow(0, testData[6]).click();
+          grievanceDetailsPage.getTitle().contains(testData[5]);
+          grievanceDetailsPage.pressBackButton();
+
+          grievancePage.getButtonClear().click();
+          grievancePage.chooseTicketTypeLastName();
+          grievancePage.useSearchFilter("Not Exist");
+          grievancePage.getTicketListRow().should("not.exist");
+          grievancePage.getButtonClear().click();
+          grievancePage.chooseTicketTypeLastName();
+          grievancePage.useSearchFilter(testData[3]);
+          grievancePage.getTicketListRow().should("have.length", testData[4]);
+        });
+      });
+      it.skip("Grievance FSP filter", () => {
+        // ToDo After fix bug: 165198
+      });
       it.skip("Grievance Creation Date filter", () => {});
       it.skip("Grievance Admin Level 2 filter", () => {});
       it.skip("Grievance Category filter", () => {});
@@ -119,7 +225,7 @@ describe("Grievance", () => {
   describe("Regression tests Grievance", () => {
     // ToDo: Enable
     xit('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
-      grievancePage.getTabSystemGenerated().click();
+      grievancePage.chooseTicketListRow(0).click();
       cy.url().should("include", "/system-generated");
     });
   });
