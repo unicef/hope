@@ -9,6 +9,7 @@ interface GrievanceDashboardCardProps {
   topNumber: number | string;
   systemGenerated: number | string;
   userGenerated: number | string;
+  dataCy?: string;
 }
 
 export const GrievanceDashboardCard = ({
@@ -16,6 +17,7 @@ export const GrievanceDashboardCard = ({
   topNumber,
   systemGenerated,
   userGenerated,
+  dataCy,
 }: GrievanceDashboardCardProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
@@ -23,17 +25,25 @@ export const GrievanceDashboardCard = ({
       <CardTitle>{topLabel}</CardTitle>
       <Grid container alignItems='center'>
         <Grid item>
-          <CardAmountSmaller>{topNumber}</CardAmountSmaller>
+          <CardAmountSmaller data-cy={`${dataCy}-top-number`}>
+            {topNumber}
+          </CardAmountSmaller>
         </Grid>
       </Grid>
       <Grid container alignItems='center'>
         <Grid xs={6} item>
-          <LabelizedField label={t('SYSTEM-GENERATED')}>
+          <LabelizedField
+            data-cy={`${dataCy}-system-generated`}
+            label={t('SYSTEM-GENERATED')}
+          >
             {systemGenerated}
           </LabelizedField>
         </Grid>
         <Grid xs={6} item>
-          <LabelizedField label={t('USER-GENERATED')}>
+          <LabelizedField
+            data-cy={`${dataCy}-user-generated`}
+            label={t('USER-GENERATED')}
+          >
             {userGenerated}
           </LabelizedField>
         </Grid>

@@ -69,7 +69,12 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
       </DialogContent>
       <DialogFooter>
         <DialogActions>
-          <Button color='primary' onClick={onClose} autoFocus>
+          <Button
+            data-cy='button-cancel'
+            color='primary'
+            onClick={onClose}
+            autoFocus
+          >
             {t('Cancel')}
           </Button>
           <Button

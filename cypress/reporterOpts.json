@@ -9,7 +9,8 @@
     "json": true
   },
   "mochaJunitReporterReporterOptions": {
-       "mochaFile": "cypress/results/results-[hash].xml",
-       "toConsole": true
+    "mochaFile": "cypress/results/results-[hash].xml",
+    "toConsole": true,
+    "includePending": true
 }
 }

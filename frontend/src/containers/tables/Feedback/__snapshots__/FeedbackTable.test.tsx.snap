@@ -51,7 +51,17 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
             class="MuiBox-root MuiBox-root-7"
           >
             <div
-              class="MuiBox-root MuiBox-root-8"
+              class="MuiToolbar-root MuiToolbar-regular makeStyles-root-8 MuiToolbar-gutters"
+            >
+              <h6
+                class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+                data-cy="table-title"
+              >
+                Feedbacks List
+              </h6>
+            </div>
+            <div
+              class="MuiBox-root MuiBox-root-11"
             />
           </div>
           <table
