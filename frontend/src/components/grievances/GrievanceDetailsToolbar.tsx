@@ -360,6 +360,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
+              data-cy='button-assign-to-me'
             >
               {t('ASSIGN TO ME')}
             </LoadingButton>
@@ -389,6 +390,7 @@ export const GrievanceDetailsToolbar = ({
                   color='primary'
                   variant='outlined'
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
+                  data-cy='button-set-on-hold'
                 >
                   {t('Set On Hold')}
                 </LoadingButton>
@@ -437,6 +439,7 @@ export const GrievanceDetailsToolbar = ({
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
+                  data-cy='button-set-to-in-progress'
                 >
                   {t('Set to in progress')}
                 </LoadingButton>
@@ -485,6 +488,7 @@ export const GrievanceDetailsToolbar = ({
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
+                  data-cy='button-send-back'
                 >
                   {t('Send Back')}
                 </LoadingButton>
@@ -506,6 +510,7 @@ export const GrievanceDetailsToolbar = ({
                   }
                   variant='outlined'
                   color='primary'
+                  data-cy='button-create-data-change'
                 >
                   {t('Create a Data Change ticket')}
                 </Button>

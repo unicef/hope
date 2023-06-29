@@ -10,6 +10,7 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
+import { useTranslation } from 'react-i18next';
 
 interface SurveysTableProps {
   filter;
@@ -22,6 +23,7 @@ export const SurveysTable = ({
   canViewDetails,
   choicesData,
 }: SurveysTableProps): ReactElement => {
+  const { t } = useTranslation();
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
@@ -37,6 +39,7 @@ export const SurveysTable = ({
     <TableWrapper>
       <UniversalTable<SurveyNode, AllSurveysQueryVariables>
         headCells={headCells}
+        title={t('Surveys List')}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllSurveysQuery}
         queriedObjectName='allSurveys'

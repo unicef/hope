@@ -42,6 +42,7 @@ export function LookUpLinkedTicketsFilters({
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
             value={filter.status || null}
+            data-cy='filters-status'
           >
             <MenuItem value=''>
               <em>None</em>
@@ -60,6 +61,7 @@ export function LookUpLinkedTicketsFilters({
             label={t('FSP')}
             value={filter.fsp}
             onChange={(e) => handleFilterChange(e, 'fsp')}
+            data-cy='filters-fsp'
           />
         </Grid>
         <Grid item xs={3}>
@@ -78,6 +80,7 @@ export function LookUpLinkedTicketsFilters({
               })
             }
             value={filter.createdAtRange.min}
+            data-cy='filters-creation-date-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -95,12 +98,14 @@ export function LookUpLinkedTicketsFilters({
               })
             }
             value={filter.createdAtRange.max}
+            data-cy='filters-creation-date-to'
           />
         </Grid>
         <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin'
+            dataCy='filters-admin'
           />
         </Grid>
         <Grid container justifyContent='flex-end'>
