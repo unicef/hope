@@ -17,7 +17,7 @@ export const RotateImg = ({
   };
 
   return (
-    <IconButton onClick={() => handleRotateImg()}>
+    <IconButton data-cy='button-rotate-image' onClick={() => handleRotateImg()}>
       <RotateRightIcon />
     </IconButton>
   );

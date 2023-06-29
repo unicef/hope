@@ -75,6 +75,7 @@ export const FeedbackFilters = ({
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
             label={t('Issue Type')}
             value={filter.issueType}
+            data-cy='filters-issue-type'
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -96,6 +97,7 @@ export const FeedbackFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filters-created-by'
           />
         </Grid>
         <Grid item xs={3}>
@@ -111,6 +113,7 @@ export const FeedbackFilters = ({
               )
             }
             value={filter.createdAtRangeMin}
+            data-cy='filters-creation-date-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -125,6 +128,7 @@ export const FeedbackFilters = ({
               )
             }
             value={filter.createdAtRangeMax}
+            data-cy='filters-creation-date-to'
           />
         </Grid>
       </Grid>

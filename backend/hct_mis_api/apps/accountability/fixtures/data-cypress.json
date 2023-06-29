@@ -1,0 +1,46 @@
+[
+    {
+        "model": "accountability.feedback",
+        "pk": "31b14edb-7260-4fc2-9384-1bf374a7e793",
+        "fields": {
+            "created_at": "2023-06-28T08:37:02.570Z",
+            "updated_at": "2023-06-28T08:37:02.570Z",
+            "unicef_id": "FED-23-0002",
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "issue_type": "NEGATIVE_FEEDBACK",
+            "household_lookup": null,
+            "individual_lookup": null,
+            "description": "Negative Feedback",
+            "comments": null,
+            "admin2": null,
+            "area": "",
+            "language": "",
+            "consent": true,
+            "program": null,
+            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "linked_grievance": null
+        }
+    },
+    {
+        "model": "accountability.feedback",
+        "pk": "fadcbe23-afb9-4679-9684-acdcafd4ca94",
+        "fields": {
+            "created_at": "2023-06-28T08:36:09.695Z",
+            "updated_at": "2023-06-28T08:37:25.249Z",
+            "unicef_id": "FED-23-0001",
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "issue_type": "POSITIVE_FEEDBACK",
+            "household_lookup": null,
+            "individual_lookup": null,
+            "description": "Positive Feedback",
+            "comments": null,
+            "admin2": null,
+            "area": "",
+            "language": "",
+            "consent": false,
+            "program": null,
+            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "linked_grievance": null
+        }
+    }
+]

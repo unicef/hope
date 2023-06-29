@@ -70,7 +70,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const systemGeneratedPath = `/${businessArea}/grievance/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
-    <Tab key={el} label={el} />
+    <Tab data-cy={`tab-${el}`} key={el} label={el} />
   ));
   const tabs = (
     <Tabs
