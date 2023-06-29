@@ -95,12 +95,20 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
   });
 });
 
+interface HopeHeaders {
+  'Business-Area': string;
+  Program: string;
+}
+
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
-  operation.setContext({
-    headers: {
-      'Business-Area': window.location.pathname.split('/')[1],
-    },
-  });
+  const businessAreaSlug = window.location.pathname.split('/')[1];
+  const programId = window.location.pathname.split('/')[3];
+  const headers: HopeHeaders = {
+    'Business-Area': businessAreaSlug,
+    Program: programId,
+  };
+
+  operation.setContext({ headers });
   return forward(operation);
 });
 
