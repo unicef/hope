@@ -42,6 +42,7 @@ class Command(BaseCommand):
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/payment/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/grievance/fixtures/data-cypress.json")
+        call_command("loaddata", "hct_mis_api/apps/accountability/fixtures/data-cypress.json")
 
         UserRole.objects.create(
             user=User.objects.create_superuser(

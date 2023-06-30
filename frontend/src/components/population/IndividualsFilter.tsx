@@ -89,6 +89,7 @@ export const IndividualsFilter = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='ind-filters-admin2'
           />
         </Grid>
         <Grid item xs={3}>
@@ -97,12 +98,7 @@ export const IndividualsFilter = ({
             value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
-            SelectDisplayProps={{
-              'data-cy': 'filters-sex',
-            }}
-            MenuProps={{
-              'data-cy': 'filters-sex-options',
-            }}
+            data-cy='ind-filters-gender'
             fullWidth
           >
             <MenuItem value=''>
@@ -118,6 +114,7 @@ export const IndividualsFilter = ({
             topLabel={t('Age')}
             placeholder={t('From')}
             value={filter.ageMin}
+            data-cy='ind-filters-age-from'
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
               handleFilterChange('ageMin', e.target.value);
@@ -130,6 +127,7 @@ export const IndividualsFilter = ({
             fullWidth
             placeholder={t('To')}
             value={filter.ageMax}
+            data-cy='ind-filters-age-to'
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
               handleFilterChange('ageMax', e.target.value);
@@ -144,10 +142,7 @@ export const IndividualsFilter = ({
             multiple
             fullWidth
             value={filter.flags}
-            SelectDisplayProps={{ 'data-cy': 'filters-flags' }}
-            MenuProps={{
-              'data-cy': 'filters-flags-options',
-            }}
+            data-cy='ind-filters-flags'
           >
             {choicesData?.flagChoices.map((each, index) => (
               <MenuItem
@@ -166,6 +161,7 @@ export const IndividualsFilter = ({
             label={t('Sort by')}
             value={filter.orderBy}
             fullWidth
+            data-cy='ind-filters-order-by'
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -182,6 +178,7 @@ export const IndividualsFilter = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
+            data-cy='ind-filters-status'
           >
             <MenuItem key='active' value='ACTIVE'>
               Active
@@ -207,6 +204,7 @@ export const IndividualsFilter = ({
               )
             }
             value={filter.lastRegistrationDateMin}
+            data-cy='ind-filters-reg-date-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -221,6 +219,7 @@ export const IndividualsFilter = ({
               )
             }
             value={filter.lastRegistrationDateMax}
+            data-cy='ind-filters-reg-date-to'
           />
         </Grid>
       </Grid>

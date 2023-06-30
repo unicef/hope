@@ -28,6 +28,7 @@ export const RdiAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  dataCy,
 }: {
   disabled?;
   fullWidth?: boolean;
@@ -38,6 +39,7 @@ export const RdiAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
+  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -81,6 +83,7 @@ export const RdiAutocomplete = ({
     <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
+      data-cy={dataCy}
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) =>

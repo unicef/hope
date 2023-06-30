@@ -1,0 +1,25 @@
+version: '3.7'
+volumes:
+  node_modules:
+
+
+services:
+  proxy:
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_HOST=frontend:80
+    depends_on:
+      - backend
+      - frontend
+
+  frontend:
+    image: unicef/hct-mis-frontend
+    env_file:
+      - .env
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: dist
+    ports:
+      - "8088:80"
+    command: nginx -g 'daemon off;'

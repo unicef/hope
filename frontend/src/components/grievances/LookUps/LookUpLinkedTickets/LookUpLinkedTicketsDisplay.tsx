@@ -51,6 +51,7 @@ export const LookUpLinkedTicketsDisplay = ({
                       color='inherit'
                       fontSize='small'
                       onClick={() => setLookUpDialogOpen(true)}
+                      data-cy='button-edit'
                     />
                   </LightGrey>
                 </Grid>
@@ -60,6 +61,7 @@ export const LookUpLinkedTicketsDisplay = ({
                       color='inherit'
                       fontSize='small'
                       onClick={() => handleRemove()}
+                      data-cy='button-delete'
                     />
                   </DarkGrey>
                 </Grid>
