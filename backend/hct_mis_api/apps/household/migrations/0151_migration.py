@@ -35,7 +35,7 @@ def _create_collections(representation_model, collection_model, related_name, bu
         logger.info(f"Finished batch collection creation for business area: {business_area.name}")
 
 
-def create_representation_collection(apps, schema_editor):
+def create_hh_and_ind_collections(apps, schema_editor):
     # Create representation collection for every household and individual already present in db
     Household = apps.get_model('household', 'Household')
     HouseholdCollection = apps.get_model('household', 'HouseholdCollection')
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='household_representations',
+                related_name='households',
                 to='household.HouseholdCollection',
             ),
         ),
@@ -90,17 +90,17 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='individual_representations',
+                related_name='individuals',
                 to='household.IndividualCollection',
             ),
         ),
-        migrations.RunPython(create_representation_collection, migrations.RunPython.noop),
+        migrations.RunPython(create_hh_and_ind_collections, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='household',
             name='household_collection',
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='household_representations',
+                related_name='households',
                 to='household.HouseholdCollection',
             ),
         ),
@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
             name='individual_collection',
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='individual_representations',
+                related_name='individuals',
                 to='household.IndividualCollection',
             ),
         ),

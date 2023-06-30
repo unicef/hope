@@ -379,7 +379,7 @@ class Household(
     )
     household_collection = models.ForeignKey(
         HouseholdCollection,
-        related_name="household_representations",
+        related_name="households",
         on_delete=models.CASCADE,
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -799,7 +799,7 @@ class Individual(
     )
     individual_collection = models.ForeignKey(
         IndividualCollection,
-        related_name="individual_representations",
+        related_name="individuals",
         on_delete=models.CASCADE,
     )
     duplicate = models.BooleanField(default=False, db_index=True)
