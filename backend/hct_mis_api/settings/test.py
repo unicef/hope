@@ -94,3 +94,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_HSTS_SECONDS = 0
 CACHE_ENABLED = False
+
+LOGGING_DISABLED = True
+
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
