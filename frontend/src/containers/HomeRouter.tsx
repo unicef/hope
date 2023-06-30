@@ -60,13 +60,11 @@ import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 
 const Root = styled.div`
   display: flex;
-  max-width: 100%;
-  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
+  height: 100vh;
   overflow: auto;
-  max-width: 100%;
   overflow-x: hidden;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({

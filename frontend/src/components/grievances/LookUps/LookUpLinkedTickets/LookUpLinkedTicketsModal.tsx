@@ -80,7 +80,10 @@ export const LookUpLinkedTicketsModal = ({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={() => setLookUpDialogOpen(false)}>
+              <Button
+                data-cy='button-cancel'
+                onClick={() => setLookUpDialogOpen(false)}
+              >
                 {t('CANCEL')}
               </Button>
               <Button

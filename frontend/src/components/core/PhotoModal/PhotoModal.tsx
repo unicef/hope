@@ -62,6 +62,7 @@ export const PhotoModal = ({
       case 'picture':
         element = (
           <MiniImage
+            data-cy='mini-image'
             alt='photo'
             src={src}
             onClick={() => setDialogOpen(true)}
@@ -71,6 +72,7 @@ export const PhotoModal = ({
       case 'button':
         element = (
           <Button
+            data-cy='button-show-photo'
             color='primary'
             variant='outlined'
             onClick={() => {
@@ -84,6 +86,7 @@ export const PhotoModal = ({
       case 'link':
         element = (
           <StyledLink
+            data-cy='link-show-photo'
             onClick={() => {
               setDialogOpen(true);
             }}
@@ -96,11 +99,12 @@ export const PhotoModal = ({
         element = (
           <Box display='flex' alignItems='center'>
             <MiniImage
+              data-cy='mini-image-close'
               alt='photo'
               src={src}
               onClick={() => setDialogOpen(true)}
             />
-            <IconButton onClick={() => closeHandler()}>
+            <IconButton data-cy='close-icon' onClick={() => closeHandler()}>
               <CloseIcon />
             </IconButton>
           </Box>
@@ -109,6 +113,7 @@ export const PhotoModal = ({
       default:
         element = (
           <MiniImage
+            data-cy='mini-image'
             alt='photo'
             src={src}
             onClick={() => setDialogOpen(true)}

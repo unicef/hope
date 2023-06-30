@@ -100,8 +100,6 @@ describe("Payment Verification", () => {
 
     context("Delete Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getCashPlanRows().should("have.length", 1);
         paymentVerificationPage.chooseCashPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(
@@ -114,16 +112,14 @@ describe("Payment Verification", () => {
           "Press Delete button on pop-up",
           "Check if Verification Plan was deleted",
         ]);
-        paymentVerificationDetailsPage.getDeletePlan().click();
-        paymentVerificationDetailsPage.getDelete().click();
+        paymentVerificationDetailsPage.getDeletePlan().scrollIntoView().click();
+        paymentVerificationDetailsPage.getDelete().scrollIntoView().click();
         paymentVerificationDetailsPage.getNumberOfPlans().contains(1);
       });
     });
 
     context("Activate Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getCashPlanRows().should("have.length", 1);
         paymentVerificationPage.chooseCashPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(
@@ -191,13 +187,13 @@ describe("Payment Verification", () => {
   describe("E2E tests Payment Verification", () => {
     // eslint-disable-next-line mocha/no-setup-in-describe
     paymentVerificationPage.countCashPlanArray().forEach((row_no) => {
-      it.skip(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
-        // pv.chooseCashPlan(row_no).click()
-        cy.get('[data-cy="cash-plan-table-row"]').first().click();
-        cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-        cy.get('[data-cy="page-header-container"]').contains("Payment Plan");
-        cy.get("h6").contains("Cash Plan Details");
-        cy.get("h6").contains("Verification Plans Summary");
+      it(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
+        paymentVerificationPage.chooseCashPlan(row_no).click();
+        cy.get('[data-cy="page-header-container"]', {
+          timeout: 10000,
+        }).contains("Payment Plan");
+        paymentVerificationDetailsPage.checkPaymentPlanDetailsTitle();
+        paymentVerificationDetailsPage.checkVerificationPlansSummaryTitle();
       });
     });
   });

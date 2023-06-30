@@ -170,6 +170,7 @@ export function DeleteIndividualGrievanceDetails({
           </Typography>
           {canApproveDataChange && (
             <Button
+              data-cy='button-approve'
               onClick={() =>
                 confirm({
                   title: t('Warning'),

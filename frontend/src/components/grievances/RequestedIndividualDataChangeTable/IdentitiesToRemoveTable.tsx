@@ -49,9 +49,15 @@ export const IdentitiesToRemoveTable = ({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>{t('Agency')}</TableCell>
-        <TableCell align='left'>{t('Country')}</TableCell>
-        <TableCell align='left'>{t('Number')}</TableCell>
+        <TableCell data-cy='table-cell-partner' align='left'>
+          {t('Partner')}
+        </TableCell>
+        <TableCell data-cy='table-cell-country' align='left'>
+          {t('Country')}
+        </TableCell>
+        <TableCell data-cy='table-cell-number' align='left'>
+          {t('Number')}
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -81,6 +87,7 @@ export const IdentitiesToRemoveTable = ({
                 <TableCell align='left'>
                   {isEdit ? (
                     <Checkbox
+                      data-cy='checkbox-identity-to-remove'
                       onChange={(): void => {
                         handleSelectIdentityToRemove(index);
                       }}
@@ -93,7 +100,7 @@ export const IdentitiesToRemoveTable = ({
                     />
                   ) : (
                     selectedIdentitiesToRemove.includes(index) && (
-                      <GreenIcon>
+                      <GreenIcon data-cy='green-check'>
                         <CheckCircleIcon />
                       </GreenIcon>
                     )

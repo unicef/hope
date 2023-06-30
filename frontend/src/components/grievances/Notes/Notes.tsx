@@ -27,7 +27,6 @@ const Date = styled.span`
 `;
 const DescMargin = styled.div`
   margin-bottom: 35px;
-  overflow: auto;
 `;
 const StyledBox = styled(Paper)`
   display: flex;
@@ -155,6 +154,7 @@ export function Notes({
                               justifyContent='flex-end'
                             >
                               <LoadingButton
+                                data-cy='button-add-note'
                                 loading={loading}
                                 color='primary'
                                 variant='contained'

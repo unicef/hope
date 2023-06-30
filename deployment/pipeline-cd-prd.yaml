@@ -67,6 +67,7 @@ stages:
                 backend.secret.STATIC_STORAGE_AZURE_ACCOUNT_KEY=$(STATIC_STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.MEDIA_STORAGE_AZURE_ACCOUNT_KEY=$(MEDIA_STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.secret.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
