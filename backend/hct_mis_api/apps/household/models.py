@@ -303,7 +303,7 @@ INDIVIDUAL_FLAGS_CHOICES = (
 logger = logging.getLogger(__name__)
 
 
-class HouseholdCollection(SoftDeletableModelWithDate, AbstractSyncable, UnicefIdentifiedModel):
+class HouseholdCollection(UnicefIdentifiedModel):
     """
     Collection of household representations.
     """
@@ -738,7 +738,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class IndividualCollection(SoftDeletableModelWithDate, AbstractSyncable, UnicefIdentifiedModel):
+class IndividualCollection(UnicefIdentifiedModel):
     """
     Collection of individual representations.
     """

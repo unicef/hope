@@ -58,9 +58,6 @@ class Migration(migrations.Migration):
             name='HouseholdCollection',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_removed', models.BooleanField(db_index=True, default=False)),
-                ('removed_date', models.DateTimeField(blank=True, null=True)),
-                ('last_sync_at', models.DateTimeField(blank=True, null=True)),
                 ('unicef_id', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
             ],
             options={
@@ -71,9 +68,6 @@ class Migration(migrations.Migration):
             name='IndividualCollection',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_removed', models.BooleanField(db_index=True, default=False)),
-                ('removed_date', models.DateTimeField(blank=True, null=True)),
-                ('last_sync_at', models.DateTimeField(blank=True, null=True)),
                 ('unicef_id', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
             ],
             options={
