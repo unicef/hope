@@ -26,6 +26,7 @@ export const AdminAreaFixedAutocomplete = ({
   parentId,
   onClear,
   additionalOnChange,
+  dataCy,
 }: {
   value;
   onChange;
@@ -34,6 +35,7 @@ export const AdminAreaFixedAutocomplete = ({
   parentId?;
   onClear?: () => void;
   additionalOnChange?: () => void;
+  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
@@ -77,6 +79,7 @@ export const AdminAreaFixedAutocomplete = ({
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
       value={newValue}
+      data-cy={dataCy || 'admin-area-autocomplete'}
       onOpen={() => {
         setOpen(true);
       }}
