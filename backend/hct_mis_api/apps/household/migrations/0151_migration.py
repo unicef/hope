@@ -24,9 +24,8 @@ def _create_collections(representation_model, collection_model, related_name, bu
     batch_size = 500
     for business_area in business_area_model.objects.all():
         logger.info(f"Starting batch collection creation for business area: {business_area.name}")
-        filtering_criteria = {"business_area": business_area, f"{related_name}__isnull": True}
-        total_representations = representation_model.objects.filter(**filtering_criteria).count()
-        all_representations = representation_model.objects.filter(**filtering_criteria).all()
+        total_representations = representation_model.objects.filter(business_area=business_area).count()
+        all_representations = representation_model.objects.filter(business_area=business_area).all()
 
         for batch_start in range(0, total_representations, batch_size):
             batch_end = batch_start + batch_size
