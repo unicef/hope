@@ -42,6 +42,12 @@ export default class Grievance extends BaseComponent {
   tabLastModifiedDate = 'th[data-cy="userModified"]';
   tabTotalDays = 'th[data-cy="totalDays"]';
   ticketListRow = 'tr[role="checkbox"]';
+  statusOptions = 'li[role="option"]';
+
+  dateTitleFilterPopup =
+    'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]';
+  daysFilterPopup =
+    'div[class="MuiPickersSlideTransition-transitionContainer MuiPickersCalendar-transitionContainer"]';
 
   // Texts
   textTitle = "Grievance Tickets";
@@ -88,6 +94,9 @@ export default class Grievance extends BaseComponent {
   getTabSystemGenerated = () => cy.get(this.tabSystemGenerated);
   getTabUserGenerated = () => cy.get(this.tabUserGenerated);
   getTicketListRow = () => cy.get(this.ticketListRow);
+  getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
+  getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
+  getOptions = () => cy.get(this.statusOptions);
 
   checkElementsOnUserGeneratedPage() {
     this.getGrievanceTitle().contains(this.textTitle);
@@ -103,6 +112,12 @@ export default class Grievance extends BaseComponent {
     // ToDo: Use after fix bug: 164824
     // return this.getTicketListRow().eq(num);
     return this.getTicketListRow().eq(num).find("a").contains(contains);
+  }
+
+  chooseCategoryFilter(category){
+    this.getCategoryFilter().click()
+    this.getOptions().contains(category).click()
+    this.getButtonApply().click()
   }
   checkElementsOnSystemGeneratedPage() {
     this.getTabSystemGenerated().click();
@@ -184,5 +199,55 @@ export default class Grievance extends BaseComponent {
       .eq(0)
       .scrollIntoView()
       .contains(text);
+  }
+
+  changeCreationDateFrom(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateFromFilter().type(date);
+  }
+
+  openCreationDateFromFilter() {
+    this.getCreationDateFromFilter().find("button").click();
+  }
+
+  chooseDayFilterPopup(day) {
+    this.getDaysFilterPopup().contains("p", day).click();
+  }
+
+  checkDateFilterFrom(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateFromFilter().find("input").should("have.value", date);
+  }
+
+  changeCreationDateTo(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateToFilter().type(date);
+  }
+
+  openCreationDateToFilter() {
+    this.getCreationDateToFilter().find("button").click();
+  }
+
+  checkDateFilterTo(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateToFilter().find("input").should("have.value", date);
+  }
+
+  checkDateTitleFilter(date) {
+    // Date format (String): Www, Mmm D
+    // Example: Sat, Jan 1
+    this.getDateTitleFilterPopup().contains(date).type("{esc}");
+  }
+  chooseTab(tabName) {
+    // Possibilities (String): USER-GENERATED, SYSTEM-GENERATED
+    cy.get(`button[data-cy="tab-${tabName}"]`).click();
+  }
+
+  expectedNumberOfRows(num){
+    if (num===0) {
+      this.getTicketListRow().should("not.exist");
+    } else {
+      this.getTicketListRow().should("have.length", num);
+    }
   }
 }

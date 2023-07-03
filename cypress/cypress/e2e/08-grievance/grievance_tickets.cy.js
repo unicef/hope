@@ -38,7 +38,7 @@ describe("Grievance", () => {
         .getTicketListRow()
         .eq(0)
         .find("a")
-        .contains("GRV-0000001")
+        .contains("GRV-0000002")
         .click();
       grievanceDetailsPage.checkGrievanceMenu();
       grievanceDetailsPage.checkElementsOnPage();
@@ -60,8 +60,8 @@ describe("Grievance", () => {
     });
     context("Grievance Filters", () => {
       [
-        ["USER-GENERATED", "GRV-0000002", 1, "Ticket ID: GRV-0000002"],
-        ["SYSTEM-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
+        ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
+        ["SYSTEM-GENERATED", "GRV-0000002", 1, "Ticket ID: GRV-0000002"],
       ].forEach((testData) => {
         it("Grievance Search filter " + testData[0], () => {
           cy.scenario([
@@ -77,12 +77,12 @@ describe("Grievance", () => {
             "Press first row from Ticket List and check data",
             "Come back to Grievance Page",
           ]);
-          cy.get(`button[data-cy="tab-${testData[0]}"]`).click();
+          grievancePage.chooseTab(testData[0]);
           grievancePage.useSearchFilter("Not Exist");
-          grievancePage.getTicketListRow().should("not.exist");
+          grievancePage.expectedNumberOfRows(0);
           grievancePage.getButtonClear().click();
           grievancePage.useSearchFilter(testData[1]);
-          grievancePage.getTicketListRow().should("have.length", testData[2]);
+          grievancePage.expectedNumberOfRows(testData[2]);
           grievancePage.chooseTicketListRow(0, testData[1]).click();
           grievanceDetailsPage.getTitle().contains(testData[3]);
         });
@@ -90,12 +90,12 @@ describe("Grievance", () => {
       [
         [
           "USER-GENERATED",
-          "HH-20-0000.0002",
+          "HH-20-0000.0001",
           1,
-          "Romaniak",
+          "Kowalska",
           1,
-          "Ticket ID: GRV-0000003",
-          "GRV-0000003",
+          "Ticket ID: GRV-0000006",
+          "GRV-0000006",
         ],
         [
           "SYSTEM-GENERATED",
@@ -103,8 +103,8 @@ describe("Grievance", () => {
           1,
           "Romaniak",
           1,
-          "Ticket ID: GRV-0000001",
-          "GRV-0000001",
+          "Ticket ID: GRV-0000002",
+          "GRV-0000002",
         ],
       ].forEach((testData) => {
         it("Grievance Search Type filter " + testData[0], () => {
@@ -137,7 +137,7 @@ describe("Grievance", () => {
             "Press first row from Ticket List and check data",
             "Come back to Grievance Page",
           ]);
-          cy.get(`button[data-cy="tab-${testData[0]}"]`).click();
+          grievancePage.chooseTab(testData[0]);
           grievancePage.checkTicketTypeFilterText("Ticket ID");
           grievancePage.chooseTicketTypeHouseholdID();
           grievancePage.checkTicketTypeFilterText("Household ID");
@@ -147,11 +147,11 @@ describe("Grievance", () => {
           grievancePage.checkTicketTypeFilterText("Last Name");
           grievancePage.chooseTicketTypeHouseholdID();
           grievancePage.useSearchFilter("Not Exist");
-          grievancePage.getTicketListRow().should("not.exist");
+          grievancePage.expectedNumberOfRows(0);
           grievancePage.getButtonClear().click();
           grievancePage.chooseTicketTypeHouseholdID();
           grievancePage.useSearchFilter(testData[1]);
-          grievancePage.getTicketListRow().should("have.length", testData[2]);
+          grievancePage.expectedNumberOfRows(testData[2]);
           grievancePage.chooseTicketListRow(0, testData[6]).click();
           grievanceDetailsPage.getTitle().contains(testData[5]);
           grievanceDetailsPage.pressBackButton();
@@ -159,21 +159,66 @@ describe("Grievance", () => {
           grievancePage.getButtonClear().click();
           grievancePage.chooseTicketTypeLastName();
           grievancePage.useSearchFilter("Not Exist");
-          grievancePage.getTicketListRow().should("not.exist");
+          grievancePage.expectedNumberOfRows(0);
           grievancePage.getButtonClear().click();
           grievancePage.chooseTicketTypeLastName();
           grievancePage.useSearchFilter(testData[3]);
-          grievancePage.getTicketListRow().should("have.length", testData[4]);
+          grievancePage.expectedNumberOfRows(testData[4]);
         });
       });
       it.skip("Grievance FSP filter", () => {
         // ToDo After fix bug: 165198
       });
-      it.skip("Grievance Creation Date filter", () => {});
+      [
+        ["USER-GENERATED", 1],
+        ["SYSTEM-GENERATED", 0],
+      ].forEach((testData) => {
+        it(`Grievance Creation Date From filter of ${testData[0]} tab`, () => {
+          grievancePage.chooseTab(testData[0]);
+          grievancePage.changeCreationDateFrom("2024-01-01");
+          grievancePage.checkDateFilterFrom("2024-01-01");
+          grievancePage.openCreationDateFromFilter();
+          grievancePage.checkDateTitleFilter("Mon, Jan 1");
+          grievancePage.openCreationDateFromFilter();
+          grievancePage.chooseDayFilterPopup(20);
+          grievancePage.checkDateFilterFrom("2024-01-20");
+          grievancePage.getButtonApply().click();
+          grievancePage.expectedNumberOfRows(testData[1]);
+        });
+      });
+      [
+        ["USER-GENERATED", 3],
+        ["SYSTEM-GENERATED", 1],
+      ].forEach((testData) => {
+        it(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
+          grievancePage.chooseTab(testData[0]);
+          grievancePage.changeCreationDateTo("2024-01-01");
+          grievancePage.checkDateFilterTo("2024-01-01");
+          grievancePage.openCreationDateToFilter();
+          grievancePage.checkDateTitleFilter("Mon, Jan 1");
+          grievancePage.openCreationDateToFilter();
+          grievancePage.chooseDayFilterPopup(20);
+          grievancePage.checkDateFilterTo("2024-01-20");
+          grievancePage.getButtonApply().click();
+          grievancePage.expectedNumberOfRows(testData[1]);
+        });
+      });
+
+      [
+        ["Data Change", "GRV-0000006"],
+        ["Sensitive Grievance", "GRV-0000004"],
+        ["Referral", "GRV-0000005"],
+        ["Grievance Complaint", "GRV-0000001"],
+      ].forEach((testData) => {
+        it(`Grievance Category filter - ${testData[0]}`, () => {
+          grievancePage.chooseCategoryFilter(testData[0]);
+          grievancePage.chooseTicketListRow(0, testData[1]);
+        });
+      });
       it.skip("Grievance Admin Level 2 filter", () => {});
-      it.skip("Grievance Category filter", () => {});
       it.skip("Grievance Assignee filter", () => {});
-      it.skip("Grievance Similarity Score filter", () => {});
+      it.skip("Grievance Similarity Score From filter", () => {});
+      it.skip("Grievance Similarity Score To filter", () => {});
       it.skip("Grievance Registration Date Import filter", () => {});
       it.skip("Grievance Preferred language filter", () => {});
     });

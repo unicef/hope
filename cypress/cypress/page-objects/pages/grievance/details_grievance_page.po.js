@@ -40,7 +40,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   newNoteField = 'textarea[data-cy="input-newNote"]';
   buttonNewNote = 'button[data-cy="button-add-note"]';
   // Texts
-  textTitle = "Ticket ID: GRV-0000001";
+  textTitle = "Ticket ID: ";
   textStatusNew = "New";
   textPriorityNotSet = "Not set";
   textUrgencyNotSet = "Not set";
