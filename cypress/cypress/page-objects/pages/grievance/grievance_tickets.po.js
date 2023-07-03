@@ -114,10 +114,22 @@ export default class Grievance extends BaseComponent {
     return this.getTicketListRow().eq(num).find("a").contains(contains);
   }
 
-  chooseCategoryFilter(category){
-    this.getCategoryFilter().click()
-    this.getOptions().contains(category).click()
-    this.getButtonApply().click()
+  chooseCategoryFilter(category) {
+    this.getCategoryFilter().click();
+    this.getOptions().contains(category).click();
+    this.getButtonApply().click();
+  }
+
+  chooseAdminFilter(name) {
+    this.getAdminLevelFilter().click();
+    this.getOptions().contains(name).click();
+    this.getButtonApply().click();
+  }
+
+  chooseAssigneeFilter(mail) {
+    this.getAssigneeFilter().click();
+    this.getOptions().contains(mail).click();
+    this.getButtonApply().click();
   }
   checkElementsOnSystemGeneratedPage() {
     this.getTabSystemGenerated().click();
@@ -243,8 +255,8 @@ export default class Grievance extends BaseComponent {
     cy.get(`button[data-cy="tab-${tabName}"]`).click();
   }
 
-  expectedNumberOfRows(num){
-    if (num===0) {
+  expectedNumberOfRows(num) {
+    if (num === 0) {
       this.getTicketListRow().should("not.exist");
     } else {
       this.getTicketListRow().should("have.length", num);

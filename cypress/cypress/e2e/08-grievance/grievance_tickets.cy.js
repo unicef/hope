@@ -215,8 +215,22 @@ describe("Grievance", () => {
           grievancePage.chooseTicketListRow(0, testData[1]);
         });
       });
-      it.skip("Grievance Admin Level 2 filter", () => {});
-      it.skip("Grievance Assignee filter", () => {});
+      it(`Grievance Admin Level 2 filter - USER-GENERATED`, () => {
+        grievancePage.chooseAdminFilter("Andarab");
+        grievancePage.chooseTicketListRow(1, "GRV-0000005");
+      });
+      it(`Grievance Admin Level 2 filter - SYSTEM-GENERATED`, () => {
+        grievancePage.chooseTab("SYSTEM-GENERATED");
+        grievancePage.chooseAdminFilter("Andarab");
+        grievancePage.expectedNumberOfRows(0);
+      });
+      ["USER-GENERATED", "SYSTEM-GENERATED"].forEach((testData) => {
+        it.only(`Grievance Assignee filter - ${testData}`, () => {
+          grievancePage.chooseTab(testData);
+          grievancePage.chooseAssigneeFilter("root@root.com");
+          grievancePage.expectedNumberOfRows(1);
+        });
+      });
       it.skip("Grievance Similarity Score From filter", () => {});
       it.skip("Grievance Similarity Score To filter", () => {});
       it.skip("Grievance Registration Date Import filter", () => {});
