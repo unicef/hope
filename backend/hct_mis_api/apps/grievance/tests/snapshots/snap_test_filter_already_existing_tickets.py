@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_0_with_permission 1'] = {
@@ -23,7 +24,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
@@ -40,7 +41,9 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                             'individual': {
                                 'fullName': 'John Doe'
                             },
-                            'paymentRecord': None
+                            'paymentRecord': {
+                                'fullName': None
+                            }
                         }
                     }
                 },
@@ -57,7 +60,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
@@ -93,7 +96,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
@@ -110,7 +113,9 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                             'individual': {
                                 'fullName': 'John Doe'
                             },
-                            'paymentRecord': None
+                            'paymentRecord': {
+                                'fullName': None
+                            }
                         }
                     }
                 },
@@ -127,7 +132,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
@@ -163,7 +168,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_pay
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
@@ -199,7 +204,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
@@ -217,7 +222,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': 'John Doe'
+                                'fullName': None
                             }
                         }
                     }
