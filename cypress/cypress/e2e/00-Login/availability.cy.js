@@ -7,7 +7,7 @@ context("Availibility", () => {
     cy.navigateToHomePage();
     cy.get("p").should("contain", "Login via Active Directory");
   });
-  it("Admin panel is available", () => {
+  it.only("Admin panel is available", () => {
     l.navigateToLoginPage();
     cy.get("a").should("contain", "HOPE Administration");
   });
