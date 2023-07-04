@@ -31,6 +31,7 @@ export const AdminAreaAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  dataCy,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
@@ -41,6 +42,7 @@ export const AdminAreaAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
+  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -86,6 +88,7 @@ export const AdminAreaAutocomplete = ({
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       value={value}
       fullWidth={fullWidth}
+      data-cy={dataCy}
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) =>

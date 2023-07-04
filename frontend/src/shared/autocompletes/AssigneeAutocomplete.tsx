@@ -29,6 +29,7 @@ export const AssigneeAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  dataCy,
 }: {
   disabled?;
   fullWidth?: boolean;
@@ -40,6 +41,7 @@ export const AssigneeAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
+  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -84,6 +86,7 @@ export const AssigneeAutocomplete = ({
   return (
     <StyledAutocomplete
       value={value}
+      data-cy={dataCy}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}

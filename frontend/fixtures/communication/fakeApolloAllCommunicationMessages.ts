@@ -10,6 +10,7 @@ export const fakeApolloAllCommunicationMessages = [
         createdBy: '',
         first: 10,
         orderBy: '-created_at',
+        program: '',
       },
     },
     result: {

@@ -14,6 +14,7 @@ export const PhotoModalFooter = ({
     <DialogFooter>
       <DialogActions>
         <Button
+          data-cy='button-cancel'
           onClick={() => {
             setDialogOpen(false);
             setTurnAngle(90);
