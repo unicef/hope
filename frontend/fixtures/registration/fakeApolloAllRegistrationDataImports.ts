@@ -1,4 +1,5 @@
 import { AllRegistrationDataImportsDocument } from '../../src/__generated__/graphql';
+import { fakeProgram } from '../programs/fakeProgram';
 
 export const fakeApolloAllRegistrationDataImports = [
   {
@@ -7,7 +8,8 @@ export const fakeApolloAllRegistrationDataImports = [
       variables: {
         importDate: null,
         businessArea: 'afghanistan',
-        programId: null,
+        program:
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
         first: 10,
         orderBy: '-import_date',
       },
