@@ -7,9 +7,10 @@ const exec = (command) => {
   });
 };
 
+exec(
+  'curl -d "text=E2E Tests Report: " -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage'
+);
 const fs = require("fs");
-const { Chart } = require("chart.js");
-
 fs.readFile(
   "./cypress/reports/mochareports/report.json",
   "utf8",
@@ -24,6 +25,8 @@ fs.readFile(
         \nTests Failed: ${report.stats.failures}
         \nTests ToDo: ${report.stats.pending}\n" -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage`;
       exec(command);
+      exec("zip -r -j report.zip ./cypress/reports/mochareports");
+
       let coverage =
         ((report.stats.tests - report.stats.pending) / report.stats.tests) *
         100;
@@ -31,6 +34,7 @@ fs.readFile(
         type: "doughnut",
         data: {
           labels: ["Passed", "Failed", "ToDo"],
+          labelColors: "#000",
           datasets: [
             {
               data: [
@@ -50,7 +54,11 @@ fs.readFile(
         },
         options: {
           plugins: {
-            datalabels: { color: "#000", anchor: "end", align: "end" },
+            datalabels: {
+              color: ["#000", "#000", "#000"],
+              anchor: "end",
+              align: "end",
+            },
             doughnutlabel: {
               labels: [
                 {
@@ -115,5 +123,8 @@ fs.readFile(
     } catch (err) {
       console.log("Error parsing JSON string:", err);
     }
+    exec(
+      'curl -F file=@report.zip -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ"  -F channels=C05EKHETMT9 -X POST https://slack.com/api/files.upload'
+    );
   }
 );
