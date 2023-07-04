@@ -1,6 +1,7 @@
 const { defineConfig } = require("cypress");
 const { verifyDownloadTasks } = require("cy-verify-downloads");
-const {execSync} = require("child_process");
+const { execSync } = require("child_process");
+
 module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
@@ -13,7 +14,9 @@ module.exports = defineConfig({
             stdio: "inherit",
           });
         };
-        exec('curl -d "text=Hi I am a bot that can post messages to any public channel." -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage');
+        exec(
+          'curl -d "text=Slack Report from tests:" -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage'
+        );
       });
     },
     projectId: "cypress",

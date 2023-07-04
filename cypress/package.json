@@ -32,7 +32,9 @@
     "test": "npm run scripts || (npm run posttest && exit 1)"
   },
   "dependencies": {
-    "cy-verify-downloads": "^0.1.14"
+    "chart.js": "^4.3.0",
+    "cy-verify-downloads": "^0.1.14",
+    "request": "^2.88.2"
   },
   "author": "",
   "description": ""
