@@ -48,14 +48,13 @@ function filtersToVariables(filters) {
   return variables;
 }
 
-const initialFilter = { search: '', module: '', userId: '' };
-
 export const ActivityLogPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
+  const initialFilter = { search: '', module: '', userId: '' };
   const permissions = usePermissions();
 
   const [filter, setFilter] = useState(
@@ -67,6 +66,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
+      programId,
       first: rowsPerPage,
       last: undefined,
       after: undefined,
