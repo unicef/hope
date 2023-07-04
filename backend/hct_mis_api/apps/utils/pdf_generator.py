@@ -1,7 +1,5 @@
-from io import BytesIO
 from typing import Any, Dict
 
-from django.core.files.base import ContentFile
 from django.template.loader import get_template
 
 from weasyprint import HTML
@@ -9,11 +7,8 @@ from weasyprint import HTML
 
 def generate_pdf_from_html(template_name: str, data: Dict) -> Any:
     template = get_template(template_name)
-    html = template.render(data)
-    res = BytesIO()
+    html_content = template.render(data)
 
-    HTML(string=html).write_pdf(res, presentational_hints=True)
+    pdf_file = HTML(string=html_content).write_pdf()
 
-    pdf = ContentFile(res.getvalue())
-
-    return pdf
+    return pdf_file

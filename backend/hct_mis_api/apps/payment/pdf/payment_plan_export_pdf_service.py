@@ -23,6 +23,7 @@ class PaymentPlanPDFExportSevice:
 
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
+        self.web_link: str = ""
 
     @staticmethod
     def get_link(api_url: Optional[str] = None) -> str:
@@ -31,6 +32,11 @@ class PaymentPlanPDFExportSevice:
         if api_url:
             return link
         return ""
+
+    def generate_web_link(self) -> None:
+        payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
+        path_name = "download-payment-plan-summary-pdf"
+        self.web_link = self.get_link(reverse(path_name, args=[payment_plan_id]))
 
     def send_email(self, context: Dict) -> None:
         text_body = render_to_string(self.text_template, context=context)
@@ -48,10 +54,6 @@ class PaymentPlanPDFExportSevice:
             logger.error(f"Email couldn't be send to {context['email']}")
 
     def get_email_context(self, user: "User") -> Dict:
-        payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
-        path_name = "download-payment-plan-summary-pdf"
-        link = self.get_link(reverse(path_name, args=[payment_plan_id]))
-
         msg = "Payment Plan Summary PDF file(s) have been generated, and below you will find the link to download the file(s)."
 
         context = {
@@ -59,18 +61,21 @@ class PaymentPlanPDFExportSevice:
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": msg,
-            "link": link,
+            "link": self.web_link,
             "title": "Payment Plan Payment List files generated",
         }
 
         return context
 
     def generate_pdf_summary(self) -> Any:
+        self.generate_web_link()
+        # TODO: update template and table with data
         template_name = "payment/payment_plan_summary_pdf_template.html"
-        pdf_context_data = {"data": [], "title": "Title", "user": "User Name", "link": "LinkLinkLink"}
+        filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
+        pdf_context_data = {"data": [], "title": self.payment_plan.unicef_id, "link": self.web_link}
 
         pdf = generate_pdf_from_html(
             template_name=template_name,
             data=pdf_context_data,
         )
-        return pdf
+        return pdf, filename
