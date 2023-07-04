@@ -6,6 +6,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils import timezone
 
@@ -539,7 +540,7 @@ def payment_plan_exclude_beneficiaries(
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id) -> None:
+def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
     """create PDF file with summary and sent an enail to request user"""
     try:
         from hct_mis_api.apps.core.models import FileTemp
@@ -557,8 +558,16 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id) ->
                 payment_plan.export_file_entitlement = None
 
             service = PaymentPlanPDFExportSevice(payment_plan)
-            pdf = service.generate_pdf_summary()
-            payment_plan.export_pdf_file_summary = pdf
+            pdf, filename = service.generate_pdf_summary()
+
+            file_pdf_obj = FileTemp(
+                object_id=payment_plan.pk,
+                content_type=get_content_type_for_model(payment_plan),
+                created_by=user,
+            )
+            file_pdf_obj.file.save(filename, ContentFile(pdf))
+
+            payment_plan.export_pdf_file_summary = file_pdf_obj
             # TODO: maybe will add background status
             # payment_plan.background_action_status_none()
             payment_plan.save()
