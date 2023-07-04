@@ -20,8 +20,8 @@ export const LinkedGrievance = ({
 }: LinkedGrievanceProps): React.ReactElement => {
   const { t } = useTranslation();
   const grievanceDetailsPath = getGrievanceDetailsPath(
-    feedback.linkedGrievance.id,
-    feedback.linkedGrievance.category,
+    feedback.linkedGrievance?.id,
+    feedback.linkedGrievance?.category,
     baseUrl,
   );
   return (
