@@ -8,16 +8,19 @@ import {
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { DuplicateProgram } from '../../dialogs/programs/DuplicateProgram';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
   canFinish: boolean;
   canEdit: boolean;
+  canDuplicate: boolean;
 }
 export const ActiveProgramDetailsPageHeaderButtons = ({
   program,
   canFinish,
   canEdit,
+  canDuplicate,
 }: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -49,6 +52,12 @@ export const ActiveProgramDetailsPageHeaderButtons = ({
           Open in CashAssist
         </Button>
       </Box>
+      {/* //TODO: add when duplicate is ready
+      {canDuplicate && (
+        <Box m={2}>
+          <DuplicateProgram programId={program.id} />
+        </Box>
+      )} */}
     </Box>
   );
 };
