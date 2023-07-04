@@ -8,7 +8,7 @@ const exec = (command) => {
 };
 
 const fs = require("fs");
-fs.readFile("/Users/szymonwyderka/Projects/hct-mis/cypress/cypress/reports/mochareports/report.json", "utf8", (err, jsonString) => {
+fs.readFile("./cypress/reports/mochareports/report.json", "utf8", (err, jsonString) => {
     if (err) {
         console.log("File read failed:", err);
         return;
