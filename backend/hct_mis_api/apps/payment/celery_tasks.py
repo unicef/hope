@@ -15,6 +15,9 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
+    PaymentPlanPDFExportSevice,
+)
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -530,4 +533,38 @@ def payment_plan_exclude_beneficiaries(
 
     except Exception as e:
         logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id) -> None:
+    """create PDF file with summary and sent an enail to request user"""
+    try:
+        from hct_mis_api.apps.core.models import FileTemp
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        user = get_user_model().objects.get(pk=user_id)
+
+        with transaction.atomic():
+            # regenerate PDF always
+            # remove old export_pdf_file_summary
+            if payment_plan.export_pdf_file_summary:
+                payment_plan.export_pdf_file_summary.file.delete(save=False)
+                payment_plan.export_pdf_file_summary.delete()
+                payment_plan.export_file_entitlement = None
+
+            service = PaymentPlanPDFExportSevice(payment_plan)
+            pdf = service.generate_pdf_summary()
+            payment_plan.export_pdf_file_summary = pdf
+            # TODO: maybe will add background status
+            # payment_plan.background_action_status_none()
+            payment_plan.save()
+
+            transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+
+    except Exception as e:
+        logger.exception("Export PDF Payment Plan Summary Error")
         raise self.retry(exc=e)

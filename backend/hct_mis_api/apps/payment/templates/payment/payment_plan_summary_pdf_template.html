@@ -1,0 +1,27 @@
+{% extends "export/pdf_base.html" %}
+
+{% block table %}
+    <p>LINK: {{ link }}</p>
+
+<table>
+  <thead>
+    {% for header_name in header_names %}
+        <th>{{ header_name }}</th>
+    {% endfor %}
+  </thead>
+  <tbody>
+    {% for row in data %}
+        <tr>
+            {% for value in row %}
+                {% if value %}
+                    <td>{{ value }}</td>
+                {% else %}
+                    <td>-</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

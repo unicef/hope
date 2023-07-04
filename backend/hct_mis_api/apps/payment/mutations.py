@@ -24,6 +24,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
+    export_pdf_payment_plan_summary,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
     payment_plan_exclude_beneficiaries,
@@ -1183,6 +1184,30 @@ class CreateFollowUpPaymentPlanMutation(PermissionMutation):
         return cls(follow_up_pp)
 
 
+class ExportPDFPaymentPlanSummaryMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        **kwargs: Any,
+    ) -> "CreateFollowUpPaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+        # TODO: upd background_action_status??
+        export_pdf_payment_plan_summary.delay(payment_plan.pk, info.context.user.pk)
+
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
@@ -1216,3 +1241,6 @@ class Mutations(graphene.ObjectType):
     import_xlsx_payment_plan_payment_list_per_fsp = ImportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
     exclude_households = ExcludeHouseholdsMutation.Field()
+
+    # pdf
+    export_pdf_payment_plan_summary = ExportPDFPaymentPlanSummaryMutation.Field()
