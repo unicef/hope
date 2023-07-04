@@ -14,15 +14,17 @@ export interface ProgramDetailsPageHeaderPropTypes {
   canEdit: boolean;
   canRemove: boolean;
   canFinish: boolean;
+  canDuplicate: boolean;
 }
 
-export function ProgramDetailsPageHeader({
+export const ProgramDetailsPageHeader = ({
   program,
   canActivate,
   canEdit,
   canRemove,
   canFinish,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
+  canDuplicate,
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   let buttons;
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
@@ -33,6 +35,7 @@ export function ProgramDetailsPageHeader({
           program={program}
           canFinish={canFinish}
           canEdit={canEdit}
+          canDuplicate={canDuplicate}
         />
       );
       break;
@@ -43,6 +46,7 @@ export function ProgramDetailsPageHeader({
           canRemove={canRemove}
           canEdit={canEdit}
           canActivate={canActivate}
+          canDuplicate={canDuplicate}
         />
       );
       break;
@@ -51,6 +55,7 @@ export function ProgramDetailsPageHeader({
         <FinishedProgramDetailsPageHeaderButtons
           program={program}
           canActivate={canActivate}
+          canDuplicate={canDuplicate}
         />
       );
   }
@@ -67,4 +72,4 @@ export function ProgramDetailsPageHeader({
       {buttons}
     </PageHeader>
   );
-}
+};

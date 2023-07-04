@@ -10,6 +10,9 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
         search: '',
         admin2: '',
         residenceStatus: '',
+        programs: [
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        ],
         first: 10,
         orderBy: 'unicef_id',
       },
