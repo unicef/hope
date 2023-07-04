@@ -1,7 +1,11 @@
 import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
+import get from 'lodash/get';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import {
+  useAllProgramsForChoicesQuery,
+  useGrievancesChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -46,6 +50,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     priority: '',
     urgency: '',
     preferredLanguage: '',
+    program: '',
   };
 
   const [selectedTab, setSelectedTab] = useState(
@@ -65,6 +70,14 @@ export const GrievancesTablePage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
+  const {
+    data: programsData,
+    loading: programsLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
+  });
+
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
   const systemGeneratedPath = `/${baseUrl}/grievance/tickets/system-generated`;
@@ -81,6 +94,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
           ...filter,
           grievanceType: GrievanceTypes[newValue],
           category: '',
+          program: '',
         });
         history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
@@ -94,11 +108,14 @@ export const GrievancesTablePage = (): React.ReactElement => {
     </Tabs>
   );
 
-  if (choicesLoading) return <LoadingComponent />;
+  if (choicesLoading || programsLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
-  if (!choicesData) return null;
+  if (!choicesData || !programsData) return null;
+
+  const allPrograms = get(programsData, 'allPrograms.edges', []);
+  const programs = allPrograms.map((edge) => edge.node);
 
   return (
     <>
@@ -111,6 +128,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
         appliedFilter={appliedFilter}
         setAppliedFilter={setAppliedFilter}
         selectedTab={selectedTab}
+        programs={programs}
       />
       <GrievancesTable
         filter={appliedFilter}
