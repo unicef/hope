@@ -1315,6 +1315,19 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         object_id_field="payment_object_id",
         related_query_name="payment_record",
     )
+    ticket_complaint_details = GenericRelation(
+        "grievance.TicketComplaintDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+    )
+
+    ticket_sensitive_details = GenericRelation(
+        "grievance.TicketSensitiveDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+    )
 
     @property
     def unicef_id(self) -> str:
@@ -1371,6 +1384,19 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         null=True,
         validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
     )  # 7 digits
+    ticket_complaint_details = GenericRelation(
+        "grievance.TicketComplaintDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+    )
+
+    ticket_sensitive_details = GenericRelation(
+        "grievance.TicketSensitiveDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+    )
 
     @property
     def full_name(self) -> str:

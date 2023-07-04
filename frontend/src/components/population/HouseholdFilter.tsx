@@ -87,12 +87,7 @@ export const HouseholdFilters = ({
             fullWidth
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
-            SelectDisplayProps={{
-              'data-cy': 'filters-residence-status',
-            }}
-            MenuProps={{
-              'data-cy': 'filters-residence-status-options',
-            }}
+            data-cy='hh-filters-residence-status'
           >
             {choicesData.residenceStatusChoices?.map((status) => (
               <MenuItem key={status.value} value={status.value}>
@@ -110,6 +105,7 @@ export const HouseholdFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            data-cy='hh-filters-admin2'
           />
         </Grid>
         <Grid item xs={3}>
@@ -122,6 +118,7 @@ export const HouseholdFilters = ({
             onChange={(e) =>
               handleFilterChange('householdSizeMin', e.target.value)
             }
+            data-cy='hh-filters-household-size-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -133,6 +130,7 @@ export const HouseholdFilters = ({
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
             }
+            data-cy='hh-filters-household-size-to'
           />
         </Grid>
         <Grid item xs={3}>
@@ -140,6 +138,7 @@ export const HouseholdFilters = ({
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
+            data-cy='hh-filters-order-by'
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -156,6 +155,7 @@ export const HouseholdFilters = ({
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
             value={filter.withdrawn}
+            data-cy='hh-filters-status'
           >
             <MenuItem key='all' value='null'>
               All
