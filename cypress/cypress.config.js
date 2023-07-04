@@ -15,7 +15,7 @@ module.exports = defineConfig({
           });
         };
         exec(
-          'curl -d "text=Slack Report from tests:" -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage'
+          'curl -d "text=Slack E2E Test Report:" -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage'
         );
       });
     },

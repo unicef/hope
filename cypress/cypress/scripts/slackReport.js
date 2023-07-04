@@ -24,7 +24,9 @@ fs.readFile(
         \nTests Failed: ${report.stats.failures}
         \nTests ToDo: ${report.stats.pending}\n" -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage`;
       exec(command);
-
+      let coverage =
+        ((report.stats.tests - report.stats.pending) / report.stats.tests) *
+        100;
       const chart = {
         type: "doughnut",
         data: {
@@ -36,18 +38,35 @@ fs.readFile(
                 report.stats.failures,
                 report.stats.pending,
               ],
+              borderColor: "rgba(255,255,255,0.8)",
               backgroundColor: [
-                "rgb(109,255,99)",
-                "rgb(235,54,54)",
-                "rgb(86,255,249)",
+                "rgb(72,159,52)",
+                "rgb(215,64,95)",
+                "rgb(36,113,164)",
               ],
-              hoverOffset: 4,
+              hoverOffset: 40,
             },
           ],
         },
+        options: {
+          plugins: {
+            datalabels: { color: "#000", anchor: "end", align: "end" },
+            doughnutlabel: {
+              labels: [
+                {
+                  text: coverage.toFixed(0).toString() + "%",
+                  color: "#000",
+                  font: { size: 30 },
+                },
+                { text: "Coverage", color: "#000" },
+              ],
+            },
+          },
+        },
       };
       const encodedChart = encodeURIComponent(JSON.stringify(chart));
-      const chartUrl = `https://quickchart.io/chart?c=${encodedChart}`;
+      const chartUrl = `https://quickchart.io/chart?format=jpg&bkg=white&c=${encodedChart}`;
+      console.log("\n\n" + chartUrl + "\n\n");
 
       const request = require("request");
 
