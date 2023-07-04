@@ -16,13 +16,10 @@ import { MiśTheme } from '../../theme';
 
 const Root = styled.div`
   display: flex;
-  max-width: 100%;
-  overflow-x: hidden;
 `;
 const MainContent = styled.div`
   flex-grow: 1;
   overflow: auto;
-  max-width: 100%;
   overflow-x: hidden;
 `;
 

@@ -373,6 +373,9 @@ export const getGrievanceDetailsPath = (
   category: number,
   baseUrl: string,
 ): string => {
+  if (!ticketId || !category) {
+    return null;
+  }
   return `/${baseUrl}/grievance/tickets/${matchGrievanceUrlByCategory(
     category,
   )}/${ticketId}`;
