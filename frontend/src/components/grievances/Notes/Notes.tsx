@@ -154,6 +154,7 @@ export function Notes({
                               justifyContent='flex-end'
                             >
                               <LoadingButton
+                                data-cy='button-add-note'
                                 loading={loading}
                                 color='primary'
                                 variant='contained'

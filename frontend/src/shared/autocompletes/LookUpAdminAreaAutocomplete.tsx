@@ -28,12 +28,14 @@ export const LookUpAdminAreaAutocomplete = ({
   onFilterChange,
   name,
   value,
+  dataCy,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
   onFilterChange;
   name: string;
   value?: AreaNodeEdge;
+  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -68,6 +70,7 @@ export const LookUpAdminAreaAutocomplete = ({
       open={open}
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
+      data-cy={dataCy}
       onOpen={() => {
         setOpen(true);
       }}

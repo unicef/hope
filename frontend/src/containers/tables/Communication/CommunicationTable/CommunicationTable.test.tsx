@@ -5,9 +5,11 @@ import wait from 'waait';
 import { fakeApolloAllCommunicationMessages } from '../../../../../fixtures/communication/fakeApolloAllCommunicationMessages';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { CommunicationTable } from './CommunicationTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 describe('containers/tables//Communication/CommunicationTable', () => {
   it('should render with data', async () => {
+    const { programId } = useBaseUrl();
     const { container } = render(
       <MockedProvider
         addTypename={false}
@@ -19,6 +21,7 @@ describe('containers/tables//Communication/CommunicationTable', () => {
             createdBy: '',
             first: 10,
             orderBy: '-created_at',
+            program: programId,
           }}
           canViewDetails={false}
         />
@@ -30,6 +33,7 @@ describe('containers/tables//Communication/CommunicationTable', () => {
   });
 
   it('should render loading', () => {
+    const { programId } = useBaseUrl();
     const { container } = render(
       <MockedProvider
         link={new ApolloLoadingLink()}
@@ -42,6 +46,7 @@ describe('containers/tables//Communication/CommunicationTable', () => {
             createdBy: '',
             first: 10,
             orderBy: '-created_at',
+            program: programId,
           }}
           canViewDetails={false}
         />

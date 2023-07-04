@@ -146,6 +146,7 @@ export function RequestedHouseholdDataChange({
                   onClick={() => setEdit(true)}
                   variant='outlined'
                   color='primary'
+                  data-cy='button-edit'
                   disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                 >
                   {t('EDIT')}

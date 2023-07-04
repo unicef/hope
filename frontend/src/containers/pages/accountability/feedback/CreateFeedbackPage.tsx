@@ -314,6 +314,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                               required
                               choices={choicesData.feedbackIssueTypeChoices}
                               component={FormikSelectField}
+                              data-cy='input-issue-type'
                             />
                           </Grid>
                         </Grid>
@@ -412,6 +413,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 label={t('Description')}
                                 required
                                 component={FormikTextField}
+                                data-cy='input-description'
                               />
                             </Grid>
                             <Grid item xs={12}>
@@ -422,6 +424,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 variant='outlined'
                                 label={t('Comments')}
                                 component={FormikTextField}
+                                data-cy='input-comments'
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -429,6 +432,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 name='admin2'
                                 variant='outlined'
                                 component={FormikAdminAreaAutocomplete}
+                                dataCy='input-admin2'
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -438,6 +442,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 variant='outlined'
                                 label={t('Area / Village / Pay point')}
                                 component={FormikTextField}
+                                data-cy='input-area'
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -448,6 +453,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 variant='outlined'
                                 label={t('Languages Spoken')}
                                 component={FormikTextField}
+                                data-cy='input-languages'
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -458,6 +464,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 label={t('Programme Title')}
                                 choices={mappedPrograms}
                                 component={FormikSelectField}
+                                data-cy='input-program'
                               />
                             </Grid>
                           </Grid>
@@ -473,6 +480,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <Button
                             component={Link}
                             to={`/${baseUrl}/accountability/feedback`}
+                            data-cy='button-cancel'
                           >
                             {t('Cancel')}
                           </Button>
@@ -481,6 +489,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}
+                            data-cy='button-back'
                           >
                             {t('Back')}
                           </Button>
