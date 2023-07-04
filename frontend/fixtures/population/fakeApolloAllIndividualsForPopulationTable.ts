@@ -1,4 +1,5 @@
 import { AllIndividualsForPopulationTableDocument } from '../../src/__generated__/graphql';
+import { fakeProgram } from '../programs/fakeProgram';
 
 export const fakeApolloAllIndividualsForPopulationTable = [
   {
@@ -15,6 +16,7 @@ export const fakeApolloAllIndividualsForPopulationTable = [
         lastRegistrationDate: '{"min":"","max":""}',
         first: 10,
         orderBy: 'unicef_id',
+        programs: [fakeProgram.id],
       },
     },
     result: {
