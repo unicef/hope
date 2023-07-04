@@ -81,6 +81,10 @@ export const ProgramDetailsPage = (): React.ReactElement => {
         canEdit={hasPermissions(PERMISSIONS.PROGRAMME_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.PROGRAMME_REMOVE, permissions)}
         canFinish={hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions)}
+        canDuplicate={hasPermissions(
+          PERMISSIONS.PROGRAMME_DUPLICATE,
+          permissions,
+        )}
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
