@@ -66,6 +66,8 @@ export const GrievancesTable = ({
     priority: filter.priority,
     urgency: filter.urgency,
     preferredLanguage: filter.preferredLanguage,
+    //TODO: add fitler for program
+    // program: filter.program || programId,
   };
 
   const [inputValue, setInputValue] = useState('');
