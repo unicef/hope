@@ -1,7 +1,6 @@
 {% extends "export/pdf_base.html" %}
 
 {% block table %}
-    <p>LINK: {{ link }}</p>
 
 <table>
   <thead>
@@ -23,5 +22,10 @@
     {% endfor %}
   </tbody>
 </table>
+
+<p></p>
+    <p>Link to Payment Plan: <a href="{{ link }}" target="_blank">{{ title }}</a></p>
+<p></p>
+<p>Generated on {% now "N j, Y" %}</p>
 
 {% endblock %}

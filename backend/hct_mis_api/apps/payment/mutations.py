@@ -1199,7 +1199,7 @@ class ExportPDFPaymentPlanSummaryMutation(PermissionMutation):
         info: Any,
         payment_plan_id: str,
         **kwargs: Any,
-    ) -> "CreateFollowUpPaymentPlanMutation":
+    ) -> "ExportPDFPaymentPlanSummaryMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
         # TODO: upd background_action_status??
