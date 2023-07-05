@@ -2,24 +2,96 @@
 
 {% block table %}
 
+<h3>LETTER OF AUTHORIZATION</h3>
+
 <table>
-  <thead>
-    {% for header_name in header_names %}
-        <th>{{ header_name }}</th>
-    {% endfor %}
-  </thead>
   <tbody>
-    {% for row in data %}
-        <tr>
-            {% for value in row %}
-                {% if value %}
-                    <td>{{ value }}</td>
-                {% else %}
-                    <td>-</td>
-                {% endif %}
-            {% endfor %}
-        </tr>
-    {% endfor %}
+  <tr>
+      <td colspan="4">PAYMENT PLAN DETAILS</td>
+  </tr>
+  <tr>
+    <td>Start Date</td>
+    <td>{{ start_date }}</td>
+    <td>Programme Name</td>
+    <td>{{ program_name }}</td>
+  </tr>
+  <tr>
+    <td>End Date</td>
+    <td>{{ end_date }}</td>
+    <td>Delivery mechanism</td>
+    <td>{{ delivery_mechanism }}</td>
+  </tr>
+  <tr>
+    <td>Dispersion Start Date</td>
+    <td>{{ dispersion_start_date }}</td>
+    <td>FSP</td>
+    <td>{{ fsp_name }}</td>
+  </tr>
+  <tr>
+    <td>Dispersion End Date</td>
+    <td>{{ dispersion_end_date }}</td>
+    <td>Vision Vendor number</td>
+    <td>{{ vision_vendor_number }}</td>
+    </tr>
+  <tr>
+    <td colspan="4">SUMMARY</td>
+  </tr>
+  <tr>
+    <td>Total number of households covered</td>
+    <td>{{ number_hh_covered }}</td>
+    <td>Total entitlement</td>
+    <td>{{ total_entitlement }}</td>
+  </tr>
+  <tr>
+    <td>Total number of individuals covered</td>
+    <td>{{ number_ind_covered }}</td>
+    <td>Currency</td>
+    <td>{{ currency }}</td>
+  </tr>
+  </tbody>
+</table>
+
+    <h3>PAYMENT PLAN ACCEPTANCE PROCESS</h3>
+
+<table>
+  <tbody>
+  <tr>
+      <td colspan="2">APPROVAL</td>
+      <td colspan="2">AUTHORIZATION</td>
+      <td colspan="2">RELEASE</td>
+  </tr>
+  <tr>
+    <td>Name of Approver</td>
+    <td>{{ name }}</td>
+    <td>Name of authorizer</td>
+    <td>{{ name }}</td>
+    <td>Name of Releaser</td>
+    <td>{{ name }}</td>
+  </tr>
+  <tr>
+    <td>Approval date</td>
+    <td>{{ aproval_date }}</td>
+    <td>Authorization date</td>
+    <td>{{ authorization_date }}</td>
+    <td>Release date</td>
+    <td>{{ release_date }}</td>
+  </tr>
+  <tr>
+    <td>Comment</td>
+    <td>{{ comment }}</td>
+    <td>Comment</td>
+    <td>{{ comment }}</td>
+    <td>Comment</td>
+    <td>{{ comment }}</td>
+  </tr>
+  <tr>
+    <td>Signature</td>
+    <td>{{ signature }}</td>
+    <td>Signature</td>
+    <td>{{ signature }}</td>
+    <td>Signature</td>
+    <td>{{ signature }}</td>
+  </tr>
   </tbody>
 </table>
 
