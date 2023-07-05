@@ -1,17 +1,14 @@
 import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
-import get from 'lodash/get';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import {
-  useAllProgramsForChoicesQuery,
-  useGrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
@@ -20,10 +17,9 @@ import {
   GrievanceTypes,
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const GrievancesTablePage = (): React.ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
@@ -70,14 +66,6 @@ export const GrievancesTablePage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const {
-    data: programsData,
-    loading: programsLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
   const systemGeneratedPath = `/${baseUrl}/grievance/tickets/system-generated`;
@@ -88,7 +76,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
         setSelectedTab(newValue);
         setFilter({
           ...filter,
@@ -108,14 +96,11 @@ export const GrievancesTablePage = (): React.ReactElement => {
     </Tabs>
   );
 
-  if (choicesLoading || programsLoading) return <LoadingComponent />;
+  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
-  if (!choicesData || !programsData) return null;
-
-  const allPrograms = get(programsData, 'allPrograms.edges', []);
-  const programs = allPrograms.map((edge) => edge.node);
+  if (!choicesData) return null;
 
   return (
     <>
@@ -128,14 +113,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
         appliedFilter={appliedFilter}
         setAppliedFilter={setAppliedFilter}
         selectedTab={selectedTab}
-        programs={programs}
       />
-      <GrievancesTable
-        filter={appliedFilter}
-        baseUrl={baseUrl}
-        businessArea={businessArea}
-        selectedTab={selectedTab}
-      />
+      <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
     </>
   );
 };
