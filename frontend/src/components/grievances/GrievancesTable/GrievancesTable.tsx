@@ -144,6 +144,7 @@ export const GrievancesTable = ({
       | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
+    _event.stopPropagation();
     const selectedIndex = selected.indexOf(name);
     const newSelected = [...selected];
 
