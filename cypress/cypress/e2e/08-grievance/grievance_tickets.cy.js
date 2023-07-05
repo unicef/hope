@@ -166,6 +166,8 @@ describe("Grievance", () => {
           grievancePage.expectedNumberOfRows(testData[4]);
         });
       });
+      it("Grievance Status filter", () => {
+      });
       it.skip("Grievance FSP filter", () => {
         // ToDo After fix bug: 165198
       });
@@ -217,18 +219,18 @@ describe("Grievance", () => {
       });
       it(`Grievance Admin Level 2 filter - USER-GENERATED`, () => {
         grievancePage.chooseAdminFilter("Andarab");
-        grievancePage.chooseTicketListRow(1, "GRV-0000005");
+        grievancePage.chooseTicketListRow(1, "GRV-0000006");
       });
       it(`Grievance Admin Level 2 filter - SYSTEM-GENERATED`, () => {
         grievancePage.chooseTab("SYSTEM-GENERATED");
         grievancePage.chooseAdminFilter("Andarab");
         grievancePage.expectedNumberOfRows(0);
       });
-      ["USER-GENERATED", "SYSTEM-GENERATED"].forEach((testData) => {
-        it.only(`Grievance Assignee filter - ${testData}`, () => {
-          grievancePage.chooseTab(testData);
+      [["USER-GENERATED", 2], ["SYSTEM-GENERATED", 1]].forEach((testData) => {
+        it(`Grievance Assignee filter - ${testData[0]}`, () => {
+          grievancePage.chooseTab(testData[0]);
           grievancePage.chooseAssigneeFilter("root@root.com");
-          grievancePage.expectedNumberOfRows(1);
+          grievancePage.expectedNumberOfRows(testData[1]);
         });
       });
       it.skip("Grievance Similarity Score From filter", () => {});

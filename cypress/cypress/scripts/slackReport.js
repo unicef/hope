@@ -25,7 +25,8 @@ fs.readFile(
         \nTests Failed: ${report.stats.failures}
         \nTests ToDo: ${report.stats.pending}\n" -d "channel=C05EKHETMT9" -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ" -X POST https://slack.com/api/chat.postMessage`;
       exec(command);
-      exec("zip -r -j report.zip ./cypress/reports/mochareports");
+      exec(pwd)
+      exec("zip -r report.zip ./cypress/reports/mochareports");
 
       let coverage =
         ((report.stats.tests - report.stats.pending) / report.stats.tests) *

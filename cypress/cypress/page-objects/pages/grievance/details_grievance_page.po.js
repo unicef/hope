@@ -45,6 +45,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   textPriorityNotSet = "Not set";
   textUrgencyNotSet = "Not set";
   textNotAssigment = "-";
+  textAssigmentRootRootkowski = "Root Rootkowski"
   textNoCategory = "Needs Adjudication";
   // Elements
   getPageHeaderContainer = () => cy.get(this.pageHeaderContainer);
@@ -86,7 +87,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
     this.getTicketStatus().contains(this.textStatusNew);
     this.getTicketPriority().contains(this.textPriorityNotSet);
     this.getTicketUrgency().contains(this.textUrgencyNotSet);
-    this.getTicketAssigment().contains(this.textNotAssigment);
+    this.getTicketAssigment().contains(this.textAssigmentRootRootkowski);
     this.getTicketCategory().contains(this.textNoCategory);
     this.getButtonAssignToMe().should("be.visible");
     this.getTicketHouseholdID().should("be.visible");
