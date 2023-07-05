@@ -4,11 +4,20 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
+  AllGrievanceTicketQuery,
+  AllGrievanceTicketQueryVariables,
+  useAllGrievanceTicketQuery,
+  useAllUsersForFiltersLazyQuery,
+  useGrievancesChoiceDataQuery,
+  useMeQuery,
+} from '../../../__generated__/graphql';
+import {
+  PERMISSIONS,
   hasCreatorOrOwnerPermissions,
   hasPermissions,
-  PERMISSIONS,
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
@@ -16,14 +25,6 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import { choicesToDict } from '../../../utils/utils';
-import {
-  AllGrievanceTicketQueryVariables,
-  useAllUsersForFiltersLazyQuery,
-  useGrievancesChoiceDataQuery,
-  useMeQuery,
-  AllGrievanceTicketQuery,
-  useAllGrievanceTicketQuery,
-} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
 import { BulkAssignModal } from './BulkAssignModal';
@@ -31,18 +32,15 @@ import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 
 interface GrievancesTableProps {
-  businessArea: string;
   filter;
-  baseUrl: string;
   selectedTab;
 }
 
 export const GrievancesTable = ({
-  businessArea,
-  baseUrl,
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -67,7 +65,7 @@ export const GrievancesTable = ({
     urgency: filter.urgency,
     preferredLanguage: filter.preferredLanguage,
     //TODO: add fitler for program
-    // program: filter.program || programId,
+    // program: programId,
   };
 
   const [inputValue, setInputValue] = useState('');
