@@ -61,7 +61,14 @@ class GrievanceTicketFactory(DjangoModelFactory):
     language = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
-    programme = factory.SubFactory(ProgramFactory)
+
+
+    @factory.post_generation
+    def programs(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+
+        self.programs.add(ProgramFactory())
 
 
 class SensitiveGrievanceTicketFactory(DjangoModelFactory):

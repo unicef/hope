@@ -634,7 +634,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     total_delivered_quantity = graphene.Float()
     start_date = graphene.String()
     end_date = graphene.String()
-    programme_name = graphene.String()
+    program_name = graphene.String()
     updated_at = graphene.String()
     verification_plans = graphene.List(PaymentVerificationPlanNode)
     total_number_of_households = graphene.Int()
@@ -655,7 +655,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None
 
-    def resolve_programme_name(self, info: Any, **kwargs: Any) -> graphene.String:
+    def resolve_program_name(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.program.name
 
     def resolve_verification_plans(self, info: Any, **kwargs: Any) -> graphene.List:

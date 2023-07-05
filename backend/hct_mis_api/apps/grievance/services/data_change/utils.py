@@ -443,11 +443,11 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
     household = reassign_roles_on_disable_individual(
         individual_to_remove,
         ticket_details.role_reassign_data,
-        getattr(ticket_details.ticket.programme, "pk", None),
+        ticket_details.programs.all(),
         info,
     )
     withdraw_individual(
-        individual_to_remove, info, old_individual, household, getattr(ticket_details.ticket.programme, "pk", None)
+        individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all()
     )
 
 
@@ -460,14 +460,14 @@ def mark_as_duplicate_individual_and_reassign_roles(
             individual_to_remove,
             ticket_details.role_reassign_data,
             info,
-            getattr(ticket_details.ticket.programme, "pk", None),
+            ticket_details.programs.all(),
             is_new_ticket=True,
         )
     else:
         household = reassign_roles_on_disable_individual(
             individual_to_remove,
             ticket_details.role_reassign_data,
-            getattr(ticket_details.ticket.programme, "pk", None),
+            ticket_details.programs.all(),
             info,
         )
     mark_as_duplicate_individual(
@@ -476,7 +476,7 @@ def mark_as_duplicate_individual_and_reassign_roles(
         old_individual,
         household,
         unique_individual,
-        getattr(ticket_details.ticket.programme, "pk", None),
+        ticket_details.programs.all(),
     )
 
 

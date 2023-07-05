@@ -112,7 +112,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     priority: 3,
     urgency: 3,
     partner: null,
-    programme: null,
+    program: null,
     comments: null,
     linkedFeedbackId: linkedFeedbackId
       ? decodeIdString(linkedFeedbackId)

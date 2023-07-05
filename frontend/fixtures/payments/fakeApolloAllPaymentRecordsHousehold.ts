@@ -38,7 +38,7 @@ export const fakeApolloAllPaymentRecordsHousehold = [
                 "deliveryDate": "1991-11-18 00:00:00+00:00",
                 "parent": {
                   "id": "UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==",
-                  "programmeName": "Test Program",
+                  "programName": "Test Program",
                   "__typename": "CashPlanAndPaymentPlanNode"
                 },
                 "__typename": "PaymentRecordAndPaymentNode"
@@ -60,7 +60,7 @@ export const fakeApolloAllPaymentRecordsHousehold = [
                 "deliveryDate": "2021-12-04 22:43:09+00:00",
                 "parent": {
                   "id": "Q2FzaFBsYW5Ob2RlOmViYzdiMTk2LWE1YzktNDI4Ni04ZTE0LWRmMmVhNjIzNTQ4Nw==",
-                  "programmeName": "Where production bill mean.",
+                  "programName": "Where production bill mean.",
                   "__typename": "CashPlanAndPaymentPlanNode"
                 },
                 "__typename": "PaymentRecordAndPaymentNode"
@@ -82,7 +82,7 @@ export const fakeApolloAllPaymentRecordsHousehold = [
                 "deliveryDate": "2021-06-16 01:11:34+00:00",
                 "parent": {
                   "id": "Q2FzaFBsYW5Ob2RlOmViYzdiMTk2LWE1YzktNDI4Ni04ZTE0LWRmMmVhNjIzNTQ4Nw==",
-                  "programmeName": "Where production bill mean.",
+                  "programName": "Where production bill mean.",
                   "__typename": "CashPlanAndPaymentPlanNode"
                 },
                 "__typename": "PaymentRecordAndPaymentNode"
@@ -104,7 +104,7 @@ export const fakeApolloAllPaymentRecordsHousehold = [
                 "deliveryDate": "2022-03-19 12:29:44+00:00",
                 "parent": {
                   "id": "Q2FzaFBsYW5Ob2RlOjJlZmRmNGM3LTE3ZDMtNDg5Zi04NWZmLWMyNjUwOWIxNGNlZA==",
-                  "programmeName": "Where production bill mean.",
+                  "programName": "Where production bill mean.",
                   "__typename": "CashPlanAndPaymentPlanNode"
                 },
                 "__typename": "PaymentRecordAndPaymentNode"

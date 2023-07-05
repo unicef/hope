@@ -477,9 +477,9 @@ export const EditGrievancePage = (): React.ReactElement => {
                           GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL.toString() && (
                           <Grid item xs={6}>
                             <Field
-                              name='programme'
+                              name='program'
                               fullWidth
-                              disabled={Boolean(ticket.programme)}
+                              disabled={Boolean(ticket.programs)}
                               variant='outlined'
                               label={t('Programme Title')}
                               choices={mappedPrograms}

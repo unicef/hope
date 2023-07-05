@@ -341,7 +341,7 @@ export function prepareVariables(businessArea, values) {
     urgency: values.urgency,
     partner: values.partner,
     comments: values.comments,
-    programme: values.programme,
+    program: values.program,
     linkedFeedbackId: values.linkedFeedbackId,
     documentation: values.documentation,
   };

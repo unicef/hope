@@ -210,15 +210,15 @@ def mark_as_duplicate_individual_and_reassign_roles(
             individual_to_remove,
             ticket_details.role_reassign_data,
             user,
-            ticket_details.ticket.programme,
+            ticket_details.ticket.programs.all(),
             "new_individual",
         )
     else:
         household = reassign_roles_on_disable_individual_service(
-            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programme
+            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
         )
     mark_as_duplicate_individual(
-        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programme
+        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
     )
 
 

@@ -142,7 +142,7 @@ class AddIndividualService(DataChangeService):
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(self.grievance_ticket.programme, "pk", None),
+            self.grievance_ticket.programs.all(),
             None,
             individual,
         )
