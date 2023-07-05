@@ -261,9 +261,8 @@ def create_household(
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
 
-    household_collection = HouseholdCollectionFactory()
     household.head_of_household = individuals[0]
-    household.household_collection = household_collection
+    household.household_collection.save()
     # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
@@ -302,9 +301,8 @@ def create_household_for_fixtures(
         individual_args = {}
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
-    household_collection = HouseholdCollectionFactory()
 
-    household.household_collection = household_collection
+    household.household_collection.save()
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
@@ -348,8 +346,7 @@ def create_household_and_individuals(
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     household: Household = HouseholdFactory.build(**household_data)
-    household_collection = HouseholdCollectionFactory()
-    household.household_collection = household_collection
+    household.household_collection.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
     individuals: List[Individual] = [
