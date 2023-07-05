@@ -96,42 +96,45 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
     )
     total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
+        blank=True,
     )
     total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
+        blank=True,
     )
     total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
+        blank=True,
     )
     total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
 
     class Meta:
@@ -289,16 +292,16 @@ class GenericPayment(TimeStampedUUIDModel):
         max_length=4,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
@@ -1309,6 +1312,19 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         object_id_field="payment_object_id",
         related_query_name="payment_record",
     )
+    ticket_complaint_details = GenericRelation(
+        "grievance.TicketComplaintDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+    )
+
+    ticket_sensitive_details = GenericRelation(
+        "grievance.TicketSensitiveDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+    )
 
     @property
     def unicef_id(self) -> str:
@@ -1365,6 +1381,19 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         null=True,
         validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
     )  # 7 digits
+    ticket_complaint_details = GenericRelation(
+        "grievance.TicketComplaintDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+    )
+
+    ticket_sensitive_details = GenericRelation(
+        "grievance.TicketSensitiveDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+    )
 
     @property
     def full_name(self) -> str:
