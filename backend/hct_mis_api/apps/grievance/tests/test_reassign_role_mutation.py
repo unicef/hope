@@ -13,7 +13,10 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -62,6 +65,7 @@ class TestRoleReassignMutation(APITestCase):
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
         cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
         cls.household.programs.add(program_one)
@@ -179,6 +183,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
         cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
         cls.household.programs.add(program_one)

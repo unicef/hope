@@ -26,7 +26,9 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
@@ -164,10 +166,17 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         "relationship": HEAD,
                     }
                     if family_id in families:
-                        individual = Individual(**individual_data, household_id=families.get(family_id))
+                        individual = Individual(
+                            **individual_data,
+                            household_id=families.get(family_id),
+                            individual_collection=IndividualCollection.objects.create(),
+                        )
                         individuals.append(individual)
                     else:
-                        individual = Individual.objects.create(**individual_data)
+                        individual = Individual.objects.create(
+                            **individual_data,
+                            individual_collection=IndividualCollection.objects.create(),
+                        )
                         individual.refresh_from_db()
 
                         household = Household.objects.create(
@@ -181,6 +190,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                             storage_obj=storage_obj,
                             collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
                             country=country,
+                            household_collection=HouseholdCollection.objects.create(),
                         )
 
                         individual.household = household

@@ -23,6 +23,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
+    HouseholdCollectionFactory,
     HouseholdFactory,
     IndividualFactory,
 )
@@ -131,7 +132,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07",
+            household_collection=HouseholdCollectionFactory(),
+        )
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)

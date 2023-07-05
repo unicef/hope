@@ -104,11 +104,13 @@ class TestSendTpToDatahub(TestCase):
             registration_data_import=rdi,
             admin_area=admin_area,
         )
+        cls.household.household_collection.save()
         cls.household_second = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
         )
+        cls.household_second.household_collection.save()
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
             relationship="HEAD",

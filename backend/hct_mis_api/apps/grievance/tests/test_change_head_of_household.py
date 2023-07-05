@@ -12,7 +12,11 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdCollectionFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
     BROTHER_SISTER,
@@ -48,6 +52,7 @@ class TestChangeHeadOfHousehold(APITestCase):
         admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
 
         cls.household = HouseholdFactory.build()
+        cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
 

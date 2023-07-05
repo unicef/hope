@@ -23,7 +23,9 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
@@ -190,11 +192,13 @@ class RdiMergeTask:
             if enumerator_rec_id := imported_household.enumerator_rec_id:
                 household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
 
+            household_collection = HouseholdCollection.objects.create()
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
                 business_area=obj_hct.business_area,
                 program=obj_hct.program,
+                household_collection=household_collection,
             )
             self.merge_admin_areas(imported_household, household)
             households_dict[imported_household.id] = household
@@ -255,6 +259,7 @@ class RdiMergeTask:
             values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
             values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
 
+            individual_collection = IndividualCollection.objects.create()
             individual = Individual(
                 **values,
                 household=household,
@@ -262,6 +267,7 @@ class RdiMergeTask:
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
                 program=obj_hct.program,
+                individual_collection=individual_collection,
             )
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:
