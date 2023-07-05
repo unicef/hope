@@ -617,8 +617,7 @@ class HardDocumentDeduplication:
         self, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
     ) -> None:
         documents_to_dedup = evaluate_qs(
-            new_documents.exclude(status=Document.STATUS_VALID)
-            .filter(type__is_identity_document=True)
+            new_documents.filter(Q(status=Document.STATUS_PENDING) & Q(type__is_identity_document=True))
             .select_related("individual", "type")
             .select_for_update(of=("self",))  # no need to lock individuals
             .order_by("pk")
