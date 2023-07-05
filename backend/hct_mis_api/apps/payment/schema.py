@@ -1,5 +1,4 @@
 import json
-from base64 import b64decode
 from decimal import Decimal
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -70,7 +69,10 @@ from hct_mis_api.apps.payment.filters import (
     payment_record_and_payment_filter,
     payment_record_and_payment_ordering,
 )
-from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.inputs import (
+    AvailableFspsForDeliveryMechanismsInput,
+    GetCashplanVerificationSampleSizeInput,
+)
 from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -94,7 +96,10 @@ from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.payment.utils import (
+    get_payment_items_for_dashboard,
+    get_payment_plan_object,
+)
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
@@ -461,9 +466,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     excluded_households = graphene.List(HouseholdNode)
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
-
     unsuccessful_payments_count = graphene.Int()
-    payments_used_in_follow_payment_plans_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -510,8 +513,22 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                     return False
             return True
 
-    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.List:
-        return self.payment_items.eligible().filter(household__withdrawn=True).count()
+    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.Int:
+        return (
+            self.eligible_payments.filter(household__withdrawn=True)
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+            .count()
+        )
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
@@ -529,8 +546,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
-        # Check there are payments in error/not distributed status
-        qs = self.unsuccessful_payments()
+        # Check there are payments in error/not distributed status and excluded withdrawn households
+        if self.is_follow_up:
+            return False
+
+        qs = self.unsuccessful_payments_for_follow_up()
 
         # Check if all payments are used in FPPs
         follow_up_payment = self.payments_used_in_follow_payment_plans()
@@ -540,10 +560,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_unsuccessful_payments_count(self, info: Any) -> int:
-        return self.unsuccessful_payments().count()
-
-    def resolve_payments_used_in_follow_payment_plans_count(self, info: Any) -> int:
-        return len(set(self.payments_used_in_follow_payment_plans().values_list("source_payment_id", flat=True)))
+        return self.unsuccessful_payments_for_follow_up().count()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -599,10 +616,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
-class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-
-
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     """
     for CashPlan and PaymentPlan models
@@ -650,7 +663,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     # TODO: do we need this empty fields ??
     def resolve_assistance_measurement(self, info: Any, **kwargs: Any) -> str:
-        return "HH"
+        return ""
 
     def resolve_dispersion_date(self, info: Any, **kwargs: Any) -> str:
         return ""
@@ -903,7 +916,6 @@ class Query(graphene.ObjectType):
     )
 
     payment_plan = relay.Node.Field(PaymentPlanNode)
-    # TODO: Keep or remove??? in favour of all_cash_plans_and_payment_plans
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
@@ -985,9 +997,8 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
-        node_name, obj_id = b64decode(input["cash_or_payment_plan_id"]).decode().split(":")
-        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(  # type: ignore
-            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
+            input["cash_or_payment_plan_id"]
         )
 
         def get_payment_records(

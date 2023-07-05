@@ -10,7 +10,7 @@ import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
-  filter?: AllCashPlansAndPaymentPlansQueryVariables;
+  filter?;
   businessArea: string;
   canViewDetails: boolean;
 }

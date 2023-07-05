@@ -78,6 +78,7 @@ export const PaymentChannelsToEditTable = ({
               {isEdit ? (
                 <Checkbox
                   color='primary'
+                  data-cy='checkbox-edit-payment-channel'
                   onChange={(): void => {
                     handleSelectPaymentChannelToEdit(index);
                   }}
@@ -89,7 +90,7 @@ export const PaymentChannelsToEditTable = ({
                 />
               ) : (
                 selectedPaymentChannelsToEdit.includes(index) && (
-                  <GreenIcon>
+                  <GreenIcon data-cy='green-check'>
                     <CheckCircleIcon />
                   </GreenIcon>
                 )

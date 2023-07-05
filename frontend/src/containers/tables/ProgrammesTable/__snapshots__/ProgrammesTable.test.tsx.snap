@@ -68,6 +68,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
             class="MuiTable-root makeStyles-table-3"
+            data-cy="table-title"
           >
             <thead
               class="MuiTableHead-root"
@@ -82,6 +83,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -105,6 +107,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -128,6 +131,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -151,6 +155,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -174,6 +179,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -197,6 +203,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   <span
                     aria-disabled="false"
                     class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
@@ -226,7 +233,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-htoDjs fzdMAW"
+                    class="sc-htoDjs htbFJq"
                     href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
                   >
                     Notice hair fall college enough perhaps.
@@ -283,6 +290,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
         </div>
         <div
           class="MuiTablePagination-root"
+          data-cy="table-pagination"
         >
           <div
             class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

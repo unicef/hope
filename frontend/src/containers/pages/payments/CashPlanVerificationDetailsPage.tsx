@@ -113,7 +113,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink to={`/${businessArea}/cashplans/${cashPlan.id}`}>
+        <BlackLink fullWidth to={`/${businessArea}/cashplans/${cashPlan.id}`}>
           {t('Cash Plan')} {cashPlan.caId}
         </BlackLink>
       }
@@ -139,7 +139,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
+            to={`/${businessArea}/grievance/payment-verification/${decodeIdString(
               cashPlan.id,
             )}`}
           >

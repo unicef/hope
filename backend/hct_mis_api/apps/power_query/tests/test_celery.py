@@ -1,10 +1,19 @@
 from django.test import TestCase, override_settings
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ..celery_tasks import refresh_report, refresh_reports, run_background_query
-from ..defaults import create_defaults
-from ..models import Formatter, Parametrizer, Query, Report
-from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, ReportFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.power_query.celery_tasks import (
+    refresh_report,
+    refresh_reports,
+    run_background_query,
+)
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Formatter, Parametrizer, Query, Report
+from hct_mis_api.apps.power_query.tests.fixtures import (
+    FormatterFactory,
+    ParametrizerFactory,
+    QueryFactory,
+    ReportFactory,
+)
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

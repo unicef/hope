@@ -118,6 +118,7 @@ class CheckAgainstSanctionListPreMergeTask:
                             household = marked_individual.household
                             admin_level_2 = household.admin2 if household else ""
                             area = household.village if household else ""
+
                             ticket = GrievanceTicket(
                                 category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                                 business_area=marked_individual.business_area,

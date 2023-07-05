@@ -46,12 +46,14 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
           >
             <h5
               class="MuiTypography-root MuiTypography-h5"
+              data-cy="page-header-title"
             >
               <div
                 class="MuiBox-root MuiBox-root-2"
               >
                 Payment Plan
-                 ID 
+                 ID
+                 
                 PP-0060-22-00000001
                 <div
                   class="sc-gqjmRU bKymfA"

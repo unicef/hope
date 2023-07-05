@@ -162,3 +162,5 @@ class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
+    flag_exclude_if_active_adjudication_ticket = graphene.Boolean()
+    flag_exclude_if_on_sanction_list = graphene.Boolean()

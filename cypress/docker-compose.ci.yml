@@ -1,0 +1,136 @@
+version: '3.7'
+x-django-envs: &django_envs
+  environment:
+    - ENV=dev
+    - SECRET_KEY=31283012-38dasda
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
+    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@mis_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@cash_assist_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@erp_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@registration_datahub_db:5432/postgres
+    - POSTGRES_SSL_MODE=off
+    - EMAIL_HOST=TBD
+    - EMAIL_HOST_USER=TBD
+    - EMAIL_HOST_PASSWORD=TBD
+    - KOBO_KF_URL=https://kobo.humanitarianresponse.info
+    - KOBO_KC_URL=https://kobo.humanitarianresponse.info
+    - KOBO_MASTER_API_TOKEN=token
+    - EXCHANGE_RATES_API_KEY=token
+    - REDIS_INSTANCE=redis:6379
+    - PYTHONUNBUFFERED=1
+    - CYPRESS_TESTING=yes
+    - DJANGO_ALLOWED_HOSTS=*
+    - SESSION_COOKIE_SECURE=false
+    - SESSION_COOKIE_HTTPONLY=true
+    - CSRF_COOKIE_HTTPONLY=false
+    - CSRF_COOKIE_SECURE=false
+    - SECURE_CONTENT_TYPE_NOSNIFF=true
+    - SECURE_REFERRER_POLICY=same-origin
+    - SECURE_HSTS_SECONDS=0
+
+volumes:
+  backend-data:
+
+services:
+  cypress:
+    build:
+      dockerfile: Dockerfile
+    command: "ci-test"
+    depends_on:
+      - proxy
+      - celery_worker
+    volumes:
+      - ../cypress-results:/code/cypress/results
+      - ../cypress-screenshots:/code/cypress/screenshots
+      - /code/node_modules
+      - ./:/code
+
+  proxy:
+    image: unicef/hct-mis-proxy
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_HOST=frontend:80
+    build:
+      context: ../proxy
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+      - frontend
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+
+  redis:
+    restart: unless-stopped
+    image: redis:4.0.11-alpine3.8
+
+  backend:
+    <<: *django_envs
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    volumes:
+      - backend-data:/data
+    command: "cy"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
+      - registration_datahub_db
+      - elasticsearch
+
+  cash_assist_datahub_db:
+    image: kartoza/postgis:14-3
+    <<: *django_envs
+
+  mis_datahub_db:
+    image: kartoza/postgis:14-3
+    <<: *django_envs
+
+  erp_datahub_db:
+    image: kartoza/postgis:14-3
+    <<: *django_envs
+
+  registration_datahub_db:
+    image: kartoza/postgis:14-3
+    <<: *django_envs
+
+  db:
+    image: kartoza/postgis:14-3
+    <<: *django_envs
+
+  celery_worker:
+    <<: *django_envs
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    volumes:
+      - backend-data:/data
+    restart: unless-stopped
+    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    depends_on:
+      - backend
+
+  elasticsearch:
+    <<: *django_envs
+    image: unicef/hct-elasticsearch
+    build:
+      context: ../elasticsearch
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1

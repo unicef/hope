@@ -69,8 +69,8 @@ export const LookUpReassignRole = ({
   }, [individualData]);
 
   useEffect(() => {
-    const category = ticket.category.toString();
-    const issueType = ticket.issueType.toString();
+    const category = ticket.category?.toString();
+    const issueType = ticket.issueType?.toString();
 
     let roleReassignData = null;
     switch (category) {

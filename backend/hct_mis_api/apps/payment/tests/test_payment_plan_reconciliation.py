@@ -5,10 +5,13 @@ import tempfile
 from collections import namedtuple
 from datetime import timedelta
 from decimal import Decimal
+from io import BytesIO
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Tuple
 from unittest.mock import patch
 from zipfile import ZipFile
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
@@ -126,7 +129,7 @@ SET_STEFICON_RULE_MUTATION = """
 mutation SetSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!) {
     setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
         paymentPlan {
-            id
+            unicefId
         }
     }
 }
@@ -914,8 +917,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             )
         )
 
-    def test_follow_up_pp_entitlements_cannot_be_changed_with_steficon_rule(self) -> None:
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+    def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, unicef_id="unicef_id_12345_2023")
         rule = RuleFactory(name="SomeRule")
 
         self.snapshot_graphql_request(
@@ -927,7 +930,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
-    def test_follow_up_pp_entitlements_cannot_be_changed_with_file_import(self) -> None:
+    def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
+        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
 
         self.snapshot_graphql_request(
@@ -935,6 +939,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
-                "file": io.BytesIO(),
+                "file": BytesIO(content),
             },
         )
