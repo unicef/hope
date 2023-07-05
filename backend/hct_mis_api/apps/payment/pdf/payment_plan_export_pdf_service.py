@@ -70,9 +70,11 @@ class PaymentPlanPDFExportSevice:
     def generate_pdf_summary(self) -> Any:
         self.generate_web_link()
         # TODO: update template and table with data
+        data = {}
         template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
-        pdf_context_data = {"data": [], "title": self.payment_plan.unicef_id, "link": self.web_link}
+        pdf_context_data = {"data": data, "title": self.payment_plan.unicef_id, "link": self.web_link}
+        # TODO: update web link now is download link
 
         pdf = generate_pdf_from_html(
             template_name=template_name,
