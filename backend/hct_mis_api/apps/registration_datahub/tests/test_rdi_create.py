@@ -121,6 +121,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id
         )
 
         households_count = ImportedHousehold.objects.count()
@@ -349,6 +350,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id
         )
 
         households = ImportedHousehold.objects.all()
@@ -365,6 +367,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id
         )
 
         bank_account_info = ImportedBankAccountInfo.objects.get(individual__row_id=7)
@@ -378,6 +381,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id
         )
 
         document = ImportedDocument.objects.filter(individual__row_id=5).first()
@@ -390,6 +394,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id
         )
 
         individual = ImportedIndividual.objects.get(row_id=3)
@@ -460,10 +465,12 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
         )
+        cls.program = ProgramFactory(status="ACTIVE")
         hct_rdi = RegistrationDataImportFactory(
             datahub_id=cls.registration_data_import.id,
             name=cls.registration_data_import.name,
             business_area=cls.business_area,
+            program=cls.program
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
@@ -479,6 +486,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id
         )
 
         households = ImportedHousehold.objects.all()
@@ -522,6 +530,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data_collectors.id,
             self.business_area.id,
+            self.program.id
         )
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
