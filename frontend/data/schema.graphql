@@ -331,7 +331,7 @@ type CashPlanAndPaymentPlanNode {
   totalDeliveredQuantity: Float
   startDate: String
   endDate: String
-  programmeName: String
+  programName: String
   updatedAt: String
   verificationPlans: [PaymentVerificationPlanNode]
   totalNumberOfHouseholds: Int
@@ -635,7 +635,7 @@ input CreateGrievanceTicketInput {
   priority: Int
   urgency: Int
   partner: Int
-  programme: ID
+  program: ID
   comments: String
   linkedFeedbackId: ID
   documentation: [GrievanceDocumentInput]
@@ -1295,7 +1295,7 @@ type GrievanceTicketNode implements Node {
   priority: Int
   urgency: Int
   partner: PartnerType
-  programme: ProgramNode
+  programs: [ProgramNode]
   comments: String
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2428,7 +2428,7 @@ type LogEntryNode implements Node {
   changes: Arg
   user: UserNode
   businessArea: UserBusinessAreaNode
-  program: ProgramNode
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   timestamp: DateTime
 }
 
@@ -3052,7 +3052,7 @@ type PaymentVerificationLogEntryNode implements Node {
   changes: Arg
   user: UserNode
   businessArea: UserBusinessAreaNode
-  program: ProgramNode
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   timestamp: DateTime
   contentObject: PaymentVerificationPlanNode
 }
@@ -3248,10 +3248,10 @@ type ProgramNode implements Node {
   paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
+  activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalEntitledQuantity: Decimal
@@ -4643,7 +4643,7 @@ input UpdateGrievanceTicketInput {
   priority: Int
   urgency: Int
   partner: Int
-  programme: ID
+  program: ID
   comments: String
   documentation: [GrievanceDocumentInput]
   documentationToUpdate: [GrievanceDocumentUpdateInput]

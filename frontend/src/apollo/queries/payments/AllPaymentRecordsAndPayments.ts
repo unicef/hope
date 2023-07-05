@@ -40,7 +40,7 @@ export const AllPaymentRecordsAndPayments = gql`
           deliveryDate
           parent {
             id
-            programmeName
+            programName
           }
           verification {
             id

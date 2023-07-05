@@ -235,7 +235,7 @@ export const GrievancesDetails = ({
               },
               showProgramme && {
                 label: t('Programme'),
-                value: ticket.programme?.name,
+                value: ticket.programs?.name,
                 size: showPartner ? 3 : 9,
               },
               showPartner && {

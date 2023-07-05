@@ -49,7 +49,7 @@ query allCashPlansAndPaymentPlans(
         totalDeliveredQuantity
         startDate
         endDate
-        programmeName
+        programName
         updatedAt
         verificationPlans {
           id

@@ -44,7 +44,8 @@ class TestLogsAssignProgram(TestCase):
         payment_verification = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan, generic_fk_obj=payment
         )
-        grievance_ticket = GrievanceTicketFactory(business_area=self.business_area, programme=self.program)
+        grievance_ticket = GrievanceTicketFactory(business_area=self.business_area)
+        grievance_ticket.programs.add(self.program)
         # TODO: update after changes for Ind and HH collections/representations
         # individual = IndividualFactory(household=None, program=cls.program)
         # household = HouseholdFactory(head_of_household=individual, program=cls.program)
