@@ -83,7 +83,7 @@ export default class Targeting extends BaseComponent {
   selectStatus(status) {
     this.getStatusFilter().click();
     this.getStatusOption().contains(status).click();
-    this.getStatusOption().contains(status).type("{esc}");
+    this.pressEscapeFromElement(this.getStatusOption().contains(status))
     this.getApply().click();
   }
 
