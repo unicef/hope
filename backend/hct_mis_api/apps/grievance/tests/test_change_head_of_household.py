@@ -12,10 +12,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
     BROTHER_SISTER,
