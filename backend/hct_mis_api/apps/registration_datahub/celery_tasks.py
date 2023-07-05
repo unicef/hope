@@ -100,7 +100,7 @@ def registration_xlsx_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str
+    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -115,6 +115,7 @@ def registration_kobo_import_task(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
                 business_area_id=business_area_id,
+                program_id=program_id
             )
     except Exception as e:
         logger.warning(e)
