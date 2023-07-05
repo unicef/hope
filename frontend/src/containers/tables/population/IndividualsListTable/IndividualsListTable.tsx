@@ -1,16 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
-  IndividualNode,
   AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
+  IndividualNode,
   useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface IndividualsListTableProps {
   filter;
