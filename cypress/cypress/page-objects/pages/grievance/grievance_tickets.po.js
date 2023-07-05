@@ -114,7 +114,7 @@ export default class Grievance extends BaseComponent {
     this.getTicketIdFilter().click();
     this.getTicketID().should("be.visible");
     this.getHouseholdID().should("be.visible");
-    this.getLastName().should("be.visible").type("{esc}");
+    this.pressEscapeFromElement(this.getLastName().should("be.visible"))
   }
 
   checkAllSearchFieldsVisible() {
