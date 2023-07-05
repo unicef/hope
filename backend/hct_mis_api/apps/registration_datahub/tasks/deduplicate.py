@@ -3,6 +3,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from uuid import UUID
 
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
@@ -29,6 +30,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     Individual,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import (
     ImportedIndividualDocument,
@@ -97,8 +99,9 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
 
-    def __init__(self, business_area_slug: str):
+    def __init__(self, business_area_slug: str, program_id: UUID):
         self.business_area: BusinessArea = BusinessArea.objects.get(slug=business_area_slug)
+        self.program: Program = Program.objects.get(id=program_id)
         self.thresholds: Thresholds = Thresholds.from_business_area(self.business_area)
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
@@ -587,9 +590,23 @@ class DeduplicateTask:
             individual_fields,
             self.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE,
         )
-        query_dict["query"]["bool"]["filter"] = [
-            {"term": {"business_area": self.business_area.slug}},
-        ]
+
+        query_dict["query"]["bool"]["filter"] = {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "business_area": self.business_area.slug
+                        }
+                    },
+                    {
+                        "term": {
+                            "program_id": self.program.id
+                        }
+                    }
+                ]
+            }
+        }
 
         document = get_individual_doc(self.business_area.slug)
 
