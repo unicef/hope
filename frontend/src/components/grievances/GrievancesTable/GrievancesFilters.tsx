@@ -1,14 +1,10 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  GrievancesChoiceDataQuery,
-  ProgramNode,
-} from '../../../__generated__/graphql';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
@@ -33,7 +29,6 @@ import { SelectFilter } from '../../core/SelectFilter';
 interface GrievancesFiltersProps {
   filter;
   choicesData: GrievancesChoiceDataQuery;
-  programs: ProgramNode[];
   selectedTab: number;
   setFilter: (filter) => void;
   initialFilter;
@@ -43,7 +38,6 @@ interface GrievancesFiltersProps {
 export const GrievancesFilters = ({
   filter,
   choicesData,
-  programs,
   selectedTab,
   setFilter,
   initialFilter,
@@ -53,7 +47,6 @@ export const GrievancesFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const {
     handleFilterChange,
@@ -345,7 +338,8 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        {!isUserGenerated && (
+        {/* //TODO: show program filter when it is needed */}
+        {/* {!isUserGenerated && (
           <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
@@ -365,7 +359,7 @@ export const GrievancesFilters = ({
               ))}
             </SelectFilter>
           </Grid>
-        )}
+        )} */}
         <Grid item container xs={3}>
           <SelectFilter
             onChange={(e) =>
