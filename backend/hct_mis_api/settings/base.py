@@ -269,45 +269,6 @@ ENV = env("ENV")
 if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = f"{ENV}"
 
-# BACKWARD_COMPATIBILITY SNIPPET
-if "DATABASE_URL" not in os.environ:  # set in pipelines
-    os.environ["DATABASE_URL"] = (
-        f'postgis://{os.getenv("POSTGRES_USER")}'
-        f':{os.getenv("POSTGRES_PASSWORD")}'
-        f'@{os.getenv("POSTGRES_HOST")}:5432/'
-        f'{os.getenv("POSTGRES_DB")}'
-    )
-    if os.getenv("POSTGRES_SSL_MODE", "off") == "on":
-        os.environ["DATABASE_URL"] = os.environ["DATABASE_URL"] + "?sslmode=require"
-
-if "DATABASE_URL_HUB_MIS" not in os.environ:
-    os.environ["DATABASE_URL_HUB_MIS"] = (
-        f'postgis://{os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER")}'
-        f':{os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD")}'
-        f'@{os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST")}:5432/'
-        f'{os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB")}?options=-c search_path=mis'
-    )
-if "DATABASE_URL_HUB_CA" not in os.environ:
-    os.environ["DATABASE_URL_HUB_CA"] = (
-        f'postgis://{os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER")}'
-        f':{os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD")}'
-        f'@{os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST")}:5432/'
-        f'{os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB")}?options=-c search_path=ca'
-    )
-if "DATABASE_URL_HUB_ERP" not in os.environ:
-    os.environ["DATABASE_URL_HUB_ERP"] = (
-        f'postgis://{os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER")}'
-        f':{os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD")}'
-        f'@{os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST")}:5432/'
-        f'{os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB")}?options=-c search_path=erp'
-    )
-if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
-    os.environ["DATABASE_URL_HUB_REGISTRATION"] = (
-        f'postgis://{os.getenv("POSTGRES_REGISTRATION_DATAHUB_USER")}'
-        f':{os.getenv("POSTGRES_REGISTRATION_DATAHUB_PASSWORD")}'
-        f'@{os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST")}:5432/'
-        f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
-    )
 RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
     {
