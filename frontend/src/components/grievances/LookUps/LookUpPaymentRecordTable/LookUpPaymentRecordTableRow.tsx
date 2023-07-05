@@ -82,7 +82,7 @@ export function LookUpPaymentRecordTableRow({
           '-'
         )}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.parent.programmeName}</TableCell>
+      <TableCell align='left'>{paymentRecord.parent.programName}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,

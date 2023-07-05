@@ -28,6 +28,7 @@ class GetProgramId(abc.ABC):
         self.class_name: str = obj.__class__.__name__
 
         if self.class_name == "GrievanceTicket":
+            # TODO: 'programme' removed in next migrations (m2m 'programs')
             self.obj = obj
             self.nested_field = "programme_id"
 

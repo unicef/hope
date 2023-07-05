@@ -1,7 +1,9 @@
 from collections import Counter
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, Union
+from uuid import UUID
 
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -27,7 +29,7 @@ def reassign_roles_on_disable_individual_service(
     individual_to_remove: Individual,
     role_reassign_data: Dict,
     user: "AbstractUser",
-    program: "Program",
+    program_or_qs:  Union["Program", QuerySet["Program"]],
     individual_key: str = "individual",
 ) -> Household:
     roles_to_bulk_update = []
@@ -50,7 +52,7 @@ def reassign_roles_on_disable_individual_service(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
-                getattr(program, "pk", None),
+                getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
                 old_individual,
                 new_individual,
             )
@@ -90,7 +92,7 @@ def reassign_roles_on_disable_individual_service(
 
 
 def reassign_roles_on_update_service(
-    individual: Individual, role_reassign_data: Dict, user: "AbstractUser", program: "Program"
+    individual: Individual, role_reassign_data: Dict, user: "AbstractUser", program_or_qs:  Union["Program", QuerySet["Program"]],
 ) -> None:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -108,7 +110,7 @@ def reassign_roles_on_update_service(
                 Individual.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
-                getattr(program, "pk", None),
+                getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
                 old_individual,
                 new_individual,
             )

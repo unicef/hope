@@ -55,14 +55,14 @@ class IndividualDeleteService(DataChangeService):
             individual_to_remove,
             details.role_reassign_data,
             user,
-            self.grievance_ticket.programme,
+            self.grievance_ticket.programs.all(),
         )
         individual_to_remove.withdraw()
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(self.grievance_ticket.programme, "pk", None),
+            self.grievance_ticket.programs.all(),
             old_individual_to_remove,
             individual_to_remove,
         )
