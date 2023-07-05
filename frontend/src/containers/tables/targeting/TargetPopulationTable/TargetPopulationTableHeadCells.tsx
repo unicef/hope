@@ -32,7 +32,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Num. of households',
+    label: 'Num. of Households',
     id: 'final_list_total_households',
     numeric: false,
     dataCy: 'num-of-households',
@@ -46,7 +46,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Last edited',
+    label: 'Last Edited',
     id: 'updated_at',
     numeric: false,
     dataCy: 'last-edited',

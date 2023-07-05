@@ -16,7 +16,7 @@ export const headCells: HeadCell<CommunicationMessageNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Number of recipients',
+    label: 'Number of Recipients',
     id: 'numberOfRecipients',
     numeric: false,
   },
@@ -28,7 +28,7 @@ export const headCells: HeadCell<CommunicationMessageNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Creation date',
+    label: 'Creation Date',
     id: 'created_at',
     numeric: false,
   },
