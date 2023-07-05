@@ -65,6 +65,7 @@ stages:
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.secret.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\

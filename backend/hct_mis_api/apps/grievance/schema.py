@@ -3,12 +3,14 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.core.files.storage import default_storage
-from django.db.models import Q, QuerySet
+from django.db.models import Case, DateField, F, Q, QuerySet, When
+from django.utils import timezone
 
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
@@ -17,12 +19,18 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    ChoiceObjectInt,
+    FieldAttributeNode,
+    sort_by_attr,
+)
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -32,12 +40,14 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.filters import (
     ExistingGrievanceTicketFilter,
     GrievanceTicketFilter,
     TicketNoteFilter,
 )
 from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -56,11 +66,23 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceDocumentNode(DjangoObjectType):
+    file_path = graphene.String(source="file_path")
+    file_name = graphene.String(source="file_name")
+
+    class Meta:
+        model = GrievanceDocument
+        exclude = ("file",)
+        interfaces = (relay.Node,)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -80,6 +102,12 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     related_tickets = graphene.List(lambda: GrievanceTicketNode)
+    priority = graphene.Int()
+    urgency = graphene.Int()
+    total_days = graphene.String()
+    partner = graphene.Field(PartnerType)
+    programme = graphene.Field(ProgramNode)
+    documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
@@ -140,6 +168,26 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_related_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._related_tickets
+
+    @staticmethod
+    def resolve_priority(grievance_ticket: GrievanceTicket, info: Any) -> int:
+        return grievance_ticket.priority
+
+    @staticmethod
+    def resolve_urgency(grievance_ticket: GrievanceTicket, info: Any) -> int:
+        return grievance_ticket.urgency
+
+    @staticmethod
+    def resolve_partner(grievance_ticket: GrievanceTicket, info: Any) -> Partner:
+        return grievance_ticket.partner
+
+    @staticmethod
+    def resolve_programme(grievance_ticket: GrievanceTicket, info: Any) -> Program:
+        return grievance_ticket.programme
+
+    @staticmethod
+    def resolve_documentation(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet[GrievanceDocument]":
+        return grievance_ticket.support_documents.order_by("-created_at")
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -206,8 +254,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                         pass
             individual_data["flex_fields"] = flex_fields
 
-        documents_to_edit = individual_data.get("documents_to_edit")
-        if documents_to_edit:
+        if documents_to_edit := individual_data.get("documents_to_edit"):
             for index, document in enumerate(documents_to_edit):
                 previous_value = document.get("previous_value", {})
                 if previous_value and previous_value.get("photo"):
@@ -222,8 +269,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                     documents_to_edit[index]["value"] = current_value
             individual_data["documents_to_edit"] = documents_to_edit
 
-        documents = individual_data.get("documents")
-        if documents:
+        if documents := individual_data.get("documents"):
             for index, document in enumerate(documents):
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
@@ -260,8 +306,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
                         pass
             individual_data["flex_fields"] = flex_fields
 
-        documents = individual_data.get("documents")
-        if documents:
+        if documents := individual_data.get("documents"):
             for index, document in enumerate(documents):
                 if document and document["photo"]:
                     document["photoraw"] = document["photo"]
@@ -442,7 +487,10 @@ class Query(graphene.ObjectType):
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_system_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
+    grievance_ticket_priority_choices = graphene.List(ChoiceObjectInt)
+    grievance_ticket_urgency_choices = graphene.List(ChoiceObjectInt)
 
     def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
         queryset = GrievanceTicket.objects.filter(ignored=False).select_related("admin2", "assigned_to", "created_by")
@@ -456,7 +504,20 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        return queryset
+        return (
+            queryset.select_related("assigned_to", "created_by")
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),  # type: ignore
+                    output_field=DateField(),
+                )
+            )
+            .annotate(total_days=F("total__day"))
+        )
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
@@ -465,7 +526,10 @@ class Query(graphene.ObjectType):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
+        return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
+
+    def resolve_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
 
     def resolve_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
@@ -473,6 +537,12 @@ class Query(graphene.ObjectType):
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
         ]
+
+    def resolve_grievance_ticket_priority_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(PRIORITY_CHOICES)
+
+    def resolve_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(URGENCY_CHOICES)
 
     def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
         business_area_slug = info.context.headers.get("Business-Area")

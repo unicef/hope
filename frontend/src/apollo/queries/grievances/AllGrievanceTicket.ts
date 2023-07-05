@@ -14,7 +14,7 @@ export const AllGrievanceTicket = gql`
     $status: [String]
     $fsp: String
     $createdAtRange: String
-    $admin: [ID]
+    $admin: ID
     $orderBy: String
     $registrationDataImport: ID
     $assignedTo: ID
@@ -22,6 +22,10 @@ export const AllGrievanceTicket = gql`
     $scoreMin: String
     $scoreMax: String
     $household: String
+    $grievanceType: String
+    $grievanceStatus: String
+    $priority: String
+    $urgency: String
     $preferredLanguage: String
   ) {
     allGrievanceTicket(
@@ -38,13 +42,17 @@ export const AllGrievanceTicket = gql`
       fsp: $fsp
       createdAtRange: $createdAtRange
       orderBy: $orderBy
-      admin: $admin
+      admin2: $admin
       registrationDataImport: $registrationDataImport
       assignedTo: $assignedTo
       cashPlan: $cashPlan
       scoreMin: $scoreMin
       scoreMax: $scoreMax
       household: $household
+      grievanceType: $grievanceType
+      grievanceStatus: $grievanceStatus
+      priority: $priority
+      urgency: $urgency
       preferredLanguage: $preferredLanguage
     ) {
       totalCount
@@ -79,6 +87,10 @@ export const AllGrievanceTicket = gql`
           relatedTickets {
             id
           }
+          priority
+          urgency
+          updatedAt
+          totalDays
         }
       }
     }

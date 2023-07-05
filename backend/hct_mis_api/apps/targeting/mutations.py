@@ -26,6 +26,16 @@ from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_tas
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
+from hct_mis_api.apps.targeting.celery_tasks import (
+    target_population_apply_steficon,
+    target_population_full_rebuild,
+    target_population_rebuild_stats,
+)
+from hct_mis_api.apps.targeting.inputs import (
+    CopyTargetPopulationInput,
+    CreateTargetPopulationInput,
+    UpdateTargetPopulationInput,
+)
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -46,17 +56,6 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-
-from .celery_tasks import (
-    target_population_apply_steficon,
-    target_population_full_rebuild,
-    target_population_rebuild_stats,
-)
-from .inputs import (
-    CopyTargetPopulationInput,
-    CreateTargetPopulationInput,
-    UpdateTargetPopulationInput,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +91,10 @@ class ValidatedMutation(PermissionMutation):
 
 
 def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
-    targeting_criteria = TargetingCriteria()
+    rules = targeting_criteria_input.pop("rules", [])
+    targeting_criteria = TargetingCriteria(**targeting_criteria_input)
     targeting_criteria.save()
-    for rule_input in targeting_criteria_input.get("rules"):
+    for rule_input in rules:
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
         for filter_input in rule_input.get("filters", []):

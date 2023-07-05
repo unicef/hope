@@ -4,34 +4,56 @@ import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
-import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleFilterChange } from '../../../../utils/utils';
 import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
+import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
+import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
+import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
+import { SearchTextField } from '../../../../components/core/SearchTextField';
+import { SelectFilter } from '../../../../components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 interface PaymentFiltersProps {
-  onFilterChange;
   filter;
   programs: ProgramNode[];
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 export const PaymentFilters = ({
-  onFilterChange,
   filter,
   programs,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: PaymentFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   const {
     data: statusChoicesData,
@@ -44,20 +66,24 @@ export const PaymentFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             value={filter.search}
+            data-cy='filter-search'
             label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationStatus', e.target.value)
             }
             label='Status'
             multiple
+            fullWidth
+            data-cy='filter-status'
             value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
@@ -69,20 +95,24 @@ export const PaymentFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             value={filter.serviceProvider}
+            data-cy='filter-fsp'
             label='FSP'
+            fullWidth
             onChange={(e) =>
               handleFilterChange('serviceProvider', e.target.value)
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
             label='Modality'
+            data-cy='filter-Modality'
             value={filter.deliveryType}
+            fullWidth
             icon={<MonetizationOnIcon />}
           >
             <MenuItem value=''>
@@ -95,9 +125,11 @@ export const PaymentFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             label='Start Date'
+            fullWidth
+            data-cy='filter-start-date'
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -109,9 +141,11 @@ export const PaymentFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             label='End Date'
+            fullWidth
+            data-cy='filter-end-date'
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -123,10 +157,12 @@ export const PaymentFilters = ({
             value={filter.endDate}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label='Programme'
+            fullWidth
+            data-cy='filter-program'
             value={filter.program}
             icon={<FlashOnIcon />}
           >
@@ -141,6 +177,10 @@ export const PaymentFilters = ({
           </SelectFilter>
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

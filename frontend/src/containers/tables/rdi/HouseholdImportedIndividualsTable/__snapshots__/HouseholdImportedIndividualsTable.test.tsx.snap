@@ -32,6 +32,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-15"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -45,6 +46,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Individual ID
                 </span>
@@ -55,6 +57,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Individual
                 </span>
@@ -65,6 +68,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Role
                 </span>
@@ -75,6 +79,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Relationship to HoH
                 </span>
@@ -85,6 +90,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Date of Birth
                 </span>
@@ -95,6 +101,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Gender
                 </span>
@@ -105,6 +112,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Dedupe within Batch
                 </span>
@@ -115,6 +123,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Dedupe against Population
                 </span>
@@ -132,7 +141,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-bxivhb dmjImO"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -179,7 +188,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-bxivhb dmjImO"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -226,7 +235,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-bxivhb dmjImO"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
@@ -270,6 +279,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
@@ -371,6 +381,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
           aria-label="enhanced table"
           aria-labelledby="tableTitle"
           class="MuiTable-root makeStyles-table-3"
+          data-cy="table-title"
         >
           <thead
             class="MuiTableHead-root"
@@ -384,6 +395,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Individual ID
                 </span>
@@ -394,6 +406,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Individual
                 </span>
@@ -404,6 +417,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Role
                 </span>
@@ -414,6 +428,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Relationship to HoH
                 </span>
@@ -424,6 +439,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Date of Birth
                 </span>
@@ -434,6 +450,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Gender
                 </span>
@@ -444,6 +461,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Dedupe within Batch
                 </span>
@@ -454,6 +472,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               >
                 <span
                   class="sc-htpNat hFMTQJ"
+                  data-cy="table-label"
                 >
                   Dedupe against Population
                 </span>
@@ -471,7 +490,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-bxivhb dmjImO"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -523,7 +542,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-bxivhb dmjImO"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -575,7 +594,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-bxivhb dmjImO"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
@@ -624,6 +643,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
       </div>
       <div
         class="MuiTablePagination-root"
+        data-cy="table-pagination"
       >
         <div
           class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"

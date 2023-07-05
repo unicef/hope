@@ -63,7 +63,7 @@ def create_defaults() -> None:
         Parametrizer.objects.update_or_create(
             name=params["name"], code=code, defaults={"system": True, "value": params["value"]()}
         )
-    from .models import Query, Report
+    from hct_mis_api.apps.power_query.models import Query, Report
 
     q, __ = Query.objects.update_or_create(
         name="Households by BusinessArea",

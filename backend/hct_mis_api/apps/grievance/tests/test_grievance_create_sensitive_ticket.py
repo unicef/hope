@@ -77,6 +77,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             business_area=cls.business_area,
             parent=cash_plan,
         )
+        cls.maxDiff = None
 
     @parameterized.expand(
         [
@@ -105,7 +106,6 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -145,7 +145,6 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                         "grievanceComplaintTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -304,8 +303,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                 "extras": {
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode")
                         }
                     }
                 },
@@ -343,8 +341,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                 "extras": {
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
-                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+                            "household": self.id_to_base64(self.household.id, "HouseholdNode")
                         }
                     }
                 },

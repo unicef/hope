@@ -57,7 +57,7 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
         "form": ClearCacheForm(),
     }
 
-    if not getattr(settings, "IS_TEST", False):
+    if getattr(settings, "CACHE_ENABLED", False):
         # skip name started with numbers
         ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
 

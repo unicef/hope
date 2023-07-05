@@ -29,10 +29,14 @@ export const IndividualsListTable = ({
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
     sex: [filter.sex],
-    search: filter.text,
-    adminArea: filter.adminArea,
+    search: filter.search,
+    admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,
+    lastRegistrationDate: JSON.stringify({
+      min: filter.lastRegistrationDateMin,
+      max: filter.lastRegistrationDateMax,
+    }),
   };
 
   return (

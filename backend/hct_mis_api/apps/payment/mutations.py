@@ -1,6 +1,5 @@
 import io
 import logging
-from base64 import b64decode
 from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -27,9 +26,12 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
+    payment_plan_exclude_beneficiaries,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
+    AssignFspToDeliveryMechanismInput,
+    ChooseDeliveryMechanismsForPaymentPlanInput,
     CreatePaymentPlanInput,
     CreatePaymentVerificationInput,
     EditPaymentVerificationInput,
@@ -64,7 +66,11 @@ from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.payment.utils import (
+    calculate_counts,
+    from_received_to_status,
+    get_payment_plan_object,
+)
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -96,11 +102,8 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
-        cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
-        node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")  # type: ignore # FIXME
-
-        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
-            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
+            input["cash_or_payment_plan_id"]
         )
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
@@ -324,8 +327,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
-    # TODO I don't think this is being used now, add permission if in use
+class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
     payment_verification = graphene.Field(PaymentVerificationNode)
 
     class Arguments:
@@ -354,6 +356,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
@@ -816,11 +819,6 @@ class DeletePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    delivery_mechanisms = graphene.List(graphene.String, required=True)
-
-
 class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -913,17 +911,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
-    fsp_id = graphene.ID(required=True)
-    delivery_mechanism = graphene.String(required=True)
-    order = graphene.Int(required=True)
-
-
-class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
-
-
 class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -1000,11 +987,6 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
             msg = "Import in progress"
-            logger.error(msg)
-            raise GraphQLError(msg)
-
-        if payment_plan.is_follow_up:
-            msg = "Entitlements of follow-up payment plan cannot be changed"
             logger.error(msg)
             raise GraphQLError(msg)
 
@@ -1110,11 +1092,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.is_follow_up:
-            msg = "Entitlements of follow-up payment plan cannot be changed"
-            logger.error(msg)
-            raise GraphQLError(msg)
-
         old_payment_plan = copy_model_object(payment_plan)
 
         engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
@@ -1161,34 +1138,16 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, payment_plan.business_area)
 
-        if not payment_plan.is_follow_up:
-            raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
+        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
+            raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
-        if payment_plan.status != PaymentPlan.Status.LOCKED:
-            raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
+        payment_plan_exclude_beneficiaries.delay(
+            decode_id_string(payment_plan_id), excluded_households_ids, exclusion_reason
+        )
 
-        if payment_plan.excluded_households_ids:
-            raise GraphQLError("This Payment Plan already contains excluded households")
-
-        if not payment_plan.eligible_payments.exists():
-            raise GraphQLError(
-                "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
-            )
-
-        for hh_unicef_id in excluded_households_ids:
-            if not payment_plan.eligible_payments.filter(household__unicef_id=hh_unicef_id).exists():
-                raise GraphQLError("These Households are not included in this Payment Plan")
-
-        payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
-
-        payments_for_exclude.update(excluded=True)
-
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
-
-        if exclusion_reason:
-            payment_plan.exclusion_reason = exclusion_reason
-            payment_plan.save(update_fields=["exclusion_reason"])
+        payment_plan.background_action_status_excluding_beneficiaries()
+        payment_plan.exclude_household_error = ""
+        payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
 
         payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)
