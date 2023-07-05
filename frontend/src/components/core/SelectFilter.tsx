@@ -33,6 +33,9 @@ export const SelectFilter = ({
           onChange={onChange}
           variant='outlined'
           label={label}
+          MenuProps={{
+            getContentAnchorEl: null,
+          }}
           InputProps={
             icon
               ? {
