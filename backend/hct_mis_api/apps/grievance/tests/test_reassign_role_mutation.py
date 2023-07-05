@@ -13,10 +13,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 

@@ -13,9 +13,10 @@ from hct_mis_api.apps.household.models import (
     MALE,
     ROLE_PRIMARY,
     Household,
+    HouseholdCollection,
     Individual,
     IndividualCollection,
-    IndividualRoleInHousehold, HouseholdCollection,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program

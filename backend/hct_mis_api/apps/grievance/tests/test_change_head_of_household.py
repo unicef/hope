@@ -13,7 +13,6 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdCollectionFactory,
     HouseholdFactory,
     IndividualFactory,
 )
