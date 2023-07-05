@@ -37,11 +37,16 @@ export const LookUpHouseholdIndividualDisplay = ({
           <Box display='flex' flexDirection='column'>
             <span>
               {t('Household ID')}:
-              <BlueText> {values?.selectedHousehold?.unicefId || '-'}</BlueText>
+              <BlueText data-cy='selected-household-id'>
+                {' '}
+                {values?.selectedHousehold?.unicefId || '-'}
+              </BlueText>
             </span>
             <span>
               {t('Individual ID')}:
-              <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
+              <BlueText data-cy='selected-individual-id'>
+                {values?.selectedIndividual?.unicefId || '-'}
+              </BlueText>
             </span>
           </Box>
         </Grid>
@@ -55,6 +60,7 @@ export const LookUpHouseholdIndividualDisplay = ({
                       color='inherit'
                       fontSize='small'
                       onClick={() => setLookUpDialogOpen(true)}
+                      data-cy='button-edit'
                     />
                   </LightGrey>
                 </Grid>
@@ -64,6 +70,7 @@ export const LookUpHouseholdIndividualDisplay = ({
                       color='inherit'
                       fontSize='small'
                       onClick={() => handleRemove()}
+                      data-cy='button-remove'
                     />
                   </DarkGrey>
                 </Grid>

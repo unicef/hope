@@ -816,5 +816,9 @@
   "Households can only be excluded from a Payment Plan in status open or locked": "Households can only be excluded from a Payment Plan in status open or locked",
   "Follow-up Payment Plan Edited": "Follow-up Payment Plan Edited",
   "Households exclusion started": "Households exclusion started",
-  "Programme Users": "Programme Users"
+  "Programme Users": "Programme Users",
+  "Surveys List": "Surveys List",
+  "Feedbacks List": "Feedbacks List",
+  "Messages List": "Messages List",
+  "Programme Duplicated": "Programme Duplicated"
 }

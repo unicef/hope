@@ -107,6 +107,7 @@ export const GrievancesFilters = ({
               label={undefined}
               value={filter.searchType}
               borderRadius='0px 4px 4px 0px'
+              data-cy='filters-search-type'
               fullWidth
             >
               {Object.keys(GrievanceSearchTypes).map((key) => (
@@ -126,6 +127,7 @@ export const GrievancesFilters = ({
             label={t('Status')}
             value={filter.status}
             fullWidth
+            data-cy='filters-status'
           >
             <MenuItem value=''>
               <em>None</em>
@@ -144,6 +146,7 @@ export const GrievancesFilters = ({
             icon={<AccountBalance style={{ color: '#5f6368' }} />}
             fullWidth
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
+            data-cy='filters-fsp'
           />
         </Grid>
         <Grid item xs={3}>
@@ -160,6 +163,7 @@ export const GrievancesFilters = ({
             }
             value={filter.createdAtRangeMin}
             fullWidth
+            data-cy='filters-creation-date-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -175,6 +179,7 @@ export const GrievancesFilters = ({
             }
             value={filter.createdAtRangeMax}
             fullWidth
+            data-cy='filters-creation-date-to'
           />
         </Grid>
         <Grid item xs={3}>
@@ -183,6 +188,7 @@ export const GrievancesFilters = ({
             label={t('Category')}
             value={filter.category}
             fullWidth
+            data-cy='filters-category'
           >
             <MenuItem value=''>
               <em>None</em>
@@ -230,6 +236,7 @@ export const GrievancesFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filters-admin-level'
           />
         </Grid>
         <Grid item xs={3}>
@@ -241,6 +248,7 @@ export const GrievancesFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filters-assignee'
           />
         </Grid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
@@ -251,6 +259,7 @@ export const GrievancesFilters = ({
                 value={filter.scoreMin}
                 placeholder='From'
                 onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
+                data-cy='filters-similarity-score-from'
                 fullWidth
               />
             </Grid>
@@ -259,6 +268,7 @@ export const GrievancesFilters = ({
                 value={filter.scoreMax}
                 placeholder='To'
                 onChange={(e) => handleFilterChange('scoreMax', e.target.value)}
+                data-cy='filters-similarity-score-to'
                 fullWidth
               />
             </Grid>
@@ -273,6 +283,7 @@ export const GrievancesFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
+            dataCy='filters-registration-data-import'
           />
         </Grid>
         <Grid item xs={3}>
@@ -284,6 +295,7 @@ export const GrievancesFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
+            dataCy='filters-preferred-language'
           />
         </Grid>
         <Grid item container xs={3}>
@@ -291,6 +303,7 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('priority', e.target.value)}
             label={t('Priority')}
             value={filter.priority}
+            data-cy='filters-priority'
             fullWidth
           >
             <MenuItem value=''>
@@ -310,6 +323,7 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
             label={t('Urgency')}
             value={filter.urgency}
+            data-cy='filters-urgency'
             fullWidth
           >
             <MenuItem value=''>
@@ -324,6 +338,28 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
+        {/* //TODO: show program filter when it is needed */}
+        {/* {!isUserGenerated && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              icon={<FlashOnIcon />}
+              fullWidth
+              data-cy='hh-filters-program'
+            >
+              <MenuItem value=''>
+                <em>{t('None')}</em>
+              </MenuItem>
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )} */}
         <Grid item container xs={3}>
           <SelectFilter
             onChange={(e) =>
@@ -332,6 +368,7 @@ export const GrievancesFilters = ({
             label={undefined}
             value={filter.grievanceStatus}
             fullWidth
+            data-cy='filters-active-tickets'
           >
             <MenuItem value={GrievanceStatuses.Active}>
               {t('Active Tickets')}

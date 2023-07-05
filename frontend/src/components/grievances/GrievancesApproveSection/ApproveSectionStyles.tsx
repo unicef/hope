@@ -6,6 +6,7 @@ export const ApproveBox = styled(Paper)`
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
+  overflow-x: scroll;
 `;
 
 export const StyledTable = styled(Table)`

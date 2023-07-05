@@ -8,6 +8,7 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
@@ -16,10 +17,9 @@ import {
   GrievanceTypes,
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const GrievancesTablePage = (): React.ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
@@ -46,6 +46,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     priority: '',
     urgency: '',
     preferredLanguage: '',
+    program: '',
   };
 
   const [selectedTab, setSelectedTab] = useState(
@@ -70,17 +71,18 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const systemGeneratedPath = `/${baseUrl}/grievance/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
-    <Tab key={el} label={el} />
+    <Tab data-cy={`tab-${el}`} key={el} label={el} />
   ));
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
         setSelectedTab(newValue);
         setFilter({
           ...filter,
           grievanceType: GrievanceTypes[newValue],
           category: '',
+          program: '',
         });
         history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
@@ -112,12 +114,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
         selectedTab={selectedTab}
       />
-      <GrievancesTable
-        filter={appliedFilter}
-        baseUrl={baseUrl}
-        businessArea={businessArea}
-        selectedTab={selectedTab}
-      />
+      <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
     </>
   );
 };

@@ -10397,7 +10397,8 @@ export type AllLogEntriesQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>,
-  userId?: Maybe<Scalars['String']>
+  userId?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -18823,8 +18824,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String, $userId: String) {
-  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module, userId: $userId) {
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String, $userId: String, $programId: String) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module, userId: $userId, programId: $programId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -18900,6 +18901,7 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      search: // value for 'search'
  *      module: // value for 'module'
  *      userId: // value for 'userId'
+ *      programId: // value for 'programId'
  *   },
  * });
  */

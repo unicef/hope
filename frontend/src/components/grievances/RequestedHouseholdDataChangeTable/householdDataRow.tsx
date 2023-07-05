@@ -52,6 +52,7 @@ export const householdDataRow = (
       <TableCell>
         {isEdit ? (
           <Checkbox
+            data-cy='checkbox-household-data'
             onChange={(event) =>
               handleSelectBioData(fieldName, event.target.checked)
             }

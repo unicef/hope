@@ -9,6 +9,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useTranslation } from 'react-i18next';
 
 interface CommunicationTableProps {
   filter;
@@ -20,6 +21,7 @@ export const CommunicationTable = ({
   canViewDetails,
 }: CommunicationTableProps): ReactElement => {
   const { programId } = useBaseUrl();
+  const { t } = useTranslation();
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
@@ -34,6 +36,7 @@ export const CommunicationTable = ({
         CommunicationMessageNode,
         AllAccountabilityCommunicationMessagesQueryVariables
       >
+        title={t('Messages List')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllAccountabilityCommunicationMessagesQuery}
