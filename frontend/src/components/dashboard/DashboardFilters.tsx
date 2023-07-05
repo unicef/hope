@@ -1,24 +1,25 @@
 import { Grid, MenuItem, Paper } from '@material-ui/core';
-import { useHistory, useLocation } from 'react-router-dom';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { createHandleFilterChange } from '../../utils/utils';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
+import { createHandleApplyFilterChange } from '../../utils/utils';
+import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;
+  flex-direction: column;
   flex: 1;
   width: 100%;
   background-color: #fff;
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
   align-items: center;
   && > div {
     margin: 5px;
@@ -26,13 +27,19 @@ const Container = styled(Paper)`
 `;
 
 interface DashboardFiltersProps {
-  onFilterChange;
   filter;
+  setFilter;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter;
 }
 
 export const DashboardFilters = ({
-  onFilterChange,
   filter,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: DashboardFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -47,21 +54,37 @@ export const DashboardFilters = ({
   const allPrograms = data?.allPrograms?.edges || [];
   const programs = allPrograms.map((edge) => edge.node);
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
+
   return (
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>None</em>
@@ -78,11 +101,18 @@ export const DashboardFilters = ({
             fullWidth
             name='administrativeArea'
             value={filter.administrativeArea}
-            onFilterChange={onFilterChange}
             filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
           />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        applyHandler={handleApplyFilter}
+        clearHandler={handleClearFilter}
+      />
     </Container>
   );
 };

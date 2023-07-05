@@ -1,20 +1,26 @@
+import { Assessment } from '@material-ui/icons';
 import Assignment from '@material-ui/icons/Assignment';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
+import BallotIcon from '@material-ui/icons/Ballot';
 import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
+import ForumIcon from '@material-ui/icons/Forum';
+import InfoIcon from '@material-ui/icons/Info';
+import ListIcon from '@material-ui/icons/List';
 import NewReleases from '@material-ui/icons/NewReleases';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import MessageIcon from '@material-ui/icons/Message';
 import PaymentIcon from '@material-ui/icons/Payment';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
 import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
+import RateReviewIcon from '@material-ui/icons/RateReview';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
-import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
 
@@ -103,23 +109,66 @@ export const menuItems = [
     ],
   },
   {
-    name: 'Grievance and Feedback',
-    href: '/grievance-and-feedback',
-    selectedRegexp: /^\/grievance-and-feedback.*$/,
+    name: 'Grievance',
+    href: '/grievance/tickets',
+    selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
     icon: <Feedback />,
-    permissions: [
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+    collapsable: true,
+    permissionModule: 'GRIEVANCES',
+    secondaryActions: [
+      {
+        name: 'Grievance Tickets',
+        href: '/grievance/tickets/user-generated',
+        selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
+        icon: <ListIcon />,
+        permissionModule: 'GRIEVANCES',
+      },
+      {
+        name: 'Grievance Dashboard',
+        href: '/grievance/dashboard',
+        selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
+        icon: <Assessment />,
+        permissionModule: 'GRIEVANCES',
+      },
+      {
+        name: 'Feedback',
+        href: '/accountability/feedback',
+        selectedRegexp: /^\/accountability\/feedback.*$/,
+        icon: <RateReviewIcon />,
+        permissionModule: 'GRIEVANCES',
+      },
+    ],
+  },
+  {
+    name: 'Accountability',
+    href: '/accountability/communication',
+    selectedRegexp: /^\/accountability\/communication.*$/,
+    icon: <ForumIcon />,
+    collapsable: true,
+    permissionModule: 'ACCOUNTABILITY',
+    flag: 'isAccountabilityApplicable',
+    secondaryActions: [
+      {
+        name: 'Communication',
+        href: '/accountability/communication',
+        selectedRegexp: /^\/accountability\/communication.*$/,
+        icon: <MessageIcon />,
+        permissionModule: 'COMMUNICATION_MESSAGE',
+      },
+      {
+        name: 'Feedback',
+        href: '/accountability/feedback',
+        selectedRegexp: /^\/accountability\/feedback.*$/,
+        icon: <RateReviewIcon />,
+        permissionModule: 'FEEDBACK',
+      },
+      {
+        name: 'Surveys',
+        href: '/accountability/surveys',
+        selectedRegexp: /^\/accountability\/surveys.*$/,
+        icon: <BallotIcon />,
+        permissionModule: 'SURVEY',
+      },
     ],
   },
   {

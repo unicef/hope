@@ -31,14 +31,20 @@ x-django-envs: &django_envs
     - SECURE_REFERRER_POLICY=same-origin
     - SECURE_HSTS_SECONDS=0
 
+volumes:
+  backend-data:
+
 services:
   cypress:
     image: ${CYPRESS_IMAGE}
     command: "ci-test"
     depends_on:
       - proxy
+      - celery_worker
     volumes:
       - ../cypress-results:/code/cypress/results
+      - ../cypress-reports:/code/cypress/reports
+
 
   proxy:
     image: unicef/hct-mis-proxy
@@ -63,6 +69,8 @@ services:
     <<: *django_envs
     image: ${BACKEND_IMAGE}
     command: "cy"
+    volumes:
+      - backend-data:/data
     depends_on:
       - db
       - redis
@@ -97,6 +105,8 @@ services:
     image: ${BACKEND_IMAGE}
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    volumes:
+      - backend-data:/data
     depends_on:
       - backend
 

@@ -238,7 +238,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
-    # todo move to StorageFile
+    # TODO: move to StorageFile
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
@@ -334,10 +334,21 @@ class HouseholdSelection(TimeStampedUUIDModel):
 
 class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     """
-    This is a set of ORed Rules. These are either applied for a candidate list
-    (against Golden Record) or for a final list (against the approved candidate
-    list).
+    Class with filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
+    (against Golden Record) or for a final list (against the approved candidate list).
+    If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
     """
+
+    flag_exclude_if_active_adjudication_ticket = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Exclude households with individuals (members or collectors) that have active adjudication ticket(s)."
+        ),
+    )
+    flag_exclude_if_on_sanction_list = models.BooleanField(
+        default=False,
+        help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
+    )
 
     def get_rules(self) -> "QuerySet":
         return self.rules.all()

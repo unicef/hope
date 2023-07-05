@@ -17,6 +17,7 @@ export interface ConfirmationDialogOptions {
   content?: string | React.ReactElement;
   continueText?: string;
   extraContent?: string;
+  warningContent?: string | null;
   disabled?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   content,
   continueText,
   extraContent,
+  warningContent,
   onSubmit,
   onClose,
   disabled = false,
@@ -45,19 +47,34 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
       </DialogTitleWrapper>
       <DialogContent>
         {extraContent ? (
-          <Typography variant='body2' style={{ paddingBottom: '16px' }}>
+          <Typography variant='body2' style={{ marginBottom: '16px' }}>
             {extraContent}
           </Typography>
         ) : null}
-        {typeof content !== 'string' ? (
-          content
-        ) : (
-          <Typography variant='body2'>{content}</Typography>
-        )}
+        <Typography
+          variant='body2'
+          style={{ marginBottom: warningContent ? '16px' : 'inherit' }}
+        >
+          {content}
+        </Typography>
+        {warningContent ? (
+          <Typography
+            color='primary'
+            variant='body2'
+            style={{ fontWeight: 'bold' }}
+          >
+            {warningContent}
+          </Typography>
+        ) : null}
       </DialogContent>
       <DialogFooter>
         <DialogActions>
-          <Button color='primary' onClick={onClose} autoFocus>
+          <Button
+            data-cy='button-cancel'
+            color='primary'
+            onClick={onClose}
+            autoFocus
+          >
             {t('Cancel')}
           </Button>
           <Button
@@ -65,6 +82,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             color='primary'
             disabled={disabled}
             onClick={onSubmit}
+            data-cy='button-confirm'
           >
             {continueText || t('Continue')}
           </Button>

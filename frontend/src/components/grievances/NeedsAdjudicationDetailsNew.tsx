@@ -204,12 +204,13 @@ export function NeedsAdjudicationDetailsNew({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                  pathname: `/${businessArea}/grievance/new-ticket`,
                   state: { linkedTicketId: ticket.id },
                 })
               }
               variant='outlined'
               color='primary'
+              data-cy='button-create-linked-ticket'
             >
               {t('Create Linked Ticket')}
             </Button>
@@ -217,6 +218,7 @@ export function NeedsAdjudicationDetailsNew({
               <Button
                 variant='outlined'
                 color='primary'
+                data-cy='button-edit'
                 disabled={
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
@@ -228,6 +230,7 @@ export function NeedsAdjudicationDetailsNew({
             {isEditable && canApprove && (
               <Button
                 disabled={isApproveDisabled()}
+                data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
                     content: getConfirmationText(),
@@ -255,17 +258,39 @@ export function NeedsAdjudicationDetailsNew({
         <TableHead>
           <TableRow>
             <TableCell align='left' />
-            <TableCell align='left'>{t('Individual ID')}</TableCell>
-            <TableCell align='left'>{t('Household ID')}</TableCell>
-            <TableCell align='left'>{t('Full Name')}</TableCell>
-            <TableCell align='left'>{t('Gender')}</TableCell>
-            <TableCell align='left'>{t('Date of Birth')}</TableCell>
-            <TableCell align='left'>{t('Similarity Score')}</TableCell>
-            <TableCell align='left'>{t('Last Registration Date')}</TableCell>
-            <TableCell align='left'>{t('Doc Type')}</TableCell>
-            <TableCell align='left'>{t('Doc #')}</TableCell>
-            <TableCell align='left'>{t('Admin Level 2')}</TableCell>
-            <TableCell align='left'>{t('Village')}</TableCell>
+            <TableCell data-cy='table-cell-individual-id' align='left'>
+              {t('Individual ID')}
+            </TableCell>
+            <TableCell data-cy='table-cell-household-id' align='left'>
+              {t('Household ID')}
+            </TableCell>
+            <TableCell data-cy='table-cell-full-name' align='left'>
+              {t('Full Name')}
+            </TableCell>
+            <TableCell data-cy='table-cell-gender' align='left'>
+              {t('Gender')}
+            </TableCell>
+            <TableCell data-cy='table-cell-date-of-birth' align='left'>
+              {t('Date of Birth')}
+            </TableCell>
+            <TableCell data-cy='table-cell-similarity-score' align='left'>
+              {t('Similarity Score')}
+            </TableCell>
+            <TableCell data-cy='table-cell-last-registration-date' align='left'>
+              {t('Last Registration Date')}
+            </TableCell>
+            <TableCell data-cy='table-cell-doc-type' align='left'>
+              {t('Doc Type')}
+            </TableCell>
+            <TableCell data-cy='table-cell-doc-number' align='left'>
+              {t('Doc #')}
+            </TableCell>
+            <TableCell data-cy='table-cell-admin-level2' align='left'>
+              {t('Admin Level 2')}
+            </TableCell>
+            <TableCell data-cy='table-cell-village' align='left'>
+              {t('Village')}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -273,6 +298,7 @@ export function NeedsAdjudicationDetailsNew({
             <TableCell align='left'>
               <Checkbox
                 color='primary'
+                data-cy='checkbox-individual'
                 disabled={
                   !isEditable ||
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL

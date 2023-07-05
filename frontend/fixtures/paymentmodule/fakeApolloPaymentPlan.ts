@@ -18,6 +18,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   sourcePaymentPlan: null,
   excludedHouseholds: null,
   exclusionReason: '',
+  excludeHouseholdError: null,
   followUps: null,
   backgroundActionStatus: null,
   canCreatePaymentVerificationPlan: false,

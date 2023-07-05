@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { ConfirmationDialog } from './ConfirmationDialog';
 
+
 const ConfirmationDialogContext = createContext<
   (options: ConfirmationDialogOptions) => Promise<void>
 >(Promise.reject.bind(Promise));
@@ -17,8 +18,10 @@ export interface ConfirmationDialogOptions {
   content?: string | React.ReactElement;
   continueText?: string;
   extraContent?: string;
+  warningContent?: string | null;
   disabled?: boolean;
 }
+
 export const useConfirmation = (): ((
   options: ConfirmationDialogOptions,
 ) => Promise<void>) => useContext(ConfirmationDialogContext);

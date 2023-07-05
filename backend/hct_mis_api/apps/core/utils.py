@@ -448,7 +448,7 @@ def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[A
     return None
 
 
-def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id: Optional[str], model: Type, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -815,7 +815,7 @@ def clear_cache_for_dashboard_totals() -> None:
         "resolve_chart_total_transferred_by_month",
     )
     # we need skip remove cache for test and because LocMemCache don't have .keys()
-    if not getattr(settings, "IS_TEST", False):
+    if getattr(settings, "CACHE_ENABLED", False):
         all_cache_keys = cache.keys("*")
         for k in [key for key in all_cache_keys if key.startswith(keys)]:
             cache.delete(k)

@@ -34,10 +34,12 @@ export const householdDataRow = (
     previousValue: string;
     approveStatus: boolean;
   };
+
   const previousValue =
-    fieldName === 'country' || fieldName === 'countryOrigin'
+    fieldName === 'country' || fieldName === 'country_origin'
       ? countriesDict[valueDetails.previousValue]
       : valueDetails.previousValue;
+
   const householdValue = field.isFlexField
     ? ticket.householdDataUpdateTicketDetails.household.flexFields[fieldName]
     : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
@@ -50,6 +52,7 @@ export const householdDataRow = (
       <TableCell>
         {isEdit ? (
           <Checkbox
+            data-cy='checkbox-household-data'
             onChange={(event) =>
               handleSelectBioData(fieldName, event.target.checked)
             }
@@ -60,7 +63,7 @@ export const householdDataRow = (
           />
         ) : (
           isItemSelected && (
-            <GreenIcon>
+            <GreenIcon data-cy='green-tick'>
               <CheckCircleIcon />
             </GreenIcon>
           )

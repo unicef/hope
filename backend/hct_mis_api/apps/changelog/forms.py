@@ -1,6 +1,6 @@
 from django import forms
 
-from . import models
+from hct_mis_api.apps.changelog import models
 
 
 class ChangelogForm(forms.ModelForm):

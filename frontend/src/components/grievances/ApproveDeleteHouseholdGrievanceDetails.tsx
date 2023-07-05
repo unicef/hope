@@ -123,11 +123,15 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
         <>
           <Box p={2}>
             {type === 'edit' ? (
-              <IconButton onClick={() => setDialogOpen(true)}>
+              <IconButton
+                data-cy='edit-button'
+                onClick={() => setDialogOpen(true)}
+              >
                 <EditIcon />
               </IconButton>
             ) : (
               <Button
+                data-cy='button-approve'
                 onClick={() => setDialogOpen(true)}
                 variant={approveStatus ? 'outlined' : 'contained'}
                 color='primary'

@@ -49,19 +49,20 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
+  const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlanData.paymentPlan.targetPopulation.id,
-    startDate: paymentPlanData.paymentPlan.startDate,
-    endDate: paymentPlanData.paymentPlan.endDate,
+    targetingId: paymentPlan.targetPopulation.id,
+    startDate: paymentPlan.startDate,
+    endDate: paymentPlan.endDate,
     currency: {
-      name: paymentPlanData.paymentPlan.currencyName,
-      value: paymentPlanData.paymentPlan.currency,
+      name: paymentPlan.currencyName,
+      value: paymentPlan.currency,
     },
-    dispersionStartDate: paymentPlanData.paymentPlan.dispersionStartDate,
-    dispersionEndDate: paymentPlanData.paymentPlan.dispersionEndDate,
+    dispersionStartDate: paymentPlan.dispersionStartDate,
+    dispersionEndDate: paymentPlan.dispersionEndDate,
   };
 
   const validationSchema = Yup.object().shape({
@@ -145,7 +146,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
         <Form>
           <AutoSubmitFormOnEnter />
           <EditPaymentPlanHeader
-            paymentPlan={paymentPlanData.paymentPlan}
+            paymentPlan={paymentPlan}
             handleSubmit={submitForm}
             businessArea={businessArea}
             permissions={permissions}
@@ -155,7 +156,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
             loading={loadingTargetPopulations}
             disabled
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
         </Form>
       )}
     </Formik>

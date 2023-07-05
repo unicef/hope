@@ -229,6 +229,6 @@ class UnicefIdentifiedModel(models.Model):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
-        if self._state.adding:
+        if self._state.adding or self.unicef_id is None:
             # due to existence of "CREATE TRIGGER" in migrations
             self.refresh_from_db(fields=["unicef_id"])
