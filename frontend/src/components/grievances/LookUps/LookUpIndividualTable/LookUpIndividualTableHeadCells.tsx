@@ -48,7 +48,7 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Admin Level 2',
+    label: 'Administrative Level 2',
     id: 'household__admin_area__name',
     numeric: false,
     dataCy: 'individual-location',
