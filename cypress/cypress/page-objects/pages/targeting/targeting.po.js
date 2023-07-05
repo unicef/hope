@@ -22,7 +22,7 @@ export default class Targeting extends BaseComponent {
   textTabName = "Name";
   textTabStatus = "Status";
   textTabProgramme = "Programme";
-  textTabNOHouseholds = "Num. of households";
+  textTabNOHouseholds = "Num. of Households";
   textTabDateCreated = "Date Created";
   textTabLastEdited = "Last edited";
   textTabCreatedBy = "Created by";
@@ -83,7 +83,7 @@ export default class Targeting extends BaseComponent {
   selectStatus(status) {
     this.getStatusFilter().click();
     this.getStatusOption().contains(status).click();
-    this.pressEscapeFromElement(this.getStatusOption().contains(status))
+    this.pressEscapeFromElement(this.getStatusOption().contains(status));
     this.getApply().click();
   }
 
