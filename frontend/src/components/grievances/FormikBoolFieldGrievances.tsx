@@ -74,6 +74,7 @@ export const FormikBoolFieldGrievances = ({
           MenuProps={{
             'data-cy': `select-options-${field.name}`,
             MenuListProps: { 'data-cy': 'select-options-container' },
+            getContentAnchorEl: null,
           }}
         >
           {options.map((each, index) => (
