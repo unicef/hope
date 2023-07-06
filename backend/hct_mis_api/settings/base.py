@@ -746,6 +746,9 @@ Clear Cache,clear-cache/
         "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
         bool,
     ),
+    "ADMIN_SYNC_REMOTE_SERVER": ("http://localhost:8000", "Remote server base URL", str),
+    "ADMIN_SYNC_LOCAL_ADMIN_URL": ("/admin/", "Local server admin URL", str),
+    "ADMIN_SYNC_REMOTE_ADMIN_URL": ("/admin/", "Remote server admin URL", str),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -1111,3 +1114,6 @@ if LOGGING_DISABLED:
     )
 
     logging.disable(logging.CRITICAL)
+
+
+ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
