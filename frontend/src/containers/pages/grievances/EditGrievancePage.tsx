@@ -14,7 +14,6 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
-  useAllProgramsQuery,
   useAllUsersQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
@@ -136,28 +135,13 @@ export const EditGrievancePage = (): React.ReactElement => {
     '*',
   );
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node?.name,
-    value: edge.node.id,
-  }));
-
   if (
     userDataLoading ||
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    currentUserDataLoading ||
-    loadingPrograms
+    currentUserDataLoading
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -473,21 +457,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                             component={FormikSelectField}
                           />
                         </Grid>
-                        {ticket.issueType?.toString() !==
-                          GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL.toString() && (
-                          <Grid item xs={6}>
-                            <Field
-                              name='program'
-                              fullWidth
-                              disabled={Boolean(ticket.programs)}
-                              variant='outlined'
-                              label={t('Programme Title')}
-                              choices={mappedPrograms}
-                              allProgramsEdges={allProgramsEdges}
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                        )}
                       </Grid>
                       {canAddDocumentation && (
                         <Box mt={3}>
