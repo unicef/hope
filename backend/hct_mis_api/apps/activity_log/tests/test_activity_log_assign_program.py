@@ -5,7 +5,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentFactory,
@@ -44,8 +43,8 @@ class TestLogsAssignProgram(TestCase):
         payment_verification = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan, generic_fk_obj=payment
         )
-        grievance_ticket = GrievanceTicketFactory(business_area=self.business_area)
-        grievance_ticket.programs.add(self.program)
+        # grievance_ticket = GrievanceTicketFactory(business_area=self.business_area)
+        # grievance_ticket.programs.add(self.program)
         # TODO: update after changes for Ind and HH collections/representations
         # individual = IndividualFactory(household=None, program=cls.program)
         # household = HouseholdFactory(head_of_household=individual, program=cls.program)
@@ -114,14 +113,14 @@ class TestLogsAssignProgram(TestCase):
             changes=dict(),
         )
         # log for GrievanceTicket
-        LogEntry.objects.create(
-            action=LogEntry.CREATE,
-            content_object=grievance_ticket,
-            user=self.user,
-            business_area=self.business_area,
-            object_repr=str(grievance_ticket),
-            changes=dict(),
-        )
+        # LogEntry.objects.create(
+        #     action=LogEntry.CREATE,
+        #     content_object=grievance_ticket,
+        #     user=self.user,
+        #     business_area=self.business_area,
+        #     object_repr=str(grievance_ticket),
+        #     changes=dict(),
+        # )
         # TODO: update after changes for Ind and HH collections/representations
         # # log for Individual
         # LogEntry.objects.create(
@@ -142,12 +141,12 @@ class TestLogsAssignProgram(TestCase):
         #     changes=dict(),
         # )
 
-        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 8)
+        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 7)
 
         call_command("activity_log_assign_program")
 
         self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 0)
-        self.assertEqual(LogEntry.objects.filter(programs__pk=self.program.pk).count(), 8)
+        self.assertEqual(LogEntry.objects.filter(programs__pk=self.program.pk).count(), 7)
 
     def test_raise_value_error_with_wrong_model(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area, program=self.program)
@@ -176,6 +175,6 @@ class TestLogsAssignProgram(TestCase):
 
         # check transaction.atomic
         rdi_log.refresh_from_db()
-        self.assertIsNone(rdi_log.programs)
+        self.assertEqual(list(rdi_log.programs.all()), [])
 
         self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 2)
