@@ -159,7 +159,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
                 registration_data_import_id=str(not_started_rdi.id),
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
-                program_id=str(program_id)
+                program_id=str(program_id),
             )
     except Exception as e:
         raise self.retry(exc=e)
@@ -193,7 +193,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
                 registration_data_import_id=str(not_started_rdi.id),
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
-                program_id=str(program_id)
+                program_id=str(program_id),
             )
     except Exception as e:
         raise self.retry(exc=e)
@@ -422,10 +422,10 @@ def automate_registration_diia_import_task(
     self: Any, program_id: "UUID", page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
-    from hct_mis_api.apps.program.models import Program
 
     with locked_cache(key="automate_rdi_diia_creation_task") as locked:
         if not locked:
@@ -450,13 +450,17 @@ def automate_registration_diia_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(
-    self: Any, program_id: "UUID", diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    self: Any,
+    program_id: "UUID",
+    diia_hh_ids: List,
+    template: str = "Diia ukraine rdi {date} {page_size}",
+    **filters: Any,
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
-    from hct_mis_api.apps.program.models import Program
 
     with locked_cache(key="registration_diia_import_task") as locked:
         if not locked:

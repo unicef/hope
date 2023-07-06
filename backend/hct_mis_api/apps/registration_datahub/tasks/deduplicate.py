@@ -3,7 +3,6 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
-from uuid import UUID
 
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
