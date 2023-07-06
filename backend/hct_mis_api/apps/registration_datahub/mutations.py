@@ -63,7 +63,7 @@ logger = logging.getLogger(__name__)
 @transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(
     registration_data_import_data: Dict, user: "User", data_source: str
-) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea, "UUID"]:
+) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea, Optional[str]]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
 
@@ -98,7 +98,7 @@ def create_registration_data_import_objects(
     created_obj_hct.datahub_id = created_obj_datahub.id
     created_obj_hct.save()
 
-    return (created_obj_datahub, created_obj_hct, import_data_obj, business_area, program_id)
+    return created_obj_datahub, created_obj_hct, import_data_obj, business_area, program_id
 
 
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
