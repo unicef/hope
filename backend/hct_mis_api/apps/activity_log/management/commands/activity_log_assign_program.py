@@ -78,7 +78,7 @@ class GetProgramId(abc.ABC):
 
 @transaction.atomic
 def activity_log_assign_program() -> None:
-    log_qs = LogEntry.objects.all().exclude(program__isnull=False)
+    log_qs = LogEntry.objects.all().exclude(programs__isnull=False)
 
     print(f"Found {log_qs.count()} Logs for assign to program")
 

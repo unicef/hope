@@ -39,4 +39,4 @@ class LogEntryFilter(FilterSet):
         return qs.filter(user_id=decode_id_string_required(value))
 
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
-        return qs.filter(program_id=decode_id_string_required(value))
+        return qs.filter(programs__id=decode_id_string_required(value))

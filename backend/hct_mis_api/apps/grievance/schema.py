@@ -183,7 +183,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_programs(grievance_ticket: GrievanceTicket, info: Any) -> Program:
-        return grievance_ticket.program.all()
+        return grievance_ticket.programs.all()
 
     @staticmethod
     def resolve_documentation(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet[GrievanceDocument]":
