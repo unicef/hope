@@ -66,8 +66,6 @@ export const GrievancesDetails = ({
       GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
     ticket.category.toString() ===
       GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
-  const showProgramme =
-    ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
@@ -118,6 +116,24 @@ export const GrievancesDetails = ({
     }
 
     return <>-</>;
+  };
+
+  const mappedPrograms = (): React.ReactElement => {
+    if (!ticket.programs?.length) {
+      return <>-</>;
+    }
+    return (
+      <Box display='flex' flexDirection='column'>
+        {ticket.programs.map((program) => (
+          <ContentLink
+            key={program.id}
+            href={`/${baseUrl}/details/${program.id}`}
+          >
+            {program.name}
+          </ContentLink>
+        ))}
+      </Box>
+    );
   };
 
   return (
@@ -231,11 +247,11 @@ export const GrievancesDetails = ({
               {
                 label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
-                size: showProgramme || showPartner ? 3 : 12,
+                size: showPartner ? 3 : 12,
               },
-              showProgramme && {
+              {
                 label: t('Programme'),
-                value: ticket.programs?.name,
+                value: mappedPrograms(),
                 size: showPartner ? 3 : 9,
               },
               showPartner && {

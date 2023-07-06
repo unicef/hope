@@ -203,7 +203,7 @@ export function prepareInitialValues(
     urgency: ticket.urgency,
     partner: ticket.partner?.id,
     comments: ticket.comments,
-    program: ticket.program?.id,
+    program: [ticket.programs[0]?.id],
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
@@ -508,7 +508,7 @@ export function prepareVariables(businessArea, values, ticket) {
     urgency: values.urgency,
     partner: values.partner,
     comments: values.comments,
-    program: values.program,
+    program: ticket.programs?.[0]?.id,
     paymentRecord: values.selectedPaymentRecords
       ? values.selectedPaymentRecords[0]
       : null,
