@@ -4,7 +4,6 @@ from datetime import datetime
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Optional, Union
-from uuid import UUID
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
