@@ -86,13 +86,11 @@ def activity_log_assign_program() -> None:
     number_of_pages = paginator.num_pages
 
     for page in paginator.page_range:
-        to_update = []
         print(f"Loading page {page} of {number_of_pages}")
 
         for log in paginator.page(page).object_list:
-            log.program_id = GetProgramId(log.content_object).get_id
-            to_update.append(log)
-
-        LogEntry.objects.bulk_update(to_update, ["program_id"])
+            program_id = GetProgramId(log.content_object).get_id
+            if program_id:
+                log.programs.add(program_id)
 
     print("Finished Updating Activity Logs")

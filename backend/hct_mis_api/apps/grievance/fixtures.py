@@ -62,7 +62,6 @@ class GrievanceTicketFactory(DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
 
-
     @factory.post_generation
     def programs(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:

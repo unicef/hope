@@ -29,7 +29,7 @@ def reassign_roles_on_disable_individual_service(
     individual_to_remove: Individual,
     role_reassign_data: Dict,
     user: "AbstractUser",
-    program_or_qs:  Union["Program", QuerySet["Program"]],
+    program_or_qs: Union["Program", QuerySet["Program"]],
     individual_key: str = "individual",
 ) -> Household:
     roles_to_bulk_update = []
@@ -92,7 +92,10 @@ def reassign_roles_on_disable_individual_service(
 
 
 def reassign_roles_on_update_service(
-    individual: Individual, role_reassign_data: Dict, user: "AbstractUser", program_or_qs:  Union["Program", QuerySet["Program"]],
+    individual: Individual,
+    role_reassign_data: Dict,
+    user: "AbstractUser",
+    program_or_qs: Union["Program", QuerySet["Program"]],
 ) -> None:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
