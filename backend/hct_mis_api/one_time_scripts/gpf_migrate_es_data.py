@@ -35,7 +35,6 @@ def migrate_program_es_db(batch_size: int = 500) -> None:
         i, household_ids_pages = 0, len(household_ids) // batch_size
         try:
             while i <= household_ids_pages:
-                print(f"Processing es data {i}/{household_ids_pages} page")
                 logger.info(f"Processing es data {i}/{household_ids_pages} page")
                 body = update_body(obj_list=[str(_id) for _id in household_ids[batch_size * i : batch_size * (i + 1)]])
                 query = (

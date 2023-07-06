@@ -594,16 +594,8 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = {
             "bool": {
                 "must": [
-                    {
-                        "term": {
-                            "business_area": self.business_area.slug
-                        }
-                    },
-                    {
-                        "term": {
-                            "program_id": self.program.id
-                        }
-                    }
+                    {"term": {"business_area": self.business_area.slug}},
+                    {"term": {"program_id": self.program.id}},
                 ]
             }
         }

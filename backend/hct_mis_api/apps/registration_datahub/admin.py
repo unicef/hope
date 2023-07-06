@@ -567,7 +567,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                                 imported_by=request.user,
                                 program=program,
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
-                                is_open=is_open
+                                is_open=is_open,
                             )
                             create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])

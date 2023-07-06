@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -43,6 +43,9 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -176,7 +179,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID") -> None:
+    def execute(
+        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: Optional["UUID"] = None
+    ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
