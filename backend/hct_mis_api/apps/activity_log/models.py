@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.conf import settings
@@ -5,15 +6,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import JSONField, QuerySet
-from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from hct_mis_api.apps.account.models import AbstractUser, User
     from hct_mis_api.apps.program.models import Program
 
@@ -104,7 +102,7 @@ def log_create(
     if program and isinstance(program, UUID):
         log.programs.add(program)
 
-    if isinstance(program, QuerySet) and program:
+    if program and isinstance(program, QuerySet):
         for program_ in program:
             log.programs.add(program_)
 

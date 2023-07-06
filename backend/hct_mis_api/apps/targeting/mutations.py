@@ -242,7 +242,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -323,7 +323,7 @@ class LockTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -352,7 +352,7 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -397,7 +397,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -454,7 +454,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                 TargetPopulation.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 info.context.user,
-                target_population.program.pk,
+                getattr(target_population.program, "pk", None),
                 None,
                 target_population,
             )
@@ -508,7 +508,7 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             _info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -563,7 +563,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             _info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -591,7 +591,7 @@ class RebuildTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            target_population.program.pk,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )

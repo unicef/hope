@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='grievanceticket',
             name='programs',
-            field=models.ManyToManyField(blank=True, related_name='grievance_tickets', to='program.Program'),
+            field=models.ManyToManyField(blank=True, null=True, related_name='grievance_tickets', to='program.Program'),
         ),
         migrations.RunPython(migrate_old_tickets_m2m_program, migrations.RunPython.noop),
     ]
