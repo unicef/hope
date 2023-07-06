@@ -176,7 +176,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str) -> None:
+    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID") -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
