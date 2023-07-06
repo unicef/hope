@@ -29,7 +29,8 @@ class Migration(migrations.Migration):
                 ('content_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='log_entries', to='contenttypes.contenttype')),
                 ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='logs', to=settings.AUTH_USER_MODEL, verbose_name='actor')),
                 ('object_repr', models.TextField(blank=True)),
-                ('program', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='program.program')),
+                ('programs', models.ManyToManyField(blank=True, related_name='activity_logs', to='program.Program'),
+                ),
             ],
             options={
                 'verbose_name': 'log entry',

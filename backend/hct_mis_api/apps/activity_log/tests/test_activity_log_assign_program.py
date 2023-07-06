@@ -55,7 +55,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=self.program,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(self.program),
             changes=dict(),
@@ -65,7 +64,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=rdi,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(rdi),
             changes=dict(),
@@ -75,7 +73,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=tp,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(tp),
             changes=dict(),
@@ -85,7 +82,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=payment_plan,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(payment_plan),
             changes=dict(),
@@ -95,7 +91,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=cash_plan,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(cash_plan),
             changes=dict(),
@@ -105,7 +100,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=payment_verification_plan,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(payment_verification_plan),
             changes=dict(),
@@ -115,7 +109,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=payment_verification,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(payment_verification),
             changes=dict(),
@@ -125,7 +118,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=grievance_ticket,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(grievance_ticket),
             changes=dict(),
@@ -136,7 +128,6 @@ class TestLogsAssignProgram(TestCase):
         #     action=LogEntry.CREATE,
         #     content_object=individual,
         #     user=cls.user,
-        #     program=None,
         #     business_area=cls.business_area,
         #     object_repr=str(individual),
         #     changes=dict(),
@@ -146,18 +137,17 @@ class TestLogsAssignProgram(TestCase):
         #     action=LogEntry.CREATE,
         #     content_object=household,
         #     user=cls.user,
-        #     program=None,
         #     business_area=cls.business_area,
         #     object_repr=str(household),
         #     changes=dict(),
         # )
 
-        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 8)
+        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 8)
 
         call_command("activity_log_assign_program")
 
-        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 0)
-        self.assertEqual(LogEntry.objects.filter(program_id=self.program.pk).count(), 8)
+        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 0)
+        self.assertEqual(LogEntry.objects.filter(programs__pk=self.program.pk).count(), 8)
 
     def test_raise_value_error_with_wrong_model(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area, program=self.program)
@@ -165,7 +155,6 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=rdi,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(rdi),
             changes=dict(),
@@ -175,19 +164,18 @@ class TestLogsAssignProgram(TestCase):
             action=LogEntry.CREATE,
             content_object=self.user,
             user=self.user,
-            program=None,
             business_area=self.business_area,
             object_repr=str(self.user),
             changes=dict(),
         )
 
-        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 2)
+        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 2)
 
         with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
             call_command("activity_log_assign_program")
 
         # check transaction.atomic
         rdi_log.refresh_from_db()
-        self.assertIsNone(rdi_log.program)
+        self.assertIsNone(rdi_log.programs)
 
-        self.assertEqual(LogEntry.objects.filter(program__isnull=True).count(), 2)
+        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 2)
