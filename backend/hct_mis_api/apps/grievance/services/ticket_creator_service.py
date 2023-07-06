@@ -164,6 +164,7 @@ class TicketCreatorService:
             status=GrievanceTicket.STATUS_ASSIGNED,
             partner=partner,
         )
-        new_ticket.programs.add(program)
+        if program:
+            new_ticket.programs.add(program)
 
         return new_ticket
