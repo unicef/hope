@@ -5,6 +5,7 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloa
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
   --mount=type=cache,target=/var/lib/apt,sharing=private \
   apt-get update &&\
+  apt-get-install -y zip\
   apt-get install -y --no-install-recommends \
   build-essential \
   libjpeg-dev \
@@ -15,7 +16,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   python3-gdal \
   gdal-bin \
   curl \
-  zip \
+  unzip \
   vim &&\
   addgroup --system --gid 82 hope &&\
   adduser --system --uid 82 --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
