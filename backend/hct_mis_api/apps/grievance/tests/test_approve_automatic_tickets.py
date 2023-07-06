@@ -19,11 +19,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketSystemFlaggingDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
-    HouseholdCollectionFactory,
-    HouseholdFactory,
-    IndividualFactory,
-)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
@@ -107,8 +103,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one = HouseholdFactory.build(
             id="07a901ed-d2a5-422a-b962-3570da1d5d07",
             registration_data_import__imported_by__partner=partner,
-            household_collection=HouseholdCollectionFactory(),
         )
+        household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)

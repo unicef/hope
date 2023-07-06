@@ -865,7 +865,7 @@ def generate_payment_plan() -> None:
         business_area=afghanistan,
         full_name="Jan Kowalski",
         sex=MALE,
-        individual_collection=IndividualCollectionFactory(),
+        defaults={"individual_collection": IndividualCollectionFactory()},
     )[0]
 
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
@@ -877,7 +877,7 @@ def generate_payment_plan() -> None:
         business_area=afghanistan,
         full_name="Adam Nowak",
         sex=MALE,
-        individual_collection=IndividualCollectionFactory(),
+        defaults={"individual_collection": IndividualCollectionFactory()},
     )[0]
 
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
@@ -890,7 +890,7 @@ def generate_payment_plan() -> None:
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
         address=address,
-        household_collection=HouseholdCollectionFactory(),
+        defaults={"household_collection": HouseholdCollectionFactory()},
     )[0]
     individual_1.household = household_1
     individual_1.save()
@@ -905,7 +905,7 @@ def generate_payment_plan() -> None:
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
         address=address,
-        household_collection=HouseholdCollectionFactory(),
+        defaults={"household_collection": HouseholdCollectionFactory()},
     )[0]
     individual_2.household = household_2
     individual_2.save()
