@@ -24,7 +24,7 @@ export default class Targeting extends BaseComponent {
   textTabProgramme = "Programme";
   textTabNOHouseholds = "Num. of Households";
   textTabDateCreated = "Date Created";
-  textTabLastEdited = "Last edited";
+  textTabLastEdited = "Last Edited";
   textTabCreatedBy = "Created by";
   buttonApply = 'button[data-cy="button-filters-apply"]';
 
