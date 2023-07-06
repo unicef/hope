@@ -339,7 +339,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis.program_id, old_rdi_mis, rdi_mis
         )
         if not self.business_area.postpone_deduplication:
-            DeduplicateTask(self.business_area.slug, program_id).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
                 registration_data_import_datahub=registration_data_import
             )
 

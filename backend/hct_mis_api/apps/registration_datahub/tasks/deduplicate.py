@@ -99,9 +99,10 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
 
-    def __init__(self, business_area_slug: str, program_id: UUID):
+    def __init__(self, business_area_slug: str, program_id: Optional[str]):
         self.business_area: BusinessArea = BusinessArea.objects.get(slug=business_area_slug)
-        self.program: Program = Program.objects.get(id=program_id)
+        if program_id:
+            self.program: Program = Program.objects.get(id=program_id)
         self.thresholds: Thresholds = Thresholds.from_business_area(self.business_area)
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
