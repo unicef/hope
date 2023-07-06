@@ -205,7 +205,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
           >
             <div>
               <span
