@@ -98,13 +98,7 @@ def create_registration_data_import_objects(
     created_obj_hct.datahub_id = created_obj_datahub.id
     created_obj_hct.save()
 
-    return (
-        created_obj_datahub,
-        created_obj_hct,
-        import_data_obj,
-        business_area,
-        program_id
-    )
+    return (created_obj_datahub, created_obj_hct, import_data_obj, business_area, program_id)
 
 
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
@@ -136,7 +130,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-            program_id
+            program_id,
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
@@ -163,7 +157,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
                 registration_data_import_id=str(created_obj_datahub.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
-                program_id=str(program_id)
+                program_id=str(program_id),
             )
         )
 
@@ -234,7 +228,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-            program_id
+            program_id,
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
@@ -258,7 +252,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
                 registration_data_import_id=str(created_obj_datahub.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
-                program_id=str(program_id)
+                program_id=str(program_id),
             )
         )
 

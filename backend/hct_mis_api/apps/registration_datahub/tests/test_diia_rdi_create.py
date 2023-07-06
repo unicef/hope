@@ -47,11 +47,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_execute_correct_data(self) -> None:
-        rdi = self.RdiDiiaCreateTask().create_rdi(
-            imported_by=None,
-            program=self.program,
-            rdi_name="Test import Diia"
-        )
+        rdi = self.RdiDiiaCreateTask().create_rdi(imported_by=None, program=self.program, rdi_name="Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
 
         households = ImportedHousehold.objects.all()
@@ -103,11 +99,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(0, ImportedHousehold.objects.all().count())
         self.assertEqual(0, ImportedIndividual.objects.all().count())
 
-        rdi = self.RdiDiiaCreateTask().create_rdi(
-            imported_by=None,
-            program=self.program,
-            rdi_name="Test import Diia"
-        )
+        rdi = self.RdiDiiaCreateTask().create_rdi(imported_by=None, program=self.program, rdi_name="Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993, 994])
 
         self.assertEqual(DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_IMPORTED).count(), 3)
@@ -129,20 +121,12 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(0, ImportedHousehold.objects.all().count())
         self.assertEqual(0, ImportedIndividual.objects.all().count())
 
-        rdi = self.RdiDiiaCreateTask().create_rdi(
-            imported_by=None,
-            program=self.program,
-            rdi_name="Test import Diia"
-        )
+        rdi = self.RdiDiiaCreateTask().create_rdi(imported_by=None, program=self.program, rdi_name="Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
 
         self.assertEqual(2, ImportedHousehold.objects.all().count())
         self.assertEqual(5, ImportedIndividual.objects.all().count())
-        rdi = self.RdiDiiaCreateTask().create_rdi(
-            imported_by=None,
-            program=self.program,
-            rdi_name="Test import Diia 2"
-        )
+        rdi = self.RdiDiiaCreateTask().create_rdi(imported_by=None, program=self.program, rdi_name="Test import Diia 2")
 
         with self.assertRaisesRegex(ValidationError, ".*Rdi doesn't found any records within status to import.*"):
             self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
@@ -151,22 +135,14 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(5, ImportedIndividual.objects.all().count())
 
     def test_execute_staging_data_mark_registration_data_import(self) -> None:
-        rdi = self.RdiDiiaCreateTask().create_rdi(
-            imported_by=None,
-            program=self.program,
-            rdi_name="Test import Diia"
-        )
+        rdi = self.RdiDiiaCreateTask().create_rdi(imported_by=None, program=self.program, rdi_name="Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993])
         self.assertEqual(
             DiiaHousehold.objects.filter(registration_data_import__isnull=False, id__in=[991, 992, 993]).count(), 3
         )
 
     def test_execute_staging_data_choices_conversion(self) -> None:
-        rdi = self.RdiDiiaCreateTask().create_rdi(
-            imported_by=None,
-            program=self.program,
-            rdi_name="Test import Diia"
-        )
+        rdi = self.RdiDiiaCreateTask().create_rdi(imported_by=None, program=self.program, rdi_name="Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993])
 
         self.assertEqual(ImportedIndividual.objects.filter(disability=DISABLED).count(), 1)

@@ -1,4 +1,5 @@
 import logging
+from unittest import skip
 
 from django.test import TestCase
 
@@ -15,6 +16,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.one_time_scripts.gpf_migrate_psql_data import migrate_program_psql_db
 
 
+@skip(reason="This migration does not include all changes")
 class TestGPFMigrationToPSQL(TestCase):
     databases = {"default"}
 

@@ -80,7 +80,7 @@ def registration_xlsx_import_task(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
                 business_area_id=business_area_id,
-                program_id=program_id
+                program_id=program_id,
             )
     except Exception as e:
         logger.warning(e)
@@ -115,7 +115,7 @@ def registration_kobo_import_task(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
                 business_area_id=business_area_id,
-                program_id=program_id
+                program_id=program_id,
             )
     except Exception as e:
         logger.warning(e)
