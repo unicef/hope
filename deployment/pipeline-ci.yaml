@@ -25,9 +25,11 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
     Docker.url: "uniappsakshopedev.azurecr.io"
+    sentryEnvironment: "dev"
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registryConnection: "ICTD-HOPE-PRD-ACR"
     Docker.url: "uniappsakshope.azurecr.io"
+    sentryEnvironment: "production"
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
   isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
   tag: $(Build.SourceVersion)
@@ -140,7 +142,7 @@ stages:
               -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.frontend.repository):latest \
               --build-arg SENTRY_DSN=$(SENTRY_DSN) \
-              --build-arg SENTRY_ENVIRONMENT=dev \
+              --build-arg SENTRY_ENVIRONMENT=$(sentryEnvironment) \
               --push \
               ./frontend
             displayName: Docker build dev
@@ -167,7 +169,7 @@ stages:
               -t $(Docker.url.trn)/$(Docker.frontend.repository):$(tag) \
               -t $(Docker.url.trn)/$(Docker.frontend.repository):latest \
               --build-arg SENTRY_DSN=$(SENTRY_DSN) \
-              --build-arg SENTRY_ENVIRONMENT=production \
+              --build-arg SENTRY_ENVIRONMENT=training \
               --push \
               ./frontend
             displayName: Docker build trn
