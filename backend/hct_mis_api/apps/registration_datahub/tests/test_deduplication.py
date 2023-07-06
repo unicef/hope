@@ -57,6 +57,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_duplicates_percentage=100,
             deduplication_golden_record_duplicates_allowed=10,
         )
+        cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
             import_data=import_data,
             business_area_slug=cls.business_area.slug,
@@ -222,7 +223,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_batch_deduplication(self) -> None:
-        task = DeduplicateTask(self.business_area.slug)
+        task = DeduplicateTask(self.business_area.slug, self.program.id)
 
         with self.assertNumQueries(9):
             task.deduplicate_imported_individuals(self.registration_data_import_datahub)
@@ -305,6 +306,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             deduplication_possible_duplicate_score=11.0,
             has_data_sharing_agreement=True,
         )
+        cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
         cls.household, cls.individuals = create_household_and_individuals(
@@ -398,7 +400,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_golden_record_deduplication(self) -> None:
-        task = DeduplicateTask(self.business_area.slug)
+        task = DeduplicateTask(self.business_area.slug, self.program.id)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=self.registration_data_import)
             .select_for_update()
@@ -415,7 +417,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(duplicate.count(), 4)
 
     def test_deduplicate_individuals_from_other_source(self) -> None:
-        task = DeduplicateTask(self.business_area.slug)
+        task = DeduplicateTask(self.business_area.slug, self.program.id)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=self.registration_data_import)
             .select_for_update()

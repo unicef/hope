@@ -29,6 +29,7 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from requests.auth import HTTPBasicAuth
 
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
@@ -425,6 +426,7 @@ class BaseRDIForm(forms.Form):
 
 class CreateRDIForm(BaseRDIForm):
     name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
+    program = forms.CharField(label="Program name", max_length=100, required=True)
     is_open = forms.BooleanField(label="Is open?", help_text="Is the RDI open for amend", required=False)
     field_order = ["name", "registration", "is_open", "filters", "status"]
 
@@ -541,9 +543,11 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                 registration = form.cleaned_data["registration"]
                 name = form.cleaned_data["name"]
                 is_open = form.cleaned_data["is_open"]
+                program_name = form.cleaned_data["program"]
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
+
                 if service := registration.rdi_parser:
                     qs = (
                         Record.objects.defer("storage", "counters", "files", "fields")
@@ -553,10 +557,18 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                     if records_ids := qs.values_list("id", flat=True):
                         try:
                             project = registration.project
-                            # programme = project.programme TODO programme refactoring
+                            program = Program.objects.filter(name=program_name).first()
+                            if not program:
+                                raise Program.DoesNotExist
+
                             organization = project.organization
                             rdi_name = name or {timezone.now()}
-                            rdi = service.create_rdi(request.user, f"{organization.slug} rdi {rdi_name}", is_open)
+                            rdi = service.create_rdi(
+                                imported_by=request.user,
+                                program=program,
+                                rdi_name=f"{organization.slug} rdi {rdi_name}",
+                                is_open=is_open
+                            )
                             create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
