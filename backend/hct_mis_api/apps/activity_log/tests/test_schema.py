@@ -67,33 +67,33 @@ class TestLogEntriesQueries(APITestCase):
         cls.program_1 = ProgramFactory(business_area=business_area, pk="ad17c53d-11b0-4e9b-8407-2e034f03fd31")
         program_2 = ProgramFactory(business_area=business_area, pk="c74612a1-212c-4148-be5b-4b41d20e623c")
 
-        LogEntry.objects.create(
+        l1 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=cls.program_1,
             user=cls.user,
-            program=cls.program_1,
             business_area=business_area,
             object_repr=str(cls.program_1),
             changes=create_diff(None, cls.program_1, Program.ACTIVITY_LOG_MAPPING),
         )
-        LogEntry.objects.create(
+        l1.programs.add(cls.program_1)
+        l2 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=program_2,
             user=cls.user,
-            program=program_2,
             business_area=business_area,
             object_repr=str(program_2),
             changes=create_diff(None, program_2, Program.ACTIVITY_LOG_MAPPING),
         )
-        LogEntry.objects.create(
+        l2.programs.add(program_2)
+        l3 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=program_2,
             user=cls.user_without_perms,
-            program=program_2,
             business_area=None,
             object_repr=str(program_2),
             changes=create_diff(None, program_2, Program.ACTIVITY_LOG_MAPPING),
         )
+        l3.programs.add(program_2)
 
     def test_all_logs_queries_without_perms(self) -> None:
         self.snapshot_graphql_request(
