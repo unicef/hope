@@ -313,6 +313,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": cls.registration_data_import,
                 "business_area": cls.business_area,
+                "program": cls.program
             },
             individuals_data=[
                 {
@@ -326,6 +327,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
+                    "program": cls.program
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -338,6 +340,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
+                    "program": cls.program
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -350,6 +353,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
+                    "program": cls.program
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -362,6 +366,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1989-09-10",
+                    "program": cls.program
                 },
             ],
         )
@@ -369,6 +374,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": registration_data_import_second,
                 "business_area": cls.business_area,
+                "program": cls.program
             },
             individuals_data=[
                 {
@@ -382,6 +388,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
+                    "program": cls.program
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -394,6 +401,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1989-09-10",
+                    "program": cls.program
                 },
             ],
         )
