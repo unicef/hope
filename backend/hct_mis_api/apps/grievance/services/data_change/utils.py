@@ -446,9 +446,7 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
         ticket_details.programs.all(),
         info,
     )
-    withdraw_individual(
-        individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all()
-    )
+    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all())
 
 
 def mark_as_duplicate_individual_and_reassign_roles(

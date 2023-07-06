@@ -1,5 +1,5 @@
-from uuid import UUID
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from uuid import UUID
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
