@@ -10,6 +10,7 @@ const exec = (command) => {
 const request = require("request");
 const SLACK_BOT_USER_TOKEN =
 "xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ";
+const CHANNEL = "C05EKHETMT9"
 
 function sendMessage(data) {
   request(
@@ -36,7 +37,7 @@ function sendMessage(data) {
 
 sendMessage({
   text: "E2E Tests Report: ",
-  channel: "C05EKHETMT9",
+  channel: CHANNEL,
 });
 
 const fs = require("fs");
@@ -56,12 +57,11 @@ fs.readFile(
                 \nTests ToDo: ${report.stats.pending}\n`
         sendMessage({
           text: text,
-          channel: "C05EKHETMT9",
+          channel: CHANNEL,
         });
 
       let coverage =
-        ((report.stats.tests - report.stats.pending) / report.stats.tests) *
-        100;
+        ((report.stats.tests - report.stats.pending) / report.stats.tests) * 100;
 
 const QuickChart = require('quickchart-js');
 const chart = new QuickChart();
@@ -116,7 +116,7 @@ console.log("\n\n" + chartUrl + "\n\n");
 
       sendMessage({
         text: "Chart data update",
-        channel: "C05EKHETMT9",
+        channel: CHANNEL,
         blocks: [
           {
             type: "image",
@@ -134,7 +134,7 @@ console.log("\n\n" + chartUrl + "\n\n");
       console.log("Error parsing JSON string:", err);
     }
     exec(
-      'curl -F file=@report.zip -H "Authorization: Bearer xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ"  -F channels=C05EKHETMT9 -X POST https://slack.com/api/files.upload'
+      `curl -F file=@report.zip -H "Authorization: Bearer ${SLACK_BOT_USER_TOKEN}" -F channels=${CHANNEL} -X POST https://slack.com/api/files.upload`
     );
   }
 );

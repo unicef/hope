@@ -120,6 +120,30 @@ export default class Grievance extends BaseComponent {
     this.getButtonApply().click();
   }
 
+  chooseStatusFilter(status) {
+    this.getStatusFilter().click();
+    this.getOptions().contains(status).click();
+    this.getButtonApply().click();
+  }
+
+  choosePriorityFilter(prio) {
+    this.getPriorityFilter().click();
+    this.getOptions().contains(prio).click();
+    this.getButtonApply().click();
+  }
+
+  chooseUrgencyFilter(urgency) {
+    this.getUrgencyFilter().click();
+    this.getOptions().contains(urgency).click();
+    this.getButtonApply().click();
+  }
+
+  chooseRDIFilter(rdi) {
+    this.getRegistrationDataImportFilter().click();
+    this.getOptions().contains(rdi).click();
+    this.getButtonApply().click();
+  }
+
   chooseAdminFilter(name) {
     this.getAdminLevelFilter().click();
     this.getOptions().contains(name).click();
@@ -189,19 +213,22 @@ export default class Grievance extends BaseComponent {
   }
   chooseTicketTypeHouseholdID() {
     this.getTicketTypeFilter().click();
-    this.getHouseholdID().click().type("{esc}");
+    this.getHouseholdID().click();
+    this.pressEscapeFromElement(this.getHouseholdID())
     this.getButtonApply().click();
   }
 
   chooseTicketTypeTicketID() {
     this.getTicketTypeFilter().click();
-    this.getTicketID().click().type("{esc}");
+    this.getTicketID().click();
+    this.pressEscapeFromElement(this.getTicketID())
     this.getButtonApply().click();
   }
 
   chooseTicketTypeLastName() {
     this.getTicketTypeFilter().click();
-    this.getLastName().click().type("{esc}");
+    this.getLastName().click();
+    this.pressEscapeFromElement(this.getLastName())
     this.getButtonApply().click();
   }
 

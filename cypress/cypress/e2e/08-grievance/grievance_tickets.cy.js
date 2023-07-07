@@ -38,7 +38,7 @@ describe("Grievance", () => {
         .getTicketListRow()
         .eq(0)
         .find("a")
-        .contains("GRV-0000002")
+        .contains("GRV-0000003")
         .click();
       grievanceDetailsPage.checkGrievanceMenu();
       grievanceDetailsPage.checkElementsOnPage();
@@ -61,7 +61,7 @@ describe("Grievance", () => {
     context("Grievance Filters", () => {
       [
         ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
-        ["SYSTEM-GENERATED", "GRV-0000002", 1, "Ticket ID: GRV-0000002"],
+        ["SYSTEM-GENERATED", "GRV-0000003", 1, "Ticket ID: GRV-0000003"],
       ].forEach((testData) => {
         it("Grievance Search filter " + testData[0], () => {
           cy.scenario([
@@ -94,8 +94,8 @@ describe("Grievance", () => {
           1,
           "Kowalska",
           1,
-          "Ticket ID: GRV-0000006",
-          "GRV-0000006",
+          "Ticket ID: GRV-0000005",
+          "GRV-0000005",
         ],
         [
           "SYSTEM-GENERATED",
@@ -103,8 +103,8 @@ describe("Grievance", () => {
           1,
           "Romaniak",
           1,
-          "Ticket ID: GRV-0000002",
-          "GRV-0000002",
+          "Ticket ID: GRV-0000003",
+          "GRV-0000003",
         ],
       ].forEach((testData) => {
         it("Grievance Search Type filter " + testData[0], () => {
@@ -166,9 +166,19 @@ describe("Grievance", () => {
           grievancePage.expectedNumberOfRows(testData[4]);
         });
       });
-      it("Grievance Status filter", () => {
+      [
+        ["Assigned", 1, "GRV-0000005"],
+        ["For Approval", 1, "GRV-0000001"],
+        ["In Progress", 1, "GRV-0000004"],
+        ["On Hold", 1, "GRV-0000002"],
+      ].forEach((testData) => {
+      it(`Grievance Status filter ${testData[0]}`, () => {
+        grievancePage.chooseStatusFilter(testData[0])
+        grievancePage.expectedNumberOfRows(testData[1]);
+        grievancePage.chooseTicketListRow(0, testData[2])
       });
-      it.skip("Grievance FSP filter", () => {
+    });
+      it("Grievance FSP filter", () => {
         // ToDo After fix bug: 165198
       });
       [
@@ -207,10 +217,10 @@ describe("Grievance", () => {
       });
 
       [
-        ["Data Change", "GRV-0000006"],
-        ["Sensitive Grievance", "GRV-0000004"],
-        ["Referral", "GRV-0000005"],
-        ["Grievance Complaint", "GRV-0000001"],
+        ["Data Change", "GRV-0000005"],
+        // ["Sensitive Grievance", "GRV-0000004"], ToDo: 166077
+        ["Referral", "GRV-0000001"],
+        // ["Grievance Complaint", "GRV-0000001"], ToDo: 166077
       ].forEach((testData) => {
         it(`Grievance Category filter - ${testData[0]}`, () => {
           grievancePage.chooseCategoryFilter(testData[0]);
@@ -219,24 +229,78 @@ describe("Grievance", () => {
       });
       it(`Grievance Admin Level 2 filter - USER-GENERATED`, () => {
         grievancePage.chooseAdminFilter("Andarab");
-        grievancePage.chooseTicketListRow(1, "GRV-0000006");
+        grievancePage.chooseTicketListRow(1, "GRV-0000002");
       });
       it(`Grievance Admin Level 2 filter - SYSTEM-GENERATED`, () => {
         grievancePage.chooseTab("SYSTEM-GENERATED");
         grievancePage.chooseAdminFilter("Andarab");
         grievancePage.expectedNumberOfRows(0);
       });
-      [["USER-GENERATED", 2], ["SYSTEM-GENERATED", 1]].forEach((testData) => {
+      [["USER-GENERATED", 2], ["SYSTEM-GENERATED", 0]].forEach((testData) => {
         it(`Grievance Assignee filter - ${testData[0]}`, () => {
           grievancePage.chooseTab(testData[0]);
           grievancePage.chooseAssigneeFilter("root@root.com");
           grievancePage.expectedNumberOfRows(testData[1]);
         });
       });
-      it.skip("Grievance Similarity Score From filter", () => {});
-      it.skip("Grievance Similarity Score To filter", () => {});
-      it.skip("Grievance Registration Date Import filter", () => {});
-      it.skip("Grievance Preferred language filter", () => {});
+      it("Grievance Similarity Score filter", () => {
+        grievancePage.chooseTab("SYSTEM-GENERATED");
+        grievancePage.getSimilarityScoreFromFilter().type(5);
+        grievancePage.getButtonApply().click();
+        grievancePage.expectedNumberOfRows(1);
+        grievancePage.getSimilarityScoreFromFilter().clear().type(10);
+        grievancePage.getButtonApply().click();
+        grievancePage.expectedNumberOfRows(0);
+        grievancePage.getButtonClear().click()
+        grievancePage.expectedNumberOfRows(1);
+        grievancePage.getSimilarityScoreFromFilter().type(5);
+        grievancePage.getSimilarityScoreToFilter().type(10);
+        grievancePage.getButtonApply().click();
+        grievancePage.expectedNumberOfRows(1);
+        grievancePage.getSimilarityScoreFromFilter().clear().type(4);
+        grievancePage.getSimilarityScoreToFilter().clear().type(5);
+        grievancePage.getButtonApply().click();
+        grievancePage.expectedNumberOfRows(0);
+      });
+      [["USER-GENERATED", "GRV-0000001"], ["SYSTEM-GENERATED", "GRV-0000003"]].forEach((testData) => {
+      it("Grievance Registration Date Import filter", () => {
+        grievancePage.chooseTab(testData[0]);
+        grievancePage.chooseRDIFilter("Test")
+        grievancePage.expectedNumberOfRows(1);
+        grievancePage.chooseTicketListRow(0, testData[1])
+      });
+      });
+      it.skip("Grievance Preferred language filter", () => {
+        // ToDo: Language filter does not work.
+      });
+      [
+        ["USER-GENERATED", "High", 1, "GRV-0000005"],
+        ["USER-GENERATED", "Low", 1, "GRV-0000002"],
+        ["USER-GENERATED", "Medium", 2, "GRV-0000001"],
+        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+      ].forEach((testData) => {
+      it(`Grievance Priority filter - ${testData[1]}`, () => {
+        grievancePage.chooseTab(testData[0]);
+        grievancePage.choosePriorityFilter(testData[1])
+        grievancePage.expectedNumberOfRows(testData[2]);
+        grievancePage.chooseTicketListRow(0, testData[3])
+      });
+    });
+    [
+    ["USER-GENERATED", "Very urgent", 1, "GRV-0000005"],
+    ["USER-GENERATED", "Urgent", 2, "GRV-0000001"],
+    ["USER-GENERATED", "Not urgent", 1, "GRV-0000002"],
+    ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+    ].forEach((testData) => {
+      it(`Grievance Urgency filter - ${testData[1]}`, () => {
+        grievancePage.chooseTab(testData[0]);
+        grievancePage.chooseUrgencyFilter(testData[1])
+        grievancePage.expectedNumberOfRows(testData[2]);
+        grievancePage.chooseTicketListRow(0, testData[3])
+      });
+    });
+      it.only("Grievance Active Tickets filter", () => {
+      });
     });
     context("Create New Ticket", () => {
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
