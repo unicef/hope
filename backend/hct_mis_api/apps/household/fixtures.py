@@ -26,7 +26,9 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     EntitlementCard,
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
@@ -76,6 +78,13 @@ def flex_field_individual(o: Any) -> Dict:
     }
 
 
+class HouseholdCollectionFactory(DjangoModelFactory):
+    class Meta:
+        model = HouseholdCollection
+
+    unicef_id = factory.Sequence(lambda n: f"HHC-{n}")
+
+
 class HouseholdFactory(DjangoModelFactory):
     class Meta:
         model = Household
@@ -119,6 +128,7 @@ class HouseholdFactory(DjangoModelFactory):
     male_age_group_12_17_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
+    household_collection = factory.SubFactory(HouseholdCollectionFactory)
     program_id = None  # TODO temporary solution until migration applied
 
     @classmethod
@@ -139,6 +149,13 @@ class IndividualIdentityFactory(DjangoModelFactory):
 class IndividualRoleInHouseholdFactory(DjangoModelFactory):
     class Meta:
         model = IndividualRoleInHousehold
+
+
+class IndividualCollectionFactory(DjangoModelFactory):
+    class Meta:
+        model = IndividualCollection
+
+    unicef_id = factory.Sequence(lambda n: f"INDC-{n}")
 
 
 class IndividualFactory(DjangoModelFactory):
@@ -172,6 +189,7 @@ class IndividualFactory(DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
     unicef_id = factory.Sequence(lambda n: f"IND-{n}")
+    individual_collection = factory.SubFactory(IndividualCollectionFactory)
     program_id = None  # TODO temporary solution until migration applied
 
 
@@ -244,6 +262,7 @@ def create_household(
     individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
 
     household.head_of_household = individuals[0]
+    household.household_collection.save()
     # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
@@ -283,6 +302,7 @@ def create_household_for_fixtures(
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
 
+    household.household_collection.save()
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
@@ -326,6 +346,7 @@ def create_household_and_individuals(
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     household: Household = HouseholdFactory.build(**household_data)
+    household.household_collection.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
     individuals: List[Individual] = [
