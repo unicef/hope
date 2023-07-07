@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('steficon', '0007_empty_rules'),
+        ('steficon', '0003_migration_squashed_0007_empty_rules'),
     ]
 
     operations = [
