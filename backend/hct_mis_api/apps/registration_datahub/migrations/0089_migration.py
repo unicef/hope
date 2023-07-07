@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('registration_datahub', '0088_migration'),
+        ('registration_datahub', '0001_migration_squashed_0088_migration'),
     ]
 
     operations = [
