@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('targeting', '0028_migration'),
+        ('targeting', '0007_migration_squashed_0028_migration'),
         ('steficon', '0007_empty_rules'),
     ]
 
