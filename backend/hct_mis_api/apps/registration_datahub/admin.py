@@ -426,7 +426,6 @@ class BaseRDIForm(forms.Form):
 
 class CreateRDIForm(BaseRDIForm):
     name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
-    program = forms.CharField(label="Program name", max_length=100, required=True)
     is_open = forms.BooleanField(label="Is open?", help_text="Is the RDI open for amend", required=False)
     field_order = ["name", "registration", "is_open", "filters", "status"]
 
@@ -543,7 +542,6 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                 registration = form.cleaned_data["registration"]
                 name = form.cleaned_data["name"]
                 is_open = form.cleaned_data["is_open"]
-                program_name = form.cleaned_data["program"]
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
@@ -557,15 +555,11 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                     if records_ids := qs.values_list("id", flat=True):
                         try:
                             project = registration.project
-                            program = Program.objects.filter(name=program_name).first()
-                            if not program:
-                                raise Program.DoesNotExist
-
                             organization = project.organization
                             rdi_name = name or {timezone.now()}
                             rdi = service.create_rdi(
                                 imported_by=request.user,
-                                program=program,
+                                program=project.program,
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
                                 is_open=is_open,
                             )
