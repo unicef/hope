@@ -770,7 +770,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-                return self.export_file_per_fsp is not None or FileTemp.objects.filter(object_id=self.id).exists()
+                return self.export_file_per_fsp is not None
             else:
                 return False
         except FileTemp.DoesNotExist:
@@ -783,7 +783,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             if self.export_file_per_fsp:
                 return self.export_file_per_fsp.file.url
-            return FileTemp.objects.filter(object_id=self.id).order_by("-created").first().file.url
         else:
             return None
 
