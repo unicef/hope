@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('steficon', '0016_migration'),
+        ('steficon', '0011_migration_squashed_0016_migration'),
     ]
 
     operations = [
