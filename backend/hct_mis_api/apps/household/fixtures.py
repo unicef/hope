@@ -120,7 +120,6 @@ class HouseholdFactory(DjangoModelFactory):
     male_age_group_12_17_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
-    # program = factory.SubFactory(ProgramFactory)
 
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
