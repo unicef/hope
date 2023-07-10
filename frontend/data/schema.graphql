@@ -529,6 +529,28 @@ type ContentTypeObjectType {
   name: String
 }
 
+type CopyProgram {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input CopyProgramInput {
+  id: String!
+  name: String
+  startDate: Date
+  endDate: Date
+  description: String
+  budget: Decimal
+  frequencyOfPayments: String
+  sector: String
+  scope: String
+  cashPlus: Boolean
+  populationGoal: Int
+  administrativeAreasOfImplementation: String
+  businessAreaSlug: String
+  individualDataNeeded: Boolean
+}
+
 input CopyTargetPopulationInput {
   id: ID
   name: String
@@ -1445,6 +1467,8 @@ type HouseholdNode implements Node {
   totalCashReceived: Decimal
   familyId: String
   program: ProgramNode
+  copiedFrom: HouseholdNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -2198,11 +2222,13 @@ type IndividualNode implements Node {
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   program: ProgramNode
+  copiedFrom: IndividualNode
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   bankAccountInfo: BankAccountInfoNode
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -2525,6 +2551,7 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
+  copyProgram(programData: CopyProgramInput!): CopyProgram
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
