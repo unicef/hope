@@ -7,13 +7,10 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('activity_log', '0001_migration'), ('activity_log', '0002_migration'), ('activity_log', '0003_migration'), ('activity_log', '0004_migration'), ('activity_log', '0005_migration')]
-
     dependencies = [
-        ('core', '0006_migration'),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('contenttypes', '0002_remove_content_type_name'),
-        ('program', '0038_migration'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('core', '0002_migration_squashed_0006_migration'),
     ]
 
     operations = [

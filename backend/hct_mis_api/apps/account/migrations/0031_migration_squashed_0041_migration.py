@@ -6,8 +6,6 @@ import hct_mis_api.apps.account.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [('account', '0031_migration'), ('account', '0032_migration'), ('account', '0033_migration'), ('account', '0034_migration'), ('account', '0035_migration'), ('account', '0036_migration'), ('account', '0037_migration'), ('account', '0038_migration'), ('account', '0039_migration'), ('account', '0040_migration'), ('account', '0041_migration')]
-
     dependencies = [
         ('account', '0001_migration_squashed_0030_migration'),
     ]

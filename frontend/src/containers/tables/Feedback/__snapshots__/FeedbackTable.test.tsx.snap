@@ -207,7 +207,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                     role="button"
                     tabindex="0"
                   >
-                    Creation date
+                    Creation Date
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

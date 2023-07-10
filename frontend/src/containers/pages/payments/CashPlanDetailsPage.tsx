@@ -64,7 +64,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`${t('Cash Plan')} #${data.cashPlan.caId}`}
+        title={`${t('Payment Plan')} #${data.cashPlan.caId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
