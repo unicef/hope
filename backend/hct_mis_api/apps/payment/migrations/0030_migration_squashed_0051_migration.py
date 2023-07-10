@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('program', '0030_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('payment', '0029_migration'),
+        ('payment', '0010_migration_squashed_0029_migration'),
     ]
 
     operations = [

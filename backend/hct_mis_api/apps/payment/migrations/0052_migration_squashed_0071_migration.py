@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
         ("core", "0060_migration"),
         ("household", "0119_migration"),
         ("program", "0035_migration"),
-        ("payment", "0051_migration"),
+        ("payment", "0030_migration_squashed_0051_migration"),
         ("core", "0048_migration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

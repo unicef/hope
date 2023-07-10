@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('geo', '0003_migration'),
-        ('sanction_list', '0009_migration'),
+        ('sanction_list', '0001_migration_squashed_0009_migration'),
     ]
 
     operations = [
