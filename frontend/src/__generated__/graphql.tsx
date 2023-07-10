@@ -1324,6 +1324,7 @@ export type DocumentNode = Node & {
   clearedBy?: Maybe<UserNode>,
   issuanceDate?: Maybe<Scalars['DateTime']>,
   expiryDate?: Maybe<Scalars['DateTime']>,
+  program?: Maybe<ProgramNode>,
   countryIso3?: Maybe<Scalars['String']>,
 };
 
@@ -28227,6 +28228,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   issuanceDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   expiryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
