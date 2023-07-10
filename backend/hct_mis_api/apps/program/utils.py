@@ -6,7 +6,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
-def copy_program_object(copy_from_program_id, program_data: dict) -> Program:
+def copy_program_object(copy_from_program_id: str, program_data: dict) -> Program:
     program = Program.objects.get(id=copy_from_program_id)
     admin_areas = program.admin_areas.all()
     program.pk = None

@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
@@ -142,7 +143,7 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
     @classmethod
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
-        program_id = decode_id_string(program_data.pop("id"))
+        program_id = decode_id_string_required(program_data.pop("id"))
         business_area = Program.objects.get(id=program_id).business_area
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
