@@ -5,8 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('erp_datahub', '0001_migration'), ('erp_datahub', '0002_migration'), ('erp_datahub', '0003_migration'), ('erp_datahub', '0004_migration'), ('erp_datahub', '0005_migration'), ('erp_datahub', '0006_migration'), ('erp_datahub', '0007_migration'), ('erp_datahub', '0008_migration'), ('erp_datahub', '0009_migration'), ('erp_datahub', '0010_migration'), ('erp_datahub', '0011_migration'), ('erp_datahub', '0012_migration'), ('erp_datahub', '0013_migration'), ('erp_datahub', '0014_migration'), ('erp_datahub', '0015_migration'), ('erp_datahub', '0016_migration'), ('erp_datahub', '0017_migration')]
-
     dependencies = [
     ]
 

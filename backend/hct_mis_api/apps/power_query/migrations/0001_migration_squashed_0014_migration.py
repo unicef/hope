@@ -21,8 +21,6 @@ def generate_hashes(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('power_query', '0001_migration'), ('power_query', '0002_migration'), ('power_query', '0003_migration'), ('power_query', '0004_migration'), ('power_query', '0005_migration'), ('power_query', '0006_migration'), ('power_query', '0007_migration'), ('power_query', '0008_migration'), ('power_query', '0009_migration'), ('power_query', '0010_migration'), ('power_query', '0011_migration'), ('power_query', '0012_migration'), ('power_query', '0013_migration'), ('power_query', '0014_migration')]
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('contenttypes', '0002_remove_content_type_name'),

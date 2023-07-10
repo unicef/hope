@@ -12,6 +12,7 @@ class BaseTest(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.household = HouseholdFactory.build(business_area=BusinessAreaFactory(name="Test"))
+        cls.household.household_collection.save()
         cls.individual = IndividualFactory(household=cls.household)
         cls.household.head_of_household = cls.individual
         cls.household.registration_data_import = RegistrationDataImportFactory()

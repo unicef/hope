@@ -303,6 +303,12 @@ INDIVIDUAL_FLAGS_CHOICES = (
 logger = logging.getLogger(__name__)
 
 
+class HouseholdCollection(UnicefIdentifiedModel):
+    """
+    Collection of household representations.
+    """
+
+
 class Household(
     SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
 ):
@@ -371,6 +377,11 @@ class Household(
             "row_id",
         ]
     )
+    household_collection = models.ForeignKey(
+        HouseholdCollection,
+        related_name="households",
+        on_delete=models.CASCADE,
+    )
     withdrawn = models.BooleanField(default=False, db_index=True)
     withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
@@ -438,7 +449,7 @@ class Household(
         "program.Program",
         related_name="households",
         blank=True,
-    )
+    )  # TODO: remove after migration
     returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
@@ -477,7 +488,7 @@ class Household(
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
-    )  # TODO Add later related name, when no clash with programs
+    )  # TODO Add later related name, when no clash with programs, set null=False after migration
 
     class Meta:
         verbose_name = "Household"
@@ -727,6 +738,12 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
+class IndividualCollection(UnicefIdentifiedModel):
+    """
+    Collection of individual representations.
+    """
+
+
 class Individual(
     SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
 ):
@@ -779,6 +796,11 @@ class Individual(
             "kobo_asset_id",
             "row_id",
         ]
+    )
+    individual_collection = models.ForeignKey(
+        IndividualCollection,
+        related_name="individuals",
+        on_delete=models.CASCADE,
     )
     duplicate = models.BooleanField(default=False, db_index=True)
     duplicate_date = models.DateTimeField(null=True, blank=True)
@@ -875,7 +897,7 @@ class Individual(
     relationship_confirmed = models.BooleanField(default=False)
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
-    )
+    )  # TODO set null=False after migration
 
     vector_column = SearchVectorField(null=True)
 
