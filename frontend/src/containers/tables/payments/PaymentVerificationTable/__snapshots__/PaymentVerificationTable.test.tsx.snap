@@ -50,7 +50,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
               data-cy="table-title"
             >
-              List of Cash Plans
+              List of Payment Plans
             </h6>
           </div>
           <div
@@ -81,7 +81,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  Cash Plan ID
+                  Payment Plan ID
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
