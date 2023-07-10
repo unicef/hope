@@ -54,10 +54,10 @@ export function ActivityLogPageFilters({
     program: 'Programme',
     household: 'Household',
     individual: 'Individual',
-    grievanceticket: 'Grievance ticket',
-    paymentverificationplan: 'Cash plan payment verification',
+    grievanceticket: 'Grievance Tickets',
+    paymentverificationplan: 'Payment Plan Payment Verification',
     targetpopulation: 'Target Population',
-    registrationdataimport: 'Registration data import',
+    registrationdataimport: 'Registration Data Import',
   };
   return (
     <ContainerWithBorder>

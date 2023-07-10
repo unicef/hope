@@ -6,8 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("payment", "0046_migration"),
         ("program", "0035_migration"),
+        ("payment", "0030_migration_squashed_0051_migration"),
     ]
 
     operations = [

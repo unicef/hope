@@ -95,7 +95,7 @@ def get_other_document_number_query(_: Any, args: Any) -> Q:
 
 
 def get_documents_number_query(document_type: str, number: str) -> Q:
-    return Q(documents__type__type=document_type, documents__document_number=number)
+    return Q(documents__type__key=document_type.lower(), documents__document_number=number)
 
 
 def get_birth_certificate_issuer_query(_: Any, args: Any) -> Q:

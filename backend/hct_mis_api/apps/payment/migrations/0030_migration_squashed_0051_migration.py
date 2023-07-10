@@ -68,8 +68,6 @@ class Migrator:
 
 class Migration(migrations.Migration):
 
-    replaces = [('payment', '0030_migration'), ('payment', '0031_migration'), ('payment', '0032_migration'), ('payment', '0033_migration'), ('payment', '0034_migration'), ('payment', '0035_migration'), ('payment', '0036_migration'), ('payment', '0037_migration'), ('payment', '0038_migration'), ('payment', '0039_migration'), ('payment', '0040_migration'), ('payment', '0041_migration'), ('payment', '0042_migration'), ('payment', '0043_migration'), ('payment', '0044_migration'), ('payment', '0045_migration'), ('payment', '0046_migration'), ('payment', '0047_migration'), ('payment', '0048_migration'), ('payment', '0049_migration'), ('payment', '0050_migration'), ('payment', '0051_migration')]
-
     dependencies = [
         ('program', '0030_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

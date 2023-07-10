@@ -8,8 +8,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('cash_assist_datahub', '0001_migration'), ('cash_assist_datahub', '0002_migration'), ('cash_assist_datahub', '0003_migration'), ('cash_assist_datahub', '0004_migration'), ('cash_assist_datahub', '0005_migration'), ('cash_assist_datahub', '0006_migration'), ('cash_assist_datahub', '0007_migration'), ('cash_assist_datahub', '0008_migration'), ('cash_assist_datahub', '0009_migration'), ('cash_assist_datahub', '0010_migration'), ('cash_assist_datahub', '0011_migration'), ('cash_assist_datahub', '0012_migration'), ('cash_assist_datahub', '0013_migration'), ('cash_assist_datahub', '0014_migration'), ('cash_assist_datahub', '0015_migration')]
-
     dependencies = [
     ]
 
