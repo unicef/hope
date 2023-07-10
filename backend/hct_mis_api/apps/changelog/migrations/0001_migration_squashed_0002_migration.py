@@ -6,8 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('changelog', '0001_migration'), ('changelog', '0002_migration')]
-
     dependencies = [
     ]
 
