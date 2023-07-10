@@ -138,7 +138,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     role="button"
                     tabindex="0"
                   >
-                    Num. of households
+                    Num. of Households
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -188,7 +188,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     role="button"
                     tabindex="0"
                   >
-                    Last edited
+                    Last Edited
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

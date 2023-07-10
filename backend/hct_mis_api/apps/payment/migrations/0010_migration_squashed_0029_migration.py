@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
     replaces = [('payment', '0010_migration'), ('payment', '0011_migration'), ('payment', '0012_migration'), ('payment', '0013_migration'), ('payment', '0014_migration'), ('payment', '0015_migration'), ('payment', '0016_migration'), ('payment', '0017_migration'), ('payment', '0018_migration'), ('payment', '0019_migration'), ('payment', '0020_migration'), ('payment', '0021_migration'), ('payment', '0022_migration'), ('payment', '0023_migration'), ('payment', '0024_migration'), ('payment', '0025_migration'), ('payment', '0026_migration'), ('payment', '0027_migration'), ('payment', '0028_migration'), ('payment', '0029_migration')]
 
     dependencies = [
-        ('payment', '0009_migration'),
+        ('payment', '0004_migration_squashed_0009_migration'),
         ('household', '0052_migration'),
         ('program', '0019_migration'),
     ]
