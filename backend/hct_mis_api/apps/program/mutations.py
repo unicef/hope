@@ -15,9 +15,15 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
 from hct_mis_api.apps.core.validators import CommonValidator
-from hct_mis_api.apps.program.inputs import CreateProgramInput, UpdateProgramInput
+from hct_mis_api.apps.program.celery_tasks import copy_program_task
+from hct_mis_api.apps.program.inputs import (
+    CopyProgramInput,
+    CreateProgramInput,
+    UpdateProgramInput,
+)
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
+from hct_mis_api.apps.program.utils import copy_program_object
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
     ProgramValidator,
@@ -127,7 +133,33 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         return cls(ok=True)
 
 
+class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
+    program = graphene.Field(ProgramNode)
+
+    class Arguments:
+        program_data = CopyProgramInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
+        program_id = decode_id_string(program_data.pop("id"))
+        business_area = Program.objects.get(id=program_id).business_area
+        cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
+
+        cls.validate(
+            start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+        )
+        program = copy_program_object(program_id, program_data)
+
+        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
+
+        return CopyProgram(program=program)
+
+
 class Mutations(graphene.ObjectType):
     create_program = CreateProgram.Field()
     update_program = UpdateProgram.Field()
     delete_program = DeleteProgram.Field()
+    copy_program = CopyProgram.Field()

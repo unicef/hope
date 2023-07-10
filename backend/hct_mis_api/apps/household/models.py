@@ -489,6 +489,15 @@ class Household(
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
     )  # TODO Add later related name, when no clash with programs, set null=False after migration
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="""If this household was copied from another household,
+        this field will contain the household it was copied from.""",
+    )
 
     class Meta:
         verbose_name = "Household"
@@ -898,6 +907,16 @@ class Individual(
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
     )  # TODO set null=False after migration
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="copied_to",
+        on_delete=models.SET_NULL,
+        help_text="""If this individual was copied from another individual,
+        this field will contain the individual it was copied from.""",
+    )
 
     vector_column = SearchVectorField(null=True)
 
