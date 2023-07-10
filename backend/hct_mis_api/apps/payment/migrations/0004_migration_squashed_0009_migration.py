@@ -10,13 +10,10 @@ import uuid
 
 class Migration(migrations.Migration):
 
-    replaces = [('payment', '0004_migration'), ('payment', '0005_migration'), ('payment', '0006_migration'), ('payment', '0007_migration'), ('payment', '0008_migration'), ('payment', '0009_migration')]
-
     dependencies = [
-        ('household', '0006_migration'),
-        ('core', '0002_migration'),
-        ('program', '0005_migration'),
-        ('program', '0010_migration'),
+        ('household', '0003_migration_squashed_0086_migration'),
+        ('core', '0002_migration_squashed_0006_migration'),
+        ('program', '0002_migration_squashed_0020_migration'),
         ('targeting', '0006_migration'),
         ('payment', '0002_migration_squashed_0003_migration'),
     ]

@@ -33,13 +33,11 @@ def populate_partner_and_country(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('household', '0130_migration'), ('household', '0131_migration'), ('household', '0132_migration'), ('household', '0133_migration'), ('household', '0134_migration'), ('household', '0135_migration'), ('household', '0136_migration'), ('household', '0137_migration'), ('household', '0138_migration'), ('household', '0139_migration'), ('household', '0140_migration')]
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('geo', '0007_migration'),
         ('household', '0129_migration'),
-        ('account', '0043_migration'),
+        ('account', '0042_migration_squashed_0050_migration'),
     ]
 
     operations = [
