@@ -7,7 +7,7 @@ import {
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { DuplicateProgram } from '../../dialogs/programs/DuplicateProgram';
+import { CopyProgram } from '../../dialogs/programs/CopyProgram';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
@@ -44,12 +44,11 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
           Open in CashAssist
         </Button>
       </Box>
-      {/* //TODO: add when duplicate is ready
       {canDuplicate && (
         <Box m={2}>
-          <DuplicateProgram programId={program.id} />
+          <CopyProgram program={program} />
         </Box>
-      )} */}
+      )}
     </Box>
   );
 };

@@ -51,6 +51,7 @@ interface ProgramFormPropTypes {
   open: boolean;
   onClose: () => void;
   title: string;
+  initialValues?: { [key: string]: string | boolean | number };
 }
 
 export const ProgramForm = ({
@@ -60,6 +61,7 @@ export const ProgramForm = ({
   open,
   onClose,
   title,
+  initialValues,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
@@ -107,8 +109,9 @@ export const ProgramForm = ({
       .max(99999999, t('Number is too big')),
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let initialValue: { [key: string]: any } = {
+  let formInitialValue: {
+    [key: string]: string | boolean | number;
+  } = initialValues || {
     name: '',
     scope: '',
     startDate: '',
@@ -122,14 +125,15 @@ export const ProgramForm = ({
     cashPlus: false,
     individualDataNeeded: 'NO',
   };
+
   if (program) {
-    initialValue = selectFields(program, Object.keys(initialValue));
-    initialValue.individualDataNeeded = program.individualDataNeeded
+    formInitialValue = selectFields(program, Object.keys(formInitialValue));
+    formInitialValue.individualDataNeeded = program.individualDataNeeded
       ? 'YES'
       : 'NO';
   }
-  if (initialValue.budget === 0) {
-    initialValue.budget = '0.00';
+  if (formInitialValue.budget === 0) {
+    formInitialValue.budget = '0.00';
   }
   if (!data) return null;
 
@@ -150,7 +154,7 @@ export const ProgramForm = ({
         aria-labelledby='form-dialog-title'
       >
         <Formik
-          initialValues={initialValue}
+          initialValues={formInitialValue}
           onSubmit={(values, { setFieldError }) => {
             const newValues = { ...values };
             newValues.budget = Number(values.budget).toFixed(2);

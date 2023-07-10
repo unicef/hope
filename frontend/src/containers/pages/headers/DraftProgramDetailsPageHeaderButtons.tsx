@@ -4,7 +4,7 @@ import { ProgramNode } from '../../../__generated__/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
-import { DuplicateProgram } from '../../dialogs/programs/DuplicateProgram';
+import { CopyProgram } from '../../dialogs/programs/CopyProgram';
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
@@ -37,12 +37,11 @@ export const DraftProgramDetailsPageHeaderButtons = ({
           <ActivateProgram program={program} />
         </Box>
       )}
-      {/* //TODO: add when duplicate is ready
       {canDuplicate && (
         <Box m={2}>
-          <DuplicateProgram programId={program.id} />
+          <CopyProgram program={program} />
         </Box>
-      )} */}
+      )}
     </Box>
   );
 };

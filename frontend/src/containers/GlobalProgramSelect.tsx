@@ -47,7 +47,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100, status: ['ACTIVE'] },
+    variables: { businessArea, first: 100 },
     fetchPolicy: 'cache-and-network',
   });
 

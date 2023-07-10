@@ -9845,6 +9845,22 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = (
   )> }
 );
 
+export type CopyProgramMutationVariables = {
+  programData: CopyProgramInput
+};
+
+
+export type CopyProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { copyProgram: Maybe<(
+    { __typename?: 'CopyProgram' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+    )> }
+  )> }
+);
+
 export type CreateProgramMutationVariables = {
   programData: CreateProgramInput
 };
@@ -17128,6 +17144,57 @@ export function useUpdatePaymentVerificationStatusAndReceivedAmountMutation(base
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
+export const CopyProgramDocument = gql`
+    mutation CopyProgram($programData: CopyProgramInput!) {
+  copyProgram(programData: $programData) {
+    program {
+      id
+    }
+  }
+}
+    `;
+export type CopyProgramMutationFn = ApolloReactCommon.MutationFunction<CopyProgramMutation, CopyProgramMutationVariables>;
+export type CopyProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CopyProgramMutation, CopyProgramMutationVariables>, 'mutation'>;
+
+    export const CopyProgramComponent = (props: CopyProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<CopyProgramMutation, CopyProgramMutationVariables> mutation={CopyProgramDocument} {...props} />
+    );
+    
+export type CopyProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CopyProgramMutation, CopyProgramMutationVariables> & TChildProps;
+export function withCopyProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CopyProgramMutation,
+  CopyProgramMutationVariables,
+  CopyProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CopyProgramMutation, CopyProgramMutationVariables, CopyProgramProps<TChildProps>>(CopyProgramDocument, {
+      alias: 'copyProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCopyProgramMutation__
+ *
+ * To run a mutation, you first call `useCopyProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyProgramMutation, { data, loading, error }] = useCopyProgramMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *   },
+ * });
+ */
+export function useCopyProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CopyProgramMutation, CopyProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<CopyProgramMutation, CopyProgramMutationVariables>(CopyProgramDocument, baseOptions);
+      }
+export type CopyProgramMutationHookResult = ReturnType<typeof useCopyProgramMutation>;
+export type CopyProgramMutationResult = ApolloReactCommon.MutationResult<CopyProgramMutation>;
+export type CopyProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyProgramMutation, CopyProgramMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {

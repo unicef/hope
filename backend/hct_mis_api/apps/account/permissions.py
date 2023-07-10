@@ -49,6 +49,7 @@ class Permissions(Enum):
     PROGRAMME_REMOVE = auto()
     PROGRAMME_ACTIVATE = auto()
     PROGRAMME_FINISH = auto()
+    PROGRAMME_DUPLICATE = auto()
 
     # Targeting
     TARGETING_VIEW_LIST = auto()
@@ -242,7 +243,9 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
+def check_permissions(
+    user: Any, permissions: Iterable[Permissions], **kwargs: Any
+) -> bool:
     if not user.is_authenticated:
         return False
     business_area_arg = kwargs.get("business_area")
@@ -254,7 +257,10 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
         business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
     if business_area is None:
         return False
-    return any(user.has_permission(permission.name, business_area) for permission in permissions)
+    return any(
+        user.has_permission(permission.name, business_area)
+        for permission in permissions
+    )
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
@@ -283,10 +289,15 @@ class BaseNodePermissionMixin:
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Any) -> None:
-        business_area = getattr(object_instance, "business_area", None)  # not every object has business_area attr
+        business_area = getattr(
+            object_instance, "business_area", None
+        )  # not every object has business_area attr
         if (
             business_area
-            and not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)
+            and not any(
+                perm.has_permission(info, business_area=business_area)
+                for perm in cls.permission_classes
+            )
         ) or not (business_area or info.context.user.is_authenticated):
             raise PermissionDenied("Permission Denied")
 
@@ -356,7 +367,9 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
             if self._extra_filter_meta:
                 meta.update(self._extra_filter_meta)
 
-            filterset_class = self._provided_filterset_class or (self.node_type._meta.filterset_class)
+            filterset_class = self._provided_filterset_class or (
+                self.node_type._meta.filterset_class
+            )
             self._filterset_class = get_filterset_class(filterset_class, **meta)
 
         return self._filterset_class
@@ -379,10 +392,14 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if business_area := info.context.headers.get("Business-Area"):
             filter_kwargs["business_area"] = business_area
-        if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
+        if not any(
+            perm.has_permission(info, **filter_kwargs) for perm in permission_classes
+        ):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:
-            filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
+            filter_kwargs[
+                "permissions"
+            ] = info.context.user.permissions_in_business_area(
                 filter_kwargs.get("business_area")
             )
         qs = super().resolve_queryset(connection, iterable, info, args)
@@ -410,10 +427,16 @@ class BaseMutationPermissionMixin:
 
     @classmethod
     def has_permission(
-        cls, info: Any, permission: Any, business_area_arg: Union[str, BusinessArea], raise_error: bool = True
+        cls,
+        info: Any,
+        permission: Any,
+        business_area_arg: Union[str, BusinessArea],
+        raise_error: bool = True,
     ) -> bool:
         cls.is_authenticated(info)
-        permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
+        permissions: Iterable = (
+            (permission,) if not isinstance(permission, list) else permission
+        )
         if isinstance(business_area_arg, BusinessArea):
             business_area = business_area_arg
         else:
@@ -447,8 +470,16 @@ class BaseMutationPermissionMixin:
         cls.is_authenticated(info)
         if not (
             cls.has_permission(info, general_permission, business_area_arg, False)
-            or (is_creator and cls.has_permission(info, creator_permission, business_area_arg, False))
-            or (is_owner and cls.has_permission(info, owner_permission, business_area_arg, False))
+            or (
+                is_creator
+                and cls.has_permission(
+                    info, creator_permission, business_area_arg, False
+                )
+            )
+            or (
+                is_owner
+                and cls.has_permission(info, owner_permission, business_area_arg, False)
+            )
         ):
             return cls.raise_permission_denied_error(raise_error=raise_error)
         return True
@@ -457,7 +488,9 @@ class BaseMutationPermissionMixin:
     def raise_permission_denied_error(raise_error: bool = True) -> bool:
         if not raise_error:
             return False
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied(
+            "Permission Denied: User does not have correct permission."
+        )
 
     @staticmethod
     def raise_not_authenticated_error() -> None:
