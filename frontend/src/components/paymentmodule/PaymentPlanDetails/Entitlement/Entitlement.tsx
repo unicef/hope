@@ -165,6 +165,9 @@ export const Entitlement = ({
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
                   disabled={shouldDisableEntitlementSelect}
+                  MenuProps={{
+                    getContentAnchorEl: null,
+                  }}
                   value={steficonRuleValue}
                   data-cy='input-entitlement-formula'
                   labelWidth={180}

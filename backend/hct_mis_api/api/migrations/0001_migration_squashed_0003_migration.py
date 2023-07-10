@@ -9,11 +9,8 @@ import hct_mis_api.apps.account.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [('api', '0001_migration'), ('api', '0002_migration'), ('api', '0003_migration')]
-
     dependencies = [
-        ('core', '0054_migration'),
-        ('core', '0053_migration'),
+        ('core', '0044_migration_squashed_0057_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

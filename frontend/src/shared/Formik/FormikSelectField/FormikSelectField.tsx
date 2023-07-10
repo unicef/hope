@@ -36,6 +36,7 @@ export const FormikSelectField = ({
           SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
           MenuProps={{
             'data-cy': `select-options-${field.name}`,
+            getContentAnchorEl: null,
             MenuListProps: { 'data-cy': 'select-options-container' },
           }}
         >

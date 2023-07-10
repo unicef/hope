@@ -50,7 +50,7 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       to: `/${baseUrl}/details/${data.paymentRecord.parent.program.id}/`,
     },
     {
-      title: `Cash Plan #${data.paymentRecord.parent.caId}`,
+      title: `Payment Plan #${data.paymentRecord.parent.caId}`,
       to: `/${baseUrl}/cashplans/${data.paymentRecord.parent.id}`,
     },
   ];
