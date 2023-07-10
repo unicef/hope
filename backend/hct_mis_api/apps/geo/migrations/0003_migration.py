@@ -18,7 +18,7 @@ def empty_reverse(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("geo", "0002_migration"),
-        ("core", "0040_migration"),
+        ("core", "0017_migration_squashed_0040_migration"),
     ]
 
     operations = [

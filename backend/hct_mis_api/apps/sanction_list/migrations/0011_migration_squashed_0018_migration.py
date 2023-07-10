@@ -5,8 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    replaces = [('sanction_list', '0011_migration'), ('sanction_list', '0012_migration'), ('sanction_list', '0013_migration'), ('sanction_list', '0014_migration'), ('sanction_list', '0015_migration'), ('sanction_list', '0016_migration'), ('sanction_list', '0017_migration'), ('sanction_list', '0018_migration')]
-
     dependencies = [
         ('sanction_list', '0010_migration'),
     ]

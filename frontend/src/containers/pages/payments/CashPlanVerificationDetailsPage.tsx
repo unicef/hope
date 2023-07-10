@@ -114,7 +114,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
     <PageHeader
       title={
         <BlackLink fullWidth to={`/${businessArea}/cashplans/${cashPlan.id}`}>
-          {t('Cash Plan')} {cashPlan.caId}
+          {t('Payment Plan')} {cashPlan.caId}
         </BlackLink>
       }
       breadCrumbs={
