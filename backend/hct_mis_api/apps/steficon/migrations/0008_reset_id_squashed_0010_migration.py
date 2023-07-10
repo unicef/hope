@@ -9,8 +9,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('steficon', '0008_reset_id'), ('steficon', '0009_restore_id'), ('steficon', '0010_migration')]
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('steficon', '0003_migration_squashed_0007_empty_rules'),

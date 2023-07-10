@@ -10,7 +10,7 @@ export default class PaymentVerification extends BaseComponent {
   startDate = 'div[data-cy="filter-start-date"]';
   endDate = 'div[data-cy="filter-end-date"]';
   statusOptions = 'li[role="option"]';
-  listOfCashPlansTitle = 'h6[data-cy="table-title"]';
+  listOfPaymentPlansTitle = 'h6[data-cy="table-title"]';
   buttonApply = 'button[data-cy="button-filters-apply"]';
   tableTitle = 'table[data-cy="table-title"]';
   tableColumn = 'span[data-cy="table-label"]';
@@ -18,14 +18,15 @@ export default class PaymentVerification extends BaseComponent {
 
   // Texts
   textTitle = "Payment Verification";
-  textTabTitle = "List of Cash Plans";
-  textPaymentPlanID = "Cash/Payment Plan ID";
+  textTabTitle = "List of Payment Plans";
+  textPaymentPlanID = "Payment Plan ID";
   textStatus = "Status";
   textFSP = "FSP";
   textModality = "Modality";
   textStartDate = "Start Date";
   textEndDate = "End Date";
-  textCashPlanID = "Cash Plan ID";
+  textProgramme = "Programme";
+  textPaymentPlanID = "Payment Plan ID";
   textVerificationStatus = "Verification Status";
   textCashAmount = "Cash Amount";
   textTimeframe = "Timeframe";
@@ -33,7 +34,7 @@ export default class PaymentVerification extends BaseComponent {
 
   // Elements
   getPaymentVerificationTitle = () => cy.get(this.paymentVerificationTitle);
-  getListOfCashPlansTitle = () => cy.get(this.listOfCashPlansTitle);
+  getListOfPaymentPlansTitle = () => cy.get(this.listOfPaymentPlansTitle);
   getPaymentPlanID = () => cy.get(this.paymentPlanID).eq(0);
   getStatus = () => cy.get(this.status);
   getFSP = () => cy.get(this.FSP);
@@ -41,12 +42,13 @@ export default class PaymentVerification extends BaseComponent {
   getStartDate = () => cy.get(this.startDate);
   getEndDate = () => cy.get(this.endDate);
   getTable = () => cy.get(this.tableTitle);
-  getCashPlanID = () => cy.get(this.tableColumn).eq(0);
+  getPaymentPlanID = () => cy.get(this.tableColumn).eq(0);
   getVerificationStatus = () => cy.get(this.tableColumn).eq(1);
   getCashAmount = () => cy.get(this.tableColumn).eq(2);
   getTimeFrame = () => cy.get(this.tableColumn).eq(3);
-  getLastModifiedDate = () => cy.get(this.tableColumn).eq(4);
-  getCashPlanRows = () => cy.get(this.rows);
+  getColumnProgramme = () => cy.get(this.tableColumn).eq(4);
+  getLastModifiedDate = () => cy.get(this.tableColumn).eq(5);
+  getPaymentPlanRows = () => cy.get(this.rows);
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);
 
@@ -54,8 +56,8 @@ export default class PaymentVerification extends BaseComponent {
     return this.getPaymentVerificationTitle().contains(this.textTitle);
   }
 
-  checkListOfCashPlansTitle() {
-    return this.getListOfCashPlansTitle().contains(this.textTabTitle);
+  checkListOfPaymentPlansTitle() {
+    return this.getListOfPaymentPlansTitle().contains(this.textTabTitle);
   }
 
   checkAllSearchFieldsVisible() {
@@ -73,9 +75,11 @@ export default class PaymentVerification extends BaseComponent {
     this.getEndDate().get("span").contains(this.textEndDate);
   }
 
-  checkCashPlansTableVisible() {
+  checkPaymentPlansTableVisible() {
     this.getTable().should("be.visible");
-    this.getCashPlanID().should("be.visible").contains(this.textCashPlanID);
+    this.getPaymentPlanID()
+      .should("be.visible")
+      .contains(this.textPaymentPlanID);
     this.getVerificationStatus()
       .should("be.visible")
       .contains(this.textVerificationStatus);
@@ -87,18 +91,18 @@ export default class PaymentVerification extends BaseComponent {
       .contains(this.textLastModifiedDate);
   }
 
-  countCashPlanArray() {
+  countPaymentPlanArray() {
     return Array.from(Array(1).keys());
   }
 
-  chooseCashPlan(row) {
-    return this.getCashPlanRows().eq(row);
+  choosePaymentPlan(row) {
+    return this.getPaymentPlanRows().eq(row);
   }
 
   selectStatus(status) {
     this.getStatus().click();
     this.getStatusOption().contains(status).click();
-    this.pressEscapeFromElement(this.getStatusOption().contains(status))
+    this.pressEscapeFromElement(this.getStatusOption().contains(status));
     this.getApply().click();
   }
 }
