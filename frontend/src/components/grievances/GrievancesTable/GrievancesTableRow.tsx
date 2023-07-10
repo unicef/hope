@@ -1,5 +1,6 @@
 import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
+import { useHistory } from 'react-router-dom';
 import React from 'react';
 import {
   AllGrievanceTicketDocument,
@@ -57,6 +58,7 @@ export const GrievancesTableRow = ({
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
+  const history = useHistory();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
@@ -96,8 +98,20 @@ export const GrievancesTableRow = ({
     }
   };
 
+  const handleRowClick = (): void => {
+    if (canViewDetails) {
+      history.push(detailsPath);
+    }
+    return null;
+  };
+
   return (
-    <ClickableTableRow hover role='checkbox' key={ticket.id}>
+    <ClickableTableRow
+      onClick={handleRowClick}
+      hover
+      role='checkbox'
+      key={ticket.id}
+    >
       <TableCell align='left' padding='checkbox'>
         <Checkbox
           color='primary'

@@ -44,6 +44,7 @@ export const AssignedToDropdown = ({
 
   const onChangeMiddleware = (e, selectedValue): void => {
     e.preventDefault();
+    e.stopPropagation();
     if (ids) {
       onFilterChange(selectedValue, ids);
     } else {
@@ -62,11 +63,13 @@ export const AssignedToDropdown = ({
       disableClearable={disableClearable}
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
-      onOpen={() => {
+      onOpen={(e) => {
+        e.stopPropagation();
         setOpen(true);
       }}
       onClose={(e, reason) => {
         e.preventDefault();
+        e.stopPropagation();
         setOpen(false);
         if (reason === 'select-option') return;
         onInputTextChange('');
@@ -89,7 +92,14 @@ export const AssignedToDropdown = ({
           value={inputValue}
           variant={label ? 'outlined' : 'standard'}
           label={value ? label : t('Not assigned')}
-          onChange={(e) => onInputTextChange(e.target.value)}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          onChange={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onInputTextChange(e.target.value);
+          }}
           InputProps={{
             ...params.InputProps,
             endAdornment: <>{params.InputProps.endAdornment}</>,

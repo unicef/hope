@@ -4,7 +4,7 @@ export default class Grievance extends BaseComponent {
   // Locators
   titlePage = 'h5[data-cy="page-header-title"]';
   searchFilter = 'div[data-cy="filters-search"]';
-  ticketIdFilter = 'div[data-cy="filters-search-type"]';
+  ticketTypeFilter = 'div[data-cy="filters-search-type"]';
   ticketId = 'li[data-value="ticket_id"]';
   householdId = 'li[data-value="ticket_hh_id"]';
   lastName = 'li[data-value="last_name"]';
@@ -42,6 +42,12 @@ export default class Grievance extends BaseComponent {
   tabLastModifiedDate = 'th[data-cy="userModified"]';
   tabTotalDays = 'th[data-cy="totalDays"]';
   ticketListRow = 'tr[role="checkbox"]';
+  statusOptions = 'li[role="option"]';
+
+  dateTitleFilterPopup =
+    'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]';
+  daysFilterPopup =
+    'div[class="MuiPickersSlideTransition-transitionContainer MuiPickersCalendar-transitionContainer"]';
 
   // Texts
   textTitle = "Grievance Tickets";
@@ -51,7 +57,7 @@ export default class Grievance extends BaseComponent {
   getGrievanceTitle = () => cy.get(this.titlePage);
   getTabTitle = () => cy.get(this.tabTitle);
   getSearchFilter = () => cy.get(this.searchFilter);
-  getTicketIdFilter = () => cy.get(this.ticketIdFilter);
+  getTicketTypeFilter = () => cy.get(this.ticketTypeFilter);
   getCreationDateFromFilter = () => cy.get(this.creationDateFromFilter);
   getCreationDateToFilter = () => cy.get(this.creationDateToFilter);
   getStatusFilter = () => cy.get(this.statusFilter);
@@ -88,6 +94,9 @@ export default class Grievance extends BaseComponent {
   getTabSystemGenerated = () => cy.get(this.tabSystemGenerated);
   getTabUserGenerated = () => cy.get(this.tabUserGenerated);
   getTicketListRow = () => cy.get(this.ticketListRow);
+  getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
+  getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
+  getOptions = () => cy.get(this.statusOptions);
 
   checkElementsOnUserGeneratedPage() {
     this.getGrievanceTitle().contains(this.textTitle);
@@ -99,6 +108,53 @@ export default class Grievance extends BaseComponent {
     this.checkAllColumnsVisibility();
   }
 
+  chooseTicketListRow(num = 0, contains = "GRV-0000002") {
+    // ToDo: Use after fix bug: 164824
+    // return this.getTicketListRow().eq(num);
+    return this.getTicketListRow().eq(num).find("a").contains(contains);
+  }
+
+  chooseCategoryFilter(category) {
+    this.getCategoryFilter().click();
+    this.getOptions().contains(category).click();
+    this.getButtonApply().click();
+  }
+
+  chooseStatusFilter(status) {
+    this.getStatusFilter().click();
+    this.getOptions().contains(status).click();
+    this.getButtonApply().click();
+  }
+
+  choosePriorityFilter(prio) {
+    this.getPriorityFilter().click();
+    this.getOptions().contains(prio).click();
+    this.getButtonApply().click();
+  }
+
+  chooseUrgencyFilter(urgency) {
+    this.getUrgencyFilter().click();
+    this.getOptions().contains(urgency).click();
+    this.getButtonApply().click();
+  }
+
+  chooseRDIFilter(rdi) {
+    this.getRegistrationDataImportFilter().click();
+    this.getOptions().contains(rdi).click();
+    this.getButtonApply().click();
+  }
+
+  chooseAdminFilter(name) {
+    this.getAdminLevelFilter().click();
+    this.getOptions().contains(name).click();
+    this.getButtonApply().click();
+  }
+
+  chooseAssigneeFilter(mail) {
+    this.getAssigneeFilter().click();
+    this.getOptions().contains(mail).click();
+    this.getButtonApply().click();
+  }
   checkElementsOnSystemGeneratedPage() {
     this.getTabSystemGenerated().click();
     this.getGrievanceTitle().contains(this.textTitle);
@@ -110,16 +166,16 @@ export default class Grievance extends BaseComponent {
     this.getTicketListRow().eq(0).should("be.visible");
   }
 
-  checkElementsOfTicketIdFilter() {
-    this.getTicketIdFilter().click();
+  checkElementsOfTicketTypeFilter() {
+    this.getTicketTypeFilter().click();
     this.getTicketID().should("be.visible");
     this.getHouseholdID().should("be.visible");
-    this.getLastName().should("be.visible").type("{esc}");
+    this.pressEscapeFromElement(this.getLastName().should("be.visible"))
   }
 
   checkAllSearchFieldsVisible() {
     this.getSearchFilter().should("be.visible");
-    this.getTicketIdFilter().should("be.visible");
+    this.getTicketTypeFilter().should("be.visible");
     this.getCreationDateFromFilter().should("be.visible");
     this.getCreationDateToFilter().should("be.visible");
     this.getStatusFilter().should("be.visible");
@@ -132,7 +188,7 @@ export default class Grievance extends BaseComponent {
     this.getPriorityFilter().should("be.visible");
     this.getUrgencyFilter().should("be.visible");
     this.getActiveTicketsFilter().should("be.visible");
-    this.checkElementsOfTicketIdFilter();
+    this.checkElementsOfTicketTypeFilter();
     this.getButtonApply().should("be.visible");
     this.getButtonClear().should("be.visible");
   }
@@ -149,5 +205,88 @@ export default class Grievance extends BaseComponent {
     this.getTabCreationData().scrollIntoView().should("be.visible");
     this.getTabLastModifiedDate().scrollIntoView().should("be.visible");
     this.getTabTotalDays().scrollIntoView().should("be.visible");
+  }
+
+  useSearchFilter(text) {
+    this.getSearchFilter().type(text);
+    this.getButtonApply().click();
+  }
+  chooseTicketTypeHouseholdID() {
+    this.getTicketTypeFilter().click();
+    this.getHouseholdID().click();
+    this.pressEscapeFromElement(this.getHouseholdID())
+    this.getButtonApply().click();
+  }
+
+  chooseTicketTypeTicketID() {
+    this.getTicketTypeFilter().click();
+    this.getTicketID().click();
+    this.pressEscapeFromElement(this.getTicketID())
+    this.getButtonApply().click();
+  }
+
+  chooseTicketTypeLastName() {
+    this.getTicketTypeFilter().click();
+    this.getLastName().click();
+    this.pressEscapeFromElement(this.getLastName())
+    this.getButtonApply().click();
+  }
+
+  checkTicketTypeFilterText(text) {
+    this.getTicketTypeFilter()
+      .find("div")
+      .eq(0)
+      .scrollIntoView()
+      .contains(text);
+  }
+
+  changeCreationDateFrom(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateFromFilter().type(date);
+  }
+
+  openCreationDateFromFilter() {
+    this.getCreationDateFromFilter().find("button").click();
+  }
+
+  chooseDayFilterPopup(day) {
+    this.getDaysFilterPopup().contains("p", day).click();
+  }
+
+  checkDateFilterFrom(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateFromFilter().find("input").should("have.value", date);
+  }
+
+  changeCreationDateTo(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateToFilter().type(date);
+  }
+
+  openCreationDateToFilter() {
+    this.getCreationDateToFilter().find("button").click();
+  }
+
+  checkDateFilterTo(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateToFilter().find("input").should("have.value", date);
+  }
+
+  checkDateTitleFilter(date) {
+    // Date format (String): Www, Mmm D
+    // Example: Sat, Jan 1
+    this.getDateTitleFilterPopup().contains(date).type("{esc}");
+  }
+  chooseTab(tabName) {
+    // Possibilities (String): USER-GENERATED, SYSTEM-GENERATED
+    cy.get(`button[data-cy="tab-${tabName}"]`).click();
+  }
+
+  expectedNumberOfRows(num) {
+    if (num === 0) {
+      this.getTicketListRow().should("not.exist");
+    } else {
+      this.getTicketListRow().should("have.length", num);
+    }
   }
 }
