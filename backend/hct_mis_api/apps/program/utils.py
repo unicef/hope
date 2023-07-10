@@ -6,7 +6,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
-def copy_program_object(copy_from_program_id: str, program_data: dict) -> Program:
+def copy_program_object(copy_from_program_id, program_data: dict) -> Program:
     program = Program.objects.get(id=copy_from_program_id)
     admin_areas = program.admin_areas.all()
     program.pk = None
@@ -21,15 +21,15 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     return program
 
 
-def copy_program_related_data(copy_from_program_id: str, new_program: Program):
-    copy_individual(copy_from_program_id, new_program)
-    copy_household(copy_from_program_id, new_program)
+def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
+    copy_individuals(copy_from_program_id, new_program)
+    copy_households(copy_from_program_id, new_program)
     copy_household_related_data(new_program)
     copy_individual_related_data(new_program)
     create_program_cycle(new_program)
 
 
-def create_program_cycle(program: Program):
+def create_program_cycle(program: Program) -> None:
     ProgramCycle.objects.create(
         program=program,
         start_date=program.start_date,
@@ -38,7 +38,7 @@ def create_program_cycle(program: Program):
     )
 
 
-def copy_individual(copy_from_program_id: str, program: Program):
+def copy_individuals(copy_from_program_id: str, program: Program) -> None:
     copied_from_individuals = Individual.objects.filter(
         program_id=copy_from_program_id, withdrawn=False, duplicate=False
     )
@@ -50,7 +50,7 @@ def copy_individual(copy_from_program_id: str, program: Program):
         individual.save()
 
 
-def copy_household(copy_from_program_id: str, program: Program):
+def copy_households(copy_from_program_id: str, program: Program) -> None:
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
         withdrawn=False,
@@ -67,14 +67,14 @@ def copy_household(copy_from_program_id: str, program: Program):
         household.save()
 
 
-def copy_household_related_data(program: Program):
+def copy_household_related_data(program: Program) -> None:
     new_households = Household.objects.filter(program=program).select_related("copied_from")
     for new_household in new_households:
         copy_roles_per_household(new_household, program)
-        copy_entitlement_card_per_household(new_household)
+        copy_entitlement_cards_per_household(new_household)
 
 
-def copy_roles_per_household(new_household: Household, program: Program):
+def copy_roles_per_household(new_household: Household, program: Program) -> None:
     copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
 
     for role in copied_from_roles:
@@ -87,7 +87,7 @@ def copy_roles_per_household(new_household: Household, program: Program):
         role.save()
 
 
-def copy_entitlement_card_per_household(new_household: Household):
+def copy_entitlement_cards_per_household(new_household: Household) -> None:
     old_entitlement_cards = new_household.copied_from.entitlement_cards.all()
     for entitlement_card in old_entitlement_cards:
         entitlement_card.pk = None
@@ -95,16 +95,16 @@ def copy_entitlement_card_per_household(new_household: Household):
         entitlement_card.save()
 
 
-def copy_individual_related_data(program: Program):
+def copy_individual_related_data(program: Program) -> None:
     new_individuals = Individual.objects.filter(program=program)
     for new_individual in new_individuals:
         set_household_per_individual(new_individual, program)
-        copy_document_per_individual(new_individual)
-        copy_individual_identity_per_individual(new_individual)
+        copy_documents_per_individual(new_individual)
+        copy_individual_identities_per_individual(new_individual)
         copy_bank_account_info_per_individual(new_individual)
 
 
-def set_household_per_individual(new_individual: Individual, program: Program):
+def set_household_per_individual(new_individual: Individual, program: Program) -> None:
     new_individual.household = Household.objects.get(
         program=program,
         copied_from_id=new_individual.household_id,
@@ -112,7 +112,7 @@ def set_household_per_individual(new_individual: Individual, program: Program):
     new_individual.save()
 
 
-def copy_document_per_individual(new_individual: Individual):
+def copy_documents_per_individual(new_individual: Individual) -> None:
     old_documents = new_individual.copied_from.documents.all()
     for document in old_documents:
         document.pk = None
@@ -120,7 +120,7 @@ def copy_document_per_individual(new_individual: Individual):
         document.save()
 
 
-def copy_individual_identity_per_individual(new_individual: Individual):
+def copy_individual_identities_per_individual(new_individual: Individual) -> None:
     old_individual_identity = new_individual.copied_from.identities.all()
     for individual_identity in old_individual_identity:
         individual_identity.pk = None
@@ -128,7 +128,7 @@ def copy_individual_identity_per_individual(new_individual: Individual):
         individual_identity.save()
 
 
-def copy_bank_account_info_per_individual(new_individual: Individual):
+def copy_bank_account_info_per_individual(new_individual: Individual) -> None:
     old_bank_account_info = new_individual.copied_from.bank_account_info.all()
     for bank_account_info in old_bank_account_info:
         bank_account_info.pk = None
