@@ -15,7 +15,6 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   python3-gdal \
   gdal-bin \
   curl \
-  zip \
   vim &&\
   addgroup --system --gid 82 hope &&\
   adduser --system --uid 82 --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
