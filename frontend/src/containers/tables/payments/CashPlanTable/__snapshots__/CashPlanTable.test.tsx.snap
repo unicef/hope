@@ -50,7 +50,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
               data-cy="table-title"
             >
-              Cash Plans
+              Payment Plans
             </h6>
           </div>
           <div
@@ -80,7 +80,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   role="button"
                   tabindex="0"
                 >
-                  Cash Plan ID
+                  Payment Plan ID
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
