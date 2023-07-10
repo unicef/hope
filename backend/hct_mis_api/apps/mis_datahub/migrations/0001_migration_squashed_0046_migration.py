@@ -63,11 +63,9 @@ def unmark_sent_tp(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('mis_datahub', '0001_migration'), ('mis_datahub', '0002_migration'), ('mis_datahub', '0003_migration'), ('mis_datahub', '0004_migration'), ('mis_datahub', '0005_migration'), ('mis_datahub', '0006_migration'), ('mis_datahub', '0007_migration'), ('mis_datahub', '0008_migration'), ('mis_datahub', '0009_migration'), ('mis_datahub', '0010_migration'), ('mis_datahub', '0011_migration'), ('mis_datahub', '0012_migration'), ('mis_datahub', '0013_migration'), ('mis_datahub', '0014_migration'), ('mis_datahub', '0015_migration'), ('mis_datahub', '0016_migration'), ('mis_datahub', '0017_migration'), ('mis_datahub', '0018_migration'), ('mis_datahub', '0019_migration'), ('mis_datahub', '0020_migration'), ('mis_datahub', '0021_migration'), ('mis_datahub', '0022_migration'), ('mis_datahub', '0023_migration'), ('mis_datahub', '0024_migration'), ('mis_datahub', '0025_migration'), ('mis_datahub', '0026_migration'), ('mis_datahub', '0027_migration'), ('mis_datahub', '0028_migration'), ('mis_datahub', '0029_migration'), ('mis_datahub', '0030_migration'), ('mis_datahub', '0031_migration'), ('mis_datahub', '0032_migration'), ('mis_datahub', '0033_migration'), ('mis_datahub', '0034_migration'), ('mis_datahub', '0035_migration'), ('mis_datahub', '0036_migration'), ('mis_datahub', '0037_migration'), ('mis_datahub', '0038_migration'), ('mis_datahub', '0039_migration'), ('mis_datahub', '0040_migration'), ('mis_datahub', '0041_migration'), ('mis_datahub', '0042_migration'), ('mis_datahub', '0043_migration'), ('mis_datahub', '0044_migration'), ('mis_datahub', '0045_migration'), ('mis_datahub', '0046_migration')]
-
     dependencies = [
-        ('targeting', '0007_migration'),
-        ('program', '0008_migration'),
+        ('targeting', '0007_migration_squashed_0028_migration'),
+        ('program', '0002_migration_squashed_0020_migration'),
     ]
 
     operations = [

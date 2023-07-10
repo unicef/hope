@@ -109,13 +109,11 @@ def undo_ticket_sensitive_migration(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('grievance', '0055_migration'), ('grievance', '0056_migration'), ('grievance', '0057_migration'), ('grievance', '0058_migration'), ('grievance', '0059_migration'), ('grievance', '0060_migration'), ('grievance', '0061_migration')]
-
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
         ('grievance', '0054_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('account', '0050_migration'),
+        ('account', '0042_migration_squashed_0050_migration'),
         ('program', '0035_migration'),
         ('household', '0147_migration'),
     ]

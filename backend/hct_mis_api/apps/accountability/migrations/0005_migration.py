@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('program', '0034_migration'),
-        ('core', '0055_migration'),
+        ('core', '0044_migration_squashed_0057_migration'),
         ('targeting', '0034_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('household', '0124_migration'),

@@ -9,8 +9,6 @@ import model_utils.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [('core', '0060_migration'), ('core', '0061_migration'), ('core', '0062_migration'), ('core', '0063_migration'), ('core', '0064_migration')]
-
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
