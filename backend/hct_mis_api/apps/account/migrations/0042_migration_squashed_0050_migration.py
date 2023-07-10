@@ -8,10 +8,8 @@ import hct_mis_api.apps.account.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [('account', '0042_migration'), ('account', '0043_migration'), ('account', '0044_migration'), ('account', '0045_migration'), ('account', '0046_migration'), ('account', '0047_migration'), ('account', '0048_migration'), ('account', '0049_migration'), ('account', '0050_migration')]
-
     dependencies = [
-        ('core', '0057_migration'),
+        ('core', '0044_migration_squashed_0057_migration'),
         ('account', '0031_migration_squashed_0041_migration'),
         ('auth', '0012_alter_user_first_name_max_length'),
     ]

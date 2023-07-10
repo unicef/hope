@@ -64,8 +64,6 @@ def revert_change_tp_statuses(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('targeting', '0007_migration'), ('targeting', '0008_migration'), ('targeting', '0009_migration'), ('targeting', '0010_migration'), ('targeting', '0011_migration'), ('targeting', '0012_migration'), ('targeting', '0013_migration'), ('targeting', '0014_migration'), ('targeting', '0015_migration'), ('targeting', '0016_migration'), ('targeting', '0017_migration'), ('targeting', '0018_migration'), ('targeting', '0019_migration'), ('targeting', '0020_migration'), ('targeting', '0021_migration'), ('targeting', '0022_migration'), ('targeting', '0023_migration'), ('targeting', '0024_migration'), ('targeting', '0025_migration'), ('targeting', '0026_migration'), ('targeting', '0027_migration'), ('targeting', '0028_migration')]
-
     dependencies = [
         ('steficon', '0002_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
