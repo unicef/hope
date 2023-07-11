@@ -42,9 +42,6 @@ services:
     depends_on:
       - proxy
       - celery_worker
-    environment:
-      BRANCH_NAME: $(Build.SourceBranchName)
-      MAIL: $(Build.RequestedForEmail)
     volumes:
       - ../cypress-results:/code/cypress/results
       - ../cypress-results:/code/cypress/report
