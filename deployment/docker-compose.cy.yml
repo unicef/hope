@@ -30,6 +30,7 @@ x-django-envs: &django_envs
     - SECURE_CONTENT_TYPE_NOSNIFF=true
     - SECURE_REFERRER_POLICY=same-origin
     - SECURE_HSTS_SECONDS=0
+    - MAILDWA=${MAIL}
 
 volumes:
   backend-data:
