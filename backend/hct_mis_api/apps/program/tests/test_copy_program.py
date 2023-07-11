@@ -170,14 +170,23 @@ class TestCopyProgram(APITestCase):
                 != self.entitlement_card1.id
             )
             assert (
-                copied_program.household_set.filter(copied_from=self.household1).first().entitlement_cards.first().card_number
+                copied_program.household_set.filter(copied_from=self.household1)
+                .first()
+                .entitlement_cards.first()
+                .card_number
                 == self.entitlement_card1.card_number
             )
 
             assert Document.objects.count() == 2
-            assert copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id != self.document1.id
             assert (
-                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().document_number
+                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id
+                != self.document1.id
+            )
+            assert (
+                copied_program.individuals.filter(copied_from=self.individuals1[0])
+                .first()
+                .documents.first()
+                .document_number
                 == self.document1.document_number
             )
 
@@ -197,7 +206,10 @@ class TestCopyProgram(APITestCase):
                 != self.bank_account_info1.id
             )
             assert (
-                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().bank_account_number
+                copied_program.individuals.filter(copied_from=self.individuals1[0])
+                .first()
+                .bank_account_info.first()
+                .bank_account_number
                 == self.bank_account_info1.bank_account_number
             )
 
@@ -211,6 +223,9 @@ class TestCopyProgram(APITestCase):
                 == self.individual_role_in_household1.role
             )
             assert (
-                copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().copied_from
+                copied_program.household_set.filter(copied_from=self.household1)
+                .first()
+                .representatives.first()
+                .copied_from
                 == self.individual_role_in_household1.individual
             )
