@@ -162,6 +162,9 @@ fs.readFile(
       channel: CHANNEL,
     });
     sendFile('report.zip')
+    gigit = exec('git status')
+    console.log(`\n git status = ${gigit}`)
+
     // exec(`git show HEAD | grep Author`).then((info) => {email = info.split('<')[1].split('>')[0];})
     // let slackUserData = exec(`curl  -d "channel=C05EKHETMT9" -d "email=${email}" -H "Authorization: Bearer ${SLACK_BOT_USER_TOKEN}" -X POST https://slack.com/api/users.lookupByEmail`);
     // parseJJ = JSON.parse(slackUserData)
