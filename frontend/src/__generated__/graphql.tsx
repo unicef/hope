@@ -1408,6 +1408,11 @@ export type ExcludeHouseholdsMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
+export type ExportPdfPaymentPlanSummaryMutation = {
+   __typename?: 'ExportPDFPaymentPlanSummaryMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
 export type ExportSurveySampleMutationMutation = {
    __typename?: 'ExportSurveySampleMutationMutation',
   survey?: Maybe<SurveyNode>,
@@ -3510,6 +3515,7 @@ export type Mutations = {
   importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   excludeHouseholds?: Maybe<ExcludeHouseholdsMutation>,
+  exportPdfPaymentPlanSummary?: Maybe<ExportPdfPaymentPlanSummaryMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -3851,6 +3857,11 @@ export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
 export type MutationsExcludeHouseholdsArgs = {
   excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
   exclusionReason?: Maybe<Scalars['String']>,
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type MutationsExportPdfPaymentPlanSummaryArgs = {
   paymentPlanId: Scalars['ID']
 };
 
@@ -26961,6 +26972,7 @@ export type ResolversTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   ExcludeHouseholdsMutation: ResolverTypeWrapper<ExcludeHouseholdsMutation>,
+  ExportPDFPaymentPlanSummaryMutation: ResolverTypeWrapper<ExportPdfPaymentPlanSummaryMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -27457,6 +27469,7 @@ export type ResolversParentTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ImportXlsxPaymentPlanPaymentListPerFspMutation,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation,
   ExcludeHouseholdsMutation: ExcludeHouseholdsMutation,
+  ExportPDFPaymentPlanSummaryMutation: ExportPdfPaymentPlanSummaryMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -28144,6 +28157,10 @@ export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentTy
 };
 
 export type ExcludeHouseholdsMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExcludeHouseholdsMutation'] = ResolversParentTypes['ExcludeHouseholdsMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type ExportPdfPaymentPlanSummaryMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportPDFPaymentPlanSummaryMutation'] = ResolversParentTypes['ExportPDFPaymentPlanSummaryMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
@@ -29165,6 +29182,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>,
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
   excludeHouseholds?: Resolver<Maybe<ResolversTypes['ExcludeHouseholdsMutation']>, ParentType, ContextType, RequireFields<MutationsExcludeHouseholdsArgs, 'excludedHouseholdsIds' | 'paymentPlanId'>>,
+  exportPdfPaymentPlanSummary?: Resolver<Maybe<ResolversTypes['ExportPDFPaymentPlanSummaryMutation']>, ParentType, ContextType, RequireFields<MutationsExportPdfPaymentPlanSummaryArgs, 'paymentPlanId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -30988,6 +31006,7 @@ export type Resolvers<ContextType = any> = {
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   ExcludeHouseholdsMutation?: ExcludeHouseholdsMutationResolvers<ContextType>,
+  ExportPDFPaymentPlanSummaryMutation?: ExportPdfPaymentPlanSummaryMutationResolvers<ContextType>,
   ExportSurveySampleMutationMutation?: ExportSurveySampleMutationMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,

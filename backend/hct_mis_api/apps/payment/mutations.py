@@ -1201,7 +1201,7 @@ class ExportPDFPaymentPlanSummaryMutation(PermissionMutation):
         **kwargs: Any,
     ) -> "ExportPDFPaymentPlanSummaryMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_EXPORT_PDF_SUMMARY, payment_plan.business_area)
         # TODO: upd background_action_status??
         export_pdf_payment_plan_summary.delay(payment_plan.pk, info.context.user.pk)
 
