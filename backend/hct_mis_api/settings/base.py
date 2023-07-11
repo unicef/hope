@@ -671,6 +671,11 @@ Clear Cache,clear-cache/
         "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
         bool,
     ),
+    "REMOVE_RDI_LINKS_TIMEDELTA": (
+        14,
+        "The schedule (in days) which is applied to task remove_old_rdi_links_task",
+        "positive_integers",
+    )
 }
 
 CONSTANCE_DBS = ("default",)

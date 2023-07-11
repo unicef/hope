@@ -541,11 +541,13 @@ def check_rdi_merge_periodic_task() -> bool:
 
 @app.task
 @sentry_tags
-def remove_old_rdi_links_task(days: int = 14, page_count: int = 100) -> None:
-    """This task removes linked RDI Datahub objects for households which were created more than 2 weeks ago"""
+def remove_old_rdi_links_task(page_count: int = 100) -> None:
+    """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
 
     from datetime import timedelta
+    from constance import config
 
+    days = config.REMOVE_RDI_LINKS_TIMEDELTA or 14
     try:
         # Get datahub_ids older than 2 weeks which have status other than MERGED
         unmerged_rdi_datahub_ids = list(
