@@ -149,10 +149,8 @@ fs.readFile(
       console.log("Error parsing JSON string:", err);
     }
     let email2 = exec(`echo $MAILDWA`)
-    let email = exec(`echo $MAIL`)
-    let branch = exec(`echo $BRANCH_NAME`)
+    let branch = exec(`echo $BRANCH_NAMEDWA`)
     console.log(`\n MAILDWA = ${email2}`)
-    console.log(`\n MAIL = ${email}`)
     console.log(`\n BRANCH_NAME = ${branch} \n`)
 
     // let slackUserData = exec(`curl  -d "channel=C05EKHETMT9" -d "email=${email}" -H "Authorization: Bearer ${SLACK_BOT_USER_TOKEN}" -X POST https://slack.com/api/users.lookupByEmail`);
