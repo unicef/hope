@@ -35,21 +35,14 @@ def fill_extra_data(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('grievance', '0001_migration'), ('grievance', '0002_migration'), ('grievance', '0003_migration'), ('grievance', '0004_migration'), ('grievance', '0005_migration'), ('grievance', '0006_migration'), ('grievance', '0007_migration'), ('grievance', '0008_migration'), ('grievance', '0009_migration'), ('grievance', '0010_migration'), ('grievance', '0011_migration'), ('grievance', '0012_migration'), ('grievance', '0013_migration'), ('grievance', '0014_migration'), ('grievance', '0015_migration'), ('grievance', '0016_migration'), ('grievance', '0017_migration'), ('grievance', '0018_migration'), ('grievance', '0019_migration'), ('grievance', '0020_migration'), ('grievance', '0021_migration'), ('grievance', '0022_migration'), ('grievance', '0023_migration'), ('grievance', '0024_migration'), ('grievance', '0025_migration'), ('grievance', '0026_migration'), ('grievance', '0027_migration'), ('grievance', '0028_migration'), ('grievance', '0029_migration'), ('grievance', '0030_migration'), ('grievance', '0031_migration'), ('grievance', '0032_migration'), ('grievance', '0033_migration'), ('grievance', '0034_migration')]
-
     dependencies = [
-        ('household', '0077_migration'),
-        ('household', '0039_migration'),
-        ('core', '0022_migration'),
-        ('household', '0001_migration'),
-        ('core', '0006_migration'),
-        ('sanction_list', '0007_migration'),
+        ('household', '0003_migration_squashed_0086_migration'),
+        ('core', '0017_migration_squashed_0040_migration'),
+        ('sanction_list', '0001_migration_squashed_0009_migration'),
         ('geo', '0004_migration'),
-        ('household', '0080_migration'),
-        ('household', '0029_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('registration_data', '0013_migration'),
-        ('payment', '0016_migration'),
+        ('payment', '0010_migration_squashed_0029_migration'),
     ]
 
     operations = [
