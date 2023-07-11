@@ -54,12 +54,6 @@ async function sendFile(file_name) {
   )
 }
 
-sendMessage({
-  text: "E2E Tests Report: ",
-  channel: CHANNEL,
-});
-
-
 fs.readFile(
   "./cypress/reports/mochareports/report.json",
   "utf8",
@@ -164,7 +158,7 @@ fs.readFile(
     // let branchName = exec(`echo $BRANCH_NAME`)
     sendMessage({
       // text: `Hello <@${parseJJ.user.id.toString()}> \nIt is report from your branch: ${branchName}`,
-      text: `It is report from your branch: ${branchName}`,
+      text: `Branch: ${branchName}`,
       channel: CHANNEL,
     });
     sendFile('report.zip')
