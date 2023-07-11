@@ -641,6 +641,8 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
 
+    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
 
@@ -652,7 +654,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["type", "country"],
+                fields=["type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -666,7 +668,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
                 name="unique_for_individual_if_not_removed_and_valid",
             ),
             UniqueConstraint(
-                fields=["document_number", "type", "country"],
+                fields=["document_number", "type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
