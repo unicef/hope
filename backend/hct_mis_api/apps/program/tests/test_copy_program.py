@@ -166,51 +166,51 @@ class TestCopyProgram(APITestCase):
             assert Individual.objects.count() == 6
             assert EntitlementCard.objects.count() == 2
             assert (
-                copied_program.household_set.order_by("created_at").first().entitlement_cards.first().id
+                copied_program.household_set.filter(copied_from=self.household1).first().entitlement_cards.first().id
                 != self.entitlement_card1.id
             )
             assert (
-                copied_program.household_set.order_by("created_at").first().entitlement_cards.first().card_number
+                copied_program.household_set.filter(copied_from=self.household1).first().entitlement_cards.first().card_number
                 == self.entitlement_card1.card_number
             )
 
             assert Document.objects.count() == 2
-            assert copied_program.individuals.order_by("created_at").first().documents.first().id != self.document1.id
+            assert copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id != self.document1.id
             assert (
-                copied_program.individuals.order_by("created_at").first().documents.first().document_number
+                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().document_number
                 == self.document1.document_number
             )
 
             assert IndividualIdentity.objects.count() == 2
             assert (
-                copied_program.individuals.order_by("created_at").first().identities.first().id
+                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().id
                 != self.individual_identity1.id
             )
             assert (
-                copied_program.individuals.order_by("created_at").first().identities.first().number
+                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().number
                 == self.individual_identity1.number
             )
 
             assert BankAccountInfo.objects.count() == 2
             assert (
-                copied_program.individuals.order_by("created_at").first().bank_account_info.first().id
+                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().id
                 != self.bank_account_info1.id
             )
             assert (
-                copied_program.individuals.order_by("created_at").first().bank_account_info.first().bank_account_number
+                copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().bank_account_number
                 == self.bank_account_info1.bank_account_number
             )
 
             assert IndividualRoleInHousehold.objects.count() == 2
             assert (
-                copied_program.household_set.order_by("created_at").first().representatives.first().id
+                copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().id
                 != self.individuals1[0].id
             )
             assert (
-                copied_program.household_set.order_by("created_at").first().representatives.first().role
+                copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().role
                 == self.individual_role_in_household1.role
             )
             assert (
-                copied_program.household_set.order_by("created_at").first().representatives.first().copied_from
+                copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().copied_from
                 == self.individual_role_in_household1.individual
             )
