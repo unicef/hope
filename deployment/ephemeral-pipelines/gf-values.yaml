@@ -13,7 +13,8 @@ backend:
     STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
     STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
     SECRET_KEY: r4nd0m5ecretkeyf0rrandomenv
-    SENTRY_DSN: "https://88d65a39ff5d42a9bff63f6b0eff4c19@excubo.unicef.io/43"
+    SENTRY_DSN: "https://4a4edc89afb74f3fbd421924efd9366b@excubo.unicef.io/52"
+    SENTRY_ENVIRONMENT: ephemeral
     EMAIL_HOST: extmail01.unicef.org
     EMAIL_USE_TLS: "false"
     EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY

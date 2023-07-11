@@ -250,7 +250,7 @@ class EntitlementCardFactory(DjangoModelFactory):
 
 def create_household(
     household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
-) -> Tuple[Household, Individual]:
+) -> Tuple[Household, List[Individual]]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
