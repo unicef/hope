@@ -39,7 +39,7 @@ class PaymentPlanPDFExportSevice:
         path_name = "download-payment-plan-summary-pdf"
         self.download_link = self.get_link(reverse(path_name, args=[payment_plan_id]))
         self.payment_plan_link = self.get_link(
-            f"/{self.payment_plan.business_area.slug}/payment-module/payment-plans/" + payment_plan_id
+            f"/{self.payment_plan.business_area.slug}/payment-module/payment-plans/" + str(payment_plan_id)
         )
 
     def send_email(self, context: Dict) -> None:
