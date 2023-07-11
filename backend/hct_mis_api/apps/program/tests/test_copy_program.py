@@ -125,7 +125,7 @@ class TestCopyProgram(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permissions", [Permissions.PROGRAMME_CREATE], True),
+            ("with_permissions", [Permissions.PROGRAMME_DUPLICATE], True),
             ("without_permissions", [], False),
         ]
     )

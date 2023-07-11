@@ -145,7 +145,7 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
         business_area = Program.objects.get(id=program_id).business_area
-        cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
+        cls.has_permission(info, Permissions.PROGRAMME_DUPLICATE, business_area)
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
