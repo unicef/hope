@@ -9284,6 +9284,22 @@ export type ExcludeHouseholdsPpMutation = (
   )> }
 );
 
+export type ExportPdfPpSummaryMutationVariables = {
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type ExportPdfPpSummaryMutation = (
+  { __typename?: 'Mutations' }
+  & { exportPdfPaymentPlanSummary: Maybe<(
+    { __typename?: 'ExportPDFPaymentPlanSummaryMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
+    )> }
+  )> }
+);
+
 export type ExportXlsxPpListMutationVariables = {
   paymentPlanId: Scalars['ID']
 };
@@ -15816,6 +15832,57 @@ export function useExcludeHouseholdsPpMutation(baseOptions?: ApolloReactHooks.Mu
 export type ExcludeHouseholdsPpMutationHookResult = ReturnType<typeof useExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationResult = ApolloReactCommon.MutationResult<ExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationOptions = ApolloReactCommon.BaseMutationOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
+export const ExportPdfPpSummaryDocument = gql`
+    mutation exportPdfPPSummary($paymentPlanId: ID!) {
+  exportPdfPaymentPlanSummary(paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type ExportPdfPpSummaryMutationFn = ApolloReactCommon.MutationFunction<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
+export type ExportPdfPpSummaryComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>, 'mutation'>;
+
+    export const ExportPdfPpSummaryComponent = (props: ExportPdfPpSummaryComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> mutation={ExportPdfPpSummaryDocument} {...props} />
+    );
+    
+export type ExportPdfPpSummaryProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> & TChildProps;
+export function withExportPdfPpSummary<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportPdfPpSummaryMutation,
+  ExportPdfPpSummaryMutationVariables,
+  ExportPdfPpSummaryProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables, ExportPdfPpSummaryProps<TChildProps>>(ExportPdfPpSummaryDocument, {
+      alias: 'exportPdfPpSummary',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportPdfPpSummaryMutation__
+ *
+ * To run a mutation, you first call `useExportPdfPpSummaryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportPdfPpSummaryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportPdfPpSummaryMutation, { data, loading, error }] = useExportPdfPpSummaryMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useExportPdfPpSummaryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>(ExportPdfPpSummaryDocument, baseOptions);
+      }
+export type ExportPdfPpSummaryMutationHookResult = ReturnType<typeof useExportPdfPpSummaryMutation>;
+export type ExportPdfPpSummaryMutationResult = ApolloReactCommon.MutationResult<ExportPdfPpSummaryMutation>;
+export type ExportPdfPpSummaryMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
 export const ExportXlsxPpListDocument = gql`
     mutation ExportXlsxPPList($paymentPlanId: ID!) {
   exportXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId) {
