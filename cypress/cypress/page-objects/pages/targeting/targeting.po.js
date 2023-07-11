@@ -38,10 +38,11 @@ export default class Targeting extends BaseComponent {
   getTabTitle = () => cy.get(this.tabTitle);
   getTabColumnName = () => cy.get(this.tabColumnLabel).eq(0);
   getTabColumnStatus = () => cy.get(this.tabColumnLabel).eq(1);
-  getTabColumnNOHouseholds = () => cy.get(this.tabColumnLabel).eq(2);
-  getTabColumnDateCreated = () => cy.get(this.tabColumnLabel).eq(3);
-  getTabColumnLastEdited = () => cy.get(this.tabColumnLabel).eq(4);
-  getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(5);
+  getTabColumnProgramme = () => cy.get(this.tabColumnLabel).eq(2);
+  getTabColumnNOHouseholds = () => cy.get(this.tabColumnLabel).eq(3);
+  getTabColumnDateCreated = () => cy.get(this.tabColumnLabel).eq(4);
+  getTabColumnLastEdited = () => cy.get(this.tabColumnLabel).eq(5);
+  getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(6);
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);
   getTargetPopulationsRows = () => cy.get(this.rows);
@@ -56,6 +57,7 @@ export default class Targeting extends BaseComponent {
     this.getTabTitle().should("be.visible").contains(this.textTabTitle);
     this.getTabColumnName().should("be.visible").contains(this.textTabName);
     this.getTabColumnStatus().should("be.visible").contains(this.textTabStatus);
+    this.getTabColumnProgramme().should("be.visible").contains(this.textTabProgramme);
     this.getTabColumnNOHouseholds()
       .should("be.visible")
       .contains(this.textTabNOHouseholds);
