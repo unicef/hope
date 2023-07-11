@@ -959,6 +959,10 @@ type ExcludeHouseholdsMutation {
   paymentPlan: PaymentPlanNode
 }
 
+type ExportPDFPaymentPlanSummaryMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type ExportSurveySampleMutationMutation {
   survey: SurveyNode
 }
@@ -2508,6 +2512,7 @@ type Mutations {
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
+  exportPdfPaymentPlanSummary(paymentPlanId: ID!): ExportPDFPaymentPlanSummaryMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload

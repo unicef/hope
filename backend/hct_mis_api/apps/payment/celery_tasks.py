@@ -553,9 +553,9 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
             # regenerate PDF always
             # remove old export_pdf_file_summary
             if payment_plan.export_pdf_file_summary:
-                payment_plan.export_pdf_file_summary.file.delete(save=False)
+                payment_plan.export_pdf_file_summary.file.delete()
                 payment_plan.export_pdf_file_summary.delete()
-                payment_plan.export_file_entitlement = None
+                payment_plan.export_pdf_file_summary = None
 
             service = PaymentPlanPDFExportSevice(payment_plan)
             pdf, filename = service.generate_pdf_summary()
