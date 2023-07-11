@@ -95,7 +95,9 @@ class TestFilterIndividualsByProgram(APITestCase):
         individuals = [IndividualFactory(**individual) for individual in individuals_to_create]
         household_one.head_of_household = individuals[0]
         household_two.head_of_household = individuals[1]
+        household_one.household_collection.save()
         household_one.save()
+        household_two.household_collection.save()
         household_two.save()
 
     @parameterized.expand(
