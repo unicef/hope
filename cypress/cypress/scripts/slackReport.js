@@ -150,8 +150,14 @@ fs.readFile(
     }
     let email2 = exec(`echo $MAILDWA`)
     let branch = exec(`echo $BRANCH_NAMEDWA`)
+    let prbra = exec(`echo $PRBRANCHDWA`)
+    let bver = exec(`echo $BUILDVERSIONDWA`)
+    let rep = exec(`echo $REPONAMEDWA`)
     console.log(`\n MAILDWA = ${email2}`)
     console.log(`\n BRANCH_NAME = ${branch} \n`)
+    console.log(`\n PRBRANCH = ${prbra}`)
+    console.log(`\n BUILDVERSION = ${bver} \n`)
+    console.log(`\n REPONAME = ${rep} \n`)
 
     // let slackUserData = exec(`curl  -d "channel=C05EKHETMT9" -d "email=${email}" -H "Authorization: Bearer ${SLACK_BOT_USER_TOKEN}" -X POST https://slack.com/api/users.lookupByEmail`);
     // parseJJ = JSON.parse(slackUserData)
