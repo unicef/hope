@@ -142,36 +142,13 @@ fs.readFile(
     } catch (err) {
       console.log("Error parsing JSON string:", err);
     }
-    let email2 = exec(`echo $MAILDWA`)
-    let branch = exec(`echo $BRANCH_NAMEDWA`)
     let branchName = exec(`echo $PRBRANCHDWA`)
-    let bver = exec(`echo $BUILDVERSIONDWA`)
-    let rep = exec(`echo $REPONAMEDWA`)
-    console.log(`\n MAILDWA = ${email2}`)
-    console.log(`\n BRANCH_NAME = ${branch}`)
-    console.log(`\n PRBRANCH = ${branchName}`)
-    console.log(`\n BUILDVERSION = ${bver}`)
-    console.log(`\n REPONAME = ${rep}`)
 
-    // let slackUserData = exec(`curl  -d "channel=C05EKHETMT9" -d "email=${email}" -H "Authorization: Bearer ${SLACK_BOT_USER_TOKEN}" -X POST https://slack.com/api/users.lookupByEmail`);
-    // parseJJ = JSON.parse(slackUserData)
-    // let branchName = exec(`echo $BRANCH_NAME`)
     sendMessage({
       // text: `Hello <@${parseJJ.user.id.toString()}> \nIt is report from your branch: ${branchName}`,
       text: `Branch: ${branchName}`,
       channel: CHANNEL,
     });
     sendFile('report.zip')
-    gigit = exec('git status')
-    console.log(`\n git status = ${gigit}`)
-
-    // exec(`git show HEAD | grep Author`).then((info) => {email = info.split('<')[1].split('>')[0];})
-    // let slackUserData = exec(`curl  -d "channel=C05EKHETMT9" -d "email=${email}" -H "Authorization: Bearer ${SLACK_BOT_USER_TOKEN}" -X POST https://slack.com/api/users.lookupByEmail`);
-    // parseJJ = JSON.parse(slackUserData)
-    // let branchName = exec(`echo $BRANCH_NAME`)
-    //   sendMessage({
-    //     text: `Hello <@${parseJJ.user.id.toString()}> \nIt is report from your branch: ${branchName}`,
-    //     channel: CHANNEL,
-    //   });
   }
 );
