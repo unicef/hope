@@ -246,8 +246,6 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
-          - script: |
-              coverage xml --rcfile=.coveragerc
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
@@ -255,7 +253,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend test'
+              dockerComposeCommand: 'run backend test && coverage xml --rcfile=.coveragerc'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
           - task: PublishCodeCoverageResults@2
