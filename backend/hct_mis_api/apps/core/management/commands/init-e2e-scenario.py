@@ -13,7 +13,9 @@ from hct_mis_api.apps.household.models import (
     MALE,
     ROLE_PRIMARY,
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -53,6 +55,7 @@ def create_household_with_individual(address: str) -> Tuple[Household, Individua
         registration_data_import=rdi,
         size=1,
         withdrawn=False,
+        household_collection=HouseholdCollection.objects.create(),
     )
 
     hh.head_of_household = Individual.objects.create(
@@ -62,6 +65,7 @@ def create_household_with_individual(address: str) -> Tuple[Household, Individua
         business_area=afghanistan,
         sex=MALE,
         full_name=faker.name(),
+        individual_collection=IndividualCollection.objects.create(),
     )
     hh.save()
 

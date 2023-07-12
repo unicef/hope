@@ -8,15 +8,13 @@ import django.db.models.manager
 
 class Migration(migrations.Migration):
 
-    replaces = [('core', '0044_migration'), ('core', '0045_migration'), ('core', '0046_migration'), ('core', '0047_migration'), ('core', '0048_migration'), ('core', '0049_migration'), ('core', '0050_migration'), ('core', '0051_migration'), ('core', '0052_migration'), ('core', '0053_migration'), ('core', '0054_migration'), ('core', '0055_migration'), ('core', '0056_migration'), ('core', '0057_migration')]
-
     dependencies = [
         ('program', '0034_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('geo', '0007_migration'),
-        ('core', '0043_migration'),
-        ('reporting', '0014_migration'),
-        ('grievance', '0049_migration'),
+        ('core', '0042_migration_squashed_0043_migration'),
+        ('reporting', '0008_migration_squashed_0014_migration'),
+        ('grievance', '0035_migration_squashed_0049_migration'),
         ('household', '0119_migration'),
     ]
 

@@ -884,6 +884,7 @@ type DocumentNode implements Node {
   clearedBy: UserNode
   issuanceDate: DateTime
   expiryDate: DateTime
+  program: ProgramNode
   countryIso3: String
 }
 

@@ -48,6 +48,7 @@ class TestChangeHeadOfHousehold(APITestCase):
         admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
 
         cls.household = HouseholdFactory.build()
+        cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
 

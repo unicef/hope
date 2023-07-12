@@ -15,8 +15,6 @@ def remove_all(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('sanction_list', '0001_migration'), ('sanction_list', '0002_migration'), ('sanction_list', '0003_migration'), ('sanction_list', '0004_migration'), ('sanction_list', '0005_migration'), ('sanction_list', '0006_migration'), ('sanction_list', '0007_migration'), ('sanction_list', '0008_migration'), ('sanction_list', '0009_migration')]
-
     dependencies = [
     ]
 

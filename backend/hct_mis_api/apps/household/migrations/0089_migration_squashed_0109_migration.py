@@ -13,12 +13,10 @@ import uuid
 
 class Migration(migrations.Migration):
 
-    replaces = [('household', '0089_migration'), ('household', '0090_migration'), ('household', '0091_migration'), ('household', '0092_migration'), ('household', '0093_migration'), ('household', '0094_migration'), ('household', '0095_migration'), ('household', '0096_migration'), ('household', '0097_migration'), ('household', '0098_migration'), ('household', '0099_migration'), ('household', '0100_migration'), ('household', '0101_migration'), ('household', '0102_migration'), ('household', '0103_migration'), ('household', '0104_migration'), ('household', '0105_migration'), ('household', '0106_migration'), ('household', '0107_migration'), ('household', '0108_migration'), ('household', '0109_migration')]
-
     dependencies = [
         ('registration_data', '0018_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0043_migration'),
+        ('core', '0042_migration_squashed_0043_migration'),
         ('household', '0088_migration'),
     ]
 
