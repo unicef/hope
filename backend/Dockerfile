@@ -51,15 +51,11 @@ RUN python3 -m venv --copies $VIRTUAL_ENV &&\
 
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --without dev
-RUN mkdir test-coverage
-CMD coverage xml -o ./test-coverage/coverage.xml
 
 # Dev image
 FROM builder AS dev
 
 RUN poetry install
-RUN mkdir test-coverage
-CMD coverage xml -o ./test-coverage/coverage.xml
 COPY ./ ./
 
 # Dist image
