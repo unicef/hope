@@ -32,7 +32,7 @@ export const PaymentVerificationTable = ({
       CashPlanAndPaymentPlanNode,
       AllCashPlansAndPaymentPlansQueryVariables
     >
-      title={t('List of Cash Plans')}
+      title={t('List of Payment Plans')}
       headCells={headCells}
       query={useAllCashPlansAndPaymentPlansQuery}
       queriedObjectName='allCashPlansAndPaymentPlans'

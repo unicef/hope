@@ -37,6 +37,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     Household,
     Individual,
+    IndividualCollection,
     IndividualIdentity,
 )
 from hct_mis_api.apps.household.services.household_recalculate_data import (
@@ -111,6 +112,7 @@ class AddIndividualService(DataChangeService):
             first_registration_date=first_registration_date,
             last_registration_date=first_registration_date,
             business_area=self.grievance_ticket.business_area,
+            individual_collection=IndividualCollection.objects.create(),
             **individual_data,
         )
         individual.refresh_from_db()

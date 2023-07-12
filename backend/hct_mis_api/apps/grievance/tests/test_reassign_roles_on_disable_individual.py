@@ -25,6 +25,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         cls.program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
 
         cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
         cls.household.programs.add(cls.program_one)

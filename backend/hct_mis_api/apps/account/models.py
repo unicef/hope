@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -200,6 +200,9 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
+
+    def natural_key(self) -> Tuple:
+        return self.name, self.subsystem
 
     def clean(self) -> None:
         if self.subsystem != Role.HOPE and self.permissions:

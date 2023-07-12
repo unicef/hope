@@ -113,8 +113,8 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink fullWidth to={`/${baseUrl}/cashplans/${cashPlan.id}`}>
-          {t('Cash Plan')} {cashPlan.caId}
+        <BlackLink fullWidth to={`/${businessArea}/cashplans/${cashPlan.id}`}>
+          {t('Payment Plan')} {cashPlan.caId}
         </BlackLink>
       }
       breadCrumbs={

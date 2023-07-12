@@ -1324,6 +1324,7 @@ export type DocumentNode = Node & {
   clearedBy?: Maybe<UserNode>,
   issuanceDate?: Maybe<Scalars['DateTime']>,
   expiryDate?: Maybe<Scalars['DateTime']>,
+  program?: Maybe<ProgramNode>,
   countryIso3?: Maybe<Scalars['String']>,
 };
 
@@ -9141,7 +9142,7 @@ export type BulkUpdateGrievanceAssigneeMutation = (
       { __typename?: 'GrievanceTicketNode' }
       & { assignedTo: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName'>
+        & Pick<UserNode, 'firstName' | 'lastName' | 'email'>
       )> }
     )>>> }
   )> }
@@ -15163,6 +15164,8 @@ export const BulkUpdateGrievanceAssigneeDocument = gql`
     grievanceTickets {
       assignedTo {
         firstName
+        lastName
+        email
       }
     }
   }
@@ -28245,6 +28248,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   issuanceDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   expiryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 

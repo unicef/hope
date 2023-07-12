@@ -22,7 +22,7 @@ export const headCells: HeadCell<ReportNode>[] = [
   },
   {
     disablePadding: false,
-    label: '# of records',
+    label: 'Num. of Records',
     id: 'numberOfRecords',
     numeric: true,
   },
@@ -34,7 +34,7 @@ export const headCells: HeadCell<ReportNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Created By',
+    label: 'Created by',
     id: 'created_by__first_name',
     numeric: false,
   },
