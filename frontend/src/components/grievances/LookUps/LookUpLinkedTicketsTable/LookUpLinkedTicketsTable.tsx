@@ -30,7 +30,7 @@ export const LookUpLinkedTicketsTable = ({
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    admin: filter?.admin?.node?.id,
+    admin2: filter?.admin2?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
   const {
