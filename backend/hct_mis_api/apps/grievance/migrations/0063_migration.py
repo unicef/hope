@@ -6,7 +6,9 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('activity_log', '0006_migration'),
         ('grievance', '0062_migration'),
+
     ]
 
     operations = [
