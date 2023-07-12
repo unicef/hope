@@ -113,12 +113,12 @@ Get the Main PostgreSQL envs.
 */}}
 {{- define "hope.postgresql.dburl" -}}
 {{- if .Values.postgresql.ephemeral -}}
-DATABASE_URL: {{ printf "postgis://%s:%s@%s:5432/%s" .Values.postgresql.username
+DATABASE_URL: {{ printf "postgis://%s:%s@%s:5432/%s" .Values.postgresql.auth.username
     .Values.postgresql.auth.password
     (include "hope.postgresql.fullname" .)
     .Values.postgresql.auth.database | b64enc }}
 {{- else }}
-DATABASE_URL: {{ printf "postgis://%s:%s@%s:5432/%s"  .Values.postgresql.username
+DATABASE_URL: {{ printf "postgis://%s:%s@%s:5432/%s"  .Values.postgresql.auth.username
     .Values.postgresql.auth.password
     .Values.postgresql.auth.host
     .Values.postgresql.auth.database | b64enc }}
@@ -130,12 +130,12 @@ Get the registrationdatahubpostgresql envs.
 */}}
 {{- define "hope.registrationdatahubpostgresql.dburl" -}}
 {{- if .Values.registrationdatahubpostgresql.ephemeral -}}
-DATABASE_URL_HUB_REGISTRATION: {{ printf "postgis://%s:%s@%s:5432/%s"  .Values.registrationdatahubpostgresql.username
+DATABASE_URL_HUB_REGISTRATION: {{ printf "postgis://%s:%s@%s:5432/%s"  .Values.registrationdatahubpostgresql.auth.username
     .Values.registrationdatahubpostgresql.auth.password
     (include "hope.registrationdatahubpostgresql.fullname" .)
     .Values.registrationdatahubpostgresql.auth.database | b64enc }}
 {{- else }}
-DATABASE_URL_HUB_REGISTRATION: {{ printf "postgis://%s:%s@%s:5432/%s"  .Values.registrationdatahubpostgresql.username
+DATABASE_URL_HUB_REGISTRATION: {{ printf "postgis://%s:%s@%s:5432/%s"  .Values.registrationdatahubpostgresql.auth.username
     .Values.registrationdatahubpostgresql.auth.password
     .Values.registrationdatahubpostgresql.auth.host
     .Values.registrationdatahubpostgresql.auth.database | b64enc }}
@@ -148,28 +148,28 @@ Get the cashassistdatahubpostgresql envs.
 */}}
 {{- define "hope.cashassistdatahubpostgresql.dburl" -}}
 {{- if .Values.cashassistdatahubpostgresql.ephemeral -}}
-DATABASE_URL_HUB_MIS: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=mis"  .Values.cashassistdatahubpostgresql.username
+DATABASE_URL_HUB_MIS: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=mis"  .Values.cashassistdatahubpostgresql.auth.username
     .Values.cashassistdatahubpostgresql.auth.password
     (include "hope.cashassistdatahubpostgresql.fullname" .)
     .Values.cashassistdatahubpostgresql.auth.database | b64enc }}
-DATABASE_URL_HUB_CA: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=ca"  .Values.cashassistdatahubpostgresql.username
+DATABASE_URL_HUB_CA: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=ca"  .Values.cashassistdatahubpostgresql.auth.username
     .Values.cashassistdatahubpostgresql.auth.password
     (include "hope.cashassistdatahubpostgresql.fullname" .)
     .Values.cashassistdatahubpostgresql.auth.database | b64enc }}
-DATABASE_URL_HUB_ERP: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=erp"  .Values.cashassistdatahubpostgresql.username
+DATABASE_URL_HUB_ERP: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=erp"  .Values.cashassistdatahubpostgresql.auth.username
     .Values.cashassistdatahubpostgresql.auth.password
     (include "hope.cashassistdatahubpostgresql.fullname" .)
     .Values.cashassistdatahubpostgresql.auth.database | b64enc }}
 {{- else }}
-DATABASE_URL_HUB_MIS: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=mis"  .Values.cashassistdatahubpostgresql.username
+DATABASE_URL_HUB_MIS: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=mis"  .Values.cashassistdatahubpostgresql.auth.username
     .Values.cashassistdatahubpostgresql.auth.password
     .Values.cashassistdatahubpostgresql.auth.host
     .Values.cashassistdatahubpostgresql.auth.database | b64enc }}
-DATABASE_URL_HUB_CA: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=ca"  .Values.cashassistdatahubpostgresql.username
+DATABASE_URL_HUB_CA: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=ca"  .Values.cashassistdatahubpostgresql.auth.username
     .Values.cashassistdatahubpostgresql.auth.password
     .Values.cashassistdatahubpostgresql.auth.host
     .Values.cashassistdatahubpostgresql.auth.database | b64enc }}
-DATABASE_URL_HUB_ERP: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=erp"  .Values.cashassistdatahubpostgresql.username
+DATABASE_URL_HUB_ERP: {{ printf "postgis://%s:%s@%s:5432/%s?options=-c search_path=erp"  .Values.cashassistdatahubpostgresql.auth.username
     .Values.cashassistdatahubpostgresql.auth.password
     .Values.cashassistdatahubpostgresql.auth.host
     .Values.cashassistdatahubpostgresql.auth.database | b64enc }}
