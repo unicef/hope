@@ -260,7 +260,7 @@ stages:
             displayName: "Publish Test Coverage"
             condition: always()
             inputs:
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/backend/test-coverage/coverage.xml'
+              summaryFileLocation: './test-coverage/coverage.xml'
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
