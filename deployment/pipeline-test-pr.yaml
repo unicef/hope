@@ -267,6 +267,12 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+          
+          - task: PublishCodeCoverageResults@2
+            displayName: "Publish Test Coverage"
+            condition: always()
+            inputs:
+              summaryFileLocation: 'backend/test-coverage/coverage.xml'
 
   - stage: e2e_tests
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]

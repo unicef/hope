@@ -42,11 +42,7 @@ services:
       - proxy
       - celery_worker
     environment:
-      - MAILDWA=${MAIL}
-      - BRANCH_NAMEDWA=${BRANCH_NAME}
-      - PRBRANCHDWA=${PRBRANCH}
-      - BUILDVERSIONDWA=${BUILDVERSION}
-      - REPONAMEDWA=${REPONAME}
+      - BRANCH_NAME=${BRANCH_NAME}
     volumes:
       - ../cypress-results:/code/cypress/results
       - ../cypress-reports:/code/cypress/reports

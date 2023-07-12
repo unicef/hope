@@ -142,10 +142,9 @@ fs.readFile(
     } catch (err) {
       console.log("Error parsing JSON string:", err);
     }
-    let branchName = exec(`echo $PRBRANCHDWA`)
+    let branchName = exec(`echo $BRANCH_NAME`)
 
     sendMessage({
-      // text: `Hello <@${parseJJ.user.id.toString()}> \nIt is report from your branch: ${branchName}`,
       text: `Branch: ${branchName}`,
       channel: CHANNEL,
     });
