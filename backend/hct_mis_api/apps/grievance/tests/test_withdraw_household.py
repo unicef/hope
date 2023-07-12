@@ -58,6 +58,7 @@ class TestWithdrawHousehold(APITestCase):
         )
 
         household = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.save()
         household.programs.add(self.program_one)

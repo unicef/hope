@@ -78,8 +78,10 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
         household_two = HouseholdFactory.build(business_area=cls.business_area)
+        household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
+        household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)

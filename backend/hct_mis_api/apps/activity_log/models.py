@@ -55,6 +55,8 @@ class LogEntry(models.Model):
         verbose_name=_("actor"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    # deprecated will be removed after data migrations, use 'programs'
+    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True)
     programs = models.ManyToManyField("program.Program", related_name="activity_logs", blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)

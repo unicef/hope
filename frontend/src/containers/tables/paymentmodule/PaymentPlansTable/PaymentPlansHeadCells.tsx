@@ -14,7 +14,7 @@ export const headCells = [
 
   {
     disablePadding: false,
-    label: 'No. of Households',
+    label: 'Num. of Households',
     id: 'totalHouseholdsCount',
     numeric: false,
   },

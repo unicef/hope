@@ -48,14 +48,14 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Change From',
+    label: 'Change from',
     id: 'changeFrom',
     numeric: false,
     weight: 1,
   },
   {
     disablePadding: false,
-    label: 'Change To',
+    label: 'Change to',
     id: 'changeTo',
     numeric: false,
     weight: 1,

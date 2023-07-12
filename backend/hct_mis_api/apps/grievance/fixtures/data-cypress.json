@@ -1,71 +1,272 @@
 [
-{
-  "model": "grievance.grievanceticket",
-  "pk": "630332e9-a1fd-44cc-9f44-3977659485d7",
-  "fields": {
-    "created_at": "2022-08-10T14:30:11.729Z",
-    "updated_at": "2022-08-10T14:30:11.729Z",
-    "version": 1660140865044971,
-    "unicef_id": "GRV-0000001",
-    "user_modified": null,
-    "last_notification_sent": null,
-    "created_by": null,
-    "assigned_to": null,
-    "status": 1,
-    "category": 8,
-    "issue_type": null,
-    "description": "",
-    "admin2": "dec7c2eb-d488-484e-ad5b-56765c994aed",
-    "area": "",
-    "language": "",
-    "consent": true,
-    "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
-    "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
-    "extras": {},
-    "ignored": false,
-    "household_unicef_id": "HH-20-0000.0014"
-  }
-},
-{
-  "model": "grievance.ticketneedsadjudicationdetails",
-  "pk": "113f2c87-ceb1-4486-9a4b-05f4fe1d1839",
-  "fields": {
-    "created_at": "2022-08-10T14:30:11.731Z",
-    "updated_at": "2022-08-10T14:30:11.731Z",
-    "ticket": "630332e9-a1fd-44cc-9f44-3977659485d7",
-    "golden_records_individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
-    "is_multiple_duplicates_version": true,
-    "possible_duplicate": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
-    "selected_individual": null,
-    "role_reassign_data": {},
-    "extra_data": {
-      "golden_records": [
-        {
-          "dob": "1923-01-01",
-          "score": 9.0,
-          "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
-          "location": "Abband",
-          "full_name": "Jan Romaniak",
-          "proximity_to_score": 3.0
+    {
+        "model": "grievance.grievanceticket",
+        "pk": "0ae07e2e-c89b-4d30-91d6-e54460499ac2",
+        "fields": {
+            "created_at": "2024-07-06T12:10:49.804Z",
+            "updated_at": "2024-07-06T12:11:17.054Z",
+            "version": 1688644530369996,
+            "unicef_id": "GRV-0000005",
+            "user_modified": "2024-07-06T12:10:49.799Z",
+            "last_notification_sent": null,
+            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "assigned_to": null,
+            "status": 5,
+            "category": 6,
+            "issue_type": null,
+            "description": "Test 4",
+            "admin2": "5ef54822-76ed-452e-9c1c-f04ce9a6dbc6",
+            "area": "",
+            "language": "English | English",
+            "consent": true,
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
+            "extras": {},
+            "ignored": false,
+            "household_unicef_id": "HH-20-0000.0002",
+            "priority": 2,
+            "urgency": 2,
+            "partner": null,
+            "programme": null,
+            "comments": null
         }
-      ],
-      "possible_duplicate": [
-        {
-          "dob": "1923-01-01",
-          "score": 9.0,
-          "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
-          "location": "Abband",
-          "full_name": "Jan Romaniak",
-          "proximity_to_score": 3.0
-        }
-      ]
     },
-    "score_min": 9.0,
-    "score_max": 9.0,
-    "possible_duplicates": [
-      "efaad4e3-f8d9-481b-a902-f5f23deb52f9"
-    ],
-    "selected_individuals": []
-  }
-}
+    {
+        "model": "grievance.grievanceticket",
+        "pk": "2a4f7f07-dfaa-49be-9fca-9802f2426854",
+        "fields": {
+            "created_at": "2023-07-06T12:07:43.040Z",
+            "updated_at": "2023-07-06T12:11:08.625Z",
+            "version": 1688644521941161,
+            "unicef_id": "GRV-0000001",
+            "user_modified": "2023-07-06T12:07:43.035Z",
+            "last_notification_sent": null,
+            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "assigned_to": null,
+            "status": 4,
+            "category": 6,
+            "issue_type": null,
+            "description": "Test 4",
+            "admin2": "5ef54822-76ed-452e-9c1c-f04ce9a6dbc6",
+            "area": "",
+            "language": "",
+            "consent": true,
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "registration_data_import": null,
+            "extras": {},
+            "ignored": false,
+            "household_unicef_id": "HH-20-0000.0002",
+            "priority": 3,
+            "urgency": 3,
+            "partner": null,
+            "programme": null,
+            "comments": null
+        }
+    },
+    {
+        "model": "grievance.grievanceticket",
+        "pk": "630332e9-a1fd-44cc-9f44-3977659485d7",
+        "fields": {
+            "created_at": "2022-08-10T14:30:11.729Z",
+            "updated_at": "2022-08-10T14:30:11.729Z",
+            "version": 1688644454121957,
+            "unicef_id": "GRV-0000002",
+            "user_modified": null,
+            "last_notification_sent": null,
+            "created_by": null,
+            "assigned_to": null,
+            "status": 1,
+            "category": 8,
+            "issue_type": null,
+            "description": "",
+            "admin2": "dec7c2eb-d488-484e-ad5b-56765c994aed",
+            "area": "",
+            "language": "",
+            "consent": true,
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
+            "extras": {},
+            "ignored": false,
+            "household_unicef_id": "HH-20-0000.0002",
+            "priority": 0,
+            "urgency": 0,
+            "partner": null,
+            "programme": null,
+            "comments": null
+        }
+    },
+    {
+        "model": "grievance.grievanceticket",
+        "pk": "c8b5fa03-ac45-4c70-85ab-c654557336c3",
+        "fields": {
+            "created_at": "2023-07-06T12:01:19.360Z",
+            "updated_at": "2023-07-06T12:01:28.063Z",
+            "version": 1688644454122695,
+            "unicef_id": "GRV-0000003",
+            "user_modified": "2023-07-06T12:01:19.355Z",
+            "last_notification_sent": null,
+            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "assigned_to": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "status": 3,
+            "category": 6,
+            "issue_type": null,
+            "description": "Test 2",
+            "admin2": "5ef54822-76ed-452e-9c1c-f04ce9a6dbc6",
+            "area": "",
+            "language": "",
+            "consent": true,
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "registration_data_import": null,
+            "extras": {},
+            "ignored": false,
+            "household_unicef_id": "HH-20-0000.0002",
+            "priority": 2,
+            "urgency": 2,
+            "partner": null,
+            "programme": null,
+            "comments": null
+        }
+    },
+    {
+        "model": "grievance.grievanceticket",
+        "pk": "ef0878c5-8da6-464a-bbf0-b13bfb93bdaf",
+        "fields": {
+            "created_at": "2023-07-06T11:58:05.412Z",
+            "updated_at": "2023-07-06T11:58:05.412Z",
+            "version": 1688644454123298,
+            "unicef_id": "GRV-0000004",
+            "user_modified": "2023-07-06T11:58:05.407Z",
+            "last_notification_sent": null,
+            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "assigned_to": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            "status": 2,
+            "category": 2,
+            "issue_type": 14,
+            "description": "Test 1",
+            "admin2": null,
+            "area": "",
+            "language": "",
+            "consent": true,
+            "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "registration_data_import": null,
+            "extras": {},
+            "ignored": false,
+            "household_unicef_id": "HH-20-0000.0001",
+            "priority": 1,
+            "urgency": 1,
+            "partner": null,
+            "programme": null,
+            "comments": null
+        }
+    },
+    {
+        "model": "grievance.ticketindividualdataupdatedetails",
+        "pk": "a9a0c463-083c-49bb-a606-6a62f2cbd0ca",
+        "fields": {
+            "created_at": "2023-07-06T11:58:05.420Z",
+            "updated_at": "2023-07-06T11:58:05.420Z",
+            "ticket": "ef0878c5-8da6-464a-bbf0-b13bfb93bdaf",
+            "individual": "c0105724-0dfc-4560-b628-a4dc87d732f6",
+            "individual_data": {
+                "documents": [],
+                "identities": [],
+                "flex_fields": {},
+                "payment_channels": [
+                    {
+                        "value": {
+                            "type": "BANK_TRANSFER",
+                            "bank_name": "2",
+                            "bank_account_number": "1"
+                        },
+                        "approve_status": false
+                    }
+                ],
+                "documents_to_edit": [],
+                "identities_to_edit": [],
+                "previous_documents": {},
+                "documents_to_remove": [],
+                "previous_identities": {},
+                "identities_to_remove": [],
+                "payment_channels_to_edit": [],
+                "previous_payment_channels": {},
+                "payment_channels_to_remove": []
+            },
+            "role_reassign_data": {}
+        }
+    },
+    {
+        "model": "grievance.ticketneedsadjudicationdetails",
+        "pk": "113f2c87-ceb1-4486-9a4b-05f4fe1d1839",
+        "fields": {
+            "created_at": "2022-08-10T14:30:11.731Z",
+            "updated_at": "2022-08-10T14:30:11.731Z",
+            "ticket": "630332e9-a1fd-44cc-9f44-3977659485d7",
+            "golden_records_individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
+            "is_multiple_duplicates_version": true,
+            "possible_duplicate": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
+            "selected_individual": null,
+            "role_reassign_data": {},
+            "extra_data": {
+                "golden_records": [
+                    {
+                        "dob": "1923-01-01",
+                        "score": 9.0,
+                        "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
+                        "location": "Abband",
+                        "full_name": "Jan Romaniak",
+                        "proximity_to_score": 3.0
+                    }
+                ],
+                "possible_duplicate": [
+                    {
+                        "dob": "1923-01-01",
+                        "score": 9.0,
+                        "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
+                        "location": "Abband",
+                        "full_name": "Jan Romaniak",
+                        "proximity_to_score": 3.0
+                    }
+                ]
+            },
+            "score_min": 9.0,
+            "score_max": 9.0,
+            "possible_duplicates": [
+                "efaad4e3-f8d9-481b-a902-f5f23deb52f9"
+            ],
+            "selected_individuals": []
+        }
+    },
+    {
+        "model": "grievance.ticketreferraldetails",
+        "pk": "545142b7-d8f2-4867-80be-f997dcbcceca",
+        "fields": {
+            "created_at": "2023-07-06T12:10:49.812Z",
+            "updated_at": "2023-07-06T12:10:49.812Z",
+            "ticket": "0ae07e2e-c89b-4d30-91d6-e54460499ac2",
+            "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
+            "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d"
+        }
+    },
+    {
+        "model": "grievance.ticketreferraldetails",
+        "pk": "8a2c3761-8e63-4e90-af3e-70e4cf217aa5",
+        "fields": {
+            "created_at": "2023-07-06T12:01:19.370Z",
+            "updated_at": "2023-07-06T12:01:19.370Z",
+            "ticket": "c8b5fa03-ac45-4c70-85ab-c654557336c3",
+            "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
+            "individual": "efaad4e3-f8d9-481b-a902-f5f23deb52f9"
+        }
+    },
+    {
+        "model": "grievance.ticketreferraldetails",
+        "pk": "bb426598-9a42-4c96-ba18-d1e62853d196",
+        "fields": {
+            "created_at": "2023-07-06T12:07:43.048Z",
+            "updated_at": "2023-07-06T12:07:43.048Z",
+            "ticket": "2a4f7f07-dfaa-49be-9fca-9802f2426854",
+            "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
+            "individual": "efaad4e3-f8d9-481b-a902-f5f23deb52f9"
+        }
+    }
 ]
