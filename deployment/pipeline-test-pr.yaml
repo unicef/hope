@@ -317,3 +317,7 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST E2E Results'
+          - task: PublishBuildArtifacts@1 
+            displayName: 'Publish Test Report Artifacts'
+            inputs:
+              PathtoPublish: './cypress-reports'
