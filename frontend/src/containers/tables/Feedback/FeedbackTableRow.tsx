@@ -23,7 +23,7 @@ export const FeedbackTableRow = ({
 }: FeedbackTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
+  const feedbackDetailsPath = `/${businessArea}/grievance/feedback/${feedback.id}`;
   const householdDetailsPath = `/${businessArea}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(

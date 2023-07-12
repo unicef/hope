@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Iterable, Tuple
 
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -10,7 +10,10 @@ from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 
 EXCLUDED_MODELS = []
 
@@ -54,11 +57,25 @@ class TestAdminSite(WebTest):
         "registration_datahub",
     ]
 
-    def setUp(self) -> None:
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+        cls.business_area = create_afghanistan()
+
+    @staticmethod
+    def create_user_role_with_permissions(
+        user: "User", permissions: Iterable, business_area: "BusinessArea"
+    ) -> UserRole:
+        permission_list = [perm.value for perm in permissions]
+        role, created = Role.objects.update_or_create(
+            name="Role with Permissions", defaults={"permissions": permission_list}
+        )
+        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        return user_role
 
     @parameterized.expand(model_admins)
     def test_changelist(self, name: str, model_admin: ModelAdmin) -> None:
+        self.create_user_role_with_permissions(self.superuser, [Permissions.DOWNLOAD_STORAGE_FILE], self.business_area)
         url = reverse(admin_urlname(model_admin.model._meta, "changelist"))  # type: ignore # str vs SafeString
         res = self.app.get(url, user=self.superuser)
         self.assertEqual(res.status_code, 200)
