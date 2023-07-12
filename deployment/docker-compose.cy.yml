@@ -73,6 +73,8 @@ services:
     command: "cy"
     volumes:
       - backend-data:/data
+      - test-coverage:test-coverage
+
     depends_on:
       - db
       - redis
