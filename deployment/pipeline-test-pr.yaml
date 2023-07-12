@@ -246,6 +246,8 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
+          - script: |
+              coverage xml --rcfile=.coveragerc
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
@@ -256,7 +258,11 @@ stages:
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
-
+          - task: PublishCodeCoverageResults@2
+            displayName: "Publish Test Coverage"
+            condition: always()
+            inputs:
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/backend/test-coverage/coverage.xml'
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
@@ -268,11 +274,6 @@ stages:
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
           
-          - task: PublishCodeCoverageResults@2
-            displayName: "Publish Test Coverage"
-            condition: always()
-            inputs:
-              summaryFileLocation: 'backend/test-coverage/coverage.xml'
 
   - stage: e2e_tests
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
@@ -302,11 +303,7 @@ stages:
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
-               BRANCH_NAME=$(Build.RequestedFor)
-               MAIL=$(Build.RequestedForEmail)
-               PRBRANCH=$(System.PullRequest.SourceBranch)
-               BUILDVERSION=$(Build.RequestedForId)
-               REPONAME=$(Build.Repository.Name)
+               BRANCH_NAME=$(System.PullRequest.SourceBranch)
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
