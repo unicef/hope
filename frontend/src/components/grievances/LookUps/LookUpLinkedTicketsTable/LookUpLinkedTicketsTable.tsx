@@ -66,7 +66,7 @@ export const LookUpLinkedTicketsTable = ({
     setFieldValue('selectedLinkedTickets', newSelected);
   };
 
-  const handleSelectAllCheckboxesClick = (event, rows): void => {
+  const handleSelectAllCheckboxesClick = (_event, rows): void => {
     if (!selected.length) {
       const newSelecteds = rows.map((row) => row.id);
       setSelected(newSelecteds);
