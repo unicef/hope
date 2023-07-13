@@ -5,7 +5,6 @@ from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
-
 from model_utils import Choices
 
 from hct_mis_api.apps.core.field_attributes.fields_types import (
@@ -33,6 +32,8 @@ class TargetingCriteriaQueryingBase:
         if rules is None:
             return
         self.rules = rules
+        self.flag_exclude_if_active_adjudication_ticket = False
+        self.flag_exclude_if_on_sanction_list = False
         if excluded_household_ids is None:
             self._excluded_household_ids = []
         else:
@@ -61,38 +62,33 @@ class TargetingCriteriaQueryingBase:
     def apply_targeting_criteria_exclusion_flags(self) -> Q:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()
 
-    @staticmethod
-    def apply_flag_exclude_if_active_adjudication_ticket() -> Q:
+    def apply_flag_exclude_if_active_adjudication_ticket(self) -> Q:
+        if not self.flag_exclude_if_active_adjudication_ticket:
+            return Q()
         return ~Q(
-            Q(target_populations__targeting_criteria__flag_exclude_if_active_adjudication_ticket=True)
-            & (
-                (
-                    Q(individuals__ticket_duplicates__isnull=False)
-                    & ~Q(individuals__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
-                )
-                | (
-                    Q(individuals__ticket_golden_records__isnull=False)
-                    & ~Q(individuals__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
-                )
-                | (
-                    Q(representatives__ticket_duplicates__isnull=False)
-                    & ~Q(representatives__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
-                )
-                | (
-                    Q(representatives__ticket_golden_records__isnull=False)
-                    & ~Q(representatives__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
-                )
+            (
+                Q(individuals__ticket_duplicates__isnull=False)
+                & ~Q(individuals__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+            )
+            | (
+                Q(individuals__ticket_golden_records__isnull=False)
+                & ~Q(individuals__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
+            )
+            | (
+                Q(representatives__ticket_duplicates__isnull=False)
+                & ~Q(representatives__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+            )
+            | (
+                Q(representatives__ticket_golden_records__isnull=False)
+                & ~Q(representatives__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
             )
         )
 
-    @staticmethod
-    def apply_flag_exclude_if_on_sanction_list() -> Q:
+    def apply_flag_exclude_if_on_sanction_list(self) -> Q:
+        if not self.flag_exclude_if_on_sanction_list:
+            return Q()
         return ~Q(
-            Q(target_populations__targeting_criteria__flag_exclude_if_on_sanction_list=True)
-            & (
-                Q(individuals__sanction_list_confirmed_match=True)
-                | Q(representatives__sanction_list_confirmed_match=True)
-            )
+            Q(individuals__sanction_list_confirmed_match=True) | Q(representatives__sanction_list_confirmed_match=True)
         )
 
     def get_query(self) -> Q:
