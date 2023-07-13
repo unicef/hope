@@ -134,7 +134,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
@@ -160,7 +160,7 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
@@ -180,7 +180,7 @@ function prepareDeleteHouseholdVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
@@ -228,7 +228,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
@@ -277,7 +277,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
