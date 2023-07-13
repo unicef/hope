@@ -38,11 +38,7 @@ describe("Grievance", () => {
         .getTicketListRow()
         .eq(0)
         .find("a")
-<<<<<<< HEAD
         .contains("GRV-0000003")
-=======
-        .contains("GRV-0000001")
->>>>>>> staging
         .click();
       grievanceDetailsPage.checkGrievanceMenu();
       grievanceDetailsPage.checkElementsOnPage();
@@ -62,7 +58,6 @@ describe("Grievance", () => {
     context("Export", () => {
       it.skip("ToDo", () => {});
     });
-<<<<<<< HEAD
     context("Grievance Filters", () => {
       [
         ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
@@ -306,20 +301,6 @@ describe("Grievance", () => {
     });
       it("Grievance Active Tickets filter", () => {
       });
-=======
-
-    context("Grievance Filters", () => {
-      it.skip("Grievance Programme filter", () => {});
-      it.skip("Grievance Status filter", () => {});
-      it.skip("Grievance FSP filter", () => {});
-      it.skip("Grievance Creation Date filter", () => {});
-      it.skip("Grievance Admin Level 2 filter", () => {});
-      it.skip("Grievance Category filter", () => {});
-      it.skip("Grievance Assignee filter", () => {});
-      it.skip("Grievance Similarity Score filter", () => {});
-      it.skip("Grievance Registration Date Import filter", () => {});
-      it.skip("Grievance Preferred language filter", () => {});
->>>>>>> staging
     });
     context("Create New Ticket", () => {
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
@@ -369,11 +350,7 @@ describe("Grievance", () => {
   describe("Regression tests Grievance", () => {
     // ToDo: Enable
     xit('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
-<<<<<<< HEAD
       grievancePage.chooseTicketListRow(0).click();
-=======
-      grievancePage.getTabSystemGenerated().click();
->>>>>>> staging
       cy.url().should("include", "/system-generated");
     });
   });
