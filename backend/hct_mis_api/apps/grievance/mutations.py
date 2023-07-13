@@ -640,6 +640,7 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
         grievance_tickets_ids = list(grievance_tickets.values_list("id", flat=True))
 
         if grievance_tickets.exists():
+            grievance_tickets.filter(status=GrievanceTicket.STATUS_NEW).update(status=GrievanceTicket.STATUS_ASSIGNED)
             grievance_tickets.update(assigned_to=assigned_to_obj)
             bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id)
 
