@@ -68,7 +68,6 @@ DEFAULTS = {
     "SESSION_COOKIE_NAME": (str, "sessionid"),
     "SECURE_HSTS_SECONDS": (int, 3600),
     "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
-    "LOGGING_DISABLED": (bool, False),
     "CACHE_ENABLED": (bool, True),
 }
 
@@ -76,7 +75,7 @@ env = Env(**DEFAULTS)
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(__file__)
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
@@ -894,7 +893,7 @@ def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
 def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
-    from ..apps.utils.security import is_root  # noqa: ABS101
+    from .apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
         return mark_safe(value.replace(":", r":<br>"))
@@ -1028,8 +1027,6 @@ SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
-LOGGING_DISABLED = env.bool("LOGGING_DISABLED", default=False)
-
 LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
 
 LOGGING: Dict[str, Any] = {
@@ -1074,47 +1071,6 @@ LOGGING: Dict[str, Any] = {
 # overwrite Azure logs
 logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
 logger_azure.setLevel(logging.WARNING)
-
-
-if LOGGING_DISABLED:
-    LOGGING["loggers"].update(
-        {
-            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-            "registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
-            "elasticsearch": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "elasticsearch-dsl-django": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-        }
-    )
-
-    logging.disable(logging.CRITICAL)
 
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
