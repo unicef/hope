@@ -57,6 +57,12 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
+import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
+import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
+import { CreateSurveyPage } from './pages/accountability/surveys/CreateSurveyPage';
+import { SurveyDetailsPage } from './pages/accountability/surveys/SurveyDetailsPage';
+import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
 
 const Root = styled.div`
   display: flex;
@@ -221,7 +227,6 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance/dashboard'>
             <GrievancesDashboardPage key='all' />
           </SentryRoute>
-          {/* TODO: uncomment when ready for deployment
           <SentryRoute path='/:businessArea/accountability/communication/create'>
             <CreateCommunicationPage />
           </SentryRoute>
@@ -230,20 +235,19 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/communication'>
             <CommunicationPage />
-          </SentryRoute> */}
-          <SentryRoute path='/:businessArea/accountability/feedback/create'>
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance/feedback/create'>
             <CreateFeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback/edit-ticket/:id'>
+          <SentryRoute path='/:businessArea/grievance/feedback/edit-ticket/:id'>
             <EditFeedbackPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback/:id'>
+          <SentryRoute path='/:businessArea/grievance/feedback/:id'>
             <FeedbackDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/feedback'>
+          <SentryRoute path='/:businessArea/grievance/feedback'>
             <FeedbackPage />
           </SentryRoute>
-          {/* TODO: uncomment when ready for deployment
           <SentryRoute path='/:businessArea/accountability/surveys/create'>
             <CreateSurveyPage />
           </SentryRoute>
@@ -252,7 +256,7 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/surveys'>
             <SurveysPage />
-          </SentryRoute> */}
+          </SentryRoute>
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
           </SentryRoute>
