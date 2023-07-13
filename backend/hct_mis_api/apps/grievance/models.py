@@ -27,7 +27,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -71,10 +71,6 @@ class GenericPaymentTicket(TimeStampedUUIDModel):
 
     class Meta:
         abstract = True
-
-    @property
-    def payment_record(self) -> Optional[Union[Payment, PaymentRecord]]:
-        return self.payment_obj
 
 
 class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
