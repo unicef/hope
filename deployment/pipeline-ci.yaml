@@ -171,7 +171,7 @@ stages:
               --build-arg SENTRY_ENVIRONMENT=ephemeral \
               --push \
               ./frontend
-            displayName: Docker build prod
+            displayName: Docker build ephemeral
             condition: and(succeeded(), eq(variables.isEphemeral, true))
           - script: |
               docker buildx create --use
