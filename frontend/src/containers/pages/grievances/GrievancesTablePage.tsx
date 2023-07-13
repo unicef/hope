@@ -36,7 +36,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     category: '',
     issueType: '',
     assignedTo: '',
-    admin: '',
+    admin2: '',
     registrationDataImport: id,
     cashPlan: cashPlanId,
     scoreMin: '',
