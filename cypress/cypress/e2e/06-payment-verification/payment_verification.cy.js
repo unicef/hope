@@ -100,13 +100,8 @@ describe("Payment Verification", () => {
 
     context("Delete Verification Plan", () => {
       beforeEach(() => {
-<<<<<<< HEAD
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
-=======
-        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
-        paymentVerificationPage.chooseCashPlan(0).click();
->>>>>>> staging
         paymentVerificationDetailsPage.createNewVerificationPlan(
           defaultNumberOfVPlans016
         );
@@ -125,13 +120,8 @@ describe("Payment Verification", () => {
 
     context("Activate Verification Plan", () => {
       beforeEach(() => {
-<<<<<<< HEAD
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
-=======
-        paymentVerificationPage.getCashPlanRows().should("have.length", 1);
-        paymentVerificationPage.chooseCashPlan(0).click();
->>>>>>> staging
         paymentVerificationDetailsPage.createNewVerificationPlan(
           defaultNumberOfVPlans016
         );
@@ -196,19 +186,11 @@ describe("Payment Verification", () => {
   });
   describe("E2E tests Payment Verification", () => {
     // eslint-disable-next-line mocha/no-setup-in-describe
-<<<<<<< HEAD
     paymentVerificationPage.countPaymentPlanArray().forEach((row_no) => {
       it(`Compare data in Payment Plan Details Page - Row: ${row_no}`, () => {
         paymentVerificationPage.choosePaymentPlan(row_no).click();
         cy.get('[data-cy="page-header-container"]', {
           timeout: 10000
-=======
-    paymentVerificationPage.countCashPlanArray().forEach((row_no) => {
-      it(`Compare data in Cash Plan Details Page - Row: ${row_no}`, () => {
-        paymentVerificationPage.chooseCashPlan(row_no).click();
-        cy.get('[data-cy="page-header-container"]', {
-          timeout: 10000,
->>>>>>> staging
         }).contains("Payment Plan");
         paymentVerificationDetailsPage.checkPaymentPlanDetailsTitle();
         paymentVerificationDetailsPage.checkVerificationPlansSummaryTitle();
