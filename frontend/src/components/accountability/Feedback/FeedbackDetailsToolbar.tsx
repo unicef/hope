@@ -25,7 +25,7 @@ export const FeedbackDetailsToolbar = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/accountability/feedback`,
+      to: `/${businessArea}/grievance/feedback`,
     },
   ];
 
@@ -46,7 +46,7 @@ export const FeedbackDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/accountability/feedback/edit-ticket/${id}`}
+              to={`/${businessArea}/grievance/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
             >

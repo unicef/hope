@@ -1,15 +1,13 @@
 import logging
 import os
 
-from .base import *  # noqa: ignore=F403
+from .settings import *  # noqa: ignore=F403
 
 # dev overrides
 DEBUG = True
 TEMPLATES[0]["OPTIONS"]["debug"] = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
-
-# other
 
 
 CACHES = {
@@ -72,7 +70,6 @@ LOGGING = {
     },
 }
 
-# ELASTICSEARCH SETTINGS
 ELASTICSEARCH_INDEX_PREFIX = "test_"
 
 logging.disable(logging.CRITICAL)
@@ -83,7 +80,6 @@ CELERY_TASK_ALWAYS_EAGER = True
 
 USE_DUMMY_EXCHANGE_RATES = False
 
-# use default settings
 SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 
@@ -92,5 +88,8 @@ CSRF_COOKIE_SECURE = False
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
-SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_SECONDS = False
 CACHE_ENABLED = False
+
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
