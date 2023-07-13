@@ -130,7 +130,7 @@ class HouseholdFactory(DjangoModelFactory):
     male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
     household_collection = factory.SubFactory(HouseholdCollectionFactory)
-    program_id = None  # TODO temporary solution until migration applied
+    # program = factory.SubFactory(ProgramFactory)
 
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
@@ -192,6 +192,7 @@ class IndividualFactory(DjangoModelFactory):
     unicef_id = factory.Sequence(lambda n: f"IND-{n}")
     individual_collection = factory.SubFactory(IndividualCollectionFactory)
     program = factory.SubFactory(ProgramFactory)
+
 
 
 class BankAccountInfoFactory(DjangoModelFactory):
