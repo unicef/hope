@@ -962,6 +962,7 @@ FLAGS = {
     "DEVELOP_DEBUG_TOOLBAR": [],
     "SILK_MIDDLEWARE": [],
     "FRONT_DOOR_BYPASS": [],
+    "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
 }
 
 if DEBUG:

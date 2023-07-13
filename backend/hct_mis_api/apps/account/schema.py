@@ -9,6 +9,7 @@ from django.utils.encoding import force_str
 from django.utils.functional import Promise
 
 import graphene
+from flags.state import flag_state
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -63,10 +64,14 @@ class RoleNode(DjangoObjectType):
 
 class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
+    is_accountability_applicable = graphene.Boolean()
 
     def resolve_permissions(self, info: Any) -> Set:
         user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
         return permissions_resolver(user_roles)
+
+    def resolve_is_accountability_applicable(self, info: Any) -> bool:
+        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
 
     class Meta:
         model = BusinessArea
