@@ -31,6 +31,7 @@ variables:
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
   isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
   isEphemeral: $[eq(variables['Build.SourceBranchName'], 'global-program-filter')]
+  isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
 
@@ -145,6 +146,7 @@ stages:
               --push \
               ./frontend
             displayName: Docker build dev
+            condition: and(succeeded(), eq(variables.isDev, true))
           - script: |
               docker buildx create --use
               docker buildx build \
