@@ -8,7 +8,10 @@ export default class BaseComponent {
   buttonGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]';
   buttonGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   buttonFeedback = 'a[data-cy="nav-Feedback"]';
+<<<<<<< HEAD
   headerTitle = 'h5[data-cy="page-header-title"]';
+=======
+>>>>>>> staging
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -26,7 +29,10 @@ export default class BaseComponent {
   getMenuButtonGrievanceTickets = () => cy.get(this.buttonGrievanceTickets);
   getMenuButtonGrievanceDashboard = () => cy.get(this.buttonGrievanceDashboard);
   getMenuButtonFeedback = () => cy.get(this.buttonFeedback);
+<<<<<<< HEAD
   getHeaderTitle = () => cy.get(this.headerTitle);
+=======
+>>>>>>> staging
 
   checkGrievanceMenu() {
     this.getMenuButtonGrievanceTickets().should("be.visible");
