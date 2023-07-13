@@ -8,7 +8,7 @@ export default class BaseComponent {
   buttonGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]';
   buttonGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   buttonFeedback = 'a[data-cy="nav-Feedback"]';
-  headerTitle = 'h5[data-cy="page-header-title"]"'
+  headerTitle = 'h5[data-cy="page-header-title"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -64,10 +64,10 @@ export default class BaseComponent {
   }
 
   pressEscapeFromElement(element){
-    element.then(($el) => {
+    element.focused().then(($el) => {
       if ($el.length) {
         element.type('{esc}')
       }
-      });
+    });
   }
 }
