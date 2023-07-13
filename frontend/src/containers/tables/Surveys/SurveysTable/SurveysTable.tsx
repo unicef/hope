@@ -11,7 +11,6 @@ import { choicesToDict, decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
-import { useTranslation } from 'react-i18next';
 
 interface SurveysTableProps {
   filter;
