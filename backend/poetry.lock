@@ -1608,11 +1608,7 @@ files = [
 ]
 
 [package.dependencies]
-<<<<<<< HEAD
-Django = ">=2.2,<3.0.dev0 || >=3.2.dev0,<5.0"
-=======
 Django = ">=2.2,<3.0.0 || >=3.2.0,<5.0"
->>>>>>> staging
 pytz = "*"
 
 [[package]]
@@ -2368,23 +2364,14 @@ tomli = {version = "*", markers = "python_version > \"3.6\" and python_version <
 
 [[package]]
 name = "ipython"
-<<<<<<< HEAD
-version = "8.12.2"
-=======
 version = "8.14.0"
->>>>>>> staging
 description = "IPython: Productive Interactive Computing"
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-<<<<<<< HEAD
-    {file = "ipython-8.12.2-py3-none-any.whl", hash = "sha256:ea8801f15dfe4ffb76dea1b09b847430ffd70d827b41735c64a0638a04103bfc"},
-    {file = "ipython-8.12.2.tar.gz", hash = "sha256:c7b80eb7f5a855a88efc971fda506ff7a91c280b42cdae26643e0f601ea281ea"},
-=======
     {file = "ipython-8.14.0-py3-none-any.whl", hash = "sha256:248aca623f5c99a6635bc3857677b7320b9b8039f99f070ee0d20a5ca5a8e6bf"},
     {file = "ipython-8.14.0.tar.gz", hash = "sha256:1d197b907b6ba441b692c48cf2a3a2de280dc0ac91a3405b39349a50272ca0a1"},
->>>>>>> staging
 ]
 
 [package.dependencies]
@@ -2827,10 +2814,7 @@ files = [
 name = "natural-keys"
 version = "2.1.0"
 description = "Enhanced support for natural keys in Django and Django REST Framework."
-<<<<<<< HEAD
-=======
 category = "main"
->>>>>>> staging
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -3151,7 +3135,6 @@ files = [
 [package.extras]
 docs = ["furo (>=2023.5.20)", "proselint (>=0.13)", "sphinx (>=7.0.1)", "sphinx-autodoc-typehints (>=1.23,!=1.23.4)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-cov (>=4.1)", "pytest-mock (>=3.10)"]
-<<<<<<< HEAD
 
 [[package]]
 name = "pluggy"
@@ -3167,8 +3150,6 @@ files = [
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
-=======
->>>>>>> staging
 
 [[package]]
 name = "pre-commit"
@@ -4380,23 +4361,14 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-<<<<<<< HEAD
 version = "4.7.1"
-=======
-version = "4.6.3"
->>>>>>> staging
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-<<<<<<< HEAD
     {file = "typing_extensions-4.7.1-py3-none-any.whl", hash = "sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36"},
     {file = "typing_extensions-4.7.1.tar.gz", hash = "sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2"},
-=======
-    {file = "typing_extensions-4.6.3-py3-none-any.whl", hash = "sha256:88a4153d8505aabbb4e13aacb7c486c2b4a33ca3b3f807914a9b4c844c471c26"},
-    {file = "typing_extensions-4.6.3.tar.gz", hash = "sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5"},
->>>>>>> staging
 ]
 
 [[package]]
@@ -4790,8 +4762,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.*"
-<<<<<<< HEAD
-content-hash = "1cd47f7329555bb8e4acac688d1814e56d7214cb7a48addfb170e5eb67ac33bf"
-=======
 content-hash = "aa2ad7ff4a12ea49169f8982ef623441c49ae57b2bc7fa9eaa3036c91d6ee3dd"
->>>>>>> staging

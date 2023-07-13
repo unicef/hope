@@ -77,11 +77,7 @@ django_settings_module = "hct_mis_api.settings.dev"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-<<<<<<< HEAD
 version = "2023.7.1"
-=======
-version = "2023.6.4"
->>>>>>> staging
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
