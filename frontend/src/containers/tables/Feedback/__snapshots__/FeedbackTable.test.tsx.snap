@@ -234,7 +234,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <a
                     class="sc-dnqmqq ciXWka"
-                    href="/afghanistan/accountability/feedback/RmVlZGJhY2tOb2RlOjM3YmJiOTI2LTNkNjUtNDlhNy04YTU0LWRjYjYxMzc5ZWIyMQ=="
+                    href="/afghanistan/grievance/feedback/RmVlZGJhY2tOb2RlOjM3YmJiOTI2LTNkNjUtNDlhNy04YTU0LWRjYjYxMzc5ZWIyMQ=="
                   >
                     FED-23-0002
                   </a>
@@ -278,7 +278,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <a
                     class="sc-dnqmqq ciXWka"
-                    href="/afghanistan/accountability/feedback/RmVlZGJhY2tOb2RlOjRmNzdmMmIyLTk4YTMtNGMyMy1hZGM4LTAxMDEwYTczMGY4Nw=="
+                    href="/afghanistan/grievance/feedback/RmVlZGJhY2tOb2RlOjRmNzdmMmIyLTk4YTMtNGMyMy1hZGM4LTAxMDEwYTczMGY4Nw=="
                   >
                     FED-23-0001
                   </a>
