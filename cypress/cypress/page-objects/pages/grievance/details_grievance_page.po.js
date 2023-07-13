@@ -2,7 +2,10 @@ import BaseComponent from "../../base.component";
 
 export default class GrievanceDetailsPage extends BaseComponent {
   // Locators
+<<<<<<< HEAD
   pageHeaderContainer = 'div[data-cy="page-header-container"]';
+=======
+>>>>>>> staging
   title = 'h5[data-cy="page-header-title"]';
   buttonEdit = 'a[data-cy="button-edit"]';
   buttonSetInProgress = 'button[data-cy="button-set-to-in-progress"]';
@@ -40,15 +43,24 @@ export default class GrievanceDetailsPage extends BaseComponent {
   newNoteField = 'textarea[data-cy="input-newNote"]';
   buttonNewNote = 'button[data-cy="button-add-note"]';
   // Texts
+<<<<<<< HEAD
   textTitle = "Ticket ID: ";
+=======
+  textTitle = "Ticket ID: GRV-0000001";
+>>>>>>> staging
   textStatusNew = "New";
   textPriorityNotSet = "Not set";
   textUrgencyNotSet = "Not set";
   textNotAssigment = "-";
+<<<<<<< HEAD
   textAssigmentRootRootkowski = "Root Rootkowski"
   textNoCategory = "Needs Adjudication";
   // Elements
   getPageHeaderContainer = () => cy.get(this.pageHeaderContainer);
+=======
+  textNoCategory = "Needs Adjudication";
+  // Elements
+>>>>>>> staging
   getTitle = () => cy.get(this.title);
   getButtonAssignToMe = () => cy.get(this.buttonAssignToMe);
   getTicketStatus = () => cy.get(this.ticketStatus);
@@ -116,8 +128,11 @@ export default class GrievanceDetailsPage extends BaseComponent {
     this.getCellVillage().scrollIntoView().should("be.visible");
     this.getNewNoteField().scrollIntoView().should("be.visible");
   }
+<<<<<<< HEAD
 
   pressBackButton() {
     this.getPageHeaderContainer().find("svg").eq(0).click();
   }
+=======
+>>>>>>> staging
 }

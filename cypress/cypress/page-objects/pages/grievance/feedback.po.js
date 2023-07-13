@@ -22,7 +22,11 @@ export default class Feedback extends BaseComponent {
   textHouseholdID = "Household ID";
   textLinkedGrievance = "Linked Grievance";
   textCreatedBy = "Created by";
+<<<<<<< HEAD
   textCreationDate = "Creation Date";
+=======
+  textCreationDate = "Creation date";
+>>>>>>> staging
   // Elements
   getTitlePage = () => cy.get(this.titlePage);
   getButtonSubmitNewFeedback = () => cy.get(this.buttonSubmitNewFeedback);
