@@ -1,16 +1,16 @@
 import React, { ReactElement } from 'react';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { choicesToDict, decodeIdString } from '../../../../utils/utils';
+import { useTranslation } from 'react-i18next';
 import {
   AllSurveysQueryVariables,
   SurveyNode,
   SurveysChoiceDataQuery,
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { choicesToDict, decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
-import { useTranslation } from 'react-i18next';
 
 interface SurveysTableProps {
   filter;
