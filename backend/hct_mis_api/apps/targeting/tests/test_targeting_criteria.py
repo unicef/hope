@@ -1,8 +1,9 @@
 import datetime
 from typing import Any, Dict, List
 
-from dateutil.relativedelta import relativedelta
 from django.core.management import call_command
+
+from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase

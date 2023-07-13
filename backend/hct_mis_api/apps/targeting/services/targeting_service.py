@@ -5,6 +5,7 @@ from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
+
 from model_utils import Choices
 
 from hct_mis_api.apps.core.field_attributes.fields_types import (
