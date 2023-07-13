@@ -4,7 +4,11 @@ export default class Grievance extends BaseComponent {
   // Locators
   titlePage = 'h5[data-cy="page-header-title"]';
   searchFilter = 'div[data-cy="filters-search"]';
+<<<<<<< HEAD
   ticketTypeFilter = 'div[data-cy="filters-search-type"]';
+=======
+  ticketIdFilter = 'div[data-cy="filters-search-type"]';
+>>>>>>> staging
   ticketId = 'li[data-value="ticket_id"]';
   householdId = 'li[data-value="ticket_hh_id"]';
   lastName = 'li[data-value="last_name"]';
@@ -42,12 +46,15 @@ export default class Grievance extends BaseComponent {
   tabLastModifiedDate = 'th[data-cy="userModified"]';
   tabTotalDays = 'th[data-cy="totalDays"]';
   ticketListRow = 'tr[role="checkbox"]';
+<<<<<<< HEAD
   statusOptions = 'li[role="option"]';
 
   dateTitleFilterPopup =
     'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]';
   daysFilterPopup =
     'div[class="MuiPickersSlideTransition-transitionContainer MuiPickersCalendar-transitionContainer"]';
+=======
+>>>>>>> staging
 
   // Texts
   textTitle = "Grievance Tickets";
@@ -57,7 +64,11 @@ export default class Grievance extends BaseComponent {
   getGrievanceTitle = () => cy.get(this.titlePage);
   getTabTitle = () => cy.get(this.tabTitle);
   getSearchFilter = () => cy.get(this.searchFilter);
+<<<<<<< HEAD
   getTicketTypeFilter = () => cy.get(this.ticketTypeFilter);
+=======
+  getTicketIdFilter = () => cy.get(this.ticketIdFilter);
+>>>>>>> staging
   getCreationDateFromFilter = () => cy.get(this.creationDateFromFilter);
   getCreationDateToFilter = () => cy.get(this.creationDateToFilter);
   getStatusFilter = () => cy.get(this.statusFilter);
@@ -94,9 +105,12 @@ export default class Grievance extends BaseComponent {
   getTabSystemGenerated = () => cy.get(this.tabSystemGenerated);
   getTabUserGenerated = () => cy.get(this.tabUserGenerated);
   getTicketListRow = () => cy.get(this.ticketListRow);
+<<<<<<< HEAD
   getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
   getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
   getOptions = () => cy.get(this.statusOptions);
+=======
+>>>>>>> staging
 
   checkElementsOnUserGeneratedPage() {
     this.getGrievanceTitle().contains(this.textTitle);
@@ -108,6 +122,7 @@ export default class Grievance extends BaseComponent {
     this.checkAllColumnsVisibility();
   }
 
+<<<<<<< HEAD
   chooseTicketListRow(num = 0, contains = "GRV-0000002") {
     // ToDo: Use after fix bug: 164824
     // return this.getTicketListRow().eq(num);
@@ -155,6 +170,8 @@ export default class Grievance extends BaseComponent {
     this.getOptions().contains(mail).click();
     this.getButtonApply().click();
   }
+=======
+>>>>>>> staging
   checkElementsOnSystemGeneratedPage() {
     this.getTabSystemGenerated().click();
     this.getGrievanceTitle().contains(this.textTitle);
@@ -166,16 +183,28 @@ export default class Grievance extends BaseComponent {
     this.getTicketListRow().eq(0).should("be.visible");
   }
 
+<<<<<<< HEAD
   checkElementsOfTicketTypeFilter() {
     this.getTicketTypeFilter().click();
     this.getTicketID().should("be.visible");
     this.getHouseholdID().should("be.visible");
     this.pressEscapeFromElement(this.getLastName().should("be.visible"))
+=======
+  checkElementsOfTicketIdFilter() {
+    this.getTicketIdFilter().click();
+    this.getTicketID().should("be.visible");
+    this.getHouseholdID().should("be.visible");
+    this.getLastName().should("be.visible").type("{esc}");
+>>>>>>> staging
   }
 
   checkAllSearchFieldsVisible() {
     this.getSearchFilter().should("be.visible");
+<<<<<<< HEAD
     this.getTicketTypeFilter().should("be.visible");
+=======
+    this.getTicketIdFilter().should("be.visible");
+>>>>>>> staging
     this.getCreationDateFromFilter().should("be.visible");
     this.getCreationDateToFilter().should("be.visible");
     this.getStatusFilter().should("be.visible");
@@ -188,7 +217,11 @@ export default class Grievance extends BaseComponent {
     this.getPriorityFilter().should("be.visible");
     this.getUrgencyFilter().should("be.visible");
     this.getActiveTicketsFilter().should("be.visible");
+<<<<<<< HEAD
     this.checkElementsOfTicketTypeFilter();
+=======
+    this.checkElementsOfTicketIdFilter();
+>>>>>>> staging
     this.getButtonApply().should("be.visible");
     this.getButtonClear().should("be.visible");
   }
@@ -206,6 +239,7 @@ export default class Grievance extends BaseComponent {
     this.getTabLastModifiedDate().scrollIntoView().should("be.visible");
     this.getTabTotalDays().scrollIntoView().should("be.visible");
   }
+<<<<<<< HEAD
 
   useSearchFilter(text) {
     this.getSearchFilter().type(text);
@@ -289,4 +323,6 @@ export default class Grievance extends BaseComponent {
       this.getTicketListRow().should("have.length", num);
     }
   }
+=======
+>>>>>>> staging
 }
