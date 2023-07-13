@@ -303,9 +303,17 @@ describe("Grievance", () => {
       });
     });
     context("Create New Ticket", () => {
+      beforeEach(() => {
+        grievancePage.getButtonNewTicket().click()
+        newTicketPage.checkElementsOnPage()
+      });
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
       // It makes sense to test all different issue types for Data Change tickets as they have different fields.
-      it.skip("Create New Ticket - Data Change - Add Individual", () => {});
+      it("Create New Ticket - Data Change - Add Individual", () => {
+        newTicketPage.chooseCategory("Data Change")
+        newTicketPage.chooseIssueType("Add Individual")
+        newTicketPage.getButtonNext().click()
+      });
       it.skip("Create New Ticket - Data Change - Household Data Update", () => {});
       it.skip("Create New Ticket - Data Change - Individual Data Update", () => {});
       it.skip("Create New Ticket - Data Change - Withdraw Individual", () => {});
