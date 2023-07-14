@@ -5,8 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('core', '0002_migration'), ('core', '0003_migration'), ('core', '0004_migration'), ('core', '0005_migration'), ('core', '0006_migration')]
-
     dependencies = [
         ('core', '0001_migration'),
     ]

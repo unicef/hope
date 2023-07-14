@@ -92,6 +92,7 @@ export const BulkAssignModal = ({
               variables: { ...initialVariables },
             },
           ],
+          awaitRefetchQueries: true,
         });
       } catch (e) {
         e.graphQLErrors.map((x) => showMessage(x.message));

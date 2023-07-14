@@ -26,11 +26,11 @@ export const LookUpLinkedTicketsTable = ({
 }: LookUpLinkedTicketsTableProps): React.ReactElement => {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
-    search: filter.search,
+    search: filter.search ? `ticket_id ${filter.search}` : '',
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    admin: filter?.admin?.node?.id,
+    admin2: filter?.admin2?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
   const {
@@ -66,7 +66,7 @@ export const LookUpLinkedTicketsTable = ({
     setFieldValue('selectedLinkedTickets', newSelected);
   };
 
-  const handleSelectAllCheckboxesClick = (event, rows): void => {
+  const handleSelectAllCheckboxesClick = (_event, rows): void => {
     if (!selected.length) {
       const newSelecteds = rows.map((row) => row.id);
       setSelected(newSelecteds);

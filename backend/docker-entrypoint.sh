@@ -26,23 +26,14 @@ else
       python manage.py runserver 0.0.0.0:8000
       ;;
     "test")
-      export DEBUG=1
-      export LOGGING_DISABLED=1
-      export CACHE_ENABLED=0
-      export ELASTICSEARCH_INDEX_PREFIX="test_"
-      export EXCHANGE_RATE_CACHE_EXPIRY=0
-      export CELERY_TASK_ALWAYS_EAGER=True
-      export SESSION_COOKIE_SECURE=False
-      export CSRF_COOKIE_SECURE=False
-      export SECURE_HSTS_SECONDS=0
-      export SOCIAL_AUTH_REDIRECT_IS_HTTPS=False
-      export EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
       wait_for_db db
       wait_for_db cash_assist_datahub_db
       wait_for_db mis_datahub_db
       wait_for_db erp_datahub_db
       wait_for_db registration_datahub_db
-      python manage.py test --settings hct_mis_api.settings.test --noinput --parallel
+      # pytest hct_mis_api -n logical
+      python manage.py test --settings hct_mis_api.settings_test --noinput --parallel
+
       ;;
     "lint")
       mkdir -p ./lint-results

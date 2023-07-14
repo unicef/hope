@@ -104,7 +104,7 @@ export function LookUpLinkedTicketsFilters({
         <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
-            name='admin'
+            name='admin2'
             dataCy='filters-admin'
           />
         </Grid>
