@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
-  useAllHouseholdsQuery,
+  useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
@@ -43,12 +43,26 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
+  const matchWithdrawnValue = (): boolean | undefined => {
+    if (filter.withdrawn === 'true') {
+      return true;
+    }
+    if (filter.withdrawn === 'false') {
+      return false;
+    }
+    return undefined;
+  };
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
+    familySize: JSON.stringify({
+      min: filter.householdSizeMin,
+      max: filter.householdSizeMax,
+    }),
     search: filter.search,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
-    familySize: JSON.stringify(filter.size),
+    withdrawn: matchWithdrawnValue(),
+    orderBy: filter.orderBy,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
@@ -112,9 +126,10 @@ export const LookUpHouseholdTable = ({
       >
         headCells={householdMultiSelect ? headCells.slice(1) : headCells}
         rowsPerPageOptions={[5, 10, 15, 20]}
-        query={useAllHouseholdsQuery}
+        query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        filterOrderBy={filter.orderBy}
         onSelectAllClick={
           householdMultiSelect && handleSelectAllCheckboxesClick
         }

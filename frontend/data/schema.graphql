@@ -283,7 +283,7 @@ type BusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   isPaymentPlanApplicable: Boolean!
-  isAccountabilityApplicable: Boolean!
+  isAccountabilityApplicable: Boolean
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -832,10 +832,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CASH_BY_FSP
   CHEQUE
   DEPOSIT_TO_CARD
-  IN_KIND
   MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2595,10 +2592,7 @@ enum PaymentDeliveryType {
   CASH_BY_FSP
   CHEQUE
   DEPOSIT_TO_CARD
-  IN_KIND
   MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2950,10 +2944,7 @@ enum PaymentRecordDeliveryType {
   CASH_BY_FSP
   CHEQUE
   DEPOSIT_TO_CARD
-  IN_KIND
   MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -4746,7 +4737,7 @@ type UserBusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   isPaymentPlanApplicable: Boolean!
-  isAccountabilityApplicable: Boolean!
+  isAccountabilityApplicable: Boolean
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
