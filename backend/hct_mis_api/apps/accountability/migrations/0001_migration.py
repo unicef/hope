@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ('registration_data', '0022_migration'),
         ('household', '0119_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0054_migration'),
+        ('core', '0044_migration_squashed_0057_migration'),
     ]
 
     operations = [

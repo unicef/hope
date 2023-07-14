@@ -70,7 +70,7 @@ export const PaymentFilters = ({
           <SearchTextField
             value={filter.search}
             data-cy='filter-search'
-            label='Cash/Payment Plan ID'
+            label='Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
             fullWidth
           />
