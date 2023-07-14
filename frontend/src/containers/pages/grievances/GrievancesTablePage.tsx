@@ -36,7 +36,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     category: '',
     issueType: '',
     assignedTo: '',
-    admin: '',
+    admin2: '',
     registrationDataImport: id,
     cashPlan: cashPlanId,
     scoreMin: '',
@@ -75,7 +75,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
         setSelectedTab(newValue);
         setFilter({
           ...filter,

@@ -243,8 +243,8 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             filter={filter}
-            name='admin'
-            value={filter.admin}
+            name='admin2'
+            value={filter.admin2}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
