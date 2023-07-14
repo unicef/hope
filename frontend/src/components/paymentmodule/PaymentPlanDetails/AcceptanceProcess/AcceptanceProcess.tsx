@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useExportPdfPpSummaryMutation,
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
@@ -63,7 +64,7 @@ export const AcceptanceProcess = ({
   const canExportPdf = hasPermissions(
     PERMISSIONS.PM_EXPORT_PDF_SUMMARY,
     permissions,
-  );
+  ) && (paymentPlan.status === PaymentPlanStatus.Accepted || paymentPlan.status === PaymentPlanStatus.Finished);
 
   return (
     <Box m={5}>
