@@ -149,9 +149,11 @@ export const AddIndividualDataChange = ({
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
-          <Grid item xs={12}>
-            {t('Flex Fields')}
-          </Grid>
+          {flexFields.length > 0 && (
+            <Grid item xs={12}>
+              {t('Flex Fields')}
+            </Grid>
+          )}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField
               key={item.name}

@@ -45,6 +45,7 @@ export const HouseholdTable = ({
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
+    orderBy: filter.orderBy,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
