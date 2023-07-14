@@ -5,8 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    replaces = [('payment', '0002_migration'), ('payment', '0003_migration')]
-
     dependencies = [
         ('payment', '0001_migration'),
         ('program', '0001_migration'),

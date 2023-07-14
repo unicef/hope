@@ -53,13 +53,10 @@ def remove_payment_plan_old_export_file(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('payment', '0078_migration'), ('payment', '0079_migration'), ('payment', '0080_migration'), ('payment', '0081_migration'), ('payment', '0082_migration'), ('payment', '0083_migration'), ('payment', '0084_migration'), ('payment', '0085_migration'), ('payment', '0086_migration'), ('payment', '0087_migration'), ('payment', '0088_migration'), ('payment', '0089_migration'), ('payment', '0090_migration'), ('payment', '0091_migration'), ('payment', '0092_migration'), ('payment', '0093_migration'), ('payment', '0094_migration'), ('payment', '0095_migration'), ('payment', '0096_migration')]
-
     dependencies = [
         ('payment', '0076_migration_squashed_0077_migration'),
-        ('core', '0064_migration'),
+        ('core', '0060_migration_squashed_0064_migration'),
         ('contenttypes', '0002_remove_content_type_name'),
-        ('core', '0063_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

@@ -18,7 +18,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
           <h6
             class="MuiTypography-root MuiTypography-h6"
           >
-            Cash Plan Details
+            Payment Plan Details
           </h6>
         </div>
         <div
@@ -113,10 +113,10 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   class="sc-htpNat hcDmtB"
                   color="textSecondary"
                 >
-                  cash plan name
+                  Payment Plan Name
                 </span>
                 <div
-                  data-cy="label-cash plan name"
+                  data-cy="label-Payment Plan Name"
                 >
                   <span
                     class="sc-bxivhb FSIfE"

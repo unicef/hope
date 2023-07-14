@@ -157,11 +157,17 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         },
     }
     TICKET_TYPES_WITH_FSP = (
-        ("complaint_ticket_details", "payment_record__service_provider"),
-        ("sensitive_ticket_details", "payment_record__service_provider"),
+        ("complaint_ticket_details", "payment_record__service_provider__full_name"),
+        ("complaint_ticket_details", "payment__financial_service_provider__name"),
+        ("sensitive_ticket_details", "payment_record__service_provider__full_name"),
+        ("sensitive_ticket_details", "payment__financial_service_provider__name"),
         (
             "payment_verification_ticket_details",
-            "payment_verifications__payment_record__service_provider",
+            "payment_verification__payment__financial_service_provider__name",
+        ),
+        (
+            "payment_verification_ticket_details",
+            "payment_verification__payment_record__service_provider__full_name",
         ),
     )
     business_area = CharFilter(field_name="business_area__slug", required=True)
@@ -242,7 +248,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         if value:
             q_obj = Q()
             for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
-                q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value})
+                q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__istartswith": value})
 
             return qs.filter(q_obj)
         return qs

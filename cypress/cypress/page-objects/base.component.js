@@ -8,6 +8,7 @@ export default class BaseComponent {
   buttonGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]';
   buttonGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   buttonFeedback = 'a[data-cy="nav-Feedback"]';
+  headerTitle = 'h5[data-cy="page-header-title"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -25,6 +26,7 @@ export default class BaseComponent {
   getMenuButtonGrievanceTickets = () => cy.get(this.buttonGrievanceTickets);
   getMenuButtonGrievanceDashboard = () => cy.get(this.buttonGrievanceDashboard);
   getMenuButtonFeedback = () => cy.get(this.buttonFeedback);
+  getHeaderTitle = () => cy.get(this.headerTitle);
 
   checkGrievanceMenu() {
     this.getMenuButtonGrievanceTickets().should("be.visible");
@@ -59,5 +61,13 @@ export default class BaseComponent {
 
   clickMenuButtonTargeting() {
     this.getMenuButtonTargeting().contains(this.buttonTargetingText).click();
+  }
+
+  pressEscapeFromElement(element){
+    element.focused().then(($el) => {
+      if ($el.length) {
+        element.type('{esc}')
+      }
+    });
   }
 }

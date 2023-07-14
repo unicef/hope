@@ -22,7 +22,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe'
+                            'fullName': None
                         }
                     },
                     'consent': True,
@@ -69,7 +69,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
+                            'fullName': None
                         }
                     },
                     'consent': True,
@@ -87,7 +87,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
+                            'fullName': None
                         }
                     },
                     'consent': True,
@@ -129,7 +129,9 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'complaintTicketDetails': {
                         'household': None,
                         'individual': None,
-                        'paymentRecord': None
+                        'paymentRecord': {
+                            'fullName': None
+                        }
                     },
                     'consent': True,
                     'description': 'Test Feedback',
@@ -173,7 +175,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe'
+                            'fullName': None
                         }
                     },
                     'consent': True,
@@ -218,7 +220,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                         },
                         'individual': None,
                         'paymentRecord': {
-                            'fullName': 'John Doe'
+                            'fullName': None
                         }
                     },
                     'consent': True,
@@ -264,7 +266,9 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                         'individual': {
                             'fullName': 'John Doe'
                         },
-                        'paymentRecord': None
+                        'paymentRecord': {
+                            'fullName': None
+                        }
                     },
                     'consent': True,
                     'description': 'Test Feedback',

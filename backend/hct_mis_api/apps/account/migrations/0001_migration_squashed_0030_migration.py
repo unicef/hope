@@ -66,14 +66,10 @@ def set_partner(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('account', '0001_migration'), ('account', '0002_migration'), ('account', '0003_migration'), ('account', '0004_migration'), ('account', '0005_migration'), ('account', '0006_migration'), ('account', '0007_migration'), ('account', '0008_migration'), ('account', '0009_migration'), ('account', '0010_migration'), ('account', '0011_migration'), ('account', '0012_migration'), ('account', '0013_migration'), ('account', '0014_migration'), ('account', '0015_migration'), ('account', '0016_migration'), ('account', '0017_migration'), ('account', '0018_migration'), ('account', '0019_migration'), ('account', '0020_migration'), ('account', '0021_migration'), ('account', '0022_migration'), ('account', '0023_migration'), ('account', '0024_migration'), ('account', '0025_migration'), ('account', '0026_migration'), ('account', '0027_migration'), ('account', '0028_migration'), ('account', '0029_migration'), ('account', '0030_migration')]
-
     dependencies = [
         ('steficon', '0002_migration'),
-        ('core', '0001_migration'),
-        ('core', '0005_migration'),
         ('auth', '0011_update_proxy_permissions'),
-        ('core', '0006_migration'),
+        ('core', '0002_migration_squashed_0006_migration'),
     ]
 
     operations = [

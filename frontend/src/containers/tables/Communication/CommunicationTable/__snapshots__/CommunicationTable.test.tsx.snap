@@ -135,7 +135,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
                     role="button"
                     tabindex="0"
                   >
-                    Number of recipients
+                    Number of Recipients
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -183,7 +183,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
                     role="button"
                     tabindex="0"
                   >
-                    Creation date
+                    Creation Date
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

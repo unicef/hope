@@ -20,10 +20,8 @@ def remove_duplicates(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('core', '0017_migration'), ('core', '0018_migration'), ('core', '0019_migration'), ('core', '0020_migration'), ('core', '0021_migration'), ('core', '0022_migration'), ('core', '0023_migration'), ('core', '0024_migration'), ('core', '0025_migration'), ('core', '0026_migration'), ('core', '0027_migration'), ('core', '0028_migration'), ('core', '0029_migration'), ('core', '0030_migration'), ('core', '0031_migration'), ('core', '0032_migration'), ('core', '0033_migration'), ('core', '0034_migration'), ('core', '0035_migration'), ('core', '0036_migration'), ('core', '0037_migration'), ('core', '0038_migration'), ('core', '0039_migration'), ('core', '0040_migration')]
-
     dependencies = [
-        ('core', '0016_migration'),
+        ('core', '0007_migration_squashed_0016_migration'),
     ]
 
     operations = [

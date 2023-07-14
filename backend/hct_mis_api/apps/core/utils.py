@@ -499,8 +499,6 @@ def update_labels_mapping(csv_file: str) -> None:
     import json
     import re
 
-    from django.conf import settings
-
     from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
         FieldFactory,
     )
@@ -815,7 +813,7 @@ def clear_cache_for_dashboard_totals() -> None:
         "resolve_chart_total_transferred_by_month",
     )
     # we need skip remove cache for test and because LocMemCache don't have .keys()
-    if getattr(settings, "CACHE_ENABLED", False):
+    if hasattr(cache, "keys"):
         all_cache_keys = cache.keys("*")
         for k in [key for key in all_cache_keys if key.startswith(keys)]:
             cache.delete(k)
