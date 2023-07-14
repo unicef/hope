@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('core', '0059_migration'),
         ('steficon', '0011_migration_squashed_0016_migration'),
-        ('registration_datahub', '0001_migration_squashed_0088_migration'),
         ('program', '0034_migration'),
     ]
 
