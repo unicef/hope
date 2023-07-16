@@ -1,4 +1,4 @@
-import { Paper } from '@material-ui/core';
+import { Box, Paper } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -23,5 +23,16 @@ interface ContainerWithBorderProps {
 export function ContainerWithBorder({
   children,
 }: ContainerWithBorderProps): React.ReactElement {
-  return <Container>{children}</Container>;
+  return (
+    <Container>
+      <Box
+        style={{ width: '100%' }}
+        display='flex'
+        flexDirection='column'
+        alignItems='flex-end'
+      >
+        {children}
+      </Box>
+    </Container>
+  );
 }

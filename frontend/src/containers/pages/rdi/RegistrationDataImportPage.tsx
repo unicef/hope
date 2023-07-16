@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { RegistrationDataImportCreateDialog } from '../../../components/rdi/create/RegistrationDataImportCreateDialog';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -13,9 +12,12 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 
 const initialFilter = {
   search: '',
-  importDate: null,
   importedBy: '',
   status: '',
+  sizeMin: '',
+  sizeMax: '',
+  importDateRangeMin: undefined,
+  importDateRangeMax: undefined,
 };
 
 export const RegistrationDataImportPage = (): React.ReactElement => {
@@ -26,8 +28,10 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
-  const debounceFilter = useDebounce(filter, 500);
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
@@ -43,9 +47,15 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
   return (
     <div>
       {toolbar}
-      <RegistrationFilters onFilterChange={setFilter} filter={filter} />
+      <RegistrationFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
       <RegistrationDataImportTable
-        filter={debounceFilter}
+        filter={appliedFilter}
         canViewDetails={hasPermissions(
           PERMISSIONS.RDI_VIEW_DETAILS,
           permissions,

@@ -12,21 +12,15 @@ interface VerificationPlansSummaryProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export function VerificationPlansSummary({
+export const VerificationPlansSummary = ({
   planNode,
-}: VerificationPlansSummaryProps): React.ReactElement {
+}: VerificationPlansSummaryProps): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    status,
-    activationDate,
-    completionDate,
-  } = planNode.paymentVerificationSummary;
-
   return (
     <Grid container>
-      <Grid item xs={9}>
+      <Grid data-cy='grid-verification-plans-summary' item xs={9}>
         <Title>
-          <Typography variant='h6'>
+          <Typography variant='h6' data-cy='table-label'>
             {t('Verification Plans Summary')}
           </Typography>
         </Title>
@@ -35,7 +29,8 @@ export function VerificationPlansSummary({
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
                 <StatusBox
-                  status={status}
+                  dataCy='verification-plans-summary-status'
+                  status={planNode.paymentVerificationSummary?.status}
                   statusToColor={paymentVerificationStatusToColor}
                 />
               </LabelizedField>
@@ -43,21 +38,34 @@ export function VerificationPlansSummary({
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
-              <LabelizedField label={t('Activation Date')}>
-                <UniversalMoment>{activationDate}</UniversalMoment>
+              <LabelizedField
+                dataCy='summary-activation-date'
+                label={t('Activation Date')}
+              >
+                <UniversalMoment>
+                  {planNode.paymentVerificationSummary?.activationDate}
+                </UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
-              <LabelizedField label={t('Completion Date')}>
-                <UniversalMoment>{completionDate}</UniversalMoment>
+              <LabelizedField
+                dataCy='summary-completion-date'
+                label={t('Completion Date')}
+              >
+                <UniversalMoment>
+                  {planNode.paymentVerificationSummary?.completionDate}
+                </UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
-              <LabelizedField label={t('Number of Verification Plans')}>
+              <LabelizedField
+                dataCy='summary-number-of-plans'
+                label={t('Number of Verification Plans')}
+              >
                 {planNode.verificationPlans.totalCount}
               </LabelizedField>
             </Box>
@@ -66,4 +74,4 @@ export function VerificationPlansSummary({
       </Grid>
     </Grid>
   );
-}
+};

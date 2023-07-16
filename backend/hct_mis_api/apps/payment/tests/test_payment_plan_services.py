@@ -134,7 +134,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(5):
+            with self.assertNumQueries(6):
                 pp = PaymentPlanService.create(input_data=input_data, user=self.user)
             self.assertEqual(mock_prepare_payment_plan_task.delay.call_args, mock.call(pp.id))
 
@@ -437,7 +437,7 @@ class TestPaymentPlanServices(APITestCase):
         pp_not_distributed = payments[1]
         pp_force_failed = payments[2]
 
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -483,7 +483,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )

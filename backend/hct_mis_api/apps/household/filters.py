@@ -83,6 +83,7 @@ class HouseholdFilter(FilterSet):
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
+    head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
@@ -122,6 +123,22 @@ class HouseholdFilter(FilterSet):
         )
     )
 
+    def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        """
+        Filter households by phone_no_valid
+        True: get households with valid phone_no or valid phone_no_alternative
+        False: get households with invalid both phone_no and invalid phone_no_alternative
+        """
+        if value is True:
+            return qs.exclude(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        elif value is False:
+            return qs.filter(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        return qs
+
     def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
@@ -142,6 +159,9 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        hh_id_regex = r"^HH-\d{2}-\d{4}\.\d{4}$"
+        if re.match(hh_id_regex, value):
+            return qs.filter(unicef_id=value)
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)

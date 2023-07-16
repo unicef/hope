@@ -62,31 +62,6 @@ class TestPaymentPlanQueries(APITestCase):
       allPaymentPlans(businessArea: $businessArea, orderBy: "unicef_id") {
         edges {
           node {
-            status
-            startDate
-            dispersionStartDate
-            dispersionEndDate
-            endDate
-            exchangeRate
-            paymentsConflictsCount
-            totalEntitledQuantity
-            totalEntitledQuantityUsd
-            totalEntitledQuantityRevised
-            totalEntitledQuantityRevisedUsd
-            totalDeliveredQuantity
-            totalDeliveredQuantityUsd
-            totalUndeliveredQuantity
-            totalUndeliveredQuantityUsd
-            unicefId
-            femaleChildrenCount
-            maleChildrenCount
-            femaleAdultsCount
-            maleAdultsCount
-            totalHouseholdsCount
-            totalIndividualsCount
-            paymentItems{
-              totalCount
-            }
             approvalProcess{
               totalCount
               edges {
@@ -97,8 +72,32 @@ class TestPaymentPlanQueries(APITestCase):
                 }
               }
             }
-            paymentsConflictsCount
             canCreateFollowUp
+            dispersionEndDate
+            dispersionStartDate
+            endDate
+            exchangeRate
+            femaleAdultsCount
+            femaleChildrenCount
+            maleAdultsCount
+            maleChildrenCount
+            paymentItems{
+              totalCount
+            }
+            paymentsConflictsCount
+            startDate
+            status
+            totalDeliveredQuantity
+            totalDeliveredQuantityUsd
+            totalEntitledQuantity
+            totalEntitledQuantityRevised
+            totalEntitledQuantityRevisedUsd
+            totalEntitledQuantityUsd
+            totalHouseholdsCount
+            totalIndividualsCount
+            totalUndeliveredQuantity
+            totalUndeliveredQuantityUsd
+            unicefId
           }
         }
       }
@@ -107,14 +106,14 @@ class TestPaymentPlanQueries(APITestCase):
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
     query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, orderBy: "unicef_id") {
         edges {
           node {
-            status
-            dispersionStartDate
             dispersionEndDate
-            unicefId
+            dispersionStartDate
+            status
             totalEntitledQuantity
+            unicefId
           }
         }
       }
@@ -151,38 +150,39 @@ class TestPaymentPlanQueries(APITestCase):
     query AllPayments($paymentPlanId: String!, $businessArea: String!) {
       allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id") {
         edgeCount
-        totalCount
         edges {
           node {
-            unicefId
-            entitlementQuantity
-            entitlementQuantityUsd
+            conflicted
             deliveredQuantity
             deliveredQuantityUsd
+            entitlementQuantity
+            entitlementQuantityUsd
             parent {
               unicefId
             }
             paymentPlanHardConflicted
-            paymentPlanSoftConflicted
             paymentPlanHardConflictedData {
               paymentPlanStatus
               paymentPlanStartDate
               paymentPlanEndDate
             }
+            paymentPlanSoftConflicted
             paymentPlanSoftConflictedData {
               paymentPlanStatus
               paymentPlanStartDate
               paymentPlanEndDate
             }
-            conflicted
+            unicefId
           }
         }
+        totalCount
       }
     }
     """
 
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.maxDiff = None
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(

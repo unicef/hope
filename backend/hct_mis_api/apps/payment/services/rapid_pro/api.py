@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
@@ -16,6 +17,12 @@ logger = logging.getLogger(__name__)
 
 class TokenNotProvided(Exception):
     pass
+
+
+@dataclass
+class RapidProFlowResponse:
+    response: Dict
+    urns: List[str]
 
 
 class RapidProAPI:
@@ -84,7 +91,9 @@ class RapidProAPI:
         flows = self._handle_get_request(RapidProAPI.FLOWS_ENDPOINT)
         return flows["results"]
 
-    def start_flows(self, flow_uuid: UUID, phone_numbers: List[str]) -> Tuple[List, Optional[Exception]]:
+    def start_flows(
+        self, flow_uuid: str, phone_numbers: List[str]
+    ) -> Tuple[List[RapidProFlowResponse], Optional[Exception]]:
         array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
@@ -108,7 +117,9 @@ class RapidProAPI:
         for urns in by_limit:
             try:
                 successful_flows.append(
-                    (_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}), urns)
+                    RapidProFlowResponse(
+                        response=_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}), urns=urns
+                    )
                 )
             except Exception as e:
                 return successful_flows, e

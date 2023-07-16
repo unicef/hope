@@ -1,11 +1,11 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ...household.fixtures import create_household
-from ..defaults import create_defaults
-from ..models import Formatter, Query, Report
-from .fixtures import (
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Formatter, Query, Report
+from hct_mis_api.apps.power_query.tests.fixtures import (
     FormatterFactory,
     ParametrizerFactory,
     QueryFactory,
@@ -33,7 +33,8 @@ class TestPowerQuery(TestCase):
         p = ParametrizerFactory()
 
         cls.query1: Query = QueryFactory(name="Query1", code="result=conn.all()", parametrizer=p)
-        cls.query1.execute_matrix()
+        res = cls.query1.execute_matrix()
+        assert res
         cls.formatter: Formatter = FormatterFactory(name="Queryset To HTML")
         cls.report1: Report = ReportFactory(formatter=cls.formatter, query=cls.query1)
         cls.report1.execute()

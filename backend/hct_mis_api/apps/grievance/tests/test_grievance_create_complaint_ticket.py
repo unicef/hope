@@ -247,6 +247,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
                 "description": "Test Feedback",
                 "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
                 "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+                "issueType": GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
                 "admin": self.admin_area.p_code,
                 "language": "Polish, English",
                 "consent": True,

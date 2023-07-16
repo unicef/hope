@@ -61,37 +61,12 @@ def populate_existing_cash_plan_usd_amount(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [
-        ("payment", "0052_migration"),
-        ("payment", "0053_migration"),
-        ("payment", "0054_migration"),
-        ("payment", "0055_migration"),
-        ("payment", "0056_migration"),
-        ("payment", "0057_migration"),
-        ("payment", "0058_migration"),
-        ("payment", "0059_migration"),
-        ("payment", "0060_migration"),
-        ("payment", "0061_migration"),
-        ("payment", "0062_migration"),
-        ("payment", "0063_migration"),
-        ("payment", "0064_migration"),
-        ("payment", "0065_migration"),
-        ("payment", "0066_migration"),
-        ("payment", "0067_migration"),
-        ("payment", "0068_migration"),
-        ("payment", "0069_migration"),
-        ("payment", "0070_migration"),
-        ("payment", "0071_migration"),
-    ]
-
     dependencies = [
         ("steficon", "0017_migration"),
-        ("household", "0109_migration"),
-        ("core", "0060_migration"),
+        ("core", "0060_migration_squashed_0064_migration"),
         ("household", "0119_migration"),
         ("program", "0035_migration"),
-        ("payment", "0051_migration"),
-        ("core", "0048_migration"),
+        ("payment", "0030_migration_squashed_0051_migration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

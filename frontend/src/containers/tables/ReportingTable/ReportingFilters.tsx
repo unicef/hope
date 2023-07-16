@@ -6,34 +6,56 @@ import { useTranslation } from 'react-i18next';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleFilterChange } from '../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 
 interface ReportingFiltersProps {
-  onFilterChange;
   filter;
   choicesData;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
 
 export const ReportingFilters = ({
-  onFilterChange,
   filter,
   choicesData,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
 }: ReportingFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
     history,
     location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
   );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
 
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             label={t('Report Type')}
             onChange={(e) => handleFilterChange('type', e.target.value)}
@@ -51,7 +73,7 @@ export const ReportingFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder={t('From')}
@@ -66,7 +88,7 @@ export const ReportingFilters = ({
             value={filter.createdFrom}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -80,7 +102,7 @@ export const ReportingFilters = ({
             value={filter.createdTo}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             label='Status'
             onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -114,6 +136,10 @@ export const ReportingFilters = ({
           />
         </Grid>
       </Grid>
+      <ClearApplyButtons
+        clearHandler={handleClearFilter}
+        applyHandler={handleApplyFilter}
+      />
     </ContainerWithBorder>
   );
 };

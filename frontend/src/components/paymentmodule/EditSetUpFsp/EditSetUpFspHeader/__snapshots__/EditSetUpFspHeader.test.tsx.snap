@@ -18,6 +18,7 @@ exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 
           >
             <h5
               class="MuiTypography-root MuiTypography-h5"
+              data-cy="page-header-title"
             >
               Edit Set up FSP
             </h5>

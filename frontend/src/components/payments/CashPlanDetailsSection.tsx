@@ -45,10 +45,10 @@ export const CashPlanDetailsSection = ({
   return (
     <Grid container>
       <Grid item xs={9}>
-        <Title>
+        <Title data-cy='div-payment-plan-details'>
           <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
         </Title>
-        <Grid container>
+        <Grid data-cy='grid-payment-plan-details' container>
           {[
             { label: t('PROGRAMME NAME'), value: planNode.program.name },
             {
@@ -82,10 +82,10 @@ export const CashPlanDetailsSection = ({
           ))}
         </Grid>
       </Grid>
-      <Grid item xs={3}>
+      <Grid data-cy='grid-bank-reconciliation' item xs={3}>
         <BorderLeftBox>
           <Title>
-            <Typography variant='h6'>{t('Bank reconciliation')}</Typography>
+            <Typography variant='h6' data-cy='table-label'>{t('Bank reconciliation')}</Typography>
           </Title>
           <Grid container>
             <Grid item xs={6}>

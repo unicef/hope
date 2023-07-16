@@ -140,6 +140,16 @@ export const HouseholdDetails = ({
                 {household?.admin2?.name}
               </LabelizedField>
             </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label={t('Administrative Level 3')}>
+                {household?.admin3?.name}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label={t('Administrative Level 4')}>
+                {household?.admin4?.name}
+              </LabelizedField>
+            </Grid>
             <Grid item xs={6}>
               <LabelizedField label={t('Geolocation')}>
                 {household?.geopoint

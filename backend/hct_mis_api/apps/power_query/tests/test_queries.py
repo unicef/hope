@@ -1,9 +1,13 @@
 from django.test import TestCase, override_settings
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ..defaults import create_defaults
-from ..models import Formatter, Query, Report
-from .fixtures import FormatterFactory, QueryFactory, ReportFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Formatter, Query, Report
+from hct_mis_api.apps.power_query.tests.fixtures import (
+    FormatterFactory,
+    QueryFactory,
+    ReportFactory,
+)
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
@@ -26,6 +30,12 @@ class TestPowerQuery(TestCase):
         result = self.query1.execute_matrix()
         self.assertTrue(self.query1.datasets.exists())
         self.assertEqual(result["{}"], self.query1.datasets.first().pk)
+
+    def test_query_lazy_execution(self) -> None:
+        self.query1.execute_matrix()
+        ds1 = self.query1.datasets.first()
+        ds2, __ = self.query1.run(use_existing=True)
+        self.assertEqual(ds1.pk, ds2.pk)
 
     def test_report_execution(self) -> None:
         self.query1.execute_matrix()

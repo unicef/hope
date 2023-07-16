@@ -2,6 +2,7 @@ import logging
 from argparse import ArgumentParser
 from typing import Any
 
+from django.conf import settings
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
@@ -18,7 +19,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default="./data/FlexibleAttributesInit.xlsx",
+            default=f"{settings.PROJECT_ROOT}/../data/FlexibleAttributesInit.xlsx",
             type=str,
             help="file",
         )

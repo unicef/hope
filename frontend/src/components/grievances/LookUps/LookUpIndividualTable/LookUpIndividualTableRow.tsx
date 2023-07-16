@@ -37,6 +37,7 @@ export function LookUpIndividualTableRow({
       hover
       role='checkbox'
       key={individual.id}
+      data-cy='individual-table-row'
     >
       <TableCell padding='checkbox'>
         <Radio

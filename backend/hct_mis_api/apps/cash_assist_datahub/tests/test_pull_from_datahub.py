@@ -5,6 +5,7 @@ from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
@@ -282,7 +283,7 @@ class TestPullDataFromDatahub(TestCase):
 
 class TestSessionsPullDataFromDatahub(TestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:

@@ -5,10 +5,15 @@ from django.urls import reverse
 
 from parameterized import parameterized
 
-from ...account.fixtures import BusinessAreaFactory, UserFactory
-from ..defaults import create_defaults
-from ..models import Query, Report
-from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, ReportFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.power_query.defaults import create_defaults
+from hct_mis_api.apps.power_query.models import Query, Report
+from hct_mis_api.apps.power_query.tests.fixtures import (
+    FormatterFactory,
+    ParametrizerFactory,
+    QueryFactory,
+    ReportFactory,
+)
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
