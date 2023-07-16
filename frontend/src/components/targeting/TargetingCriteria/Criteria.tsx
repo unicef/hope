@@ -195,11 +195,11 @@ export function Criteria({
       })}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton onClick={editFunction}>
+          <IconButton data-cy='button-edit' onClick={editFunction}>
             <Edit />
           </IconButton>
           {canRemove && (
-            <IconButton onClick={removeFunction}>
+            <IconButton data-cy='button-edit' onClick={removeFunction}>
               <Delete />
             </IconButton>
           )}

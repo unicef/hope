@@ -93,7 +93,7 @@ export const IdentitiesToEditTable = ({
                 />
               ) : (
                 selectedIdentitiesToEdit.includes(index) && (
-                  <GreenIcon>
+                  <GreenIcon data-cy='green-check'>
                     <CheckCircleIcon />
                   </GreenIcon>
                 )
@@ -107,7 +107,7 @@ export const IdentitiesToEditTable = ({
         <TableBody>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Agency')}</TableCell>
+            <TableCell align='left'>{t('Partner')}</TableCell>
             <TableCell align='left'>
               {getPreviousPartner(identity.previous_value)}
             </TableCell>

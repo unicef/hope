@@ -29,6 +29,7 @@ export const EditHouseholdDataChangeField = ({
   const businessArea = useBusinessArea();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   let fieldProps;
   if (!field) return null;
 
@@ -120,6 +121,7 @@ export const EditHouseholdDataChangeField = ({
           variant='outlined'
           label={field.labelEn}
           required={field.required}
+          disabled={isEditTicket}
           {...fieldProps}
         />
       </Grid>

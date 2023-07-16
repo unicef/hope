@@ -48,7 +48,14 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
 from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
-from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    ROLE_ALTERNATE,
+    Document,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -96,42 +103,45 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
     )
     total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
+        blank=True,
     )
     total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
+        blank=True,
     )
     total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0"))],
         db_index=True,
         null=True,
+        blank=True,
     )
     total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
 
     class Meta:
@@ -234,10 +244,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
     DELIVERY_TYPE_CHEQUE = "Cheque"
     DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
-    DELIVERY_TYPE_IN_KIND = "In Kind"
     DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
-    DELIVERY_TYPE_OTHER = "Other"
-    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
     DELIVERY_TYPE_REFERRAL = "Referral"
     DELIVERY_TYPE_TRANSFER = "Transfer"
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
@@ -249,10 +256,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_CASH_BY_FSP,
         DELIVERY_TYPE_CHEQUE,
         DELIVERY_TYPE_DEPOSIT_TO_CARD,
-        DELIVERY_TYPE_IN_KIND,
         DELIVERY_TYPE_MOBILE_MONEY,
-        DELIVERY_TYPE_OTHER,
-        DELIVERY_TYPE_PRE_PAID_CARD,
         DELIVERY_TYPE_REFERRAL,
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
@@ -265,10 +269,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_CASH_BY_FSP, _("Cash by FSP")),
         (DELIVERY_TYPE_CHEQUE, _("Cheque")),
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
-        (DELIVERY_TYPE_IN_KIND, _("In Kind")),
         (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
-        (DELIVERY_TYPE_OTHER, _("Other")),
-        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
         (DELIVERY_TYPE_REFERRAL, _("Referral")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
@@ -289,16 +290,16 @@ class GenericPayment(TimeStampedUUIDModel):
         max_length=4,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
@@ -888,6 +889,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("household_id", _("Household ID")),
         ("household_size", _("Household Size")),
         ("collector_name", _("Collector Name")),
+        ("alternate_collector_full_name", _("Alternate collector Full Name")),
+        ("alternate_collector_given_name", _("Alternate collector Given Name")),
+        ("alternate_collector_middle_name", _("Alternate collector Middle Name")),
+        ("alternate_collector_phone_no", _("Alternate collector phone number")),
+        ("alternate_collector_document_numbers", _("Alternate collector Document numbers")),
+        ("alternate_collector_sex", _("Alternate collector Gender")),
         ("payment_channel", _("Payment Channel")),
         ("fsp_name", _("FSP Name")),
         ("currency", _("Currency")),
@@ -912,7 +919,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
-        max_length=250,
+        max_length=500,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -940,13 +947,34 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return None
 
     @classmethod
-    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float]:
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+        alternate_collector = None
+        alternate_collector_column_names = (
+            "alternate_collector_full_name",
+            "alternate_collector_given_name",
+            "alternate_collector_middle_name",
+            "alternate_collector_sex",
+            "alternate_collector_phone_no",
+            "alternate_collector_document_numbers",
+        )
+        if column_name in alternate_collector_column_names:
+            if ind_role := IndividualRoleInHousehold.objects.filter(
+                household=payment.household, role=ROLE_ALTERNATE
+            ).first():
+                alternate_collector = ind_role.individual
+
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
             "household_id": (payment.household, "unicef_id"),
             "household_size": (payment.household, "size"),
             "admin_level_2": (payment.household.admin2, "name"),
             "collector_name": (payment.collector, "full_name"),
+            "alternate_collector_full_name": (alternate_collector, "full_name"),
+            "alternate_collector_given_name": (alternate_collector, "given_name"),
+            "alternate_collector_middle_name": (alternate_collector, "middle_name"),
+            "alternate_collector_sex": (alternate_collector, "sex"),
+            "alternate_collector_phone_no": (alternate_collector, "phone_no"),
+            "alternate_collector_document_numbers": (alternate_collector, "document_number"),
             "payment_channel": (payment, "delivery_type"),
             "fsp_name": (payment.financial_service_provider, "name"),
             "currency": (payment, "currency"),
@@ -964,6 +992,15 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return float(-1)
         if column_name == "delivery_date" and payment.delivery_date is not None:
             return str(payment.delivery_date)
+        if column_name == "alternate_collector_document_numbers" and alternate_collector:
+            return (
+                list(
+                    alternate_collector.documents.filter(status=Document.STATUS_VALID).values_list(
+                        "document_number", flat=True
+                    )
+                )
+                or ""
+            )
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
 
@@ -1309,6 +1346,19 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         object_id_field="payment_object_id",
         related_query_name="payment_record",
     )
+    ticket_complaint_details = GenericRelation(
+        "grievance.TicketComplaintDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+    )
+
+    ticket_sensitive_details = GenericRelation(
+        "grievance.TicketSensitiveDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+    )
 
     @property
     def unicef_id(self) -> str:
@@ -1365,6 +1415,19 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         null=True,
         validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
     )  # 7 digits
+    ticket_complaint_details = GenericRelation(
+        "grievance.TicketComplaintDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+    )
+
+    ticket_sensitive_details = GenericRelation(
+        "grievance.TicketSensitiveDetails",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+    )
 
     @property
     def full_name(self) -> str:

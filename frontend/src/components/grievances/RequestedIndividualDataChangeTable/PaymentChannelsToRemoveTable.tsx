@@ -47,8 +47,12 @@ export const PaymentChannelsToRemoveTable = ({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>{t('Bank name')}</TableCell>
-        <TableCell align='left'>{t('Bank account number')}</TableCell>
+        <TableCell data-cy='table-cell-bank-name' align='left'>
+          {t('Bank name')}
+        </TableCell>
+        <TableCell data-cy='table-cell-bank-account-number' align='left'>
+          {t('Bank account number')}
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -82,6 +86,7 @@ export const PaymentChannelsToRemoveTable = ({
                 <TableCell align='left'>
                   {isEdit ? (
                     <Checkbox
+                      data-cy='checkbox-payment-channel-to-remove'
                       onChange={(): void => {
                         handleSelectPaymentChannelToRemove(index);
                       }}
@@ -94,7 +99,7 @@ export const PaymentChannelsToRemoveTable = ({
                     />
                   ) : (
                     selectedPaymentChannelsToRemove.includes(index) && (
-                      <GreenIcon>
+                      <GreenIcon data-cy='green-check'>
                         <CheckCircleIcon />
                       </GreenIcon>
                     )

@@ -24,6 +24,7 @@ export const FormikTextField = ({
   type,
   precision,
   integer,
+  maxLength,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -46,6 +47,13 @@ export const FormikTextField = ({
     form.handleBlur(newEvent);
   };
 
+  const handleChange = (e): void => {
+    if (type === 'number' && e.target.value > 999999999) {
+      return;
+    }
+    form.handleChange(e);
+  };
+
   return (
     <>
       <StyledTextField
@@ -55,7 +63,7 @@ export const FormikTextField = ({
         id={`textField-${field.name}`}
         margin='dense'
         value={field.value}
-        onChange={form.handleChange}
+        onChange={handleChange}
         onBlur={onBlur}
         error={isInvalid}
         autoComplete='off'
@@ -66,6 +74,7 @@ export const FormikTextField = ({
           startAdornment: decoratorStart && (
             <InputAdornment position='start'>{decoratorStart}</InputAdornment>
           ),
+
           endAdornment: decoratorEnd && (
             <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
           ),
@@ -74,6 +83,7 @@ export const FormikTextField = ({
         // eslint-disable-next-line react/jsx-no-duplicate-props
         inputProps={{
           'data-cy': `input-${field.name}`,
+          maxLength: maxLength || undefined,
         }}
       />
     </>

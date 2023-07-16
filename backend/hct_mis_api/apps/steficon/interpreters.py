@@ -14,9 +14,9 @@ from django.utils.safestring import mark_safe
 
 from jinja2 import Environment
 
-from .config import config
-from .exception import RuleError
-from .templatetags import engine
+from hct_mis_api.apps.steficon.config import config
+from hct_mis_api.apps.steficon.exception import RuleError
+from hct_mis_api.apps.steficon.templatetags import engine
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class Interpreter:
 
 
 def call_rule(rule_id: UUID, context: Dict) -> Any:
-    from .models import Rule
+    from hct_mis_api.apps.steficon.models import Rule
 
     rule: Rule = Rule.objects.get(id=rule_id)
     return rule.execute(context)

@@ -51,13 +51,14 @@ export const OpenTargetPopulationHeaderButtons = ({
         </IconButton>
       )}
       {canRemove && (
-        <IconButton onClick={() => setOpenDelete(true)}>
+        <IconButton data-cy='button-delete' onClick={() => setOpenDelete(true)}>
           <Delete />
         </IconButton>
       )}
       {canEdit && (
         <Box m={2}>
           <Button
+            data-cy='button-edit'
             variant='outlined'
             color='primary'
             startIcon={<EditRounded />}
@@ -71,6 +72,7 @@ export const OpenTargetPopulationHeaderButtons = ({
       {canEdit && (
         <Box m={2}>
           <Button
+            data-cy='button-rebuild'
             variant='outlined'
             color='primary'
             disabled={rebuildTargetPopulationLoading}

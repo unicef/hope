@@ -39,7 +39,7 @@ class ImportedIndividualDocument(Document):
     birth_date = fields.DateField(similarity="boolean")
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
-    business_area = fields.KeywordField(similarity="boolean")
+    business_area = fields.KeywordField(similarity="boolean", attr="business_area")
     admin1 = fields.KeywordField()
     admin2 = fields.KeywordField()
     registration_data_import_id = fields.KeywordField(

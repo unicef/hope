@@ -2,9 +2,8 @@ import logging
 
 from django.contrib import admin
 
+from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
-
-from .. import models as account_models
 
 logger = logging.getLogger(__name__)
 

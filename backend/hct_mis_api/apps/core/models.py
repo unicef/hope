@@ -23,7 +23,7 @@ from hct_mis_api.apps.utils.models import (
 from mptt.fields import TreeForeignKey
 
 
-class BusinessArea(TimeStampedUUIDModel):
+class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     """
     BusinessArea (EPRP called Workspace, also synonym was
     country/region) model.
@@ -101,6 +101,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_ignore_withdraw = models.BooleanField(default=False)
 
     is_payment_plan_applicable = models.BooleanField(default=False)
+    is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -123,6 +124,9 @@ class BusinessArea(TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def natural_key(self) -> Tuple[str]:
+        return (self.code,)
 
     @property
     def cash_assist_code(self) -> str:

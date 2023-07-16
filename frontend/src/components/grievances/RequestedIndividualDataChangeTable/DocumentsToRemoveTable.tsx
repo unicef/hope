@@ -48,9 +48,15 @@ export const DocumentsToRemoveTable = ({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>{t('ID Type')}</TableCell>
-        <TableCell align='left'>{t('Country')}</TableCell>
-        <TableCell align='left'>{t('Number')}</TableCell>
+        <TableCell data-cy='table-cell-id-type' align='left'>
+          {t('ID Type')}
+        </TableCell>
+        <TableCell data-cy='table-cell-id-country' align='left'>
+          {t('Country')}
+        </TableCell>
+        <TableCell data-cy='table-cell-id-type' align='left'>
+          {t('Number')}
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -81,6 +87,7 @@ export const DocumentsToRemoveTable = ({
                 <TableCell align='left'>
                   {isEdit ? (
                     <Checkbox
+                      data-cy='checkbox-remove-document'
                       onChange={(): void => {
                         handleSelectDocumentToRemove(index);
                       }}
@@ -93,7 +100,7 @@ export const DocumentsToRemoveTable = ({
                     />
                   ) : (
                     selectedDocumentsToRemove.includes(index) && (
-                      <GreenIcon>
+                      <GreenIcon data-cy='green-check'>
                         <CheckCircleIcon />
                       </GreenIcon>
                     )

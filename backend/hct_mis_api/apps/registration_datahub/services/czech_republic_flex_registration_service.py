@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -40,9 +40,6 @@ logger = logging.getLogger(__name__)
 
 
 class CzechRepublicFlexRegistration(BaseRegistrationService):
-    BUSINESS_AREA_SLUG: str = "czech-republic"
-    REGISTRATION_ID: Tuple = (25,)
-
     INDIVIDUAL_MAPPING_DICT: Dict[str, str] = {
         "sex": "gender_i_c",
         "birth_date": "birth_date_i_c",
@@ -281,8 +278,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        self._check_registration_id(record.registration, "Czech Republic data is processed only from registration 25")
-
         record_data_dict = record.get_data()
         if isinstance(record_data_dict, str):
             record_data_dict = json.loads(record_data_dict)

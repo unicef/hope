@@ -12,6 +12,7 @@ backend:
     STORAGE_AZURE_ACCOUNT_NAME: saunihopestg
     KOBO_KF_URL: https://kf-hope.unitst.org
     KOBO_KC_URL: https://kc-hope.unitst.org
+    SENTRY_ENVIRONMENT: "staging"
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET

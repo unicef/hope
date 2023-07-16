@@ -30,7 +30,7 @@ export const LookUpLinkedTicketsModal = ({
     status: '',
     fsp: '',
     createdAtRange: '',
-    admin: '',
+    admin2: '',
   };
   const [filterApplied, setFilterApplied] = useState(filterInitial);
   const [filter, setFilter] = useState(filterInitial);
@@ -80,7 +80,10 @@ export const LookUpLinkedTicketsModal = ({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={() => setLookUpDialogOpen(false)}>
+              <Button
+                data-cy='button-cancel'
+                onClick={() => setLookUpDialogOpen(false)}
+              >
                 {t('CANCEL')}
               </Button>
               <Button

@@ -1,0 +1,1023 @@
+[
+{
+  "model": "registration_datahub.importedhousehold",
+  "pk": "732c60be-0276-4054-a2e1-d425acdb821a",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.331Z",
+    "updated_at": "2022-08-10T14:30:11.870Z",
+    "consent_sign": "D3-2022-08-10_140204.3238310000.jpg",
+    "consent": true,
+    "consent_sharing": "HUMANITARIAN_PARTNER",
+    "residence_status": "REFUGEE",
+    "country_origin": "SM",
+    "size": 4,
+    "address": "938 Luna Cliffs Apt. 551\nJameschester, SC 24934",
+    "country": "IM",
+    "admin1": "AF11",
+    "admin1_title": "Ghazni",
+    "admin2": "AF1115",
+    "admin2_title": "Abband",
+    "geopoint": "SRID=4326;POINT (70.21020900000001 172.085021)",
+    "female_age_group_0_5_count": 0,
+    "female_age_group_6_11_count": 0,
+    "female_age_group_12_17_count": 0,
+    "female_age_group_18_59_count": null,
+    "female_age_group_60_count": null,
+    "pregnant_count": null,
+    "male_age_group_0_5_count": 0,
+    "male_age_group_6_11_count": 0,
+    "male_age_group_12_17_count": 0,
+    "male_age_group_18_59_count": null,
+    "male_age_group_60_count": null,
+    "female_age_group_0_5_disabled_count": 0,
+    "female_age_group_6_11_disabled_count": 0,
+    "female_age_group_12_17_disabled_count": 0,
+    "female_age_group_18_59_disabled_count": null,
+    "female_age_group_60_disabled_count": null,
+    "male_age_group_0_5_disabled_count": 0,
+    "male_age_group_6_11_disabled_count": 0,
+    "male_age_group_12_17_disabled_count": 0,
+    "male_age_group_18_59_disabled_count": null,
+    "male_age_group_60_disabled_count": null,
+    "head_of_household": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+    "fchild_hoh": false,
+    "child_hoh": false,
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "first_registration_date": "2020-08-22T00:00:00Z",
+    "last_registration_date": "2020-08-22T00:00:00Z",
+    "returnee": false,
+    "flex_fields": {},
+    "start": null,
+    "deviceid": "",
+    "name_enumerator": "Harley Rawlings",
+    "org_enumerator": "UNICEF",
+    "org_name_enumerator": "UNICEF",
+    "village": "",
+    "registration_method": "",
+    "collect_individual_data": "",
+    "currency": "",
+    "unhcr_id": "",
+    "kobo_submission_uuid": null,
+    "kobo_asset_id": "",
+    "kobo_submission_time": null,
+    "row_id": 3,
+    "diia_rec_id": "",
+    "flex_registrations_record": null,
+    "mis_unicef_id": "HH-20-0000.0014"
+  }
+},
+{
+  "model": "registration_datahub.importedhousehold",
+  "pk": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.334Z",
+    "updated_at": "2022-08-10T14:30:11.839Z",
+    "consent_sign": "D4-2022-08-10_140204.3283380000.jpg",
+    "consent": true,
+    "consent_sharing": "HUMANITARIAN_PARTNER,PRIVATE_PARTNER,GOVERNMENT_PARTNER,UNICEF,",
+    "residence_status": "REFUGEE",
+    "country_origin": "SM",
+    "size": 4,
+    "address": "938 Luna Cliffs Apt. 551\nJameschester, SC 24934",
+    "country": "IM",
+    "admin1": "AF06",
+    "admin1_title": "Nangarhar",
+    "admin2": "AF0617",
+    "admin2_title": "Achin",
+    "geopoint": "SRID=4326;POINT (70.21020900000001 172.085021)",
+    "female_age_group_0_5_count": 0,
+    "female_age_group_6_11_count": 0,
+    "female_age_group_12_17_count": 0,
+    "female_age_group_18_59_count": null,
+    "female_age_group_60_count": null,
+    "pregnant_count": null,
+    "male_age_group_0_5_count": 0,
+    "male_age_group_6_11_count": 0,
+    "male_age_group_12_17_count": 0,
+    "male_age_group_18_59_count": null,
+    "male_age_group_60_count": null,
+    "female_age_group_0_5_disabled_count": 0,
+    "female_age_group_6_11_disabled_count": 0,
+    "female_age_group_12_17_disabled_count": 0,
+    "female_age_group_18_59_disabled_count": null,
+    "female_age_group_60_disabled_count": null,
+    "male_age_group_0_5_disabled_count": 0,
+    "male_age_group_6_11_disabled_count": 0,
+    "male_age_group_12_17_disabled_count": 0,
+    "male_age_group_18_59_disabled_count": null,
+    "male_age_group_60_disabled_count": null,
+    "head_of_household": "6c8d9be4-3bce-4a87-952a-e6abab468086",
+    "fchild_hoh": false,
+    "child_hoh": false,
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "first_registration_date": "2020-08-22T00:00:00Z",
+    "last_registration_date": "2020-08-22T00:00:00Z",
+    "returnee": false,
+    "flex_fields": {},
+    "start": null,
+    "deviceid": "",
+    "name_enumerator": "Harley Rawlings",
+    "org_enumerator": "UNICEF",
+    "org_name_enumerator": "UNICEF",
+    "village": "",
+    "registration_method": "",
+    "collect_individual_data": "",
+    "currency": "",
+    "unhcr_id": "",
+    "kobo_submission_uuid": null,
+    "kobo_asset_id": "",
+    "kobo_submission_time": null,
+    "row_id": 4,
+    "diia_rec_id": "",
+    "flex_registrations_record": null,
+    "mis_unicef_id": "HH-20-0000.0013"
+  }
+},
+{
+  "model": "registration_datahub.importedindividual",
+  "pk": "27a7a17b-4a3d-4643-a332-d177f0425f84",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.454Z",
+    "updated_at": "2022-08-10T14:30:11.816Z",
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Angela Kowalska",
+    "given_name": "Angela",
+    "middle_name": "",
+    "family_name": "Kowalska",
+    "relationship": "BROTHER_SISTER",
+    "sex": "FEMALE",
+    "birth_date": "2000-01-10",
+    "estimated_birth_date": false,
+    "marital_status": "SINGLE",
+    "phone_no": "0048724467321",
+    "phone_no_alternative": "",
+    "email": "fake111test@email.com",
+    "household": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1988-06-15",
+    "last_registration_date": "1988-06-15",
+    "deduplication_batch_status": "UNIQUE_IN_BATCH",
+    "deduplication_golden_record_status": "UNIQUE",
+    "deduplication_batch_results": {
+      "score": {
+        "max": 0,
+        "min": 9223372036854775807,
+        "qty": 0
+      },
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "deduplication_golden_record_results": {
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "flex_fields": {},
+    "pregnant": true,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "kobo_asset_id": "",
+    "row_id": 7,
+    "disability_certificate_picture": "",
+    "mis_unicef_id": "IND-88-0000.0041"
+  }
+},
+{
+  "model": "registration_datahub.importedindividual",
+  "pk": "6c8d9be4-3bce-4a87-952a-e6abab468086",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.454Z",
+    "updated_at": "2022-08-10T14:30:11.830Z",
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Agata Kowalska",
+    "given_name": "Agata",
+    "middle_name": "",
+    "family_name": "Kowalska",
+    "relationship": "HEAD",
+    "sex": "FEMALE",
+    "birth_date": "1964-01-10",
+    "estimated_birth_date": false,
+    "marital_status": "SINGLE",
+    "phone_no": "0048875012932",
+    "phone_no_alternative": "",
+    "email": "fake222test@email.com",
+    "household": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1988-06-15",
+    "last_registration_date": "1988-06-15",
+    "deduplication_batch_status": "UNIQUE_IN_BATCH",
+    "deduplication_golden_record_status": "UNIQUE",
+    "deduplication_batch_results": {
+      "score": {
+        "max": 0,
+        "min": 9223372036854775807,
+        "qty": 0
+      },
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "deduplication_golden_record_results": {
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "flex_fields": {},
+    "pregnant": true,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "kobo_asset_id": "",
+    "row_id": 6,
+    "disability_certificate_picture": "",
+    "mis_unicef_id": "IND-88-0000.0042"
+  }
+},
+{
+  "model": "registration_datahub.importedindividual",
+  "pk": "6ef3b767-5be6-4bbd-a598-6a5cc2960faf",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.454Z",
+    "updated_at": "2022-08-10T14:30:11.795Z",
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Alicja Kowalska",
+    "given_name": "Alicja",
+    "middle_name": "",
+    "family_name": "Kowalska",
+    "relationship": "NON_BENEFICIARY",
+    "sex": "FEMALE",
+    "birth_date": "1941-08-26",
+    "estimated_birth_date": false,
+    "marital_status": "MARRIED",
+    "phone_no": "0048503123555",
+    "phone_no_alternative": "",
+    "email": "fake333test@email.com",
+    "household": null,
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1942-12-12",
+    "last_registration_date": "1942-12-12",
+    "deduplication_batch_status": "UNIQUE_IN_BATCH",
+    "deduplication_golden_record_status": "UNIQUE",
+    "deduplication_batch_results": {
+      "score": {
+        "max": 0,
+        "min": 9223372036854775807,
+        "qty": 0
+      },
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "deduplication_golden_record_results": {
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "flex_fields": {},
+    "pregnant": true,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "kobo_asset_id": "",
+    "row_id": 8,
+    "disability_certificate_picture": "",
+    "mis_unicef_id": "IND-42-0000.0037"
+  }
+},
+{
+  "model": "registration_datahub.importedindividual",
+  "pk": "6f116cf6-04ca-4d98-b275-638acae21108",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.454Z",
+    "updated_at": "2022-08-10T14:30:11.861Z",
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Jan Romaniak",
+    "given_name": "Jan",
+    "middle_name": "",
+    "family_name": "Romaniak",
+    "relationship": "BROTHER_SISTER",
+    "sex": "MALE",
+    "birth_date": "1923-01-01",
+    "estimated_birth_date": true,
+    "marital_status": "MARRIED",
+    "phone_no": "0048734123423",
+    "phone_no_alternative": "",
+    "email": "fake444test@email.com",
+    "household": "732c60be-0276-4054-a2e1-d425acdb821a",
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1988-06-15",
+    "last_registration_date": "1988-06-15",
+    "deduplication_batch_status": "DUPLICATE_IN_BATCH",
+    "deduplication_golden_record_status": "UNIQUE",
+    "deduplication_batch_results": {
+      "score": {
+        "max": 9.0,
+        "min": 9.0,
+        "qty": 1
+      },
+      "duplicates": [
+        {
+          "dob": "1991-11-18",
+          "score": 9.0,
+          "hit_id": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+          "location": "AF1115",
+          "full_name": "Jan Romaniak",
+          "proximity_to_score": 3.0
+        }
+      ],
+      "possible_duplicates": []
+    },
+    "deduplication_golden_record_results": {
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "flex_fields": {},
+    "pregnant": false,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "kobo_asset_id": "",
+    "row_id": 5,
+    "disability_certificate_picture": "",
+    "mis_unicef_id": "IND-88-0000.0040"
+  }
+},
+{
+  "model": "registration_datahub.importedindividual",
+  "pk": "86f8a870-360c-432d-af46-7426f7070c90",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.453Z",
+    "updated_at": "2022-08-10T14:30:11.799Z",
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Alicja Romaniak",
+    "given_name": "Alicja",
+    "middle_name": "",
+    "family_name": "Romaniak",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "FEMALE",
+    "birth_date": "1996-06-21",
+    "estimated_birth_date": false,
+    "marital_status": "MARRIED",
+    "phone_no": "0048601123432",
+    "phone_no_alternative": "",
+    "email": "fake555test@email.com",
+    "household": "732c60be-0276-4054-a2e1-d425acdb821a",
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1969-06-22",
+    "last_registration_date": "1969-06-22",
+    "deduplication_batch_status": "UNIQUE_IN_BATCH",
+    "deduplication_golden_record_status": "UNIQUE",
+    "deduplication_batch_results": {
+      "score": {
+        "max": 0,
+        "min": 9223372036854775807,
+        "qty": 0
+      },
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "deduplication_golden_record_results": {
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "flex_fields": {},
+    "pregnant": false,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "kobo_asset_id": "",
+    "row_id": 4,
+    "disability_certificate_picture": "",
+    "mis_unicef_id": "IND-69-0000.0038"
+  }
+},
+{
+  "model": "registration_datahub.importedindividual",
+  "pk": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.437Z",
+    "updated_at": "2022-08-10T14:30:11.845Z",
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Jan Romaniak",
+    "given_name": "Jan",
+    "middle_name": "Roman",
+    "family_name": "Romaniak",
+    "relationship": "HEAD",
+    "sex": "MALE",
+    "birth_date": "1991-11-18",
+    "estimated_birth_date": false,
+    "marital_status": "MARRIED",
+    "phone_no": "0048605899014",
+    "phone_no_alternative": "",
+    "email": "fake111test@email.com",
+    "household": "732c60be-0276-4054-a2e1-d425acdb821a",
+    "registration_data_import": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1974-12-15",
+    "last_registration_date": "1974-12-15",
+    "deduplication_batch_status": "DUPLICATE_IN_BATCH",
+    "deduplication_golden_record_status": "UNIQUE",
+    "deduplication_batch_results": {
+      "score": {
+        "max": 9.0,
+        "min": 9.0,
+        "qty": 1
+      },
+      "duplicates": [
+        {
+          "dob": "1923-01-01",
+          "score": 9.0,
+          "hit_id": "6f116cf6-04ca-4d98-b275-638acae21108",
+          "location": "AF1115",
+          "full_name": "Jan Romaniak",
+          "proximity_to_score": 3.0
+        }
+      ],
+      "possible_duplicates": []
+    },
+    "deduplication_golden_record_results": {
+      "duplicates": [],
+      "possible_duplicates": []
+    },
+    "flex_fields": {},
+    "pregnant": false,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "kobo_asset_id": "",
+    "row_id": 3,
+    "disability_certificate_picture": "",
+    "mis_unicef_id": "IND-74-0000.0039"
+  }
+},
+{
+  "model": "registration_datahub.importedindividualroleinhousehold",
+  "pk": "6dfe900c-c39e-474b-bfbf-2d56b57cb8fb",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.473Z",
+    "updated_at": "2022-08-10T14:02:04.473Z",
+    "individual": "6c8d9be4-3bce-4a87-952a-e6abab468086",
+    "household": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
+    "role": "PRIMARY"
+  }
+},
+{
+  "model": "registration_datahub.importedindividualroleinhousehold",
+  "pk": "bfafa49c-3251-4f58-a754-98e9973458bc",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.473Z",
+    "updated_at": "2022-08-10T14:02:04.473Z",
+    "individual": "86f8a870-360c-432d-af46-7426f7070c90",
+    "household": "732c60be-0276-4054-a2e1-d425acdb821a",
+    "role": "ALTERNATE"
+  }
+},
+{
+  "model": "registration_datahub.importedindividualroleinhousehold",
+  "pk": "c87168f2-ac2f-4220-866f-42a5bb32e381",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.473Z",
+    "updated_at": "2022-08-10T14:02:04.473Z",
+    "individual": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+    "household": "732c60be-0276-4054-a2e1-d425acdb821a",
+    "role": "PRIMARY"
+  }
+},
+{
+  "model": "registration_datahub.importedindividualroleinhousehold",
+  "pk": "d346ccbd-2910-4bb5-b236-7c6d8a99f8f5",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.473Z",
+    "updated_at": "2022-08-10T14:02:04.473Z",
+    "individual": "6ef3b767-5be6-4bbd-a598-6a5cc2960faf",
+    "household": "cc46b6b9-4f2e-4ce4-a17e-e51747f68883",
+    "role": "ALTERNATE"
+  }
+},
+{
+  "model": "registration_datahub.registrationdataimportdatahub",
+  "pk": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+  "fields": {
+    "created_at": "2022-03-30T09:22:14.856Z",
+    "updated_at": "2022-03-30T09:22:16.791Z",
+    "name": "Test Diia",
+    "import_date": "2022-03-30T09:22:14.856Z",
+    "hct_id": "04992dce-8e47-154b-4938-743415412dce",
+    "import_data": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
+    "import_done": "NOT_STARTED",
+    "business_area_slug": "ukraine"
+  }
+},
+{
+  "model": "registration_datahub.registrationdataimportdatahub",
+  "pk": "f814f78d-6f0d-49d9-961c-79322fa172b9",
+  "fields": {
+    "created_at": "2022-08-10T14:02:02.454Z",
+    "updated_at": "2022-08-10T14:02:04.474Z",
+    "name": "test",
+    "import_date": "2022-08-10T14:02:02.454Z",
+    "hct_id": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
+    "import_data": "f87474eb-8db9-409a-b42e-7b30f4af41f9",
+    "import_done": "DONE",
+    "business_area_slug": "afghanistan"
+  }
+},
+{
+  "model": "registration_datahub.importdata",
+  "pk": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
+  "fields": {
+    "created_at": "2022-05-29T09:21:29.900Z",
+    "updated_at": "2022-04-29T09:21:34.214Z",
+    "status": "PENDING",
+    "business_area_slug": "ukraine",
+    "file": "",
+    "data_type": "DIIA",
+    "number_of_households": 0,
+    "number_of_individuals": 0,
+    "error": "",
+    "validation_errors": "",
+    "created_by_id": null
+  }
+},
+{
+  "model": "registration_datahub.importdata",
+  "pk": "f87474eb-8db9-409a-b42e-7b30f4af41f9",
+  "fields": {
+    "created_at": "2022-08-10T14:01:53.990Z",
+    "updated_at": "2022-08-10T14:01:57.509Z",
+    "status": "FINISHED",
+    "business_area_slug": "afghanistan",
+    "file": "romaniak_with_admins_12.xlsx",
+    "data_type": "XLSX",
+    "number_of_households": 2,
+    "number_of_individuals": 6,
+    "error": "",
+    "validation_errors": "",
+    "created_by_id": "4196c2c5-c2dd-48d2-887f-3a9d39e78916"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "185d0037-a1bc-4eef-a679-749b5964c1f6",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Electoral Card",
+    "key": "electoral_card"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "National ID",
+    "key": "national_id"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "6087e502-defa-44e2-9865-63f45a71471e",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Other",
+    "key": "other"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "89481e2a-3ef1-40fb-8021-6b92bcb03db4",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Driver's License",
+    "key": "drivers_license"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "92fbe664-66f1-42ea-9c9c-8c093db16f3b",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Tax Number Identification",
+    "key": "tax_id"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "d2c54476-0a45-4f0a-aca1-e78e78f1e2cc",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "National Passport",
+    "key": "national_passport"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "db4b73d0-3a53-48b5-9d2b-bdf0de29ccbf",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Birth Certificate",
+    "key": "birth_certificate"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "ee41c19e-63d2-473b-9e6f-65eb8ff2cbe5",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Foreigner's Residence Permit",
+    "key": "residence_permit_no"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "afd33528-f377-4494-80be-89f5ab8c2d3b",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Disability Certificate",
+    "key": "disability_certificate"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "b37fbf40-bc38-4a86-9e87-e2f420fd0754",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Foster child",
+    "key": "foster_child"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "6782d559-c2f2-4d89-b8f8-37447c179233",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Bank Statement",
+    "key": "bank_statement"
+  }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "5cc56283-6f85-4572-861a-e85c43bb9873",
+    "fields": {
+        "created_at": "2023-05-25T12:38:42.348Z",
+        "updated_at": "2023-05-25T12:39:06.054Z",
+        "label": "Disability Card",
+        "key": "disability_card"
+    }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "aa5b57f7-d848-4240-8738-96e8a53ca3f0",
+    "fields": {
+        "created_at": "2023-05-25T12:39:27.898Z",
+        "updated_at": "2023-05-25T12:39:27.898Z",
+        "label": "Medical Certificate",
+        "key": "medical_certificate"
+    }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "b2a5bab4-1641-4585-9184-a0f844da6af3",
+    "fields": {
+        "created_at": "2023-05-25T12:38:17.892Z",
+        "updated_at": "2023-05-25T12:38:57.496Z",
+        "label": "Proof of Legal Guardianship",
+        "key": "proof_legal_guardianship"
+    }
+},
+{
+    "model": "registration_datahub.importeddocumenttype",
+    "pk": "fb85dd2a-f73e-403b-8241-677789558605",
+    "fields": {
+        "created_at": "2023-05-25T12:39:46.671Z",
+        "updated_at": "2023-05-25T12:39:46.671Z",
+        "label": "Temporary Protection Visa",
+        "key": "temporary_protection_visa"
+    }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "1f1a5a3b-461f-4da3-9e98-09437ed91b08",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "ASH221345",
+    "photo": "",
+    "individual": "86f8a870-360c-432d-af46-7426f7070c90",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "255397d7-8a0e-437e-98f7-be2bf9368e1f",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "JA123123",
+    "photo": "",
+    "individual": "86f8a870-360c-432d-af46-7426f7070c90",
+    "type": "d2c54476-0a45-4f0a-aca1-e78e78f1e2cc",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "4df58da4-a632-43ca-be7e-07b54d89fd30",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "BSH221315",
+    "photo": "",
+    "individual": "6ef3b767-5be6-4bbd-a598-6a5cc2960faf",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "58e3d2c2-7224-4f8b-8424-403635963ee5",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "DAZ132964",
+    "photo": "",
+    "individual": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "7d234914-7b51-43f0-9302-33b44f8411b9",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "CSH221395",
+    "photo": "",
+    "individual": "27a7a17b-4a3d-4643-a332-d177f0425f84",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "b4a5c74b-4266-44ed-9c8c-e8c236ff688f",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "WSH221365",
+    "photo": "",
+    "individual": "6f116cf6-04ca-4d98-b275-638acae21108",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importeddocument",
+  "pk": "bb3d7187-6572-4f21-9492-ddc531d0b182",
+  "fields": {
+    "created_at": "2022-08-10T14:02:04.469Z",
+    "updated_at": "2022-08-10T14:02:04.469Z",
+    "document_number": "TSH221375",
+    "photo": "",
+    "individual": "6c8d9be4-3bce-4a87-952a-e6abab468086",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
+    "doc_date": null
+  }
+},
+{
+  "model": "registration_datahub.importedindividualidentity",
+  "pk": 1,
+  "fields": {
+    "individual": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+    "document_number": "johniak pany",
+    "partner": "UNHCR",
+    "country": "PL"
+  }
+},
+{
+  "model": "registration_datahub.diiahousehold",
+  "pk": 1,
+  "fields": {
+    "rec_id": "111111",
+    "vpo_doc": "test_file_name.jpg",
+    "vpo_doc_id": "VPO-DOC-001",
+    "vpo_doc_date": "30-04-2022",
+    "address": "Староміська майдан, 854, кв. 794, 80571, Одеса, Луганська область, Ukraine",
+    "consent": true,
+    "source_data": "",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_household": null,
+    "status": null
+  }
+},
+{
+  "model": "registration_datahub.diiahousehold",
+  "pk": 2,
+  "fields": {
+    "rec_id": "222222",
+    "vpo_doc": "test_file_name.jpg",
+    "vpo_doc_id": "VPO-DOC-2222",
+    "vpo_doc_date": "29-04-2022",
+    "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
+    "consent": true,
+    "source_data": "",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_household": null,
+    "status": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 1,
+  "fields": {
+    "rec_id": "111111",
+    "individual_id": "111222333111",
+    "last_name": "Hurst",
+    "first_name": "Fiona",
+    "second_name": "Second",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "F",
+    "birth_date": "15-10-2001",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "",
+    "bank_name": "",
+    "doc_type": null,
+    "doc_serie": null,
+    "doc_number": null,
+    "doc_issue_date": null,
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 2,
+  "fields": {
+    "rec_id": "111111",
+    "individual_id": "111222333444",
+    "last_name": "Clay",
+    "first_name": "Francis",
+    "second_name": "Mid",
+    "relationship": "HEAD",
+    "sex": "M",
+    "birth_date": "11-01-1999",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "1234123412341234",
+    "bank_name": "PrivatBank",
+    "doc_type": null,
+    "doc_serie": "FA",
+    "doc_number": "123321123",
+    "doc_issue_date": "11-10-2035",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 3,
+  "fields": {
+    "rec_id": "222222",
+    "individual_id": "123412341234 999 222",
+    "last_name": "Duarte",
+    "first_name": "Erik",
+    "second_name": "Mid",
+    "relationship": "HEAD",
+    "sex": "M",
+    "birth_date": "22-02-1989",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "6543789043215678",
+    "bank_name": "MonoBank",
+    "doc_type": null,
+    "doc_serie": "KO",
+    "doc_number": "222233334444",
+    "doc_issue_date": "12-03-2023",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 4,
+  "fields": {
+    "rec_id": "222222",
+    "individual_id": "76543113349",
+    "last_name": "Burnett",
+    "first_name": "Lydia",
+    "second_name": "Lin",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "F",
+    "birth_date": "19-01-1993",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "",
+    "bank_name": "",
+    "doc_type": null,
+    "doc_serie": null,
+    "doc_number": null,
+    "doc_issue_date": null,
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 5,
+  "fields": {
+    "rec_id": "222222",
+    "individual_id": "",
+    "last_name": "Bautista",
+    "first_name": "Sam",
+    "second_name": "Bautista1",
+    "relationship": "SON_DAUGHTER",
+    "sex": "M",
+    "birth_date": "16-06-2009",
+    "birth_doc": "BRS321333",
+    "marital_status": "",
+    "disability": "True",
+    "iban": "",
+    "bank_name": "",
+    "doc_type": null,
+    "doc_serie": null,
+    "doc_number": null,
+    "doc_issue_date": null,
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+}
+]

@@ -10,7 +10,7 @@ import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
-  filter?: AllCashPlansAndPaymentPlansQueryVariables;
+  filter?;
   businessArea: string;
   canViewDetails: boolean;
 }
@@ -36,7 +36,7 @@ export function PaymentVerificationTable({
       CashPlanAndPaymentPlanNode,
       AllCashPlansAndPaymentPlansQueryVariables
     >
-      title={t('List of Cash Plans')}
+      title={t('List of Payment Plans')}
       headCells={headCells}
       query={useAllCashPlansAndPaymentPlansQuery}
       queriedObjectName='allCashPlansAndPaymentPlans'

@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("geo", "0003_migration"),
         ("core", "0041_migration"),
-        ("household", "0086_migration"),
+        ("household", "0003_migration_squashed_0086_migration"),
         ("sanction_list", "0010_migration"),
     ]
 

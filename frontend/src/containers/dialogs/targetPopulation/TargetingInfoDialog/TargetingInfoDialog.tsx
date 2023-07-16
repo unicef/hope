@@ -72,8 +72,8 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label={t('Field List')} />
-      <Tab label={t('Targeting Diagram')} />
+      <Tab data-cy='tab-field-list' label={t('Field List')} />
+      <Tab data-cy='tab-targeting-diagram' label={t('Targeting Diagram')} />
     </Tabs>
   );
   return (
@@ -89,6 +89,7 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
           onClick={() => setOpen(false)}
           color='primary'
           aria-label='Close Information Modal'
+          data-cy='button-close'
         >
           <Close />
         </IconButton>
