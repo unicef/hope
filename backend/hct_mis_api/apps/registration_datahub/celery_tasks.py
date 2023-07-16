@@ -12,7 +12,7 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.models import ImportedHousehold, Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
@@ -521,3 +521,45 @@ def check_rdi_merge_periodic_task() -> bool:
             return True
         rdi_merge_celery_manager.execute()
     return True
+
+
+@app.task
+@sentry_tags
+def remove_old_rdi_links_task(page_count: int = 100) -> None:
+    """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
+
+    from datetime import timedelta
+
+    from constance import config
+
+    days = config.REMOVE_RDI_LINKS_TIMEDELTA or 14
+    try:
+        # Get datahub_ids older than 2 weeks which have status other than MERGED
+        unmerged_rdi_datahub_ids = list(
+            RegistrationDataImport.objects.filter(
+                created_at__lte=timezone.now() - timedelta(days=days),
+                status__in=[
+                    RegistrationDataImport.IN_REVIEW,
+                    RegistrationDataImport.DEDUPLICATION_FAILED,
+                    RegistrationDataImport.IMPORT_ERROR,
+                    RegistrationDataImport.MERGE_ERROR,
+                ],
+            ).values_list("datahub_id", flat=True)
+        )
+
+        i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
+        while i <= count:
+            logger.info(f"Page {i}/{count} processing...")
+            rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
+
+            ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+
+            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(erased=True)
+            i += 1
+
+        logger.info(
+            f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
+        )
+    except Exception:
+        logger.error("Removing old RDI objects failed")
+        raise

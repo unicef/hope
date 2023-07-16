@@ -16,11 +16,13 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
+  RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
+import {HouseholdTable} from "../../tables/population/HouseholdTable";
 
 const Container = styled.div`
   && {
@@ -82,6 +84,60 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     stopPolling();
   }
 
+  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+
+  const RegistrationContainer = ({ isErased }) => {
+    return (
+      <Container>
+        <RegistrationDetails registration={data.registrationDataImport} />
+        { isErased ? null : (
+            <TableWrapper>
+              <ContainerColumnWithBorder>
+                <Title>
+                  <Typography variant='h6'>
+                    {isMerged ? t('Population Preview') : t('Import Preview')}
+                  </Typography>
+                </Title>
+                <TabsContainer>
+                  <StyledTabs
+                    value={selectedTab}
+                    onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
+                      setSelectedTab(newValue)
+                    }
+                    indicatorColor='primary'
+                    textColor='primary'
+                    variant='fullWidth'
+                    aria-label='full width tabs example'
+                  >
+                    <Tab label={t('Households')} />
+                    <Tab label={t('Individuals')} />
+                  </StyledTabs>
+                </TabsContainer>
+                <TabPanel value={selectedTab} index={0}>
+                  <ImportedHouseholdTable
+                    key={`${data.registrationDataImport.status}-household`}
+                    isMerged={isMerged}
+                    rdiId={id}
+                    businessArea={businessArea}
+                  />
+                </TabPanel>
+                <TabPanel value={selectedTab} index={1}>
+                  <ImportedIndividualsTable
+                    showCheckbox
+                    rdiId={id}
+                    isMerged={isMerged}
+                    businessArea={businessArea}
+                    key={`${data.registrationDataImport.status}-individual`}
+                    choicesData={choicesData}
+                  />
+                </TabPanel>
+              </ContainerColumnWithBorder>
+            </TableWrapper>
+        )}
+      </Container>
+    )
+  }
+
   return (
     <div>
       <RegistrationDataImportDetailsPageHeader
@@ -94,47 +150,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
         canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
-      <Container>
-        <RegistrationDetails registration={data.registrationDataImport} />
-        <TableWrapper>
-          <ContainerColumnWithBorder>
-            <Title>
-              <Typography variant='h6'>{t('Import Preview')}</Typography>
-            </Title>
-            <TabsContainer>
-              <StyledTabs
-                value={selectedTab}
-                onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                  setSelectedTab(newValue)
-                }
-                indicatorColor='primary'
-                textColor='primary'
-                variant='fullWidth'
-                aria-label='full width tabs example'
-              >
-                <Tab label={t('Households')} />
-                <Tab label={t('Individuals')} />
-              </StyledTabs>
-            </TabsContainer>
-            <TabPanel value={selectedTab} index={0}>
-              <ImportedHouseholdTable
-                key={`${data.registrationDataImport.status}-household`}
-                rdiId={id}
-                businessArea={businessArea}
-              />
-            </TabPanel>
-            <TabPanel value={selectedTab} index={1}>
-              <ImportedIndividualsTable
-                showCheckbox
-                rdiId={id}
-                businessArea={businessArea}
-                key={`${data.registrationDataImport.status}-individual`}
-                choicesData={choicesData}
-              />
-            </TabPanel>
-          </ContainerColumnWithBorder>
-        </TableWrapper>
-      </Container>
+      <RegistrationContainer isErased={data.registrationDataImport.erased} />
     </div>
   );
 }

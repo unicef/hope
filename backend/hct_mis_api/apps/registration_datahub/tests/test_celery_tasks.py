@@ -9,11 +9,13 @@ from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
 
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -24,10 +26,20 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
+    remove_old_rdi_links_task,
+)
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedBankAccountInfoFactory,
+    ImportedDocumentFactory,
+    ImportedDocumentTypeFactory,
+    ImportedHouseholdFactory,
+    ImportedIndividualFactory,
+    RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -590,3 +602,73 @@ class TestAutomatingRDICreationTask(TestCase):
 
         with self.assertRaises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
+
+
+class RemoveOldRDIDatahubLinksTest(TestCase):
+    databases = {"default", "registration_datahub"}
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        call_command("loadbusinessareas")
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        geo_models.Country.objects.create(name="Afghanistan")
+
+        cls.rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)
+        cls.rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
+        cls.rdi_3 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGING)
+
+    def test_remove_old_rdi_objects(self) -> None:
+        rdi_hub_1 = RegistrationDataImportDatahubFactory()
+        rdi_hub_2 = RegistrationDataImportDatahubFactory()
+        rdi_hub_3 = RegistrationDataImportDatahubFactory()
+
+        self.rdi_1.datahub_id = rdi_hub_1.id
+        self.rdi_2.datahub_id = rdi_hub_2.id
+        self.rdi_3.datahub_id = rdi_hub_3.id
+
+        self.rdi_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
+        self.rdi_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
+        self.rdi_3.created_at = timezone.now()
+
+        self.rdi_1.save()
+        self.rdi_2.save()
+        self.rdi_3.save()
+
+        imported_household_1 = ImportedHouseholdFactory(registration_data_import=rdi_hub_1)
+        imported_household_2 = ImportedHouseholdFactory(registration_data_import=rdi_hub_2)
+        imported_household_3 = ImportedHouseholdFactory(registration_data_import=rdi_hub_3)
+
+        imported_individual_1 = ImportedIndividualFactory(household=imported_household_1)
+        imported_individual_2 = ImportedIndividualFactory(household=imported_household_2)
+        imported_individual_3 = ImportedIndividualFactory(household=imported_household_3)
+
+        ImportedDocumentFactory(
+            individual=imported_individual_1, type=ImportedDocumentTypeFactory(key="birth_certificate")
+        )
+        ImportedDocumentFactory(individual=imported_individual_2, type=ImportedDocumentTypeFactory(key="tax_id"))
+        ImportedDocumentFactory(
+            individual=imported_individual_3, type=ImportedDocumentTypeFactory(key="drivers_license")
+        )
+
+        ImportedBankAccountInfoFactory(individual=imported_individual_1)
+        ImportedBankAccountInfoFactory(individual=imported_individual_2)
+
+        self.assertEqual(ImportedHousehold.objects.count(), 3)
+        self.assertEqual(ImportedIndividual.objects.count(), 3)
+        self.assertEqual(ImportedDocument.objects.count(), 3)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 2)
+
+        remove_old_rdi_links_task.__wrapped__()
+
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(ImportedDocument.objects.count(), 1)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 0)
+
+        self.rdi_1.refresh_from_db()
+        self.rdi_2.refresh_from_db()
+        self.rdi_3.refresh_from_db()
+
+        self.assertEqual(self.rdi_1.erased, True)
+        self.assertEqual(self.rdi_2.erased, True)
+        self.assertEqual(self.rdi_3.erased, False)
