@@ -16,18 +16,15 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 
 
-class TestAbortRdiMutation(APITestCase):
+class TestEraseRdiMutation(APITestCase):
     databases = "__all__"
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
-    ABORT_IMPORT_QUERY = """
-      mutation AbortRegistrationDataImportMutation(
-        $id: ID!
-      ) {
-        abortRegistrationDataImport(
-          id: $id
-        ) {
+    ERASE_IMPORT_QUERY = """
+      mutation EraseRegistrationDataImportMutation($id: ID!) {
+        eraseRegistrationDataImport(id: $id) {
           registrationDataImport {
+            erased
             status
           }
         }
@@ -53,7 +50,7 @@ class TestAbortRdiMutation(APITestCase):
         cls.rdi_2.datahub_id = cls.rdi_hub_2.id
         cls.rdi_2.save()
 
-    def test_abort_registration_data_import_removes_data_links(self) -> None:
+    def test_erase_registration_data_import_removes_data_links(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
         imported_household = ImportedHouseholdFactory(registration_data_import=self.rdi_hub_1)
@@ -63,17 +60,17 @@ class TestAbortRdiMutation(APITestCase):
         self.assertEqual(ImportedIndividual.objects.count(), 1)
 
         self.graphql_request(
-            request_string=self.ABORT_IMPORT_QUERY,
+            request_string=self.ERASE_IMPORT_QUERY,
             context={"user": self.user},
             variables={"id": self.id_to_base64(self.rdi_1.id, "RegistrationDataImportNode")},
         )
 
-        self.assertEqual(RegistrationDataImport.objects.filter(status=RegistrationDataImport.ABORTED).count(), 1)
+        self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 1)
 
         self.assertEqual(ImportedHousehold.objects.count(), 0)
         self.assertEqual(ImportedIndividual.objects.count(), 0)
 
-    def test_abort_registration_data_import_raises_error_when_wrong_status(self) -> None:
+    def test_erase_registration_data_import_raises_error_when_wrong_status(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
         imported_household = ImportedHouseholdFactory(registration_data_import=self.rdi_hub_2)
@@ -83,7 +80,7 @@ class TestAbortRdiMutation(APITestCase):
         self.assertEqual(ImportedIndividual.objects.count(), 1)
 
         abort_mutation_response = self.graphql_request(
-            request_string=self.ABORT_IMPORT_QUERY,
+            request_string=self.ERASE_IMPORT_QUERY,
             context={"user": self.user},
             variables={"id": self.id_to_base64(self.rdi_2.id, "RegistrationDataImportNode")},
         )
@@ -91,10 +88,11 @@ class TestAbortRdiMutation(APITestCase):
         assert "errors" in abort_mutation_response
         self.assertEqual(
             abort_mutation_response["errors"][0]["message"],
-            "RDI can be aborted only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED",
+            "RDI can be erased only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED",
         )
 
-        self.assertEqual(RegistrationDataImport.objects.filter(status=RegistrationDataImport.ABORTED).count(), 0)
+        self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 0)
+        self.assertEqual(RegistrationDataImport.objects.filter(erased=False).count(), 2)
 
         self.assertEqual(ImportedHousehold.objects.count(), 1)
         self.assertEqual(ImportedIndividual.objects.count(), 1)
