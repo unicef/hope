@@ -47,7 +47,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     REFUSED_IMPORT = "REFUSED"
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
-    ABORTED = "ABORTED"
     STATUS_CHOICE = (
         (LOADING, _("Loading")),
         (DEDUPLICATION, _("Deduplication")),
@@ -61,7 +60,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         (MERGING, _("Merging")),
         (MERGE_ERROR, _("Merge Error")),
         (REFUSED_IMPORT, _("Refused import")),
-        (ABORTED, _("Aborted")),
     )
     XLS = "XLS"
     KOBO = "KOBO"
@@ -111,6 +109,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
 
     def __str__(self) -> str:
         return self.name
