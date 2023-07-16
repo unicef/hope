@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('steficon', '0010_migration'),
+        ('steficon', '0008_reset_id_squashed_0010_migration'),
         ('targeting', '0029_migration'),
     ]
 

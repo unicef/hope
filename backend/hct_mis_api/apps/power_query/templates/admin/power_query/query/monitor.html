@@ -1,0 +1,22 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% load power_query %}
+{% block action-content %}
+    <h1>Queries</h1>
+    <table>
+        {% for rec in queries.all %}
+            <tr>
+                <td><a href="{% url "admin:power_query_query_change" rec.pk %}">{{ rec }}</a></td>
+                <td>{{ rec.status }}</td>
+                <td>{{ rec.sentry_error_id }}</td>
+                <td>{{ rec.sentry_error_id }}</td>
+                <td>{{ rec.error_message }}</td>
+                <td>{% if rec.celery_task %}
+                    <a href="{{ flower_address }}/task/{{ rec.celery_task }}">inpect</a>
+                {% else %}
+                    <a href="../{{ rec.pk }}/queue/">queue</a>
+                {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

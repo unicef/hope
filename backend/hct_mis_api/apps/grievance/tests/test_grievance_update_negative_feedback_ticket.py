@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -8,7 +8,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -40,10 +39,9 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -70,105 +68,19 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_negative_feedback_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_update_negative_feedback_ticket_not_supported(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        input_data = self._prepare_input()
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user},
-            variables=input_data,
+            variables={
+                "input": {
+                    "description": "Test Feedback",
+                    "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                    "admin": self.admin_area.p_code,
+                    "language": "Polish, English",
+                    "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
+                }
+            },
         )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_negative_feedback_ticket_with_household_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_negative_feedback_ticket_with_individual_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user},
-            variables=input_data,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_UPDATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_negative_feedback_ticket_with_household_and_individual_extras(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        extras = {
-            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-        }
-        input_data = self._prepare_input(extras)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={"user": self.user},
-            variables=input_data,
-        )
-
-    def _prepare_input(self, extras: Optional[Any] = None) -> Dict:
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
-            }
-        }
-
-        if extras:
-            input_data["input"]["extras"] = {"category": {"negativeFeedbackTicketExtras": extras}}
-
-        return input_data

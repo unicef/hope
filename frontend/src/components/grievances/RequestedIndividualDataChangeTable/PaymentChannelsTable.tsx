@@ -55,8 +55,12 @@ export const PaymentChannelsTable = ({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>{t('Bank name')}</TableCell>
-        <TableCell align='left'>{t('Bank account number')}</TableCell>
+        <TableCell data-cy='table-cell-bank-name' align='left'>
+          {t('Bank name')}
+        </TableCell>
+        <TableCell data-cy='table-cell-bank-account-number' align='left'>
+          {t('Bank account number')}
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -81,6 +85,7 @@ export const PaymentChannelsTable = ({
                 <TableCell align='left'>
                   {isEdit ? (
                     <Checkbox
+                      data-cy='checkbox-payment-channel'
                       color='primary'
                       onChange={(): void => {
                         handleSelectPaymentChannel(index);
@@ -93,7 +98,7 @@ export const PaymentChannelsTable = ({
                     />
                   ) : (
                     selectedPaymentChannels.includes(index) && (
-                      <GreenIcon>
+                      <GreenIcon data-cy='green-check'>
                         <CheckCircleIcon />
                       </GreenIcon>
                     )

@@ -1,6 +1,7 @@
 import { Button, Grid } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +18,8 @@ export function NewIdentityFieldArray({
   addIndividualFieldsData,
   values,
 }: NewIdentityFieldArrayProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
@@ -61,6 +64,7 @@ export function NewIdentityFieldArray({
                     });
                   }}
                   startIcon={<AddCircleOutline />}
+                  disabled={isEditTicket}
                 >
                   {t('Add Identity')}
                 </Button>

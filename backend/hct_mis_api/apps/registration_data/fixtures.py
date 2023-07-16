@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 import factory.fuzzy
 from factory.django import DjangoModelFactory
@@ -35,3 +36,12 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     datahub_id = factory.Faker("uuid4")
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     erased = False
+
+    @classmethod
+    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> RegistrationDataImport:
+        created_at = kwargs.pop("created_at", None)
+        obj = super()._create(target_class, *args, **kwargs)
+        if created_at:
+            obj.created_at = created_at
+            obj.save()
+        return obj

@@ -14,6 +14,7 @@ export function DatePickerFilter({
   topLabel = null,
   onChange,
   value = null,
+  fullWidth = true,
   ...props
 }: DatePickerFieldProps): React.ReactElement {
   return (
@@ -32,6 +33,7 @@ export function DatePickerFilter({
         value={value}
         format='YYYY-MM-DD'
         InputAdornmentProps={{ position: 'end' }}
+        fullWidth={fullWidth}
         {...props}
       />
     </Box>

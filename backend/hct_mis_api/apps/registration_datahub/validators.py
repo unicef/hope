@@ -90,7 +90,6 @@ class XLSXValidator(BaseValidator):
 
 
 class ImportDataInstanceValidator:
-    BUSINESS_AREA_SLUG = None
     business_area_code = None
     DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
         "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",

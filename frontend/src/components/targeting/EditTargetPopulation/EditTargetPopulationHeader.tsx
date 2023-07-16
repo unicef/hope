@@ -47,6 +47,7 @@ export const EditTargetPopulationHeader = ({
             fullWidth
             required
             component={FormikTextField}
+            data-cy='target-population-name'
           />
         ) : (
           values.name
@@ -62,6 +63,7 @@ export const EditTargetPopulationHeader = ({
               variant='outlined'
               color='primary'
               component={Link}
+              data-cy='button-cancel'
               to={`/${businessArea}/target-population/${targetPopulation.id}`}
             >
               {t('Cancel')}
@@ -74,6 +76,7 @@ export const EditTargetPopulationHeader = ({
             color='primary'
             onClick={handleSubmit}
             loading={loading}
+            data-cy='button-save'
             disabled={
               values.targetingCriteria?.length === 0 || !values.name || loading
             }

@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from dateutil.relativedelta import relativedelta
-from prompt_toolkit.validation import ValidationError  # noqa: F811 # TODO: bug?
 
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.household.models import (
@@ -96,7 +95,7 @@ def get_other_document_number_query(_: Any, args: Any) -> Q:
 
 
 def get_documents_number_query(document_type: str, number: str) -> Q:
-    return Q(documents__type__type=document_type, documents__document_number=number)
+    return Q(documents__type__key=document_type.lower(), documents__document_number=number)
 
 
 def get_birth_certificate_issuer_query(_: Any, args: Any) -> Q:
@@ -165,7 +164,7 @@ def get_has_bank_account_number_query(_: Any, args: Any) -> Q:
 
 def get_has_tax_id_query(_: Any, args: Any) -> Q:
     has_tax_id = args[0] in [True, "True"]
-    return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
+    return Q(documents__type__key__iexact="TAX_ID") if has_tax_id else ~Q(documents__type__key__iexact="TAX_ID")
 
 
 def country_generic_query(comparison_method: str, args: Any, lookup: Any) -> Q:

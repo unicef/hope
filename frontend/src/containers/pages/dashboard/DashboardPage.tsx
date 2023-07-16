@@ -30,6 +30,9 @@ export const DashboardPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
   const { data, loading } = useDashboardYearsChoiceDataQuery({
     variables: { businessArea },
@@ -68,13 +71,19 @@ export const DashboardPage = (): React.ReactElement => {
     <>
       <PageHeader tabs={tabs} title={t('Dashboard')}>
         {hasPermissionToExport && (
-          <ExportModal filter={filter} year={years[selectedTab]} />
+          <ExportModal filter={appliedFilter} year={years[selectedTab]} />
         )}
       </PageHeader>
       {hasPermissionToView ? (
         <>
           {businessArea !== 'global' ? (
-            <DashboardFilters filter={filter} onFilterChange={setFilter} />
+            <DashboardFilters
+              filter={filter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
           ) : (
             <DashboardPaper noMarginTop extraPaddingLeft color='#6f6f6f'>
               <Typography variant='body2'>
@@ -87,7 +96,7 @@ export const DashboardPage = (): React.ReactElement => {
           <DashboardYearPage
             selectedTab={selectedTab}
             year={years[selectedTab]}
-            filter={filter}
+            filter={appliedFilter}
           />
         </>
       ) : (

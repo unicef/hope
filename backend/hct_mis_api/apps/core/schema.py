@@ -17,7 +17,8 @@ from django.db import models
 
 import graphene
 from constance import config
-from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
+from flags.state import flag_state
+from graphene import Boolean, Connection, ConnectionField, DateTime, Int, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -47,7 +48,17 @@ class ChoiceObject(graphene.ObjectType):
     value = String()
 
 
+class ChoiceObjectInt(graphene.ObjectType):
+    name = String()
+    value = Int()
+
+
 class BusinessAreaNode(DjangoObjectType):
+    is_accountability_applicable = graphene.Boolean()
+
+    def resolve_is_accountability_applicable(self, info: Any) -> bool:
+        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
+
     @classmethod
     def get_queryset(cls, queryset: "QuerySet", info: Any) -> "QuerySet":
         return queryset.filter(is_split=False)

@@ -28,6 +28,11 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
     CzechRepublicFlexRegistration,
 )
+from hct_mis_api.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 
 
 class TestCzechRepublicRegistrationService(TestCase):
@@ -56,16 +61,20 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
+        slug = "czech-republic"
         BusinessArea.objects.create(
             **{
                 "code": "BOCZ",
                 "name": "Czech Republic",
                 "region_name": "CZE",
-                "slug": "czech-republic",
+                "slug": slug,
                 "has_data_sharing_agreement": True,
             },
         )
 
+        cls.organization = OrganizationFactory.create(slug=slug)
+        project = ProjectFactory.create(organization=cls.organization)
+        cls.registration = RegistrationFactory.create(project=project)
         geo_models.Country.objects.create(name="Czechia")
 
         consent = [
@@ -211,7 +220,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         cls.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
-        service = CzechRepublicFlexRegistration()
+        service = CzechRepublicFlexRegistration(self.registration)
         rdi = service.create_rdi(self.user, f"czech_republic rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)

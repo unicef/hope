@@ -57,9 +57,7 @@ class GenerateDashboardReportContentHelpers:
             valid_payment_records_in_instance = valid_payment_records.filter(
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
-            valid_households = Household.objects.filter(
-                payment_records__in=valid_payment_records_in_instance
-            ).distinct()
+            valid_households = Household.objects.filter(paymentrecord__in=valid_payment_records_in_instance).distinct()
             households_aggr = cls._aggregate_instances_sum(
                 valid_households,
                 individual_count_fields,
@@ -69,7 +67,7 @@ class GenerateDashboardReportContentHelpers:
             instance["num_households"] = valid_households.count()
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
-        households = Household.objects.filter(payment_records__in=valid_payment_records).distinct()
+        households = Household.objects.filter(paymentrecord__in=valid_payment_records).distinct()
         households_aggr = cls._aggregate_instances_sum(households, individual_count_fields)
         totals = {
             "num_households": households.count(),
@@ -93,14 +91,14 @@ class GenerateDashboardReportContentHelpers:
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
             households_aggr = cls._aggregate_instances_sum(
-                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
+                Household.objects.filter(paymentrecord__in=valid_payment_records_in_instance).distinct(),
                 individual_count_fields,
             )
             instance.update(households_aggr)
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
         households_aggr = cls._aggregate_instances_sum(
-            Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
+            Household.objects.filter(paymentrecord__in=valid_payment_records).distinct(),
             individual_count_fields,
         )
         # return instances for rows and totals row info
@@ -274,7 +272,7 @@ class GenerateDashboardReportContentHelpers:
         if not cls._is_report_global(report):
             filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
-        path_to_payment_record_verifications = "cashplan__verifications__payment_record_verifications"
+        path_to_payment_record_verifications = "cashplan__payment_verification_plan__payment_record_verifications"
 
         def format_status_filter(status: str) -> Q:
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
@@ -282,7 +280,11 @@ class GenerateDashboardReportContentHelpers:
         programs = (
             Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
             .distinct()
-            .annotate(total_cash_plan_verifications=Count("cashplan__verifications", distinct=True))
+            .annotate(
+                total_cash_plan_verifications=Count(
+                    "cashplan__payment_verification_plan__payment_record_verifications", distinct=True
+                )
+            )
             .annotate(
                 total_households=Count(
                     f"{path_to_payment_record_verifications}__payment_record__household",
@@ -300,7 +302,7 @@ class GenerateDashboardReportContentHelpers:
                     "cashplan__payment_items",
                     distinct=True,
                     filter=Q(
-                        cashplan__verifications__isnull=False,
+                        cashplan__payment_verification_plan__isnull=False,
                         cashplan__payment_items__status=PaymentRecord.STATUS_SUCCESS,
                         cashplan__payment_items__delivered_quantity__gt=0,
                     ),
@@ -395,14 +397,14 @@ class GenerateDashboardReportContentHelpers:
         for admin_area in admin_areas:
             valid_payment_records_in_instance = valid_payment_records.filter(household__admin_area=admin_area["id"])
             households_aggr = cls._aggregate_instances_sum(
-                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
+                Household.objects.filter(paymentrecord__in=valid_payment_records_in_instance).distinct(),
                 individual_count_fields,
             )
             admin_area.update(households_aggr)
 
         totals.update(
             cls._aggregate_instances_sum(
-                Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
+                Household.objects.filter(paymentrecord__in=valid_payment_records).distinct(),
                 individual_count_fields,
             )
         )
@@ -580,7 +582,7 @@ class GenerateDashboardReportContentHelpers:
             {"delivered_quantity_usd__gt": 0},
             "delivery_date",
             "household__admin_area",
-            "cash_plan__program",
+            "parent__program",
             "business_area",
         )
 
@@ -960,7 +962,7 @@ class GenerateDashboardReportService:
 
     def _send_email(self) -> None:
         path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
-        protocol = "http" if settings.IS_DEV else "https"
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         context = {
             "report_type": self._report_types_to_joined_str(),
             "created_at": self._format_date(self.report.created_at),

@@ -22,7 +22,7 @@ class Config(SmartConfig):
 
         from smart_admin.smart_auth.admin import ContentTypeAdmin, PermissionAdmin
 
-        from .admin import LogEntryAdmin
+        from .admin import LogEntryAdmin  # noqa
 
         smart_register(ContentType)(ContentTypeAdmin)
         smart_register(LogEntry)(LogEntryAdmin)
@@ -39,7 +39,7 @@ class Config(SmartConfig):
             panel_sysinfo,
         )
 
-        from .panels import email, panel_elasticsearch
+        from .panels import email, panel_elasticsearch  # noqa
 
         site.register_panel(panel_migrations)
         site.register_panel(panel_sysinfo)

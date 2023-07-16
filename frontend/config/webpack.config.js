@@ -50,7 +50,7 @@ const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
 
 let cspReportUri = null;
-const sentryDsn = process.env.SENTRY_FRONTEND_DSN;
+const sentryDsn = process.env.SENTRY_DSN;
 
 if (process.env.NODE_ENV !== 'development' && sentryDsn) {
   const sentryKey = sentryDsn.split('@')[0].split('//')[1];

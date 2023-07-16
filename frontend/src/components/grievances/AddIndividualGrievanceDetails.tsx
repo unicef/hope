@@ -130,6 +130,7 @@ export function AddIndividualGrievanceDetails({
           <Typography variant='h6'>{t('Individual Data')}</Typography>
           {canApproveDataChange && (
             <Button
+              data-cy='button-approve'
               onClick={() =>
                 confirm({
                   title: t('Warning'),

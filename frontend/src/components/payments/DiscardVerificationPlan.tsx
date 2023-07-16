@@ -7,7 +7,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
@@ -15,16 +14,13 @@ import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
 }
 
 export function DiscardVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
 }: DiscardVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
-  const [finishDialogOpen, setFinishDialogOpen] = useState(false);
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
@@ -32,8 +28,8 @@ export function DiscardVerificationPlan({
     try {
       await mutate({
         variables: { paymentVerificationPlanId },
-        refetchQueries,
       });
+      setDiscardDialogOpen(false);
       showMessage(t('Verification plan has been discarded.'));
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -44,15 +40,15 @@ export function DiscardVerificationPlan({
       <Box p={2}>
         <ErrorButton
           startIcon={<ClearIcon />}
-          onClick={() => setFinishDialogOpen(true)}
+          onClick={() => setDiscardDialogOpen(true)}
           data-cy='button-discard-plan'
         >
           DISCARD
         </ErrorButton>
       </Box>
       <Dialog
-        open={finishDialogOpen}
-        onClose={() => setFinishDialogOpen(false)}
+        open={discardDialogOpen}
+        onClose={() => setDiscardDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
         maxWidth='md'
@@ -74,7 +70,7 @@ export function DiscardVerificationPlan({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setFinishDialogOpen(false)}>
+            <Button onClick={() => setDiscardDialogOpen(false)}>
               {t('CANCEL')}
             </Button>
             <ErrorButtonContained

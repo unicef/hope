@@ -3,7 +3,7 @@ module.exports = {
     includes: ['./src/apollo/**/*.js'],
     service: {
       name: 'htc-mis',
-      localSchemaFile: './data/schema.graphql'
+      localSchemaFile: './data/schema.graphql',
     },
   },
 };

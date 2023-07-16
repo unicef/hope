@@ -18,7 +18,7 @@ def set_business_area(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0002_migration"),
+        ("core", "0002_migration_squashed_0006_migration"),
         ("targeting", "0003_migration"),
     ]
 

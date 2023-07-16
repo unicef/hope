@@ -28,7 +28,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
       CashPlanAndPaymentPlanNode,
       AllCashPlansAndPaymentPlansQueryVariables
     >
-      title={t('Cash Plans')}
+      title={t('Payment Plans')}
       headCells={headCells}
       query={useAllCashPlansAndPaymentPlansQuery}
       queriedObjectName='allCashPlansAndPaymentPlans'

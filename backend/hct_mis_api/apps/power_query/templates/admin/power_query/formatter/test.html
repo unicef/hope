@@ -2,7 +2,7 @@
 {% load engine %}
 {% block action-content %}
     <div style="padding: 10px;">
-        <form method="post">
+        <form method="post" id="formatter-form">
             {% csrf_token %}
             <table>
                 {{ form }}

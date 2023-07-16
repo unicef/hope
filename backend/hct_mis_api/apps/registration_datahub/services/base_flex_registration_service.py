@@ -23,6 +23,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.aurora.models import Registration
+from hct_mis_api.aurora.rdi import AuroraProcessor
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -30,17 +32,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class BaseRegistrationService(abc.ABC):
-    BUSINESS_AREA_SLUG = ""
-    REGISTRATION_ID = tuple()
+class BaseRegistrationService(AuroraProcessor, abc.ABC):
     PROCESS_FLEX_RECORDS_TASK = process_flex_records_task
+
+    def __init__(self, registration: Registration):
+        self.registration = registration
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
-        business_area = BusinessArea.objects.get(slug=self.BUSINESS_AREA_SLUG)
+    def create_rdi(
+        self, imported_by: Optional[Any], rdi_name: str = "rdi_name", is_open: bool = False
+    ) -> RegistrationDataImport:
+        project = self.registration.project
+        # programme = project.programme TODO programme refactoring
+        organization = project.organization
+        business_area = BusinessArea.objects.get(slug=organization.slug)
+
         number_of_individuals = 0
         number_of_households = 0
+        status = RegistrationDataImport.LOADING if is_open else RegistrationDataImport.IMPORTING
 
         rdi = RegistrationDataImport.objects.create(
             name=rdi_name,
@@ -49,7 +59,7 @@ class BaseRegistrationService(abc.ABC):
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
             business_area=business_area,
-            status=RegistrationDataImport.IMPORTING,
+            status=status,
         )
 
         import_data = ImportData.objects.create(
@@ -178,7 +188,3 @@ class BaseRegistrationService(abc.ABC):
             name = hashlib.md5(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
-
-    def _check_registration_id(self, record_registration: int, error_msg: str = "") -> None:
-        if record_registration not in self.REGISTRATION_ID:
-            raise ValidationError(error_msg)

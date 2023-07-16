@@ -10,5 +10,9 @@ export const LinkedTicketIdDisplay = ({
   const { data } = useGrievanceTicketUnicefIdQuery({
     variables: { id: ticketId },
   });
-  return <BlueText>{data?.grievanceTicket?.unicefId}</BlueText>;
+  return (
+    <BlueText data-cy='linked-ticket-id'>
+      {data?.grievanceTicket?.unicefId}
+    </BlueText>
+  );
 };

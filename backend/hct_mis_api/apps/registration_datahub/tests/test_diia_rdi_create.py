@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.forms import model_to_dict
@@ -27,10 +28,10 @@ from hct_mis_api.apps.registration_datahub.models import (
 class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
-        "hct_mis_api/apps/geo/fixtures/data.json",
-        "hct_mis_api/apps/core/fixtures/data.json",
-        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
-        "hct_mis_api/apps/registration_datahub/fixtures/diiadata_stg.json",
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/diiadata.json",
+        f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/diiadata_stg.json",
     ]
 
     @classmethod

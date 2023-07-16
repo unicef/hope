@@ -86,6 +86,11 @@ export const GRIEVANCE_ISSUE_TYPES = {
   DELETE_INDIVIDUAL: '15',
   ADD_INDIVIDUAL: '16',
   DELETE_HOUSEHOLD: '17',
+  PAYMENT_COMPLAINT: '18',
+  FSP_COMPLAINT: '19',
+  REGISTRATION_COMPLAINT: '20',
+  OTHER_COMPLAINT: '21',
+  PARTNER_COMPLAINT: '22',
 };
 
 export const REPORT_TYPES = {
@@ -106,6 +111,75 @@ export const REPORTING_STATES = {
 };
 
 export const COLLECT_TYPES_MAPPING = {
+  A_: 'Unknown',
+  A_0: 'None',
+  A_1: 'Full',
+  A_2: 'Partial',
+};
+export const GRIEVANCE_TICKETS_TYPES = {
+  userGenerated: 0,
+  systemGenerated: 1,
+};
+
+export const GrievanceTypes = {
+  0: 'user',
+  1: 'system',
+};
+
+export const GrievanceStatuses = {
+  All: 'all',
+  Active: 'active',
+  Closed: 'Closed',
+};
+
+export const GrievanceSearchTypes = {
+  TicketID: 'ticket_id',
+  HouseholdID: 'ticket_hh_id',
+  LastName: 'last_name',
+};
+
+export const GrievanceSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
+};
+
+export const FeedbackSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
+};
+
+export const ISSUE_TYPE_CATEGORIES = {
+  DATA_CHANGE: 'Data Change',
+  SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
+  GRIEVANCE_COMPLAINT: 'Grievance Complaint',
+};
+
+export const CommunicationSteps = {
+  LookUp: 0,
+  SampleSize: 1,
+  Details: 2,
+};
+
+export const CommunicationTabsValues = {
+  HOUSEHOLD: 0,
+  TARGET_POPULATION: 1,
+  RDI: 2,
+};
+
+export const SurveySteps = {
+  LookUp: 0,
+  SampleSize: 1,
+  Details: 2,
+};
+
+export const SurveyTabsValues = {
+  PROGRAM: 0,
+  TARGET_POPULATION: 1,
+  RDI: 2,
   A_: 'Unknown',
   A_0: 'None',
   A_1: 'Full',
