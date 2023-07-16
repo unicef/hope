@@ -433,4 +433,4 @@ class Mutations(graphene.ObjectType):
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
     refuse_registration_data_import = RefuseRegistrationDataImportMutation.Field()
     rerun_dedupe = RegistrationDeduplicationMutation.Field()
-    abort_registration_data_import = EraseRegistrationDataImportMutation.Field()
+    erase_registration_data_import = EraseRegistrationDataImportMutation.Field()
