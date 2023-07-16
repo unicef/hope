@@ -569,9 +569,7 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
 
             ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
 
-            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(
-                status=RegistrationDataImport.ABORTED
-            )
+            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(erased=True)
             i += 1
 
         logger.info(
