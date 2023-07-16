@@ -46,11 +46,6 @@ export type _TableTotalCashTransferredDataNode = {
   totalHouseholds?: Maybe<Scalars['Int']>,
 };
 
-export type AbortRegistrationDataImportMutation = {
-   __typename?: 'AbortRegistrationDataImportMutation',
-  registrationDataImport?: Maybe<RegistrationDataImportNode>,
-};
-
 export enum Action {
   Lock = 'LOCK',
   LockFsp = 'LOCK_FSP',
@@ -1191,6 +1186,11 @@ export type EditPaymentVerificationInput = {
 export type EditPaymentVerificationMutation = {
    __typename?: 'EditPaymentVerificationMutation',
   paymentPlan?: Maybe<GenericPaymentPlanNode>,
+};
+
+export type EraseRegistrationDataImportMutation = {
+   __typename?: 'EraseRegistrationDataImportMutation',
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
 export type ExcludeHouseholdsMutation = {
@@ -3110,7 +3110,7 @@ export type Mutations = {
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>,
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>,
-  abortRegistrationDataImport?: Maybe<AbortRegistrationDataImportMutation>,
+  eraseRegistrationDataImport?: Maybe<EraseRegistrationDataImportMutation>,
   checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>,
 };
 
@@ -3510,7 +3510,7 @@ export type MutationsRerunDedupeArgs = {
 };
 
 
-export type MutationsAbortRegistrationDataImportArgs = {
+export type MutationsEraseRegistrationDataImportArgs = {
   id: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
@@ -5580,6 +5580,7 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
+  erased: Scalars['Boolean'],
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -5644,8 +5645,7 @@ export enum RegistrationDataImportStatus {
   Merged = 'MERGED',
   Merging = 'MERGING',
   MergeError = 'MERGE_ERROR',
-  Refused = 'REFUSED',
-  Aborted = 'ABORTED'
+  Refused = 'REFUSED'
 }
 
 export type RegistrationDeduplicationMutation = {
@@ -7646,7 +7646,7 @@ export type PaymentRecordDetailsFragment = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
   & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -8713,22 +8713,6 @@ export type UpdateProgramMutation = (
   )> }
 );
 
-export type AbortRdiMutationVariables = {
-  id: Scalars['ID']
-};
-
-
-export type AbortRdiMutation = (
-  { __typename?: 'Mutations' }
-  & { abortRegistrationDataImport: Maybe<(
-    { __typename?: 'AbortRegistrationDataImportMutation' }
-    & { registrationDataImport: Maybe<(
-      { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'status'>
-    )> }
-  )> }
-);
-
 export type CreateRegistrationKoboImportMutationVariables = {
   registrationDataImportData: RegistrationKoboImportMutationInput
 };
@@ -8759,6 +8743,22 @@ export type CreateRegistrationXlsxImportMutation = (
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId' | 'screenBeneficiary'>
+    )> }
+  )> }
+);
+
+export type EraseRdiMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type EraseRdiMutation = (
+  { __typename?: 'Mutations' }
+  & { eraseRegistrationDataImport: Maybe<(
+    { __typename?: 'EraseRegistrationDataImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'status' | 'erased'>
     )> }
   )> }
 );
@@ -12418,6 +12418,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   createdAt
   name
   status
+  erased
   importDate
   importedBy {
     id
@@ -15274,58 +15275,6 @@ export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
-export const AbortRdiDocument = gql`
-    mutation AbortRDI($id: ID!) {
-  abortRegistrationDataImport(id: $id) {
-    registrationDataImport {
-      id
-      status
-    }
-  }
-}
-    `;
-export type AbortRdiMutationFn = ApolloReactCommon.MutationFunction<AbortRdiMutation, AbortRdiMutationVariables>;
-export type AbortRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<AbortRdiMutation, AbortRdiMutationVariables>, 'mutation'>;
-
-    export const AbortRdiComponent = (props: AbortRdiComponentProps) => (
-      <ApolloReactComponents.Mutation<AbortRdiMutation, AbortRdiMutationVariables> mutation={AbortRdiDocument} {...props} />
-    );
-    
-export type AbortRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<AbortRdiMutation, AbortRdiMutationVariables> & TChildProps;
-export function withAbortRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  AbortRdiMutation,
-  AbortRdiMutationVariables,
-  AbortRdiProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, AbortRdiMutation, AbortRdiMutationVariables, AbortRdiProps<TChildProps>>(AbortRdiDocument, {
-      alias: 'abortRdi',
-      ...operationOptions
-    });
-};
-
-/**
- * __useAbortRdiMutation__
- *
- * To run a mutation, you first call `useAbortRdiMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useAbortRdiMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [abortRdiMutation, { data, loading, error }] = useAbortRdiMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useAbortRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AbortRdiMutation, AbortRdiMutationVariables>) {
-        return ApolloReactHooks.useMutation<AbortRdiMutation, AbortRdiMutationVariables>(AbortRdiDocument, baseOptions);
-      }
-export type AbortRdiMutationHookResult = ReturnType<typeof useAbortRdiMutation>;
-export type AbortRdiMutationResult = ApolloReactCommon.MutationResult<AbortRdiMutation>;
-export type AbortRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<AbortRdiMutation, AbortRdiMutationVariables>;
 export const CreateRegistrationKoboImportDocument = gql`
     mutation CreateRegistrationKoboImport($registrationDataImportData: RegistrationKoboImportMutationInput!) {
   registrationKoboImport(registrationDataImportData: $registrationDataImportData) {
@@ -15438,6 +15387,59 @@ export function useCreateRegistrationXlsxImportMutation(baseOptions?: ApolloReac
 export type CreateRegistrationXlsxImportMutationHookResult = ReturnType<typeof useCreateRegistrationXlsxImportMutation>;
 export type CreateRegistrationXlsxImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationXlsxImportMutation>;
 export type CreateRegistrationXlsxImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
+export const EraseRdiDocument = gql`
+    mutation eraseRDI($id: ID!) {
+  eraseRegistrationDataImport(id: $id) {
+    registrationDataImport {
+      id
+      status
+      erased
+    }
+  }
+}
+    `;
+export type EraseRdiMutationFn = ApolloReactCommon.MutationFunction<EraseRdiMutation, EraseRdiMutationVariables>;
+export type EraseRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EraseRdiMutation, EraseRdiMutationVariables>, 'mutation'>;
+
+    export const EraseRdiComponent = (props: EraseRdiComponentProps) => (
+      <ApolloReactComponents.Mutation<EraseRdiMutation, EraseRdiMutationVariables> mutation={EraseRdiDocument} {...props} />
+    );
+    
+export type EraseRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EraseRdiMutation, EraseRdiMutationVariables> & TChildProps;
+export function withEraseRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  EraseRdiMutation,
+  EraseRdiMutationVariables,
+  EraseRdiProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, EraseRdiMutation, EraseRdiMutationVariables, EraseRdiProps<TChildProps>>(EraseRdiDocument, {
+      alias: 'eraseRdi',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useEraseRdiMutation__
+ *
+ * To run a mutation, you first call `useEraseRdiMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEraseRdiMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [eraseRdiMutation, { data, loading, error }] = useEraseRdiMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useEraseRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EraseRdiMutation, EraseRdiMutationVariables>) {
+        return ApolloReactHooks.useMutation<EraseRdiMutation, EraseRdiMutationVariables>(EraseRdiDocument, baseOptions);
+      }
+export type EraseRdiMutationHookResult = ReturnType<typeof useEraseRdiMutation>;
+export type EraseRdiMutationResult = ApolloReactCommon.MutationResult<EraseRdiMutation>;
+export type EraseRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<EraseRdiMutation, EraseRdiMutationVariables>;
 export const MergeRdiDocument = gql`
     mutation MergeRDI($id: ID!) {
   mergeRegistrationDataImport(id: $id) {
@@ -23952,7 +23954,7 @@ export type ResolversTypes = {
   MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
   RefuseRegistrationDataImportMutation: ResolverTypeWrapper<RefuseRegistrationDataImportMutation>,
   RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
-  AbortRegistrationDataImportMutation: ResolverTypeWrapper<AbortRegistrationDataImportMutation>,
+  EraseRegistrationDataImportMutation: ResolverTypeWrapper<EraseRegistrationDataImportMutation>,
   CheckAgainstSanctionListMutation: ResolverTypeWrapper<CheckAgainstSanctionListMutation>,
 };
 
@@ -24399,7 +24401,7 @@ export type ResolversParentTypes = {
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
   RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation,
   RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
-  AbortRegistrationDataImportMutation: AbortRegistrationDataImportMutation,
+  EraseRegistrationDataImportMutation: EraseRegistrationDataImportMutation,
   CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
 };
 
@@ -24417,10 +24419,6 @@ export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, Paren
   admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type AbortRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['AbortRegistrationDataImportMutation'] = ResolversParentTypes['AbortRegistrationDataImportMutation']> = {
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
 export type ActionPaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionPaymentPlanMutation'] = ResolversParentTypes['ActionPaymentPlanMutation']> = {
@@ -24970,6 +24968,10 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['GenericPaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type EraseRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EraseRegistrationDataImportMutation'] = ResolversParentTypes['EraseRegistrationDataImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
 export type ExcludeHouseholdsMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExcludeHouseholdsMutation'] = ResolversParentTypes['ExcludeHouseholdsMutation']> = {
@@ -25908,7 +25910,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>,
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
-  abortRegistrationDataImport?: Resolver<Maybe<ResolversTypes['AbortRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsAbortRegistrationDataImportArgs, 'id'>>,
+  eraseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['EraseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsEraseRegistrationDataImportArgs, 'id'>>,
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
 };
 
@@ -26575,6 +26577,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
@@ -27519,7 +27522,6 @@ export type Resolvers<ContextType = any> = {
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
-  AbortRegistrationDataImportMutation?: AbortRegistrationDataImportMutationResolvers<ContextType>,
   ActionPaymentPlanMutation?: ActionPaymentPlanMutationResolvers<ContextType>,
   ActivatePaymentVerificationPlan?: ActivatePaymentVerificationPlanResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
@@ -27587,6 +27589,7 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
+  EraseRegistrationDataImportMutation?: EraseRegistrationDataImportMutationResolvers<ContextType>,
   ExcludeHouseholdsMutation?: ExcludeHouseholdsMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,

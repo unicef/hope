@@ -84,7 +84,59 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     stopPolling();
   }
 
-  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status
+  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+
+  const RegistrationContainer = ({ isErased }) => {
+    return (
+      <Container>
+        <RegistrationDetails registration={data.registrationDataImport} />
+        { isErased ? null : (
+            <TableWrapper>
+              <ContainerColumnWithBorder>
+                <Title>
+                  <Typography variant='h6'>
+                    {isMerged ? t('Population Preview') : t('Import Preview')}
+                  </Typography>
+                </Title>
+                <TabsContainer>
+                  <StyledTabs
+                    value={selectedTab}
+                    onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
+                      setSelectedTab(newValue)
+                    }
+                    indicatorColor='primary'
+                    textColor='primary'
+                    variant='fullWidth'
+                    aria-label='full width tabs example'
+                  >
+                    <Tab label={t('Households')} />
+                    <Tab label={t('Individuals')} />
+                  </StyledTabs>
+                </TabsContainer>
+                <TabPanel value={selectedTab} index={0}>
+                  <ImportedHouseholdTable
+                    key={`${data.registrationDataImport.status}-household`}
+                    isMerged={isMerged}
+                    rdiId={id}
+                    businessArea={businessArea}
+                  />
+                </TabPanel>
+                <TabPanel value={selectedTab} index={1}>
+                  <ImportedIndividualsTable
+                    showCheckbox
+                    rdiId={id}
+                    isMerged={isMerged}
+                    businessArea={businessArea}
+                    key={`${data.registrationDataImport.status}-individual`}
+                    choicesData={choicesData}
+                  />
+                </TabPanel>
+              </ContainerColumnWithBorder>
+            </TableWrapper>
+        )}
+      </Container>
+    )
+  }
 
   return (
     <div>
@@ -98,49 +150,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
         canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
-      <Container>
-        <RegistrationDetails registration={data.registrationDataImport} />
-        <TableWrapper>
-          <ContainerColumnWithBorder>
-            <Title>
-              <Typography variant='h6'>{isMerged ? t('Population Preview') : t('Import Preview')}</Typography>
-            </Title>
-            <TabsContainer>
-              <StyledTabs
-                value={selectedTab}
-                onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                  setSelectedTab(newValue)
-                }
-                indicatorColor='primary'
-                textColor='primary'
-                variant='fullWidth'
-                aria-label='full width tabs example'
-              >
-                <Tab label={t('Households')} />
-                <Tab label={t('Individuals')} />
-              </StyledTabs>
-            </TabsContainer>
-            <TabPanel value={selectedTab} index={0}>
-              <ImportedHouseholdTable
-                key={`${data.registrationDataImport.status}-household`}
-                isMerged={isMerged}
-                rdiId={id}
-                businessArea={businessArea}
-              />
-            </TabPanel>
-            <TabPanel value={selectedTab} index={1}>
-              <ImportedIndividualsTable
-                showCheckbox
-                rdiId={id}
-                isMerged={isMerged}
-                businessArea={businessArea}
-                key={`${data.registrationDataImport.status}-individual`}
-                choicesData={choicesData}
-              />
-            </TabPanel>
-          </ContainerColumnWithBorder>
-        </TableWrapper>
-      </Container>
+      <RegistrationContainer isErased={data.registrationDataImport.erased} />
     </div>
   );
 }
