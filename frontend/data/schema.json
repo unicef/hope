@@ -46147,6 +46147,18 @@
             "deprecationReason": null
           },
           {
+            "name": "program",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProgramNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "countryIso3",
             "description": null,
             "args": [],

@@ -64,8 +64,6 @@ def unmark_sent_tp(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('targeting', '0007_migration_squashed_0028_migration'),
-        ('program', '0002_migration_squashed_0020_migration'),
     ]
 
     operations = [

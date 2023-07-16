@@ -299,7 +299,7 @@ describe("Grievance", () => {
         grievancePage.chooseTicketListRow(0, testData[3])
       });
     });
-      it.only("Grievance Active Tickets filter", () => {
+      it("Grievance Active Tickets filter", () => {
       });
     });
     context("Create New Ticket", () => {

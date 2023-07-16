@@ -46,8 +46,7 @@ export default class PaymentVerification extends BaseComponent {
   getVerificationStatus = () => cy.get(this.tableColumn).eq(1);
   getCashAmount = () => cy.get(this.tableColumn).eq(2);
   getTimeFrame = () => cy.get(this.tableColumn).eq(3);
-  getColumnProgramme = () => cy.get(this.tableColumn).eq(4);
-  getLastModifiedDate = () => cy.get(this.tableColumn).eq(5);
+  getLastModifiedDate = () => cy.get(this.tableColumn).eq(4);
   getPaymentPlanRows = () => cy.get(this.rows);
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);

@@ -37,6 +37,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -76,7 +77,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:
     return code
 
 
-class HouseholdFilter(FilterSet):
+class HouseholdFilter(GlobalProgramFilter, FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -190,7 +191,7 @@ class HouseholdFilter(FilterSet):
         return qs.filter(q_obj).distinct()
 
 
-class IndividualFilter(FilterSet):
+class IndividualFilter(GlobalProgramFilter, FilterSet):
     business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
