@@ -6,6 +6,7 @@ export const registrationMinimal = gql`
     createdAt
     name
     status
+    erased
     importDate
     importedBy {
       id
