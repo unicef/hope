@@ -529,6 +529,7 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
     """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
 
     from datetime import timedelta
+
     from constance import config
 
     days = config.REMOVE_RDI_LINKS_TIMEDELTA or 14
