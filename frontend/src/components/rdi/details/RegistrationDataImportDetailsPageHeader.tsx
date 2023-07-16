@@ -8,7 +8,7 @@ import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useRefuseRdiMutation,
-  useAbortRdiMutation
+  useEraseRdiMutation
 } from '../../../__generated__/graphql';
 import {BreadCrumbsItem} from '../../core/BreadCrumbs';
 import {LoadingButton} from '../../core/LoadingButton';
@@ -40,19 +40,19 @@ export function RegistrationDataImportDetailsPageHeader({
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
   const [mutate, { loading }] = useRefuseRdiMutation();
-  const [abortRdiMutate, { loading: abortLoading }] = useAbortRdiMutation();
+  const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
 
   let buttons = null;
 
-  const abortButton = (
+  const eraseButton = (
       <LoadingButton
-        loading={abortLoading}
+        loading={eraseLoading}
         onClick={() =>
          confirm({
             title: t('Warning'),
-            content: t('Are you sure you want to abort RDI? Aborting RDI causes deletion of all related datahub RDI data'),
+            content: t('Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data'),
           }).then(async () => {
-            await abortRdiMutate({
+            await eraseRdiMutate({
               variables: { id: registration.id },
             })
           })
@@ -60,7 +60,7 @@ export function RegistrationDataImportDetailsPageHeader({
         variant='contained'
         color='primary'
       >
-        {t('Abort import')}
+        {t('Erase import')}
       </LoadingButton>
   )
   // eslint-disable-next-line default-case
@@ -69,7 +69,7 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.MergeError:
       buttons = (
         <div>
-          {canRefuse && abortButton}
+          {canRefuse && eraseButton}
         </div>
       );
       break;
@@ -101,7 +101,7 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.DeduplicationFailed:
       buttons = (
         <div>
-          {canRefuse && abortButton}
+          {canRefuse && eraseButton}
           {canRerunDedupe && (
             <MergeButtonContainer>
               <RerunDedupe registration={registration} />
@@ -132,12 +132,14 @@ export function RegistrationDataImportDetailsPageHeader({
       to: `/${businessArea}/registration-data-import/`,
     },
   ];
+
   return (
     <PageHeader
       title={registration.name}
       breadCrumbs={canViewList ? breadCrumbsItems : null}
+      isErased={registration.erased}
     >
-      {buttons}
+      {registration.erased ? null : buttons}
     </PageHeader>
   );
 }

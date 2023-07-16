@@ -3,10 +3,6 @@ schema {
   mutation: Mutations
 }
 
-type AbortRegistrationDataImportMutation {
-  registrationDataImport: RegistrationDataImportNode
-}
-
 enum Action {
   LOCK
   LOCK_FSP
@@ -801,6 +797,10 @@ input EditPaymentVerificationInput {
 
 type EditPaymentVerificationMutation {
   paymentPlan: GenericPaymentPlanNode
+}
+
+type EraseRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
 }
 
 type ExcludeHouseholdsMutation {
@@ -2241,7 +2241,7 @@ type Mutations {
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
-  abortRegistrationDataImport(id: ID!, version: BigInt): AbortRegistrationDataImportMutation
+  eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
@@ -3261,6 +3261,7 @@ type RegistrationDataImportNode implements Node {
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
   excluded: Boolean!
+  erased: Boolean!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3297,7 +3298,6 @@ enum RegistrationDataImportStatus {
   MERGING
   MERGE_ERROR
   REFUSED
-  ABORTED
 }
 
 type RegistrationDeduplicationMutation {

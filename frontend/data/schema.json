@@ -14180,6 +14180,22 @@
             "deprecationReason": null
           },
           {
+            "name": "erased",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -14540,12 +14556,6 @@
           },
           {
             "name": "REFUSED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "ABORTED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -53433,7 +53443,7 @@
             "deprecationReason": null
           },
           {
-            "name": "abortRegistrationDataImport",
+            "name": "eraseRegistrationDataImport",
             "description": null,
             "args": [
               {
@@ -53463,7 +53473,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "AbortRegistrationDataImportMutation",
+              "name": "EraseRegistrationDataImportMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -59892,7 +59902,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AbortRegistrationDataImportMutation",
+        "name": "EraseRegistrationDataImportMutation",
         "description": null,
         "fields": [
           {
