@@ -11,7 +11,6 @@ import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-import {AdminAreaAutocomplete} from "../population/AdminAreaAutocomplete";
 
 const Container = styled(Paper)`
   display: flex;

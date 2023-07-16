@@ -326,7 +326,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "AbortRegistrationDataImportMutation":
+    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
         obj_hct = RegistrationDataImport.objects.get(id=decode_id)
