@@ -746,7 +746,7 @@ Clear Cache,clear-cache/
         bool,
     ),
     "REMOVE_RDI_LINKS_TIMEDELTA": (
-        14,
+        90,
         "The schedule (in days) which is applied to task remove_old_rdi_links_task",
         "positive_integers",
     ),
