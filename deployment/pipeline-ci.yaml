@@ -6,6 +6,7 @@ trigger:
     - staging
     - master
     - global-program-filter
+    - testing-ephemeral
     - ops/*
   paths:
     exclude:
