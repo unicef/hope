@@ -532,9 +532,9 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
 
     from constance import config
 
-    days = config.REMOVE_RDI_LINKS_TIMEDELTA or 14
+    days = config.REMOVE_RDI_LINKS_TIMEDELTA
     try:
-        # Get datahub_ids older than 2 weeks which have status other than MERGED
+        # Get datahub_ids older than 3 months which have status other than MERGED
         unmerged_rdi_datahub_ids = list(
             RegistrationDataImport.objects.filter(
                 created_at__lte=timezone.now() - timedelta(days=days),
