@@ -1,19 +1,25 @@
 import * as React from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@material-ui/core';
 import { Formik, Form, Field } from 'formik';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import {useTranslation} from "react-i18next";
+import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import {useSnackbar} from "../../../hooks/useSnackBar";
-
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }) => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id, name } = registration;
   const initialValues = {
-    refuseReason: ""
-  }
+    refuseReason: '',
+  };
 
   const validationSchema = Yup.object().shape({
     refuseReason: Yup.string()
@@ -24,15 +30,16 @@ const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }) => {
 
   return (
     <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={async (values) => {
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={async (values) => {
         try {
           await refuseMutate({
             variables: {
               id,
-              refuseReason: values.refuseReason
-          }})
+              refuseReason: values.refuseReason,
+            },
+          });
           onClose();
           showMessage('RDI refused');
         } catch (e) {
@@ -42,11 +49,7 @@ const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }) => {
     >
       {({ submitForm, values, setFieldValue }) => (
         <Form>
-          <Dialog
-              open={open}
-              onClose={onClose}
-              style={{ minWidth: "750px" }}
-          >
+          <Dialog open={open} onClose={onClose} style={{ minWidth: '750px' }}>
             <DialogTitle>Refuse RDI</DialogTitle>
             <DialogContent>
               <DialogContentText>
@@ -63,13 +66,15 @@ const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }) => {
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
-              <Button onClick={submitForm} color="primary" variant="contained">Save</Button>
+              <Button onClick={submitForm} color='primary' variant='contained'>
+                Save
+              </Button>
             </DialogActions>
           </Dialog>
         </Form>
       )}
     </Formik>
   );
-}
+};
 
 export { RefuseRdiForm };

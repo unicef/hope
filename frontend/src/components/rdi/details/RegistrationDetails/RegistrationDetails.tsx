@@ -9,10 +9,12 @@ import { StatusBox } from '../../../core/StatusBox';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
-import { RegistrationDetailedFragment, RegistrationDataImportStatus } from '../../../../__generated__/graphql';
+import {
+  RegistrationDetailedFragment,
+  RegistrationDataImportStatus,
+} from '../../../../__generated__/graphql';
 import { DedupeBox } from '../DedupeBox';
 import { Title } from '../../../core/Title';
-
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)}px;
@@ -124,13 +126,14 @@ export function RegistrationDetails({
                   value={renderImportedBy()}
                 />
               </Grid>
-              { registration.status ===  RegistrationDataImportStatus.Refused && registration.refuseReason ? (
-                  <Grid item xs={6}>
-                    <LabelizedField
-                      label={t('Refuse Reason')}
-                      value={registration?.refuseReason}
-                    />
-                  </Grid>
+              {registration.status === RegistrationDataImportStatus.Refused &&
+              registration.refuseReason ? (
+                <Grid item xs={6}>
+                  <LabelizedField
+                    label={t('Refuse Reason')}
+                    value={registration?.refuseReason}
+                  />
+                </Grid>
               ) : null}
             </Grid>
           </Grid>
