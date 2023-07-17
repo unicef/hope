@@ -495,8 +495,8 @@ class Household(
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="""If this household was copied from another household,
-        this field will contain the household it was copied from.""",
+        help_text="If this household was copied from another household, "
+        "this field will contain the household it was copied from.",
     )
 
     class Meta:
@@ -916,8 +916,8 @@ class Individual(
         db_index=True,
         related_name="copied_to",
         on_delete=models.SET_NULL,
-        help_text="""If this individual was copied from another individual,
-        this field will contain the individual it was copied from.""",
+        help_text="If this individual was copied from another individual, "
+        "this field will contain the individual it was copied from.",
     )
 
     vector_column = SearchVectorField(null=True)
