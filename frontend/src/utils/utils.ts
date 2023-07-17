@@ -195,6 +195,8 @@ export function registrationDataImportStatusToColor(
   }
 }
 
+export const registrationDataImportErasedColor = () => themeObj.palette.error.main;
+
 export function targetPopulationStatusToColor(
   theme: typeof themeObj,
   status: string,
