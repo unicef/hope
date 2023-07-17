@@ -626,8 +626,8 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         self.rdi_2.datahub_id = rdi_hub_2.id
         self.rdi_3.datahub_id = rdi_hub_3.id
 
-        self.rdi_1.created_at = "2023-04-20 00:08:07.127325+00:00"  # older than 2 weeks
-        self.rdi_2.created_at = "2023-03-10 20:07:07.127325+00:00"  # older than 2 weeks
+        self.rdi_1.created_at = "2022-04-20 00:08:07.127325+00:00"  # older than 3 months
+        self.rdi_2.created_at = "2023-01-10 20:07:07.127325+00:00"  # older than 3 months
         self.rdi_3.created_at = timezone.now()
 
         self.rdi_1.save()
