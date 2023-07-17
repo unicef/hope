@@ -3,13 +3,18 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
+  DialogTitle, TextField,
   Typography,
 } from '@material-ui/core';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+
+export interface TextAreaOptions {
+  title: string,
+  maxLength: number
+}
 
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
@@ -19,6 +24,7 @@ export interface ConfirmationDialogOptions {
   extraContent?: string;
   warningContent?: string | null;
   disabled?: boolean;
+  textArea?: TextAreaOptions
 }
 
 export interface ConfirmationDialogProps extends ConfirmationDialogOptions {
@@ -37,6 +43,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   onSubmit,
   onClose,
   disabled = false,
+  textArea
 }) => {
   const { t } = useTranslation();
 
@@ -65,6 +72,19 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
           >
             {warningContent}
           </Typography>
+        ) : null}
+        {textArea ? (
+            <TextField
+              multiline
+              fullWidth
+              required
+              id="outlined-multiline-static"
+              label={textArea.title}
+              rows={3}
+              variant="filled"
+              style={{ marginTop: "10px", marginBottom: "10px" }}
+              inputProps={{ maxLength: textArea.maxLength }}
+            />
         ) : null}
       </DialogContent>
       <DialogFooter>
