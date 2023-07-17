@@ -1,5 +1,5 @@
 import {Button} from '@material-ui/core';
-import React from 'react';
+import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
 import styled from 'styled-components';
@@ -16,6 +16,7 @@ import {PageHeader} from '../../core/PageHeader';
 import {MergeRegistrationDataImportDialog} from './MergeRegistrationDataImportDialog';
 import {RerunDedupe} from './RerunDedupe';
 import {useConfirmation} from "../../core/ConfirmationDialog";
+import {RefuseRdiForm} from "./refuseRdiForm";
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -39,8 +40,9 @@ export function RegistrationDataImportDetailsPageHeader({
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
-  const [mutate, { loading }] = useRefuseRdiMutation();
+  const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
+  const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 
   let buttons = null;
 
@@ -58,7 +60,7 @@ export function RegistrationDataImportDetailsPageHeader({
           })
         }
         variant='contained'
-        color='primary'
+        color='error'
       >
         {t('Erase import')}
       </LoadingButton>
@@ -78,12 +80,8 @@ export function RegistrationDataImportDetailsPageHeader({
         <div>
           {canMerge && canRefuse && (
             <LoadingButton
-              loading={loading}
-              onClick={() =>
-                mutate({
-                  variables: { id: registration.id },
-                })
-              }
+              loading={refuseLoading}
+              onClick={() => setShowRefuseRdiForm(true)}
               variant='contained'
               color='primary'
             >
@@ -134,12 +132,20 @@ export function RegistrationDataImportDetailsPageHeader({
   ];
 
   return (
-    <PageHeader
-      title={registration.name}
-      breadCrumbs={canViewList ? breadCrumbsItems : null}
-      isErased={registration.erased}
-    >
-      {registration.erased ? null : buttons}
-    </PageHeader>
+    <>
+      <PageHeader
+        title={registration.name}
+        breadCrumbs={canViewList ? breadCrumbsItems : null}
+        isErased={registration.erased}
+      >
+        {registration.erased ? null : buttons}
+      </PageHeader>
+      <RefuseRdiForm
+          open={showRefuseRdiForm}
+          refuseMutate={refuseMutate}
+          onClose={() => setShowRefuseRdiForm(false)}
+          registration={registration}
+      />
+    </>
   );
 }
