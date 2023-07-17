@@ -41,7 +41,17 @@ describe("Grievance", () => {
         .contains("GRV-0000003")
         .click();
       grievanceDetailsPage.checkGrievanceMenu();
+      grievanceDetailsPage.getButtonAssignToMe().should("be.visible");
       grievanceDetailsPage.checkElementsOnPage();
+      grievanceDetailsPage
+        .getCreateLinkedTicket()
+        .scrollIntoView()
+        .should("be.visible");
+      grievanceDetailsPage
+        .getMarkDuplicate()
+        .scrollIntoView()
+        .should("be.visible");
+      grievanceDetailsPage.checkElementsCells();
     });
     it("Check Grievance New Ticket page", () => {
       cy.scenario([
@@ -172,12 +182,12 @@ describe("Grievance", () => {
         ["In Progress", 1, "GRV-0000004"],
         ["On Hold", 1, "GRV-0000002"],
       ].forEach((testData) => {
-      it(`Grievance Status filter ${testData[0]}`, () => {
-        grievancePage.chooseStatusFilter(testData[0])
-        grievancePage.expectedNumberOfRows(testData[1]);
-        grievancePage.chooseTicketListRow(0, testData[2])
+        it(`Grievance Status filter ${testData[0]}`, () => {
+          grievancePage.chooseStatusFilter(testData[0]);
+          grievancePage.expectedNumberOfRows(testData[1]);
+          grievancePage.chooseTicketListRow(0, testData[2]);
+        });
       });
-    });
       it("Grievance FSP filter", () => {
         // ToDo After fix bug: 165198
       });
@@ -236,7 +246,10 @@ describe("Grievance", () => {
         grievancePage.chooseAdminFilter("Andarab");
         grievancePage.expectedNumberOfRows(0);
       });
-      [["USER-GENERATED", 2], ["SYSTEM-GENERATED", 0]].forEach((testData) => {
+      [
+        ["USER-GENERATED", 2],
+        ["SYSTEM-GENERATED", 0],
+      ].forEach((testData) => {
         it(`Grievance Assignee filter - ${testData[0]}`, () => {
           grievancePage.chooseTab(testData[0]);
           grievancePage.chooseAssigneeFilter("root@root.com");
@@ -251,7 +264,7 @@ describe("Grievance", () => {
         grievancePage.getSimilarityScoreFromFilter().clear().type(10);
         grievancePage.getButtonApply().click();
         grievancePage.expectedNumberOfRows(0);
-        grievancePage.getButtonClear().click()
+        grievancePage.getButtonClear().click();
         grievancePage.expectedNumberOfRows(1);
         grievancePage.getSimilarityScoreFromFilter().type(5);
         grievancePage.getSimilarityScoreToFilter().type(10);
@@ -262,13 +275,16 @@ describe("Grievance", () => {
         grievancePage.getButtonApply().click();
         grievancePage.expectedNumberOfRows(0);
       });
-      [["USER-GENERATED", "GRV-0000001"], ["SYSTEM-GENERATED", "GRV-0000003"]].forEach((testData) => {
-      it("Grievance Registration Date Import filter", () => {
-        grievancePage.chooseTab(testData[0]);
-        grievancePage.chooseRDIFilter("Test")
-        grievancePage.expectedNumberOfRows(1);
-        grievancePage.chooseTicketListRow(0, testData[1])
-      });
+      [
+        ["USER-GENERATED", "GRV-0000001"],
+        ["SYSTEM-GENERATED", "GRV-0000003"],
+      ].forEach((testData) => {
+        it("Grievance Registration Date Import filter", () => {
+          grievancePage.chooseTab(testData[0]);
+          grievancePage.chooseRDIFilter("Test");
+          grievancePage.expectedNumberOfRows(1);
+          grievancePage.chooseTicketListRow(0, testData[1]);
+        });
       });
       it.skip("Grievance Preferred language filter", () => {
         // ToDo: Language filter does not work.
@@ -279,40 +295,168 @@ describe("Grievance", () => {
         ["USER-GENERATED", "Medium", 2, "GRV-0000001"],
         ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
       ].forEach((testData) => {
-      it(`Grievance Priority filter - ${testData[1]}`, () => {
-        grievancePage.chooseTab(testData[0]);
-        grievancePage.choosePriorityFilter(testData[1])
-        grievancePage.expectedNumberOfRows(testData[2]);
-        grievancePage.chooseTicketListRow(0, testData[3])
+        it(`Grievance Priority filter - ${testData[1]}`, () => {
+          grievancePage.chooseTab(testData[0]);
+          grievancePage.choosePriorityFilter(testData[1]);
+          grievancePage.expectedNumberOfRows(testData[2]);
+          grievancePage.chooseTicketListRow(0, testData[3]);
+        });
       });
-    });
-    [
-    ["USER-GENERATED", "Very urgent", 1, "GRV-0000005"],
-    ["USER-GENERATED", "Urgent", 2, "GRV-0000001"],
-    ["USER-GENERATED", "Not urgent", 1, "GRV-0000002"],
-    ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
-    ].forEach((testData) => {
-      it(`Grievance Urgency filter - ${testData[1]}`, () => {
-        grievancePage.chooseTab(testData[0]);
-        grievancePage.chooseUrgencyFilter(testData[1])
-        grievancePage.expectedNumberOfRows(testData[2]);
-        grievancePage.chooseTicketListRow(0, testData[3])
+      [
+        ["USER-GENERATED", "Very urgent", 1, "GRV-0000005"],
+        ["USER-GENERATED", "Urgent", 2, "GRV-0000001"],
+        ["USER-GENERATED", "Not urgent", 1, "GRV-0000002"],
+        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+      ].forEach((testData) => {
+        it(`Grievance Urgency filter - ${testData[1]}`, () => {
+          grievancePage.chooseTab(testData[0]);
+          grievancePage.chooseUrgencyFilter(testData[1]);
+          grievancePage.expectedNumberOfRows(testData[2]);
+          grievancePage.chooseTicketListRow(0, testData[3]);
+        });
       });
-    });
-      it("Grievance Active Tickets filter", () => {
-      });
+      it("Grievance Active Tickets filter", () => {});
     });
     context("Create New Ticket", () => {
       beforeEach(() => {
-        grievancePage.getButtonNewTicket().click()
-        newTicketPage.checkElementsOnPage()
+        grievancePage.getButtonNewTicket().click();
+        newTicketPage.checkElementsOnPage();
       });
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
       // It makes sense to test all different issue types for Data Change tickets as they have different fields.
-      it("Create New Ticket - Data Change - Add Individual", () => {
-        newTicketPage.chooseCategory("Data Change")
-        newTicketPage.chooseIssueType("Add Individual")
-        newTicketPage.getButtonNext().click()
+      it.only("Create New Ticket - Data Change - Add Individual", () => {
+        newTicketPage.chooseCategory("Data Change");
+        newTicketPage.chooseIssueType("Add Individual");
+        newTicketPage.getButtonNext().click();
+        newTicketPage.getHouseholdTab().should("be.visible");
+        newTicketPage.getHouseholdTableRows(0).click();
+        newTicketPage.getButtonNext().click();
+        newTicketPage.getReceivedConsent().click();
+        newTicketPage.getButtonNext().click();
+        newTicketPage.getDescription().type("Test - Create new ticket");
+        newTicketPage.getComments().type("Added comment");
+        newTicketPage.getAdminAreaAutocomplete().click();
+        newTicketPage.getOption().contains("Burka").click();
+        newTicketPage.getInputArea().type("Afira");
+        newTicketPage.getInputLanguage().type("English");
+        newTicketPage.getSelectPriority().click();
+        newTicketPage.getOption().contains("Medium").click();
+        newTicketPage.getSelectUrgency().click();
+        newTicketPage.getOption().contains("Urgent").click();
+        newTicketPage.getLookUpButton().click();
+        cy.get('tr[role="checkbox"]').eq(0).click();
+        newTicketPage.getButtonNext().eq(1).click();
+        newTicketPage.getIndividualID().contains("-");
+        newTicketPage.getHouseholdID().contains("HH-20-0000.0001");
+        newTicketPage.getIssueTypeLabel().contains("Add Individual");
+        newTicketPage.getCategory().contains("Data Change");
+        newTicketPage.getWhoAnswersPhone().type("Test Person");
+        newTicketPage.getWhoAnswersAltPhone().type("Test Alt Person");
+        newTicketPage.getRole().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(2)
+          .contains("Primary collector")
+          .click();
+        newTicketPage.getRelationship().click();
+        newTicketPage.getOptionUndefined().eq(5).contains("Free union").click();
+        newTicketPage.getPhoneNo().type("+93666777888");
+        newTicketPage.getMiddleName().type("Bibi");
+        newTicketPage.getMaritalStatus().click();
+        newTicketPage.getOptionUndefined().eq(0).contains("Divorced").click();
+        newTicketPage.getPregnant().click();
+        newTicketPage.getOptionZero().contains("Yes").click();
+        newTicketPage.getDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(1)
+          .contains("not disabled")
+          .click();
+        // ToDo: Uncomment after resolve bug: XXX
+        // newTicketPage.getEmail().type("abdul.bibi.gul@al.al");
+        newTicketPage.getPhysicalDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(1)
+          .contains("Cannot do at all")
+          .click();
+        newTicketPage.getsSeeingDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(3)
+          .contains("Some difficulty")
+          .click();
+        newTicketPage.getMemoryDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(0)
+          .contains("A lot of difficulty")
+          .click();
+        newTicketPage.getTearingDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(3)
+          .contains("Some difficulty")
+          .click();
+        newTicketPage.getCommsDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .eq(3)
+          .contains("Some difficulty")
+          .click();
+        newTicketPage.getGivenName().type("Abdul");
+        newTicketPage.getGender().click();
+        newTicketPage.getOptionUndefined().contains("Female").click();
+        newTicketPage.getFullName().type("Abdul Bibi Gul");
+        newTicketPage.getFamilyName().type("Test Family Name");
+        newTicketPage.getEstimatedBirthDate().click();
+        newTicketPage.getOptionOne().contains("No").click();
+        newTicketPage.getWorkStatus().click();
+        newTicketPage.getOptionUndefined().contains("Not provided").click();
+        newTicketPage.getObservedDisability().click();
+        newTicketPage.getOptionUndefined().eq(0).click();
+        newTicketPage.getOptionUndefined().eq(1).click();
+        newTicketPage.getOptionUndefined().eq(2).click().type("{esc}");
+        newTicketPage.getSelfcareDisability().click();
+        newTicketPage
+          .getOptionUndefined()
+          .contains("A lot of difficulty")
+          .click();
+        newTicketPage.getBirthDate().type("1990.03.10");
+        newTicketPage.getPhoneNoAlternative().type("No");
+        newTicketPage.getButtonNext().contains("Save").click();
+        grievanceDetailsPage.checkElementsOnPage(
+          grievanceDetailsPage.textStatusAssigned,
+          grievanceDetailsPage.textPriorityMedium,
+          grievanceDetailsPage.textUrgencyUrgent,
+          grievanceDetailsPage.textNotAssigment,
+          "Data Change"
+        );
+        grievanceDetailsPage.getLabelGENDER();
+        grievanceDetailsPage.getLabelRole();
+        grievanceDetailsPage.getLabelPhoneNo();
+        grievanceDetailsPage.getLabelPregnant();
+        grievanceDetailsPage.getLabelFullName();
+        grievanceDetailsPage.getLabelBirthDate();
+        grievanceDetailsPage.getLabelDisability();
+        grievanceDetailsPage.getLabelGivenName();
+        grievanceDetailsPage.getLabelFamilyName();
+        grievanceDetailsPage.getLabelMiddleName();
+        grievanceDetailsPage.getLabelWorkStatus();
+        grievanceDetailsPage.getLabelRelationship();
+        grievanceDetailsPage.getLabelMaritalStatus();
+        grievanceDetailsPage.getLabelCommsDisability();
+        // Todo: Fix after resolve bug: XXX - MEMORY DISABILITY
+        // grievanceDetailsPage.getLabelMEMORYDISABILITY();
+        grievanceDetailsPage.getLabelSeeingDisability();
+        grievanceDetailsPage.getLabelWhoAnswersPhone();
+        grievanceDetailsPage.getLabelHearingDisability();
+        grievanceDetailsPage.getLabelObservedDisability();
+        grievanceDetailsPage.getLabelPhysicalDisability();
+        grievanceDetailsPage.getLabelSelfcareDisability();
+        grievanceDetailsPage.getLabelEstimatedBirthDate();
+        grievanceDetailsPage.getLabelPhoneNoAlternative();
+        grievanceDetailsPage.getLabelWhoAnswersAltPhone();
       });
       it.skip("Create New Ticket - Data Change - Household Data Update", () => {});
       it.skip("Create New Ticket - Data Change - Individual Data Update", () => {});
