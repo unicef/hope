@@ -23,6 +23,12 @@ stages:
         displayName: "[KOBO] Deployment"
         steps:
           - checkout: hct-mis-helm
+          - task: Bash@3
+            displayName: "List files in hct-mis-helm/pkg"
+            inputs:
+              targetType: "inline"
+              script: |
+                ls -la hct-mis-helm/pkg
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
