@@ -8,7 +8,7 @@ const Link = styled.a`
   color: #000;
   font-size: 14px;
   line-height: 19px;
-  max-width: 200px;
+  max-width: ${(props) => (props.fullWidth ? '100%' : '200px')}
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -19,13 +19,15 @@ export const ContentLink = ({
   href,
   children,
   download = false,
+  fullWidth = false,
 }: {
   href: string;
   children: string;
   download?: boolean;
+  fullWidth?: boolean;
 }): React.ReactElement => {
   return (
-    <Link download={download} href={href}>
+    <Link download={download} href={href} fullWidth={fullWidth}>
       {children}
     </Link>
   );
