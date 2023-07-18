@@ -452,7 +452,12 @@ def decode_and_get_object(encoded_id: Optional[str], model: Type, required: bool
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
-        decoded_id = decode_id_string(encoded_id)
+        if isinstance(encoded_id, int):
+            decoded_id = encoded_id
+        elif isinstance(encoded_id, str) and encoded_id.isnumeric():
+            decoded_id = int(encoded_id)
+        else:
+            decoded_id = decode_id_string(encoded_id)
         return get_object_or_404(model, id=decoded_id)
 
     return None
