@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
-const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }) => {
+const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id, name } = registration;
