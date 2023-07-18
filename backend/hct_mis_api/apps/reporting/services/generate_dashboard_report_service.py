@@ -967,17 +967,16 @@ class GenerateDashboardReportService:
             "report_type": self._report_types_to_joined_str(),
             "created_at": self._format_date(self.report.created_at),
             "report_url": f"{protocol}://{Site.objects.first()}{path}",
+            "title": "Report",
         }
         text_body = render_to_string("dashboard_report.txt", context=context)
         html_body = render_to_string("dashboard_report.html", context=context)
-        msg = EmailMultiAlternatives(
-            subject="HOPE report generated",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[self.report.created_by.email],
-            body=text_body,
+        subject = "HOPE report generated"
+
+        # TODO: will rewrite .email_user()
+        self.report.created_by.email_user(
+            subject, text_body, settings.EMAIL_HOST_USER, html_message=html_body
         )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
 
     @staticmethod
     def _adjust_column_width_from_col(ws: "Worksheet", min_col: int, max_col: int, min_row: int) -> None:
