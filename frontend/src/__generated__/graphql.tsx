@@ -1410,6 +1410,11 @@ export type ExcludeHouseholdsMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
+export type ExportPdfPaymentPlanSummaryMutation = {
+   __typename?: 'ExportPDFPaymentPlanSummaryMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
 export type ExportSurveySampleMutationMutation = {
    __typename?: 'ExportSurveySampleMutationMutation',
   survey?: Maybe<SurveyNode>,
@@ -3512,6 +3517,7 @@ export type Mutations = {
   importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   excludeHouseholds?: Maybe<ExcludeHouseholdsMutation>,
+  exportPdfPaymentPlanSummary?: Maybe<ExportPdfPaymentPlanSummaryMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -3854,6 +3860,11 @@ export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
 export type MutationsExcludeHouseholdsArgs = {
   excludedHouseholdsIds: Array<Maybe<Scalars['String']>>,
   exclusionReason?: Maybe<Scalars['String']>,
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type MutationsExportPdfPaymentPlanSummaryArgs = {
   paymentPlanId: Scalars['ID']
 };
 
@@ -9331,6 +9342,22 @@ export type ExcludeHouseholdsPpMutation = (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
       )>>> }
+    )> }
+  )> }
+);
+
+export type ExportPdfPpSummaryMutationVariables = {
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type ExportPdfPpSummaryMutation = (
+  { __typename?: 'Mutations' }
+  & { exportPdfPaymentPlanSummary: Maybe<(
+    { __typename?: 'ExportPDFPaymentPlanSummaryMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
     )> }
   )> }
 );
@@ -16001,6 +16028,57 @@ export function useExcludeHouseholdsPpMutation(baseOptions?: ApolloReactHooks.Mu
 export type ExcludeHouseholdsPpMutationHookResult = ReturnType<typeof useExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationResult = ApolloReactCommon.MutationResult<ExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationOptions = ApolloReactCommon.BaseMutationOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
+export const ExportPdfPpSummaryDocument = gql`
+    mutation exportPdfPPSummary($paymentPlanId: ID!) {
+  exportPdfPaymentPlanSummary(paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type ExportPdfPpSummaryMutationFn = ApolloReactCommon.MutationFunction<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
+export type ExportPdfPpSummaryComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>, 'mutation'>;
+
+    export const ExportPdfPpSummaryComponent = (props: ExportPdfPpSummaryComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> mutation={ExportPdfPpSummaryDocument} {...props} />
+    );
+    
+export type ExportPdfPpSummaryProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> & TChildProps;
+export function withExportPdfPpSummary<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportPdfPpSummaryMutation,
+  ExportPdfPpSummaryMutationVariables,
+  ExportPdfPpSummaryProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables, ExportPdfPpSummaryProps<TChildProps>>(ExportPdfPpSummaryDocument, {
+      alias: 'exportPdfPpSummary',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportPdfPpSummaryMutation__
+ *
+ * To run a mutation, you first call `useExportPdfPpSummaryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportPdfPpSummaryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportPdfPpSummaryMutation, { data, loading, error }] = useExportPdfPpSummaryMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useExportPdfPpSummaryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>(ExportPdfPpSummaryDocument, baseOptions);
+      }
+export type ExportPdfPpSummaryMutationHookResult = ReturnType<typeof useExportPdfPpSummaryMutation>;
+export type ExportPdfPpSummaryMutationResult = ApolloReactCommon.MutationResult<ExportPdfPpSummaryMutation>;
+export type ExportPdfPpSummaryMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
 export const ExportXlsxPpListDocument = gql`
     mutation ExportXlsxPPList($paymentPlanId: ID!) {
   exportXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId) {
@@ -27348,6 +27426,7 @@ export type ResolversTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   ExcludeHouseholdsMutation: ResolverTypeWrapper<ExcludeHouseholdsMutation>,
+  ExportPDFPaymentPlanSummaryMutation: ResolverTypeWrapper<ExportPdfPaymentPlanSummaryMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -27845,6 +27924,7 @@ export type ResolversParentTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ImportXlsxPaymentPlanPaymentListPerFspMutation,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation,
   ExcludeHouseholdsMutation: ExcludeHouseholdsMutation,
+  ExportPDFPaymentPlanSummaryMutation: ExportPdfPaymentPlanSummaryMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -28537,6 +28617,10 @@ export type EraseRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type ExcludeHouseholdsMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExcludeHouseholdsMutation'] = ResolversParentTypes['ExcludeHouseholdsMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type ExportPdfPaymentPlanSummaryMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportPDFPaymentPlanSummaryMutation'] = ResolversParentTypes['ExportPDFPaymentPlanSummaryMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
@@ -29558,6 +29642,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>,
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
   excludeHouseholds?: Resolver<Maybe<ResolversTypes['ExcludeHouseholdsMutation']>, ParentType, ContextType, RequireFields<MutationsExcludeHouseholdsArgs, 'excludedHouseholdsIds' | 'paymentPlanId'>>,
+  exportPdfPaymentPlanSummary?: Resolver<Maybe<ResolversTypes['ExportPDFPaymentPlanSummaryMutation']>, ParentType, ContextType, RequireFields<MutationsExportPdfPaymentPlanSummaryArgs, 'paymentPlanId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -31386,6 +31471,7 @@ export type Resolvers<ContextType = any> = {
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   EraseRegistrationDataImportMutation?: EraseRegistrationDataImportMutationResolvers<ContextType>,
   ExcludeHouseholdsMutation?: ExcludeHouseholdsMutationResolvers<ContextType>,
+  ExportPDFPaymentPlanSummaryMutation?: ExportPdfPaymentPlanSummaryMutationResolvers<ContextType>,
   ExportSurveySampleMutationMutation?: ExportSurveySampleMutationMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
