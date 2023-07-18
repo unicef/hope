@@ -601,7 +601,7 @@ class GenerateDashboardReportContentHelpers:
         else:
             business_area_code_path = "business_area__code"
             instances = Program.objects.filter(cashplan__payment_items__in=valid_payment_records)
-            valid_payment_records_in_instance_filter_key = "cash_plan__program"
+            valid_payment_records_in_instance_filter_key = "parent__program"
 
         instances = (
             instances.distinct()
