@@ -2532,7 +2532,7 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
-  refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
+  refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
@@ -3598,6 +3598,7 @@ type RegistrationDataImportNode implements Node {
   screenBeneficiary: Boolean!
   excluded: Boolean!
   erased: Boolean!
+  refuseReason: String
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!

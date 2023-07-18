@@ -3970,6 +3970,7 @@ export type MutationsMergeRegistrationDataImportArgs = {
 
 export type MutationsRefuseRegistrationDataImportArgs = {
   id: Scalars['ID'],
+  refuseReason?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -6306,6 +6307,7 @@ export type RegistrationDataImportNode = Node & {
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
   erased: Scalars['Boolean'],
+  refuseReason?: Maybe<Scalars['String']>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -8592,7 +8594,7 @@ export type PaymentRecordDetailsFragment = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'refuseReason'>
   & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9896,7 +9898,8 @@ export type MergeRdiMutation = (
 );
 
 export type RefuseRdiMutationVariables = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  refuseReason?: Maybe<Scalars['String']>
 };
 
 
@@ -9906,7 +9909,7 @@ export type RefuseRdiMutation = (
     { __typename?: 'RefuseRegistrationDataImportMutation' }
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'status'>
+      & Pick<RegistrationDataImportNode, 'id' | 'status' | 'refuseReason'>
     )> }
   )> }
 );
@@ -14099,6 +14102,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   dataSource
   numberOfHouseholds
   numberOfIndividuals
+  refuseReason
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -17641,11 +17645,12 @@ export type MergeRdiMutationHookResult = ReturnType<typeof useMergeRdiMutation>;
 export type MergeRdiMutationResult = ApolloReactCommon.MutationResult<MergeRdiMutation>;
 export type MergeRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<MergeRdiMutation, MergeRdiMutationVariables>;
 export const RefuseRdiDocument = gql`
-    mutation RefuseRDI($id: ID!) {
-  refuseRegistrationDataImport(id: $id) {
+    mutation RefuseRDI($id: ID!, $refuseReason: String) {
+  refuseRegistrationDataImport(id: $id, refuseReason: $refuseReason) {
     registrationDataImport {
       id
       status
+      refuseReason
     }
   }
 }
@@ -17683,6 +17688,7 @@ export function withRefuseRdi<TProps, TChildProps = {}>(operationOptions?: Apoll
  * const [refuseRdiMutation, { data, loading, error }] = useRefuseRdiMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      refuseReason: // value for 'refuseReason'
  *   },
  * });
  */
@@ -30380,6 +30386,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
