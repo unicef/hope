@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional,
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -974,9 +973,7 @@ class GenerateDashboardReportService:
         subject = "HOPE report generated"
 
         # TODO: will rewrite .email_user()
-        self.report.created_by.email_user(
-            subject, text_body, settings.EMAIL_HOST_USER, html_message=html_body
-        )
+        self.report.created_by.email_user(subject, text_body, settings.EMAIL_HOST_USER, html_message=html_body)
 
     @staticmethod
     def _adjust_column_width_from_col(ws: "Worksheet", min_col: int, max_col: int, min_row: int) -> None:
