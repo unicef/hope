@@ -8,9 +8,9 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { Formik, Form, Field } from 'formik';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }): React.ReactElement => {
@@ -47,7 +47,7 @@ const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }): React.Rea
         }
       }}
     >
-      {({ submitForm, values, setFieldValue }) => (
+      {({ submitForm }) => (
         <Form>
           <Dialog open={open} onClose={onClose} style={{ minWidth: '750px' }}>
             <DialogTitle>Refuse RDI</DialogTitle>

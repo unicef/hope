@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
-  useEraseRdiMutation,
   useRefuseRdiMutation,
   useEraseRdiMutation,
 } from '../../../__generated__/graphql';
@@ -17,7 +16,6 @@ import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
-import { useConfirmation } from '../../core/ConfirmationDialog';
 import { RefuseRdiForm } from './refuseRdiForm';
 
 
