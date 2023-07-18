@@ -28,7 +28,7 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                ls -la hct-mis-helm/pkg
+                pwd ; ls -la . ; ls -la hct-mis-helm/ ; ls -la hct-mis-helm/pkg/
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
