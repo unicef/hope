@@ -2,8 +2,8 @@ import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { renderUserName } from '../../../../utils/utils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { renderUserName } from '../../../../utils/utils';
 import { DividerLine } from '../../../core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
@@ -33,9 +33,7 @@ export const AcceptanceProcessRow = ({
     rejectedOn,
   } = acceptanceProcess;
 
-  const {
-    approvalProcess,
-  } = paymentPlan;
+  const { approvalProcess } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
     switch (stage) {
@@ -53,9 +51,7 @@ export const AcceptanceProcessRow = ({
 
   return (
     <StyledBox m={5}>
-      <AcceptanceProcessStepper
-        acceptanceProcess={acceptanceProcess}
-      />
+      <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
       <Grid container>
         <Grid item xs={4}>
           {actions.approval.length > 0 && (
