@@ -3,7 +3,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle, TextField,
+  DialogTitle,
   Typography,
 } from '@material-ui/core';
 import React, { FC } from 'react';
