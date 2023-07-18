@@ -94,6 +94,7 @@ export const LinkedGrievancesModal = ({
       >
         <TableCell align='left'>
           <BlackLink
+            fullWidth
             to={getGrievanceDetailsPath(row.id, row.category, businessArea)}
           >
             {row.unicefId}
@@ -117,6 +118,7 @@ export const LinkedGrievancesModal = ({
       ? allGrievances.map((el) => (
           <span key={el.node.id}>
             <ContentLink
+              fullWidth
               href={getGrievanceDetailsPath(
                 el.node.id,
                 el.node.category,
