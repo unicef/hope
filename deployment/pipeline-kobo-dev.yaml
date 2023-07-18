@@ -23,12 +23,6 @@ stages:
         displayName: "[KOBO] Deployment"
         steps:
           - checkout: hct-mis-helm
-          - task: Bash@3
-            displayName: "List files in hct-mis-helm/pkg"
-            inputs:
-              targetType: "inline"
-              script: |
-                pwd ; ls -la . ; ls -la hct-mis-helm/ ; ls -la hct-mis-helm/pkg/
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -37,7 +31,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: "upgrade"
               chartType: "FilePath"
-              chartPath: 'hct-mis-helm/pkg/kobo-$(Chart.version).tgz'
+              chartPath: 'pkg/kobo-$(Chart.version).tgz'
               releaseName: "kobo"
               install: true
               waitForExecution: false
