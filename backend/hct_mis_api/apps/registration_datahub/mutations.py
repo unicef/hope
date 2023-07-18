@@ -282,6 +282,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        refuse_reason = graphene.String(required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -306,6 +307,9 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.validate(status=obj_hct.status)
 
         ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+        refuse_reason = kwargs.get("refuse_reason")
+        if refuse_reason:
+            obj_hct.refuse_reason = refuse_reason
         obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
         obj_hct.save()
 
