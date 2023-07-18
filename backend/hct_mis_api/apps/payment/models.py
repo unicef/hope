@@ -68,6 +68,7 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
+    from hct_mis_api.apps.geo.models import Area
 
 logger = logging.getLogger(__name__)
 
@@ -440,6 +441,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
     export_file_per_fsp = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    export_pdf_file_summary = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
     steficon_rule = models.ForeignKey(
@@ -934,6 +938,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_from_core_field(cls, payment: "Payment", core_field_name: str) -> Any:
+        def parse_admin_area(obj: "Area") -> str:
+            if not obj:
+                return ""
+            return f"{obj.p_code} - {obj.name}"
+
         collector = payment.collector
         household = payment.household
         core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
@@ -943,6 +952,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if attr["associated_with"] == _INDIVIDUAL:
             return nested_getattr(collector, lookup, None)
         if attr["associated_with"] == _HOUSEHOLD:
+            if core_field_name in {"admin1", "admin2", "admin3", "admin4"}:
+                admin_area = getattr(household, core_field_name)
+                return parse_admin_area(admin_area)
             return nested_getattr(household, lookup, None)
         return None
 

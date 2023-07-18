@@ -3,20 +3,23 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
+  useEraseRdiMutation,
   useRefuseRdiMutation,
   useEraseRdiMutation,
 } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
+import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { RefuseRdiForm } from './refuseRdiForm';
+
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -62,7 +65,7 @@ export function RegistrationDataImportDetailsPageHeader({
         })
       }
       variant='contained'
-      color='error'
+      color='primary'
     >
       {t('Erase import')}
     </LoadingButton>
