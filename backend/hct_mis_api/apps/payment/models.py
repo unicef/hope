@@ -765,7 +765,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def has_export_file(self) -> bool:
         """
-        for Locked plan return  export_file_entitlement file
+        for Locked plan return export_file_entitlement file
         for Accepted and Finished export_file_per_fsp file
         """
         try:
@@ -781,7 +781,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
         """
-        for Locked plan return  export_file_entitlement file link
+        for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
         """
         if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
