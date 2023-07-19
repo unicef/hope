@@ -68,6 +68,15 @@ function ObjectRepresentations({
     )}`,
     //TODO: add grievance ticket url based on category
     grievanceticket: `/${businessArea}/grievance/tickets`,
+    feedback: `/${businessArea}/grievance/feedback${btoa(
+      'FeedbackNode:' + id,
+    )}`,
+    survey: `/${businessArea}/accountability/surveys${btoa(
+      'SurveyNode:' + id,
+    )}`,
+    communication: `/${businessArea}/accountability/communication${btoa(
+      'CommunicationMessageNode:' + id,
+    )}`,
     household: `/${businessArea}/population/household/${btoa(
       'HouseholdNode:' + id,
     )}`,
