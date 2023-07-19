@@ -68,6 +68,7 @@
   "Core Fields": "Core Fields",
   "Flex Fields": "Flex Fields",
   "Add Document": "Add Document",
+  "Add documentation": "Add documentation",
   "Add Identity": "Add Identity",
   "GENDER": "GENDER",
   "You did not approve the following add individual data. Are you sure you want to continue?": "You did not approve the following add individual data. Are you sure you want to continue?",
@@ -185,7 +186,7 @@
   "TICKET ID": "TICKET ID",
   "Payment Ids": "Payment Ids",
   "ROLE": "ROLE",
-  "Individual is the HOH or the external collector for a household": "Individual is the HOH or the external collector for a household",
+  "Individual is the HOH or the collector for the household": "Individual is the HOH or the collector for the household",
   "Upon removing you will need to select new individual(s) for this role.": "Upon removing you will need to select new individual(s) for this role.",
   "Head of Household": "Head of Household",
   "Requested Data Change": "Requested Data Change",
@@ -818,5 +819,7 @@
   "Households exclusion started": "Households exclusion started",
   "Surveys List": "Surveys List",
   "Feedbacks List": "Feedbacks List",
-  "Messages List": "Messages List"
+  "Messages List": "Messages List",
+  "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
+  "PDF generated. Please check your email.": "PDF generated. Please check your email."
 }
