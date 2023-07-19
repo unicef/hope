@@ -26,7 +26,6 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -47,7 +46,6 @@ export const HouseholdTable = ({
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
-    programs: [programId],
   };
   return (
     <TableWrapper>
