@@ -71,20 +71,13 @@ ALL_HOUSEHOLD_QUERY_MAX = """
     }
     """
 ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
-    query AllHouseholds($programs:[ID]){
-      allHouseholds(programs: $programs, businessArea: "afghanistan") {
+    query AllHouseholds {
+      allHouseholds(businessArea: "afghanistan") {
         edges {
           node {
             size
             countryOrigin
             address
-            programs {
-              edges {
-                node {
-                  name
-                }
-              }
-            }
           }
         }
       }
@@ -137,9 +130,11 @@ class TestHouseholdQuery(APITestCase):
                 {"size": family_size, "address": "Lorem Ipsum", "country_origin": country_origin},
             )
             if index % 2:
-                household.programs.add(cls.program_one)
+                household.program = cls.program_one
+                household.save()
             else:
-                household.programs.add(cls.program_two)
+                household.program = cls.program_two
+                household.save()
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",
@@ -174,22 +169,12 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=query_string,
-            context={"user": self.user},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
-            ("without_permission", []),
-        ]
-    )
-    def test_household_filter_by_programme(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
-            variables={"programs": [self.id_to_base64(self.program_one.id, "ProgramNode")]},
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode")
+                }
+            },
         )
 
     @parameterized.expand(
@@ -203,6 +188,11 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode")
+                }
+            },
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )

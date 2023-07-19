@@ -97,7 +97,6 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
             "admin_area": ["exact"],
             "admin2": ["exact"],
             "target_populations": ["exact"],
-            "programs": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
         }

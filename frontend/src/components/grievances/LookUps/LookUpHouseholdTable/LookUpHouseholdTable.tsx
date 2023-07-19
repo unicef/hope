@@ -44,14 +44,12 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
-  const { programId } = useBaseUrl();
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     search: filter.search,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     familySize: JSON.stringify(filter.size),
-    programs: [programId],
   };
 
   const [selected, setSelected] = useState<string[]>(
