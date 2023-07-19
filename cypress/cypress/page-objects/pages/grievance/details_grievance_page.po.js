@@ -12,6 +12,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   ticketUrgency = 'div[data-cy="label-Urgency"]';
   ticketAssigment = 'div[data-cy="label-Assigned to"]';
   ticketCategory = 'div[data-cy="label-Category"]';
+  labelIssueType = 'div[data-cy="label-Issue Type"]';
   ticketHouseholdID = 'div[data-cy="label-Household ID"]';
   ticketIndividualID = 'div[data-cy="label-Individual ID"]';
   ticketPaymentLabel = 'div[data-cy="label-Payment ID"]';
@@ -63,6 +64,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   labelEstimatedBirthDate = 'div[data-cy="label-estimated birth date"]';
   labelPhoneNoAlternative = 'div[data-cy="label-phone no alternative"]';
   labelWhoAnswersAltPhone = 'div[data-cy="label-who answers alt phone"]';
+  labelTickets = 'div[data-cy="label-Tickets"]';
 
   // Texts
   textTitle = "Ticket ID: ";
@@ -103,6 +105,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getMarkDuplicate = () => cy.get(this.markDuplicate);
   getCellIndividualID = () => cy.get(this.cellIndividualID);
   getCellHouseholdID = () => cy.get(this.cellHouseholdID);
+  getLabelIssueType = () => cy.get(this.labelIssueType);
   getCellFullName = () => cy.get(this.cellFullName);
   getCellGender = () => cy.get(this.cellGender);
   getCellDateOfBirth = () => cy.get(this.cellDateOfBirth);
@@ -137,6 +140,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getLabelEstimatedBirthDate = () => cy.get(this.labelEstimatedBirthDate);
   getLabelPhoneNoAlternative = () => cy.get(this.labelPhoneNoAlternative);
   getLabelWhoAnswersAltPhone = () => cy.get(this.labelWhoAnswersAltPhone);
+  getLabelTickets = () => cy.get(this.labelTickets);
 
   checkElementsOnPage(
     status = this.textStatusNew,

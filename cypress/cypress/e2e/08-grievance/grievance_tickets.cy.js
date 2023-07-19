@@ -7,6 +7,9 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
 
 describe("Grievance", () => {
+  before(function () {
+    cy.fixture("grievance_new_ticket").as("newTicket");
+  });
   beforeEach(() => {
     cy.adminLogin();
     cy.navigateToHomePage();
@@ -324,139 +327,207 @@ describe("Grievance", () => {
       });
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
       // It makes sense to test all different issue types for Data Change tickets as they have different fields.
-      it.only("Create New Ticket - Data Change - Add Individual", () => {
-        newTicketPage.chooseCategory("Data Change");
-        newTicketPage.chooseIssueType("Add Individual");
-        newTicketPage.getButtonNext().click();
-        newTicketPage.getHouseholdTab().should("be.visible");
-        newTicketPage.getHouseholdTableRows(0).click();
-        newTicketPage.getButtonNext().click();
-        newTicketPage.getReceivedConsent().click();
-        newTicketPage.getButtonNext().click();
-        newTicketPage.getDescription().type("Test - Create new ticket");
-        newTicketPage.getComments().type("Added comment");
-        newTicketPage.getAdminAreaAutocomplete().click();
-        newTicketPage.getOption().contains("Burka").click();
-        newTicketPage.getInputArea().type("Afira");
-        newTicketPage.getInputLanguage().type("English");
-        newTicketPage.getSelectPriority().click();
-        newTicketPage.getOption().contains("Medium").click();
-        newTicketPage.getSelectUrgency().click();
-        newTicketPage.getOption().contains("Urgent").click();
-        newTicketPage.getLookUpButton().click();
-        cy.get('tr[role="checkbox"]').eq(0).click();
-        newTicketPage.getButtonNext().eq(1).click();
-        newTicketPage.getIndividualID().contains("-");
-        newTicketPage.getHouseholdID().contains("HH-20-0000.0001");
-        newTicketPage.getIssueTypeLabel().contains("Add Individual");
-        newTicketPage.getCategory().contains("Data Change");
-        newTicketPage.getWhoAnswersPhone().type("Test Person");
-        newTicketPage.getWhoAnswersAltPhone().type("Test Alt Person");
-        newTicketPage.getRole().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(2)
-          .contains("Primary collector")
-          .click();
-        newTicketPage.getRelationship().click();
-        newTicketPage.getOptionUndefined().eq(5).contains("Free union").click();
-        newTicketPage.getPhoneNo().type("+93666777888");
-        newTicketPage.getMiddleName().type("Bibi");
-        newTicketPage.getMaritalStatus().click();
-        newTicketPage.getOptionUndefined().eq(0).contains("Divorced").click();
-        newTicketPage.getPregnant().click();
-        newTicketPage.getOptionZero().contains("Yes").click();
-        newTicketPage.getDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(1)
-          .contains("not disabled")
-          .click();
-        // ToDo: Uncomment after resolve bug: XXX
-        // newTicketPage.getEmail().type("abdul.bibi.gul@al.al");
-        newTicketPage.getPhysicalDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(1)
-          .contains("Cannot do at all")
-          .click();
-        newTicketPage.getsSeeingDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(3)
-          .contains("Some difficulty")
-          .click();
-        newTicketPage.getMemoryDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(0)
-          .contains("A lot of difficulty")
-          .click();
-        newTicketPage.getTearingDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(3)
-          .contains("Some difficulty")
-          .click();
-        newTicketPage.getCommsDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .eq(3)
-          .contains("Some difficulty")
-          .click();
-        newTicketPage.getGivenName().type("Abdul");
-        newTicketPage.getGender().click();
-        newTicketPage.getOptionUndefined().contains("Female").click();
-        newTicketPage.getFullName().type("Abdul Bibi Gul");
-        newTicketPage.getFamilyName().type("Test Family Name");
-        newTicketPage.getEstimatedBirthDate().click();
-        newTicketPage.getOptionOne().contains("No").click();
-        newTicketPage.getWorkStatus().click();
-        newTicketPage.getOptionUndefined().contains("Not provided").click();
-        newTicketPage.getObservedDisability().click();
-        newTicketPage.getOptionUndefined().eq(0).click();
-        newTicketPage.getOptionUndefined().eq(1).click();
-        newTicketPage.getOptionUndefined().eq(2).click().type("{esc}");
-        newTicketPage.getSelfcareDisability().click();
-        newTicketPage
-          .getOptionUndefined()
-          .contains("A lot of difficulty")
-          .click();
-        newTicketPage.getBirthDate().type("1990.03.10");
-        newTicketPage.getPhoneNoAlternative().type("No");
-        newTicketPage.getButtonNext().contains("Save").click();
-        grievanceDetailsPage.checkElementsOnPage(
-          grievanceDetailsPage.textStatusAssigned,
-          grievanceDetailsPage.textPriorityMedium,
-          grievanceDetailsPage.textUrgencyUrgent,
-          grievanceDetailsPage.textNotAssigment,
-          "Data Change"
-        );
-        grievanceDetailsPage.getLabelGENDER();
-        grievanceDetailsPage.getLabelRole();
-        grievanceDetailsPage.getLabelPhoneNo();
-        grievanceDetailsPage.getLabelPregnant();
-        grievanceDetailsPage.getLabelFullName();
-        grievanceDetailsPage.getLabelBirthDate();
-        grievanceDetailsPage.getLabelDisability();
-        grievanceDetailsPage.getLabelGivenName();
-        grievanceDetailsPage.getLabelFamilyName();
-        grievanceDetailsPage.getLabelMiddleName();
-        grievanceDetailsPage.getLabelWorkStatus();
-        grievanceDetailsPage.getLabelRelationship();
-        grievanceDetailsPage.getLabelMaritalStatus();
-        grievanceDetailsPage.getLabelCommsDisability();
-        // Todo: Fix after resolve bug: XXX - MEMORY DISABILITY
-        // grievanceDetailsPage.getLabelMEMORYDISABILITY();
-        grievanceDetailsPage.getLabelSeeingDisability();
-        grievanceDetailsPage.getLabelWhoAnswersPhone();
-        grievanceDetailsPage.getLabelHearingDisability();
-        grievanceDetailsPage.getLabelObservedDisability();
-        grievanceDetailsPage.getLabelPhysicalDisability();
-        grievanceDetailsPage.getLabelSelfcareDisability();
-        grievanceDetailsPage.getLabelEstimatedBirthDate();
-        grievanceDetailsPage.getLabelPhoneNoAlternative();
-        grievanceDetailsPage.getLabelWhoAnswersAltPhone();
+      ["DataChangeAddIndividual"].forEach((testData) => {
+        it.only("Create New Ticket - Data Change - Add Individual", function () {
+          let newTicket = this.newTicket[testData];
+          newTicketPage.chooseCategory(newTicket.category);
+          newTicketPage.chooseIssueType(newTicket.issueType);
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getHouseholdTab().should("be.visible");
+          newTicketPage.getHouseholdTableRows(0).click();
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getReceivedConsent().click();
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getDescription().type(newTicket.description);
+          newTicketPage.getComments().type(newTicket.comment);
+          newTicketPage.getAdminAreaAutocomplete().click();
+          newTicketPage.getOption().contains(newTicket.adminArea).click();
+          newTicketPage.getInputArea().type(newTicket.inputArea);
+          newTicketPage.getInputLanguage().type(newTicket.inputLanguage);
+          newTicketPage.getSelectPriority().click();
+          newTicketPage.getOption().contains(newTicket.priority).click();
+          newTicketPage.getSelectUrgency().click();
+          newTicketPage.getOption().contains(newTicket.urgency).click();
+          newTicketPage.getLookUpButton().click();
+          newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+          newTicketPage.getCheckbox().eq(0).click();
+          newTicketPage.getButtonNext().eq(1).click();
+          newTicketPage.getIndividualID().contains(newTicket.individualID);
+          newTicketPage.getHouseholdID().contains(newTicket.householdID);
+          newTicketPage.getIssueTypeLabel().contains(newTicket.issueType);
+          newTicketPage.getCategory().contains(newTicket.category);
+          newTicketPage.getWhoAnswersPhone().type(newTicket.whoAnswersPhone);
+          newTicketPage
+            .getWhoAnswersAltPhone()
+            .type(newTicket.whoAnswersAltPhone);
+          newTicketPage.getRole().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(2)
+            .contains(newTicket.role)
+            .click();
+          newTicketPage.getRelationship().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(5)
+            .contains(newTicket.relationship)
+            .click();
+          newTicketPage.getPhoneNo().type(newTicket.phoneNo);
+          newTicketPage.getMiddleName().type(newTicket.middleName);
+          newTicketPage.getMaritalStatus().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(0)
+            .contains(newTicket.maritalStatus)
+            .click();
+          newTicketPage.getPregnant().click();
+          newTicketPage.getOptionZero().contains(newTicket.pregnant).click();
+          newTicketPage.getDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(1)
+            .contains(newTicket.disability)
+            .click();
+          // ToDo: Uncomment after resolve bug: XXX
+          // newTicketPage.getEmail().type(newTicket.email);
+          newTicketPage.getPhysicalDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(1)
+            .contains(newTicket.physicalDisability)
+            .click();
+          newTicketPage.getsSeeingDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(3)
+            .contains(newTicket.seeingDisability)
+            .click();
+          newTicketPage.getMemoryDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(0)
+            .contains(newTicket.memoryDisability)
+            .click();
+          newTicketPage.getHearingDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(3)
+            .contains(newTicket.hearingDisability)
+            .click();
+          newTicketPage.getCommsDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .eq(3)
+            .contains(newTicket.commsDisability)
+            .click();
+          newTicketPage.getGivenName().type(newTicket.givenName);
+          newTicketPage.getGender().click();
+          newTicketPage.getOptionUndefined().contains(newTicket.gender).click();
+          newTicketPage.getFullName().type(newTicket.fullName);
+          newTicketPage.getFamilyName().type(newTicket.familyName);
+          newTicketPage.getEstimatedBirthDate().click();
+          newTicketPage
+            .getOptionOne()
+            .contains(newTicket.estimatedBirthDate)
+            .click();
+          newTicketPage.getWorkStatus().click();
+          newTicketPage
+            .getOptionUndefined()
+            .contains(newTicket.workStatus)
+            .click();
+          newTicketPage.getObservedDisability().click();
+          newTicketPage.getOptionUndefined().eq(0).click();
+          newTicketPage.getOptionUndefined().eq(1).click();
+          newTicketPage.getOptionUndefined().eq(2).click().type("{esc}");
+          newTicketPage.getSelfcareDisability().click();
+          newTicketPage
+            .getOptionUndefined()
+            .contains(newTicket.selfcareDisability)
+            .click();
+          newTicketPage.getBirthDate().type(newTicket.birthDate);
+          newTicketPage
+            .getPhoneNoAlternative()
+            .type(newTicket.phoneNoAlternative);
+          newTicketPage.getButtonNext().contains("Save").click();
+
+          grievanceDetailsPage.checkElementsOnPage(
+            grievanceDetailsPage.textStatusAssigned,
+            newTicket.priority,
+            newTicket.urgency,
+            grievanceDetailsPage.textNotAssigment,
+            newTicket.category
+          );
+          grievanceDetailsPage
+            .getAdministrativeLevel()
+            .contains(newTicket.adminArea);
+          grievanceDetailsPage
+            .getLanguagesSpoken()
+            .contains(newTicket.inputLanguage);
+          grievanceDetailsPage.getAreaVillage().contains(newTicket.inputArea);
+          grievanceDetailsPage
+            .getLabelIssueType()
+            .contains(newTicket.issueType);
+          grievanceDetailsPage.getLabelTickets().contains(newTicket.lookUp);
+          grievanceDetailsPage.getLabelGENDER().contains(newTicket.gender);
+          grievanceDetailsPage.getLabelRole().contains(newTicket.role);
+          grievanceDetailsPage.getLabelPhoneNo().contains(newTicket.phoneNo);
+          grievanceDetailsPage.getLabelPregnant().contains(newTicket.pregnant);
+          grievanceDetailsPage.getLabelFullName().contains(newTicket.fullName);
+          grievanceDetailsPage
+            .getLabelBirthDate()
+            .contains(newTicket.birthDate);
+          // Todo: Fix after resolve bug: XXX
+          // grievanceDetailsPage.getLabelDisability().contains("not disabled");
+          grievanceDetailsPage
+            .getLabelGivenName()
+            .contains(newTicket.givenName);
+          grievanceDetailsPage
+            .getLabelFamilyName()
+            .contains(newTicket.familyName);
+          grievanceDetailsPage
+            .getLabelMiddleName()
+            .contains(newTicket.middleName);
+          grievanceDetailsPage
+            .getLabelWorkStatus()
+            .contains(newTicket.workStatus);
+          grievanceDetailsPage
+            .getLabelRelationship()
+            .contains(newTicket.relationship);
+          grievanceDetailsPage
+            .getLabelMaritalStatus()
+            .contains(newTicket.maritalStatus);
+          grievanceDetailsPage
+            .getLabelCommsDisability()
+            .contains(newTicket.commsDisability);
+          // Todo: Fix after resolve bug: XXX - MEMORY DISABILITY
+          // grievanceDetailsPage.getLabelMEMORYDISABILITY().contains("");
+          grievanceDetailsPage
+            .getLabelSeeingDisability()
+            .contains(newTicket.seeingDisability);
+          grievanceDetailsPage
+            .getLabelWhoAnswersPhone()
+            .contains(newTicket.whoAnswersPhone);
+          grievanceDetailsPage
+            .getLabelHearingDisability()
+            .contains(newTicket.hearingDisability);
+          // Todo: Fix after resolve bug: XXX - OBSERVED DISABILITY
+          // grievanceDetailsPage.getLabelObservedDisability().contains("");
+          grievanceDetailsPage
+            .getLabelPhysicalDisability()
+            .contains(newTicket.physicalDisability);
+          grievanceDetailsPage
+            .getLabelSelfcareDisability()
+            .contains(newTicket.selfcareDisability);
+          grievanceDetailsPage
+            .getLabelEstimatedBirthDate()
+            .contains(newTicket.estimatedBirthDate);
+          grievanceDetailsPage
+            .getLabelPhoneNoAlternative()
+            .contains(newTicket.phoneNoAlternative);
+          grievanceDetailsPage
+            .getLabelWhoAnswersAltPhone()
+            .contains(newTicket.whoAnswersAltPhone);
+        });
       });
       it.skip("Create New Ticket - Data Change - Household Data Update", () => {});
       it.skip("Create New Ticket - Data Change - Individual Data Update", () => {});

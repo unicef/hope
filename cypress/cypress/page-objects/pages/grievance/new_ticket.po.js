@@ -49,6 +49,7 @@ export default class NewTicket extends BaseComponent {
     'input[data-cy="input-individualData.phoneNoAlternative"]';
   addDocument = 'button[type="button"]';
   lookUpButton = 'div[data-cy="look-up-button"]';
+  checkbox = 'tr[role="checkbox"]';
   selectUrgency = 'div[data-cy="select-urgency"]';
   selectPriority = 'div[data-cy="select-priority"]';
   inputLanguage = 'textarea[data-cy="input-language"]';
@@ -94,7 +95,7 @@ export default class NewTicket extends BaseComponent {
   getPhysicalDisability = () => cy.get(this.physicalDisability);
   getsSeeingDisability = () => cy.get(this.seeingDisability);
   getMemoryDisability = () => cy.get(this.memoryDisability);
-  getTearingDisability = () => cy.get(this.hearingDisability);
+  getHearingDisability = () => cy.get(this.hearingDisability);
   getCommsDisability = () => cy.get(this.commsDisability);
   getGivenName = () => cy.get(this.givenName);
   getGender = () => cy.get(this.gender);
@@ -108,6 +109,7 @@ export default class NewTicket extends BaseComponent {
   getPhoneNoAlternative = () => cy.get(this.phoneNoAlternative);
   getAddDocument = () => cy.get(this.addDocument);
   getLookUpButton = () => cy.get(this.lookUpButton);
+  getCheckbox = () => cy.get(this.checkbox);
   getSelectUrgency = () => cy.get(this.selectUrgency);
   getSelectPriority = () => cy.get(this.selectPriority);
   getInputLanguage = () => cy.get(this.inputLanguage);
