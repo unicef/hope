@@ -66,18 +66,16 @@ function ObjectRepresentations({
     targetpopulation: `/${businessArea}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
-    //TODO: add grievance ticket url based on category
-    grievanceticket: `/${businessArea}/grievance/tickets`,
-    // grievanceticket: `/${businessArea}/grievance/tickets/${
-    //   isUserGenerated ? 'user-generated' : 'system-generated'
-    // }/${btoa('GrievanceTicketNode:' + id)}`,
-    feedback: `/${businessArea}/grievance/feedback${btoa(
+    grievanceticket: `/${businessArea}/grievance/tickets/${
+      logEntry.isUserGenerated ? 'user-generated' : 'system-generated'
+    }/${btoa('GrievanceTicketNode:' + id)}`,
+    feedback: `/${businessArea}/grievance/feedback/${btoa(
       'FeedbackNode:' + id,
     )}`,
-    survey: `/${businessArea}/accountability/surveys${btoa(
+    survey: `/${businessArea}/accountability/surveys/${btoa(
       'SurveyNode:' + id,
     )}`,
-    communication: `/${businessArea}/accountability/communication${btoa(
+    communication: `/${businessArea}/accountability/communication/${btoa(
       'CommunicationMessageNode:' + id,
     )}`,
     household: `/${businessArea}/population/household/${btoa(
@@ -101,10 +99,10 @@ function ObjectRepresentations({
     logEntry.action === LogEntryAction.Delete ||
     logEntry.action === LogEntryAction.SoftDelete
   ) {
-    return <>{logEntry.objectRepr}</>;
+    return <>{logEntry.objectId}</>;
   }
   return (
-    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectRepr}</StyledLink>
+    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectId}</StyledLink>
   );
 }
 
