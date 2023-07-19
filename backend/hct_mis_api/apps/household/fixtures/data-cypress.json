@@ -131,6 +131,7 @@
     "total_cash_received_usd": null,
     "total_cash_received": null,
     "programs": [],
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -210,6 +211,7 @@
     "total_cash_received_usd": null,
     "total_cash_received": null,
     "programs": [],
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -638,6 +640,7 @@
     "row_id": 3,
     "disability_certificate_picture": "",
     "vector_column": "'jan':1 'romaniak':2",
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -716,6 +719,7 @@
     "row_id": 7,
     "disability_certificate_picture": "",
     "vector_column": "'angela':1 'kowalska':2",
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -794,6 +798,7 @@
     "row_id": 8,
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'kowalska':2",
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -872,6 +877,7 @@
     "row_id": 4,
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'romaniak':2",
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -950,6 +956,7 @@
     "row_id": 6,
     "disability_certificate_picture": "",
     "vector_column": "'agata':1 'kowalska':2",
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 },
@@ -1046,6 +1053,7 @@
     "row_id": 5,
     "disability_certificate_picture": "",
     "vector_column": "'jan':1 'romaniak':2",
+    "copied_from": null,
     "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
   }
 }
