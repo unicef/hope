@@ -68,6 +68,9 @@ function ObjectRepresentations({
     )}`,
     //TODO: add grievance ticket url based on category
     grievanceticket: `/${businessArea}/grievance/tickets`,
+    // grievanceticket: `/${businessArea}/grievance/tickets/${
+    //   isUserGenerated ? 'user-generated' : 'system-generated'
+    // }/${btoa('GrievanceTicketNode:' + id)}`,
     feedback: `/${businessArea}/grievance/feedback${btoa(
       'FeedbackNode:' + id,
     )}`,
