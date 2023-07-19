@@ -3428,6 +3428,7 @@ export type LogEntryNode = Node & {
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
+  isUserGenerated?: Maybe<Scalars['Boolean']>,
 };
 
 export type LogEntryNodeConnection = {
@@ -4594,6 +4595,7 @@ export type PaymentVerificationLogEntryNode = Node & {
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
+  isUserGenerated?: Maybe<Scalars['Boolean']>,
   contentObject?: Maybe<PaymentVerificationPlanNode>,
 };
 
@@ -10420,7 +10422,7 @@ export type AllLogEntriesQuery = (
       & Pick<LogEntryNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'LogEntryNode' }
-        & Pick<LogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp'>
+        & Pick<LogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp' | 'isUserGenerated'>
         & { contentType: Maybe<(
           { __typename?: 'ContentTypeObjectType' }
           & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model' | 'name'>
@@ -19065,6 +19067,7 @@ export const AllLogEntriesDocument = gql`
         objectRepr
         objectId
         timestamp
+        isUserGenerated
         contentType {
           id
           appLabel
@@ -29570,6 +29573,7 @@ export type LogEntryNodeResolvers<ContextType = any, ParentType extends Resolver
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isUserGenerated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type LogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeConnection'] = ResolversParentTypes['LogEntryNodeConnection']> = {
@@ -29940,6 +29944,7 @@ export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentTy
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isUserGenerated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   contentObject?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType>,
 };
 
