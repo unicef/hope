@@ -2430,6 +2430,7 @@ type LogEntryNode implements Node {
   user: UserNode
   businessArea: UserBusinessAreaNode
   timestamp: DateTime
+  isUserGenerated: Boolean
 }
 
 type LogEntryNodeConnection {
@@ -3049,6 +3050,7 @@ type PaymentVerificationLogEntryNode implements Node {
   user: UserNode
   businessArea: UserBusinessAreaNode
   timestamp: DateTime
+  isUserGenerated: Boolean
   contentObject: PaymentVerificationPlanNode
 }
 
