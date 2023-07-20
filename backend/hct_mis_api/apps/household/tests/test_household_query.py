@@ -169,12 +169,7 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=query_string,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode")
-                }
-            },
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
         )
 
     @parameterized.expand(
@@ -188,11 +183,6 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode")
-                }
-            },
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
