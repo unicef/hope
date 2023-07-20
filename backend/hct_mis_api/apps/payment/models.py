@@ -246,6 +246,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_CHEQUE = "Cheque"
     DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
     DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
+    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
     DELIVERY_TYPE_REFERRAL = "Referral"
     DELIVERY_TYPE_TRANSFER = "Transfer"
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
@@ -258,6 +259,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_CHEQUE,
         DELIVERY_TYPE_DEPOSIT_TO_CARD,
         DELIVERY_TYPE_MOBILE_MONEY,
+        DELIVERY_TYPE_PRE_PAID_CARD,
         DELIVERY_TYPE_REFERRAL,
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
@@ -271,6 +273,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_CHEQUE, _("Cheque")),
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
         (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
+        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
         (DELIVERY_TYPE_REFERRAL, _("Referral")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
