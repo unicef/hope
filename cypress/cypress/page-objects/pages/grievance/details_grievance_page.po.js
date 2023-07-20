@@ -2,6 +2,7 @@ import BaseComponent from "../../base.component";
 
 export default class GrievanceDetailsPage extends BaseComponent {
   // Locators
+  pageHeaderContainer = 'div[data-cy="page-header-container"]';
   title = 'h5[data-cy="page-header-title"]';
   buttonEdit = 'a[data-cy="button-edit"]';
   buttonSetInProgress = 'button[data-cy="button-set-to-in-progress"]';
@@ -39,13 +40,15 @@ export default class GrievanceDetailsPage extends BaseComponent {
   newNoteField = 'textarea[data-cy="input-newNote"]';
   buttonNewNote = 'button[data-cy="button-add-note"]';
   // Texts
-  textTitle = "Ticket ID: GRV-0000001";
+  textTitle = "Ticket ID: ";
   textStatusNew = "New";
   textPriorityNotSet = "Not set";
   textUrgencyNotSet = "Not set";
   textNotAssigment = "-";
+  textAssigmentRootRootkowski = "Root Rootkowski"
   textNoCategory = "Needs Adjudication";
   // Elements
+  getPageHeaderContainer = () => cy.get(this.pageHeaderContainer);
   getTitle = () => cy.get(this.title);
   getButtonAssignToMe = () => cy.get(this.buttonAssignToMe);
   getTicketStatus = () => cy.get(this.ticketStatus);
@@ -112,5 +115,9 @@ export default class GrievanceDetailsPage extends BaseComponent {
     this.getCellAdminLevel2().scrollIntoView().should("be.visible");
     this.getCellVillage().scrollIntoView().should("be.visible");
     this.getNewNoteField().scrollIntoView().should("be.visible");
+  }
+
+  pressBackButton() {
+    this.getPageHeaderContainer().find("svg").eq(0).click();
   }
 }

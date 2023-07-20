@@ -4,7 +4,7 @@ import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
 export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   {
     disablePadding: false,
-    label: 'Cash Plan ID',
+    label: 'Payment Plan ID',
     id: 'ca_id',
     numeric: false,
   },

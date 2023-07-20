@@ -13,6 +13,8 @@ export const Bulk_Update_Grievance_Tickets_Assignees_Mutation = gql`
       grievanceTickets {
         assignedTo {
           firstName
+          lastName
+          email
         }
       }
     }

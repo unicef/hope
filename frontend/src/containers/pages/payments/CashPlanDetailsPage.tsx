@@ -40,7 +40,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const {
     data: caData,
     loading: caPrefixLoading,
-  } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
   const businessArea = useBusinessArea();
 
   if (loading || caPrefixLoading) return <LoadingComponent />;
@@ -61,7 +61,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`${t('Cash Plan')} #${data.cashPlan.caId}`}
+        title={`${t('Payment Plan')} #${data.cashPlan.caId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,

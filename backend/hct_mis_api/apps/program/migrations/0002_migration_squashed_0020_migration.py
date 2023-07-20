@@ -31,11 +31,9 @@ def populate_existing_cash_plan_rates(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('program', '0002_migration'), ('program', '0003_migration'), ('program', '0004_migration'), ('program', '0005_migration'), ('program', '0006_migration'), ('program', '0007_migration'), ('program', '0008_migration'), ('program', '0009_migration'), ('program', '0010_migration'), ('program', '0011_migration'), ('program', '0012_migration'), ('program', '0013_migration'), ('program', '0014_migration'), ('program', '0015_migration'), ('program', '0016_migration'), ('program', '0017_migration'), ('program', '0018_migration'), ('program', '0019_migration'), ('program', '0020_migration')]
-
     dependencies = [
-        ('core', '0002_migration'),
-        ('payment', '0003_migration'),
+        ('core', '0002_migration_squashed_0006_migration'),
+        ('payment', '0002_migration_squashed_0003_migration'),
         ('targeting', '0001_migration'),
         ('program', '0001_migration'),
     ]

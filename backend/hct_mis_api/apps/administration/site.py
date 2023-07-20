@@ -1,6 +1,5 @@
 from typing import Any, List
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache
@@ -57,7 +56,7 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
         "form": ClearCacheForm(),
     }
 
-    if getattr(settings, "CACHE_ENABLED", False):
+    if hasattr(dj_cache, "keys"):
         # skip name started with numbers
         ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
 
