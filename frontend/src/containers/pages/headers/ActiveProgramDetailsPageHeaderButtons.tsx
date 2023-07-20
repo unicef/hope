@@ -8,7 +8,7 @@ import {
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { DuplicateProgram } from '../../dialogs/programs/DuplicateProgram';
+import { CopyProgram } from '../../dialogs/programs/CopyProgram';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
@@ -52,12 +52,11 @@ export const ActiveProgramDetailsPageHeaderButtons = ({
           Open in CashAssist
         </Button>
       </Box>
-      {/* //TODO: add when duplicate is ready
       {canDuplicate && (
         <Box m={2}>
-          <DuplicateProgram programId={program.id} />
+          <CopyProgram program={program} />
         </Box>
-      )} */}
+      )}
     </Box>
   );
 };
