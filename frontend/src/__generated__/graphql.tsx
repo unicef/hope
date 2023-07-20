@@ -941,6 +941,29 @@ export type ContentTypeObjectTypeLogEntriesArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
+export type CopyProgram = {
+   __typename?: 'CopyProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  program?: Maybe<ProgramNode>,
+};
+
+export type CopyProgramInput = {
+  id: Scalars['String'],
+  name?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  description?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['Decimal']>,
+  frequencyOfPayments?: Maybe<Scalars['String']>,
+  sector?: Maybe<Scalars['String']>,
+  scope?: Maybe<Scalars['String']>,
+  cashPlus?: Maybe<Scalars['Boolean']>,
+  populationGoal?: Maybe<Scalars['Int']>,
+  administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
+};
+
 export type CopyTargetPopulationInput = {
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
@@ -2024,6 +2047,8 @@ export type HouseholdNode = Node & {
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   familyId?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
+  copiedFrom?: Maybe<HouseholdNode>,
+  copiedTo: HouseholdNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals?: Maybe<IndividualNodeConnection>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -2068,6 +2093,15 @@ export type HouseholdNodeProgramsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
+};
+
+
+export type HouseholdNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -3028,11 +3062,13 @@ export type IndividualNode = Node & {
   preferredLanguage?: Maybe<Scalars['String']>,
   relationshipConfirmed: Scalars['Boolean'],
   program?: Maybe<ProgramNode>,
+  copiedFrom?: Maybe<IndividualNode>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
   identities: IndividualIdentityNodeConnection,
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
+  copiedTo: IndividualNodeConnection,
   bankAccountInfo?: Maybe<BankAccountInfoNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
   collectorPayments: PaymentNodeConnection,
@@ -3076,6 +3112,15 @@ export type IndividualNodeDocumentsArgs = {
 
 
 export type IndividualNodeIdentitiesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeCopiedToArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3538,6 +3583,7 @@ export type Mutations = {
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
+  copyProgram?: Maybe<CopyProgram>,
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>,
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
   registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>,
@@ -3933,6 +3979,11 @@ export type MutationsUpdateProgramArgs = {
 
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']
+};
+
+
+export type MutationsCopyProgramArgs = {
+  programData: CopyProgramInput
 };
 
 
@@ -5971,7 +6022,6 @@ export type QueryAllHouseholdsArgs = {
   adminArea?: Maybe<Scalars['ID']>,
   admin2?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   size?: Maybe<Scalars['String']>,
@@ -9795,6 +9845,22 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = (
   )> }
 );
 
+export type CopyProgramMutationVariables = {
+  programData: CopyProgramInput
+};
+
+
+export type CopyProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { copyProgram: Maybe<(
+    { __typename?: 'CopyProgram' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+    )> }
+  )> }
+);
+
 export type CreateProgramMutationVariables = {
   programData: CreateProgramInput
 };
@@ -12302,7 +12368,6 @@ export type AllHouseholdsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   familySize?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
   headOfHouseholdPhoneNoValid?: Maybe<Scalars['Boolean']>,
   adminArea?: Maybe<Scalars['ID']>,
@@ -12360,7 +12425,6 @@ export type AllHouseholdsForPopulationTableQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   familySize?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
   adminArea?: Maybe<Scalars['ID']>,
   search?: Maybe<Scalars['String']>,
@@ -12407,7 +12471,6 @@ export type AllIndividualsQueryVariables = {
   age?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   householdId?: Maybe<Scalars['UUID']>,
@@ -12491,7 +12554,6 @@ export type AllIndividualsForPopulationTableQueryVariables = {
   age?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   householdId?: Maybe<Scalars['UUID']>,
@@ -17080,6 +17142,57 @@ export function useUpdatePaymentVerificationStatusAndReceivedAmountMutation(base
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
+export const CopyProgramDocument = gql`
+    mutation CopyProgram($programData: CopyProgramInput!) {
+  copyProgram(programData: $programData) {
+    program {
+      id
+    }
+  }
+}
+    `;
+export type CopyProgramMutationFn = ApolloReactCommon.MutationFunction<CopyProgramMutation, CopyProgramMutationVariables>;
+export type CopyProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CopyProgramMutation, CopyProgramMutationVariables>, 'mutation'>;
+
+    export const CopyProgramComponent = (props: CopyProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<CopyProgramMutation, CopyProgramMutationVariables> mutation={CopyProgramDocument} {...props} />
+    );
+    
+export type CopyProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CopyProgramMutation, CopyProgramMutationVariables> & TChildProps;
+export function withCopyProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CopyProgramMutation,
+  CopyProgramMutationVariables,
+  CopyProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CopyProgramMutation, CopyProgramMutationVariables, CopyProgramProps<TChildProps>>(CopyProgramDocument, {
+      alias: 'copyProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCopyProgramMutation__
+ *
+ * To run a mutation, you first call `useCopyProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyProgramMutation, { data, loading, error }] = useCopyProgramMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *   },
+ * });
+ */
+export function useCopyProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CopyProgramMutation, CopyProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<CopyProgramMutation, CopyProgramMutationVariables>(CopyProgramDocument, baseOptions);
+      }
+export type CopyProgramMutationHookResult = ReturnType<typeof useCopyProgramMutation>;
+export type CopyProgramMutationResult = ApolloReactCommon.MutationResult<CopyProgramMutation>;
+export type CopyProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyProgramMutation, CopyProgramMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
@@ -23286,8 +23399,8 @@ export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<type
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -23380,7 +23493,6 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
- *      programs: // value for 'programs'
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
  *      adminArea: // value for 'adminArea'
@@ -23402,8 +23514,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -23475,7 +23587,6 @@ export function withAllHouseholdsForPopulationTable<TProps, TChildProps = {}>(op
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
- *      programs: // value for 'programs'
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *      adminArea: // value for 'adminArea'
  *      search: // value for 'search'
@@ -23496,8 +23607,8 @@ export type AllHouseholdsForPopulationTableQueryHookResult = ReturnType<typeof u
 export type AllHouseholdsForPopulationTableLazyQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableLazyQuery>;
 export type AllHouseholdsForPopulationTableQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
     totalCount
     pageInfo {
       startCursor
@@ -23610,7 +23721,6 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
- *      programs: // value for 'programs'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      householdId: // value for 'householdId'
@@ -23633,8 +23743,8 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
     totalCount
     pageInfo {
       startCursor
@@ -23705,7 +23815,6 @@ export function withAllIndividualsForPopulationTable<TProps, TChildProps = {}>(o
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
- *      programs: // value for 'programs'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      householdId: // value for 'householdId'
@@ -27101,6 +27210,8 @@ export type ResolversTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
+  CopyProgramInput: CopyProgramInput,
+  CopyProgram: ResolverTypeWrapper<CopyProgram>,
   UploadImportDataXLSXFileAsync: ResolverTypeWrapper<UploadImportDataXlsxFileAsync>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
@@ -27597,6 +27708,8 @@ export type ResolversParentTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: UpdateProgram,
   DeleteProgram: DeleteProgram,
+  CopyProgramInput: CopyProgramInput,
+  CopyProgram: CopyProgram,
   UploadImportDataXLSXFileAsync: UploadImportDataXlsxFileAsync,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
@@ -28031,6 +28144,11 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
   ticketsensitivedetailsSet?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeTicketsensitivedetailsSetArgs>,
   logEntries?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CopyProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyProgram'] = ResolversParentTypes['CopyProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
@@ -28679,6 +28797,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   familyId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, HouseholdNodeCopiedToArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentrecordSetArgs>,
@@ -29062,11 +29182,13 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, IndividualNodeIdentitiesArgs>,
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, IndividualNodeCopiedToArgs>,
   bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentrecordSetArgs>,
   collectorPayments?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, IndividualNodeCollectorPaymentsArgs>,
@@ -29299,6 +29421,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
+  copyProgram?: Resolver<Maybe<ResolversTypes['CopyProgram']>, ParentType, ContextType, RequireFields<MutationsCopyProgramArgs, 'programData'>>,
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
@@ -31077,6 +31200,7 @@ export type Resolvers<ContextType = any> = {
   CommunicationMessageRecipientMapNodeConnection?: CommunicationMessageRecipientMapNodeConnectionResolvers<ContextType>,
   CommunicationMessageRecipientMapNodeEdge?: CommunicationMessageRecipientMapNodeEdgeResolvers<ContextType>,
   ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
+  CopyProgram?: CopyProgramResolvers<ContextType>,
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
