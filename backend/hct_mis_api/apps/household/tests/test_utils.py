@@ -678,14 +678,13 @@ class TestGetBiggestProgram(TestCase):
 class TestAssignNonProgramRDIToBiggestProgram(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-
+        Program.objects.filter(business_area=self.business_area).delete()
         self.program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
         self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
         self.rdi2 = RegistrationDataImportFactory(business_area=self.business_area)
         self.rdi3 = RegistrationDataImportFactory(business_area=self.business_area)
-        Individual.objects.all().delete()
-        Household.objects.all().delete()
-        individual_rdi1 = IndividualFactory(household=None)
+
+        individual_rdi1 = IndividualFactory(household=None, business_area=self.business_area)
         self.household_rdi1 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=individual_rdi1,
@@ -694,7 +693,7 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         individual_rdi1.household = self.household_rdi1
         individual_rdi1.save()
 
-        individual_rdi2 = IndividualFactory(household=None)
+        individual_rdi2 = IndividualFactory(household=None, business_area=self.business_area)
         self.household_rdi2 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=individual_rdi2,
@@ -703,7 +702,7 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         individual_rdi2.household = self.household_rdi2
         individual_rdi2.save()
 
-        individual_rdi3 = IndividualFactory(household=None)
+        individual_rdi3 = IndividualFactory(household=None, business_area=self.business_area)
         self.household_rdi3 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=individual_rdi3,
@@ -712,7 +711,7 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         individual_rdi3.household = self.household_rdi3
         individual_rdi3.save()
 
-        individual_rdi4 = IndividualFactory(household=None)
+        individual_rdi4 = IndividualFactory(household=None, business_area=self.business_area)
         self.household_rdi4 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=individual_rdi4,
@@ -735,6 +734,7 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         assert self.rdi1.programs.count() == 1
         assert self.rdi2.programs.count() == 1
         assert self.rdi3.programs.count() == 1
+
         assert self.rdi1.programs.first() == self.program
         assert self.rdi2.programs.first() == self.program
         assert self.rdi3.programs.first() == self.program
