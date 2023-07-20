@@ -194,7 +194,6 @@ class IndividualFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory)
 
 
-
 class BankAccountInfoFactory(DjangoModelFactory):
     class Meta:
         model = BankAccountInfo
