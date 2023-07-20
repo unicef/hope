@@ -7,7 +7,6 @@ import {
   useAllHouseholdsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
@@ -44,14 +43,12 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
-  const { programId } = useBaseUrl();
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     search: filter.search,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     familySize: JSON.stringify(filter.size),
-    programs: [programId],
   };
 
   const [selected, setSelected] = useState<string[]>(
