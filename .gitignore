@@ -29,6 +29,7 @@ backend/test-results/
 backend/lint-results/
 backend/mypy-results/
 cypress-results/
+cypress-reports/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

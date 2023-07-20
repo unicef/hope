@@ -63,10 +63,10 @@ export default class BaseComponent {
     this.getMenuButtonTargeting().contains(this.buttonTargetingText).click();
   }
 
-  pressEscapeFromElement(element){
+  pressEscapeFromElement(element) {
     element.focused().then(($el) => {
       if ($el.length) {
-        element.type('{esc}')
+        element.type("{esc}");
       }
     });
   }
