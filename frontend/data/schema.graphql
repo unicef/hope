@@ -267,7 +267,9 @@ type BusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProApiKey: String
+  rapidProPaymentVerificationToken: String
+  rapidProMessagesToken: String
+  rapidProSurveyToken: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
@@ -3298,7 +3300,7 @@ type Query {
   recipients(offset: Int, before: String, after: String, first: Int, last: Int, survey: String!, orderBy: String): RecipientNodeConnection
   accountabilitySampleSize(input: AccountabilitySampleSizeInput): AccountabilitySampleSizeNode
   surveyCategoryChoices: [ChoiceObject]
-  availableFlows: [RapidProFlowNode]
+  surveyAvailableFlows: [RapidProFlowNode]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String): LogEntryNodeConnection
@@ -4729,7 +4731,9 @@ type UserBusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProApiKey: String
+  rapidProPaymentVerificationToken: String
+  rapidProMessagesToken: String
+  rapidProSurveyToken: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
