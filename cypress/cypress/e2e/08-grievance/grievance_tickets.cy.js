@@ -69,7 +69,7 @@ describe("Grievance", () => {
 
   describe("Component tests Grievance", () => {
     context("Export", () => {
-      it.skip("ToDo", () => {});
+      it.skip("Export", () => {});
     });
     context("Grievance Filters", () => {
       [
@@ -328,7 +328,7 @@ describe("Grievance", () => {
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
       // It makes sense to test all different issue types for Data Change tickets as they have different fields.
       ["DataChangeAddIndividual"].forEach((testData) => {
-        it.only("Create New Ticket - Data Change - Add Individual", function () {
+        it("Create New Ticket - Data Change - Add Individual", function () {
           let newTicket = this.newTicket[testData];
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
@@ -388,7 +388,7 @@ describe("Grievance", () => {
             .eq(1)
             .contains(newTicket.disability)
             .click();
-          // ToDo: Uncomment after resolve bug: XXX
+          // ToDo: Uncomment after resolve bug: 167376
           // newTicketPage.getEmail().type(newTicket.email);
           newTicketPage.getPhysicalDisability().click();
           newTicketPage
@@ -476,7 +476,7 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelBirthDate()
             .contains(newTicket.birthDate);
-          // Todo: Fix after resolve bug: XXX
+          // Todo: Fix after resolve bug: 167436
           // grievanceDetailsPage.getLabelDisability().contains("not disabled");
           grievanceDetailsPage
             .getLabelGivenName()
@@ -499,7 +499,7 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelCommsDisability()
             .contains(newTicket.commsDisability);
-          // Todo: Fix after resolve bug: XXX - MEMORY DISABILITY
+          // Todo: Fix after resolve bug: 167426 - MEMORY DISABILITY
           // grievanceDetailsPage.getLabelMEMORYDISABILITY().contains("");
           grievanceDetailsPage
             .getLabelSeeingDisability()
@@ -510,7 +510,7 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelHearingDisability()
             .contains(newTicket.hearingDisability);
-          // Todo: Fix after resolve bug: XXX - OBSERVED DISABILITY
+          // Todo: Fix after resolve bug: 167436 - OBSERVED DISABILITY
           // grievanceDetailsPage.getLabelObservedDisability().contains("");
           grievanceDetailsPage
             .getLabelPhysicalDisability()
