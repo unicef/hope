@@ -796,7 +796,7 @@
             "deprecationReason": null
           },
           {
-            "name": "availableFlows",
+            "name": "surveyAvailableFlows",
             "description": null,
             "args": [],
             "type": {
@@ -14961,29 +14961,6 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "erased",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
               "kind": "OBJECT",
               "name": "AreaNode",
               "ofType": null
@@ -19868,7 +19845,31 @@
             "deprecationReason": null
           },
           {
-            "name": "rapidProApiKey",
+            "name": "rapidProPaymentVerificationToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProMessagesToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProSurveyToken",
             "description": null,
             "args": [],
             "type": {
@@ -22344,6 +22345,22 @@
           },
           {
             "name": "excluded",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "erased",
             "description": null,
             "args": [],
             "type": {
@@ -44621,30 +44638,6 @@
             "deprecationReason": null
           },
           {
-            "name": "issuanceDate",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "expiryDate",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "edgeCount",
             "description": null,
             "args": [],
@@ -49240,7 +49233,31 @@
             "deprecationReason": null
           },
           {
-            "name": "rapidProApiKey",
+            "name": "rapidProPaymentVerificationToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProMessagesToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProSurveyToken",
             "description": null,
             "args": [],
             "type": {

@@ -41,6 +41,7 @@ from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import (
     chart_create_filter_query_for_payment_verification_gfk,
     chart_filters_decoder,
@@ -91,7 +92,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,

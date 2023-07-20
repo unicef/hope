@@ -57,11 +57,11 @@ from hct_mis_api.apps.core.models import (
     StorageFile,
     XLSXKoboTemplate,
 )
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
 from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
