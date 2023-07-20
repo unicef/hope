@@ -16,7 +16,6 @@ export const fakeApolloAllIndividualsForPopulationTable = [
         lastRegistrationDate: '{"min":"","max":""}',
         first: 10,
         orderBy: 'unicef_id',
-        programs: [fakeProgram.id],
       },
     },
     result: {
