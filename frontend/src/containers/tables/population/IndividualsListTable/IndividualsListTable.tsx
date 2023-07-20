@@ -7,7 +7,6 @@ import {
   useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
@@ -26,7 +25,6 @@ export const IndividualsListTable = ({
   choicesData,
 }: IndividualsListTableProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
   const initialVariables = {
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
@@ -39,7 +37,6 @@ export const IndividualsListTable = ({
       min: filter.lastRegistrationDateMin,
       max: filter.lastRegistrationDateMax,
     }),
-    programs: [programId],
   };
 
   return (
