@@ -9,6 +9,7 @@ export default class NewTicket extends BaseComponent {
   statusOptions = 'li[role="option"]';
   lookUpTabs = 'button[role="tab"]';
   householdTableRow = 'tr[data-cy="household-table-row"]';
+  individualTableRow = 'tr[data-cy="individual-table-row"]';
   receivedConsent = 'span[data-cy="input-consent"]';
   individualID = 'div[data-cy="label-INDIVIDUAL ID"]';
   householdID = 'div[data-cy="label-HOUSEHOLD ID"]';
@@ -60,6 +61,9 @@ export default class NewTicket extends BaseComponent {
   optionOne = 'li[data-cy="select-option-1"]';
   labelCategoryDescription = 'div[data-cy="label-Category Description"]';
   labelIssueTypeDescription = 'div[data-cy="label-Issue Type Description"]';
+  selectFieldName =
+    'div[data-cy="select-householdDataUpdateFields[0].fieldName"]';
+  inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]';
 
   // Texts
   textLookUpHousehold = "LOOK UP HOUSEHOLD";
@@ -133,6 +137,8 @@ export default class NewTicket extends BaseComponent {
   getIndividualTab = () =>
     cy.get(this.lookUpTabs).contains(this.textLookUpIndividual);
   getHouseholdTableRows = (number) => cy.get(this.householdTableRow).eq(number);
+  getIndividualTableRows = (number) =>
+    cy.get(this.individualTableRow).eq(number);
   getReceivedConsent = () => cy.get(this.receivedConsent);
   getDescription = () => cy.get(this.description);
   getIndividualID = () => cy.get(this.individualID);
@@ -178,6 +184,8 @@ export default class NewTicket extends BaseComponent {
   getOptionOne = () => cy.get(this.optionOne);
   getLabelCategoryDescription = () => cy.get(this.labelCategoryDescription);
   getLabelIssueTypeDescription = () => cy.get(this.labelIssueTypeDescription);
+  getSelectFieldName = () => cy.get(this.selectFieldName);
+  getInputValue = () => cy.get(this.inputValue);
 
   checkElementsOnPage() {
     this.getTitle().contains(this.textTitle);
@@ -193,5 +201,9 @@ export default class NewTicket extends BaseComponent {
   chooseIssueType(issue) {
     this.getIssueType().should("be.visible").click();
     this.getOption().contains(issue).click();
+  }
+
+  selectOption(optionName) {
+    return cy.get(`li[data-cy="select-option-${optionName}"]`);
   }
 }

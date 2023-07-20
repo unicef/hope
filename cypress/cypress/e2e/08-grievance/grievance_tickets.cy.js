@@ -328,7 +328,7 @@ describe("Grievance", () => {
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
       // It makes sense to test all different issue types for Data Change tickets as they have different fields.
       ["DataChangeAddIndividual"].forEach((testData) => {
-        it.only("Create New Ticket - Data Change - Add Individual", function () {
+        it("Create New Ticket - Data Change - Add Individual", function () {
           let newTicket = this.newTicket[testData];
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
@@ -539,7 +539,82 @@ describe("Grievance", () => {
             .contains(newTicket.whoAnswersAltPhone);
         });
       });
-      it.skip("Create New Ticket - Data Change - Household Data Update", () => {});
+      ["Household Data Update - 1", "Household Data Update - 2"].forEach(
+        (testData) => {
+          it(`Create New Ticket - Data Change - ${testData}`, function () {
+            let newTicket = this.newTicket[testData];
+            newTicketPage.chooseCategory(newTicket.category);
+            newTicketPage.chooseIssueType(newTicket.issueType);
+            newTicketPage
+              .getLabelCategoryDescription()
+              .contains(
+                newTicketPage.textCategoryDescription[newTicket.category]
+              );
+            newTicketPage
+              .getLabelIssueTypeDescription()
+              .contains(
+                newTicketPage.textIssueTypeDescription[newTicket.issueType]
+              );
+            newTicketPage.getButtonNext().click();
+            newTicketPage.getHouseholdTab().should("be.visible");
+            newTicketPage.getHouseholdTableRows(0).click();
+            // ToDo: Delete after fixed: 167943
+            newTicketPage.getIndividualTab().click();
+            newTicketPage.getIndividualTableRows(0).click();
+            newTicketPage.getButtonNext().click();
+            newTicketPage.getReceivedConsent().click();
+            newTicketPage.getButtonNext().click();
+            newTicketPage.getDescription().type(newTicket.description);
+            newTicketPage.getComments().type(newTicket.comment);
+            newTicketPage.getAdminAreaAutocomplete().click();
+            newTicketPage.getOption().contains(newTicket.adminArea).click();
+            newTicketPage.getInputArea().type(newTicket.inputArea);
+            newTicketPage.getInputLanguage().type(newTicket.inputLanguage);
+            newTicketPage.getSelectPriority().click();
+            newTicketPage.getOption().contains(newTicket.priority).click();
+            newTicketPage.getSelectUrgency().click();
+            newTicketPage.getOption().contains(newTicket.urgency).click();
+            newTicketPage.getLookUpButton().click();
+            newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+            newTicketPage.getCheckbox().eq(0).click();
+            newTicketPage.getButtonNext().eq(1).click();
+            newTicketPage.getSelectFieldName().click();
+            newTicketPage.selectOption(newTicket.householdDataField).click();
+            newTicketPage.getInputValue().type("1");
+            newTicketPage.getButtonNext().contains("Save").click();
+
+            grievanceDetailsPage.checkElementsOnPage(
+              grievanceDetailsPage.textStatusAssigned,
+              newTicket.priority,
+              newTicket.urgency,
+              grievanceDetailsPage.textNotAssigment,
+              newTicket.category
+            );
+            grievanceDetailsPage
+              .getTicketIndividualID()
+              .contains(newTicket.individualID);
+            grievanceDetailsPage
+              .getAdministrativeLevel()
+              .contains(newTicket.adminArea);
+            grievanceDetailsPage
+              .getLanguagesSpoken()
+              .contains(newTicket.inputLanguage);
+            grievanceDetailsPage.getAreaVillage().contains(newTicket.inputArea);
+            grievanceDetailsPage
+              .getLabelIssueType()
+              .contains(newTicket.issueType);
+            grievanceDetailsPage.getLabelTickets().contains(newTicket.lookUp);
+            grievanceDetailsPage
+              .getTicketCategoryBy()
+              .contains(newTicket.createdBy);
+            grievanceDetailsPage
+              .getCheckbox()
+              .contains(
+                newTicket.householdDataField.split("s")[0].toLowerCase()
+              );
+          });
+        }
+      );
       it.skip("Create New Ticket - Data Change - Individual Data Update", () => {});
       it.skip("Create New Ticket - Data Change - Withdraw Individual", () => {});
       it.skip("Create New Ticket - Data Change - Withdraw Household", () => {});
