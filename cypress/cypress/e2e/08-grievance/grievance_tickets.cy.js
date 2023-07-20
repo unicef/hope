@@ -328,10 +328,20 @@ describe("Grievance", () => {
       // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
       // It makes sense to test all different issue types for Data Change tickets as they have different fields.
       ["DataChangeAddIndividual"].forEach((testData) => {
-        it("Create New Ticket - Data Change - Add Individual", function () {
+        it.only("Create New Ticket - Data Change - Add Individual", function () {
           let newTicket = this.newTicket[testData];
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
+          newTicketPage
+            .getLabelCategoryDescription()
+            .contains(
+              newTicketPage.textCategoryDescription[newTicket.category]
+            );
+          newTicketPage
+            .getLabelIssueTypeDescription()
+            .contains(
+              newTicketPage.textIssueTypeDescription[newTicket.issueType]
+            );
           newTicketPage.getButtonNext().click();
           newTicketPage.getHouseholdTab().should("be.visible");
           newTicketPage.getHouseholdTableRows(0).click();

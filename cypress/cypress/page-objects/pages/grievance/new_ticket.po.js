@@ -58,12 +58,70 @@ export default class NewTicket extends BaseComponent {
   optionUndefined = 'li[data-cy="select-option-undefined"]';
   optionZero = 'li[data-cy="select-option-0"]';
   optionOne = 'li[data-cy="select-option-1"]';
+  labelCategoryDescription = 'div[data-cy="label-Category Description"]';
+  labelIssueTypeDescription = 'div[data-cy="label-Issue Type Description"]';
 
   // Texts
   textLookUpHousehold = "LOOK UP HOUSEHOLD";
   textLookUpIndividual = "LOOK UP INDIVIDUAL";
   textTitle = "New Ticket";
   textNext = "Next";
+  textCategoryDescription = {
+    "Data Change":
+      "A grievance that is submitted to change in the households or beneficiary status",
+    "Grievance Complaint":
+      "A grievance submitted to express dissatisfaction made about an individual, UNICEF/NGO/Partner/Vendor, about a received service or about the process itself",
+    Referral:
+      "A grievance submitted to direct the reporting individual to another service provider/actor to provide support/help that is beyond the scope of work of UNICEF",
+    "Sensitive Grievance":
+      "A grievance that shall be treated with sensitivity or which individual wishes to submit anonymously",
+  };
+
+  textIssueTypeDescription = {
+    "Add Individual":
+      "A grievance submitted to specifically change in the households to add an individual",
+    "Household Data Update":
+      "A grievance submitted to change in the household data (Address, number of individuals, etc.)",
+    "Individual Data Update":
+      "A grievance submitted to change in the household’s individuals data (Family name, full name, birth date, etc.)",
+    "Withdraw Individual":
+      "A grievance submitted to remove an individual from within a household",
+    "Withdraw Household": "A grievance submitted to remove a household",
+    "Payment Related Complaint":
+      "A grievance submitted to complain about payments",
+    "FSP Related Complaint":
+      "A grievance to report dissatisfaction on service provided by a Financial Service Providers",
+    "Registration Related Complaint":
+      "A grievance submitted on issues/difficulties encountered during the registration of beneficiaries",
+    "Other Complaint":
+      "Other complaints that do not fall into specific predefined categories",
+    "Partner Related Complaint":
+      "A grievance submitted on issues encountered by an implementing partner",
+    "Bribery, corruption or kickback":
+      "Grievance on illicit payments or favors in exchange for personal gain",
+    "Data breach":
+      "Grievance on unauthorized access or disclosure of beneficiary data",
+    "Conflict of interest":
+      "Grievance on deception or falsification for personal gain",
+    "Fraud and forgery":
+      "Grievance related to identity theft or impersonation to benefit from someone’s entitlements",
+    "Fraud involving misuse of programme funds by third party":
+      "Grievance on forgery actions undertaken by third parties’ individuals",
+    "Gross mismanagement":
+      "Grievance on mismanagement leading to significant negative impact",
+    "Harassment and abuse of authority":
+      "Grievance related to intimidation, mistreatment, or abuse by those in authority",
+    "Inappropriate staff conduct":
+      "Grievance related to improper behavior or actions (physical or verbal) by program staff",
+    Miscellaneous:
+      "Other issues not falling into specific predefined categories",
+    "Personal disputes":
+      "Grievance on conflicts or disagreements between individuals",
+    "Sexual harassment and sexual exploitation":
+      "Grievance on unwanted advances, abuse, or exploitation of a sexual nature",
+    "Unauthorized use, misuse or waste of UNICEF property or funds":
+      "Grievance on improper or unauthorized handling or disposal of assets/funds",
+  };
   // Elements
   getTitle = () => cy.get(this.title);
   getSelectCategory = () => cy.get(this.selectCategory);
@@ -118,6 +176,8 @@ export default class NewTicket extends BaseComponent {
   getOptionUndefined = () => cy.get(this.optionUndefined);
   getOptionZero = () => cy.get(this.optionZero);
   getOptionOne = () => cy.get(this.optionOne);
+  getLabelCategoryDescription = () => cy.get(this.labelCategoryDescription);
+  getLabelIssueTypeDescription = () => cy.get(this.labelIssueTypeDescription);
 
   checkElementsOnPage() {
     this.getTitle().contains(this.textTitle);
