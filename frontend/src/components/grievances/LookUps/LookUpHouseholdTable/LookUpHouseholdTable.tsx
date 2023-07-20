@@ -7,7 +7,6 @@ import {
   useAllHouseholdsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';

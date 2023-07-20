@@ -7,7 +7,6 @@ import {
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
