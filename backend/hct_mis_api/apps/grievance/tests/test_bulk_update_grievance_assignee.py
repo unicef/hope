@@ -25,6 +25,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             assignedTo {
                 firstName
             }
+            status
         }
       }
     }

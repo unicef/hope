@@ -23,10 +23,8 @@ def remove_all_rules(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('steficon', '0003_migration'), ('steficon', '0004_migration'), ('steficon', '0005_migration'), ('steficon', '0006_migration'), ('steficon', '0007_empty_rules')]
-
     dependencies = [
-        ('targeting', '0028_migration'),
+        ('targeting', '0007_migration_squashed_0028_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('steficon', '0002_migration'),
     ]

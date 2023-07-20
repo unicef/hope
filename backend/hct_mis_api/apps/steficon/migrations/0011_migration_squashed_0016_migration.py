@@ -5,10 +5,8 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('steficon', '0011_migration'), ('steficon', '0012_migration'), ('steficon', '0013_migration'), ('steficon', '0014_migration'), ('steficon', '0015_migration'), ('steficon', '0016_migration')]
-
     dependencies = [
-        ('steficon', '0010_migration'),
+        ('steficon', '0008_reset_id_squashed_0010_migration'),
         ('targeting', '0031_migration'),
     ]
 
