@@ -36,7 +36,9 @@ def migrate_data_to_representations(business_area: BusinessArea) -> None:
     - adjust payments and payment_records to corresponding representations
 
     """
-    for program in Program.objects.filter(business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]):
+    for program in Program.objects.filter(
+        business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
+    ).order_by("status"):
         if program.status == Program.ACTIVE:
             target_populations_ids = TargetPopulation.objects.filter(
                 program=program,
