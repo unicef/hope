@@ -56,6 +56,18 @@ export const AssignedToDropdown = ({
     setInputValue(debouncedInputText);
   }, [debouncedInputText, setInputValue]);
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const sortOptionsDataByEmail = (options) => {
+    options.sort((a, b) => {
+      const emailA = a.node?.email?.toLowerCase();
+      const emailB = b.node?.email?.toLowerCase();
+      return emailA.localeCompare(emailB);
+    });
+    return options;
+  };
+
+  const sortedOptions = sortOptionsDataByEmail(optionsData);
+
   return (
     <StyledAutocomplete
       fullWidth={fullWidth}
@@ -84,7 +96,7 @@ export const AssignedToDropdown = ({
         return `${value?.email}`;
       }}
       value={value}
-      options={optionsData}
+      options={sortedOptions}
       renderInput={(params) => (
         <TextField
           {...params}
