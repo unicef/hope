@@ -7,7 +7,6 @@ import {
   useHouseholdLazyQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { decodeIdString } from '../../../../utils/utils';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpIndividualTableHeadCells';
@@ -47,7 +46,6 @@ export const LookUpIndividualTable = ({
   noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const [getHousehold, results] = useHouseholdLazyQuery();
-  const { programId } = useBaseUrl();
   useEffect(() => {
     if (results.data && !results.loading && !results.error) {
       setFieldValue('selectedHousehold', results.data.household);
@@ -80,7 +78,6 @@ export const LookUpIndividualTable = ({
     sex: [filter.sex],
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     flags: [],
-    programs: [decodeIdString(programId)],
     lastRegistrationDate: JSON.stringify({
       min: filter.lastRegistrationDateMin,
       max: filter.lastRegistrationDateMax,
