@@ -24,7 +24,7 @@ import {
   SurveyCategory,
   useAccountabilitySampleSizeLazyQuery,
   useAllAdminAreasQuery,
-  useAvailableFlowsLazyQuery,
+  useSurveyAvailableFlowsLazyQuery,
   useCreateSurveyAccountabilityMutation,
 } from '../../../../__generated__/graphql';
 import { LookUpSelection } from '../../../../components/accountability/Surveys/LookUps/LookUpSelection';
@@ -146,7 +146,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const [
     loadAvailableFlows,
     { data: flowsData, loading: flowsLoading },
-  ] = useAvailableFlowsLazyQuery({
+  ] = useSurveyAvailableFlowsLazyQuery({
     fetchPolicy: 'network-only',
   });
 
@@ -206,8 +206,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
         name: el.node.name,
       }))
     : [];
-  const mappedFlows = flowsData?.availableFlows?.length
-    ? flowsData.availableFlows.map((el) => ({ value: el.id, name: el.name }))
+  const mappedFlows = flowsData?.surveyAvailableFlows?.length
+    ? flowsData.surveyAvailableFlows.map((el) => ({ value: el.id, name: el.name }))
     : [];
 
   const getSampleSizePercentage = (): string => {
@@ -236,7 +236,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const matchTitle = (values): string => {
     return category === SurveyCategory.Sms || category === SurveyCategory.Manual
       ? values.title
-      : flowsData?.availableFlows.find((el) => values.title === el.id).name;
+      : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id).name;
   };
 
   const prepareMutationVariables = (

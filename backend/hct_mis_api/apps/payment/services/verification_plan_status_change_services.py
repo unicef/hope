@@ -2,6 +2,7 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketPaymentVerificationDetails,
@@ -9,7 +10,6 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
 
 class VerificationPlanStatusChangeServices:
@@ -88,7 +88,7 @@ class VerificationPlanStatusChangeServices:
 
     def _activate_rapidpro(self) -> None:
         business_area_slug = self.payment_verification_plan.business_area.slug
-        api = RapidProAPI(business_area_slug)
+        api = RapidProAPI(business_area_slug, RapidProAPI.MODE_VERIFICATION)
 
         hoh_ids = [
             pv.payment_obj.household.head_of_household.pk
@@ -96,7 +96,7 @@ class VerificationPlanStatusChangeServices:
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
-        successful_flows, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
+        successful_flows, error = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
         for successful_flow in successful_flows:
             self.payment_verification_plan.rapid_pro_flow_start_uuids.append(successful_flow.response["uuid"])
 
@@ -154,7 +154,9 @@ class VerificationPlanStatusChangeServices:
             )
 
             ticket_payment_verification_details = TicketPaymentVerificationDetails(
-                ticket=grievance_ticket, payment_verification_status=status, payment_verification=verification
+                ticket=grievance_ticket,
+                payment_verification_status=status,
+                payment_verification=verification,
             )
             ticket_payment_verification_details_list.append(ticket_payment_verification_details)
 
