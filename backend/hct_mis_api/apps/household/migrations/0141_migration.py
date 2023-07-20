@@ -5,7 +5,7 @@ import django.db.models.expressions
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("household", "0140_migration"),
+        ("household", "0130_migration_squashed_0140_migration"),
     ]
 
     operations = [
