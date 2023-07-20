@@ -26,7 +26,7 @@ def migrate_data_to_representations(business_area: BusinessArea) -> None:
     Take TargetPopulations:
     - all for programs in status ACTIVE
     - in status STATUS_READY_FOR_PAYMENT_MODULE and STATUS_READY_FOR_CASH_ASSIST for programs in status FINISHED,
-      delete other TargetPopulations
+    delete other TargetPopulations
     For all households and individuals in given TargetPopulations:
     - create new representations
     - copy all objects related to old households/individuals or adjust existing ones if they are related to program
@@ -67,9 +67,6 @@ def migrate_data_to_representations(business_area: BusinessArea) -> None:
 
         adjust_household_selections(household_selections, program)
 
-    # bound_other_objects_to_void_program(business_area)
-
-    # assign_non_program_rdi_to_biggest_program(business_area)
     assign_non_program_objects_to_biggest_program(business_area)
 
     adjust_payments(business_area)
@@ -96,7 +93,7 @@ def get_individual_representation_per_program_by_old_individual_id(
     ).first()
 
 
-def copy_household_representation(household: Household, program: Program) -> Household:
+def copy_household_representation(household: Household, program: Program) -> Optional[Household]:
     """
     Copy household into representation for given program.
     If representation in this program already exists, return it, so that it is not copied again.
@@ -106,26 +103,26 @@ def copy_household_representation(household: Household, program: Program) -> Hou
     if household.copied_from and not household.copied_to.exists():
         # this is already household representation, not original household
         return household
-    # If household already has any representations
+    # check if household already has any representation
     if household.copied_to.exists():
+        # if representation of this household already exists in this program, return it
         if Household.objects.filter(
             program=program,
             copied_from=household.copied_from,
         ).exists():
-            # Representation already exists in this program
-            household = get_household_representation_per_program_by_old_household_id(
+            household_representation = get_household_representation_per_program_by_old_household_id(
                 program.pk,
                 household.copied_from.pk,
             )
         else:
-            household = copy_household(household, program)
+            household_representation = copy_household(household, program)
     else:
         # for the first representation, adjust household and all related objects to it,
-        # instead of copying and assiign "copied_to"
-        household = adjust_household_to_representation(household, program)
+        # instead of copying and assign "copied_to"
+        household_representation = adjust_household_to_representation(household, program)
 
-    household.refresh_from_db()
-    return household
+    household_representation.refresh_from_db()
+    return household_representation
 
 
 def copy_household(household: Household, program: Program) -> Household:
@@ -193,28 +190,28 @@ def copy_individual_representation(
     program: Program,
     individual: Individual,
     household_representation: Optional[Household] = None,
-) -> Individual:
+) -> Optional[Individual]:
     # ignore if this is already individual representation - we want to copy only original individual
     if individual.copied_from and not individual.copied_to.exists():
         return individual
 
     # check if this is not the first representation of this individual
     if individual.copied_to.exists():
-        # check if there is already representation in this program
+        # if representation of this individual already exists in this program, return it
         if Individual.objects.filter(
             program=program,
             copied_from=individual,
         ).exists():
-            individual = get_individual_representation_per_program_by_old_individual_id(
+            individual_representation = get_individual_representation_per_program_by_old_individual_id(
                 program.pk,
                 individual.pk,
             )
         else:
-            individual = copy_individual(individual, program, household_representation)
+            individual_representation = copy_individual(individual, program, household_representation)
     else:
-        individual = adjust_individual_to_representation(individual, program, household_representation)
+        individual_representation = adjust_individual_to_representation(individual, program, household_representation)
 
-    return individual
+    return individual_representation
 
 
 def copy_individual(
@@ -224,7 +221,7 @@ def copy_individual(
     individual.copied_from_id = copied_from_id
     individual.origin_unicef_id = individual.unicef_id
     individual.pk = None
-    individual.unicef_id = None
+    individual.unicef_id = None  # type: ignore
     individual.program = program
     individual.household = household_representation
     individual.save()
@@ -480,20 +477,6 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
         PaymentRecord.objects.bulk_update(payment_record_updates, fields=["head_of_household_id", "household_id"])
 
 
-# def handle_rdi(household: Household, program: Program) -> None:
-#     household.refresh_from_db()
-#     rdi = household.registration_data_import
-#     if rdi:
-#         # Get only households that are not copies, but originals
-#         households = rdi.households.exclude(Q(copied_to=None) & Q(copied_from__isnull=False))
-#         for rdi_household in households:
-#             copy_household_representation(rdi_household, program)
-#
-#         copy_roles(households, program)
-#
-#         rdi.programs.add(program)
-
-
 def handle_rdis(households: QuerySet, program: Program) -> None:
     rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
     rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
@@ -535,53 +518,6 @@ def assign_non_program_objects_to_biggest_program(business_area: BusinessArea) -
     )
 
 
-# def assign_non_program_rdi_to_biggest_program(business_area: BusinessArea) -> None:
-#     biggest_program = get_biggest_program(business_area)
-#     if not biggest_program:
-#         return
-#     rdis = RegistrationDataImport.objects.filter(business_area=business_area, programs=None)
-#     # update rdis so they are bound to the biggest program
-#     rdi_through = RegistrationDataImport.programs.through
-#     rdi_through.objects.bulk_create(
-#         [rdi_through(registrationdataimport_id=rdi.id, program_id=biggest_program.id) for rdi in rdis]
-#     )
-#
-#     households = Household.objects.filter(
-#         registration_data_import__in=[rdi.id for rdi in rdis], business_area=business_area
-#     ).exclude(Q(copied_to=None) & Q(copied_from__isnull=False))
-#
-#     for household in households:
-#         copy_household_representation(household, biggest_program)
-#
-#     copy_roles(households, program=biggest_program)
-
-
-# def bound_other_objects_to_void_program(business_area: BusinessArea) -> None:
-#     """
-#     Create void program and bound all households and individuals without program to it.
-#     """
-#     void_program = create_void_program(business_area)
-#
-#     update_non_program_households_program(void_program, business_area)
-#     update_non_program_individuals_program(void_program, business_area)
-#
-#
-# def create_void_program(business_area: BusinessArea) -> Program:
-#     return Program.objects.get_or_create(
-#         name="Void program",
-#         status=Program.DRAFT,
-#         start_date=timezone.now(),
-#         end_date=timezone.datetime.max,
-#         business_area=business_area,
-#         budget=0,
-#         frequency_of_payments=Program.ONE_OFF,
-#         sector=Program.CHILD_PROTECTION,
-#         scope=Program.SCOPE_FOR_PARTNERS,
-#         cash_plus=True,
-#         population_goal=1,
-#     )[0]
-#
-#
 def update_non_program_households_program(program: Program, business_area: BusinessArea) -> None:
     households = Household.objects.filter(program__isnull=True, business_area=business_area)
     households_count = households.count()

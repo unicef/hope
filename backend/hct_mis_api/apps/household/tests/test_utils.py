@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 from unittest import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
@@ -58,8 +58,8 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 def create_origin_household_with_individual(
     business_area: BusinessArea,
     program_id: Optional[str],
-    household_kwargs=None,
-    individual_kwargs=None,
+    household_kwargs: Optional[Dict] = None,
+    individual_kwargs: Optional[Dict] = None,
 ) -> tuple[Household, Individual]:
     if household_kwargs is None:
         household_kwargs = {}
@@ -721,7 +721,7 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         individual_rdi4.household = self.household_rdi4
         individual_rdi4.save()
 
-    def test_assign_non_program_rdi_to_biggest_program(self):
+    def test_assign_non_program_rdi_to_biggest_program(self) -> None:
         assert self.rdi1.programs.count() == 0
         assert self.rdi2.programs.count() == 0
         assert self.rdi3.programs.count() == 0
@@ -870,7 +870,7 @@ class TestHandleRDIs(TestCase):
         self.household_rdi1_5_origin.refresh_from_db()
         self.individual_rdi1_5_origin.refresh_from_db()
 
-    def test_handle_rdis(self):
+    def test_handle_rdis(self) -> None:
         household_count = Household.objects.count()
         individual_count = Individual.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()

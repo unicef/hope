@@ -305,7 +305,7 @@ class TestMigrateDataToRepresentations(TestCase):
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
         )
 
-    def refresh_objects(self):
+    def refresh_objects(self) -> None:
         self.household1.refresh_from_db()
         self.individual1_1.refresh_from_db()
         self.individual1_2.refresh_from_db()
@@ -344,7 +344,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.payment_record7.refresh_from_db()
         self.rdi_with_3_hhs.refresh_from_db()
 
-    def test_migrate_data_to_representations(self):
+    def test_migrate_data_to_representations(self) -> None:
         household_count = Household.objects.filter(business_area=self.business_area).count()
         individual_count = Individual.objects.filter(business_area=self.business_area).count()
         document_count = Document.objects.filter(individual__business_area=self.business_area).count()
