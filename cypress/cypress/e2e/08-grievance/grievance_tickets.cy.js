@@ -615,7 +615,81 @@ describe("Grievance", () => {
           });
         }
       );
-      it.skip("Create New Ticket - Data Change - Individual Data Update", () => {});
+      ["Individual Data Update"].forEach((testData) => {
+        it.only(`Create New Ticket - Data Change - ${testData}`, function () {
+          let newTicket = this.newTicket[testData];
+          newTicketPage.chooseCategory(newTicket.category);
+          newTicketPage.chooseIssueType(newTicket.issueType);
+          newTicketPage
+            .getLabelCategoryDescription()
+            .contains(
+              newTicketPage.textCategoryDescription[newTicket.category]
+            );
+          newTicketPage
+            .getLabelIssueTypeDescription()
+            .contains(
+              newTicketPage.textIssueTypeDescription[newTicket.issueType]
+            );
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getHouseholdTab().should("be.visible");
+          newTicketPage.getHouseholdTableRows(0).click();
+          newTicketPage.getIndividualTab().click();
+          newTicketPage.getIndividualTableRows(0).click();
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getReceivedConsent().click();
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getDescription().type(newTicket.description);
+          newTicketPage.getComments().type(newTicket.comment);
+          newTicketPage.getAdminAreaAutocomplete().click();
+          newTicketPage.getOption().contains(newTicket.adminArea).click();
+          newTicketPage.getInputArea().type(newTicket.inputArea);
+          newTicketPage.getInputLanguage().type(newTicket.inputLanguage);
+          newTicketPage.getSelectPriority().click();
+          newTicketPage.getOption().contains(newTicket.priority).click();
+          newTicketPage.getSelectUrgency().click();
+          newTicketPage.getOption().contains(newTicket.urgency).click();
+          newTicketPage.getLookUpButton().click();
+          newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+          newTicketPage.getCheckbox().eq(0).click();
+          newTicketPage.getButtonNext().eq(1).click();
+          newTicketPage.getIndividualFieldName().click();
+          newTicketPage.selectOption(newTicket.individualDataField).click();
+          newTicketPage
+            .getInputIndividualData(newTicket.individualDataField)
+            .type(newTicket.newData);
+          newTicketPage.getButtonNext().contains("Save").click();
+
+          grievanceDetailsPage.checkElementsOnPage(
+            grievanceDetailsPage.textStatusAssigned,
+            newTicket.priority,
+            newTicket.urgency,
+            grievanceDetailsPage.textNotAssigment,
+            newTicket.category
+          );
+          grievanceDetailsPage
+            .getTicketIndividualID()
+            .contains(newTicket.individualID);
+          grievanceDetailsPage
+            .getAdministrativeLevel()
+            .contains(newTicket.adminArea);
+          grievanceDetailsPage
+            .getLanguagesSpoken()
+            .contains(newTicket.inputLanguage);
+          grievanceDetailsPage.getAreaVillage().contains(newTicket.inputArea);
+          grievanceDetailsPage
+            .getLabelIssueType()
+            .contains(newTicket.issueType);
+          grievanceDetailsPage.getLabelTickets().contains(newTicket.lookUp);
+          grievanceDetailsPage
+            .getTicketCategoryBy()
+            .contains(newTicket.createdBy);
+          grievanceDetailsPage
+            .getCheckbox()
+            .contains(newTicket.individualDataField.toLowerCase());
+          grievanceDetailsPage.getCheckbox().contains(newTicket.currentData);
+          grievanceDetailsPage.getCheckbox().contains(newTicket.newData);
+        });
+      });
       it.skip("Create New Ticket - Data Change - Withdraw Individual", () => {});
       it.skip("Create New Ticket - Data Change - Withdraw Household", () => {});
       it.skip("Create New Ticket - Grievance Complaint", () => {});

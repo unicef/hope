@@ -71,5 +71,24 @@
     "householdID": "HH-20-0000.0001",
     "householdDataField": "Females Age 18 - 59",
     "createdBy": "Cypress User"
+  },
+  "Individual Data Update":
+  {
+    "category": "Data Change",
+    "issueType": "Individual Data Update",
+    "description": "Test - Individual Data Update",
+    "comment": "Added comment and it is grate Individual Data Update",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "None",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "IND-88-0000.0002",
+    "householdID": "HH-20-0000.0001",
+    "individualDataField": "Family name",
+    "currentData": "Kowalska",
+    "newData": "Trattori",
+    "createdBy": "Cypress User"
   }
 }

@@ -63,6 +63,8 @@ export default class NewTicket extends BaseComponent {
   labelIssueTypeDescription = 'div[data-cy="label-Issue Type Description"]';
   selectFieldName =
     'div[data-cy="select-householdDataUpdateFields[0].fieldName"]';
+  individualFieldName =
+    'div[data-cy="select-individualDataUpdateFields[0].fieldName"]';
   inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]';
 
   // Texts
@@ -186,6 +188,7 @@ export default class NewTicket extends BaseComponent {
   getLabelIssueTypeDescription = () => cy.get(this.labelIssueTypeDescription);
   getSelectFieldName = () => cy.get(this.selectFieldName);
   getInputValue = () => cy.get(this.inputValue);
+  getIndividualFieldName = () => cy.get(this.individualFieldName);
 
   checkElementsOnPage() {
     this.getTitle().contains(this.textTitle);
@@ -205,5 +208,9 @@ export default class NewTicket extends BaseComponent {
 
   selectOption(optionName) {
     return cy.get(`li[data-cy="select-option-${optionName}"]`);
+  }
+
+  getInputIndividualData(fieldName) {
+    return cy.get(`div[data-cy="input-individual-data-${fieldName}"]`);
   }
 }
