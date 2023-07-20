@@ -132,7 +132,8 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
                 initialValues.issueType ===
                   GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
                 initialValues.issueType ===
-                  GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
+                  GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
+                initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
               label={t('LOOK UP INDIVIDUAL')}
             />
