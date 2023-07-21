@@ -1035,7 +1035,7 @@ class Query(graphene.ObjectType):
         }
 
     def resolve_all_rapid_pro_flows(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[RapidProFlow]:
-        api = RapidProAPI(business_area_slug)
+        api = RapidProAPI(business_area_slug, RapidProAPI.MODE_VERIFICATION)
         return api.get_flows()
 
     def resolve_payment_record_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
