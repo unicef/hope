@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth.models import AbstractUser
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from graphql import GraphQLError
@@ -10,6 +10,7 @@ from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -55,21 +56,33 @@ class MessageCrudServices:
             raise GraphQLError(err_msg)
 
         message.save()
+        phone_numbers = message.households.filter(
+            Q(head_of_household__phone_no__isnull=False) | ~Q(head_of_household__phone_no="")
+        ).values_list("head_of_household__phone_no", flat=True)
+        api = RapidProAPI(business_area.slug, RapidProAPI.MODE_MESSAGE)
+        api.broadcast_message(phone_numbers, message.body)
         return message
 
     @classmethod
     def _get_households(cls, input_data: dict) -> QuerySet[Household]:
         if household_ids := [decode_id_string(household) for household in input_data.get("households", [])]:
             return Household.objects.filter(id__in=household_ids).exclude(
-                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
             )
         elif target_population_id := input_data.get("target_population"):
             return Household.objects.filter(
                 selections__target_population__id=decode_id_string(target_population_id),
-            ).exclude(head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False)
+            ).exclude(
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
+            )
         elif registration_data_import_id := input_data.get("registration_data_import"):
             return Household.objects.filter(
                 registration_data_import__status=RegistrationDataImport.MERGED,
                 registration_data_import_id=decode_id_string(registration_data_import_id),
-            ).exclude(head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False)
+            ).exclude(
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
+            )
         return Household.objects.none()

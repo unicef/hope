@@ -8,8 +8,8 @@ from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProFlowResponse
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProFlowResponse
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
@@ -32,7 +32,7 @@ class TestCreateSurvey(APITestCase):
 
     AVAILABLE_FLOWS = """
     query AvailableFlows {
-        availableFlows {
+        surveyAvailableFlows {
             id
             name
         }
@@ -123,7 +123,7 @@ class TestCreateSurvey(APITestCase):
                 variables={
                     "input": {
                         "title": "Test survey",
-                        "category": Survey.CATEGORY_MANUAL,
+                        "category": Survey.CATEGORY_RAPID_PRO,
                         "samplingType": Survey.SAMPLING_FULL_LIST,
                         "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
                         "fullListArguments": {
@@ -136,19 +136,15 @@ class TestCreateSurvey(APITestCase):
             survey = Survey.objects.get(title="Test survey")
             self.assertTrue(task_mock.called)
             self.assertEqual(task_mock.call_args[0][0], survey.id)
-            self.assertEqual(task_mock.call_args[0][1], "flow123")
-            self.assertEqual(task_mock.call_args[0][2], self.business_area.id)
 
         households = self.tp.households.all()
         self.assertEqual(households[0].individuals.count(), 3)
-        phone_number_1 = households[0].individuals.first().phone_no
-        phone_number_2 = households[1].individuals.first().phone_no
-        phone_number_3 = households[2].individuals.first().phone_no
+        phone_number_1 = households[0].head_of_household.phone_no
+        phone_number_2 = households[1].head_of_household.phone_no
+        phone_number_3 = households[2].head_of_household.phone_no
 
-        with patch(
-            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
-        ):
-            start_flows_mock_1 = MagicMock(
+        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)):
+            start_flow_mock_1 = MagicMock(
                 return_value=(
                     [
                         RapidProFlowResponse(
@@ -162,23 +158,23 @@ class TestCreateSurvey(APITestCase):
                 )
             )
             with patch(
-                "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
-                start_flows_mock_1,
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.start_flow",
+                start_flow_mock_1,
             ):
                 survey.refresh_from_db()
                 self.assertEqual(len(survey.successful_rapid_pro_calls), 0)
 
-                send_survey_to_users(survey.id, "flow123", self.business_area.id)
+                send_survey_to_users(survey.id)
                 survey.refresh_from_db()
 
-                self.assertEqual(start_flows_mock_1.call_count, 1)
-                self.assertEqual(start_flows_mock_1.call_args[0][0], "flow123")
-                self.assertEqual(len(start_flows_mock_1.call_args[0][1]), 9)  # 3 inds in 3 households, 9 total
+                self.assertEqual(start_flow_mock_1.call_count, 1)
+                self.assertEqual(start_flow_mock_1.call_args[0][0], "flow123")
+                self.assertEqual(len(start_flow_mock_1.call_args[0][1]), 3)  # sending only to HOHs, 3 households
                 self.assertEqual(len(survey.successful_rapid_pro_calls), 1)
                 self.assertEqual(survey.successful_rapid_pro_calls[0]["flow_uuid"], "flow123")
                 self.assertEqual(survey.successful_rapid_pro_calls[0]["urns"], [phone_number_1, phone_number_2])
 
-            start_flows_mock_2 = MagicMock(
+            start_flow_mock_2 = MagicMock(
                 return_value=(
                     [
                         RapidProFlowResponse(
@@ -192,14 +188,14 @@ class TestCreateSurvey(APITestCase):
                 )
             )
             with patch(
-                "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
-                start_flows_mock_2,
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.start_flow",
+                start_flow_mock_2,
             ):
-                send_survey_to_users(survey.id, "flow123", self.business_area.id)
+                send_survey_to_users(survey.id)
                 survey.refresh_from_db()
-                self.assertEqual(start_flows_mock_2.call_count, 1)
-                self.assertEqual(start_flows_mock_2.call_args[0][0], "flow123")
-                self.assertEqual(len(start_flows_mock_2.call_args[0][1]), 7)  # 7 inds in households remaining total
+                self.assertEqual(start_flow_mock_2.call_count, 1)
+                self.assertEqual(start_flow_mock_2.call_args[0][0], "flow123")
+                self.assertEqual(len(start_flow_mock_2.call_args[0][1]), 1)  # 2 HOHs in households remaining total
                 self.assertEqual(len(survey.successful_rapid_pro_calls), 2)
                 self.assertEqual(survey.successful_rapid_pro_calls[1]["flow_uuid"], "flow123")
                 self.assertEqual(survey.successful_rapid_pro_calls[1]["urns"], [phone_number_3])
@@ -228,9 +224,9 @@ class TestCreateSurvey(APITestCase):
 
     def test_getting_available_flows(self) -> None:
         with patch(
-            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
+            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
         ), patch(
-            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flows",
+            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
             MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
         ):
             self.snapshot_graphql_request(

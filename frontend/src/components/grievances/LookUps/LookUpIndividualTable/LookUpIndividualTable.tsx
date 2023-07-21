@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
 import {
   AllIndividualsQuery,
   AllIndividualsQueryVariables,
-  useAllIndividualsQuery,
+  useAllIndividualsForPopulationTableQuery,
   useHouseholdLazyQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { decodeIdString } from '../../../../utils/utils';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
@@ -74,17 +74,16 @@ export const LookUpIndividualTable = ({
 
   const initialVariables: AllIndividualsQueryVariables = {
     businessArea,
-    search: filter.search,
-    admin2: [decodeIdString(filter?.admin2?.node?.id)],
-    sex: [filter.sex],
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
-    flags: [],
-    programs: [decodeIdString(filter.programs)],
+    sex: [filter.sex],
+    search: filter.search,
+    admin2: [filter.admin2],
+    flags: filter.flags,
+    status: filter.status,
     lastRegistrationDate: JSON.stringify({
       min: filter.lastRegistrationDateMin,
       max: filter.lastRegistrationDateMax,
     }),
-    status: filter.status,
     orderBy: filter.orderBy,
     householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
@@ -98,7 +97,8 @@ export const LookUpIndividualTable = ({
       >
         headCells={headCells}
         rowsPerPageOptions={[5, 10, 15, 20]}
-        query={useAllIndividualsQuery}
+        filterOrderBy={filter.orderBy}
+        query={useAllIndividualsForPopulationTableQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         renderRow={(row) => (
