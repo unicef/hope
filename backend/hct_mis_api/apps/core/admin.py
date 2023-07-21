@@ -410,7 +410,7 @@ UNICEF HOPE""",
             form = TestRapidproForm(request.POST)
             try:
                 if form.is_valid():
-                    api = RapidProAPI(self.object.slug)
+                    api = RapidProAPI(self.object.slug, RapidProAPI.MODE_VERIFICATION)
                     phone_number = form.cleaned_data["phone_number"]
                     flow_name = form.cleaned_data["flow_name"]
                     context["phone_number"] = phone_number

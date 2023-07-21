@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -95,20 +97,27 @@ mutation CreateAccountabilityCommunicationMessage (
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
-
-        self.snapshot_graphql_request(
-            request_string=self.MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
-            variables={
-                "input": {
-                    "title": "Test message",
-                    "body": "Test body",
-                    "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
-                    "samplingType": sampling_type,
-                    **self.sampling_data[sampling_type],
+        broadcast_message_mock = MagicMock(return_value=None)
+        with patch(
+            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
+        ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock):
+            self.snapshot_graphql_request(
+                request_string=self.MUTATION,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={
+                    "input": {
+                        "title": "Test message",
+                        "body": "Test body",
+                        "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
+                        "samplingType": sampling_type,
+                        **self.sampling_data[sampling_type],
+                    },
                 },
-            },
-        )
+            )
+            self.assertEqual(broadcast_message_mock.call_count, 1)
+            if sampling_type == Survey.SAMPLING_FULL_LIST:
+                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.target_population.households.count())
+            self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
 
     @parameterized.expand(
         [
@@ -120,17 +129,24 @@ mutation CreateAccountabilityCommunicationMessage (
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
-
-        self.snapshot_graphql_request(
-            request_string=self.MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
-            variables={
-                "input": {
-                    "title": "Test message",
-                    "body": "Test body",
-                    "households": [self.id_to_base64(hh.id, "HouseholdNode") for hh in self.households],
-                    "samplingType": sampling_type,
-                    **self.sampling_data[sampling_type],
+        broadcast_message_mock = MagicMock(return_value=None)
+        with patch(
+            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
+        ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock):
+            self.snapshot_graphql_request(
+                request_string=self.MUTATION,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={
+                    "input": {
+                        "title": "Test message",
+                        "body": "Test body",
+                        "households": [self.id_to_base64(hh.id, "HouseholdNode") for hh in self.households],
+                        "samplingType": sampling_type,
+                        **self.sampling_data[sampling_type],
+                    },
                 },
-            },
-        )
+            )
+            self.assertEqual(broadcast_message_mock.call_count, 1)
+            if sampling_type == Survey.SAMPLING_FULL_LIST:
+                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), len(self.households))
+            self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
