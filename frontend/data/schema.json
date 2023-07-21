@@ -22376,6 +22376,18 @@
             "deprecationReason": null
           },
           {
+            "name": "refuseReason",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -27385,6 +27397,12 @@
           },
           {
             "name": "MOBILE_MONEY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PRE_PAID_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -34207,6 +34225,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isUserGenerated",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "contentObject",
             "description": null,
             "args": [],
@@ -35722,6 +35752,12 @@
             "deprecationReason": null
           },
           {
+            "name": "PRE_PAID_CARD",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "REFERRAL",
             "description": null,
             "isDeprecated": false,
@@ -37232,6 +37268,12 @@
           },
           {
             "name": "MOBILE_MONEY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PRE_PAID_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -47347,6 +47389,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isUserGenerated",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "isDeprecated": false,
@@ -59072,6 +59126,33 @@
             "deprecationReason": null
           },
           {
+            "name": "exportPdfPaymentPlanSummary",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentPlanId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExportPDFPaymentPlanSummaryMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createTargetPopulation",
             "description": null,
             "args": [
@@ -59670,6 +59751,16 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "refuseReason",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -65573,6 +65664,29 @@
       {
         "kind": "OBJECT",
         "name": "ExcludeHouseholdsMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ExportPDFPaymentPlanSummaryMutation",
         "description": null,
         "fields": [
           {

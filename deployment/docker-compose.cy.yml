@@ -41,6 +41,8 @@ services:
     depends_on:
       - proxy
       - celery_worker
+    environment:
+      - BRANCH_NAME=${BRANCH_NAME}
     volumes:
       - ../cypress-results:/code/cypress/results
       - ../cypress-reports:/code/cypress/reports
@@ -71,6 +73,7 @@ services:
     command: "cy"
     volumes:
       - backend-data:/data
+
     depends_on:
       - db
       - redis
