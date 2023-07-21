@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
     FEMALE,
-    GRANDDAUGHER_GRANDSON,
+    GRANDDAUGHTER_GRANDSON,
     HEAD,
     MALE,
     NON_BENEFICIARY,
@@ -32,7 +32,9 @@ class TestRecalculateData(TestCase):
         create_afghanistan()
 
         business_area = BusinessArea.objects.first()
-        registration_data_import = RegistrationDataImportFactory(business_area=business_area)
+        registration_data_import = RegistrationDataImportFactory(
+            business_area=business_area
+        )
 
         household_data = {
             "business_area": business_area,
@@ -70,19 +72,27 @@ class TestRecalculateData(TestCase):
                 # "age": 39,
                 "relationship": COUSIN,
                 "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("1981-08-08", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "1981-08-08", "%Y-%m-%d"
+                ).date(),
                 "pregnant": True,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")
+                ),
                 "physical_disability": "LOT_DIFFICULTY",
             },
             {
                 "registration_data_import": registration_data_import,
                 # "age": 27,
-                "relationship": GRANDDAUGHER_GRANDSON,
+                "relationship": GRANDDAUGHTER_GRANDSON,
                 "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("1993-09-01", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "1993-09-01", "%Y-%m-%d"
+                ).date(),
                 "pregnant": True,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-07-03", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2021-07-03", "%Y-%m-%d")
+                ),
                 "selfcare_disability": "CANNOT_DO",
             },
             {
@@ -90,9 +100,13 @@ class TestRecalculateData(TestCase):
                 # "age": 0,
                 "relationship": HEAD,
                 "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2021-06-29", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "2021-06-29", "%Y-%m-%d"
+                ).date(),
                 "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")
+                ),
                 "memory_disability": "LOT_DIFFICULTY",
             },
             {
@@ -100,9 +114,13 @@ class TestRecalculateData(TestCase):
                 # "age": 5,
                 "relationship": BROTHER_SISTER,
                 "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "2015-07-29", "%Y-%m-%d"
+                ).date(),
                 "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")
+                ),
                 "seeing_disability": "LOT_DIFFICULTY",
                 "hearing_disability": "LOT_DIFFICULTY",
                 "physical_disability": "LOT_DIFFICULTY",
@@ -115,9 +133,13 @@ class TestRecalculateData(TestCase):
                 # "age": 11,
                 "relationship": AUNT_UNCLE,
                 "sex": FEMALE,
-                "birth_date": datetime.datetime.strptime("2009-07-29", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "2009-07-29", "%Y-%m-%d"
+                ).date(),
                 "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")
+                ),
                 "hearing_disability": "CANNOT_DO",
             },
             {
@@ -125,9 +147,13 @@ class TestRecalculateData(TestCase):
                 # "age": 5,
                 "relationship": NON_BENEFICIARY,
                 "sex": MALE,
-                "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "2015-07-29", "%Y-%m-%d"
+                ).date(),
                 "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")
+                ),
                 "hearing_disability": "CANNOT_DO",
             },
             {
@@ -135,15 +161,21 @@ class TestRecalculateData(TestCase):
                 # "age": 59,
                 "relationship": COUSIN,
                 "sex": MALE,
-                "birth_date": datetime.datetime.strptime("1961-07-29", "%Y-%m-%d").date(),
+                "birth_date": datetime.datetime.strptime(
+                    "1961-07-29", "%Y-%m-%d"
+                ).date(),
                 "pregnant": False,
-                "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
+                "first_registration_date": timezone.make_aware(
+                    datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")
+                ),
                 "memory_disability": "LOT_DIFFICULTY",
                 "comms_disability": "LOT_DIFFICULTY",
             },
         ]
 
-        cls.household, cls.individuals = create_household_and_individuals(household_data, individuals_data)
+        cls.household, cls.individuals = create_household_and_individuals(
+            household_data, individuals_data
+        )
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_0_5_count(self) -> None:
@@ -277,7 +309,9 @@ class TestRecalculateData(TestCase):
         household = Household.objects.get(pk=self.household.pk)
         self.assertEqual(household.pregnant_count, 2)
 
-    @patch("hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay")
+    @patch(
+        "hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay"
+    )
     @freeze_time("2021-07-29")
     def test_interval_recalculate_population_fields_task(
         self, recalculate_population_fields_task_mock: MagicMock
@@ -287,4 +321,6 @@ class TestRecalculateData(TestCase):
         )
 
         interval_recalculate_population_fields_task.delay()
-        recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[self.household.pk])
+        recalculate_population_fields_task_mock.assert_called_once_with(
+            household_ids=[self.household.pk]
+        )
