@@ -401,7 +401,9 @@ export type BusinessAreaNode = Node & {
   koboToken?: Maybe<Scalars['String']>,
   koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
-  rapidProApiKey?: Maybe<Scalars['String']>,
+  rapidProPaymentVerificationToken?: Maybe<Scalars['String']>,
+  rapidProMessagesToken?: Maybe<Scalars['String']>,
+  rapidProSurveyToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
@@ -1264,6 +1266,7 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
   MobileMoney = 'MOBILE_MONEY',
+  PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
@@ -4091,6 +4094,7 @@ export enum PaymentDeliveryType {
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
   MobileMoney = 'MOBILE_MONEY',
+  PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
@@ -4496,6 +4500,7 @@ export enum PaymentRecordDeliveryType {
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
   MobileMoney = 'MOBILE_MONEY',
+  PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
@@ -4999,7 +5004,7 @@ export type Query = {
   recipients?: Maybe<RecipientNodeConnection>,
   accountabilitySampleSize?: Maybe<AccountabilitySampleSizeNode>,
   surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  availableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>,
+  surveyAvailableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -7800,7 +7805,9 @@ export type UserBusinessAreaNode = Node & {
   koboToken?: Maybe<Scalars['String']>,
   koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
-  rapidProApiKey?: Maybe<Scalars['String']>,
+  rapidProPaymentVerificationToken?: Maybe<Scalars['String']>,
+  rapidProMessagesToken?: Maybe<Scalars['String']>,
+  rapidProSurveyToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
@@ -13373,12 +13380,12 @@ export type AllSurveysQuery = (
   )> }
 );
 
-export type AvailableFlowsQueryVariables = {};
+export type SurveyAvailableFlowsQueryVariables = {};
 
 
-export type AvailableFlowsQuery = (
+export type SurveyAvailableFlowsQuery = (
   { __typename?: 'Query' }
-  & { availableFlows: Maybe<Array<Maybe<(
+  & { surveyAvailableFlows: Maybe<Array<Maybe<(
     { __typename?: 'RapidProFlowNode' }
     & Pick<RapidProFlowNode, 'id' | 'name'>
   )>>> }
@@ -26188,56 +26195,56 @@ export function useAllSurveysLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
 export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
 export type AllSurveysQueryResult = ApolloReactCommon.QueryResult<AllSurveysQuery, AllSurveysQueryVariables>;
-export const AvailableFlowsDocument = gql`
-    query AvailableFlows {
-  availableFlows {
+export const SurveyAvailableFlowsDocument = gql`
+    query SurveyAvailableFlows {
+  surveyAvailableFlows {
     id
     name
   }
 }
     `;
-export type AvailableFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>, 'query'>;
+export type SurveyAvailableFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>, 'query'>;
 
-    export const AvailableFlowsComponent = (props: AvailableFlowsComponentProps) => (
-      <ApolloReactComponents.Query<AvailableFlowsQuery, AvailableFlowsQueryVariables> query={AvailableFlowsDocument} {...props} />
+    export const SurveyAvailableFlowsComponent = (props: SurveyAvailableFlowsComponentProps) => (
+      <ApolloReactComponents.Query<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables> query={SurveyAvailableFlowsDocument} {...props} />
     );
     
-export type AvailableFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AvailableFlowsQuery, AvailableFlowsQueryVariables> & TChildProps;
-export function withAvailableFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type SurveyAvailableFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables> & TChildProps;
+export function withSurveyAvailableFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  AvailableFlowsQuery,
-  AvailableFlowsQueryVariables,
-  AvailableFlowsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AvailableFlowsQuery, AvailableFlowsQueryVariables, AvailableFlowsProps<TChildProps>>(AvailableFlowsDocument, {
-      alias: 'availableFlows',
+  SurveyAvailableFlowsQuery,
+  SurveyAvailableFlowsQueryVariables,
+  SurveyAvailableFlowsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables, SurveyAvailableFlowsProps<TChildProps>>(SurveyAvailableFlowsDocument, {
+      alias: 'surveyAvailableFlows',
       ...operationOptions
     });
 };
 
 /**
- * __useAvailableFlowsQuery__
+ * __useSurveyAvailableFlowsQuery__
  *
- * To run a query within a React component, call `useAvailableFlowsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAvailableFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useSurveyAvailableFlowsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSurveyAvailableFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAvailableFlowsQuery({
+ * const { data, loading, error } = useSurveyAvailableFlowsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useAvailableFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AvailableFlowsQuery, AvailableFlowsQueryVariables>(AvailableFlowsDocument, baseOptions);
+export function useSurveyAvailableFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
+        return ApolloReactHooks.useQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, baseOptions);
       }
-export function useAvailableFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AvailableFlowsQuery, AvailableFlowsQueryVariables>(AvailableFlowsDocument, baseOptions);
+export function useSurveyAvailableFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, baseOptions);
         }
-export type AvailableFlowsQueryHookResult = ReturnType<typeof useAvailableFlowsQuery>;
-export type AvailableFlowsLazyQueryHookResult = ReturnType<typeof useAvailableFlowsLazyQuery>;
-export type AvailableFlowsQueryResult = ApolloReactCommon.QueryResult<AvailableFlowsQuery, AvailableFlowsQueryVariables>;
+export type SurveyAvailableFlowsQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsQuery>;
+export type SurveyAvailableFlowsLazyQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsLazyQuery>;
+export type SurveyAvailableFlowsQueryResult = ApolloReactCommon.QueryResult<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>;
 export const RecipientsDocument = gql`
     query Recipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $survey: String!, $orderBy: String) {
   recipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, survey: $survey, orderBy: $orderBy) {
@@ -28153,7 +28160,9 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProPaymentVerificationToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProMessagesToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProSurveyToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -30129,7 +30138,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
   accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeNode']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
   surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  availableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>,
+  surveyAvailableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -31260,7 +31269,9 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProPaymentVerificationToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProMessagesToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProSurveyToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
