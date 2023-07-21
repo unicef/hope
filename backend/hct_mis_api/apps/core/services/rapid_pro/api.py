@@ -249,20 +249,20 @@ class RapidProAPI:
             logger.exception(e)
             return str(e), None
 
-    def broadcast_message(self, phone_numbers: List[str], message: str):
+    def broadcast_message(self, phone_numbers: List[str], message: str) -> None:
         batch_size = 100
         batched_phone_numbers = [phone_numbers[i : i + batch_size] for i in range(0, len(phone_numbers), batch_size)]
         for batch in batched_phone_numbers:
             self._broadcast_message_batch(batch, message)
 
-    def _broadcast_message_batch(self, phone_numbers: List[str], message: str):
+    def _broadcast_message_batch(self, phone_numbers: List[str], message: str) -> None:
         data = {
             "urns": [f"{config.RAPID_PRO_PROVIDER}:{phone_number}" for phone_number in phone_numbers],
             "text": {"eng": message},
             "base_language": "eng",
         }
         try:
-            return self._handle_post_request(f"{RapidProAPI.BROADCAST_START_ENDPOINT}", data)
+            self._handle_post_request(f"{RapidProAPI.BROADCAST_START_ENDPOINT}", data)
         except requests.exceptions.HTTPError as e:
             print(e.response.json())
             errors = self._parse_json_urns_error(e, phone_numbers)

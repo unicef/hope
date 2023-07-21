@@ -43,7 +43,7 @@ class CheckRapidProVerificationTask:
             for payment_verification in payment_record_verifications
             if payment_verification.payment_obj.head_of_household is not None
         }
-        api = RapidProAPI(business_area.slug)
+        api = RapidProAPI(business_area.slug, RapidProAPI.MODE_VERIFICATION)
         rapid_pro_results = api.get_mapped_flow_runs(payment_verification_plan.rapid_pro_flow_start_uuids)
         payment_record_verification_to_update = self._get_payment_record_verification_to_update(
             rapid_pro_results, payment_record_verifications_phone_number_dict
