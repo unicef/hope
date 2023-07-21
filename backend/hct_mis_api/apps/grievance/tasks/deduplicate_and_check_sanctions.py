@@ -38,7 +38,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
             HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))
             return
 
-        DeduplicateTask(business_area.slug).deduplicate_individuals_from_other_source(individuals)
+        DeduplicateTask(business_area.slug, None).deduplicate_individuals_from_other_source(individuals)
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 

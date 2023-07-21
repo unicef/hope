@@ -4,7 +4,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -14,9 +14,10 @@ from hct_mis_api.apps.household.models import (
     SANCTION_LIST_CONFIRMED_MATCH,
     SANCTION_LIST_POSSIBLE_MATCH,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
+class TestIndividualFlagQuery(APITestCase):
     databases = "__all__"
 
     QUERY = """
@@ -39,6 +40,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(status="ACTIVE")
 
         individuals_to_create: List[Dict] = [
             {
@@ -49,6 +51,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
                 "deduplication_golden_record_status": NEEDS_ADJUDICATION,
+                "program": cls.program,
             },
             {
                 "full_name": "Robin Ford",
@@ -58,6 +61,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
                 "birth_date": "1946-02-15",
                 "id": "8ef39244-2884-459b-ad14-8d63a6fe4a4a",
                 "duplicate": True,
+                "program": cls.program,
             },
             {
                 "full_name": "Timothy Perry",
@@ -67,6 +71,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
                 "birth_date": "1983-12-21",
                 "id": "badd2d2d-7ea0-46f1-bb7a-69f385bacdcd",
                 "sanction_list_possible_match": True,
+                "program": cls.program,
             },
             {
                 "full_name": "Eric Torres",
@@ -76,6 +81,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
                 "birth_date": "1973-03-23",
                 "id": "2c1a26a3-2827-4a99-9000-a88091bf017c",
                 "sanction_list_confirmed_match": True,
+                "program": cls.program,
             },
             {
                 "full_name": "Kailan Shan",
@@ -87,6 +93,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
                 "deduplication_golden_record_status": NEEDS_ADJUDICATION,
                 "sanction_list_possible_match": True,
                 "sanction_list_confirmed_match": True,
+                "program": cls.program,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -95,6 +102,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
                 "phone_no": "001-296-358-5428-607",
                 "birth_date": "1969-11-29",
                 "id": "0fc995cc-ea72-4319-9bfe-9c9fda3ec191",
+                "program": cls.program,
             },
         ]
         create_household_and_individuals(None, individuals_to_create)
@@ -124,6 +132,6 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
     def test_individual_programme_filter(self, flags: Any) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"flags": flags},
         )
