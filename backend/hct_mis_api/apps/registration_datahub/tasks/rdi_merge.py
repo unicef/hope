@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedHousehold,
@@ -446,13 +447,27 @@ class RdiMergeTask:
 
             self._update_individuals_and_households(individual_ids)
 
+            imported_households.delete()
+
+            logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
+
             cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
             cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
 
         except Exception as e:
             logger.error(e)
 
+            # remove es individuals if exists
             remove_elasticsearch_documents_by_matching_ids(
                 individual_ids, get_individual_doc(obj_hct.business_area.slug)
+            )
+
+            # remove es households if exists
+            remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
+
+            # proactively try to remove also es data for imported individuals
+            remove_elasticsearch_documents_by_matching_ids(
+                list(imported_individuals.values_list("id", flat=True)),
+                get_imported_individual_doc(obj_hct.business_area.slug),
             )
             raise

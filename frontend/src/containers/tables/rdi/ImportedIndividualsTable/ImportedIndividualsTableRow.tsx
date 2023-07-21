@@ -1,6 +1,7 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
@@ -8,19 +9,17 @@ import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  ImportedIndividualMinimalFragment,
-} from '../../../../__generated__/graphql';
 
 interface ImportedIndividualsTableRowProps {
-  individual: ImportedIndividualMinimalFragment;
+  individual;
   choices: HouseholdChoiceDataQuery;
+  isMerged?: boolean;
 }
 
 export function ImportedIndividualsTableRow({
   individual,
   choices,
+  isMerged,
 }: ImportedIndividualsTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -34,10 +33,13 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const individualPath = `/${businessArea}/registration-data-import/individual/${individual.id}`;
+  const importedIndividualPath = `/${businessArea}/registration-data-import/individual/${individual.id}`;
+  const mergedIndividualPath = `/${businessArea}/population/individuals/${individual.id}`;
+  const url = isMerged ? mergedIndividualPath : importedIndividualPath;
+
   const handleClick = (e): void => {
     e.stopPropagation();
-    history.push(individualPath);
+    history.push(url);
   };
   return (
     <ClickableTableRow
@@ -47,7 +49,9 @@ export function ImportedIndividualsTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        <BlackLink to={individualPath}>{individual.importId}</BlackLink>
+        <BlackLink to={url}>
+          {isMerged ? individual.unicefId : individual.importId}
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
