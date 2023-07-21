@@ -9,7 +9,7 @@ export default class Targeting extends BaseComponent {
   maxNumberOfHouseholds = 'div[data-cy="filters-num-individuals-max"]';
   buttonCreateNew = 'a[data-cy="button-target-population-create-new"]';
   tabTitle = 'h6[data-cy="table-title"]';
-  tabColumnLabel = 'span[data-cy=" table-label"]';
+  tabColumnLabel = 'span[data-cy="table-label"]';
   statusOptions = 'li[role="option"]';
   rows = 'tr[role="checkbox"]';
 
