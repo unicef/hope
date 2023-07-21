@@ -6,6 +6,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils import timezone
 
@@ -15,6 +16,9 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
+    PaymentPlanPDFExportSevice,
+)
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -530,4 +534,46 @@ def payment_plan_exclude_beneficiaries(
 
     except Exception as e:
         logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
+    """create PDF file with summary and sent an enail to request user"""
+    try:
+        from hct_mis_api.apps.core.models import FileTemp
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        user = get_user_model().objects.get(pk=user_id)
+
+        with transaction.atomic():
+            # regenerate PDF always
+            # remove old export_pdf_file_summary
+            if payment_plan.export_pdf_file_summary:
+                payment_plan.export_pdf_file_summary.file.delete()
+                payment_plan.export_pdf_file_summary.delete()
+                payment_plan.export_pdf_file_summary = None
+
+            service = PaymentPlanPDFExportSevice(payment_plan)
+            pdf, filename = service.generate_pdf_summary()
+
+            file_pdf_obj = FileTemp(
+                object_id=payment_plan.pk,
+                content_type=get_content_type_for_model(payment_plan),
+                created_by=user,
+            )
+            file_pdf_obj.file.save(filename, ContentFile(pdf))
+
+            payment_plan.export_pdf_file_summary = file_pdf_obj
+            # TODO: maybe will add background status
+            # payment_plan.background_action_status_none()
+            payment_plan.save()
+
+            transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+
+    except Exception as e:
+        logger.exception("Export PDF Payment Plan Summary Error")
         raise self.retry(exc=e)

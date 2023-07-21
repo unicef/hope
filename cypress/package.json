@@ -33,6 +33,7 @@
     "test": "npm run scripts || (npm run posttest && exit 1)"
   },
   "dependencies": {
+    "axios": "^1.4.0",
     "chart.js": "^4.3.0",
     "chartjs": "^0.3.24",
     "cy-verify-downloads": "^0.1.14",
