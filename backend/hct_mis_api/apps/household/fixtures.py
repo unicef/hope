@@ -32,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 faker = Faker()
@@ -190,7 +191,7 @@ class IndividualFactory(DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
     unicef_id = factory.Sequence(lambda n: f"IND-{n}")
     individual_collection = factory.SubFactory(IndividualCollectionFactory)
-    # program = factory.SubFactory(ProgramFactory)
+    program = factory.SubFactory(ProgramFactory)
 
 
 class BankAccountInfoFactory(DjangoModelFactory):

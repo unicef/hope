@@ -70,7 +70,7 @@ def log_create(
     mapping: Dict,
     business_area_field: Any,
     user: Optional[Union["AbstractUser", "User"]] = None,
-    program_id: Optional["UUID"] = None,
+    program_id: Optional[Union["UUID", str]] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:
