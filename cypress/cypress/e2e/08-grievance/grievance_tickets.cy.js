@@ -868,13 +868,19 @@ describe("Grievance", () => {
           newTicketPage.getOption().contains(newTicket.priority).click();
           newTicketPage.getSelectUrgency().click();
           newTicketPage.getOption().contains(newTicket.urgency).click();
-          newTicketPage
-            .getLookUpButton()
-            .contains("Look up Payment Record")
-            .click();
-          newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
-          newTicketPage.getCheckbox().eq(0).click();
-          newTicketPage.getButtonNext().eq(1).click();
+          if (
+            ["Payment Related Complaint", "FSP Related Complaint"].includes(
+              testData
+            )
+          ) {
+            newTicketPage
+              .getLookUpButton()
+              .contains("Look up Payment Record")
+              .click();
+            newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+            newTicketPage.getCheckbox().eq(0).click();
+            newTicketPage.getButtonNext().eq(1).click();
+          }
         });
       });
       it.skip("Create New Ticket - Negative Feedback", () => {});

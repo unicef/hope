@@ -135,7 +135,7 @@
     "inputLanguage": "Polish",
     "priority": "Low",
     "urgency": "Not urgent",
-    "lookUp": "RCPT-0060-23-0.000.019",
+    "lookUp": "RCPT-0060-23-0.000.058",
     "individualID": "IND-88-0000.0006",
     "householdID": "HH-20-0000.0002",
     "createdBy": "Cypress User"
@@ -151,7 +151,7 @@
     "inputLanguage": "Polish",
     "priority": "Low",
     "urgency": "Not urgent",
-    "lookUp": "GRV-0000003",
+    "lookUp": "RCPT-0060-23-0.000.058",
     "individualID": "-",
     "householdID": "HH-20-0000.0002",
     "createdBy": "Cypress User"
@@ -167,7 +167,7 @@
     "inputLanguage": "Polish",
     "priority": "Low",
     "urgency": "Not urgent",
-    "lookUp": "GRV-0000003",
+    "lookUp": "RCPT-0060-23-0.000.058",
     "individualID": "-",
     "householdID": "-",
     "createdBy": "Cypress User"
@@ -183,7 +183,7 @@
     "inputLanguage": "Polish",
     "priority": "Low",
     "urgency": "Not urgent",
-    "lookUp": "GRV-0000003",
+    "lookUp": "RCPT-0060-23-0.000.058",
     "individualID": "-",
     "householdID": "-",
     "createdBy": "Cypress User"
@@ -199,7 +199,7 @@
     "inputLanguage": "Polish",
     "priority": "Low",
     "urgency": "Not urgent",
-    "lookUp": "GRV-0000003",
+    "lookUp": "RCPT-0060-23-0.000.058",
     "individualID": "-",
     "householdID": "-",
     "createdBy": "Cypress User"
