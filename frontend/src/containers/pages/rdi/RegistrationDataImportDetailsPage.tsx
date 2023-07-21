@@ -4,6 +4,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  RegistrationDataImportStatus,
+  useHouseholdChoiceDataQuery,
+  useRegistrationDataImportQuery,
+} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -11,18 +16,12 @@ import { TableWrapper } from '../../../components/core/TableWrapper';
 import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import {
-  RegistrationDataImportStatus,
-  useHouseholdChoiceDataQuery,
-  useRegistrationDataImportQuery,
-} from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
-import {HouseholdTable} from "../../tables/population/HouseholdTable";
 
 const Container = styled.div`
   && {
@@ -84,59 +83,64 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     stopPolling();
   }
 
-  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+  const isMerged =
+    RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
 
-  const RegistrationContainer = ({ isErased }) => {
+  const RegistrationContainer = ({
+    isErased,
+  }: {
+    isErased: boolean;
+  }): React.ReactElement => {
     return (
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
-        { isErased ? null : (
-            <TableWrapper>
-              <ContainerColumnWithBorder>
-                <Title>
-                  <Typography variant='h6'>
-                    {isMerged ? t('Population Preview') : t('Import Preview')}
-                  </Typography>
-                </Title>
-                <TabsContainer>
-                  <StyledTabs
-                    value={selectedTab}
-                    onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                      setSelectedTab(newValue)
-                    }
-                    indicatorColor='primary'
-                    textColor='primary'
-                    variant='fullWidth'
-                    aria-label='full width tabs example'
-                  >
-                    <Tab label={t('Households')} />
-                    <Tab label={t('Individuals')} />
-                  </StyledTabs>
-                </TabsContainer>
-                <TabPanel value={selectedTab} index={0}>
-                  <ImportedHouseholdTable
-                    key={`${data.registrationDataImport.status}-household`}
-                    isMerged={isMerged}
-                    rdiId={id}
-                    businessArea={businessArea}
-                  />
-                </TabPanel>
-                <TabPanel value={selectedTab} index={1}>
-                  <ImportedIndividualsTable
-                    showCheckbox
-                    rdiId={id}
-                    isMerged={isMerged}
-                    businessArea={businessArea}
-                    key={`${data.registrationDataImport.status}-individual`}
-                    choicesData={choicesData}
-                  />
-                </TabPanel>
-              </ContainerColumnWithBorder>
-            </TableWrapper>
+        {isErased ? null : (
+          <TableWrapper>
+            <ContainerColumnWithBorder>
+              <Title>
+                <Typography variant='h6'>
+                  {isMerged ? t('Population Preview') : t('Import Preview')}
+                </Typography>
+              </Title>
+              <TabsContainer>
+                <StyledTabs
+                  value={selectedTab}
+                  onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
+                    setSelectedTab(newValue)
+                  }
+                  indicatorColor='primary'
+                  textColor='primary'
+                  variant='fullWidth'
+                  aria-label='full width tabs example'
+                >
+                  <Tab label={t('Households')} />
+                  <Tab label={t('Individuals')} />
+                </StyledTabs>
+              </TabsContainer>
+              <TabPanel value={selectedTab} index={0}>
+                <ImportedHouseholdTable
+                  key={`${data.registrationDataImport.status}-household`}
+                  isMerged={isMerged}
+                  rdiId={id}
+                  businessArea={businessArea}
+                />
+              </TabPanel>
+              <TabPanel value={selectedTab} index={1}>
+                <ImportedIndividualsTable
+                  showCheckbox
+                  rdiId={id}
+                  isMerged={isMerged}
+                  businessArea={businessArea}
+                  key={`${data.registrationDataImport.status}-individual`}
+                  choicesData={choicesData}
+                />
+              </TabPanel>
+            </ContainerColumnWithBorder>
+          </TableWrapper>
         )}
       </Container>
-    )
-  }
+    );
+  };
 
   return (
     <div>

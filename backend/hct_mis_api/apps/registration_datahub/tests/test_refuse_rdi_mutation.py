@@ -25,14 +25,11 @@ class TestRefuseRdiMutation(APITestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     REFUSE_IMPORT_QUERY = """
-      mutation RefuseRegistrationDataImportMutation(
-        $id: ID!
-      ) {
-        refuseRegistrationDataImport(
-          id: $id
-        ) {
+      mutation RefuseRDI($id: ID!, $refuseReason: String) {
+        refuseRegistrationDataImport(id: $id, refuseReason: $refuseReason) {
           registrationDataImport {
             status
+            refuseReason
           }
         }
       }
@@ -101,3 +98,23 @@ class TestRefuseRdiMutation(APITestCase):
 
         self.assertEqual(ImportedHousehold.objects.all().count(), 0)
         self.assertEqual(ImportedIndividual.objects.all().count(), 0)
+
+    def test_refuse_registration_data_import_with_reason(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+
+        rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
+        rdi_hub = RegistrationDataImportDatahubFactory()
+        rdi.datahub_id = rdi_hub.id
+        rdi.save()
+
+        imported_household = ImportedHouseholdFactory(registration_data_import=rdi_hub)
+        ImportedIndividualFactory(household=imported_household)
+
+        self.snapshot_graphql_request(
+            request_string=self.REFUSE_IMPORT_QUERY,
+            context={"user": self.user},
+            variables={
+                "id": self.id_to_base64(rdi.id, "RegistrationDataImportNode"),
+                "refuseReason": "This is refuse reason",
+            },
+        )

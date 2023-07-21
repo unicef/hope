@@ -256,7 +256,6 @@ stages:
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
-
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
@@ -267,6 +266,7 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+          
 
   - stage: e2e_tests
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
@@ -296,6 +296,7 @@ stages:
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
+               BRANCH_NAME=$(System.PullRequest.SourceBranch)
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
@@ -306,3 +307,7 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST E2E Results'
+          - task: PublishBuildArtifacts@1 
+            displayName: 'Publish Test Report Artifacts'
+            inputs:
+              PathtoPublish: './cypress-reports'
