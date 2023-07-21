@@ -55,6 +55,7 @@ from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     MARITAL_STATUS_CHOICE,
+    NONE,
     OBSERVED_DISABILITY_CHOICE,
     ORG_ENUMERATOR_CHOICES,
     REGISTRATION_METHOD_CHOICES,
@@ -1234,7 +1235,11 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Does the individual have disability?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in OBSERVED_DISABILITY_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in OBSERVED_DISABILITY_CHOICE
+            if value != NONE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "observed_disability_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
