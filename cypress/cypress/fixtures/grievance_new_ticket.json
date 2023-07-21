@@ -90,5 +90,118 @@
     "currentData": "Kowalska",
     "newData": "Trattori",
     "createdBy": "Cypress User"
+  },
+  "Withdraw Individual":
+  {
+    "category": "Data Change",
+    "issueType": "Withdraw Individual",
+    "description": "Test - Withdraw Individual",
+    "comment": "Withdraw Individual - Comment?!?",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "None",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "IND-88-0000.0002",
+    "householdID": "HH-20-0000.0001",
+    "createdBy": "Cypress User",
+    "familyName": "Angela Kowalska"
+  },
+  "Withdraw Household":
+  {
+    "category": "Data Change",
+    "issueType": "Withdraw Household",
+    "description": "Test - Withdraw Household",
+    "comment": "",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "Polish",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "-",
+    "householdID": "HH-20-0000.0001",
+    "createdBy": "Cypress User"
+  },
+  "Payment Related Complaint":
+  {
+    "category": "Grievance Complaint",
+    "issueType": "Payment Related Complaint",
+    "description": "Test - Withdraw Household",
+    "comment": "",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "Polish",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "RCPT-0060-23-0.000.019",
+    "individualID": "IND-88-0000.0006",
+    "householdID": "HH-20-0000.0002",
+    "createdBy": "Cypress User"
+  },
+  "FSP Related Complaint":
+  {
+    "category": "Grievance Complaint",
+    "issueType": "FSP Related Complaint",
+    "description": "Test - Withdraw Household",
+    "comment": "",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "Polish",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "-",
+    "householdID": "HH-20-0000.0002",
+    "createdBy": "Cypress User"
+  },
+  "Registration Related Complaint":
+  {
+    "category": "Grievance Complaint",
+    "issueType": "Registration Related Complaint",
+    "description": "Test - Withdraw Household",
+    "comment": "",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "Polish",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "-",
+    "householdID": "-",
+    "createdBy": "Cypress User"
+  },
+  "Other Complaint":
+  {
+    "category": "Grievance Complaint",
+    "issueType": "Other Complaint",
+    "description": "Test - Withdraw Household",
+    "comment": "",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "Polish",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "-",
+    "householdID": "-",
+    "createdBy": "Cypress User"
+  },
+  "Partner Related Complaint":
+  {
+    "category": "Grievance Complaint",
+    "issueType": "Partner Related Complaint",
+    "description": "Test - Withdraw Household",
+    "comment": "",
+    "adminArea": "Pul-e-Khumri",
+    "inputArea": "Test Area",
+    "inputLanguage": "Polish",
+    "priority": "Low",
+    "urgency": "Not urgent",
+    "lookUp": "GRV-0000003",
+    "individualID": "-",
+    "householdID": "-",
+    "createdBy": "Cypress User"
   }
 }
