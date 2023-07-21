@@ -57,7 +57,6 @@ class RapidProAPI:
         if not token:
             raise TokenNotProvided(f"Token is not set for {business_area.name}.")
         self.url = settings.RAPID_PRO_URL
-        print({"Authorization": f"Token {token}"})
         self._client.headers.update({"Authorization": f"Token {token}"})
 
     def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> Dict:
@@ -72,9 +71,6 @@ class RapidProAPI:
         return response.json()
 
     def _handle_post_request(self, url: str, data: Dict) -> Dict:
-        print(f"{self._get_url()}{url}")
-
-        print(json.dumps(data))
         response = self._client.post(url=f"{self._get_url()}{url}", json=data)
         try:
             response.raise_for_status()
