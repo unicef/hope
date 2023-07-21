@@ -835,6 +835,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -959,6 +960,10 @@ type EraseRegistrationDataImportMutation {
 }
 
 type ExcludeHouseholdsMutation {
+  paymentPlan: PaymentPlanNode
+}
+
+type ExportPDFPaymentPlanSummaryMutation {
   paymentPlan: PaymentPlanNode
 }
 
@@ -2428,6 +2433,7 @@ type LogEntryNode implements Node {
   user: UserNode
   businessArea: UserBusinessAreaNode
   timestamp: DateTime
+  isUserGenerated: Boolean
 }
 
 type LogEntryNodeConnection {
@@ -2511,6 +2517,7 @@ type Mutations {
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
+  exportPdfPaymentPlanSummary(paymentPlanId: ID!): ExportPDFPaymentPlanSummaryMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2529,7 +2536,7 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
-  refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
+  refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
@@ -2600,6 +2607,7 @@ enum PaymentDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2952,6 +2960,7 @@ enum PaymentRecordDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -3046,6 +3055,7 @@ type PaymentVerificationLogEntryNode implements Node {
   user: UserNode
   businessArea: UserBusinessAreaNode
   timestamp: DateTime
+  isUserGenerated: Boolean
   contentObject: PaymentVerificationPlanNode
 }
 
@@ -3595,6 +3605,7 @@ type RegistrationDataImportNode implements Node {
   screenBeneficiary: Boolean!
   excluded: Boolean!
   erased: Boolean!
+  refuseReason: String
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!

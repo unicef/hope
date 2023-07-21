@@ -61,6 +61,11 @@ api_patterns = [
         name="download-payment-plan-payment-list",
     ),
     path(
+        "download-payment-plan-payment-summary-pdf/<str:payment_plan_id>",
+        hct_mis_api.apps.payment.views.download_payment_plan_summary_pdf,
+        name="download-payment-plan-summary-pdf",
+    ),
+    path(
         "download-sanction-template",
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),

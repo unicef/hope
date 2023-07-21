@@ -246,6 +246,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_CHEQUE = "Cheque"
     DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
     DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
+    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
     DELIVERY_TYPE_REFERRAL = "Referral"
     DELIVERY_TYPE_TRANSFER = "Transfer"
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
@@ -258,6 +259,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_CHEQUE,
         DELIVERY_TYPE_DEPOSIT_TO_CARD,
         DELIVERY_TYPE_MOBILE_MONEY,
+        DELIVERY_TYPE_PRE_PAID_CARD,
         DELIVERY_TYPE_REFERRAL,
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
@@ -271,6 +273,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_CHEQUE, _("Cheque")),
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
         (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
+        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
         (DELIVERY_TYPE_REFERRAL, _("Referral")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
@@ -441,6 +444,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
     export_file_per_fsp = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    export_pdf_file_summary = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
     steficon_rule = models.ForeignKey(
@@ -761,11 +767,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def has_export_file(self) -> bool:
+        """
+        for Locked plan return export_file_entitlement file
+        for Accepted and Finished export_file_per_fsp file
+        """
         try:
             if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-                return self.export_file_per_fsp is not None or FileTemp.objects.filter(object_id=self.id).exists()
+                return self.export_file_per_fsp is not None
             else:
                 return False
         except FileTemp.DoesNotExist:
@@ -773,12 +783,20 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
+        """
+        for Locked plan return export_file_entitlement file link
+        for Accepted and Finished export_file_per_fsp file link
+        """
         if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
-            return self.export_file_entitlement.file.url
+            if self.export_file_entitlement and self.export_file_entitlement.file:
+                return self.export_file_entitlement.file.url
+            else:
+                return None
         elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-            if self.export_file_per_fsp:
+            if self.export_file_per_fsp and self.export_file_per_fsp.file:
                 return self.export_file_per_fsp.file.url
-            return FileTemp.objects.filter(object_id=self.id).order_by("-created").first().file.url
+            else:
+                return None
         else:
             return None
 
