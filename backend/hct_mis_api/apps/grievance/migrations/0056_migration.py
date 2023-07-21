@@ -5,7 +5,7 @@ from django.db import migrations
 def update_status_for_not_assigned_tickets(apps, schema_editor):
 
     GrievanceTicket = apps.get_model("grievance", "GrievanceTicket")
-    GrievanceTicket.filter(status=GrievanceTicket.STATUS_ASSIGNED, assigned_to=None).update(status=GrievanceTicket.STATUS_NEW)
+    GrievanceTicket.objects.filter(status=GrievanceTicket.STATUS_ASSIGNED, assigned_to=None).update(status=GrievanceTicket.STATUS_NEW)
 
 
 class Migration(migrations.Migration):
