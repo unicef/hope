@@ -634,7 +634,7 @@ export const getFullNodeFromEdgesById = (edges, id) => {
   return edges.find((edge) => edge.node.id === id)?.node || null;
 };
 
-export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
+export const getFlexFieldTextValue = (_key, value, fieldAttribute): string => {
   let textValue = value;
   if (!fieldAttribute) return textValue;
   if (fieldAttribute.type === 'SELECT_ONE') {
@@ -648,6 +648,7 @@ export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
     );
     textValue = values.map((item) => item.labelEn).join(', ');
   }
+
   return textValue;
 };
 
