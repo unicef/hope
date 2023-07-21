@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                     ("BROTHER_SISTER", "Brother / Sister"),
                     ("COUSIN", "Cousin"),
                     ("DAUGHTERINLAW_SONINLAW", "Daughter-in-law / Son-in-law"),
-                    ("GRANDDAUGHTER_GRANDSON", "Granddaughter / Grandson"),
+                    ("GRANDDAUGHER_GRANDSON", "Granddaughter / Grandson"),
                     ("GRANDMOTHER_GRANDFATHER", "Grandmother / Grandfather"),
                     ("HEAD", "Head of household (self)"),
                     ("MOTHER_FATHER", "Mother / Father"),
