@@ -47,6 +47,5 @@ class SurveyCrudServices:
 
         if not result.households:
             raise Exception("There are no selected recipients.")
-
         survey.save()
         return survey
