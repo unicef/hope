@@ -27,7 +27,7 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
         Feedback.POSITIVE_FEEDBACK if model_type == TicketPositiveFeedbackDetails else Feedback.NEGATIVE_FEEDBACK
     )
 
-    # Switch off aut_now_add, so newly created feedbacks will have the same create_at timestamp
+    # Switch off aut_now_add, so newly created feedbacks will have the same created_at timestamp
     Feedback._meta.get_field("created_at").auto_now_add = False
     try:
         for page_number in paginator.page_range:
