@@ -3,12 +3,11 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
-    NegativeFeedbackTicketWithExtrasFactory,
     NegativeFeedbackTicketWithoutExtrasFactory,
-    PositiveFeedbackTicketWithExtrasFactory,
     PositiveFeedbackTicketWithoutExtrasFactory,
 )
 from hct_mis_api.apps.grievance.models import (
@@ -16,7 +15,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketNegativeFeedbackDetails,
     TicketPositiveFeedbackDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.one_time_scripts.move_tickets_to_feedback import (
     move_tickets_to_feedback,
@@ -28,42 +27,46 @@ class TestMigrationFosterChild(TestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
 
+        cls.business_area = BusinessArea.objects.first()
         cls.user = UserFactory()
+
         cls.program_1 = ProgramFactory()
         cls.program_2 = ProgramFactory()
+
         cls.admin2_1 = AreaFactory()
         cls.admin2_2 = AreaFactory()
 
-        cls.household_1, cls.individuals_1 = create_household_and_individuals()
-        cls.household_2, cls.individuals_2 = create_household_and_individuals()
+        cls.individual_1 = IndividualFactory(household=None)
+        cls.household_1 = HouseholdFactory(head_of_household=cls.individual_1)
+
+        cls.individual_2 = IndividualFactory(household=None)
+        cls.household_2 = HouseholdFactory(head_of_household=cls.individual_2)
 
         cls.ticket_1 = GrievanceTicketFactory(description="grievance_ticket_1_description", programme=cls.program_1)
         cls.ticket_positive_1 = PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.ticket_1)
 
         cls.ticket_2 = GrievanceTicketFactory(language="grievance_ticket_2_language")
-        cls.ticket_positive_2 = PositiveFeedbackTicketWithExtrasFactory(ticket=cls.ticket_2)
-        cls.ticket_positive_2.household = cls.household_1
-        cls.ticket_positive_2.save()
+        cls.ticket_positive_2 = PositiveFeedbackTicketWithoutExtrasFactory(
+            ticket=cls.ticket_2, household=cls.household_1
+        )
 
-        cls.ticket_3 = GrievanceTicketFactory(consent=False, programme=cls.program_2)
-        cls.ticket_positive_3 = PositiveFeedbackTicketWithExtrasFactory(ticket=cls.ticket_3)
-        cls.ticket_positive_3.household = cls.household_1
-        cls.ticket_positive_3.individual = cls.individuals_1[0]
-        cls.ticket_positive_3.save()
+        cls.ticket_3 = GrievanceTicketFactory(programme=cls.program_2, consent=False)
+        cls.ticket_positive_3 = PositiveFeedbackTicketWithoutExtrasFactory(
+            ticket=cls.ticket_3, household=cls.household_1, individual=cls.individual_1
+        )
 
         cls.ticket_4 = GrievanceTicketFactory(comments="grievance_ticket_4_comments", admin2=cls.admin2_1)
         cls.ticket_negative_1 = NegativeFeedbackTicketWithoutExtrasFactory(ticket=cls.ticket_4)
 
         cls.ticket_5 = GrievanceTicketFactory(area="grievance_ticket_5_area")
-        cls.ticket_negative_2 = NegativeFeedbackTicketWithExtrasFactory(ticket=cls.ticket_5)
-        cls.ticket_negative_2.household = cls.household_2
-        cls.ticket_negative_2.save()
+        cls.ticket_negative_2 = NegativeFeedbackTicketWithoutExtrasFactory(
+            ticket=cls.ticket_5, household=cls.household_2
+        )
 
         cls.ticket_6 = GrievanceTicketFactory(admin2=cls.admin2_2, consent=True)
-        cls.ticket_negative_3 = NegativeFeedbackTicketWithExtrasFactory(ticket=cls.ticket_6)
-        cls.ticket_negative_3.household = cls.household_2
-        cls.ticket_negative_3.individual = cls.individuals_2[0]
-        cls.ticket_negative_3.save()
+        cls.ticket_negative_3 = NegativeFeedbackTicketWithoutExtrasFactory(
+            ticket=cls.ticket_6, household=cls.household_2, individual=cls.individual_2
+        )
 
         cls.ticket_1_created_at = cls.ticket_positive_1.created_at
         cls.ticket_2_created_at = cls.ticket_positive_2.created_at
@@ -113,23 +116,25 @@ class TestMigrationFosterChild(TestCase):
         # Specific values
 
         self.assertEqual(feedbacks[0].description, "grievance_ticket_1_description")
-        self.assertEqual(feedbacks[0].programme, self.program_1)
+        self.assertEqual(feedbacks[0].program, self.program_1)
 
         self.assertEqual(feedbacks[1].language, "grievance_ticket_2_language")
-        self.assertEqual(feedbacks[1].household, self.household_1)
+        self.assertEqual(feedbacks[1].household_lookup, self.household_1)
 
-        self.assertIs(feedbacks[2].consent, True)
-        self.assertIs(feedbacks[2].programme, self.program_2)
-        self.assertEqual(feedbacks[2].household, self.household_1)
-        self.assertEqual(feedbacks[2].individual, self.individuals_1[0])
+        self.assertIs(feedbacks[2].consent, False)
+        self.assertEqual(feedbacks[2].program, self.program_2)
+        self.assertEqual(feedbacks[2].household_lookup, self.household_1)
+        self.assertEqual(feedbacks[2].individual_lookup, self.individual_1)
 
         self.assertEqual(feedbacks[3].comments, "grievance_ticket_4_comments")
         self.assertEqual(feedbacks[3].admin2, self.admin2_1)
 
         self.assertEqual(feedbacks[4].area, "grievance_ticket_5_area")
-        self.assertEqual(feedbacks[4].household, self.household_2)
+        self.assertEqual(feedbacks[4].household_lookup, self.household_2)
 
-        self.assertIs(feedbacks[5].consent, False)
+        self.assertIs(feedbacks[5].consent, True)
         self.assertEqual(feedbacks[5].admin2, self.admin2_2)
-        self.assertEqual(feedbacks[5].household, self.household_2)
-        self.assertEqual(feedbacks[5].individual, self.individuals_2[0])
+        self.assertEqual(feedbacks[5].household_lookup, self.household_2)
+        self.assertEqual(feedbacks[5].individual_lookup, self.individual_2)
+
+        self.assertIs(Feedback._meta.get_field("created_at").auto_now_add, True)
