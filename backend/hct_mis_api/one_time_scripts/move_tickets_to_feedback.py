@@ -19,13 +19,16 @@ def move_tickets_to_feedback() -> None:
 
 
 def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 1000) -> None:
-    queryset = TicketPositiveFeedbackDetails.objects.all().order_by("created_at").select_related("ticket")
+    queryset = model_type.objects.all().order_by("created_at").select_related("ticket")
     paginator = Paginator(queryset, batch_size)
     pages = queryset.count() // batch_size + 1
 
     issue_type = (
         Feedback.POSITIVE_FEEDBACK if model_type == TicketPositiveFeedbackDetails else Feedback.NEGATIVE_FEEDBACK
     )
+
+    # Switch off aut_now_add, so newly created feedbacks will have the same create_at timestamp
+    Feedback._meta.get_field("created_at").auto_now_add = False
     try:
         for page_number in paginator.page_range:
             feedbacks_to_create = []
@@ -35,9 +38,9 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
                 feedbacks_to_create.append(
                     Feedback(
                         created_at=obj.created_at,
-                        household_lookup_id=obj.household.id,
-                        individual_lookup_id=obj.individual.id,
-                        business_area_id=obj.ticket.business_area.id,
+                        household_lookup=getattr(obj, "household", None),
+                        individual_lookup=getattr(obj, "individual", None),
+                        business_area=obj.ticket.business_area,
                         issue_type=issue_type,
                         description=obj.ticket.description,
                         admin2_id=obj.ticket.admin2.id,
@@ -45,7 +48,7 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
                         area=obj.ticket.area,
                         consent=obj.ticket.consent,
                         comments=obj.ticket.comments,
-                        program_id=obj.ticket.programme.id,
+                        program=getattr(obj.ticket, "programme", None),
                         created_by_id=obj.ticket.created_by.id,
                         linked_grievance_id=obj.ticket.id,
                     )
@@ -54,15 +57,26 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
     except Exception:
         logger.error("Migrating tickets to feedback failed")
         raise
+    finally:
+        # Go back to default settings
+        Feedback._meta.get_field("created_at").auto_now_add = True
     logger.info(f"Migration of {model_type.__name__} succeeded")
 
 
 def delete_moved_to_feedback_tickets(model_type: Type[object], batch_size: int = 1000) -> None:
-    queryset_ids = Feedback.objects.values_list("linked_grievance_id", flat=True)
-    i, pages = 0, queryset_ids.count() // batch_size + 1
+    if model_type == TicketPositiveFeedbackDetails:
+        ticket_ids = Feedback.objects.filter(issue_type=Feedback.POSITIVE_FEEDBACK).values_list(
+            "linked_grievance_id", flat=True
+        )
+    else:
+        ticket_ids = Feedback.objects.filter(issue_type=Feedback.NEGATIVE_FEEDBACK).values_list(
+            "linked_grievance_id", flat=True
+        )
+    i, pages = 0, len(ticket_ids) // batch_size + 1
     try:
         while i <= pages:
-            model_type.objects.filter(id__in=list(queryset_ids[i * pages : (i + 1) * pages]))
+            model_type.objects.filter(ticket_id__in=list(ticket_ids[i * batch_size : (i + 1) * batch_size])).delete()
+            i += 1
     except Exception:
         logger.error("Deleting migrated tickets failed")
         raise
