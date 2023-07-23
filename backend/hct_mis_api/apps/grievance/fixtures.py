@@ -29,7 +29,11 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     PaymentVerificationFactory,
@@ -265,6 +269,15 @@ class PositiveFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
     individual = None
 
 
+class PositiveFeedbackTicketWithExtrasFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketPositiveFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK)
+    household = factory.SubFactory(HouseholdFactory)
+    individual = factory.SubFactory(IndividualFactory)
+
+
 class NegativeFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketNegativeFeedbackDetails
@@ -272,6 +285,15 @@ class NegativeFeedbackTicketWithoutExtrasFactory(DjangoModelFactory):
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)
     household = None
     individual = None
+
+
+class NegativeFeedbackTicketWithExtrasFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketNegativeFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)
+    household = factory.SubFactory(HouseholdFactory)
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class ReferralTicketWithoutExtrasFactory(DjangoModelFactory):
