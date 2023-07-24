@@ -66,6 +66,7 @@ export default class NewTicket extends BaseComponent {
   individualFieldName =
     'div[data-cy="select-individualDataUpdateFields[0].fieldName"]';
   inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]';
+  partner = 'div[data-cy="select-partner"]';
 
   // Texts
   textLookUpHousehold = "LOOK UP HOUSEHOLD";
@@ -189,6 +190,7 @@ export default class NewTicket extends BaseComponent {
   getSelectFieldName = () => cy.get(this.selectFieldName);
   getInputValue = () => cy.get(this.inputValue);
   getIndividualFieldName = () => cy.get(this.individualFieldName);
+  getPartner = () => cy.get(this.partner);
 
   checkElementsOnPage() {
     this.getTitle().contains(this.textTitle);

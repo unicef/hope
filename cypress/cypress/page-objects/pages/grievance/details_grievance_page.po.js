@@ -66,6 +66,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   labelWhoAnswersAltPhone = 'div[data-cy="label-who answers alt phone"]';
   labelTickets = 'div[data-cy="label-Tickets"]';
   checkbox = 'tr[role="checkbox"]';
+  labelPartner = 'div[data-cy="label-Partner"]';
 
   // Texts
   textTitle = "Ticket ID: ";
@@ -94,6 +95,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getTicketHouseholdID = () => cy.get(this.ticketHouseholdID);
   getTicketIndividualID = () => cy.get(this.ticketIndividualID);
   getTicketPaymentLabel = () => cy.get(this.ticketPaymentLabel);
+  getLabelPartner = () => cy.get(this.labelPartner);
   getTicketCategoryBy = () => cy.get(this.ticketCategoryBy);
   getDateCreation = () => cy.get(this.dateCreation);
   getLastModifiedDate = () => cy.get(this.lastModifiedDate);

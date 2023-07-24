@@ -325,8 +325,6 @@ describe("Grievance", () => {
         grievancePage.getButtonNewTicket().click();
         newTicketPage.checkElementsOnPage();
       });
-      // ToDo: I don't think it is necessary to test each issue type for Sensitive Grievance category. Issue types are the only things that differ.
-      // It makes sense to test all different issue types for Data Change tickets as they have different fields.
       ["DataChangeAddIndividual"].forEach((testData) => {
         it("Create New Ticket - Data Change - Add Individual", function () {
           let newTicket = this.newTicket[testData];
@@ -830,7 +828,7 @@ describe("Grievance", () => {
         "Other Complaint",
         "Partner Related Complaint",
       ].forEach((testData) => {
-        it.only(`Create New Ticket - Grievance Complaint - ${testData}`, function () {
+        it(`Create New Ticket - Grievance Complaint - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
@@ -868,36 +866,197 @@ describe("Grievance", () => {
           newTicketPage.getOption().contains(newTicket.priority).click();
           newTicketPage.getSelectUrgency().click();
           newTicketPage.getOption().contains(newTicket.urgency).click();
+          newTicketPage.getLookUpButton().first().click();
+          newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+          newTicketPage.getCheckbox().eq(0).click();
+          newTicketPage.getButtonNext().eq(1).click();
           if (
             ["Payment Related Complaint", "FSP Related Complaint"].includes(
               testData
             )
           ) {
+            if (testData === "Payment Related Complaint") {
+              newTicketPage.getButtonNext().contains("Save").click();
+              newTicketPage
+                .getLookUpButton()
+                .parent()
+                .parent()
+                .contains("Payment Records are required");
+            }
+
             newTicketPage
               .getLookUpButton()
               .contains("Look up Payment Record")
               .click();
-            newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
-            newTicketPage.getCheckbox().eq(0).click();
-            newTicketPage.getButtonNext().eq(1).click();
+            newTicketPage
+              .getCheckbox()
+              .eq(0)
+              .find("td")
+              .eq(1)
+              .find("a")
+              .first()
+              .then(($text) => {
+                const lookUp = $text.text();
+                newTicketPage.getCheckbox().eq(0).click();
+                newTicketPage.getButtonNext().eq(1).click();
+                newTicketPage.getButtonNext().contains("Save").click();
+                grievanceDetailsPage.getTicketPaymentLabel().contains(lookUp);
+              });
+          } else if (testData === "Partner Related Complaint") {
+            newTicketPage.getPartner().click();
+            newTicketPage.selectOption(newTicket.partner).click();
+            newTicketPage.getButtonNext().contains("Save").click();
+            grievanceDetailsPage.getLabelPartner().contains(newTicket.partner);
+          } else {
+            newTicketPage.getButtonNext().contains("Save").click();
           }
+
+          grievanceDetailsPage.checkElementsOnPage(
+            grievanceDetailsPage.textStatusAssigned,
+            newTicket.priority,
+            newTicket.urgency,
+            grievanceDetailsPage.textNotAssigment,
+            newTicket.category
+          );
+          grievanceDetailsPage
+            .getTicketIndividualID()
+            .contains(newTicket.individualID);
+          grievanceDetailsPage
+            .getAdministrativeLevel()
+            .contains(newTicket.adminArea);
+          grievanceDetailsPage
+            .getLanguagesSpoken()
+            .contains(newTicket.inputLanguage);
+          grievanceDetailsPage.getAreaVillage().contains(newTicket.inputArea);
+          grievanceDetailsPage
+            .getLabelIssueType()
+            .contains(newTicket.issueType);
+          grievanceDetailsPage.getLabelTickets().contains(newTicket.lookUp);
+          grievanceDetailsPage
+            .getTicketCategoryBy()
+            .contains(newTicket.createdBy);
         });
       });
-      it.skip("Create New Ticket - Negative Feedback", () => {});
-      it.skip("Create New Ticket - Positive Feedback", () => {});
-      it.skip("Create New Ticket - Referral", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Bribery, corruption or kickback", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Data breach", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Conflict of interest", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Fraud and forgery", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Fraud involving misuse of programme funds by third party", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Gross mismanagement", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Harassment and abuse of authority", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Inappropriate staff conduct", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Miscellaneous", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Personal disputes", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Sexual harassment and sexual exploitation", () => {});
-      it.skip("Create New Ticket - Sensitive Grievance - Unauthorized use, misuse or waste of UNICEF property or funds", () => {});
+      ["Referral"].forEach((testData) => {
+        it(`Create New Ticket - ${testData}`, function () {
+          let newTicket = this.newTicket[testData];
+          newTicketPage.chooseCategory(newTicket.category);
+          newTicketPage
+            .getLabelCategoryDescription()
+            .contains(
+              newTicketPage.textCategoryDescription[newTicket.category]
+            );
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getHouseholdTab().should("be.visible");
+
+          if (newTicket.householdID !== "-")
+            newTicketPage.getHouseholdTableRows(1).click();
+          if (newTicket.individualID !== "-") {
+            newTicketPage.getIndividualTab().click();
+            newTicketPage.getIndividualTableRows(2).click();
+          }
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getReceivedConsent().click();
+          newTicketPage.getButtonNext().click();
+
+          newTicketPage.getDescription().type(newTicket.description);
+          if (newTicket.comment)
+            newTicketPage.getComments().type(newTicket.comment);
+          newTicketPage.getAdminAreaAutocomplete().click();
+          newTicketPage.getOption().contains(newTicket.adminArea).click();
+          newTicketPage.getInputArea().type(newTicket.inputArea);
+          newTicketPage.getInputLanguage().type(newTicket.inputLanguage);
+          newTicketPage.getSelectPriority().click();
+          newTicketPage.getOption().contains(newTicket.priority).click();
+          newTicketPage.getSelectUrgency().click();
+          newTicketPage.getOption().contains(newTicket.urgency).click();
+          newTicketPage.getLookUpButton().first().click();
+          newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+          newTicketPage.getCheckbox().eq(0).click();
+          newTicketPage.getButtonNext().eq(1).click();
+          newTicketPage.getButtonNext().contains("Save").click();
+
+          grievanceDetailsPage.checkElementsOnPage(
+            grievanceDetailsPage.textStatusAssigned,
+            newTicket.priority,
+            newTicket.urgency,
+            grievanceDetailsPage.textNotAssigment,
+            newTicket.category
+          );
+          grievanceDetailsPage
+            .getTicketIndividualID()
+            .contains(newTicket.individualID);
+          grievanceDetailsPage
+            .getAdministrativeLevel()
+            .contains(newTicket.adminArea);
+          grievanceDetailsPage
+            .getLanguagesSpoken()
+            .contains(newTicket.inputLanguage);
+          grievanceDetailsPage.getAreaVillage().contains(newTicket.inputArea);
+          grievanceDetailsPage.getLabelTickets().contains(newTicket.lookUp);
+          grievanceDetailsPage
+            .getTicketCategoryBy()
+            .contains(newTicket.createdBy);
+        });
+      });
+      [
+        "Bribery, corruption or kickback",
+        "Data breach",
+        "Conflict of interest",
+        "Fraud and forgery",
+        "Fraud involving misuse of programme funds by third party",
+        "Gross mismanagement",
+        "Harassment and abuse of authority",
+        "Inappropriate staff conduct",
+        "Miscellaneous",
+        "Personal disputes",
+        "Sexual harassment and sexual exploitation",
+        "Unauthorized use, misuse or waste of UNICEF property or funds",
+      ].forEach((testData) => {
+        it(`Create New Ticket - Sensitive Grievance - ${testData}`, function () {
+          let newTicket = this.newTicket[testData];
+          newTicketPage.chooseCategory(newTicket.category);
+          newTicketPage.chooseIssueType(newTicket.issueType);
+          newTicketPage
+            .getLabelCategoryDescription()
+            .contains(
+              newTicketPage.textCategoryDescription[newTicket.category]
+            );
+          newTicketPage
+            .getLabelIssueTypeDescription()
+            .contains(
+              newTicketPage.textIssueTypeDescription[newTicket.issueType]
+            );
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getHouseholdTab().should("be.visible");
+          if (newTicket.householdID !== "-")
+            newTicketPage.getHouseholdTableRows(1).click();
+          if (newTicket.individualID !== "-") {
+            newTicketPage.getIndividualTab().click();
+            newTicketPage.getIndividualTableRows(2).click();
+          }
+          newTicketPage.getButtonNext().click();
+          newTicketPage.getReceivedConsent().click();
+          newTicketPage.getButtonNext().click();
+
+          newTicketPage.getDescription().type(newTicket.description);
+          if (newTicket.comment)
+            newTicketPage.getComments().type(newTicket.comment);
+          newTicketPage.getAdminAreaAutocomplete().click();
+          newTicketPage.getOption().contains(newTicket.adminArea).click();
+          newTicketPage.getInputArea().type(newTicket.inputArea);
+          newTicketPage.getInputLanguage().type(newTicket.inputLanguage);
+          newTicketPage.getSelectPriority().click();
+          newTicketPage.getOption().contains(newTicket.priority).click();
+          newTicketPage.getSelectUrgency().click();
+          newTicketPage.getOption().contains(newTicket.urgency).click();
+          newTicketPage.getLookUpButton().first().click();
+          newTicketPage.getCheckbox().eq(0).contains(newTicket.lookUp);
+          newTicketPage.getCheckbox().eq(0).click();
+          newTicketPage.getButtonNext().eq(1).click();
+          newTicketPage.getButtonNext().contains("Save").click();
+        });
+      });
 
       it.skip("Create New Ticket - Cancel", () => {});
     });
