@@ -287,7 +287,9 @@ class IndividualDataUpdateService(DataChangeService):
             only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
 
         if "phone_no_alternative" in only_approved_data:
-            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(only_approved_data["phone_no_alternative"])
+            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(
+                only_approved_data["phone_no_alternative"]
+            )
 
         Individual.objects.filter(id=new_individual.id).update(
             flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
