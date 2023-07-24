@@ -33,7 +33,6 @@ else
       wait_for_db registration_datahub_db
       # pytest hct_mis_api -n logical
       python manage.py test --settings hct_mis_api.settings_test --noinput --parallel
-
       ;;
     "lint")
       mkdir -p ./lint-results
