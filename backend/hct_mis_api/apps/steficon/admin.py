@@ -36,6 +36,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.steficon.forms import (
+    RuleCommitAdminForm,
     RuleDownloadCSVFileProcessForm,
     RuleFileProcessForm,
     RuleForm,
@@ -531,3 +532,4 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
     change_form_template = None
     change_list_template = None
     resource_class = RuleCommitResource
+    form = RuleCommitAdminForm
