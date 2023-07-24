@@ -58,6 +58,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
 class IndividualDataUpdateService(DataChangeService):
@@ -281,6 +282,13 @@ class IndividualDataUpdateService(DataChangeService):
             merged_flex_fields.update(individual.flex_fields)
         merged_flex_fields.update(flex_fields)
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
+
+        if "phone_no" in only_approved_data:
+            only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
+
+        if "phone_no_alternative" in only_approved_data:
+            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(only_approved_data["phone_no_alternative"])
+
         Individual.objects.filter(id=new_individual.id).update(
             flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
         )
