@@ -1,4 +1,4 @@
-from unittest import TestCase
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.household.fixtures import (
@@ -40,42 +40,35 @@ class TestMigrateDataToRepresentations(TestCase):
         Program.objects.filter(business_area=self.business_area).delete()
         # programs
         self.program_active = ProgramFactory(
-            business_area=self.business_area,
             status=Program.ACTIVE,
         )
         self.program_finished1 = ProgramFactory(
-            business_area=self.business_area,
             status=Program.FINISHED,
         )
         self.program_finished2 = ProgramFactory(
-            business_area=self.business_area,
             status=Program.FINISHED,
         )
         # RDIs
-        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi1 = RegistrationDataImportFactory()
 
         # TargetPopulations
         # for active programs target population status does not matter
         self.target_population1 = TargetPopulationFactory(
-            business_area=self.business_area,
             program=self.program_active,
             status=TargetPopulation.STATUS_OPEN,
         )
 
         self.target_population2 = TargetPopulationFactory(
-            business_area=self.business_area,
             program=self.program_finished1,
             status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
         )
 
         self.target_population_wrong = TargetPopulationFactory(
-            business_area=self.business_area,
             program=self.program_finished1,
             status=TargetPopulation.STATUS_OPEN,
         )
 
         self.target_population3 = TargetPopulationFactory(
-            business_area=self.business_area,
             program=self.program_finished2,
             status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
         )
@@ -123,11 +116,9 @@ class TestMigrateDataToRepresentations(TestCase):
 
         # Payments 1
         payment_plan1 = PaymentPlanFactory(
-            business_area=self.business_area,
             target_population=self.target_population1,
         )
         self.payment1 = PaymentFactory(
-            business_area=self.business_area,
             parent=payment_plan1,
             collector=self.individual1_2,
             household=self.household1,
@@ -135,7 +126,6 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         self.payment_record1 = PaymentRecordFactory(
-            business_area=self.business_area,
             target_population=self.target_population1,
             household=self.household1,
             head_of_household=self.individual1_1,
@@ -177,11 +167,9 @@ class TestMigrateDataToRepresentations(TestCase):
 
         # Payments 2
         payment_plan2 = PaymentPlanFactory(
-            business_area=self.business_area,
             target_population=self.target_population2,
         )
         self.payment2 = PaymentFactory(
-            business_area=self.business_area,
             parent=payment_plan2,
             collector=self.collector2_1,
             household=self.household2,
@@ -189,7 +177,6 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         self.payment_record2 = PaymentRecordFactory(
-            business_area=self.business_area,
             target_population=self.target_population2,
             household=self.household2,
             head_of_household=self.collector2_1,
@@ -205,7 +192,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household3.target_populations.set([self.target_population_wrong])
 
         # Household4 and its data (without target population)
-        self.rdi4_1 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi4_1 = RegistrationDataImportFactory()
         self.individual4_1 = IndividualFactory(business_area=self.business_area, household=None)
         self.household4 = HouseholdFactory(
             business_area=self.business_area,
@@ -214,7 +201,7 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Household 5, 6 and 7 and their data (has rdi with 3 households)
-        self.rdi_with_3_hhs = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi_with_3_hhs = RegistrationDataImportFactory()
         self.individual5_1 = IndividualFactory(business_area=self.business_area, household=None)
         self.household5 = HouseholdFactory(
             business_area=self.business_area,
@@ -266,11 +253,9 @@ class TestMigrateDataToRepresentations(TestCase):
 
         # Payments 5
         payment_plan5 = PaymentPlanFactory(
-            business_area=self.business_area,
             target_population=self.target_population2,
         )
         self.payment5 = PaymentFactory(
-            business_area=self.business_area,
             parent=payment_plan5,
             collector=self.collector5_1,
             household=self.household5,
@@ -278,7 +263,6 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         self.payment_record5 = PaymentRecordFactory(
-            business_area=self.business_area,
             target_population=self.target_population2,
             household=self.household5,
             head_of_household=self.individual5_1,
@@ -286,11 +270,9 @@ class TestMigrateDataToRepresentations(TestCase):
         )
         # Payments 7
         payment_plan7 = PaymentPlanFactory(
-            business_area=self.business_area,
             target_population=self.target_population3,
         )
         self.payment7 = PaymentFactory(
-            business_area=self.business_area,
             parent=payment_plan7,
             collector=self.collector5_1,
             household=self.household7,
@@ -298,7 +280,6 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         self.payment_record7 = PaymentRecordFactory(
-            business_area=self.business_area,
             target_population=self.target_population3,
             household=self.household7,
             head_of_household=self.individual7_1,
@@ -372,11 +353,10 @@ class TestMigrateDataToRepresentations(TestCase):
         )
         assert (
             HouseholdSelection.objects.filter(household__business_area=self.business_area).count()
-            - household_selection_count
-            == 0
+            == household_selection_count
         )
-        assert Payment.objects.filter(business_area=self.business_area).count() - payment_count == 0
-        assert PaymentRecord.objects.filter(business_area=self.business_area).count() - payment_record_count == 0
+        assert Payment.objects.filter(business_area=self.business_area).count() == payment_count
+        assert PaymentRecord.objects.filter(business_area=self.business_area).count() == payment_record_count
 
         self.refresh_objects()
 

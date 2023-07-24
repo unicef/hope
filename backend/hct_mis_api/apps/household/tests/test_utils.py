@@ -1,5 +1,6 @@
 from typing import Dict, Optional
-from unittest import TestCase
+
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
@@ -94,7 +95,7 @@ class TestCopyDocumentPerIndividual(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
 
-        program = ProgramFactory(business_area=business_area)
+        program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
         self.document1_1 = create_individual_document(self.individual1)
         self.document1_2 = create_individual_document(self.individual1)
@@ -117,7 +118,7 @@ class TestCopyDocumentPerIndividual(TestCase):
 class TestCopyIndividualIdentityPerIndividual(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
-        program = ProgramFactory(business_area=business_area)
+        program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
         self.individual_identity1 = IndividualIdentityFactory(individual=self.individual1)
         self.individual_identity2 = IndividualIdentityFactory(individual=self.individual1)
@@ -141,13 +142,13 @@ class TestCopyIndividualIdentityPerIndividual(TestCase):
         individual_identities_count = IndividualIdentity.objects.count()
         copy_individual_identity_per_individual(self.individual_representation1, self.individual_representation1)
 
-        assert IndividualIdentity.objects.count() - individual_identities_count == 0
+        assert IndividualIdentity.objects.count() == individual_identities_count
 
 
 class TestCopyBankAccountInfoPerIndividual(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
-        program = ProgramFactory(business_area=business_area)
+        program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
         self.bank_account_info1 = BankAccountInfoFactory(individual=self.individual1)
         self.bank_account_info2 = BankAccountInfoFactory(individual=self.individual1)
@@ -171,13 +172,13 @@ class TestCopyBankAccountInfoPerIndividual(TestCase):
         bank_account_info_count = BankAccountInfo.objects.count()
         copy_bank_account_info_per_individual(self.individual_representation1, self.individual_representation1)
 
-        assert BankAccountInfo.objects.count() - bank_account_info_count == 0
+        assert BankAccountInfo.objects.count() == bank_account_info_count
 
 
 class TestCopyEntitlementCardPerHousehold(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
-        program = ProgramFactory(business_area=business_area)
+        program = ProgramFactory()
         individual1 = IndividualFactory(household=None, program_id=program.id, business_area=business_area)
         self.household1 = HouseholdFactory(head_of_household=individual1, business_area=business_area)
         self.entitlement_card1 = EntitlementCardFactory(household=self.household1)
@@ -203,13 +204,13 @@ class TestCopyEntitlementCardPerHousehold(TestCase):
         entitlement_card_count = EntitlementCard.objects.count()
         copy_entitlement_card_per_household(self.household_representation1, self.household_representation1)
 
-        assert EntitlementCard.objects.count() - entitlement_card_count == 0
+        assert EntitlementCard.objects.count() == entitlement_card_count
 
 
 class TestCopyIndividualRepresentation(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
-        self.program = ProgramFactory(business_area=business_area)
+        self.program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
         self.document1_1 = create_individual_document(self.individual1)
         self.document1_2 = create_individual_document(self.individual1)
@@ -290,7 +291,7 @@ class TestCopyIndividualRepresentation(TestCase):
 class TestCopyHouseholdRepresentation(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
-        self.program = ProgramFactory(business_area=business_area)
+        self.program = ProgramFactory()
 
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
         self.document1_1 = create_individual_document(self.individual1)
@@ -337,12 +338,12 @@ class TestCopyHouseholdRepresentation(TestCase):
         self.household1 = Household.objects.get(pk=self.household1.pk)
 
         assert household == self.household1
-        assert Household.objects.count() - household_count == 0
-        assert EntitlementCard.objects.count() - entitlement_card_count == 0
-        assert Individual.objects.count() - individual_count == 0
-        assert Document.objects.count() - documents_count == 0
-        assert IndividualIdentity.objects.count() - individual_identities_count == 0
-        assert BankAccountInfo.objects.count() - bank_account_info_count == 0
+        assert Household.objects.count() == household_count
+        assert EntitlementCard.objects.count() == entitlement_card_count
+        assert Individual.objects.count() == individual_count
+        assert Document.objects.count() == documents_count
+        assert IndividualIdentity.objects.count() == individual_identities_count
+        assert BankAccountInfo.objects.count() == bank_account_info_count
 
     def test_copy_household_representation_first_representation(self) -> None:
         original_pk = self.household1.pk
@@ -367,17 +368,17 @@ class TestCopyHouseholdRepresentation(TestCase):
         assert household.individuals.first().identities.count() == 2
         assert household.individuals.first().bank_account_info.count() == 2
 
-        assert Household.objects.count() - household_count == 0
-        assert EntitlementCard.objects.count() - entitlement_card_count == 0
+        assert Household.objects.count() == household_count
+        assert EntitlementCard.objects.count() == entitlement_card_count
 
-        assert Individual.objects.count() - individual_count == 0
-        assert Document.objects.count() - documents_count == 0
-        assert IndividualIdentity.objects.count() - individual_identities_count == 0
-        assert BankAccountInfo.objects.count() - bank_account_info_count == 0
+        assert Individual.objects.count() == individual_count
+        assert Document.objects.count() == documents_count
+        assert IndividualIdentity.objects.count() == individual_identities_count
+        assert BankAccountInfo.objects.count() == bank_account_info_count
 
     def test_copy_household_representation(self) -> None:
         original_pk = self.household1.pk
-        other_program = ProgramFactory(business_area=self.program.business_area)
+        other_program = ProgramFactory()
 
         self.household1.copied_from_id = self.household1.id
         self.household1.origin_unicef_id = self.household1.unicef_id
@@ -426,7 +427,7 @@ class TestCopyHouseholdRepresentation(TestCase):
 class TestAdjustPayments(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        self.other_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        self.other_program = ProgramFactory(status=Program.ACTIVE)
         self.target_population1 = TargetPopulationFactory(program=self.other_program)
         payment_plan = PaymentPlanFactory(target_population=self.target_population1)
         (
@@ -484,7 +485,7 @@ class TestAdjustPayments(TestCase):
 class TestAdjustPaymentRecords(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        self.other_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        self.other_program = ProgramFactory(status=Program.ACTIVE)
         self.target_population1 = TargetPopulationFactory(program=self.other_program)
         (
             self.household_other_program,
@@ -501,7 +502,7 @@ class TestAdjustPaymentRecords(TestCase):
         )
 
     def test_adjust_payment_records_other_program(self) -> None:
-        this_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        this_program = ProgramFactory(status=Program.ACTIVE)
 
         individual_representation_this_program = IndividualFactory(
             program_id=this_program.id,
@@ -539,8 +540,8 @@ class TestAdjustPaymentRecords(TestCase):
 class TestAdjustHouseholdSelections(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        self.other_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.current_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        self.other_program = ProgramFactory(status=Program.ACTIVE)
+        self.current_program = ProgramFactory(status=Program.ACTIVE)
 
         self.target_population1 = TargetPopulationFactory(program=self.current_program)
 
@@ -572,7 +573,7 @@ class TestAdjustHouseholdSelections(TestCase):
         assert HouseholdSelection.objects.count() == household_selections_count
 
     def test_adjust_household_selections_program_no_representation(self) -> None:
-        no_representation_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        no_representation_program = ProgramFactory(status=Program.ACTIVE)
         household_selections = HouseholdSelection.objects.filter(target_population=self.target_population1)
 
         adjust_household_selections(household_selections=household_selections, program=no_representation_program)
@@ -593,8 +594,8 @@ class TestCopyRoles(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
 
-        self.other_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.current_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        self.other_program = ProgramFactory(status=Program.ACTIVE)
+        self.current_program = ProgramFactory(status=Program.ACTIVE)
 
         self.household_other_program = HouseholdFactory(
             program_id=self.other_program.id,
@@ -651,9 +652,8 @@ class TestCopyRoles(TestCase):
 class TestGetBiggestProgram(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        Program.objects.all().delete()
-        small_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.biggest_program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        small_program = ProgramFactory(status=Program.ACTIVE)
+        self.biggest_program = ProgramFactory(status=Program.ACTIVE)
 
         HouseholdFactory(
             program_id=small_program.id,
@@ -678,11 +678,10 @@ class TestGetBiggestProgram(TestCase):
 class TestAssignNonProgramRDIToBiggestProgram(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        Program.objects.filter(business_area=self.business_area).delete()
-        self.program = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
-        self.rdi2 = RegistrationDataImportFactory(business_area=self.business_area)
-        self.rdi3 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.program = ProgramFactory(status=Program.ACTIVE)
+        self.rdi1 = RegistrationDataImportFactory()
+        self.rdi2 = RegistrationDataImportFactory()
+        self.rdi3 = RegistrationDataImportFactory()
 
         individual_rdi1 = IndividualFactory(household=None, business_area=self.business_area)
         self.household_rdi1 = HouseholdFactory(
@@ -753,13 +752,10 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
 class TestHandleRDIs(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        self.program1 = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.program2 = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
-        self.rdi2 = RegistrationDataImportFactory(business_area=self.business_area)
-
-        Individual.objects.all().delete()
-        Household.objects.all().delete()
+        self.program1 = ProgramFactory(status=Program.ACTIVE)
+        self.program2 = ProgramFactory(status=Program.ACTIVE)
+        self.rdi1 = RegistrationDataImportFactory()
+        self.rdi2 = RegistrationDataImportFactory()
 
         self.household_rdi1_1, self.individual_rdi1_1 = create_origin_household_with_individual(
             program_id=self.program1.id,
