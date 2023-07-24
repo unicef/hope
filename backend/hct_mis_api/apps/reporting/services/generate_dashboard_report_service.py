@@ -1,9 +1,9 @@
 import copy
 import datetime
 import functools
-import io
 import logging
 from itertools import chain
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from django.conf import settings
@@ -15,7 +15,6 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
-from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -945,9 +944,12 @@ class GenerateDashboardReportService:
             file_name = (
                 self._report_type_to_str(self.report_types[0]) if len(self.report_types) == 1 else "Multiple reports"
             )
+            with NamedTemporaryFile() as tmp:
+                self.wb.save(tmp.name)
+                file = bytes(tmp.read())
             self.report.file.save(
                 f"{file_name}-{self._format_date(self.report.created_at)}.xlsx",
-                io.BytesIO(save_virtual_workbook(self.wb)),
+                file,
                 save=False,
             )
             self.report.status = DashboardReport.COMPLETED
