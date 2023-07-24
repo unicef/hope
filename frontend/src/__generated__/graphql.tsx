@@ -5035,6 +5035,7 @@ export type Query = {
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
   grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>,
   grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>,
+  grievanceTicketSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   payment?: Maybe<PaymentNode>,
   allPayments?: Maybe<PaymentNodeConnection>,
@@ -11411,6 +11412,9 @@ export type GrievancesChoiceDataQuery = (
       { __typename?: 'ChoiceObject' }
       & Pick<ChoiceObject, 'name' | 'value'>
     )>>> }
+  )>>>, grievanceTicketSearchTypesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -21247,6 +21251,10 @@ export const GrievancesChoiceDataDocument = gql`
       value
     }
   }
+  grievanceTicketSearchTypesChoices {
+    name
+    value
+  }
 }
     `;
 export type GrievancesChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>, 'query'>;
@@ -30169,6 +30177,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
   grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>,
   grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>,
+  grievanceTicketSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllSteficonRulesArgs, 'type'>>,
   payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType, RequireFields<QueryPaymentArgs, 'id'>>,
   allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>,
