@@ -10,9 +10,11 @@ from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
+from power_query.widget import PythonFormatterEditor
+
 from hct_mis_api.apps.steficon.config import config
 from hct_mis_api.apps.steficon.interpreters import Interpreter, mapping
-from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.steficon.widget import ContentTypeChoiceField, PythonEditor
 
 if TYPE_CHECKING:
@@ -215,3 +217,11 @@ class RuleForm(forms.ModelForm):
         if self.instance.pk:
             pass
         return self.cleaned_data
+
+
+class RuleCommitAdminForm(forms.ModelForm):
+    definition = forms.CharField(widget=PythonFormatterEditor)
+
+    class Meta:
+        model = RuleCommit
+        exclude = ("updated_by", "created_by")
