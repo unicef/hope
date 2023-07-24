@@ -451,7 +451,7 @@ describe("Grievance", () => {
           newTicketPage.getButtonNext().contains("Save").click();
 
           grievanceDetailsPage.checkElementsOnPage(
-            grievanceDetailsPage.textStatusAssigned,
+            grievanceDetailsPage.textStatusNew,
             newTicket.priority,
             newTicket.urgency,
             grievanceDetailsPage.textNotAssigment,
