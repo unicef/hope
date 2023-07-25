@@ -5,10 +5,13 @@ import tempfile
 from collections import namedtuple
 from datetime import timedelta
 from decimal import Decimal
+from io import BytesIO
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Tuple
 from unittest.mock import patch
 from zipfile import ZipFile
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
@@ -126,7 +129,7 @@ SET_STEFICON_RULE_MUTATION = """
 mutation SetSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!) {
     setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
         paymentPlan {
-            id
+            unicefId
         }
     }
 }
@@ -650,20 +653,32 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(sheet.cell(row=2, column=3).value, self.household_1.size)
             self.assertEqual(sheet.cell(row=1, column=4).value, "collector_name")
             self.assertEqual(sheet.cell(row=2, column=4).value, payment.collector.full_name)
-            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=6).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=6).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=7).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=7).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=8).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=1, column=5).value, "alternate_collector_full_name")
+            self.assertEqual(sheet.cell(row=2, column=5).value, None)
+            self.assertEqual(sheet.cell(row=1, column=6).value, "alternate_collector_given_name")
+            self.assertEqual(sheet.cell(row=2, column=6).value, None)
+            self.assertEqual(sheet.cell(row=1, column=7).value, "alternate_collector_middle_name")
+            self.assertEqual(sheet.cell(row=2, column=7).value, None)
+            self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_phone_no")
+            self.assertEqual(sheet.cell(row=2, column=8).value, None)
+            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_document_numbers")
+            self.assertEqual(sheet.cell(row=2, column=9).value, None)
+            self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_sex")
             self.assertEqual(sheet.cell(row=2, column=10).value, None)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "delivery_date")
-            self.assertEqual(sheet.cell(row=2, column=11).value, str(payment.delivery_date))
+            self.assertEqual(sheet.cell(row=1, column=11).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=11).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=12).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=12).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=13).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=13).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=14).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=14).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=15).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=15).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=16).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=16).value, None)
+            self.assertEqual(sheet.cell(row=1, column=17).value, "delivery_date")
+            self.assertEqual(sheet.cell(row=2, column=17).value, str(payment.delivery_date))
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
@@ -902,8 +917,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             )
         )
 
-    def test_follow_up_pp_entitlements_cannot_be_changed_with_steficon_rule(self) -> None:
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+    def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, unicef_id="unicef_id_12345_2023")
         rule = RuleFactory(name="SomeRule")
 
         self.snapshot_graphql_request(
@@ -915,7 +930,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
-    def test_follow_up_pp_entitlements_cannot_be_changed_with_file_import(self) -> None:
+    def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
+        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
 
         self.snapshot_graphql_request(
@@ -923,6 +939,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
-                "file": io.BytesIO(),
+                "file": BytesIO(content),
             },
         )

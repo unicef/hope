@@ -13,17 +13,16 @@ from django.utils import timezone
 
 from admin_extra_buttons.decorators import button
 
-from ...targeting.services.targeting_stats_refresher import refresh_stats
-from ..forms import (
+from hct_mis_api.apps.household.forms import (
     AddToTargetPopulationForm,
     CreateTargetPopulationForm,
     MassRestoreForm,
     MassWithdrawForm,
-    RestoreForm,
     WithdrawForm,
 )
-from ..models import Household
-from ..services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class HouseholdWithDrawnMixin:
@@ -143,7 +142,7 @@ class HouseholdWithDrawnMixin:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
-            context["form"] = RestoreForm(
+            context["form"] = MassRestoreForm(
                 initial={
                     "reopen_tickets": True,
                     "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),

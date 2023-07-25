@@ -132,7 +132,7 @@ export const GrievancesSidebar = ({
   };
 
   return (
-    <Grid item xs={3}>
+    <Grid item xs={4}>
       {renderRightSection()}
     </Grid>
   );

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -11,7 +12,7 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 
 class TestHouseholdWithdraw(TestCase):
     databases = {"registration_datahub", "default"}
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:

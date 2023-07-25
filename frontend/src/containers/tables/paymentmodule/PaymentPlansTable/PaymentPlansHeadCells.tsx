@@ -14,7 +14,7 @@ export const headCells = [
 
   {
     disablePadding: false,
-    label: 'No. of Households',
+    label: 'Num. of Households',
     id: 'totalHouseholdsCount',
     numeric: false,
   },
@@ -57,7 +57,7 @@ export const headCells = [
   {
     disablePadding: false,
     label: 'Follow-up Payment Plans',
-    id: 'id',
+    id: 'followup-id',
     numeric: false,
   },
 ];

@@ -81,7 +81,7 @@ frontend:
     port: 80
 
   secret:
-    SENTRY_FRONTEND_DSN: ""
+    SENTRY_DSN: ""
 
 ingress:
   enabled: true

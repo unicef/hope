@@ -74,14 +74,18 @@ export function RequestedHouseholdDataChangeTable({
       <TableHead>
         <TableRow>
           <TableCell align='left' />
-          <TableCell align='left'>{t('Type of Data')}</TableCell>
-          <TableCell align='left'>
+          <TableCell data-cy='table-cell-type-of-data' align='left'>
+            {t('Type of Data')}
+          </TableCell>
+          <TableCell data-cy='table-cell-previous-current-value' align='left'>
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
               : t('Current')}{' '}
             {t('Value')}
           </TableCell>
-          <TableCell align='left'>{t('New Value')}</TableCell>
+          <TableCell data-cy='table-cell-new-value' align='left'>
+            {t('New Value')}
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>

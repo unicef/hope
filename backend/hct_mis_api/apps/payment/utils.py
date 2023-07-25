@@ -1,10 +1,12 @@
 import datetime
 import typing
+from base64 import b64decode
 from decimal import Decimal
 from math import ceil
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
@@ -142,3 +144,19 @@ def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
 
 def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
     return ExtendedQuerySetSequence(PaymentPlan.objects.all(), CashPlan.objects.all())
+
+
+def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan", "CashPlan"]:
+    """
+    get cash_or_payment_plan_id: "UGF5bWVudFBsYW5Ob2RlOmEz4YjA2NGJkMmJmMw=="
+    return CashPlan/PaymentPlan object or raise 404
+    """
+    node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
+
+    payment_plan_object: Union["CashPlan", "PaymentPlan"]
+    if node_name == "CashPlanNode":
+        payment_plan_object = get_object_or_404(CashPlan, pk=obj_id)
+    else:
+        payment_plan_object = get_object_or_404(PaymentPlan, pk=obj_id)
+
+    return payment_plan_object

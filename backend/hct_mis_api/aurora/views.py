@@ -11,8 +11,8 @@ from django.views.generic.edit import ProcessFormView
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 from sentry_sdk import set_tag
 
-from .models import Registration
-from .utils import fetch_metadata
+from hct_mis_api.aurora.models import Registration
+from hct_mis_api.aurora.utils import fetch_metadata
 
 
 class FetchDataView(ProcessFormView):
@@ -28,7 +28,7 @@ class FetchDataView(ProcessFormView):
 
 
 class RegistrationDataView(PermissionRequiredMixin, TemplateView):
-    template_name = "registration/dataset_list.html"
+    template_name = "dataset_list.html"
     permission_required = [
         "registration.can_view_data",
         "registration.can_manage_registration",

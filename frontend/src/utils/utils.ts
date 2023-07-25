@@ -1,7 +1,7 @@
+import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
-import camelCase from 'lodash/camelCase';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -195,6 +195,9 @@ export function registrationDataImportStatusToColor(
   }
 }
 
+export const registrationDataImportErasedColor = (): string =>
+  themeObj.palette.error.main;
+
 export function targetPopulationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -325,6 +328,25 @@ export function grievanceTicketStatusToColor(
       return theme.hctPalette.darkBrown;
     case 'Closed':
       return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function grievanceTicketBadgeColors(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Not urgent':
+    case 'Low':
+      return theme.hctPalette.green;
+    case 'Very urgent':
+    case 'High':
+      return theme.palette.error.main;
+    case 'Urgent':
+    case 'Medium':
+      return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
   }
@@ -612,7 +634,7 @@ export const getFullNodeFromEdgesById = (edges, id) => {
   return edges.find((edge) => edge.node.id === id)?.node || null;
 };
 
-export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
+export const getFlexFieldTextValue = (_key, value, fieldAttribute): string => {
   let textValue = value;
   if (!fieldAttribute) return textValue;
   if (fieldAttribute.type === 'SELECT_ONE') {
@@ -626,6 +648,7 @@ export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
     );
     textValue = values.map((item) => item.labelEn).join(', ');
   }
+
   return textValue;
 };
 
@@ -690,6 +713,10 @@ export async function clearCache(apolloClient = null): Promise<void> {
   localStorage.clear();
   await localForage.clear();
 }
+
+export const round = (value: number, decimals = 2): number => {
+  return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
+};
 
 type Location = ReturnType<typeof useLocation>;
 type FilterValue = string | string[] | boolean | null | undefined;
@@ -806,6 +833,81 @@ export const createHandleFilterChange = (
   };
 
   return handleFilterChange;
+};
+
+type HandleFilterChange = (key: string, value: FilterValue) => void;
+type HandleApplyFilterChanges = () => void;
+type HandleClearFilter = () => void;
+
+interface HandleFilterChangeFunctions {
+  handleFilterChange: HandleFilterChange;
+  applyFilterChanges: HandleApplyFilterChanges;
+  clearFilter: HandleClearFilter;
+}
+
+export const createHandleApplyFilterChange = (
+  initialFilter: Filter,
+  history: useHistory<LocationState>,
+  location: Location,
+  filter: Filter,
+  setFilter: (filter: { [key: string]: FilterValue }) => void,
+  appliedFilter: Filter,
+  setAppliedFilter: (filter: Filter) => void,
+): HandleFilterChangeFunctions => {
+  const handleFilterChange = (key: string, value: FilterValue): void => {
+    const newFilter = {
+      ...filter,
+      [key]: value,
+    };
+
+    setFilter(newFilter);
+  };
+
+  const applyFilterChanges = (): void => {
+    setAppliedFilter(filter);
+
+    const params = new URLSearchParams(location.search);
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          params.delete(key);
+          value.forEach((val) => {
+            if (val !== null && val !== undefined) {
+              params.append(key, val);
+            }
+          });
+        } else {
+          const paramValue =
+            typeof value === 'boolean' ? value.toString() : value;
+          params.set(key, paramValue);
+        }
+      } else {
+        params.delete(key);
+      }
+    });
+
+    const search = params.toString();
+    history.push({ search });
+
+    setFilter(filter);
+  };
+
+  const clearFilter = (): void => {
+    const params = new URLSearchParams(location.search);
+    Object.keys(appliedFilter).forEach((key) => {
+      params.delete(key);
+    });
+    const search = params.toString();
+    history.push({ search });
+    setFilter(initialFilter);
+    setAppliedFilter(initialFilter);
+  };
+
+  return {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  };
 };
 
 export const tomorrow = new Date().setDate(new Date().getDate() + 1);

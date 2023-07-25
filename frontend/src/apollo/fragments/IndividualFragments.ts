@@ -156,3 +156,38 @@ export const individualDetailed = gql`
     preferredLanguage
   }
 `;
+
+export const mergedIndividualMinimal = gql`
+  fragment mergedIndividualMinimal on IndividualNode {
+    id
+    unicefId
+    age
+    fullName
+    birthDate
+    sex
+    role
+    relationship
+    deduplicationBatchStatus
+    deduplicationGoldenRecordStatus
+    deduplicationGoldenRecordResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+      age
+      location
+    }
+    deduplicationBatchResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+      age
+      location
+    }
+    registrationDataImport {
+      id
+      datahubId
+    }
+  }
+`;

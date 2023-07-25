@@ -1,25 +1,25 @@
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
-
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.models import ImportedHousehold, Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.aurora.models import Registration
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -107,10 +107,7 @@ def registration_xlsx_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    self: Any,
-    registration_data_import_id: str,
-    import_data_id: str,
-    business_area_id: str,
+    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -137,6 +134,70 @@ def registration_kobo_import_task(
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def registration_kobo_import_hourly_task(self: Any) -> None:
+    try:
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
+
+        not_started_rdi = RegistrationDataImportDatahub.objects.filter(
+            import_done=RegistrationDataImportDatahub.NOT_STARTED
+        ).first()
+
+        if not_started_rdi is None:
+            return
+        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        with configure_scope() as scope:
+            scope.set_tag("business_area", business_area)
+
+            RdiKoboCreateTask().execute(
+                registration_data_import_id=str(not_started_rdi.id),
+                import_data_id=str(not_started_rdi.import_data.id),
+                business_area_id=str(business_area.id),
+            )
+    except Exception as e:
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def registration_xlsx_import_hourly_task(self: Any) -> None:
+    try:
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
+
+        not_started_rdi = RegistrationDataImportDatahub.objects.filter(
+            import_done=RegistrationDataImportDatahub.NOT_STARTED
+        ).first()
+        if not_started_rdi is None:
+            return
+
+        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        with configure_scope() as scope:
+            scope.set_tag("business_area", business_area)
+
+            RdiXlsxCreateTask().execute(
+                registration_data_import_id=str(not_started_rdi.id),
+                import_data_id=str(not_started_rdi.import_data.id),
+                business_area_id=str(business_area.id),
+            )
+    except Exception as e:
         raise self.retry(exc=e)
 
 
@@ -247,27 +308,13 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Tuple) -> None:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        SriLankaRegistrationService,
-    )
-    from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
-        UkraineBaseRegistrationService,
-        UkraineRegistrationService,
-    )
-
+def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records_ids: List) -> None:
+    registration = Registration.objects.get(id=reg_id)
     try:
-        # check only first item in tuple registration_ids
-        # TODO: maybe refactor registration_ids arg or add service_name in arg
-        registration_id = next(iter(registration_ids))
-        if registration_id in [2, 3]:
-            UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_id == 21:
-            UkraineRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_id == 17:
-            SriLankaRegistrationService().process_records(rdi_id, records_ids)
+        if service := registration.rdi_parser:
+            service.process_records(rdi_id, records_ids)
         else:
-            logger.exception(f"Not Implemented Service for Registration id(s): {registration_ids}")
+            logger.exception("Not Implemented Service for Registration")
             raise NotImplementedError
     except Exception as e:
         logger.exception("Process Flex Records Task error")
@@ -285,9 +332,7 @@ def extract_records_task(max_records: int = 500) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def fresh_extract_records_task(
-    records_ids: Optional["_QuerySet[Any, Any]"] = None,
-) -> None:
+def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = None) -> None:
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
@@ -304,17 +349,19 @@ def automate_rdi_creation_task(
     fix_tax_id: bool = False,
     **filters: Any,
 ) -> List:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        get_registration_to_rdi_service_map,
-    )
-
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as locked:
             if not locked:
                 return []
             output = []
-
-            service: Optional[Any] = get_registration_to_rdi_service_map().get(registration_id)
+            try:
+                registration = Registration.objects.get(id=registration_id)
+            except Registration.DoesNotExist:
+                raise NotImplementedError
+            project = registration.project
+            # programme = project.programme TODO programme refactoring
+            organization = project.organization
+            service: Optional[Any] = registration.rdi_parser
             if service is None:
                 raise NotImplementedError
 
@@ -337,10 +384,10 @@ def automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
                     records=len(records_ids),
-                    business_area_name=service.BUSINESS_AREA_SLUG,
+                    business_area_name=organization.name,
                 )
-                rdi = service().create_rdi(imported_by=None, rdi_name=rdi_name)
-                service().process_records(rdi_id=rdi.id, records_ids=records_ids)
+                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
                     merge_registration_data_import_task.delay(rdi.id)
@@ -373,10 +420,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(
-    self: Any,
-    page_size: int,
-    template: str = "Diia ukraine rdi {date} {page_size}",
-    **filters: Any,
+    self: Any, page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
@@ -405,13 +449,8 @@ def automate_registration_diia_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(
-    self: Any,
-    diia_hh_ids: List,
-    template: str = "Diia ukraine rdi {date} {page_size}",
-    **filters: Any,
+    self: Any, diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
-    # sleep
-
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
@@ -451,8 +490,7 @@ def deduplicate_documents() -> bool:
         for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
             with transaction.atomic():
                 documents_query = Document.objects.filter(
-                    status=Document.STATUS_PENDING,
-                    individual__registration_data_import=rdi,
+                    status=Document.STATUS_PENDING, individual__registration_data_import=rdi
                 )
                 HardDocumentDeduplication().deduplicate(
                     documents_query,
@@ -461,12 +499,23 @@ def deduplicate_documents() -> bool:
 
         with transaction.atomic():
             documents_query = Document.objects.filter(
-                status=Document.STATUS_PENDING,
-                individual__registration_data_import__isnull=True,
+                status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
             )
             HardDocumentDeduplication().deduplicate(
                 documents_query,
             )
+    return True
+
+
+@app.task
+@sentry_tags
+def check_rdi_import_periodic_task() -> bool:
+    from hct_mis_api.apps.utils.celery_manager import rdi_import_celery_manager
+
+    with locked_cache(key="celery_manager_periodic_task") as locked:
+        if not locked:
+            return True
+        rdi_import_celery_manager.execute()
     return True
 
 
@@ -489,3 +538,45 @@ def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> 
         manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
         manager.execute()
         return True
+
+
+@app.task
+@sentry_tags
+def remove_old_rdi_links_task(page_count: int = 100) -> None:
+    """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
+
+    from datetime import timedelta
+
+    from constance import config
+
+    days = config.REMOVE_RDI_LINKS_TIMEDELTA
+    try:
+        # Get datahub_ids older than 3 months which have status other than MERGED
+        unmerged_rdi_datahub_ids = list(
+            RegistrationDataImport.objects.filter(
+                created_at__lte=timezone.now() - timedelta(days=days),
+                status__in=[
+                    RegistrationDataImport.IN_REVIEW,
+                    RegistrationDataImport.DEDUPLICATION_FAILED,
+                    RegistrationDataImport.IMPORT_ERROR,
+                    RegistrationDataImport.MERGE_ERROR,
+                ],
+            ).values_list("datahub_id", flat=True)
+        )
+
+        i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
+        while i <= count:
+            logger.info(f"Page {i}/{count} processing...")
+            rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
+
+            ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+
+            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(erased=True)
+            i += 1
+
+        logger.info(
+            f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
+        )
+    except Exception:
+        logger.error("Removing old RDI objects failed")
+        raise

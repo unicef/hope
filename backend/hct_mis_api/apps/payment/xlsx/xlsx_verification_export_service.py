@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, Optional
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.urls import reverse
 
 import openpyxl
@@ -25,6 +23,9 @@ logger = logging.getLogger(__name__)
 
 
 class XlsxVerificationExportService(XlsxExportBaseService):
+    text_template = "payment/verification_plan_xlsx_file_generated_email.txt"
+    html_template = "payment/verification_plan_xlsx_file_generated_email.html"
+
     HEADERS = (
         "payment_record_id",
         "payment_record_ca_id",
@@ -141,8 +142,10 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             xlsx_obj.file.save(filename, File(tmp))
 
     def get_email_context(self, user: "User") -> dict:
-        payment_verification_id = encode_id_base64(self.payment_verification_plan.pk, "PaymentVerificationPlan")
-        link = self.get_link(reverse("download-payment-verification-plan", args=[payment_verification_id]))
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+        payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
+        api = reverse("download-payment-verification-plan", args=[payment_verification_id])
+        link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {
@@ -155,32 +158,3 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         }
 
         return context
-
-    def send_email(self, user: "User") -> None:  # type: ignore
-        # TODO: this function is not used anywhere yet but once it is, the `user` arg should not override the `context` arg from the base class
-        protocol = "http" if settings.IS_DEV else "https"
-        payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
-        api = reverse("download-payment-verification-plan", args=[payment_verification_id])
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
-
-        msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
-        context = {
-            "first_name": getattr(user, "first_name", ""),
-            "last_name": getattr(user, "last_name", ""),
-            "email": getattr(user, "email", ""),
-            "message": msg,
-            "link": link,
-        }
-        text_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.txt", context=context)
-        html_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.html", context=context)
-
-        email = EmailMultiAlternatives(
-            subject="Verification Plan XLSX file generated",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[context["email"]],
-            body=text_body,
-        )
-        email.attach_alternative(html_body, "text/html")
-        result = email.send()
-        if not result:
-            logger.error(f"Email couldn't be send to {context['email']}")

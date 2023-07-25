@@ -12,7 +12,7 @@ exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should rend
       TOTAL NUMBER OF INDIVIDUALS REACHED
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center MuiGrid-justify-xs-space-between"
+      class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center MuiGrid-justify-content-xs-space-between"
     >
       <div
         class="MuiGrid-root MuiGrid-item"

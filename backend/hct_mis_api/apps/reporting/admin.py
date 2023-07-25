@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import DashboardReport, Report
+from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
 
 @admin.register(Report)

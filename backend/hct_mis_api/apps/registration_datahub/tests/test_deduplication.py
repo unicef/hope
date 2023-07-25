@@ -29,8 +29,10 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.querysets import evaluate_qs
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 class TestBatchDeduplication(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
@@ -289,6 +291,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         )
 
 
+@disabled_locally_test
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)

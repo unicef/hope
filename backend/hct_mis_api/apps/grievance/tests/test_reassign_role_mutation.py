@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -134,7 +135,7 @@ class TestRoleReassignMutation(APITestCase):
 
 
 class TestRoleReassignMutationNewTicket(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(

@@ -34,7 +34,7 @@ export const headCells: HeadCell<UserNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Last login',
+    label: 'Last Login',
     id: 'lastLogin',
     numeric: false,
   },

@@ -7,7 +7,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
     color="#1E877D"
   >
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center MuiGrid-justify-xs-space-between"
+      class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center MuiGrid-justify-content-xs-space-between"
     >
       <div
         class="MuiGrid-root MuiGrid-item"

@@ -49,7 +49,7 @@ export function LookUpButton({
       <span>{title}</span>
     </LookUpPlaceholder>
   ) : (
-    <LookUp onClick={handleClick}>
+    <LookUp data-cy='look-up-button' onClick={handleClick}>
       <MarginRightSpan>
         <SearchIcon />
       </MarginRightSpan>

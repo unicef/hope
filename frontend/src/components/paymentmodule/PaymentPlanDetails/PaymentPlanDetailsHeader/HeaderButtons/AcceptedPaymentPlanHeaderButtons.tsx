@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
@@ -30,6 +31,13 @@ export const AcceptedPaymentPlanHeaderButtons = ({
     { loading: loadingExport },
   ] = useExportXlsxPpListPerFspMutation();
 
+  const shouldDisableExportXlsx =
+    loadingExport ||
+    !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
+    !canExportXlsx ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting;
+
   return (
     <Box display='flex' alignItems='center'>
       <>
@@ -42,11 +50,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           <Box p={2}>
             <LoadingButton
               loading={loadingExport}
-              disabled={
-                loadingExport ||
-                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
-                !canExportXlsx
-              }
+              disabled={shouldDisableExportXlsx}
               color='primary'
               variant='contained'
               startIcon={<GetApp />}

@@ -6,8 +6,8 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketSystemFlaggingDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
-    close_system_flagging_ticket,
+from hct_mis_api.apps.grievance.services.system_ticket_service import (
+    close_system_flagging_ticket_service,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Individual
@@ -37,7 +37,7 @@ class TestSystemTickets(APITestCase):
             approve_status=True,
         )
 
-        close_system_flagging_ticket(ticket_details.ticket, None, False)
+        close_system_flagging_ticket_service(ticket_details.ticket, self.user)
         individual = Individual.objects.get(pk=self.individual.pk)
         self.assertTrue(individual.sanction_list_confirmed_match)
 
@@ -49,6 +49,6 @@ class TestSystemTickets(APITestCase):
             approve_status=False,
         )
 
-        close_system_flagging_ticket(ticket_details.ticket, None, False)
+        close_system_flagging_ticket_service(ticket_details.ticket, self.user)
         individual = Individual.objects.get(pk=self.individual.pk)
         self.assertFalse(individual.sanction_list_confirmed_match)

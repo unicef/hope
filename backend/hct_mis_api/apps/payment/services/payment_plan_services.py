@@ -117,9 +117,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:
-        if self.payment_plan.is_follow_up:
-            raise GraphQLError("Lock is available only for Follow-up Payment Plan")
-
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
@@ -133,9 +130,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
-        if self.payment_plan.is_follow_up:
-            raise GraphQLError("Unlock is available only for Follow-up Payment Plan")
-
         self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -153,6 +147,9 @@ class PaymentPlanService:
             msg = "There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
             logging.exception(msg)
             raise GraphQLError(msg)
+
+        if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
+            raise GraphQLError("All Payments must have assigned FSP")
 
         dm_to_fsp_mapping = [
             {
@@ -298,6 +295,7 @@ class PaymentPlanService:
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
+                    program_id=payment_plan.program_id,
                     business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
@@ -380,12 +378,12 @@ class PaymentPlanService:
         basic_fields = ["start_date", "end_date"]
 
         if self.payment_plan.is_follow_up:
-            follow_up_pp_fields = ["dispersion_start_date", "dispersion_end_date"]
-            not_supported_fields = [field for field in list(input_data.keys()) if field not in follow_up_pp_fields]
-            if not_supported_fields:
-                raise GraphQLError(
-                    "Can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan"
-                )
+            # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
+            # remove not editable fields
+            input_data.pop("targeting_id", None)
+            input_data.pop("currency", None)
+            input_data.pop("start_date", None)
+            input_data.pop("end_date", None)
 
         for basic_field in basic_fields:
             if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):
@@ -466,6 +464,7 @@ class PaymentPlanService:
             self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
             self.payment_plan.target_population.save()
 
+        self.payment_plan.payment_items.all().delete()
         self.payment_plan.delete()
         return self.payment_plan
 
@@ -474,6 +473,7 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user.pk)
+        self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
     def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
@@ -481,6 +481,7 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
+        self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
@@ -565,31 +566,13 @@ class PaymentPlanService:
                 raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
 
     def create_follow_up_payments(self) -> None:
-        payments_to_copy = (
-            self.payment_plan.source_payment_plan.eligible_payments.filter(
-                status__in=[
-                    Payment.STATUS_ERROR,
-                    Payment.STATUS_NOT_DISTRIBUTED,
-                    Payment.STATUS_FORCE_FAILED,
-                ]  # TODO remove force failed?
-            )
-            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
-            .exclude(  # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
-                household_id__in=Payment.objects.filter(
-                    is_follow_up=True,
-                    parent__source_payment_plan=self.payment_plan.source_payment_plan,
-                    parent__program_cycle=self.payment_plan.program_cycle,
-                    excluded=False,
-                )
-                .exclude(parent=self.payment_plan)
-                .values_list("household_id", flat=True)
-            )
-        )
+        payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
 
         follow_up_payments = [
             Payment(
                 parent=self.payment_plan,
                 source_payment=payment,
+                program_id=self.payment_plan.program_id,
                 is_follow_up=True,
                 business_area_id=payment.business_area_id,
                 status=Payment.STATUS_PENDING,
@@ -614,18 +597,7 @@ class PaymentPlanService:
         if source_pp.is_follow_up:
             raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
 
-        # TODO: add the same logic here as in create_follow_up_payments() `payments_to_copy`
-        if (
-            not source_pp.payment_items.eligible()
-            .filter(
-                status__in=[
-                    Payment.STATUS_ERROR,
-                    Payment.STATUS_NOT_DISTRIBUTED,
-                    Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
-                ]
-            )
-            .exists()
-        ):
+        if not source_pp.unsuccessful_payments().exists():
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(

@@ -75,7 +75,7 @@ export function CashPlanDetails({
     <ContainerWithBorder>
       <Box display='flex' flexDirection='column'>
         <Title>
-          <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
+          <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -101,7 +101,7 @@ export function CashPlanDetails({
             </Grid>
             <Grid item xs={4}>
               <LabelizedField
-                label={t('cash plan name')}
+                label={t('Payment Plan Name')}
                 value={cashPlan.name}
               />
             </Grid>

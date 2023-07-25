@@ -13,6 +13,9 @@ export const EXCLUDE_HOUSEHOLDS_PP = gql`
     ) {
       paymentPlan {
         id
+        status
+        backgroundActionStatus
+        excludeHouseholdError
         exclusionReason
         excludedHouseholds {
           id

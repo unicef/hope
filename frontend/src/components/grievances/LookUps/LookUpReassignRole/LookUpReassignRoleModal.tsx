@@ -9,21 +9,21 @@ import {
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import {
+  GrievanceTicketDocument,
+  useIndividualChoiceDataQuery,
+  useReassignRoleGrievanceMutation,
+} from '../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import {
-  GrievanceTicketDocument,
-  ProgramNode,
-  useAllProgramsQuery,
-  useReassignRoleGrievanceMutation,
-} from '../../../../__generated__/graphql';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
-import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
+import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 
 export const LookUpReassignRoleModal = ({
@@ -36,6 +36,7 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  shouldUseMultiple,
   individual,
   household,
 }: {
@@ -48,49 +49,50 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold;
   setSelectedIndividual;
   setSelectedHousehold;
+  shouldUseMultiple;
   individual;
   household?;
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
-  const individualFilterInitial: {
-    search;
-    programs;
-    lastRegistrationDate;
-    status;
-    admin2;
-    sex;
-    household?;
-  } = {
+
+  const initialFilterIND = {
     search: '',
-    programs: '',
-    lastRegistrationDate: { min: undefined, max: undefined },
-    status: '',
-    admin2: null,
+    admin2: '',
     sex: '',
+    ageMin: '',
+    ageMax: '',
+    flags: [],
+    orderBy: 'unicef_id',
+    status: '',
+    household: '',
   };
+
   if (household) {
-    individualFilterInitial.household = household?.id;
+    initialFilterIND.household = household?.id;
   }
-  const [filterIndividualApplied, setFilterIndividualApplied] = useState(
-    individualFilterInitial,
+
+  const [filterIND, setFilterIND] = useState(
+    getFilterFromQueryParams(location, initialFilterIND),
   );
-  const [filterIndividual, setFilterIndividual] = useState(
-    individualFilterInitial,
+  const [appliedFilterIND, setAppliedFilterIND] = useState(
+    getFilterFromQueryParams(location, initialFilterIND),
   );
+
   const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
+  const {
+    data: individualChoicesData,
+    loading: individualChoicesLoading,
+  } = useIndividualChoiceDataQuery();
 
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  if (individualChoicesLoading) return <LoadingComponent />;
 
-  const { allPrograms } = data;
-  const programs = allPrograms.edges.map((edge) => edge.node);
+  if (!individualChoicesData) {
+    return null;
+  }
 
   const handleCancel = (): void => {
     setLookUpDialogOpen(false);
@@ -118,14 +120,13 @@ export const LookUpReassignRoleModal = ({
           role: values.role,
         };
 
-        const shouldUseMultiple =
-          ticket.needsAdjudicationTicketDetails.selectedIndividuals.length;
+        const variables = shouldUseMultiple
+          ? multipleRolesVariables
+          : singleRoleVariables;
 
         try {
           await mutate({
-            variables: shouldUseMultiple
-              ? multipleRolesVariables
-              : singleRoleVariables,
+            variables,
             refetchQueries: () => [
               {
                 query: GrievanceTicketDocument,
@@ -153,16 +154,17 @@ export const LookUpReassignRoleModal = ({
             <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
-            <LookUpIndividualFilters
-              programs={programs as ProgramNode[]}
-              filter={filterIndividual}
-              onFilterChange={setFilterIndividual}
-              setFilterIndividualApplied={setFilterIndividualApplied}
-              individualFilterInitial={individualFilterInitial}
-              household={household}
+            <IndividualsFilter
+              filter={filterIND}
+              choicesData={individualChoicesData}
+              setFilter={setFilterIND}
+              initialFilter={initialFilterIND}
+              appliedFilter={appliedFilterIND}
+              setAppliedFilter={setAppliedFilterIND}
+              isOnPaper={false}
             />
             <LookUpIndividualTable
-              filter={filterIndividualApplied}
+              filter={appliedFilterIND}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
               valuesInner={values}
@@ -172,7 +174,7 @@ export const LookUpReassignRoleModal = ({
               setSelectedIndividual={setSelectedIndividual}
               ticket={ticket}
               excludedId={individual.id}
-              withdrawn={false}
+              noTableStyling
             />
           </DialogContent>
           <DialogFooter>

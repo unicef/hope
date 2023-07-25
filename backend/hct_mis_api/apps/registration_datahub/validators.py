@@ -90,7 +90,6 @@ class XLSXValidator(BaseValidator):
 
 
 class ImportDataInstanceValidator:
-    BUSINESS_AREA_SLUG = None
     business_area_code = None
     DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
         "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
@@ -1145,12 +1144,18 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 item.append(submission["kobo_submission_time"].isoformat())
                 all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
             household: Dict[str, Any]
+            household_uuid_list: List[str] = []
             for household in reduced_submissions:
+                household_uuid = str(household.get("_uuid"))
+
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
-                    str(household.get("_uuid")), []
+                    household_uuid, []
                 )
-                if submission_exists is True:
+                submission_duplicate = household_uuid in household_uuid_list
+                if submission_exists or submission_duplicate:
                     continue
+
+                household_uuid_list.append(household_uuid)
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0

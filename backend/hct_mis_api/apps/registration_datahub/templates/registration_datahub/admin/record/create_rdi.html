@@ -15,7 +15,7 @@
         </table>
         <table>
                 <tr>
-                    {% for fname in all_fields%}
+                    {% for fname in all_fields %}
                     <th>
                         {{ fname }}
                     </th>
@@ -23,7 +23,7 @@
                 </tr>
             {% for r in qs %}
                 <tr>
-                    {% for fname in all_fields%}
+                    {% for fname in all_fields %}
                     <td>
                         {{ r|lookup:fname }}
                     </td>

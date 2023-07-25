@@ -1,5 +1,6 @@
 import { Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
 import React, { useEffect } from 'react';
@@ -31,6 +32,8 @@ export const EditHouseholdDataChangeFieldRow = ({
   values,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
   const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
@@ -62,6 +65,7 @@ export const EditHouseholdDataChangeFieldRow = ({
               value: item.name,
               name: item.labelEn,
             }))}
+          disabled={isEditTicket}
         />
       </Grid>
 
@@ -80,11 +84,13 @@ export const EditHouseholdDataChangeFieldRow = ({
       ) : (
         <Grid item xs={4} />
       )}
-      <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>
+      {itemValue.fieldName && (
+        <Grid item xs={1}>
+          <IconButton disabled={isEditTicket} onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        </Grid>
+      )}
     </>
   );
 };

@@ -45,6 +45,9 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
   const { changes } = logEntry;
   const [expanded, setExpanded] = useState(false);
   const classes = useStyles({});
+
+  if (!changes) return null;
+
   const keys = Object.keys(changes);
   const { length } = keys;
   if (length === 1) {

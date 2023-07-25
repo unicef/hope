@@ -59,10 +59,18 @@ export const DocumentsTable = ({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>{t('ID Type')}</TableCell>
-        <TableCell align='left'>{t('Country')}</TableCell>
-        <TableCell align='left'>{t('Number')}</TableCell>
-        <TableCell align='left'>{t('Photo')}</TableCell>
+        <TableCell data-cy='table-cell-id-type' align='left'>
+          {t('ID Type')}
+        </TableCell>
+        <TableCell data-cy='table-cell-country' align='left'>
+          {t('Country')}
+        </TableCell>
+        <TableCell data-cy='table-cell-number' align='left'>
+          {t('Number')}
+        </TableCell>
+        <TableCell data-cy='table-cell-photo' align='left'>
+          {t('Photo')}
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -83,6 +91,7 @@ export const DocumentsTable = ({
                   {isEdit ? (
                     <Checkbox
                       color='primary'
+                      data-cy='checkbox-document'
                       onChange={(): void => {
                         handleSelectDocument(index);
                       }}
@@ -94,7 +103,7 @@ export const DocumentsTable = ({
                     />
                   ) : (
                     selectedDocuments.includes(index) && (
-                      <GreenIcon>
+                      <GreenIcon data-cy='green-check-icon'>
                         <CheckCircleIcon />
                       </GreenIcon>
                     )

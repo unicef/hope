@@ -1,0 +1,58 @@
+[
+  {
+    "fields": {
+      "is_removed": false,
+      "created_at": "2023-06-02T08:47:24.043Z",
+      "updated_at": "2023-06-02T08:47:28.213Z",
+      "last_sync_at": null,
+      "version": 1685694701529236,
+      "name": "Test Programm",
+      "status": "ACTIVE",
+      "start_date": "2023-04-01",
+      "end_date": "2023-12-31",
+      "description": "description text",
+      "ca_id": null,
+      "ca_hash_id": null,
+      "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+      "budget": "150000.00",
+      "frequency_of_payments": "REGULAR",
+      "sector": "CHILD_PROTECTION",
+      "scope": "UNICEF",
+      "cash_plus": true,
+      "population_goal": 0,
+      "administrative_areas_of_implementation": "",
+      "individual_data_needed": false,
+      "admin_areas": []
+    },
+    "model": "program.program",
+    "pk": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+  },
+  {
+    "model": "program.program",
+    "pk": "61d7b5ce-b039-4884-9dec-0b41ff9d6650",
+    "fields": {
+      "is_removed": false,
+      "created_at": "2023-06-02T08:48:44.455Z",
+      "updated_at": "2023-06-02T08:48:44.455Z",
+      "last_sync_at": null,
+      "version": 1685694777771119,
+      "name": "Draft Program",
+      "status": "DRAFT",
+      "start_date": "2023-08-05",
+      "end_date": "2024-05-31",
+      "description": "description text here",
+      "ca_id": null,
+      "ca_hash_id": null,
+      "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+      "budget": "2000000.00",
+      "frequency_of_payments": "REGULAR",
+      "sector": "EDUCATION",
+      "scope": "FOR_PARTNERS",
+      "cash_plus": true,
+      "population_goal": 99,
+      "administrative_areas_of_implementation": "other data here ",
+      "individual_data_needed": true,
+      "admin_areas": []
+    }
+  }
+]
