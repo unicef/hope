@@ -1,6 +1,6 @@
 from typing import Optional
 
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count, F, Q, QuerySet
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
@@ -502,6 +502,7 @@ def get_biggest_program(business_area: BusinessArea) -> Optional[Program]:
         Program.objects.filter(business_area=business_area, status=Program.ACTIVE)
         .annotate(household_count=Count("household"))
         .order_by("-household_count")
+        .only("id")
         .first()
     )
 
@@ -513,7 +514,7 @@ def assign_non_program_objects_to_biggest_program(business_area: BusinessArea) -
     update_non_program_individuals_program(biggest_program, business_area)
     update_non_program_households_program(biggest_program, business_area)
     update_non_program_document_program(biggest_program, business_area)
-    rdis = RegistrationDataImport.objects.filter(programs=None, business_area=business_area)
+    rdis = RegistrationDataImport.objects.filter(programs=None, business_area=business_area).only("id")
     rdi_through = RegistrationDataImport.programs.through
     rdi_through.objects.bulk_create(
         [rdi_through(registrationdataimport_id=rdi.id, program_id=biggest_program.id) for rdi in rdis]
@@ -521,57 +522,18 @@ def assign_non_program_objects_to_biggest_program(business_area: BusinessArea) -
 
 
 def update_non_program_households_program(program: Program, business_area: BusinessArea) -> None:
-    households = Household.objects.filter(program__isnull=True, business_area=business_area)
-    households_count = households.count()
-
-    for batch_start in range(0, households_count, BATCH_SIZE):
-        batch_end = batch_start + BATCH_SIZE
-        households_updates = []
-
-        for household in households[batch_start:batch_end]:
-            households_updates.append(
-                Household(
-                    id=household.id,
-                    program=program,
-                    copied_from_id=household.id,
-                    origin_unicef_id=household.unicef_id,
-                )
-            )
-
-        Household.objects.bulk_update(households_updates, ["program", "copied_from", "origin_unicef_id"])
+    Household.objects.filter(
+        program__isnull=True,
+        business_area=business_area,
+    ).update(program_id=program.id, copied_from_id=F("id"), origin_unicef_id=F("unicef_id"))
 
 
 def update_non_program_individuals_program(program: Program, business_area: BusinessArea) -> None:
-    individuals = Individual.objects.filter(program__isnull=True, business_area=business_area)
-    individuals_count = individuals.count()
-    for batch_start in range(0, individuals_count, BATCH_SIZE):
-        batch_end = batch_start + BATCH_SIZE
-        individuals_updates = []
-
-        for individual in individuals[batch_start:batch_end]:
-            individuals_updates.append(
-                Individual(
-                    id=individual.id,
-                    program=program,
-                    copied_from_id=individual.id,
-                    origin_unicef_id=individual.unicef_id,
-                )
-            )
-        Individual.objects.bulk_update(individuals_updates, ["program", "copied_from", "origin_unicef_id"])
+    Individual.objects.filter(
+        program__isnull=True,
+        business_area=business_area,
+    ).update(program_id=program.id, copied_from_id=F("id"), origin_unicef_id=F("unicef_id"))
 
 
 def update_non_program_document_program(program: Program, business_area: BusinessArea) -> None:
-    documents = Document.objects.filter(program__isnull=True, individual__business_area=business_area)
-    documents_count = documents.count()
-    for batch_start in range(0, documents_count, BATCH_SIZE):
-        batch_end = batch_start + BATCH_SIZE
-        documents_updates = []
-
-        for document in documents[batch_start:batch_end]:
-            documents_updates.append(
-                Document(
-                    id=document.id,
-                    program=program,
-                )
-            )
-        Document.objects.bulk_update(documents_updates, ["program"])
+    Document.objects.filter(program__isnull=True, individual__business_area=business_area).update(program_id=program.id)
