@@ -3336,6 +3336,7 @@ type Query {
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
   grievanceTicketPriorityChoices: [ChoiceObjectInt]
   grievanceTicketUrgencyChoices: [ChoiceObjectInt]
+  grievanceTicketSearchTypesChoices: [ChoiceObject]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean, type: String!): SteficonRuleNodeConnection
   payment(id: ID!): PaymentNode
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
