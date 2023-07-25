@@ -13,7 +13,7 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import DocumentType, Household, Individual
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,21 @@ class GrievanceTicketDocument(Document):
     ticket_details = fields.ObjectField(
         properties={
             "household": fields.ObjectField(
-                properties={"head_of_household": fields.ObjectField(properties={"family_name": fields.KeywordField()})}
+                properties={
+                    "head_of_household": fields.ObjectField(
+                        properties={
+                            "family_name": fields.KeywordField(),
+                            "documents": fields.ListField(
+                                fields.ObjectField(
+                                    properties={
+                                        "number": fields.KeywordField(attr="document_number"),
+                                        "type": fields.KeywordField(attr="type.key"),
+                                    }
+                                )
+                            ),
+                        }
+                    )
+                }
             )
         }
     )
@@ -79,7 +93,16 @@ class GrievanceTicketDocument(Document):
         fields = [
             "created_at",
         ]
-        related_models = [Area, BusinessArea, Household, Individual, RegistrationDataImport, User]
+        related_models = [
+            Area,
+            BusinessArea,
+            Household,
+            Individual,
+            Document,
+            DocumentType,
+            RegistrationDataImport,
+            User,
+        ]
 
     class Index:
         name = INDEX
