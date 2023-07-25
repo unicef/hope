@@ -3,14 +3,14 @@
 exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
 <div>
   <div
-    class="sc-bxivhb ixnywI"
+    class="sc-EHOje iaZfbD"
     data-cy="page-header-container"
   >
     <div
-      class="sc-ifAKCX dWpFEd"
+      class="sc-bZQynM ktisbs"
     >
       <div
-        class="sc-gzVnrw btWNie"
+        class="sc-dnqmqq bPwZQa"
       >
         <svg
           aria-hidden="true"
@@ -24,7 +24,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
         </svg>
       </div>
       <div
-        class="sc-EHOje PMFav"
+        class="sc-gzVnrw coeMyM"
       >
         <div>
           <div
@@ -46,21 +46,23 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
           >
             <h5
               class="MuiTypography-root MuiTypography-h5"
+              data-cy="page-header-title"
             >
               <div
                 class="MuiBox-root MuiBox-root-2"
               >
                 Payment Plan
-                 ID 
+                 ID
+                 
                 PP-0060-22-00000001
                 <div
-                  class="sc-gqjmRU bKymfA"
+                  class="sc-VigVT iysrxQ"
                 >
                   <div
-                    class="sc-iwsKbI dUmvrG"
+                    class="sc-bxivhb cgarbp"
                   >
                     <div
-                      class="sc-gZMcBi gdYFKs"
+                      class="sc-ifAKCX knuZap"
                       data-cy="status-container"
                     >
                       LOCKED
@@ -75,7 +77,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
           </div>
         </div>
         <div
-          class="sc-bZQynM jdkaLI"
+          class="sc-htoDjs jWUwCq"
         >
           <div
             class="MuiBox-root MuiBox-root-4"
@@ -119,7 +121,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
       </div>
     </div>
     <div
-      class="sc-htoDjs hzwHVL"
+      class="sc-iwsKbI fVvfjI"
     />
   </div>
 </div>

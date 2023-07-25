@@ -2,6 +2,7 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketPaymentVerificationDetails,
@@ -9,7 +10,6 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
 
 class VerificationPlanStatusChangeServices:
@@ -88,7 +88,7 @@ class VerificationPlanStatusChangeServices:
 
     def _activate_rapidpro(self) -> None:
         business_area_slug = self.payment_verification_plan.business_area.slug
-        api = RapidProAPI(business_area_slug)
+        api = RapidProAPI(business_area_slug, RapidProAPI.MODE_VERIFICATION)
 
         hoh_ids = [
             pv.payment_obj.household.head_of_household.pk
@@ -96,13 +96,13 @@ class VerificationPlanStatusChangeServices:
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
-        flow_start_info_list, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
-        for flow_start_info, _ in flow_start_info_list:
-            self.payment_verification_plan.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))
+        successful_flows, error = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
+        for successful_flow in successful_flows:
+            self.payment_verification_plan.rapid_pro_flow_start_uuids.append(successful_flow.response["uuid"])
 
         all_urns = []
-        for _, urns in flow_start_info_list:
-            all_urns.extend(urn.split(":")[-1] for urn in urns)
+        for successful_flow in successful_flows:
+            all_urns.extend(urn.split(":")[-1] for urn in successful_flow.urns)
         processed_individuals = individuals.filter(phone_no__in=all_urns)
 
         payment_verifications_to_upd = []
@@ -137,10 +137,11 @@ class VerificationPlanStatusChangeServices:
         if verifications.count() == 0:
             return
 
+        business_area = payment_verification_plan.payment_plan_obj.business_area
         grievance_ticket_list = [
             GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-                business_area=payment_verification_plan.payment_plan_obj.business_area,
+                business_area=business_area,
             )
             for _ in list(range(verifications.count()))
         ]
@@ -153,7 +154,9 @@ class VerificationPlanStatusChangeServices:
             )
 
             ticket_payment_verification_details = TicketPaymentVerificationDetails(
-                ticket=grievance_ticket, payment_verification_status=status, payment_verification=verification
+                ticket=grievance_ticket,
+                payment_verification_status=status,
+                payment_verification=verification,
             )
             ticket_payment_verification_details_list.append(ticket_payment_verification_details)
 

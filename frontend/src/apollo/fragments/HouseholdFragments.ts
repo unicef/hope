@@ -34,6 +34,18 @@ export const householdMinimal = gql`
       level
       pCode
     }
+    admin3 {
+      id
+      name
+      level
+      pCode
+    }
+    admin4 {
+      id
+      name
+      level
+      pCode
+    }
     headOfHousehold {
       id
       fullName
@@ -151,5 +163,27 @@ export const householdDetailed = gql`
         currency
       }
     }
+  }
+`;
+
+export const mergedHouseholdMinimal = gql`
+  fragment mergedHouseholdMinimal on HouseholdNode {
+    id
+    unicefId
+    headOfHousehold {
+      id
+      fullName
+    }
+    size
+    admin1 {
+        id
+        name
+    }    
+    admin2 {
+        id
+        name
+    }    
+    firstRegistrationDate
+    hasDuplicates
   }
 `;

@@ -78,6 +78,8 @@ export const AllIndividuals = gql`
           age
           sex
           lastRegistrationDate
+          phoneNo
+          birthDate
           documents {
             edges {
               node {

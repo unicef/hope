@@ -1,5 +1,6 @@
 from typing import Any, List
 
+from django.conf import settings
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -13,7 +14,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFact
 
 class TestImportedHouseholdQuery(APITestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     ALL_IMPORTED_HOUSEHOLD_QUERY = """
     query AllImportedHouseholds{

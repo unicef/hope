@@ -48,7 +48,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
+              chartPath: 'hct-mis-helm/pkg/hope-$(CHART_VERSION).tgz'
               releaseName: 'hope'
               install: true
               waitForExecution: false
@@ -66,7 +66,9 @@ stages:
                 backend.secret.SECRET_KEY=$(SECRET_KEY),\
                 backend.secret.STATIC_STORAGE_AZURE_ACCOUNT_KEY=$(STATIC_STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.MEDIA_STORAGE_AZURE_ACCOUNT_KEY=$(MEDIA_STORAGE_AZURE_ACCOUNT_KEY),\
+                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.secret.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
@@ -74,6 +76,7 @@ stages:
                 postgresql.password=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                pgadmin.password=$(PGADMIN_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
           - script: |
               timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/job=upgrade \

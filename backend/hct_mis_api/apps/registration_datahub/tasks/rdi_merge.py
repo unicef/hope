@@ -10,7 +10,9 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+    create_needs_adjudication_tickets,
+)
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -27,6 +29,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedHousehold,
@@ -212,6 +215,8 @@ class RdiMergeTask:
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
+                expiry_date=imported_document.expiry_date,
+                issuance_date=imported_document.issuance_date,
             )
             documents_to_create.append(document)
         identities_to_create = []
@@ -361,7 +366,7 @@ class RdiMergeTask:
                 individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                 household_ids = [str(household.id) for household in households_dict.values()]
 
-                recalculate_population_fields_task(household_ids)
+                transaction.on_commit(lambda: recalculate_population_fields_task(household_ids))
                 logger.info(
                     f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                 )
@@ -442,13 +447,27 @@ class RdiMergeTask:
 
             self._update_individuals_and_households(individual_ids)
 
+            imported_households.delete()
+
+            logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
+
             cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
             cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
 
         except Exception as e:
             logger.error(e)
 
+            # remove es individuals if exists
             remove_elasticsearch_documents_by_matching_ids(
                 individual_ids, get_individual_doc(obj_hct.business_area.slug)
+            )
+
+            # remove es households if exists
+            remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
+
+            # proactively try to remove also es data for imported individuals
+            remove_elasticsearch_documents_by_matching_ids(
+                list(imported_individuals.values_list("id", flat=True)),
+                get_imported_individual_doc(obj_hct.business_area.slug),
             )
             raise

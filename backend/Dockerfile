@@ -14,6 +14,13 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   python3-psycopg2 \
   python3-gdal \
   gdal-bin \
+  libcairo2 \
+  libcairo2-dev \
+  libffi-dev \
+  libgdk-pixbuf2.0-0 \
+  libpango-1.0-0 \
+  libpangocairo-1.0-0 \
+  shared-mime-info \
   curl \
   vim &&\
   addgroup --system --gid 82 hope &&\
@@ -42,6 +49,7 @@ FROM base as builder
 
 RUN python3 -m venv --copies $VIRTUAL_ENV &&\
   python3 -m venv --copies $POETRY_HOME &&\
+  $POETRY_HOME/bin/pip install lockfile==0.12.2 &&\
   $POETRY_HOME/bin/pip install poetry==1.3.0 &&\
   poetry config virtualenvs.create false &&\
   poetry config cache-dir /var/cache/poetry

@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
+import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
@@ -56,6 +57,7 @@ export function AddIndividualGrievanceDetails({
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
+
       const fieldAttribute = fieldsDict[key];
       if (fieldAttribute.type === 'BOOL') {
         textValue = renderBoolean(value as boolean);
@@ -64,6 +66,13 @@ export function AddIndividualGrievanceDetails({
         textValue =
           fieldAttribute.choices.find((item) => item.value === value)
             ?.labelEn || '-';
+      }
+
+      if (fieldAttribute.name === 'disability') {
+        textValue = value ? 'Disabled' : 'Not Disabled';
+      }
+      if (Array.isArray(value)) {
+        textValue = value.map((el) => capitalize(el)).join(', ');
       }
       return (
         <Grid key={key} item xs={6}>
@@ -74,6 +83,7 @@ export function AddIndividualGrievanceDetails({
         </Grid>
       );
     }) || [];
+
   const flexFieldLabels =
     Object.entries(flexFields || {}).map(
       ([key, value]: [string, string | string[]]) => {
@@ -90,9 +100,9 @@ export function AddIndividualGrievanceDetails({
   const documentLabels =
     documents?.map((item) => {
       return (
-        <Grid key={item.country + item.key} item xs={6}>
+        <Grid key={item?.country + item?.key} item xs={6}>
           <LabelizedField
-            label={item.key.replace(/_/g, ' ')}
+            label={item?.key?.replace(/_/g, ' ')}
             value={item.number}
           />
         </Grid>
@@ -130,6 +140,7 @@ export function AddIndividualGrievanceDetails({
           <Typography variant='h6'>{t('Individual Data')}</Typography>
           {canApproveDataChange && (
             <Button
+              data-cy='button-approve'
               onClick={() =>
                 confirm({
                   title: t('Warning'),

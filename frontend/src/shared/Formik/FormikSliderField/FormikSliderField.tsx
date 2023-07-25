@@ -16,6 +16,7 @@ export const FormikSliderField = ({
   suffix,
   min,
   max,
+  dataCy,
   ...otherProps
 }): React.ReactElement => {
   const classes = useStyles();
@@ -31,6 +32,7 @@ export const FormikSliderField = ({
         <Grid item xs>
           <Slider
             {...otherProps}
+            data-cy={dataCy}
             min={min}
             max={max}
             value={typeof field.value === 'number' ? field.value : 0}

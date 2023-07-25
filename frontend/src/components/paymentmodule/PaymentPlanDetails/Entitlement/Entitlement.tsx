@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -138,17 +139,17 @@ export const Entitlement = ({
   );
 
   const shouldDisableEntitlementSelect =
-    !canApplySteficonRule ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan.isFollowUp;
+    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || paymentPlan.isFollowUp;
+    paymentPlan.status !== PaymentPlanStatus.Locked;
 
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan.isFollowUp;
+    paymentPlan.isFollowUp ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting;
 
   return (
     <Box m={5}>
@@ -164,6 +165,9 @@ export const Entitlement = ({
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
                   disabled={shouldDisableEntitlementSelect}
+                  MenuProps={{
+                    getContentAnchorEl: null,
+                  }}
                   value={steficonRuleValue}
                   data-cy='input-entitlement-formula'
                   labelWidth={180}

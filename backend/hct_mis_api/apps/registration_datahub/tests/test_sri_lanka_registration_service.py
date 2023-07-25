@@ -20,6 +20,11 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
+from hct_mis_api.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 
 
 class TestSriLankaRegistrationService(TestCase):
@@ -143,9 +148,12 @@ class TestSriLankaRegistrationService(TestCase):
 
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
+        cls.organization = OrganizationFactory.create(slug="sri-lanka")
+        project = ProjectFactory.create(organization=cls.organization)
+        cls.registration = RegistrationFactory.create(project=project)
 
     def test_import_data_to_datahub(self) -> None:
-        service = SriLankaRegistrationService()
+        service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)
@@ -189,7 +197,7 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
 
     def test_import_record_twice(self) -> None:
-        service = SriLankaRegistrationService()
+        service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
 
         service.process_records(rdi.id, [self.records[0].id])
@@ -202,20 +210,3 @@ class TestSriLankaRegistrationService(TestCase):
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
         self.assertEqual(ImportedHousehold.objects.count(), 1)
-
-    def test_import_record_not_from_registration_17(self) -> None:
-        record = Record.objects.create(
-            registration=666,
-            timestamp=timezone.make_aware(datetime.datetime(2022, 4, 1)),
-            source_id=2,
-            fields={},
-            status=Record.STATUS_TO_IMPORT,
-        )
-
-        service = SriLankaRegistrationService()
-        rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
-        service.process_records(rdi.id, [record.id])
-
-        record.refresh_from_db()
-        self.assertEqual(record.status, Record.STATUS_ERROR)
-        self.assertEqual(ImportedHousehold.objects.count(), 0)

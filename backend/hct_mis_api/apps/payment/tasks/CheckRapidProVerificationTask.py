@@ -1,12 +1,12 @@
 import logging
 from typing import Any, Dict, List, Optional
 
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
 )
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
@@ -38,12 +38,12 @@ class CheckRapidProVerificationTask:
             "payment_obj__head_of_household"
         )
         business_area = payment_verification_plan.payment_plan_obj.business_area
-        # FIXME: payment_verification.payment_obj.head_of_household nullable field
         payment_record_verifications_phone_number_dict = {
             str(payment_verification.payment_obj.head_of_household.phone_no): payment_verification
             for payment_verification in payment_record_verifications
+            if payment_verification.payment_obj.head_of_household is not None
         }
-        api = RapidProAPI(business_area.slug)
+        api = RapidProAPI(business_area.slug, RapidProAPI.MODE_VERIFICATION)
         rapid_pro_results = api.get_mapped_flow_runs(payment_verification_plan.rapid_pro_flow_start_uuids)
         payment_record_verification_to_update = self._get_payment_record_verification_to_update(
             rapid_pro_results, payment_record_verifications_phone_number_dict

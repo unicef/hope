@@ -23,7 +23,7 @@ export const OpenPaymentPlanHeaderButtons = ({
 }: OpenPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const { id } = paymentPlan;
+  const { id, isFollowUp } = paymentPlan;
 
   return (
     <Box display='flex' alignItems='center'>
@@ -35,7 +35,9 @@ export const OpenPaymentPlanHeaderButtons = ({
             color='primary'
             startIcon={<EditRounded />}
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}/edit`}
+            to={`/${businessArea}/payment-module/${
+              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+            }/${id}/edit`}
           >
             {t('Edit')}
           </Button>

@@ -98,10 +98,15 @@ export const VolumeByDeliveryMechanismSection = ({
         </Typography>{' '}
       </Title>
       <ContentWrapper>
-        <Grid container spacing={0} justify='flex-start'>
+        <Grid container spacing={0} justifyContent='flex-start'>
           {mappedDeliveryMechanism}
         </Grid>
-        <Grid container spacing={0} justify='flex-start' alignItems='center'>
+        <Grid
+          container
+          spacing={0}
+          justifyContent='flex-start'
+          alignItems='center'
+        >
           <Grid item xs={4}>
             <ChartContainer>
               <Pie

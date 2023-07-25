@@ -29,9 +29,12 @@ export const FormikDecimalField = ({
     }
   };
 
-  function handleChange(e): void {
+  const handleChange = (e): void => {
+    if (e.target.value > 999999999) {
+      return;
+    }
     form.setFieldValue(field.name, e.target.value.toString(), true);
-  }
+  };
 
   return (
     <>

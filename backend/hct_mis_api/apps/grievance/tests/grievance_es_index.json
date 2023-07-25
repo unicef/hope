@@ -1,0 +1,74 @@
+{
+  "properties" : {
+    "admin2" : {
+      "properties" : {
+        "id" : {
+          "type" : "keyword"
+        }
+      }
+    },
+    "assigned_to" : {
+      "properties" : {
+        "id" : {
+          "type" : "keyword"
+        }
+      }
+    },
+    "business_area" : {
+      "properties" : {
+        "slug" : {
+          "type" : "keyword"
+        }
+      }
+    },
+    "category" : {
+      "type" : "keyword"
+    },
+    "created_at" : {
+      "type" : "date"
+    },
+    "grievance_type" : {
+      "type" : "keyword"
+    },
+    "household_unicef_id" : {
+      "type" : "keyword"
+    },
+    "issue_type" : {
+      "type" : "keyword"
+    },
+    "priority" : {
+      "type" : "keyword"
+    },
+    "registration_data_import" : {
+      "properties" : {
+        "id" : {
+          "type" : "keyword"
+        }
+      }
+    },
+    "status" : {
+      "type" : "keyword"
+    },
+    "ticket_details" : {
+      "properties" : {
+        "household" : {
+          "properties" : {
+            "head_of_household" : {
+              "properties" : {
+                "family_name" : {
+                  "type" : "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unicef_id" : {
+      "type" : "keyword"
+    },
+    "urgency" : {
+      "type" : "keyword"
+    }
+  }
+}

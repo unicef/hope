@@ -11,6 +11,7 @@ import debug_toolbar
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
+import hct_mis_api.apps.accountability.views
 import hct_mis_api.apps.household.views
 import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
@@ -60,6 +61,11 @@ api_patterns = [
         name="download-payment-plan-payment-list",
     ),
     path(
+        "download-payment-plan-payment-summary-pdf/<str:payment_plan_id>",
+        hct_mis_api.apps.payment.views.download_payment_plan_summary_pdf,
+        name="download-payment-plan-summary-pdf",
+    ),
+    path(
         "download-sanction-template",
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
@@ -73,6 +79,11 @@ api_patterns = [
         hct_mis_api.apps.targeting.views.download_xlsx_households,
         name="admin-download-target-population",
     ),
+    path(
+        "download-survey-sample/<str:survey_id>",
+        hct_mis_api.apps.accountability.views.download_cash_plan_payment_verification,
+        name="download-survey-sample",
+    ),
     path(f"{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
     path(f"{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
     path(
@@ -81,7 +92,7 @@ api_patterns = [
     ),
     path(
         "power_query/",
-        include("hct_mis_api.apps.power_query.urls"),
+        include("power_query.urls"),
     ),
     path(
         "changelog/",

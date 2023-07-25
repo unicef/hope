@@ -1,8 +1,8 @@
 import json
-import re
-import sys
 import os
+import re
 import subprocess
+import sys
 from datetime import date
 
 
@@ -16,7 +16,7 @@ def bump_version():
         new_version = get_hotfix_new_version(frontend_version)
     else:
         new_version = get_normal_new_version(frontend_version)
-    subprocess.run([f"{dir_path}/bump_version.sh", new_version],cwd=f"{dir_path}/../../")
+    subprocess.run([f"{dir_path}/bump_version.sh", new_version], cwd=f"{dir_path}/../../")
 
 
 def get_hotfix_new_version(version_string):
@@ -39,5 +39,6 @@ def get_normal_new_version(version_string):
     else:
         current_minor = 1
     return f"{current_year}.{current_month}.{current_minor}"
+
 
 bump_version()

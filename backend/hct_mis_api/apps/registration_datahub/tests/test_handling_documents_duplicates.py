@@ -1,5 +1,6 @@
 from typing import List
 
+from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test.utils import CaptureQueriesContext
@@ -25,11 +26,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -108,11 +111,23 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "sex": MALE,
                     "birth_date": "1985-08-12",
                 },
+                {
+                    "registration_data_import": cls.registration_data_import,
+                    "given_name": "Example",
+                    "full_name": "Example Example",
+                    "middle_name": "",
+                    "family_name": "Example",
+                    "phone_no": "123-45-67-899",
+                    "phone_no_alternative": "",
+                    "relationship": SON_DAUGHTER,
+                    "sex": MALE,
+                    "birth_date": "1985-08-12",
+                },
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentTypeFactory(label="national_id", type="national_id")
-        dt_tax_id = DocumentTypeFactory(label="tax_id", type="tax_id")
+        dt = DocumentTypeFactory(label="national_id", key="national_id")
+        dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id")
         dt.save()
         cls.document1 = Document(
             country=country,
@@ -149,6 +164,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[4],
+        )
+        cls.document9 = Document.objects.create(
+            country=country,
+            type=dt,
+            document_number="UNIQ",
+            individual=cls.individuals[5],
         )
 
         cls.document1.save()
@@ -287,3 +308,17 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         HardDocumentDeduplication().deduplicate(self.get_documents_query([doc_national_id_2]))
         doc_national_id_2.refresh_from_db()
         self.assertEqual(doc_national_id_2.status, Document.STATUS_VALID)
+
+    def test_hard_documents_deduplication_for_invalid_document(self) -> None:
+        self.individuals[5].withdraw()
+        self.document9.refresh_from_db()
+        self.assertEqual(self.document9.status, Document.STATUS_INVALID)
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query(
+                [
+                    self.document9,
+                ]
+            )
+        )
+        self.document9.refresh_from_db()
+        self.assertEqual(self.document9.status, Document.STATUS_INVALID)

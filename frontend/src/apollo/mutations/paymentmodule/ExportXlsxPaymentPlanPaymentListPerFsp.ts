@@ -5,6 +5,7 @@ export const ExportXlsxPPListPerFsp = gql`
       paymentPlan {
         id
         status
+        backgroundActionStatus
       }
     }
   }

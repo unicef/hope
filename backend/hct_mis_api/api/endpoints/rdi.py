@@ -12,17 +12,16 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
+from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
+from hct_mis_api.api.endpoints.upload import HouseholdSerializer
+from hct_mis_api.api.models import Grant
+from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     RegistrationDataImportDatahub,
 )
-
-from ...apps.registration_data.models import RegistrationDataImport
-from ..models import Grant
-from ..utils import humanize_errors
-from .base import HOPEAPIBusinessAreaView, HOPEAPIView
-from .mixin import HouseholdUploadMixin
-from .upload import HouseholdSerializer
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea

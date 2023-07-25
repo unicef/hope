@@ -163,7 +163,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-justify-xs-flex-end"
+            class="MuiGrid-root MuiGrid-container MuiGrid-justify-content-xs-flex-end"
           >
             <div
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"

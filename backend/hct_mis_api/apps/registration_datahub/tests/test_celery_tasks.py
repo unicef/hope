@@ -9,11 +9,13 @@ from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
 
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -24,10 +26,20 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
+    remove_old_rdi_links_task,
+)
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedBankAccountInfoFactory,
+    ImportedDocumentFactory,
+    ImportedDocumentTypeFactory,
+    ImportedHouseholdFactory,
+    ImportedIndividualFactory,
+    RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -43,9 +55,17 @@ from hct_mis_api.apps.registration_datahub.services.base_flex_registration_servi
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     create_task_for_processing_records,
 )
+from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
+    SriLankaRegistrationService,
+)
 from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
+)
+from hct_mis_api.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
 )
 
 SRI_LANKA_FIELDS: Dict = {
@@ -222,8 +242,9 @@ def create_imported_document_types() -> None:
 
 
 def create_ukraine_business_area() -> None:
+    slug = "ukraine"
     BusinessArea.objects.create(
-        slug="ukraine",
+        slug=slug,
         code="1234",
         name="Ukraine",
         long_name="the long name of ukraine",
@@ -231,11 +252,18 @@ def create_ukraine_business_area() -> None:
         region_name="UA",
         has_data_sharing_agreement=True,
     )
+    organization = OrganizationFactory(name=slug, slug=slug)
+    prj = ProjectFactory.create(organization=organization)
+    for id in [2, 3, 21, 26, 27, 28, 29]:
+        registration = RegistrationFactory(id=id, project=prj)
+        registration.rdi_parser = UkraineRegistrationService
+        registration.save()
 
 
 def create_sri_lanka_business_area() -> None:
+    slug = "sri-lanka"
     BusinessArea.objects.create(
-        slug="sri-lanka",
+        slug=slug,
         code="0608",
         name="Sri Lanka",
         long_name="THE DEMOCRATIC SOCIALIST REPUBLIC OF SRI LANKA",
@@ -243,6 +271,11 @@ def create_sri_lanka_business_area() -> None:
         region_name="SAR",
         has_data_sharing_agreement=True,
     )
+    organization = OrganizationFactory(name=slug, slug=slug)
+    prj = ProjectFactory.create(organization=organization)
+    registration = RegistrationFactory(id=17, project=prj)
+    registration.rdi_parser = SriLankaRegistrationService
+    registration.save()
 
 
 def create_czech_republic_business_area() -> None:
@@ -277,16 +310,24 @@ class TestAutomatingRDICreationTask(TestCase):
         "cash_assist_datahub_mis",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        organization = OrganizationFactory.create(slug="ukraine")
+        cls.project = ProjectFactory.create(organization=organization)
+        cls.registration = RegistrationFactory.create(project=cls.project)
+        cls.registration.rdi_parser = UkraineBaseRegistrationService
+        cls.registration.save()
 
     def test_successful_run_without_records_to_import(self) -> None:
-        result = run_automate_rdi_creation_task(registration_id=2, page_size=1)
+        result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)
         assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
-        record = create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_ERROR)
+        record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
 
         page_size = 1
         assert RegistrationDataImport.objects.count() == 0
@@ -300,19 +341,18 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
 
-        registration = 2
         amount_of_records = 10
         page_size = 3
 
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=registration, status=Record.STATUS_TO_IMPORT)
+            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
 
         result = run_automate_rdi_creation_task(
-            registration_id=registration, page_size=page_size, template="some template {date} {records}"
+            registration_id=self.registration.id, page_size=page_size, template="some template {date} {records}"
         )
 
         assert RegistrationDataImport.objects.count() == 4  # or math.ceil(amount_of_records / page_size)
@@ -327,12 +367,11 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
 
-        registration = 3
         amount_of_records = 10
         page_size = 3
 
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=registration, status=Record.STATUS_TO_IMPORT)
+            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
@@ -342,7 +381,7 @@ class TestAutomatingRDICreationTask(TestCase):
             "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
-                registration_id=registration,
+                registration_id=self.registration.id,
                 page_size=page_size,
                 template="some template {date} {records}",
                 auto_merge=True,
@@ -354,12 +393,11 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
 
-        registration = 2
         amount_of_records = 10
         page_size = 3
 
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=registration, status=Record.STATUS_TO_IMPORT)
+            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
@@ -369,7 +407,7 @@ class TestAutomatingRDICreationTask(TestCase):
             "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
-                registration_id=registration,
+                registration_id=self.registration.id,
                 page_size=page_size,
                 template="some template {date} {records}",
                 fix_tax_id=True,
@@ -386,7 +424,6 @@ class TestAutomatingRDICreationTask(TestCase):
         Sri Lanka - 17 -> SriLankaRegistrationService()
         Czech Republic - 18, 19 -> NotImplementedError for now
 
-        check get_registration_to_rdi_service_map()
         """
         create_ukraine_business_area()
         create_imported_document_types()
@@ -397,6 +434,10 @@ class TestAutomatingRDICreationTask(TestCase):
             2: "ukraine",
             3: "ukraine",
             21: "ukraine",  # new form
+            26: "ukraine",  # new form
+            27: "ukraine",  # new form
+            28: "ukraine",  # new form
+            29: "ukraine",  # new form
             17: "sri-lanka",
             18: "czech republic",
             19: "czech republic",
@@ -408,18 +449,19 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        registration_ids = [2, 3, 21, 17, 18, 19, 999]
+        registration_ids = [2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999]
         for registration_id in registration_ids:
             for _ in range(amount_of_records):
                 records_count += 1
                 files = None
                 if registration_id == 17:
                     data = SRI_LANKA_FIELDS
-                elif registration_id == 21:
+                elif registration_id in [21, 26, 27, 28, 29]:
                     data = UKRAINE_NEW_FORM_FIELDS
                     files = UKRAINE_NEW_FORM_FILES
                 else:
                     data = UKRAINE_FIELDS
+
                 create_record(fields=data, registration=registration_id, status=Record.STATUS_TO_IMPORT, files=files)
 
             assert Record.objects.count() == records_count
@@ -439,7 +481,9 @@ class TestAutomatingRDICreationTask(TestCase):
                 # for SriLanka we create "children" and "caretaker" as two separate Individuals
                 # and for Ukr new form reg_id=21 we create 2 Ind and 1 Hh
                 # that why need amount_of_records * 2
-                imported_ind_count += amount_of_records if registration_id not in [17, 21] else amount_of_records * 2
+                imported_ind_count += (
+                    amount_of_records if registration_id not in [17, 21, 26, 27, 28, 29] else amount_of_records * 2
+                )
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
@@ -463,14 +507,15 @@ class TestAutomatingRDICreationTask(TestCase):
             status=Record.STATUS_TO_IMPORT,
         )
         records_ids = Record.objects.all().values_list("id", flat=True)
-        rdi = UkraineBaseRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+
+        rdi = UkraineBaseRegistrationService(self.registration).create_rdi(None, "ukraine rdi timezone UTC")
 
         assert Record.objects.count() == 2
         assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
 
-        process_flex_records_task(rdi.pk, list(records_ids), UkraineBaseRegistrationService.REGISTRATION_ID)
+        process_flex_records_task(self.registration.pk, rdi.pk, list(records_ids))
         rdi.refresh_from_db()
 
         assert Record.objects.filter(status=Record.STATUS_TO_IMPORT).count() == 1
@@ -489,19 +534,26 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_record(
             fields=UKRAINE_NEW_FORM_FIELDS,
-            registration=21,
+            registration=self.registration.id,
             status=Record.STATUS_TO_IMPORT,
             files=UKRAINE_NEW_FORM_FILES,
         )
+
         records_ids = Record.objects.all().values_list("id", flat=True)
-        rdi = UkraineRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+        self.registration.rdi_parser = UkraineRegistrationService
+        self.registration.save()
+        rdi = UkraineRegistrationService(self.registration).create_rdi(None, "ukraine rdi timezone UTC")
 
         assert Record.objects.count() == 1
         assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
 
-        process_flex_records_task(rdi.pk, list(records_ids), UkraineRegistrationService.REGISTRATION_ID)
+        process_flex_records_task(
+            self.registration.id,
+            rdi.pk,
+            list(records_ids),
+        )
         rdi.refresh_from_db()
 
         assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 1
@@ -549,4 +601,74 @@ class TestAutomatingRDICreationTask(TestCase):
             PROCESS_FLEX_RECORDS_TASK = None
 
         with self.assertRaises(NotImplementedError):
-            create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), [1])
+            create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
+
+
+class RemoveOldRDIDatahubLinksTest(TestCase):
+    databases = {"default", "registration_datahub"}
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        call_command("loadbusinessareas")
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        geo_models.Country.objects.create(name="Afghanistan")
+
+        cls.rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)
+        cls.rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
+        cls.rdi_3 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGING)
+
+    def test_remove_old_rdi_objects(self) -> None:
+        rdi_hub_1 = RegistrationDataImportDatahubFactory()
+        rdi_hub_2 = RegistrationDataImportDatahubFactory()
+        rdi_hub_3 = RegistrationDataImportDatahubFactory()
+
+        self.rdi_1.datahub_id = rdi_hub_1.id
+        self.rdi_2.datahub_id = rdi_hub_2.id
+        self.rdi_3.datahub_id = rdi_hub_3.id
+
+        self.rdi_1.created_at = "2022-04-20 00:08:07.127325+00:00"  # older than 3 months
+        self.rdi_2.created_at = "2023-01-10 20:07:07.127325+00:00"  # older than 3 months
+        self.rdi_3.created_at = timezone.now()
+
+        self.rdi_1.save()
+        self.rdi_2.save()
+        self.rdi_3.save()
+
+        imported_household_1 = ImportedHouseholdFactory(registration_data_import=rdi_hub_1)
+        imported_household_2 = ImportedHouseholdFactory(registration_data_import=rdi_hub_2)
+        imported_household_3 = ImportedHouseholdFactory(registration_data_import=rdi_hub_3)
+
+        imported_individual_1 = ImportedIndividualFactory(household=imported_household_1)
+        imported_individual_2 = ImportedIndividualFactory(household=imported_household_2)
+        imported_individual_3 = ImportedIndividualFactory(household=imported_household_3)
+
+        ImportedDocumentFactory(
+            individual=imported_individual_1, type=ImportedDocumentTypeFactory(key="birth_certificate")
+        )
+        ImportedDocumentFactory(individual=imported_individual_2, type=ImportedDocumentTypeFactory(key="tax_id"))
+        ImportedDocumentFactory(
+            individual=imported_individual_3, type=ImportedDocumentTypeFactory(key="drivers_license")
+        )
+
+        ImportedBankAccountInfoFactory(individual=imported_individual_1)
+        ImportedBankAccountInfoFactory(individual=imported_individual_2)
+
+        self.assertEqual(ImportedHousehold.objects.count(), 3)
+        self.assertEqual(ImportedIndividual.objects.count(), 3)
+        self.assertEqual(ImportedDocument.objects.count(), 3)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 2)
+
+        remove_old_rdi_links_task.__wrapped__()
+
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(ImportedDocument.objects.count(), 1)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 0)
+
+        self.rdi_1.refresh_from_db()
+        self.rdi_2.refresh_from_db()
+        self.rdi_3.refresh_from_db()
+
+        self.assertEqual(self.rdi_1.erased, True)
+        self.assertEqual(self.rdi_2.erased, True)
+        self.assertEqual(self.rdi_3.erased, False)

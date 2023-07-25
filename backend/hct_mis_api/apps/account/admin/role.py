@@ -9,16 +9,20 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from admin_extra_buttons.decorators import button
+from admin_sync.collector import ForeignKeysCollector
 from admin_sync.mixin import SyncMixin
+from admin_sync.protocol import LoadDumpProtocol
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
+from hct_mis_api.apps.account import models as account_models
+from hct_mis_api.apps.account.admin.filters import (
+    IncompatibleRoleFilter,
+    PermissionFilter,
+)
+from hct_mis_api.apps.account.admin.forms import RoleAdminForm
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-
-from .. import models as account_models
-from ..permissions import Permissions
-from .filters import IncompatibleRoleFilter, PermissionFilter
-from .forms import RoleAdminForm
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +34,15 @@ class RoleResource(resources.ModelResource):
         import_id_fields = ("name", "subsystem")
 
 
+class UnrelatedForeignKeysCollector(ForeignKeysCollector):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(False)
+
+
+class UnrelatedForeignKeysProtocol(LoadDumpProtocol):
+    collector_class = UnrelatedForeignKeysCollector
+
+
 @admin.register(account_models.Role)
 class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
@@ -38,6 +51,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     list_filter = (PermissionFilter, "subsystem")
     resource_class = RoleResource
     change_list_template = "admin/account/role/change_list.html"
+    protocol_class = UnrelatedForeignKeysProtocol
 
     @button()
     def members(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:

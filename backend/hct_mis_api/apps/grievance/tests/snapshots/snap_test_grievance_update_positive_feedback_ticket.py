@@ -4,26 +4,10 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_with_household_and_individual_extras_0_with_permission 1'] = {
-    'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'positiveFeedbackTicketDetails': {
-                    'household': {
-                        'size': 1
-                    },
-                    'individual': {
-                        'fullName': 'John Doe'
-                    }
-                }
-            }
-        }
-    }
-}
-
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_with_household_and_individual_extras_1_without_permission 1'] = {
+snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_not_supported_0_with_permission 1'] = {
     'data': {
         'updateGrievanceTicket': None
     },
@@ -35,7 +19,7 @@ snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_
                     'line': 5
                 }
             ],
-            'message': 'Permission Denied: User does not have correct permission.',
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
             'path': [
                 'updateGrievanceTicket'
             ]
@@ -43,90 +27,7 @@ snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_
     ]
 }
 
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_with_household_extras_0_with_permission 1'] = {
-    'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'positiveFeedbackTicketDetails': {
-                    'household': {
-                        'size': 1
-                    },
-                    'individual': None
-                }
-            }
-        }
-    }
-}
-
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_with_household_extras_1_without_permission 1'] = {
-    'data': {
-        'updateGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 11,
-                    'line': 5
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'updateGrievanceTicket'
-            ]
-        }
-    ]
-}
-
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_with_individual_extras_0_with_permission 1'] = {
-    'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'positiveFeedbackTicketDetails': {
-                    'household': None,
-                    'individual': {
-                        'fullName': 'John Doe'
-                    }
-                }
-            }
-        }
-    }
-}
-
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_with_individual_extras_1_without_permission 1'] = {
-    'data': {
-        'updateGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 11,
-                    'line': 5
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'updateGrievanceTicket'
-            ]
-        }
-    ]
-}
-
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_without_extras_0_with_permission 1'] = {
-    'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'positiveFeedbackTicketDetails': {
-                    'household': None,
-                    'individual': None
-                }
-            }
-        }
-    }
-}
-
-snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_without_extras_1_without_permission 1'] = {
+snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_not_supported_1_without_permission 1'] = {
     'data': {
         'updateGrievanceTicket': None
     },

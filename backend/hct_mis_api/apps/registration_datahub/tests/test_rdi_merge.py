@@ -1,3 +1,8 @@
+from contextlib import contextmanager
+from typing import Callable, Generator
+
+from django.conf import settings
+from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 
 from freezegun import freeze_time
@@ -19,14 +24,41 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedHousehold,
+    ImportedIndividual,
+)
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@contextmanager
+def capture_on_commit_callbacks(
+    *, using: str = DEFAULT_DB_ALIAS, execute: bool = False
+) -> Generator[list[Callable[[], None]], None, None]:
+    callbacks: list[Callable[[], None]] = []
+    start_count = len(connections[using].run_on_commit)
+    try:
+        yield callbacks
+    finally:
+        while True:
+            callback_count = len(connections[using].run_on_commit)
+            for _, callback in connections[using].run_on_commit[start_count:]:
+                callbacks.append(callback)
+                if execute:
+                    callback()
+
+            if callback_count == len(connections[using].run_on_commit):
+                break
+            start_count = callback_count
+
+
+@disabled_locally_test
 class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = [
-        "hct_mis_api/apps/geo/fixtures/data.json",
-        "hct_mis_api/apps/core/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
     ]
 
     @classmethod
@@ -179,15 +211,20 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             enumerator_rec_id=1234567890,
         )
         self.set_imported_individuals(imported_household)
-
-        RdiMergeTask().execute(self.rdi.pk)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
 
+        imported_households = ImportedHousehold.objects.all()
+        imported_individuals = ImportedIndividual.objects.all()
+
         self.assertEqual(1, households.count())
+        self.assertEqual(0, imported_households.count())  # Removed after successful merge
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
+        self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
         self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
@@ -257,7 +294,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         self.set_imported_individuals(imported_household)
 
-        RdiMergeTask().execute(self.rdi.pk)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()

@@ -20,6 +20,15 @@ docker-compose up
 # once everything is up, in yet another terminal
 docker exec -it <prefix>_backend_1 ./manage.py initdemo
 ```
+
+There are some additional services that are not necessary for the app to run but may help a developer. If you want to e.g. turn on the kibana service, just run
+
+```bash
+docker-compose -f docker-compose.kibana.yml up
+```
+
+For the full list, try `ls -l docker-compose.*.yml`.
+
 ***
 Frontend app is run inside Docker (a lot slower)
 
@@ -29,7 +38,7 @@ docker-compose -f docker-compose.yml -f docker-compose.frontend.yml up
 docker-compose -f docker-compose.yml -f docker-compose.frontend.yml run --rm backend bash
 
 # in docker container
-./manage.py initdemo
+./manage.py initdemo --skip-drop
 ```
 
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
@@ -42,7 +51,7 @@ When running locally, you don't neet to provide AD credentials - you can go stra
 Go to cypress_testing_service catalog
 Create cypress.env.json file based on cypress.env.json.example file
 Run yarn install
-In seperate terminal tab run docker-compose run --rm backend ./manage.py initcypress
+In separate terminal tab run docker-compose run --rm backend ./manage.py initcypress
 Run yarn cy:open
 
 

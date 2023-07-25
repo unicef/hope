@@ -1,9 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.mutations_extras.utils import reassign_roles_on_update
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_update_service,
+)
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -71,7 +74,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             },
         }
 
-        reassign_roles_on_update(self.primary_collector_individual, role_reassign_data)
+        reassign_roles_on_update_service(self.primary_collector_individual, role_reassign_data, UserFactory())
 
         individual.refresh_from_db()
         self.household.refresh_from_db()
@@ -91,7 +94,7 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         with self.assertRaises(ValidationError) as context:
-            reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
+            reassign_roles_on_update_service(self.alternate_collector_individual, role_reassign_data, UserFactory())
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
@@ -108,7 +111,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             },
         }
 
-        reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
+        reassign_roles_on_update_service(self.alternate_collector_individual, role_reassign_data, UserFactory())
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_ALTERNATE)
