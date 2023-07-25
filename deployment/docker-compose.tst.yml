@@ -33,6 +33,7 @@ services:
     command: "test"
     volumes:
       - ../backend:/code/
+      - ../backend/test-coverage:/code/backend/test-coverage
     depends_on:
       - db
       - redis

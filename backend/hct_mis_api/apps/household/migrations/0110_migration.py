@@ -9,7 +9,7 @@ from django.contrib.postgres.operations import AddIndexConcurrently
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ('household', '0109_migration'),
+        ('household', '0089_migration_squashed_0109_migration'),
     ]
 
     operations = [

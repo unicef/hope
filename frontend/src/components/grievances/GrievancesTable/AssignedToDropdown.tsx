@@ -44,6 +44,7 @@ export const AssignedToDropdown = ({
 
   const onChangeMiddleware = (e, selectedValue): void => {
     e.preventDefault();
+    e.stopPropagation();
     if (ids) {
       onFilterChange(selectedValue, ids);
     } else {
@@ -55,6 +56,18 @@ export const AssignedToDropdown = ({
     setInputValue(debouncedInputText);
   }, [debouncedInputText, setInputValue]);
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const sortOptionsDataByEmail = (options) => {
+    options.sort((a, b) => {
+      const emailA = a.node?.email?.toLowerCase();
+      const emailB = b.node?.email?.toLowerCase();
+      return emailA.localeCompare(emailB);
+    });
+    return options;
+  };
+
+  const sortedOptions = sortOptionsDataByEmail(optionsData);
+
   return (
     <StyledAutocomplete
       fullWidth={fullWidth}
@@ -62,11 +75,13 @@ export const AssignedToDropdown = ({
       disableClearable={disableClearable}
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
-      onOpen={() => {
+      onOpen={(e) => {
+        e.stopPropagation();
         setOpen(true);
       }}
       onClose={(e, reason) => {
         e.preventDefault();
+        e.stopPropagation();
         setOpen(false);
         if (reason === 'select-option') return;
         onInputTextChange('');
@@ -81,7 +96,7 @@ export const AssignedToDropdown = ({
         return `${value?.email}`;
       }}
       value={value}
-      options={optionsData}
+      options={sortedOptions}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -89,7 +104,14 @@ export const AssignedToDropdown = ({
           value={inputValue}
           variant={label ? 'outlined' : 'standard'}
           label={value ? label : t('Not assigned')}
-          onChange={(e) => onInputTextChange(e.target.value)}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          onChange={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onInputTextChange(e.target.value);
+          }}
           InputProps={{
             ...params.InputProps,
             endAdornment: <>{params.InputProps.endAdornment}</>,

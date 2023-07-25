@@ -171,7 +171,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 <span>
                   <a
-                    class="sc-bwzfXH dTmCfi"
+                    class="sc-bwzfXH djwZJX"
                     href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE="
                   >
                     HH-20-0000.0001
@@ -195,7 +195,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 <span>
                   <a
-                    class="sc-bwzfXH dTmCfi"
+                    class="sc-bwzfXH djwZJX"
                     href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
                   >
                     IND-88-0000.0005
@@ -402,6 +402,47 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Comments"
               >
                 -
+              </div>
+            </div>
+          </div>
+          <div
+            class="sc-VigVT fYNizF"
+          >
+            <div
+              class="sc-jTzLTM dYrwmq"
+            />
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Category Description
+              </span>
+              <div
+                data-cy="label-Category Description"
+              >
+                A grievance that is submitted to change in the households or beneficiary status
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Issue Type Description
+              </span>
+              <div
+                data-cy="label-Issue Type Description"
+              >
+                A grievance submitted to remove an individual from within a household
               </div>
             </div>
           </div>

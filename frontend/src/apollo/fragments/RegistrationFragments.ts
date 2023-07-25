@@ -6,6 +6,7 @@ export const registrationMinimal = gql`
     createdAt
     name
     status
+    erased
     importDate
     importedBy {
       id
@@ -16,6 +17,7 @@ export const registrationMinimal = gql`
     dataSource
     numberOfHouseholds
     numberOfIndividuals
+    refuseReason
   }
 `;
 

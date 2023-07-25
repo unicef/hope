@@ -149,7 +149,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    # of records
+                    Num. of Records
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -197,7 +197,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    Created By
+                    Created by
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

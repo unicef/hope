@@ -14,8 +14,10 @@ from hct_mis_api.apps.household.models import (
     SANCTION_LIST_CONFIRMED_MATCH,
     SANCTION_LIST_POSSIBLE_MATCH,
 )
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
     databases = "__all__"
 

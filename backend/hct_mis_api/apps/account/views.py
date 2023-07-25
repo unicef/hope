@@ -1,8 +1,7 @@
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 
 from django.http import HttpRequest, HttpResponse
-
-from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.export_users_xlsx import ExportUsersXlsx
 
@@ -19,6 +18,9 @@ def download_exported_users(request: HttpRequest, business_area_slug: str) -> Ht
     response = HttpResponse(content_type=mimetype)
     response["Content-Disposition"] = f"attachment; filename={filename}"
 
-    response.write(save_virtual_workbook(wb))
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = bytes(tmp.read())
+    response.write(file)
 
     return response

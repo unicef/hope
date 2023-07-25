@@ -14,17 +14,20 @@ snapshots['TestUpdateGrievanceTickets::test_bulk_update_grievance_assignee_0_wit
                 {
                     'assignedTo': {
                         'firstName': 'user_two'
-                    }
+                    },
+                    'status': 2
                 },
                 {
                     'assignedTo': {
                         'firstName': 'user_two'
-                    }
+                    },
+                    'status': 2
                 },
                 {
                     'assignedTo': {
                         'firstName': 'user_two'
-                    }
+                    },
+                    'status': 2
                 }
             ]
         }
@@ -58,17 +61,20 @@ snapshots['TestUpdateGrievanceTickets::test_bulk_update_grievance_assignee_es_au
                 {
                     'assignedTo': {
                         'firstName': 'user_two'
-                    }
+                    },
+                    'status': 2
                 },
                 {
                     'assignedTo': {
                         'firstName': 'user_two'
-                    }
+                    },
+                    'status': 2
                 },
                 {
                     'assignedTo': {
                         'firstName': 'user_two'
-                    }
+                    },
+                    'status': 2
                 }
             ]
         }

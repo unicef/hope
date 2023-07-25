@@ -10,12 +10,10 @@ import uuid
 
 class Migration(migrations.Migration):
 
-    replaces = [('reporting', '0005_migration'), ('reporting', '0006_migration'), ('reporting', '0007_migration')]
-
     dependencies = [
-        ('core', '0016_migration'),
-        ('reporting', '0004_migration'),
-        ('program', '0019_migration'),
+        ('core', '0007_migration_squashed_0016_migration'),
+        ('reporting', '0001_migration_squashed_0004_migration'),
+        ('program', '0002_migration_squashed_0020_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

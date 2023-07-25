@@ -60,14 +60,10 @@ def delete_household_unicef_id(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('grievance', '0035_migration'), ('grievance', '0036_migration'), ('grievance', '0037_migration'), ('grievance', '0038_migration'), ('grievance', '0039_migration'), ('grievance', '0040_migration'), ('grievance', '0041_migration'), ('grievance', '0042_migration'), ('grievance', '0043_migration'), ('grievance', '0044_migration'), ('grievance', '0045_migration'), ('grievance', '0046_migration'), ('grievance', '0047_migration'), ('grievance', '0048_migration'), ('grievance', '0049_migration')]
-
     dependencies = [
-        ('household', '0093_migration'),
-        ('grievance', '0034_migration'),
-        ('household', '0105_migration'),
+        ('grievance', '0001_migration_squashed_0034_migration'),
         ('household', '0111_migration'),
-        ('payment', '0044_migration'),
+        ('payment', '0030_migration_squashed_0051_migration'),
     ]
 
     operations = [

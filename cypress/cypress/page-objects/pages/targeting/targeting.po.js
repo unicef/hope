@@ -22,9 +22,9 @@ export default class Targeting extends BaseComponent {
   textTabName = "Name";
   textTabStatus = "Status";
   textTabProgramme = "Programme";
-  textTabNOHouseholds = "Num. of households";
+  textTabNOHouseholds = "Num. of Households";
   textTabDateCreated = "Date Created";
-  textTabLastEdited = "Last edited";
+  textTabLastEdited = "Last Edited";
   textTabCreatedBy = "Created by";
   buttonApply = 'button[data-cy="button-filters-apply"]';
 
@@ -83,7 +83,7 @@ export default class Targeting extends BaseComponent {
   selectStatus(status) {
     this.getStatusFilter().click();
     this.getStatusOption().contains(status).click();
-    this.getStatusOption().contains(status).type("{esc}");
+    this.pressEscapeFromElement(this.getStatusOption().contains(status));
     this.getApply().click();
   }
 
