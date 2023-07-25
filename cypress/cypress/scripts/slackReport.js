@@ -80,7 +80,7 @@ fs.readFile(
         console.log(`Branch name: ${branchName} Build ID: ${buildID}`);
 
         sendMessage({
-          text: `:interrobang: ${firstMessage}\n* \t\t\t\t\t\:interrobang:FAILED:interrobang:* \n${text}`,
+          text: `:interrobang: ${firstMessage}\n${pipelineLink}\n* \t\t\t\t\t\:interrobang:FAILED:interrobang:* \n${text}`,
           // channel: CHANNEL,
         });
 
@@ -152,7 +152,7 @@ fs.readFile(
             },
           ],
         });
-        sendFile("report.zip");
+        // sendFile("report.zip");
       }
     } catch (err) {
       console.log("Error parsing JSON string:", err);
