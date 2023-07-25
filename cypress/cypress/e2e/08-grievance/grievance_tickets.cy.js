@@ -1013,7 +1013,7 @@ describe("Grievance", () => {
         "Sexual harassment and sexual exploitation",
         "Unauthorized use, misuse or waste of UNICEF property or funds",
       ].forEach((testData) => {
-        it(`Create New Ticket - Sensitive Grievance - ${testData}`, function () {
+        it.only(`Create New Ticket - Sensitive Grievance - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
