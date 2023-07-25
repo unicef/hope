@@ -267,9 +267,7 @@ type BusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProPaymentVerificationToken: String
-  rapidProMessagesToken: String
-  rapidProSurveyToken: String
+  rapidProApiKey: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
@@ -835,7 +833,6 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2248,7 +2245,7 @@ enum IndividualRelationship {
   BROTHER_SISTER
   COUSIN
   DAUGHTERINLAW_SONINLAW
-  GRANDDAUGHER_GRANDSON
+  GRANDDAUGHTER_GRANDSON
   GRANDMOTHER_GRANDFATHER
   HEAD
   MOTHER_FATHER
@@ -2607,7 +2604,6 @@ enum PaymentDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2960,7 +2956,6 @@ enum PaymentRecordDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -4742,9 +4737,7 @@ type UserBusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProPaymentVerificationToken: String
-  rapidProMessagesToken: String
-  rapidProSurveyToken: String
+  rapidProApiKey: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
