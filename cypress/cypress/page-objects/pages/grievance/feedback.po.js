@@ -14,6 +14,13 @@ export default class Feedback extends BaseComponent {
   tableTitle = 'h6[data-cy="table-title"]';
   tableColumns = 'span[data-cy="table-label"]';
   tableRow = 'tr[role="checkbox"]';
+  searchFilter = 'div[data-cy="filters-search"]';
+  daysFilterPopup =
+    'div[class="MuiPickersSlideTransition-transitionContainer MuiPickersCalendar-transitionContainer"]';
+  creationDateToFilter = 'div[data-cy="filters-creation-date-to"]';
+  dateTitleFilterPopup =
+    'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]';
+
   // Texts
   textTitle = "Feedback";
   textTableTitle = "Feedbacks List";
@@ -33,6 +40,7 @@ export default class Feedback extends BaseComponent {
   getFilterCreationDateTo = () => cy.get(this.filterCreationDateTo);
   getButtonClear = () => cy.get(this.buttonClear);
   getButtonApply = () => cy.get(this.buttonApply);
+  getSearchFilter = () => cy.get(this.searchFilter);
   getTableTitle = () => cy.get(this.tableTitle);
   getFeedbackID = () => cy.get(this.tableColumns).eq(0);
   getIssueType = () => cy.get(this.tableColumns).eq(1);
@@ -41,6 +49,9 @@ export default class Feedback extends BaseComponent {
   getCreatedBy = () => cy.get(this.tableColumns).eq(4);
   getCreationDate = () => cy.get(this.tableColumns).eq(5);
   getRows = () => cy.get(this.tableRow);
+  getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
+  getCreationDateToFilter = () => cy.get(this.creationDateToFilter);
+  getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
 
   checkElementsOnPage() {
     this.getTitlePage().contains(this.textTitle);
@@ -67,5 +78,46 @@ export default class Feedback extends BaseComponent {
 
   chooseTableRow(num) {
     this.getRows().eq(num).click();
+  }
+
+  useSearchFilter(text) {
+    this.getSearchFilter().type(text);
+    this.getButtonApply().click();
+  }
+
+  chooseTicketListRow(num = 0, contains = "FED-23-0001") {
+    return this.getRows().eq(num).find("a").contains(contains);
+  }
+
+  expectedNumberOfRows(num) {
+    if (num === 0) {
+      this.getRows().should("not.exist");
+    } else {
+      this.getRows().should("have.length", num);
+    }
+  }
+
+  changeCreationDateTo(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateToFilter().type(date);
+  }
+
+  checkDateFilterTo(date) {
+    // Date format (String): YYYY-MM-DD
+    this.getCreationDateToFilter().find("input").should("have.value", date);
+  }
+
+  openCreationDateToFilter() {
+    this.getCreationDateToFilter().find("button").click();
+  }
+
+  checkDateTitleFilter(date) {
+    // Date format (String): Www, Mmm D
+    // Example: Sat, Jan 1
+    this.getDateTitleFilterPopup().contains(date).type("{esc}");
+  }
+
+  chooseDayFilterPopup(day) {
+    this.getDaysFilterPopup().contains("p", day).click();
   }
 }
