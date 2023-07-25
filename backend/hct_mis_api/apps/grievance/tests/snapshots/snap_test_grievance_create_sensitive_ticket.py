@@ -26,7 +26,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe'
+                            'fullName': None
                         }
                     }
                 }
@@ -74,7 +74,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
+                            'fullName': None
                         }
                     }
                 },
@@ -93,7 +93,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
+                            'fullName': None
                         }
                     }
                 }
@@ -136,7 +136,9 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'sensitiveTicketDetails': {
                         'household': None,
                         'individual': None,
-                        'paymentRecord': None
+                        'paymentRecord': {
+                            'fullName': None
+                        }
                     }
                 }
             ]
@@ -181,7 +183,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe'
+                            'fullName': None
                         }
                     }
                 }
@@ -227,7 +229,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         },
                         'individual': None,
                         'paymentRecord': {
-                            'fullName': 'John Doe'
+                            'fullName': None
                         }
                     }
                 }
@@ -268,7 +270,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'line': 3
                 }
             ],
-            'message': "['You have to provide issue_type in 3']",
+            'message': 'You have to provide issue_type in 3',
             'path': [
                 'createGrievanceTicket'
             ]
@@ -314,7 +316,9 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'individual': {
                             'fullName': 'John Doe'
                         },
-                        'paymentRecord': None
+                        'paymentRecord': {
+                            'fullName': None
+                        }
                     }
                 }
             ]
@@ -354,7 +358,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'line': 3
                 }
             ],
-            'message': '["You can\'t provide extras.category.grievance_complaint_ticket_extras in 3"]',
+            'message': "You can't provide extras.category.grievance_complaint_ticket_extras in 3",
             'path': [
                 'createGrievanceTicket'
             ]

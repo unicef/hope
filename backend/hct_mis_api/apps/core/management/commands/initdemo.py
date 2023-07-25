@@ -2,8 +2,10 @@ import time
 from argparse import ArgumentParser
 from typing import Any
 
+from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
+from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
@@ -27,6 +29,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
+        start_time = timezone.now()
         db_connection = connections["default"]
         connected = False
 
@@ -49,18 +52,23 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
         call_command("flush", "--noinput", database="registration_datahub")
 
-        call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/core/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/registration_data/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/household/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/grievance/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
 
         call_command(
-            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
+            "loaddata",
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data.json",
+            database="registration_datahub",
         )
         call_command(
-            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json", database="registration_datahub"
+            "loaddata",
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/diiadata.json",
+            database="registration_datahub",
         )
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data.json")
 
@@ -122,3 +130,5 @@ class Command(BaseCommand):
                 user.is_superuser = True
             user.set_unusable_password()
             user.save()
+
+        print(f"Done in {timezone.now()- start_time}")

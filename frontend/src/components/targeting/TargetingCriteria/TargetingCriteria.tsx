@@ -1,10 +1,21 @@
-import React, { Fragment, useState } from 'react';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Button, Paper, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  Paper,
+  Typography,
+} from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { Field } from 'formik';
+import React, { Fragment, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { Criteria } from './Criteria';
 import {
   ContentWrapper,
@@ -74,6 +85,7 @@ interface TargetingCriteriaProps {
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
   selectedProgram?;
   isEdit?: boolean;
+  screenBeneficiary: boolean;
 }
 
 export function TargetingCriteria({
@@ -82,11 +94,15 @@ export function TargetingCriteria({
   targetPopulation,
   selectedProgram,
   isEdit,
+  screenBeneficiary,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
+  const regex = /(create|edit-tp)/;
+  const isDetailsPage = !regex.test(location.pathname);
   const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
@@ -114,10 +130,12 @@ export function TargetingCriteria({
     return closeModal();
   };
   return (
-    <div>
-      <PaperContainer>
+    <PaperContainer>
+      <Box display='flex' flexDirection='column'>
         <Title>
-          <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
+          <Typography data-cy='title-targeting-criteria' variant='h6'>
+            {t('Targeting Criteria')}
+          </Typography>
           {isEdit && (
             <>
               {!!rules.length && (
@@ -125,6 +143,7 @@ export function TargetingCriteria({
                   variant='outlined'
                   color='primary'
                   onClick={() => setOpen(true)}
+                  data-cy='button-target-population-add-criteria'
                 >
                   {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
@@ -142,45 +161,122 @@ export function TargetingCriteria({
           )}
         </Title>
         <ContentWrapper>
-          {rules.length ? (
-            rules.map((criteria, index) => {
-              return (
-                //eslint-disable-next-line
-                <Fragment key={criteria.id || index}>
-                  <Criteria
-                    isEdit={isEdit}
-                    canRemove={rules.length > 1}
-                    rules={criteria.filters}
-                    individualsFiltersBlocks={
-                      criteria.individualsFiltersBlocks || []
-                    }
-                    editFunction={() => editCriteria(criteria, index)}
-                    removeFunction={() => helpers.remove(index)}
-                  />
+          <Box display='flex' flexDirection='column'>
+            {rules.length ? (
+              rules.map((criteria, index) => {
+                return (
+                  //eslint-disable-next-line
+                  <Fragment key={criteria.id || index}>
+                    <Criteria
+                      isEdit={isEdit}
+                      canRemove={rules.length > 1}
+                      rules={criteria.filters}
+                      individualsFiltersBlocks={
+                        criteria.individualsFiltersBlocks || []
+                      }
+                      editFunction={() => editCriteria(criteria, index)}
+                      removeFunction={() => helpers.remove(index)}
+                    />
 
-                  {index === rules.length - 1 ||
-                  (rules.length === 1 && index === 0) ? null : (
-                    <Divider>
-                      <DividerLabel>Or</DividerLabel>
-                    </Divider>
+                    {index === rules.length - 1 ||
+                    (rules.length === 1 && index === 0) ? null : (
+                      <Divider>
+                        <DividerLabel>Or</DividerLabel>
+                      </Divider>
+                    )}
+                  </Fragment>
+                );
+              })
+            ) : (
+              <AddCriteria
+                onClick={() => setOpen(true)}
+                data-cy='button-target-population-add-criteria'
+              >
+                <AddCircleOutline />
+                <p>{t('Add Filter')}</p>
+              </AddCriteria>
+            )}
+            {isDetailsPage ? (
+              <Box mt={3} p={3}>
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                    <FormControlLabel
+                      disabled
+                      control={
+                        <Checkbox
+                          color='primary'
+                          name='flagExcludeIfActiveAdjudicationTicket'
+                          data-cy='checkbox-exclude-if-active-adjudication-ticket'
+                          checked={Boolean(
+                            targetPopulation?.targetingCriteria
+                              ?.flagExcludeIfActiveAdjudicationTicket,
+                          )}
+                        />
+                      }
+                      label={t(
+                        'Exclude Households with Active Adjudication Ticket',
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    {screenBeneficiary && (
+                      <FormControlLabel
+                        disabled
+                        control={
+                          <Checkbox
+                            data-cy='checkbox-exclude-if-on-sanction-list'
+                            color='primary'
+                            name='flagExcludeIfOnSanctionList'
+                          />
+                        }
+                        checked={Boolean(
+                          targetPopulation?.targetingCriteria
+                            ?.flagExcludeIfOnSanctionList,
+                        )}
+                        label={t(
+                          'Exclude Households with an active sanction screen flag',
+                        )}
+                      />
+                    )}
+                  </Grid>
+                </Grid>
+              </Box>
+            ) : (
+              <Box mt={3} p={3}>
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                    <Field
+                      name='flagExcludeIfActiveAdjudicationTicket'
+                      label={t(
+                        'Exclude Households with Active Adjudication Ticket',
+                      )}
+                      color='primary'
+                      component={FormikCheckboxField}
+                      data-cy='input-active-adjudication-ticket'
+                    />
+                  </Grid>
+                  {screenBeneficiary && (
+                    <Grid item xs={6}>
+                      <Field
+                        name='flagExcludeIfOnSanctionList'
+                        label={t(
+                          'Exclude Households with an active sanction screen flag',
+                        )}
+                        color='primary'
+                        component={FormikCheckboxField}
+                        data-cy='input-active-sanction-flag'
+                      />
+                    </Grid>
                   )}
-                </Fragment>
-              );
-            })
-          ) : (
-            <AddCriteria
-              onClick={() => setOpen(true)}
-              data-cy='button-target-population-add-criteria'
-            >
-              <AddCircleOutline />
-              <p>{t('Add Filter')}</p>
-            </AddCriteria>
-          )}
+                </Grid>
+              </Box>
+            )}
+          </Box>
         </ContentWrapper>
         {targetPopulation && (
           <VulnerabilityScoreComponent targetPopulation={targetPopulation} />
         )}
-      </PaperContainer>
-    </div>
+      </Box>
+    </PaperContainer>
   );
 }

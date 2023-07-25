@@ -15,9 +15,11 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import (
+    full_rebuild,
+    refresh_stats,
+)
 from hct_mis_api.apps.utils.sentry import sentry_tags
-
-from .services.targeting_stats_refresher import full_rebuild, refresh_stats
 
 logger = logging.getLogger(__name__)
 

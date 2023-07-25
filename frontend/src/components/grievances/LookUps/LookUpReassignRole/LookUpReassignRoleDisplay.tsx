@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, LightGrey } from '../LookUpStyles';
 
 export const LookUpReassignRoleDisplay = ({
-  values,
+  selectedHousehold,
+  selectedIndividual,
   setLookUpDialogOpen,
   disabled,
 }: {
-  values;
+  selectedHousehold;
+  selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;
 }): React.ReactElement => {
@@ -21,17 +23,17 @@ export const LookUpReassignRoleDisplay = ({
           <Box display='flex' flexDirection='column'>
             <span>
               {t('Household ID')}:
-              <BlueText> {values?.selectedHousehold?.unicefId || '-'}</BlueText>
+              <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
               {t('Individual ID')}:
-              <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
+              <BlueText>{selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>
         <Grid item>
           <Box p={2}>
-            <Grid container justify='center' alignItems='center'>
+            <Grid container justifyContent='center' alignItems='center'>
               <Grid item>
                 {disabled ? null : (
                   <LightGrey>

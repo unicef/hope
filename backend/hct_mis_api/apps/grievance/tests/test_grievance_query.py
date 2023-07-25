@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, List
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -20,6 +21,7 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.fixtures import create_household
 
 
+@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceQuery(APITestCase):
     ALL_GRIEVANCE_QUERY = """
     query AllGrievanceTickets {
@@ -40,8 +42,8 @@ class TestGrievanceQuery(APITestCase):
     """
 
     FILTER_BY_ADMIN_AREA = """
-    query AllGrievanceTickets($admin: [ID]) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin: $admin) {
+    query AllGrievanceTickets($admin: ID) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin2: $admin) {
         edges {
           node {
             status
@@ -109,7 +111,7 @@ class TestGrievanceQuery(APITestCase):
 
     FILTER_BY_CATEGORY = """
     query AllGrievanceTickets($category: String) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", category: $category) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "-created_at", category: $category) {
         edges {
           node {
             status
@@ -167,6 +169,7 @@ class TestGrievanceQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.maxDiff = None
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -174,13 +177,13 @@ class TestGrievanceQuery(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = Country.objects.first()
-        area_type_new = AreaTypeFactory(
+        area_type = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
         )
-        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type_new, p_code="123aa123")
-        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type_new, p_code="sadasdasfd222")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
         _, individuals = create_household({"size": 2})
         cls.individual_1 = individuals[0]
@@ -199,7 +202,7 @@ class TestGrievanceQuery(APITestCase):
                     "admin2": cls.admin_area_1,
                     "language": "Polish",
                     "consent": True,
-                    "description": "Just random description",
+                    "description": "Just random description 111",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": cls.user,
@@ -212,7 +215,7 @@ class TestGrievanceQuery(APITestCase):
                     "admin2": cls.admin_area_2,
                     "language": "English",
                     "consent": True,
-                    "description": "Just random description",
+                    "description": "Just random description 222",
                     "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_ON_HOLD,
                     "created_by": cls.user,
@@ -225,7 +228,7 @@ class TestGrievanceQuery(APITestCase):
                     "admin2": cls.admin_area_2,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Just random description",
+                    "description": "Just random description 333",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": cls.user,
@@ -291,7 +294,7 @@ class TestGrievanceQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
-            variables={"admin": self.admin_area_1.id},
+            variables={"admin": self.id_to_base64(self.admin_area_1.id, "GrievanceTicketNode")},
         )
 
     def test_grievance_list_filtered_by_created_at(self) -> None:

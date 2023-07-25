@@ -21,12 +21,14 @@ interface TargetPopulationCoreProps {
   id: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   permissions: string[];
+  screenBeneficiary: boolean;
 }
 
 export function TargetPopulationCore({
   id,
   targetPopulation,
   permissions,
+  screenBeneficiary,
 }: TargetPopulationCoreProps): React.ReactElement {
   const { t } = useTranslation();
   if (!targetPopulation) return null;
@@ -37,11 +39,12 @@ export function TargetPopulationCore({
         <TargetingCriteria
           rules={targetPopulation.targetingCriteria?.rules || []}
           targetPopulation={targetPopulation}
+          screenBeneficiary={screenBeneficiary}
         />
       ) : null}
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
-          <Typography variant='h6'>
+          <Typography data-cy='title-excluded-entries' variant='h6'>
             {t(
               'Excluded Target Population Entries (Households or Individuals)',
             )}
@@ -74,7 +77,7 @@ export function TargetPopulationCore({
         />
       ) : (
         <PaperContainer>
-          <Typography variant='h6'>
+          <Typography data-cy='target-population-building' variant='h6'>
             {t('Target Population is building')}
           </Typography>
           <Label>
@@ -83,7 +86,6 @@ export function TargetPopulationCore({
           </Label>
         </PaperContainer>
       )}
-
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={targetPopulation.id} />
       )}

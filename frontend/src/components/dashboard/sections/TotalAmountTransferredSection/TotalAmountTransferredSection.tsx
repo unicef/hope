@@ -22,7 +22,7 @@ export const TotalAmountTransferredSection = ({
   if (!data) return null;
   return (
     <DashboardCard color='#1E877D'>
-      <Grid container justify='space-between' alignItems='center'>
+      <Grid container justifyContent='space-between' alignItems='center'>
         <Grid item>
           <CardTitle>{t('TOTAL AMOUNT TRANSFERRED')}</CardTitle>
           <CardTextLight>{t('IN USD')}</CardTextLight>

@@ -264,6 +264,58 @@
   }
 },
 {
+    "model": "household.documenttype",
+    "pk": "5cc56283-6f85-4572-861a-e85c43bb9873",
+    "fields": {
+        "created_at": "2023-05-25T12:38:42.348Z",
+        "updated_at": "2023-05-25T12:39:06.054Z",
+        "label": "Disability Card",
+        "key": "disability_card",
+        "is_identity_document": true,
+        "unique_for_individual": false,
+        "valid_for_deduplication": false
+    }
+},
+{
+    "model": "household.documenttype",
+    "pk": "aa5b57f7-d848-4240-8738-96e8a53ca3f0",
+    "fields": {
+        "created_at": "2023-05-25T12:39:27.898Z",
+        "updated_at": "2023-05-25T12:39:27.898Z",
+        "label": "Medical Certificate",
+        "key": "medical_certificate",
+        "is_identity_document": true,
+        "unique_for_individual": false,
+        "valid_for_deduplication": false
+    }
+},
+{
+    "model": "household.documenttype",
+    "pk": "b2a5bab4-1641-4585-9184-a0f844da6af3",
+    "fields": {
+        "created_at": "2023-05-25T12:38:17.892Z",
+        "updated_at": "2023-05-25T12:38:57.496Z",
+        "label": "Proof of Legal Guardianship",
+        "key": "proof_legal_guardianship",
+        "is_identity_document": true,
+        "unique_for_individual": false,
+        "valid_for_deduplication": false
+    }
+},
+{
+    "model": "household.documenttype",
+    "pk": "fb85dd2a-f73e-403b-8241-677789558605",
+    "fields": {
+        "created_at": "2023-05-25T12:39:46.671Z",
+        "updated_at": "2023-05-25T12:39:46.671Z",
+        "label": "Temporary Protection Visa",
+        "key": "temporary_protection_visa",
+        "is_identity_document": true,
+        "unique_for_individual": false,
+        "valid_for_deduplication": false
+    }
+},
+{
   "model": "household.document",
   "pk": "0040cb2a-4b86-41b2-82b1-d5ac4d11471d",
   "fields": {

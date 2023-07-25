@@ -4,8 +4,10 @@ from unittest import mock
 from django.core.management import call_command
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 class TestCommands(BaseElasticSearchTestCase):
     databases = "__all__"
 

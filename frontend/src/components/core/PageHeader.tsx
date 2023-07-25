@@ -2,7 +2,9 @@ import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
 import styled from 'styled-components';
+import { registrationDataImportErasedColor } from '../../utils/utils';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
+import { StatusBox } from './StatusBox';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -51,6 +53,11 @@ const TitleWrapper = styled.div`
   }
 `;
 
+const StatusErasedWrapper = styled.div`
+  margin-left: 15px;
+  text-transform: uppercase;
+`;
+
 interface Props {
   title: string | React.ReactElement;
   children?: React.ReactElement;
@@ -58,6 +65,7 @@ interface Props {
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
   flags?: React.ReactElement;
+  isErased?: boolean;
 }
 
 export function PageHeader({
@@ -67,6 +75,7 @@ export function PageHeader({
   tabs = null,
   hasInputComponent,
   flags,
+  isErased,
 }: Props): React.ReactElement {
   return (
     <Wrapper data-cy='page-header-container'>
@@ -85,7 +94,17 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Box display='flex' alignItems='center'>
-                  <Typography variant='h5'>{title}</Typography>
+                  <Typography data-cy='page-header-title' variant='h5'>
+                    {title}
+                  </Typography>
+                  {isErased ? (
+                    <StatusErasedWrapper>
+                      <StatusBox
+                        status='erased'
+                        statusToColor={registrationDataImportErasedColor}
+                      />
+                    </StatusErasedWrapper>
+                  ) : null}
                   <Box display='flex' ml={2}>
                     {flags}
                   </Box>

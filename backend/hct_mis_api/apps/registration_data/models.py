@@ -109,6 +109,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
+    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name

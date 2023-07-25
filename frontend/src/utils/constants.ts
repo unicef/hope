@@ -80,12 +80,121 @@ export const GRIEVANCE_CATEGORIES = {
   SYSTEM_FLAGGING: '9',
 };
 
+export const GRIEVANCE_CATEGORIES_NAMES = {
+  '1': 'PAYMENT_VERIFICATION',
+  '2': 'DATA_CHANGE',
+  '3': 'SENSITIVE_GRIEVANCE',
+  '4': 'GRIEVANCE_COMPLAINT',
+  '5': 'NEGATIVE_FEEDBACK',
+  '6': 'REFERRAL',
+  '7': 'POSITIVE_FEEDBACK',
+  '8': 'DEDUPLICATION',
+  '9': 'SYSTEM_FLAGGING',
+};
+
 export const GRIEVANCE_ISSUE_TYPES = {
+  DATA_BREACH: '1',
+  BRIBERY_CORRUPTION_KICKBACKS: '2',
+  FRAUD_FORGERY: '3',
+  FRAUD_MISUSE: '4',
+  HARASSMENT: '5',
+  INAPPROPRIATE_STAFF_CONDUCT: '6',
+  UNAUTHORIZED_USE: '7',
+  CONFLICT_OF_INTEREST: '8',
+  GROSS_MISMANAGEMENT: '9',
+  PERSONAL_DISPUTES: '10',
+  SEXUAL_HARASSMENT: '11',
+  MISCELLANEOUS: '12',
   EDIT_HOUSEHOLD: '13',
   EDIT_INDIVIDUAL: '14',
   DELETE_INDIVIDUAL: '15',
   ADD_INDIVIDUAL: '16',
   DELETE_HOUSEHOLD: '17',
+  PAYMENT_COMPLAINT: '18',
+  FSP_COMPLAINT: '19',
+  REGISTRATION_COMPLAINT: '20',
+  OTHER_COMPLAINT: '21',
+  PARTNER_COMPLAINT: '22',
+};
+
+export const GRIEVANCE_ISSUE_TYPES_NAMES = {
+  '1': 'DATA_BREACH',
+  '2': 'BRIBERY_CORRUPTION_KICKBACKS',
+  '3': 'FRAUD_FORGERY',
+  '4': 'FRAUD_MISUSE',
+  '5': 'HARASSMENT',
+  '6': 'INAPPROPRIATE_STAFF_CONDUCT',
+  '7': 'UNAUTHORIZED_USE',
+  '8': 'CONFLICT_OF_INTEREST',
+  '9': 'GROSS_MISMANAGEMENT',
+  '10': 'PERSONAL_DISPUTES',
+  '11': 'SEXUAL_HARASSMENT',
+  '12': 'MISCELLANEOUS',
+  '13': 'EDIT_HOUSEHOLD',
+  '14': 'EDIT_INDIVIDUAL',
+  '15': 'DELETE_INDIVIDUAL',
+  '16': 'ADD_INDIVIDUAL',
+  '17': 'DELETE_HOUSEHOLD',
+  '18': 'PAYMENT_COMPLAINT',
+  '19': 'FSP_COMPLAINT',
+  '20': 'REGISTRATION_COMPLAINT',
+  '21': 'OTHER_COMPLAINT',
+  '22': 'PARTNER_COMPLAINT',
+};
+
+export const GRIEVANCE_CATEGORY_DESCRIPTIONS = {
+  DATA_CHANGE:
+    'A grievance that is submitted to change in the households or beneficiary status',
+  GRIEVANCE_COMPLAINT:
+    'A grievance submitted to express dissatisfaction made about an individual, UNICEF/NGO/Partner/Vendor, about a received service or about the process itself',
+  REFERRAL:
+    'A grievance submitted to direct the reporting individual to another service provider/actor to provide support/help that is beyond the scope of work of UNICEF',
+  SENSITIVE_GRIEVANCE:
+    'A grievance that shall be treated with sensitivity or which individual wishes to submit anonymously',
+};
+
+export const GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS = {
+  ADD_INDIVIDUAL:
+    'A grievance submitted to specifically change in the households to add an individual',
+  EDIT_HOUSEHOLD:
+    'A grievance submitted to change in the household data (Address, number of individuals, etc.)',
+  EDIT_INDIVIDUAL:
+    'A grievance submitted to change in the household’s individuals data (Family name, full name, birth date, etc.)',
+  DELETE_INDIVIDUAL:
+    'A grievance submitted to remove an individual from within a household',
+  DELETE_HOUSEHOLD: 'A grievance submitted to remove a household',
+  PAYMENT_COMPLAINT: 'A grievance submitted to complain about payments',
+  FSP_COMPLAINT:
+    'A grievance to report dissatisfaction on service provided by a Financial Service Providers',
+  REGISTRATION_COMPLAINT:
+    'A grievance submitted on issues/difficulties encountered during the registration of beneficiaries',
+  PARTNER_COMPLAINT:
+    'A grievance submitted on issues encountered by an implementing partner',
+  OTHER_COMPLAINT:
+    'Other complaints that do not fall into specific predefined categories',
+  DATA_BREACH:
+    'Grievance on unauthorized access or disclosure of beneficiary data',
+  BRIBERY_CORRUPTION_KICKBACKS:
+    'Grievance on illicit payments or favors in exchange for personal gain',
+  FRAUD_FORGERY:
+    'Grievance related to identity theft or impersonation to benefit from someone’s entitlements',
+  FRAUD_MISUSE:
+    'Grievance on forgery actions undertaken by third parties’ individuals',
+  HARASSMENT:
+    'Grievance related to intimidation, mistreatment, or abuse by those in authority',
+  INAPPROPRIATE_STAFF_CONDUCT:
+    'Grievance related to improper behavior or actions (physical or verbal) by program staff',
+  UNAUTHORIZED_USE:
+    'Grievance on improper or unauthorized handling or disposal of assets/funds',
+  CONFLICT_OF_INTEREST:
+    'Grievance on deception or falsification for personal gain',
+  GROSS_MISMANAGEMENT:
+    'Grievance on mismanagement leading to significant negative impact',
+  PERSONAL_DISPUTES:
+    'Grievance on conflicts or disagreements between individuals',
+  SEXUAL_HARASSMENT:
+    'Grievance on unwanted advances, abuse, or exploitation of a sexual nature',
+  MISCELLANEOUS: 'Other issues not falling into specific predefined categories',
 };
 
 export const REPORT_TYPES = {
@@ -106,6 +215,75 @@ export const REPORTING_STATES = {
 };
 
 export const COLLECT_TYPES_MAPPING = {
+  A_: 'Unknown',
+  A_0: 'None',
+  A_1: 'Full',
+  A_2: 'Partial',
+};
+export const GRIEVANCE_TICKETS_TYPES = {
+  userGenerated: 0,
+  systemGenerated: 1,
+};
+
+export const GrievanceTypes = {
+  0: 'user',
+  1: 'system',
+};
+
+export const GrievanceStatuses = {
+  All: 'all',
+  Active: 'active',
+  Closed: 'Closed',
+};
+
+export const GrievanceSearchTypes = {
+  TicketID: 'ticket_id',
+  HouseholdID: 'ticket_hh_id',
+  LastName: 'last_name',
+};
+
+export const GrievanceSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
+};
+
+export const FeedbackSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
+};
+
+export const ISSUE_TYPE_CATEGORIES = {
+  DATA_CHANGE: 'Data Change',
+  SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
+  GRIEVANCE_COMPLAINT: 'Grievance Complaint',
+};
+
+export const CommunicationSteps = {
+  LookUp: 0,
+  SampleSize: 1,
+  Details: 2,
+};
+
+export const CommunicationTabsValues = {
+  HOUSEHOLD: 0,
+  TARGET_POPULATION: 1,
+  RDI: 2,
+};
+
+export const SurveySteps = {
+  LookUp: 0,
+  SampleSize: 1,
+  Details: 2,
+};
+
+export const SurveyTabsValues = {
+  PROGRAM: 0,
+  TARGET_POPULATION: 1,
+  RDI: 2,
   A_: 'Unknown',
   A_0: 'None',
   A_1: 'Full',

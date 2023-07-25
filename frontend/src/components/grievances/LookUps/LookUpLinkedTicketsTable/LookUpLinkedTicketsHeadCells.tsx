@@ -6,7 +6,7 @@ export const headCells: HeadCell<
 >[] = [
   {
     disablePadding: false,
-    label: 'Ticket Id',
+    label: 'Ticket ID',
     id: 'id',
     numeric: false,
     dataCy: 'ticket-id',
@@ -27,7 +27,7 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Household Id',
+    label: 'Household ID',
     id: 'householdId',
     numeric: false,
     dataCy: 'householdId',

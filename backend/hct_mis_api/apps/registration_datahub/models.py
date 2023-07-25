@@ -369,7 +369,6 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         null=True,
     )
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
-    # TODO: Add business_area FK field instead
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:
@@ -459,6 +458,8 @@ class ImportedDocument(TimeStampedUUIDModel):
     )
     country = CountryField(default="U")
     doc_date = models.DateField(blank=True, null=True, default=None)
+    issuance_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True, db_index=True)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError

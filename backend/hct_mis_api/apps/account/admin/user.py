@@ -21,14 +21,17 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.account import models as account_models
+from hct_mis_api.apps.account.admin.ad import ADUSerMixin
+from hct_mis_api.apps.account.admin.filters import BusinessAreaFilter, HasKoboAccount
+from hct_mis_api.apps.account.admin.forms import (
+    AddRoleForm,
+    HopeUserCreationForm,
+    ImportCSVForm,
+)
+from hct_mis_api.apps.account.admin.mixins import KoboAccessMixin
+from hct_mis_api.apps.account.admin.user_role import UserRoleInline
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
-
-from .. import models as account_models
-from .ad import ADUSerMixin
-from .filters import BusinessAreaFilter, HasKoboAccount
-from .forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
-from .mixins import KoboAccessMixin
-from .user_role import UserRoleInline
 
 if TYPE_CHECKING:
     from uuid import UUID

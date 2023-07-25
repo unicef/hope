@@ -1,11 +1,13 @@
-import React from 'react';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
+import React, { useEffect } from 'react';
+import styled from 'styled-components';
 import {
   AllIndividualsQuery,
   AllIndividualsQueryVariables,
-  useAllIndividualsQuery,
+  useAllIndividualsForPopulationTableQuery,
+  useHouseholdLazyQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { decodeIdString } from '../../../../utils/utils';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
@@ -21,8 +23,15 @@ interface LookUpIndividualTableProps {
   setSelectedHousehold;
   ticket?;
   excludedId?;
-  withdrawn?: boolean;
+  noTableStyling?;
 }
+
+const NoTableStyling = styled.div`
+  .MuiPaper-elevation1 {
+    box-shadow: none;
+    padding: 0 !important;
+  }
+`;
 
 export const LookUpIndividualTable = ({
   businessArea,
@@ -34,12 +43,21 @@ export const LookUpIndividualTable = ({
   setSelectedHousehold,
   ticket,
   excludedId,
-  withdrawn,
+  noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement => {
+  const [getHousehold, results] = useHouseholdLazyQuery();
+
+  useEffect(() => {
+    if (results.data && !results.loading && !results.error) {
+      setFieldValue('selectedHousehold', results.data.household);
+      setSelectedHousehold(results.data.household);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [results, setSelectedHousehold]);
+
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
-      setFieldValue('selectedHousehold', individual.household);
-      setSelectedHousehold(individual.household);
+      getHousehold({ variables: { id: individual.household.id.toString() } });
     }
     setSelectedIndividual(individual);
     setFieldValue('selectedIndividual', individual);
@@ -53,30 +71,34 @@ export const LookUpIndividualTable = ({
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null;
   }
+
   const initialVariables: AllIndividualsQueryVariables = {
     businessArea,
-    search: filter.search,
-    programs: [decodeIdString(filter.programs)],
-    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
-    status: filter.status,
-    admin2: [decodeIdString(filter?.admin2?.node?.id)],
+    age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     sex: [filter.sex],
+    search: filter.search,
+    admin2: [filter.admin2],
+    flags: filter.flags,
+    status: filter.status,
+    lastRegistrationDate: JSON.stringify({
+      min: filter.lastRegistrationDateMin,
+      max: filter.lastRegistrationDateMax,
+    }),
+    orderBy: filter.orderBy,
     householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
   };
-  if (withdrawn !== null && withdrawn !== undefined) {
-    initialVariables.withdrawn = withdrawn;
-  }
 
-  return (
-    <TableWrapper>
+  const renderTable = (): React.ReactElement => {
+    return (
       <UniversalTable<
         AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
         AllIndividualsQueryVariables
       >
         headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
-        query={useAllIndividualsQuery}
+        rowsPerPageOptions={[5, 10, 15, 20]}
+        filterOrderBy={filter.orderBy}
+        query={useAllIndividualsForPopulationTableQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         renderRow={(row) => (
@@ -88,6 +110,11 @@ export const LookUpIndividualTable = ({
           />
         )}
       />
-    </TableWrapper>
+    );
+  };
+  return noTableStyling ? (
+    <NoTableStyling>{renderTable()}</NoTableStyling>
+  ) : (
+    <TableWrapper>{renderTable()}</TableWrapper>
   );
 };

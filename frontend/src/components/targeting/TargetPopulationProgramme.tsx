@@ -44,7 +44,9 @@ export function TargetPopulationProgramme({
   return (
     <PaperContainer data-cy='target-population-program-container'>
       <Title>
-        <Typography variant='h6'>{t('Programme')}</Typography>
+        <Typography data-cy='program-title' variant='h6'>
+          {t('Programme')}
+        </Typography>
       </Title>
       <OverviewContainer>
         <Box display='flex' flexDirection='column'>
@@ -54,13 +56,13 @@ export function TargetPopulationProgramme({
           <Field
             name='program'
             label={t('Programme')}
+            data-cy="input-program"
             fullWidth
             variant='outlined'
             required
             choices={mappedPrograms}
             component={FormikSelectFieldConfirmProgram}
             allProgramsEdges={allProgramsEdges}
-            data-cy='input-program'
             program={program}
             setFieldValue={setFieldValue}
             values={values}

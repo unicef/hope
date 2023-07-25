@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.mutations_extras.utils import (
-    reassign_roles_on_disable_individual,
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_disable_individual_service,
 )
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
@@ -72,7 +73,9 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             },
         }
 
-        reassign_roles_on_disable_individual(self.primary_collector_individual, role_reassign_data)
+        reassign_roles_on_disable_individual_service(
+            self.primary_collector_individual, role_reassign_data, UserFactory()
+        )
 
         individual.refresh_from_db()
         self.household.refresh_from_db()
@@ -92,7 +95,9 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         with self.assertRaises(ValidationError) as context:
-            reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
+            reassign_roles_on_disable_individual_service(
+                self.alternate_collector_individual, role_reassign_data, UserFactory()
+            )
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
@@ -109,7 +114,9 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             },
         }
 
-        reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
+        reassign_roles_on_disable_individual_service(
+            self.alternate_collector_individual, role_reassign_data, UserFactory()
+        )
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_ALTERNATE)

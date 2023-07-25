@@ -5,19 +5,30 @@ import { MiśTheme } from '../../theme';
 const Link = styled.a`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
     theme.hctTypography.fontFamily};
-  color: #253b46;
+  color: #000;
   font-size: 14px;
   line-height: 19px;
+  max-width: ${(props) => (props.fullWidth ? '100%' : '200px')}
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
 `;
 
 export const ContentLink = ({
   href,
   children,
+  download = false,
+  fullWidth = false,
 }: {
   href: string;
   children: string;
-  target?: string;
-  rel?: string;
+  download?: boolean;
+  fullWidth?: boolean;
 }): React.ReactElement => {
-  return <Link href={href}>{children}</Link>;
+  return (
+    <Link download={download} href={href} fullWidth={fullWidth}>
+      {children}
+    </Link>
+  );
 };
