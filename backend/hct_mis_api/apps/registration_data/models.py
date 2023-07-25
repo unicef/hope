@@ -129,10 +129,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     @classmethod
     def get_choices(cls, business_area_slug: Optional[str] = None) -> List[Dict[str, Any]]:
-        queryset = cls.objects.filter(
-            Q(business_area__slug=business_area_slug)
-            & ~Q(status__in=[cls.DEDUPLICATION_FAILED, cls.MERGE_ERROR, cls.IMPORT_ERROR, cls.REFUSED_IMPORT])
-        )
+        query = ~Q(status__in=[cls.DEDUPLICATION_FAILED, cls.MERGE_ERROR, cls.IMPORT_ERROR, cls.REFUSED_IMPORT])
+        if business_area_slug:
+            query &= Q(business_area__slug=business_area_slug)
+        queryset = cls.objects.filter(query)
         return [
             {
                 "label": {"English(EN)": f"{rdi.name}"},
