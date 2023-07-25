@@ -233,6 +233,8 @@ class TestCopyIndividualRepresentation(TestCase):
         assert individual == self.individual1
         assert individual.copied_from == self.individual1
         assert individual.origin_unicef_id == self.individual1.unicef_id
+        assert individual.documents.first().program == self.program
+        assert individual.documents.last().program == self.program
         assert Document.objects.count() == documents_count
         assert IndividualIdentity.objects.count() == individual_identities_count
         assert BankAccountInfo.objects.count() == bank_account_info_count
@@ -678,6 +680,7 @@ class TestGetBiggestProgram(TestCase):
 class TestAssignNonProgramRDIToBiggestProgram(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
+        Program.objects.filter(business_area=self.business_area).delete()
         self.program = ProgramFactory(status=Program.ACTIVE)
         self.rdi1 = RegistrationDataImportFactory()
         self.rdi2 = RegistrationDataImportFactory()

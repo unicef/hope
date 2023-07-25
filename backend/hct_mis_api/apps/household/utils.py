@@ -161,12 +161,15 @@ def copy_household(household: Household, program: Program) -> Household:
     return household
 
 
-def adjust_household_to_representation(household: Household, program: Program) -> Household:
+def adjust_household_to_representation(
+    household: Household, program: Program, move_to_biggest_program: bool = False
+) -> Household:
     """
     Use this function when household has no representations yet - original object is used as first representation
     for optimization purposes. Corresponding representations of individuals need to be adjusted as well.
     """
-    household.program = program
+    if not move_to_biggest_program:
+        household.program = program
     # assign original household as copied_from
     # in this case the same household, so we know it is already a representation
     household.copied_from_id = household.id
@@ -252,35 +255,44 @@ def adjust_individual_to_representation(
     individual.origin_unicef_id = individual.unicef_id
     individual.household = household_representation
     individual.save()
+    individual.documents.update(program=individual.program)
     return individual
 
 
-def copy_roles(households: QuerySet, program: Program) -> None:
+def copy_roles(households: QuerySet, program: Program, move_to_biggest_program: bool = False) -> None:
     # filter roles for original households (exclude roles in household representations as we don't want to copy them)
-    roles = IndividualRoleInHousehold.objects.filter(
-        household__in=households,
-        individual__is_removed=False,
-        household__is_removed=False,
-    ).exclude(Q(household__copied_to=None) & Q(household__copied_from__isnull=False))
+    roles = (
+        IndividualRoleInHousehold.objects.filter(
+            household__in=households,
+            individual__is_removed=False,
+            household__is_removed=False,
+        )
+        .exclude(Q(household__copied_to=None) & Q(household__copied_from__isnull=False))
+        .order_by("pk")
+    )
 
     roles_count = roles.count()
     for batch_start in range(0, roles_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
         roles_list = []
         for role in roles[batch_start:batch_end]:
-            household_representation = get_household_representation_per_program_by_old_household_id(
-                program=program,
-                old_household_id=role.household_id,
-            )
+            if move_to_biggest_program:
+                household_representation = role.household
+            else:
+                household_representation = get_household_representation_per_program_by_old_household_id(
+                    program=program,
+                    old_household_id=role.household_id,
+                )
             individual_representation = get_individual_representation_per_program_by_old_individual_id(
                 program=program,
                 old_individual_id=role.individual_id,
             )
             if not individual_representation:
                 individual_representation = copy_individual_representation(program=program, individual=role.individual)
+            role.refresh_from_db()
             # check if representation existing in this program is not an original
             # if it is, we don't need to copy the role
-            if household_representation != role.household or individual_representation != role.individual:
+            if household_representation.pk != role.household_id or individual_representation.pk != role.individual_id:
                 # wider query inside to limit number of queries - the condition above will pass only for non-originals
                 # check if there already is a role for this individual representation in this household representation
                 if IndividualRoleInHousehold.objects.filter(
@@ -288,12 +300,15 @@ def copy_roles(households: QuerySet, program: Program) -> None:
                     individual=individual_representation,
                 ).exists():
                     continue
-                role.pk = None
-                role.household = household_representation
+                if not move_to_biggest_program:
+                    role.pk = None
+                    role.household = household_representation
                 role.individual = individual_representation
                 roles_list.append(role)
-
-        IndividualRoleInHousehold.objects.bulk_create(roles_list)
+        if move_to_biggest_program:
+            IndividualRoleInHousehold.objects.bulk_update(roles_list, ["individual"])
+        else:
+            IndividualRoleInHousehold.objects.bulk_create(roles_list)
 
 
 def delete_target_populations_in_wrong_statuses(program: Program) -> None:
@@ -394,7 +409,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
     Payment is already related to program through PaymentPlan (parent), and then TargetPopulation.
     """
 
-    payments = Payment.objects.filter(parent__target_population__program__business_area=business_area)
+    payments = Payment.objects.filter(parent__target_population__program__business_area=business_area).order_by("pk")
     payments_count = payments.count()
 
     for batch_start in range(0, payments_count, BATCH_SIZE):
@@ -423,7 +438,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
                 program=payment_program,
                 old_household_id=payment.household_id,
             )
-
+            payment.refresh_from_db()
             if (
                 not (
                     representation_collector == payment.collector
@@ -446,7 +461,9 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
     Adjust PaymentRecord individuals and households to their representations.
     PaymentRecord is already related to program through TargetPopulation.
     """
-    payment_records = PaymentRecord.objects.filter(target_population__program__business_area=business_area)
+    payment_records = PaymentRecord.objects.filter(target_population__program__business_area=business_area).order_by(
+        "pk"
+    )
     payment_records_count = payment_records.count()
     for batch_start in range(0, payment_records_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
@@ -465,6 +482,7 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
                 program=payment_record_program,
                 old_household_id=payment_record.household_id,
             )
+            payment_record.refresh_from_db()
             if (
                 not (
                     representation_head_of_household == payment_record.head_of_household
@@ -522,10 +540,12 @@ def assign_non_program_objects_to_biggest_program(business_area: BusinessArea) -
 
 
 def update_non_program_households_program(program: Program, business_area: BusinessArea) -> None:
-    Household.objects.filter(
-        program__isnull=True,
-        business_area=business_area,
-    ).update(program_id=program.id, copied_from_id=F("id"), origin_unicef_id=F("unicef_id"))
+    households = Household.objects.filter(program__isnull=True, business_area=business_area)
+    for household in households:
+        adjust_household_to_representation(household, program, move_to_biggest_program=True)
+    copy_roles(households, program=program, move_to_biggest_program=True)
+
+    households.update(program=program)
 
 
 def update_non_program_individuals_program(program: Program, business_area: BusinessArea) -> None:

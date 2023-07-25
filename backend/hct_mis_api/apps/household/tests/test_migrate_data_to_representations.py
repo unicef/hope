@@ -184,12 +184,26 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Household3 and its data (in wrong target population)
+        # Additional helper individual that will already be enrolled into a different program
+        # and is representative in the household3
+        self.individual_helper3 = IndividualFactory(business_area=self.business_area, household=None)
+        household_helper = HouseholdFactory(
+            business_area=self.business_area,
+            head_of_household=self.individual_helper3,
+        )
+        household_helper.target_populations.set([self.target_population3])
+
         self.individual3_1 = IndividualFactory(business_area=self.business_area, household=None)
         self.household3 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual3_1,
         )
         self.household3.target_populations.set([self.target_population_wrong])
+        self.role_alternate3 = IndividualRoleInHouseholdFactory(
+            individual=self.individual_helper3,
+            household=self.household3,
+            role=ROLE_ALTERNATE,
+        )
 
         # Household4 and its data (without target population)
         self.rdi4_1 = RegistrationDataImportFactory()
@@ -324,6 +338,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.payment7.refresh_from_db()
         self.payment_record7.refresh_from_db()
         self.rdi_with_3_hhs.refresh_from_db()
+        self.individual_helper3.refresh_from_db()
 
     def test_migrate_data_to_representations(self) -> None:
         household_count = Household.objects.filter(business_area=self.business_area).count()
@@ -340,7 +355,7 @@ class TestMigrateDataToRepresentations(TestCase):
         migrate_data_to_representations(business_area=self.business_area)
 
         assert Household.objects.filter(business_area=self.business_area).count() - household_count == 8
-        assert Individual.objects.filter(business_area=self.business_area).count() - individual_count == 16
+        assert Individual.objects.filter(business_area=self.business_area).count() - individual_count == 17
         assert Document.objects.filter(individual__business_area=self.business_area).count() - document_count == 6
         assert (
             IndividualIdentity.objects.filter(individual__business_area=self.business_area).count() - identity_count
@@ -371,6 +386,14 @@ class TestMigrateDataToRepresentations(TestCase):
         assert self.household1.individuals.count() == 3
         assert self.household1.representatives.count() == 2
 
+        assert self.individual1_1.program == self.program_active
+        assert self.individual1_1.copied_from == self.individual1_1
+        assert self.individual1_1.origin_unicef_id == self.individual1_1.unicef_id
+        assert self.individual1_1.copied_to.count() == 2
+        assert self.individual1_1.household == self.household1
+        assert self.individual1_1.documents.first().program == self.program_active
+        assert self.individual1_1.documents.last().program == self.program_active
+
         household1_representation = self.household1.copied_to.exclude(id=self.household1.id).first()
         individual_representation1_1 = self.individual1_1.copied_to.exclude(id=self.individual1_1.id).first()
 
@@ -385,9 +408,13 @@ class TestMigrateDataToRepresentations(TestCase):
         assert household1_representation.representatives.count() == 2
 
         assert individual_representation1_1.household == household1_representation
+        assert individual_representation1_1.program == self.program_finished1
         assert individual_representation1_1.copied_from == self.individual1_1
         assert individual_representation1_1.origin_unicef_id == self.individual1_1.unicef_id
         assert individual_representation1_1.copied_to.count() == 0
+        assert individual_representation1_1.documents.count() == 2
+        assert individual_representation1_1.documents.first().program == self.program_finished1
+        assert individual_representation1_1.documents.last().program == self.program_finished1
         assert individual_representation1_1.documents.count() == 2
         assert individual_representation1_1.identities.count() == 1
         assert individual_representation1_1.bank_account_info.count() == 1
@@ -477,6 +504,18 @@ class TestMigrateDataToRepresentations(TestCase):
         assert self.individual3_1.copied_from == self.individual3_1
         assert self.individual3_1.origin_unicef_id == self.individual3_1.unicef_id
         assert self.individual3_1.copied_to.count() == 1
+
+        self.assertEqual(self.individual_helper3.copied_to.count(), 2)
+        individual_helper3_representation = self.individual_helper3.copied_to.filter(
+            program=self.program_active
+        ).first()
+        assert (
+            IndividualRoleInHousehold.objects.get(
+                household=self.household3,
+                role=ROLE_ALTERNATE,
+            ).individual
+            == individual_helper3_representation
+        )
 
         assert self.target_population_wrong.is_removed is True
 
