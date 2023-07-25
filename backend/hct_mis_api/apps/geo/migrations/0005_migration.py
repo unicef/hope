@@ -40,10 +40,10 @@ def copy_admin_area_data(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("geo", "0004_migration"),
-        ("grievance", "0034_migration"),
+        ("grievance", "0001_migration_squashed_0034_migration"),
         ("household", "0087_migration"),
         ("program", "0029_migration"),
-        ("reporting", "0008_migration"),
+        ("reporting", "0008_migration_squashed_0014_migration"),
     ]
 
     operations = [migrations.RunPython(copy_admin_area_data, migrations.RunPython.noop)]

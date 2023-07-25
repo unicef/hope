@@ -67,25 +67,34 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
+        area_type1 = AreaTypeFactory(
+            name="Admin type level one",
+            country=country,
+            area_level=1,
+        )
+        area_type2 = AreaTypeFactory(
+            parent=area_type1,
+            name="Admin type level two",
             country=country,
             area_level=2,
         )
-        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
-        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sfds3dgg23")
+        admin_area = AreaFactory(name="City Test 1", area_type=area_type1, p_code="sfds")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type2, p_code="sfds323", parent=admin_area)
+        cls.admin_area_2 = AreaFactory(
+            name="City Example", area_type=area_type2, p_code="sfds3dgg23", parent=admin_area
+        )
 
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", admin_area=cls.admin_area_1)
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
-        household_two = HouseholdFactory.build(id="603dfd3f-baca-42d1-aac6-3e1c537ddbef")
+        household_two = HouseholdFactory.build(id="603dfd3f-baca-42d1-aac6-3e1c537ddbef", admin_area=cls.admin_area_1)
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_two.programs.add(program_one)

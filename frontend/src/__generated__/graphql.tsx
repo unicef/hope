@@ -401,7 +401,9 @@ export type BusinessAreaNode = Node & {
   koboToken?: Maybe<Scalars['String']>,
   koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
-  rapidProApiKey?: Maybe<Scalars['String']>,
+  rapidProPaymentVerificationToken?: Maybe<Scalars['String']>,
+  rapidProMessagesToken?: Maybe<Scalars['String']>,
+  rapidProSurveyToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
@@ -417,7 +419,7 @@ export type BusinessAreaNode = Node & {
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
   isPaymentPlanApplicable: Scalars['Boolean'],
-  isAccountabilityApplicable: Scalars['Boolean'],
+  isAccountabilityApplicable?: Maybe<Scalars['Boolean']>,
   active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -1263,9 +1265,7 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CashByFsp = 'CASH_BY_FSP',
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  InKind = 'IN_KIND',
   MobileMoney = 'MOBILE_MONEY',
-  Other = 'OTHER',
   PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
@@ -1403,8 +1403,18 @@ export type EditPaymentVerificationMutation = {
   paymentPlan?: Maybe<GenericPaymentPlanNode>,
 };
 
+export type EraseRegistrationDataImportMutation = {
+   __typename?: 'EraseRegistrationDataImportMutation',
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
 export type ExcludeHouseholdsMutation = {
    __typename?: 'ExcludeHouseholdsMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
+export type ExportPdfPaymentPlanSummaryMutation = {
+   __typename?: 'ExportPDFPaymentPlanSummaryMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
@@ -3421,6 +3431,7 @@ export type LogEntryNode = Node & {
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
+  isUserGenerated?: Maybe<Scalars['Boolean']>,
 };
 
 export type LogEntryNodeConnection = {
@@ -3510,6 +3521,7 @@ export type Mutations = {
   importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   excludeHouseholds?: Maybe<ExcludeHouseholdsMutation>,
+  exportPdfPaymentPlanSummary?: Maybe<ExportPdfPaymentPlanSummaryMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -3530,6 +3542,7 @@ export type Mutations = {
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>,
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>,
+  eraseRegistrationDataImport?: Maybe<EraseRegistrationDataImportMutation>,
   checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>,
 };
 
@@ -3855,6 +3868,11 @@ export type MutationsExcludeHouseholdsArgs = {
 };
 
 
+export type MutationsExportPdfPaymentPlanSummaryArgs = {
+  paymentPlanId: Scalars['ID']
+};
+
+
 export type MutationsCreateTargetPopulationArgs = {
   input: CreateTargetPopulationInput
 };
@@ -3956,12 +3974,19 @@ export type MutationsMergeRegistrationDataImportArgs = {
 
 export type MutationsRefuseRegistrationDataImportArgs = {
   id: Scalars['ID'],
+  refuseReason?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsRerunDedupeArgs = {
   registrationDataImportDatahubId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsEraseRegistrationDataImportArgs = {
+  id: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -4068,9 +4093,7 @@ export enum PaymentDeliveryType {
   CashByFsp = 'CASH_BY_FSP',
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  InKind = 'IN_KIND',
   MobileMoney = 'MOBILE_MONEY',
-  Other = 'OTHER',
   PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
@@ -4476,9 +4499,7 @@ export enum PaymentRecordDeliveryType {
   CashByFsp = 'CASH_BY_FSP',
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  InKind = 'IN_KIND',
   MobileMoney = 'MOBILE_MONEY',
-  Other = 'OTHER',
   PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
@@ -4579,6 +4600,7 @@ export type PaymentVerificationLogEntryNode = Node & {
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
+  isUserGenerated?: Maybe<Scalars['Boolean']>,
   contentObject?: Maybe<PaymentVerificationPlanNode>,
 };
 
@@ -4982,7 +5004,7 @@ export type Query = {
   recipients?: Maybe<RecipientNodeConnection>,
   accountabilitySampleSize?: Maybe<AccountabilitySampleSizeNode>,
   surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  availableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>,
+  surveyAvailableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -5082,6 +5104,8 @@ export type Query = {
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
   allIndividuals?: Maybe<IndividualNodeConnection>,
+  allMergedHouseholds?: Maybe<HouseholdNodeConnection>,
+  allMergedIndividuals?: Maybe<IndividualNodeConnection>,
   sectionHouseholdsReached?: Maybe<SectionTotalNode>,
   sectionIndividualsReached?: Maybe<SectionTotalNode>,
   sectionChildReached?: Maybe<SectionTotalNode>,
@@ -5937,6 +5961,32 @@ export type QueryAllIndividualsArgs = {
 };
 
 
+export type QueryAllMergedHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllMergedIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  household?: Maybe<Scalars['ID']>,
+  rdiId?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
 export type QuerySectionHouseholdsReachedArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
@@ -6263,6 +6313,8 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
+  erased: Scalars['Boolean'],
+  refuseReason?: Maybe<Scalars['String']>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -7753,7 +7805,9 @@ export type UserBusinessAreaNode = Node & {
   koboToken?: Maybe<Scalars['String']>,
   koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
-  rapidProApiKey?: Maybe<Scalars['String']>,
+  rapidProPaymentVerificationToken?: Maybe<Scalars['String']>,
+  rapidProMessagesToken?: Maybe<Scalars['String']>,
+  rapidProSurveyToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
@@ -7769,7 +7823,7 @@ export type UserBusinessAreaNode = Node & {
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
   isPaymentPlanApplicable: Scalars['Boolean'],
-  isAccountabilityApplicable: Scalars['Boolean'],
+  isAccountabilityApplicable?: Maybe<Scalars['Boolean']>,
   active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -8388,6 +8442,21 @@ export type HouseholdDetailedFragment = (
   & HouseholdMinimalFragment
 );
 
+export type MergedHouseholdMinimalFragment = (
+  { __typename?: 'HouseholdNode' }
+  & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'firstRegistrationDate' | 'hasDuplicates'>
+  & { headOfHousehold: (
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'fullName'>
+  ), admin1: Maybe<(
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name'>
+  )>, admin2: Maybe<(
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name'>
+  )> }
+);
+
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
   & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'email' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
@@ -8479,6 +8548,21 @@ export type IndividualDetailedFragment = (
   & IndividualMinimalFragment
 );
 
+export type MergedIndividualMinimalFragment = (
+  { __typename?: 'IndividualNode' }
+  & Pick<IndividualNode, 'id' | 'unicefId' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
+  )>>>, deduplicationBatchResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
+  )>>>, registrationDataImport: Maybe<(
+    { __typename?: 'RegistrationDataImportNode' }
+    & Pick<RegistrationDataImportNode, 'id' | 'datahubId'>
+  )> }
+);
+
 export type PaymentRecordDetailsFragment = (
   { __typename?: 'PaymentRecordNode' }
   & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
@@ -8519,7 +8603,7 @@ export type PaymentRecordDetailsFragment = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'refuseReason'>
   & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9019,7 +9103,7 @@ export type BulkUpdateGrievanceAssigneeMutation = (
       { __typename?: 'GrievanceTicketNode' }
       & { assignedTo: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName'>
+        & Pick<UserNode, 'firstName' | 'lastName' | 'email'>
       )> }
     )>>> }
   )> }
@@ -9269,6 +9353,22 @@ export type ExcludeHouseholdsPpMutation = (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
       )>>> }
+    )> }
+  )> }
+);
+
+export type ExportPdfPpSummaryMutationVariables = {
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type ExportPdfPpSummaryMutation = (
+  { __typename?: 'Mutations' }
+  & { exportPdfPaymentPlanSummary: Maybe<(
+    { __typename?: 'ExportPDFPaymentPlanSummaryMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
     )> }
   )> }
 );
@@ -9774,6 +9874,22 @@ export type CreateRegistrationXlsxImportMutation = (
   )> }
 );
 
+export type EraseRdiMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type EraseRdiMutation = (
+  { __typename?: 'Mutations' }
+  & { eraseRegistrationDataImport: Maybe<(
+    { __typename?: 'EraseRegistrationDataImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'status' | 'erased'>
+    )> }
+  )> }
+);
+
 export type MergeRdiMutationVariables = {
   id: Scalars['ID']
 };
@@ -9791,7 +9907,8 @@ export type MergeRdiMutation = (
 );
 
 export type RefuseRdiMutationVariables = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  refuseReason?: Maybe<Scalars['String']>
 };
 
 
@@ -9801,7 +9918,7 @@ export type RefuseRdiMutation = (
     { __typename?: 'RefuseRegistrationDataImportMutation' }
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'status'>
+      & Pick<RegistrationDataImportNode, 'id' | 'status' | 'refuseReason'>
     )> }
   )> }
 );
@@ -10312,7 +10429,7 @@ export type AllLogEntriesQuery = (
       & Pick<LogEntryNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'LogEntryNode' }
-        & Pick<LogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp'>
+        & Pick<LogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp' | 'isUserGenerated'>
         & { contentType: Maybe<(
           { __typename?: 'ContentTypeObjectType' }
           & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model' | 'name'>
@@ -10827,7 +10944,7 @@ export type AllGrievanceTicketQueryVariables = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   fsp?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
-  admin?: Maybe<Scalars['ID']>,
+  admin2?: Maybe<Scalars['ID']>,
   orderBy?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
@@ -12755,6 +12872,68 @@ export type AllKoboProjectsQuery = (
   )> }
 );
 
+export type AllMergedHouseholdsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllMergedHouseholdsQuery = (
+  { __typename?: 'Query' }
+  & { allMergedHouseholds: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & MergedHouseholdMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllMergedIndividualsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllMergedIndividualsQuery = (
+  { __typename?: 'Query' }
+  & { allMergedIndividuals: Maybe<(
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & MergedIndividualMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllRegistrationDataImportsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -13201,12 +13380,12 @@ export type AllSurveysQuery = (
   )> }
 );
 
-export type AvailableFlowsQueryVariables = {};
+export type SurveyAvailableFlowsQueryVariables = {};
 
 
-export type AvailableFlowsQuery = (
+export type SurveyAvailableFlowsQuery = (
   { __typename?: 'Query' }
-  & { availableFlows: Maybe<Array<Maybe<(
+  & { surveyAvailableFlows: Maybe<Array<Maybe<(
     { __typename?: 'RapidProFlowNode' }
     & Pick<RapidProFlowNode, 'id' | 'name'>
   )>>> }
@@ -13712,6 +13891,27 @@ export const HouseholdDetailedFragmentDoc = gql`
 }
     ${HouseholdMinimalFragmentDoc}
 ${IndividualMinimalFragmentDoc}`;
+export const MergedHouseholdMinimalFragmentDoc = gql`
+    fragment mergedHouseholdMinimal on HouseholdNode {
+  id
+  unicefId
+  headOfHousehold {
+    id
+    fullName
+  }
+  size
+  admin1 {
+    id
+    name
+  }
+  admin2 {
+    id
+    name
+  }
+  firstRegistrationDate
+  hasDuplicates
+}
+    `;
 export const IndividualDetailedFragmentDoc = gql`
     fragment individualDetailed on IndividualNode {
   ...individualMinimal
@@ -13793,6 +13993,40 @@ export const IndividualDetailedFragmentDoc = gql`
   preferredLanguage
 }
     ${IndividualMinimalFragmentDoc}`;
+export const MergedIndividualMinimalFragmentDoc = gql`
+    fragment mergedIndividualMinimal on IndividualNode {
+  id
+  unicefId
+  age
+  fullName
+  birthDate
+  sex
+  role
+  relationship
+  deduplicationBatchStatus
+  deduplicationGoldenRecordStatus
+  deduplicationGoldenRecordResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+    age
+    location
+  }
+  deduplicationBatchResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+    age
+    location
+  }
+  registrationDataImport {
+    id
+    datahubId
+  }
+}
+    `;
 export const PaymentRecordDetailsFragmentDoc = gql`
     fragment paymentRecordDetails on PaymentRecordNode {
   id
@@ -13866,6 +14100,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   createdAt
   name
   status
+  erased
   importDate
   importedBy {
     id
@@ -13876,6 +14111,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   dataSource
   numberOfHouseholds
   numberOfIndividuals
+  refuseReason
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -15031,6 +15267,8 @@ export const BulkUpdateGrievanceAssigneeDocument = gql`
     grievanceTickets {
       assignedTo {
         firstName
+        lastName
+        email
       }
     }
   }
@@ -15803,6 +16041,57 @@ export function useExcludeHouseholdsPpMutation(baseOptions?: ApolloReactHooks.Mu
 export type ExcludeHouseholdsPpMutationHookResult = ReturnType<typeof useExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationResult = ApolloReactCommon.MutationResult<ExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationOptions = ApolloReactCommon.BaseMutationOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
+export const ExportPdfPpSummaryDocument = gql`
+    mutation exportPdfPPSummary($paymentPlanId: ID!) {
+  exportPdfPaymentPlanSummary(paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type ExportPdfPpSummaryMutationFn = ApolloReactCommon.MutationFunction<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
+export type ExportPdfPpSummaryComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>, 'mutation'>;
+
+    export const ExportPdfPpSummaryComponent = (props: ExportPdfPpSummaryComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> mutation={ExportPdfPpSummaryDocument} {...props} />
+    );
+    
+export type ExportPdfPpSummaryProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> & TChildProps;
+export function withExportPdfPpSummary<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportPdfPpSummaryMutation,
+  ExportPdfPpSummaryMutationVariables,
+  ExportPdfPpSummaryProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables, ExportPdfPpSummaryProps<TChildProps>>(ExportPdfPpSummaryDocument, {
+      alias: 'exportPdfPpSummary',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportPdfPpSummaryMutation__
+ *
+ * To run a mutation, you first call `useExportPdfPpSummaryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportPdfPpSummaryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportPdfPpSummaryMutation, { data, loading, error }] = useExportPdfPpSummaryMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useExportPdfPpSummaryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>(ExportPdfPpSummaryDocument, baseOptions);
+      }
+export type ExportPdfPpSummaryMutationHookResult = ReturnType<typeof useExportPdfPpSummaryMutation>;
+export type ExportPdfPpSummaryMutationResult = ApolloReactCommon.MutationResult<ExportPdfPpSummaryMutation>;
+export type ExportPdfPpSummaryMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
 export const ExportXlsxPpListDocument = gql`
     mutation ExportXlsxPPList($paymentPlanId: ID!) {
   exportXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId) {
@@ -17260,6 +17549,59 @@ export function useCreateRegistrationXlsxImportMutation(baseOptions?: ApolloReac
 export type CreateRegistrationXlsxImportMutationHookResult = ReturnType<typeof useCreateRegistrationXlsxImportMutation>;
 export type CreateRegistrationXlsxImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationXlsxImportMutation>;
 export type CreateRegistrationXlsxImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
+export const EraseRdiDocument = gql`
+    mutation eraseRDI($id: ID!) {
+  eraseRegistrationDataImport(id: $id) {
+    registrationDataImport {
+      id
+      status
+      erased
+    }
+  }
+}
+    `;
+export type EraseRdiMutationFn = ApolloReactCommon.MutationFunction<EraseRdiMutation, EraseRdiMutationVariables>;
+export type EraseRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EraseRdiMutation, EraseRdiMutationVariables>, 'mutation'>;
+
+    export const EraseRdiComponent = (props: EraseRdiComponentProps) => (
+      <ApolloReactComponents.Mutation<EraseRdiMutation, EraseRdiMutationVariables> mutation={EraseRdiDocument} {...props} />
+    );
+    
+export type EraseRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EraseRdiMutation, EraseRdiMutationVariables> & TChildProps;
+export function withEraseRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  EraseRdiMutation,
+  EraseRdiMutationVariables,
+  EraseRdiProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, EraseRdiMutation, EraseRdiMutationVariables, EraseRdiProps<TChildProps>>(EraseRdiDocument, {
+      alias: 'eraseRdi',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useEraseRdiMutation__
+ *
+ * To run a mutation, you first call `useEraseRdiMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEraseRdiMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [eraseRdiMutation, { data, loading, error }] = useEraseRdiMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useEraseRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EraseRdiMutation, EraseRdiMutationVariables>) {
+        return ApolloReactHooks.useMutation<EraseRdiMutation, EraseRdiMutationVariables>(EraseRdiDocument, baseOptions);
+      }
+export type EraseRdiMutationHookResult = ReturnType<typeof useEraseRdiMutation>;
+export type EraseRdiMutationResult = ApolloReactCommon.MutationResult<EraseRdiMutation>;
+export type EraseRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<EraseRdiMutation, EraseRdiMutationVariables>;
 export const MergeRdiDocument = gql`
     mutation MergeRDI($id: ID!) {
   mergeRegistrationDataImport(id: $id) {
@@ -17312,11 +17654,12 @@ export type MergeRdiMutationHookResult = ReturnType<typeof useMergeRdiMutation>;
 export type MergeRdiMutationResult = ApolloReactCommon.MutationResult<MergeRdiMutation>;
 export type MergeRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<MergeRdiMutation, MergeRdiMutationVariables>;
 export const RefuseRdiDocument = gql`
-    mutation RefuseRDI($id: ID!) {
-  refuseRegistrationDataImport(id: $id) {
+    mutation RefuseRDI($id: ID!, $refuseReason: String) {
+  refuseRegistrationDataImport(id: $id, refuseReason: $refuseReason) {
     registrationDataImport {
       id
       status
+      refuseReason
     }
   }
 }
@@ -17354,6 +17697,7 @@ export function withRefuseRdi<TProps, TChildProps = {}>(operationOptions?: Apoll
  * const [refuseRdiMutation, { data, loading, error }] = useRefuseRdiMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      refuseReason: // value for 'refuseReason'
  *   },
  * });
  */
@@ -18730,6 +19074,7 @@ export const AllLogEntriesDocument = gql`
         objectRepr
         objectId
         timestamp
+        isUserGenerated
         contentType {
           id
           appLabel
@@ -20112,8 +20457,8 @@ export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAl
 export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
 export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin2, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage) {
     totalCount
     pageInfo {
       startCursor
@@ -20197,7 +20542,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      status: // value for 'status'
  *      fsp: // value for 'fsp'
  *      createdAtRange: // value for 'createdAtRange'
- *      admin: // value for 'admin'
+ *      admin2: // value for 'admin2'
  *      orderBy: // value for 'orderBy'
  *      registrationDataImport: // value for 'registrationDataImport'
  *      assignedTo: // value for 'assignedTo'
@@ -24524,6 +24869,144 @@ export function useAllKoboProjectsLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProjectsQuery>;
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
+export const AllMergedHouseholdsDocument = gql`
+    query AllMergedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
+  allMergedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...mergedHouseholdMinimal
+      }
+    }
+  }
+}
+    ${MergedHouseholdMinimalFragmentDoc}`;
+export type AllMergedHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>, 'query'>;
+
+    export const AllMergedHouseholdsComponent = (props: AllMergedHouseholdsComponentProps) => (
+      <ApolloReactComponents.Query<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables> query={AllMergedHouseholdsDocument} {...props} />
+    );
+    
+export type AllMergedHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables> & TChildProps;
+export function withAllMergedHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllMergedHouseholdsQuery,
+  AllMergedHouseholdsQueryVariables,
+  AllMergedHouseholdsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables, AllMergedHouseholdsProps<TChildProps>>(AllMergedHouseholdsDocument, {
+      alias: 'allMergedHouseholds',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllMergedHouseholdsQuery__
+ *
+ * To run a query within a React component, call `useAllMergedHouseholdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllMergedHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllMergedHouseholdsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      rdiId: // value for 'rdiId'
+ *      orderBy: // value for 'orderBy'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllMergedHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, baseOptions);
+      }
+export function useAllMergedHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, baseOptions);
+        }
+export type AllMergedHouseholdsQueryHookResult = ReturnType<typeof useAllMergedHouseholdsQuery>;
+export type AllMergedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllMergedHouseholdsLazyQuery>;
+export type AllMergedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>;
+export const AllMergedIndividualsDocument = gql`
+    query AllMergedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String, $duplicatesOnly: Boolean, $businessArea: String) {
+  allMergedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy, duplicatesOnly: $duplicatesOnly, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...mergedIndividualMinimal
+      }
+    }
+  }
+}
+    ${MergedIndividualMinimalFragmentDoc}`;
+export type AllMergedIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>, 'query'>;
+
+    export const AllMergedIndividualsComponent = (props: AllMergedIndividualsComponentProps) => (
+      <ApolloReactComponents.Query<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables> query={AllMergedIndividualsDocument} {...props} />
+    );
+    
+export type AllMergedIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables> & TChildProps;
+export function withAllMergedIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllMergedIndividualsQuery,
+  AllMergedIndividualsQueryVariables,
+  AllMergedIndividualsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables, AllMergedIndividualsProps<TChildProps>>(AllMergedIndividualsDocument, {
+      alias: 'allMergedIndividuals',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllMergedIndividualsQuery__
+ *
+ * To run a query within a React component, call `useAllMergedIndividualsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllMergedIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllMergedIndividualsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      rdiId: // value for 'rdiId'
+ *      household: // value for 'household'
+ *      orderBy: // value for 'orderBy'
+ *      duplicatesOnly: // value for 'duplicatesOnly'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllMergedIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, baseOptions);
+      }
+export function useAllMergedIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, baseOptions);
+        }
+export type AllMergedIndividualsQueryHookResult = ReturnType<typeof useAllMergedIndividualsQuery>;
+export type AllMergedIndividualsLazyQueryHookResult = ReturnType<typeof useAllMergedIndividualsLazyQuery>;
+export type AllMergedIndividualsQueryResult = ApolloReactCommon.QueryResult<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
     query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String) {
   allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size) {
@@ -25712,56 +26195,56 @@ export function useAllSurveysLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
 export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
 export type AllSurveysQueryResult = ApolloReactCommon.QueryResult<AllSurveysQuery, AllSurveysQueryVariables>;
-export const AvailableFlowsDocument = gql`
-    query AvailableFlows {
-  availableFlows {
+export const SurveyAvailableFlowsDocument = gql`
+    query SurveyAvailableFlows {
+  surveyAvailableFlows {
     id
     name
   }
 }
     `;
-export type AvailableFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>, 'query'>;
+export type SurveyAvailableFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>, 'query'>;
 
-    export const AvailableFlowsComponent = (props: AvailableFlowsComponentProps) => (
-      <ApolloReactComponents.Query<AvailableFlowsQuery, AvailableFlowsQueryVariables> query={AvailableFlowsDocument} {...props} />
+    export const SurveyAvailableFlowsComponent = (props: SurveyAvailableFlowsComponentProps) => (
+      <ApolloReactComponents.Query<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables> query={SurveyAvailableFlowsDocument} {...props} />
     );
     
-export type AvailableFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AvailableFlowsQuery, AvailableFlowsQueryVariables> & TChildProps;
-export function withAvailableFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type SurveyAvailableFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables> & TChildProps;
+export function withSurveyAvailableFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  AvailableFlowsQuery,
-  AvailableFlowsQueryVariables,
-  AvailableFlowsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AvailableFlowsQuery, AvailableFlowsQueryVariables, AvailableFlowsProps<TChildProps>>(AvailableFlowsDocument, {
-      alias: 'availableFlows',
+  SurveyAvailableFlowsQuery,
+  SurveyAvailableFlowsQueryVariables,
+  SurveyAvailableFlowsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables, SurveyAvailableFlowsProps<TChildProps>>(SurveyAvailableFlowsDocument, {
+      alias: 'surveyAvailableFlows',
       ...operationOptions
     });
 };
 
 /**
- * __useAvailableFlowsQuery__
+ * __useSurveyAvailableFlowsQuery__
  *
- * To run a query within a React component, call `useAvailableFlowsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAvailableFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useSurveyAvailableFlowsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSurveyAvailableFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAvailableFlowsQuery({
+ * const { data, loading, error } = useSurveyAvailableFlowsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useAvailableFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AvailableFlowsQuery, AvailableFlowsQueryVariables>(AvailableFlowsDocument, baseOptions);
+export function useSurveyAvailableFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
+        return ApolloReactHooks.useQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, baseOptions);
       }
-export function useAvailableFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AvailableFlowsQuery, AvailableFlowsQueryVariables>(AvailableFlowsDocument, baseOptions);
+export function useSurveyAvailableFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, baseOptions);
         }
-export type AvailableFlowsQueryHookResult = ReturnType<typeof useAvailableFlowsQuery>;
-export type AvailableFlowsLazyQueryHookResult = ReturnType<typeof useAvailableFlowsLazyQuery>;
-export type AvailableFlowsQueryResult = ApolloReactCommon.QueryResult<AvailableFlowsQuery, AvailableFlowsQueryVariables>;
+export type SurveyAvailableFlowsQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsQuery>;
+export type SurveyAvailableFlowsLazyQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsLazyQuery>;
+export type SurveyAvailableFlowsQueryResult = ApolloReactCommon.QueryResult<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>;
 export const RecipientsDocument = gql`
     query Recipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $survey: String!, $orderBy: String) {
   recipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, survey: $survey, orderBy: $orderBy) {
@@ -26959,6 +27442,7 @@ export type ResolversTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   ExcludeHouseholdsMutation: ResolverTypeWrapper<ExcludeHouseholdsMutation>,
+  ExportPDFPaymentPlanSummaryMutation: ResolverTypeWrapper<ExportPdfPaymentPlanSummaryMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -26993,6 +27477,7 @@ export type ResolversTypes = {
   MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
   RefuseRegistrationDataImportMutation: ResolverTypeWrapper<RefuseRegistrationDataImportMutation>,
   RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
+  EraseRegistrationDataImportMutation: ResolverTypeWrapper<EraseRegistrationDataImportMutation>,
   CheckAgainstSanctionListMutation: ResolverTypeWrapper<CheckAgainstSanctionListMutation>,
 };
 
@@ -27455,6 +27940,7 @@ export type ResolversParentTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ImportXlsxPaymentPlanPaymentListPerFspMutation,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation,
   ExcludeHouseholdsMutation: ExcludeHouseholdsMutation,
+  ExportPDFPaymentPlanSummaryMutation: ExportPdfPaymentPlanSummaryMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
@@ -27489,6 +27975,7 @@ export type ResolversParentTypes = {
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
   RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation,
   RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
+  EraseRegistrationDataImportMutation: EraseRegistrationDataImportMutation,
   CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
 };
 
@@ -27673,7 +28160,9 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProPaymentVerificationToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProMessagesToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProSurveyToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -27689,7 +28178,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isAccountabilityApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isAccountabilityApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
@@ -28141,7 +28630,15 @@ export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentTy
   paymentPlan?: Resolver<Maybe<ResolversTypes['GenericPaymentPlanNode']>, ParentType, ContextType>,
 };
 
+export type EraseRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EraseRegistrationDataImportMutation'] = ResolversParentTypes['EraseRegistrationDataImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
 export type ExcludeHouseholdsMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExcludeHouseholdsMutation'] = ResolversParentTypes['ExcludeHouseholdsMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type ExportPdfPaymentPlanSummaryMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportPDFPaymentPlanSummaryMutation'] = ResolversParentTypes['ExportPDFPaymentPlanSummaryMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
@@ -29085,6 +29582,7 @@ export type LogEntryNodeResolvers<ContextType = any, ParentType extends Resolver
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isUserGenerated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type LogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeConnection'] = ResolversParentTypes['LogEntryNodeConnection']> = {
@@ -29163,6 +29661,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>,
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
   excludeHouseholds?: Resolver<Maybe<ResolversTypes['ExcludeHouseholdsMutation']>, ParentType, ContextType, RequireFields<MutationsExcludeHouseholdsArgs, 'excludedHouseholdsIds' | 'paymentPlanId'>>,
+  exportPdfPaymentPlanSummary?: Resolver<Maybe<ResolversTypes['ExportPDFPaymentPlanSummaryMutation']>, ParentType, ContextType, RequireFields<MutationsExportPdfPaymentPlanSummaryArgs, 'paymentPlanId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -29183,6 +29682,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>,
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
+  eraseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['EraseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsEraseRegistrationDataImportArgs, 'id'>>,
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
 };
 
@@ -29453,6 +29953,7 @@ export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentTy
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isUserGenerated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   contentObject?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType>,
 };
 
@@ -29637,7 +30138,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
   accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeNode']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
   surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  availableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>,
+  surveyAvailableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -29737,6 +30238,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
   allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
+  allMergedHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllMergedHouseholdsArgs>,
+  allMergedIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllMergedIndividualsArgs>,
   sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>,
@@ -29896,6 +30399,8 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
@@ -30764,7 +31269,9 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProPaymentVerificationToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProMessagesToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProSurveyToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -30780,7 +31287,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isAccountabilityApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isAccountabilityApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
@@ -30985,7 +31492,9 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
+  EraseRegistrationDataImportMutation?: EraseRegistrationDataImportMutationResolvers<ContextType>,
   ExcludeHouseholdsMutation?: ExcludeHouseholdsMutationResolvers<ContextType>,
+  ExportPDFPaymentPlanSummaryMutation?: ExportPdfPaymentPlanSummaryMutationResolvers<ContextType>,
   ExportSurveySampleMutationMutation?: ExportSurveySampleMutationMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,

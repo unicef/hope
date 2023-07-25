@@ -30,7 +30,7 @@ export const LookUpLinkedTicketsModal = ({
     status: '',
     fsp: '',
     createdAtRange: '',
-    admin: '',
+    admin2: '',
   };
   const [filterApplied, setFilterApplied] = useState(filterInitial);
   const [filter, setFilter] = useState(filterInitial);
