@@ -14539,7 +14539,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GRANDDAUGHER_GRANDSON",
+            "name": "GRANDDAUGHTER_GRANDSON",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -19845,31 +19845,7 @@
             "deprecationReason": null
           },
           {
-            "name": "rapidProPaymentVerificationToken",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "rapidProMessagesToken",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "rapidProSurveyToken",
+            "name": "rapidProApiKey",
             "description": null,
             "args": [],
             "type": {
@@ -27397,12 +27373,6 @@
           },
           {
             "name": "MOBILE_MONEY",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "PRE_PAID_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -35752,12 +35722,6 @@
             "deprecationReason": null
           },
           {
-            "name": "PRE_PAID_CARD",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "REFERRAL",
             "description": null,
             "isDeprecated": false,
@@ -37268,12 +37232,6 @@
           },
           {
             "name": "MOBILE_MONEY",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "PRE_PAID_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -49287,31 +49245,7 @@
             "deprecationReason": null
           },
           {
-            "name": "rapidProPaymentVerificationToken",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "rapidProMessagesToken",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "rapidProSurveyToken",
+            "name": "rapidProApiKey",
             "description": null,
             "args": [],
             "type": {
