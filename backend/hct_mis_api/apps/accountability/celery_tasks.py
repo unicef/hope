@@ -1,7 +1,9 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.template.loader import render_to_string
 
 from sentry_sdk import configure_scope
 
@@ -31,7 +33,14 @@ def export_survey_sample_task(survey_id: str, user_id: str) -> None:
 
             service = ExportSurveySampleService(survey, user)
             service.export_sample()
-            service.send_email()
+
+            context = service.get_email_context()
+            user.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
     except Exception as e:
         logger.exception(e)
         raise
