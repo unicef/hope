@@ -44,6 +44,7 @@ services:
       - celery_worker
     volumes:
       - ../cypress-results:/code/cypress/results
+      - ../cypress-report:/code/cypress/report
       - ../cypress-screenshots:/code/cypress/screenshots
       - /code/node_modules
       - ./:/code

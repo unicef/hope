@@ -23,8 +23,10 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [

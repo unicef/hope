@@ -88,6 +88,19 @@ export const GrievancesFilters = ({
     filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
     filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
+  const preparedStatusChoices = useMemo(() => {
+    //No status NEW for user generated grievances
+    if (
+      filter.grievanceType ===
+      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
+    ) {
+      return choicesData.grievanceTicketStatusChoices.filter(
+        (item) => item.name !== 'New',
+      );
+    }
+    return choicesData.grievanceTicketStatusChoices;
+  }, [choicesData, filter.grievanceType]);
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -132,7 +145,7 @@ export const GrievancesFilters = ({
             <MenuItem value=''>
               <em>None</em>
             </MenuItem>
-            {choicesData.grievanceTicketStatusChoices.map((item) => (
+            {preparedStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
@@ -230,8 +243,8 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             filter={filter}
-            name='admin'
-            value={filter.admin}
+            name='admin2'
+            value={filter.admin2}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}

@@ -34,7 +34,7 @@ export const headCells: HeadCell<SurveyNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Creation date',
+    label: 'Creation Date',
     id: 'created_at',
     numeric: false,
   },

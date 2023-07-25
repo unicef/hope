@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('program', '0030_migration'),
-        ('payment', '0035_migration'),
+        ('payment', '0030_migration_squashed_0051_migration'),
 
     ]
 

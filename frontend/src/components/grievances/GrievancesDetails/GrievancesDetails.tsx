@@ -3,7 +3,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
 } from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
@@ -23,6 +27,7 @@ import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { DividerLine } from '../../core/DividerLine';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -119,6 +124,15 @@ export const GrievancesDetails = ({
 
     return <>-</>;
   };
+
+  const categoryDescription =
+    GRIEVANCE_CATEGORY_DESCRIPTIONS[
+      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
+    ] || '';
+  const issueTypeDescription =
+    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
+      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
+    ] || '';
 
   return (
     <Grid item xs={12}>
@@ -295,6 +309,19 @@ export const GrievancesDetails = ({
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
                 </Grid>
               ))}
+            <DividerLine />
+            <Grid item xs={6}>
+              <LabelizedField label={t('Category Description')}>
+                {categoryDescription}
+              </LabelizedField>
+            </Grid>
+            {issueTypeDescription && (
+              <Grid item xs={6}>
+                <LabelizedField label={t('Issue Type Description')}>
+                  {issueTypeDescription}
+                </LabelizedField>
+              </Grid>
+            )}
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>

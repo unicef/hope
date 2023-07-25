@@ -54,7 +54,7 @@ export const GrievancesTable = ({
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
-    admin: filter.admin,
+    admin2: filter.admin2,
     registrationDataImport: filter.registrationDataImport,
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
@@ -144,6 +144,7 @@ export const GrievancesTable = ({
       | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
+    _event.stopPropagation();
     const selectedIndex = selected.indexOf(name);
     const newSelected = [...selected];
 

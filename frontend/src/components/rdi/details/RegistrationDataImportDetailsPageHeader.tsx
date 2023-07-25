@@ -1,19 +1,23 @@
 import { Button } from '@material-ui/core';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useRefuseRdiMutation,
+  useEraseRdiMutation,
 } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
+import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
+import { RefuseRdiForm } from './refuseRdiForm';
+
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -36,21 +40,47 @@ export function RegistrationDataImportDetailsPageHeader({
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const [mutate, { loading }] = useRefuseRdiMutation();
+  const confirm = useConfirmation();
+  const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
+  const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
+  const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
+
   let buttons = null;
+
+  const eraseButton = (
+    <LoadingButton
+      loading={eraseLoading}
+      onClick={() =>
+        confirm({
+          title: t('Warning'),
+          content: t(
+            'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
+          ),
+        }).then(async () => {
+          await eraseRdiMutate({
+            variables: { id: registration.id },
+          });
+        })
+      }
+      variant='contained'
+      color='primary'
+    >
+      {t('Erase import')}
+    </LoadingButton>
+  );
   // eslint-disable-next-line default-case
   switch (registration?.status) {
+    case RegistrationDataImportStatus.ImportError:
+    case RegistrationDataImportStatus.MergeError:
+      buttons = <div>{canRefuse && eraseButton}</div>;
+      break;
     case RegistrationDataImportStatus.InReview:
       buttons = (
         <div>
           {canMerge && canRefuse && (
             <LoadingButton
-              loading={loading}
-              onClick={() =>
-                mutate({
-                  variables: { id: registration.id },
-                })
-              }
+              loading={refuseLoading}
+              onClick={() => setShowRefuseRdiForm(true)}
               variant='contained'
               color='primary'
             >
@@ -68,6 +98,7 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.DeduplicationFailed:
       buttons = (
         <div>
+          {canRefuse && eraseButton}
           {canRerunDedupe && (
             <MergeButtonContainer>
               <RerunDedupe registration={registration} />
@@ -98,12 +129,22 @@ export function RegistrationDataImportDetailsPageHeader({
       to: `/${businessArea}/registration-data-import/`,
     },
   ];
+
   return (
-    <PageHeader
-      title={registration.name}
-      breadCrumbs={canViewList ? breadCrumbsItems : null}
-    >
-      {buttons}
-    </PageHeader>
+    <>
+      <PageHeader
+        title={registration.name}
+        breadCrumbs={canViewList ? breadCrumbsItems : null}
+        isErased={registration.erased}
+      >
+        {registration.erased ? null : buttons}
+      </PageHeader>
+      <RefuseRdiForm
+        open={showRefuseRdiForm}
+        refuseMutate={refuseMutate}
+        onClose={() => setShowRefuseRdiForm(false)}
+        registration={registration}
+      />
+    </>
   );
 }

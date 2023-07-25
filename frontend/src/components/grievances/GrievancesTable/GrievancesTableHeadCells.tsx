@@ -6,7 +6,7 @@ export const headCells: HeadCell<
 >[] = [
   {
     disablePadding: false,
-    label: 'Ticket Id',
+    label: 'Ticket ID',
     id: 'unicef_id',
     numeric: false,
     dataCy: 'ticket-id',
@@ -41,7 +41,7 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Household Id',
+    label: 'Household ID',
     id: 'household_unicef_id',
     numeric: false,
     dataCy: 'householdId',
@@ -69,21 +69,21 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Creation date',
+    label: 'Creation Date',
     id: 'created_at',
     numeric: false,
     dataCy: 'createdAt',
   },
   {
     disablePadding: false,
-    label: 'Last modified date',
+    label: 'Last Modified Date',
     id: 'user_modified',
     numeric: false,
     dataCy: 'userModified',
   },
   {
     disablePadding: false,
-    label: 'Total days',
+    label: 'Total Days',
     id: 'total_days',
     numeric: false,
     dataCy: 'totalDays',

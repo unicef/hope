@@ -6,10 +6,8 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('reporting', '0008_migration'), ('reporting', '0009_migration'), ('reporting', '0010_migration'), ('reporting', '0011_migration'), ('reporting', '0012_migration'), ('reporting', '0013_migration'), ('reporting', '0014_migration')]
-
     dependencies = [
-        ('reporting', '0007_migration'),
+        ('reporting', '0005_migration_squashed_0007_migration'),
         ('geo', '0004_migration'),
     ]
 

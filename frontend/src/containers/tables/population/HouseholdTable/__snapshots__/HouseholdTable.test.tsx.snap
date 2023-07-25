@@ -95,7 +95,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                     class="sc-gzVnrw dYSoUE"
                     data-cy="table-label"
                   >
-                    Household Id
+                    Household ID
                   </span>
                 </th>
                 <th

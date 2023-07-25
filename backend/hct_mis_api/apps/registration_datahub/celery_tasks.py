@@ -10,9 +10,10 @@ from django.utils import timezone
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.models import ImportedHousehold, Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
@@ -44,24 +45,27 @@ def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
 
 @contextmanager
 def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
-    if cache.get(key):
-        logger.info(f"Task with key {key} is already running")
-        yield False
-    else:
-        try:
-            logger.info(f"Task with key {key} running")
-            cache.set(key, True, timeout=timeout)
+    now = timezone.now()
+    try:
+        if cache.get_or_set(key, now, timeout=timeout) == now:
+            logger.info(f"Task with key {key} started")
             yield True
-        finally:
-            cache.delete(key)
-            logger.info(f"Task with key {key} finished")
+        else:
+            logger.info(f"Task with key {key} is already running")
+            yield False
+    finally:
+        cache.delete(key)
+        logger.info(f"Task with key {key} finished")
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str
+    self: Any,
+    registration_data_import_id: str,
+    import_data_id: str,
+    business_area_id: str,
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -69,18 +73,23 @@ def registration_xlsx_import_task(
             RdiXlsxCreateTask,
         )
 
-        with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
-
-            RegistrationDataImport.objects.filter(datahub_id=registration_data_import_id).update(
-                status=RegistrationDataImport.IMPORTING
-            )
-
-            RdiXlsxCreateTask().execute(
-                registration_data_import_id=registration_data_import_id,
-                import_data_id=import_data_id,
-                business_area_id=business_area_id,
-            )
+        with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
+            if not locked:
+                raise Exception(
+                    f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
+                )
+            with configure_scope() as scope:
+                scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
+                rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
+                if rdi.status != RegistrationDataImport.IMPORT_SCHEDULED:
+                    raise Exception("Rdi is not in status IMPORT_SCHEDULED while trying to import")
+                rdi.status = RegistrationDataImport.IMPORTING
+                rdi.save()
+                RdiXlsxCreateTask().execute(
+                    registration_data_import_id=registration_data_import_id,
+                    import_data_id=import_data_id,
+                    business_area_id=business_area_id,
+                )
     except Exception as e:
         logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
@@ -500,24 +509,63 @@ def deduplicate_documents() -> bool:
 
 
 @app.task
+@log_start_and_end
 @sentry_tags
-def check_rdi_import_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import rdi_import_celery_manager
-
-    with locked_cache(key="celery_manager_periodic_task") as locked:
+def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> bool:
+    with cache.lock(
+        f"check_rdi_import_periodic_task_{business_area_slug}",
+        blocking_timeout=60 * 5,
+        timeout=60 * 60 * 1,
+    ) as locked:
         if not locked:
-            return True
-        rdi_import_celery_manager.execute()
-    return True
+            raise Exception("cannot set lock on check_rdi_import_periodic_task")
+        from hct_mis_api.apps.utils.celery_manager import (
+            RegistrationDataXlsxImportCeleryManager,
+        )
+
+        business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
+        manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
+        manager.execute()
+        return True
 
 
 @app.task
 @sentry_tags
-def check_rdi_merge_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import rdi_merge_celery_manager
+def remove_old_rdi_links_task(page_count: int = 100) -> None:
+    """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
 
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        rdi_merge_celery_manager.execute()
-    return True
+    from datetime import timedelta
+
+    from constance import config
+
+    days = config.REMOVE_RDI_LINKS_TIMEDELTA
+    try:
+        # Get datahub_ids older than 3 months which have status other than MERGED
+        unmerged_rdi_datahub_ids = list(
+            RegistrationDataImport.objects.filter(
+                created_at__lte=timezone.now() - timedelta(days=days),
+                status__in=[
+                    RegistrationDataImport.IN_REVIEW,
+                    RegistrationDataImport.DEDUPLICATION_FAILED,
+                    RegistrationDataImport.IMPORT_ERROR,
+                    RegistrationDataImport.MERGE_ERROR,
+                ],
+            ).values_list("datahub_id", flat=True)
+        )
+
+        i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
+        while i <= count:
+            logger.info(f"Page {i}/{count} processing...")
+            rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
+
+            ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+
+            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(erased=True)
+            i += 1
+
+        logger.info(
+            f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
+        )
+    except Exception:
+        logger.error("Removing old RDI objects failed")
+        raise

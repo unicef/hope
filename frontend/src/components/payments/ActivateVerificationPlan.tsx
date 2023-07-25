@@ -71,7 +71,7 @@ export function ActivateVerificationPlan({
           <DialogContainer>
             <Box p={5}>
               {t(
-                'Are you sure you want to activate the Verification Plan for this Cash Plan?',
+                'Are you sure you want to activate the Verification Plan for this Payment Plan?',
               )}
             </Box>
           </DialogContainer>
