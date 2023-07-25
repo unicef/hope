@@ -67,15 +67,17 @@ fs.readFile(
     try {
       const report = JSON.parse(jsonString);
       let branchName = exec(`echo $BRANCH_NAME`).replace(/\s/g, "");
+      let buildID = exec(`echo $BUILD_ID`).replace(/\s/g, "");
       let firstMessage = `Branch: <https://github.com/unicef/hct-mis/compare/${branchName}|${branchName}>`;
+      let pipelineLink = `Pipeline: <https://unicef.visualstudio.com/ICTD-HCT-MIS/_build/results?buildId=${buildID}&view=results|${buildID}>`;
       if (report.stats.failures == "0") {
         sendMessage({
-          text: `:tada: ${firstMessage}\n*PASSED*`,
+          text: `:tada: ${firstMessage}\n${pipelineLink}\n*PASSED*`,
           // channel: CHANNEL,
         });
       } else {
         const text = `Passed: ${report.stats.passes} \tFailed: ${report.stats.failures} \tToDo: ${report.stats.pending}\n`;
-        console.log(`Branch name: ${branchName} Author: Todo`);
+        console.log(`Branch name: ${branchName} Build ID: ${buildID}`);
 
         sendMessage({
           text: `:interrobang: ${firstMessage}\n* \t\t\t\t\t\:interrobang:FAILED:interrobang:* \n${text}`,
