@@ -225,6 +225,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "given_name": {"value": "Test", "approve_status": True},
                 "full_name": {"value": "Test Example", "approve_status": True},
                 "family_name": {"value": "Example", "approve_status": True},
+                "phone_no_alternative": {"value": "+48602203689", "approve_status": True},
                 "sex": {"value": "MALE", "approve_status": False},
                 "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
                 "marital_status": {"value": SINGLE, "approve_status": True},
@@ -359,6 +360,8 @@ class TestCloseDataChangeTickets(APITestCase):
             cls.assertEqual(individual.given_name, "Test")
             cls.assertEqual(individual.full_name, "Test Example")
             cls.assertEqual(individual.family_name, "Example")
+            cls.assertEqual(individual.phone_no_alternative, "+48602203689")
+            cls.assertEqual(individual.phone_no_alternative_valid, True)
             cls.assertEqual(individual.marital_status, SINGLE)
             cls.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
 
