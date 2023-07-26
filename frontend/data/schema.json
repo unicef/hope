@@ -2418,6 +2418,22 @@
             "deprecationReason": null
           },
           {
+            "name": "grievanceTicketSearchTypesChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allSteficonRules",
             "description": null,
             "args": [
@@ -19845,7 +19861,31 @@
             "deprecationReason": null
           },
           {
-            "name": "rapidProApiKey",
+            "name": "rapidProPaymentVerificationToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProMessagesToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProSurveyToken",
             "description": null,
             "args": [],
             "type": {
@@ -27373,6 +27413,12 @@
           },
           {
             "name": "MOBILE_MONEY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PRE_PAID_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -35722,6 +35768,12 @@
             "deprecationReason": null
           },
           {
+            "name": "PRE_PAID_CARD",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "REFERRAL",
             "description": null,
             "isDeprecated": false,
@@ -37232,6 +37284,12 @@
           },
           {
             "name": "MOBILE_MONEY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PRE_PAID_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -49245,7 +49303,31 @@
             "deprecationReason": null
           },
           {
-            "name": "rapidProApiKey",
+            "name": "rapidProPaymentVerificationToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProMessagesToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rapidProSurveyToken",
             "description": null,
             "args": [],
             "type": {
@@ -61960,6 +62042,16 @@
             "defaultValue": null
           },
           {
+            "name": "email",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "relationship",
             "description": null,
             "type": {
@@ -62867,6 +62959,16 @@
           },
           {
             "name": "phoneNoAlternative",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "email",
             "description": null,
             "type": {
               "kind": "SCALAR",

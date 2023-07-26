@@ -236,12 +236,6 @@ export const GrievanceStatuses = {
   Closed: 'Closed',
 };
 
-export const GrievanceSearchTypes = {
-  TicketID: 'ticket_id',
-  HouseholdID: 'ticket_hh_id',
-  LastName: 'last_name',
-};
-
 export const GrievanceSteps = {
   Selection: 0,
   Lookup: 1,
