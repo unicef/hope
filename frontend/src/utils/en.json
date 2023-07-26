@@ -820,11 +820,8 @@
   "Surveys List": "Surveys List",
   "Feedbacks List": "Feedbacks List",
   "Messages List": "Messages List",
-<<<<<<< HEAD
   "Programme Duplicated": "Programme Duplicated",
-  "Copy Programme": "Copy Programme"
-=======
+  "Copy Programme": "Copy Programme",
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email."
->>>>>>> develop
 }

@@ -17,17 +17,14 @@ export const registrationMinimal = gql`
     dataSource
     numberOfHouseholds
     numberOfIndividuals
-<<<<<<< HEAD
     program {
       id
       name
       startDate
       endDate
-      status  
+      status
     }
-=======
     refuseReason
->>>>>>> develop
   }
 `;
 
