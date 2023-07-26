@@ -55,8 +55,6 @@ export const CreateFollowUpPaymentPlan = ({
   } = paymentPlan;
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
     dispersionStartDate: Yup.date().required(
@@ -118,6 +116,7 @@ export const CreateFollowUpPaymentPlan = ({
               variant='outlined'
               color='primary'
               onClick={() => setDialogOpen(true)}
+              disabled={!hasPermissions(PERMISSIONS.PM_CREATE, permissions)}
             >
               {t('Create Follow-up Payment Plan')}
             </Button>

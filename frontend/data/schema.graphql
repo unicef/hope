@@ -72,6 +72,7 @@ input AddIndividualDataObjectType {
   maritalStatus: String
   phoneNo: String
   phoneNoAlternative: String
+  email: String
   relationship: String!
   disability: Boolean
   workStatus: String
@@ -2327,6 +2328,7 @@ input IndividualUpdateDataObjectType {
   maritalStatus: String
   phoneNo: String
   phoneNoAlternative: String
+  email: String
   relationship: String
   disability: String
   workStatus: String
