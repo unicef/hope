@@ -153,7 +153,7 @@ class CreateSurveyMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE, business_area)
         survey = SurveyCrudServices.create(info.context.user, business_area, input)
-        transaction.on_commit(partial(send_survey_to_users.delay, survey.id, input["flow"], business_area.id))
+        transaction.on_commit(partial(send_survey_to_users.delay, survey.id))
         log_create(
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",

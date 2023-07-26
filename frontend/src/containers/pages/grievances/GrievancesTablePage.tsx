@@ -12,7 +12,6 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
-  GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
 } from '../../../utils/constants';
@@ -28,7 +27,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
 
   const initialFilter = {
     search: '',
-    searchType: GrievanceSearchTypes.TicketID,
+    searchType: 'ticket_id',
     status: '',
     fsp: '',
     createdAtRangeMin: undefined,
@@ -36,7 +35,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     category: '',
     issueType: '',
     assignedTo: '',
-    admin: '',
+    admin2: '',
     registrationDataImport: id,
     cashPlan: cashPlanId,
     scoreMin: '',
@@ -64,7 +63,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const {
     data: choicesData,
     loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  } = useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;

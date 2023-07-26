@@ -1,135 +1,115 @@
-import abc
 import logging
-from typing import Any, List, Tuple
+from functools import cached_property
+from typing import Any, Optional
 
-from django.core.exceptions import FieldDoesNotExist
+from django.db.models import QuerySet
 
-from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
-from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx
-from hct_mis_api.apps.payment.models import PaymentPlan
+from celery import Task
+
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    merge_registration_data_import_task,
-    registration_xlsx_import_task,
-)
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.utils.celery_utils import (
+    get_all_celery_tasks,
+    get_task_in_queue_or_running,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class BaseCeleryManager(abc.ABC):
-    model: Any = ""
-    model_status: str = ""
-    model_status_field: str = "status"
-    task: Any = ""
-    lookup: str = ""
+class BaseCeleryTaskManager:
+    pending_status: Optional[str] = None
+    queue = "default"
 
-    def create_obj_list(self) -> List[str]:
-        try:
-            self.model._meta.get_field(self.model_status_field)
-            return list(
-                self.model.objects.filter(**{self.model_status_field: self.model_status}).values_list("id", flat=True)
-            )
-        except FieldDoesNotExist as e:
-            logger.exception(f"Field {self.model_status_field} for model {self.model} does not exists. {e}")
-            raise
+    def __init__(self, business_area: Optional[BusinessArea] = None) -> None:
+        self.all_celery_tasks = get_all_celery_tasks(self.queue)
+        self.business_area = business_area
 
-    @staticmethod
-    def get_celery_tasks() -> Tuple[Any, Any, Any]:
-        i = app.control.inspect()
-        return i.scheduled(), i.active(), i.reserved()
+    @property
+    def pending_queryset(self) -> QuerySet:
+        raise NotImplementedError("pending_queryset not implemented")
 
-    @abc.abstractmethod
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        pass
+    @property
+    def pending_queryset_for_business_area(self) -> QuerySet:
+        if not self.business_area:
+            return self.pending_queryset
+        return self.pending_queryset.filter(business_area=self.business_area)
+
+    @property
+    def in_progress_queryset(self) -> QuerySet:
+        raise NotImplementedError("in_progress_queryset not implemented")
+
+    @property
+    def in_progress_queryset_for_business_area(self) -> QuerySet:
+        if not self.business_area:
+            return self.in_progress_queryset
+        return self.in_progress_queryset.filter(business_area=self.business_area)
 
     def execute(self) -> None:
-        list_to_check = self.create_obj_list()
-        celery_ids_list = []
-        model_name = self.model.__name__
+        for model_object in self.in_progress_queryset_for_business_area.all():
+            task_kwargs = self.get_task_kwargs(model_object)
+            task = self.get_celery_task_by_kwargs(task_kwargs)
+            if not (task and task.get("status") == "queued" or not task):
+                continue
+            logger.info(
+                f"{self.in_progress_queryset.model.__name__}: id {model_object.id} was in status IN PROGRESS importing should be PENDING because task was {'not_in_queue' if not task else 'queued'}"
+            )
+            model_object.status = self.pending_status
+            model_object.save()
 
-        for group in self.get_celery_tasks():
-            if group is not None:
-                for _, task_list in group.items():
-                    for task in task_list:
-                        task_name = task.get("name", "").split(".")[-1]
-                        if task_name == self.task.__name__:
-                            celery_ids_list.append(task["kwargs"].get(self.lookup))
+        for model_object in self.pending_queryset_for_business_area.all():
+            task_kwargs = self.get_task_kwargs(model_object)
+            task = self.get_celery_task_by_kwargs(task_kwargs)
+            if task:
+                continue
+            logger.info(
+                f"{self.pending_queryset.model.__name__}: id {model_object.id} was in status PENDING but not in celery queue"
+            )
+            logger.info(f"registration_xlsx_import_task scheduled with kwargs {task_kwargs}")
+            self.celery_task.delay(**task_kwargs)
 
-        ids_to_run = [rdi_id for rdi_id in list_to_check if rdi_id not in celery_ids_list]
-        if not ids_to_run:
-            logger.info(f"Found no {model_name} with status {self.model_status}")
+    def get_celery_task_by_kwargs(self, task_kwargs: dict) -> Optional[dict]:
+        return get_task_in_queue_or_running(
+            name=self.celery_task.name,
+            all_celery_tasks=self.all_celery_tasks,
+            kwargs=task_kwargs,
+        )
 
-        task_kwargs = self.create_kwargs(ids_to_run)
-        for kwargs in task_kwargs:
-            self.task.delay(**kwargs)
-            logger.info(f"Celery task run for {model_name} id: {kwargs[self.lookup]} from periodic task scheduler")
+    @cached_property
+    def celery_task(self) -> Task:
+        raise NotImplementedError
 
-
-class RdiImportCeleryManager(BaseCeleryManager):
-    model = RegistrationDataImport
-    model_status = RegistrationDataImport.IMPORTING
-    task = registration_xlsx_import_task
-    lookup = "registration_data_import_id"
-
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        registration_xlsx_import_task_kwargs = []
-        for rdi_id in ids_to_run:
-            rdi = RegistrationDataImport.objects.get(id=rdi_id)
-            rdi_datahub = RegistrationDataImportDatahub.objects.get(id=str(rdi.datahub_id))
-            kwargs = {
-                "registration_data_import_id": str(rdi_datahub.id),
-                "import_data_id": str(rdi_datahub.import_data_id),
-                "business_area_id": str(rdi.business_area.id),
-            }
-            registration_xlsx_import_task_kwargs.append(kwargs)
-        return registration_xlsx_import_task_kwargs
+    def get_task_kwargs(self, model_object: Any) -> dict:
+        raise NotImplementedError
 
 
-class RdiMergeCeleryManager(BaseCeleryManager):
-    model = RegistrationDataImport
-    model_status = RegistrationDataImport.MERGING
-    task = merge_registration_data_import_task
-    lookup = "registration_data_import_id"
+class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
+    pending_status = RegistrationDataImport.IMPORT_SCHEDULED
 
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        merge_registration_data_import_task_kwargs = []
-        for rdi_id in ids_to_run:
-            merge_registration_data_import_task_kwargs.append({"registration_data_import_id": str(rdi_id)})
-        return merge_registration_data_import_task_kwargs
+    @property
+    def pending_queryset(self) -> QuerySet:
+        return RegistrationDataImport.objects.filter(
+            status=RegistrationDataImport.IMPORT_SCHEDULED, data_source=RegistrationDataImport.XLS
+        )
 
+    @property
+    def in_progress_queryset(self) -> QuerySet:
+        return RegistrationDataImport.objects.filter(
+            status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
+        )
 
-class SendTPCeleryManager(BaseCeleryManager):
-    model = TargetPopulation
-    model_status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
-    task = send_target_population_task
-    lookup = "target_population_id"
+    @cached_property
+    def celery_task(self) -> Task:
+        from hct_mis_api.apps.registration_datahub.celery_tasks import (
+            registration_xlsx_import_task,
+        )
 
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        send_tp_task_kwargs = []
-        for tp_id in ids_to_run:
-            send_tp_task_kwargs.append({"target_population_id": str(tp_id)})
-        return send_tp_task_kwargs
+        return registration_xlsx_import_task
 
-
-class XlsxExportingCeleryManager(BaseCeleryManager):
-    model = PaymentPlan
-    model_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
-    model_status_field = "background_action_status"
-    task = create_payment_plan_payment_list_xlsx
-    lookup = "payment_plan_id"
-
-    def create_kwargs(self, ids_to_run: List[str]) -> List:
-        xlsx_exporting_task_kwargs = []
-        for pp_id in ids_to_run:
-            pp = PaymentPlan.objects.get(id=pp_id)
-            xlsx_exporting_task_kwargs.append({"payment_plan_id": str(pp_id), "user_id": pp.created_by_id})
-        return xlsx_exporting_task_kwargs
-
-
-rdi_import_celery_manager = RdiImportCeleryManager()
-rdi_merge_celery_manager = RdiMergeCeleryManager()
-send_tp_celery_manager = SendTPCeleryManager()
-xlsx_exporting_celery_manager = XlsxExportingCeleryManager()
+    def get_task_kwargs(self, rdi: RegistrationDataImport) -> dict:
+        rdi_datahub = RegistrationDataImportDatahub.objects.get(hct_id=rdi.id)
+        return {
+            "registration_data_import_id": str(rdi_datahub.id),
+            "import_data_id": str(rdi_datahub.import_data_id),
+            "business_area_id": str(rdi.business_area_id),
+        }

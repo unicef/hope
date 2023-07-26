@@ -147,7 +147,7 @@ export const menuItems: MenuItem[] = [
       },
       {
         name: 'Feedback',
-        href: '/accountability/feedback',
+        href: '/grievance/feedback',
         selectedRegexp: /^\/accountability\/feedback.*$/,
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
@@ -169,13 +169,6 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/accountability\/communication.*$/,
         icon: <MessageIcon />,
         permissionModule: 'COMMUNICATION_MESSAGE',
-      },
-      {
-        name: 'Feedback',
-        href: '/accountability/feedback',
-        selectedRegexp: /^\/accountability\/feedback.*$/,
-        icon: <RateReviewIcon />,
-        permissionModule: 'FEEDBACK',
       },
       {
         name: 'Surveys',

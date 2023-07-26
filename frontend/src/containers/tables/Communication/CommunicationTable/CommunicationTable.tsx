@@ -1,15 +1,19 @@
 import React, { ReactElement } from 'react';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useTranslation } from 'react-i18next';
 import {
   AllAccountabilityCommunicationMessagesQueryVariables,
   CommunicationMessageNode,
   useAllAccountabilityCommunicationMessagesQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
+<<<<<<< HEAD
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
+=======
+>>>>>>> develop
 
 interface CommunicationTableProps {
   filter;

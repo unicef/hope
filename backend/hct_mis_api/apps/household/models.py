@@ -106,7 +106,7 @@ GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
 MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
 DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
 SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
-GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
+GRANDDAUGHTER_GRANDSON = "GRANDDAUGHTER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 FOSTER_CHILD = "FOSTER_CHILD"
@@ -120,7 +120,7 @@ RELATIONSHIP_CHOICE = (
     (BROTHER_SISTER, "Brother / Sister"),
     (COUSIN, "Cousin"),
     (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
-    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
+    (GRANDDAUGHTER_GRANDSON, "Granddaughter / Grandson"),
     (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
     (HEAD, "Head of household (self)"),
     (MOTHER_FATHER, "Mother / Father"),
@@ -310,7 +310,11 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 
 class Household(
-    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+    SoftDeletableModelWithDate,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    UnicefIdentifiedModel,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -714,7 +718,10 @@ class IndividualIdentity(models.Model):
         max_length=255,
     )
     partner = models.ForeignKey(
-        "account.Partner", related_name="individual_identities", null=True, on_delete=models.PROTECT
+        "account.Partner",
+        related_name="individual_identities",
+        null=True,
+        on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
 
@@ -743,7 +750,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     )
 
     class Meta:
-        unique_together = ("role", "household")
+        unique_together = [("role", "household"), ("household", "individual")]
 
     def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"
@@ -756,7 +763,11 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 
 class Individual(
-    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+    SoftDeletableModelWithDate,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    UnicefIdentifiedModel,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -1128,7 +1139,11 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
 
 
 class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
-    individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="bank_account_info",
+        on_delete=models.CASCADE,
+    )
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
