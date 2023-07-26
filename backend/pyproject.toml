@@ -175,6 +175,7 @@ update = "^0.0.1"
 urllib3 = "^1.26.9"
 xlrd = "^1.2"  # update to 2 breaks
 weasyprint = "^59.0"
+django-cleanup = "^8.0.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "0.982"
