@@ -72,6 +72,7 @@ input AddIndividualDataObjectType {
   maritalStatus: String
   phoneNo: String
   phoneNoAlternative: String
+  email: String
   relationship: String!
   disability: Boolean
   workStatus: String
@@ -267,7 +268,9 @@ type BusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProApiKey: String
+  rapidProPaymentVerificationToken: String
+  rapidProMessagesToken: String
+  rapidProSurveyToken: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
@@ -833,6 +836,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2293,6 +2297,7 @@ input IndividualUpdateDataObjectType {
   maritalStatus: String
   phoneNo: String
   phoneNoAlternative: String
+  email: String
   relationship: String
   disability: String
   workStatus: String
@@ -2604,6 +2609,7 @@ enum PaymentDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2956,6 +2962,7 @@ enum PaymentRecordDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -4738,7 +4745,9 @@ type UserBusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProApiKey: String
+  rapidProPaymentVerificationToken: String
+  rapidProMessagesToken: String
+  rapidProSurveyToken: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
