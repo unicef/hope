@@ -66,9 +66,25 @@ function ObjectRepresentations({
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
+<<<<<<< HEAD
     //TODO: add grievance ticket url based on category
     grievanceticket: `/${baseUrl}/grievance/tickets`,
     household: `/${baseUrl}/population/household/${btoa(
+=======
+    grievanceticket: `/${businessArea}/grievance/tickets/${
+      logEntry.isUserGenerated ? 'user-generated' : 'system-generated'
+    }/${btoa('GrievanceTicketNode:' + id)}`,
+    feedback: `/${businessArea}/grievance/feedback/${btoa(
+      'FeedbackNode:' + id,
+    )}`,
+    survey: `/${businessArea}/accountability/surveys/${btoa(
+      'SurveyNode:' + id,
+    )}`,
+    communication: `/${businessArea}/accountability/communication/${btoa(
+      'CommunicationMessageNode:' + id,
+    )}`,
+    household: `/${businessArea}/population/household/${btoa(
+>>>>>>> develop
       'HouseholdNode:' + id,
     )}`,
     individual: `/${baseUrl}/population/individuals/${btoa(
@@ -89,10 +105,10 @@ function ObjectRepresentations({
     logEntry.action === LogEntryAction.Delete ||
     logEntry.action === LogEntryAction.SoftDelete
   ) {
-    return <>{logEntry.objectRepr}</>;
+    return <>{logEntry.objectId}</>;
   }
   return (
-    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectRepr}</StyledLink>
+    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectId}</StyledLink>
   );
 }
 

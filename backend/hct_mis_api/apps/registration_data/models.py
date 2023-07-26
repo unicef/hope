@@ -117,6 +117,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="registration_imports",
         on_delete=models.SET_NULL,
     )
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
+    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name

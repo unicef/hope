@@ -1,11 +1,10 @@
 import logging
+from typing import Dict
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.urls import reverse
 
 import openpyxl
@@ -19,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class ExportSurveySampleService:
+    text_template = "survey/survey_sample_xlsx_file_generated_email.txt"
+    html_template = "survey/survey_sample_xlsx_file_generated_email.html"
+
     WORKBOOK_TITLE = "Survey Sample"
     HEADERS = (
         "household_unicef_id",
@@ -41,7 +43,7 @@ class ExportSurveySampleService:
             wb.save(tmp.name)
             self.survey.store_sample_file(filename, File(tmp))
 
-    def send_email(self) -> None:
+    def get_email_context(self) -> Dict:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         survey_id = encode_id_base64(self.survey.id, "Survey")
         api = reverse("download-survey-sample", args=[survey_id])
@@ -54,20 +56,9 @@ class ExportSurveySampleService:
             "email": self.user.email,
             "message": msg,
             "link": link,
+            "title": "Survey sample XLSX file generated",
         }
-        text_body = render_to_string("survey/survey_sample_xlsx_file_generated_email.txt", context=context)
-        html_body = render_to_string("survey/survey_sample_xlsx_file_generated_email.html", context=context)
-
-        email = EmailMultiAlternatives(
-            subject="Survey sample XLSX file generated",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[context["email"]],
-            body=text_body,
-        )
-        email.attach_alternative(html_body, "text/html")
-        result = email.send()
-        if not result:
-            logger.error(f"Email couldn't be send to {context['email']}")
+        return context
 
     def _generate_file(self) -> openpyxl.Workbook:
         wb = self._create_workbook()

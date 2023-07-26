@@ -197,6 +197,7 @@ export const HouseholdDetails = ({
           <Typography variant='h6'>{t('Benefits')}</Typography>
         </Title>
         <Grid container>
+<<<<<<< HEAD
           <Grid item xs={3}>
             <LabelizedField label={t('Cash received')}>
               {household?.programsWithDeliveredQuantity?.length ? (
@@ -222,6 +223,29 @@ export const HouseholdDetails = ({
                           ))}
                         </Box>
                       </Grid>
+=======
+          <Grid item xs={8}>
+            <Grid container>
+              <Grid item xs={6}>
+                <Label color='textSecondary'>
+                  {t('PrOgRAmmE(S) ENROLLED')}
+                </Label>
+              </Grid>
+              <Grid item xs={6}>
+                <Label color='textSecondary'>{t('Cash received')}</Label>
+              </Grid>
+            </Grid>
+            {household?.programsWithDeliveredQuantity?.length ? (
+              household?.programsWithDeliveredQuantity?.map((item) => (
+                <Box key={item.id} mb={2}>
+                  <Grid container key={item.id}>
+                    <Grid item xs={6}>
+                      <ContentLink
+                        href={`/${businessArea}/programs/${item.id}`}
+                      >
+                        {item.name}
+                      </ContentLink>
+>>>>>>> develop
                     </Grid>
                   </Box>
                 ))

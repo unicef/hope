@@ -797,6 +797,7 @@ class GenerateReportService:
             "report_type": self.report.get_report_type_display(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
             "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/reporting/{encode_id_base64(self.report.id, "Report")}',
+            "title": "Report",
         }
         text_body = render_to_string("report.txt", context=context)
         html_body = render_to_string("report.html", context=context)

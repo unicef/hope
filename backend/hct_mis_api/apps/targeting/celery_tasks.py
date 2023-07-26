@@ -14,7 +14,6 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
-from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import (
     full_rebuild,
@@ -49,7 +48,12 @@ def target_population_apply_steficon(self: Any, target_population_id: UUID) -> N
         with atomic():
             entry: HouseholdSelection
             for entry in target_population.selections.all():
-                result = rule.execute({"household": entry.household, "target_population": target_population})
+                result = rule.execute(
+                    {
+                        "household": entry.household,
+                        "target_population": target_population,
+                    }
+                )
                 entry.vulnerability_score = result.value
                 updates.append(entry)
             HouseholdSelection.objects.bulk_update(updates, ["vulnerability_score"])
@@ -68,7 +72,9 @@ def target_population_apply_steficon(self: Any, target_population_id: UUID) -> N
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
 def target_population_rebuild_stats(self: Any, target_population_id: UUID) -> None:
     with cache.lock(
-        f"target_population_rebuild_stats_{target_population_id}", blocking_timeout=60 * 10, timeout=60 * 60 * 2
+        f"target_population_rebuild_stats_{target_population_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
     ):
         target_population = TargetPopulation.objects.get(pk=target_population_id)
         target_population.build_status = TargetPopulation.BUILD_STATUS_BUILDING
@@ -88,7 +94,9 @@ def target_population_rebuild_stats(self: Any, target_population_id: UUID) -> No
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
 def target_population_full_rebuild(self: Any, target_population_id: UUID) -> None:
     with cache.lock(
-        f"target_population_full_rebuild_{target_population_id}", blocking_timeout=60 * 10, timeout=60 * 60 * 2
+        f"target_population_full_rebuild_{target_population_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
     ):
         target_population = TargetPopulation.objects.get(pk=target_population_id)
         target_population.build_status = TargetPopulation.BUILD_STATUS_BUILDING
@@ -105,18 +113,6 @@ def target_population_full_rebuild(self: Any, target_population_id: UUID) -> Non
             target_population.build_status = TargetPopulation.BUILD_STATUS_FAILED
             target_population.save()
             raise self.retry(exc=e)
-
-
-@app.task
-@sentry_tags
-def check_send_tp_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import send_tp_celery_manager
-
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        send_tp_celery_manager.execute()
-    return True
 
 
 @app.task()

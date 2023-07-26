@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
     FEMALE,
-    GRANDDAUGHER_GRANDSON,
+    GRANDDAUGHTER_GRANDSON,
     HEAD,
     MALE,
     NON_BENEFICIARY,
@@ -78,7 +78,7 @@ class TestRecalculateData(TestCase):
             {
                 "registration_data_import": registration_data_import,
                 # "age": 27,
-                "relationship": GRANDDAUGHER_GRANDSON,
+                "relationship": GRANDDAUGHTER_GRANDSON,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("1993-09-01", "%Y-%m-%d").date(),
                 "pregnant": True,
