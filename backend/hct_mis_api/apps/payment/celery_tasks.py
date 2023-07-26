@@ -15,10 +15,11 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportSevice,
 )
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -393,19 +394,21 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
-        from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.services.payment_plan_services import (
-            PaymentPlanService,
-        )
+        with transaction.atomic():
+            from hct_mis_api.apps.payment.models import PaymentPlan
+            from hct_mis_api.apps.payment.services.payment_plan_services import (
+                PaymentPlanService,
+            )
 
-        payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
+            payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
 
-        PaymentPlanService.create_payments(payment_plan)
-        payment_plan.refresh_from_db()
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
-        payment_plan.status_open()
-        payment_plan.save(update_fields=("status",))
+            PaymentPlanService.create_payments(payment_plan)
+            payment_plan.refresh_from_db()
+            create_payment_plan_snapshot_data(payment_plan)
+            payment_plan.update_population_count_fields()
+            payment_plan.update_money_fields()
+            payment_plan.status_open()
+            payment_plan.save(update_fields=("status",))
     except Exception as e:
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
@@ -564,3 +567,4 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
         raise self.retry(exc=e)
+
