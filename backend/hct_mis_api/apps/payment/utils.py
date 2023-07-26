@@ -30,6 +30,8 @@ def get_number_of_samples(payment_records_sample_count: int, confidence_interval
     from statistics import NormalDist
 
     variable = 0.5
+    # fix float division by zero
+    margin_of_error = margin_of_error if margin_of_error > 0 else 0.01
     z_score = NormalDist().inv_cdf(confidence_interval + (1 - confidence_interval) / 2)
     theoretical_sample = (z_score**2) * variable * (1 - variable) / margin_of_error**2
     actual_sample = ceil(
