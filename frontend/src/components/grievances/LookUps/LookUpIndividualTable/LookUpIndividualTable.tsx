@@ -74,15 +74,11 @@ export const LookUpIndividualTable = ({
   const initialVariables: AllIndividualsQueryVariables = {
     businessArea,
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
-<<<<<<< HEAD
-    flags: [],
-=======
     sex: [filter.sex],
     search: filter.search,
     admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,
->>>>>>> develop
     lastRegistrationDate: JSON.stringify({
       min: filter.lastRegistrationDateMin,
       max: filter.lastRegistrationDateMax,

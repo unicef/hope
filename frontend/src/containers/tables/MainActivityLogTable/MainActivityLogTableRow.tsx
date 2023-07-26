@@ -66,25 +66,15 @@ function ObjectRepresentations({
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
-<<<<<<< HEAD
-    //TODO: add grievance ticket url based on category
-    grievanceticket: `/${baseUrl}/grievance/tickets`,
-    household: `/${baseUrl}/population/household/${btoa(
-=======
-    grievanceticket: `/${businessArea}/grievance/tickets/${
+    grievanceticket: `/${baseUrl}/grievance/tickets/${
       logEntry.isUserGenerated ? 'user-generated' : 'system-generated'
     }/${btoa('GrievanceTicketNode:' + id)}`,
-    feedback: `/${businessArea}/grievance/feedback/${btoa(
-      'FeedbackNode:' + id,
-    )}`,
-    survey: `/${businessArea}/accountability/surveys/${btoa(
-      'SurveyNode:' + id,
-    )}`,
-    communication: `/${businessArea}/accountability/communication/${btoa(
+    feedback: `/${baseUrl}/grievance/feedback/${btoa('FeedbackNode:' + id)}`,
+    survey: `/${baseUrl}/accountability/surveys/${btoa('SurveyNode:' + id)}`,
+    communication: `/${baseUrl}/accountability/communication/${btoa(
       'CommunicationMessageNode:' + id,
     )}`,
-    household: `/${businessArea}/population/household/${btoa(
->>>>>>> develop
+    household: `/${baseUrl}/population/household/${btoa(
       'HouseholdNode:' + id,
     )}`,
     individual: `/${baseUrl}/population/individuals/${btoa(

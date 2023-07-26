@@ -401,7 +401,9 @@ export type BusinessAreaNode = Node & {
   koboToken?: Maybe<Scalars['String']>,
   koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
-  rapidProApiKey?: Maybe<Scalars['String']>,
+  rapidProPaymentVerificationToken?: Maybe<Scalars['String']>,
+  rapidProMessagesToken?: Maybe<Scalars['String']>,
+  rapidProSurveyToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
@@ -1292,6 +1294,7 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
   MobileMoney = 'MOBILE_MONEY',
+  PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
@@ -4159,6 +4162,7 @@ export enum PaymentDeliveryType {
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
   MobileMoney = 'MOBILE_MONEY',
+  PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
@@ -4565,6 +4569,7 @@ export enum PaymentRecordDeliveryType {
   Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
   MobileMoney = 'MOBILE_MONEY',
+  PrePaidCard = 'PRE_PAID_CARD',
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
@@ -6437,12 +6442,9 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
-<<<<<<< HEAD
   program?: Maybe<ProgramNode>,
-=======
   erased: Scalars['Boolean'],
   refuseReason?: Maybe<Scalars['String']>,
->>>>>>> develop
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -6537,6 +6539,7 @@ export type RegistrationKoboImportMutationInput = {
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
+  programId?: Maybe<Scalars['String']>,
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -7938,7 +7941,9 @@ export type UserBusinessAreaNode = Node & {
   koboToken?: Maybe<Scalars['String']>,
   koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
-  rapidProApiKey?: Maybe<Scalars['String']>,
+  rapidProPaymentVerificationToken?: Maybe<Scalars['String']>,
+  rapidProMessagesToken?: Maybe<Scalars['String']>,
+  rapidProSurveyToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
@@ -14680,7 +14685,6 @@ export const RegistrationMinimalFragmentDoc = gql`
   dataSource
   numberOfHouseholds
   numberOfIndividuals
-<<<<<<< HEAD
   program {
     id
     name
@@ -14688,9 +14692,7 @@ export const RegistrationMinimalFragmentDoc = gql`
     endDate
     status
   }
-=======
   refuseReason
->>>>>>> develop
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -28392,7 +28394,9 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProPaymentVerificationToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProMessagesToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProSurveyToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -30651,12 +30655,9 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-<<<<<<< HEAD
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-=======
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
->>>>>>> develop
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
@@ -31525,7 +31526,9 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProPaymentVerificationToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProMessagesToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProSurveyToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,

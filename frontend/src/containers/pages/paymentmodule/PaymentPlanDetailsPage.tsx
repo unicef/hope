@@ -14,21 +14,12 @@ import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPla
 import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
-<<<<<<< HEAD
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-=======
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
->>>>>>> develop
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-<<<<<<< HEAD
-import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-=======
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
->>>>>>> develop
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();

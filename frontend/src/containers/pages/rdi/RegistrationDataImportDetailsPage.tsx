@@ -5,10 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-<<<<<<< HEAD
-=======
   RegistrationDataImportStatus,
->>>>>>> develop
   useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '../../../__generated__/graphql';
@@ -20,11 +17,7 @@ import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-<<<<<<< HEAD
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-=======
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
->>>>>>> develop
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';

@@ -41,12 +41,8 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
           objectRepr
           objectId
           timestamp
-<<<<<<< HEAD
-          contentType {
-=======
           isUserGenerated
-          contentType{
->>>>>>> develop
+          contentType {
             id
             appLabel
             model
