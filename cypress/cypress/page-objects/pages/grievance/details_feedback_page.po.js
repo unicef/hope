@@ -2,6 +2,7 @@ import BaseComponent from "../../base.component";
 
 export default class FeedbackDetailsPage extends BaseComponent {
   // Locators
+  pageHeaderContainer = 'div[data-cy="page-header-container"]';
   titlePage = 'h5[data-cy="page-header-title"]';
   buttonEdit = 'a[data-cy="button-edit"]';
   labelCategory = 'div[data-cy="label-Category"]';
@@ -16,12 +17,14 @@ export default class FeedbackDetailsPage extends BaseComponent {
   labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"  ]';
   labelDescription = 'div[data-cy="label-Description"]';
   labelComments = 'div[data-cy="label-Comments"]';
+
   // Texts
   textTitle = "Feedback ID: ";
   textCategory = "Feedback";
   textIssueType = "Negative Feedback";
   textDescription = "Negative Feedback";
   // Elements
+  getPageHeaderContainer = () => cy.get(this.pageHeaderContainer);
   getTitlePage = () => cy.get(this.titlePage);
   getButtonEdit = () => cy.get(this.buttonEdit);
   getCategory = () => cy.get(this.labelCategory);
@@ -51,5 +54,8 @@ export default class FeedbackDetailsPage extends BaseComponent {
     this.getLanguagesSpoken().should("be.visible");
     this.getDescription().contains(this.textDescription);
     this.getComments().should("be.visible");
+  }
+  pressBackButton() {
+    this.getPageHeaderContainer().find("svg").eq(0).click();
   }
 }
