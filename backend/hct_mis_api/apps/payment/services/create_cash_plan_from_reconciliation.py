@@ -4,10 +4,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
-from django.template.loader import render_to_string
 
 import openpyxl
 
@@ -37,6 +34,9 @@ ValidationError = Exception
 
 
 class CreateCashPlanReconciliationService:
+    text_template = "admin/payment/payment_record/import_payment_records_email.txt"
+    html_template = "admin/payment/payment_record/import_payment_records_email.html"
+
     COLUMN_PAYMENT_ID = "PAYMENT_ID"
     COLUMN_PAYMENT_STATUS = "PAYMENT_STATUS"
     COLUMN_DELIVERED_AMOUNT = "DELIVERED_AMOUNT"
@@ -195,30 +195,18 @@ class CreateCashPlanReconciliationService:
             str(service_provider_id),
         )
 
-    def send_email(self, user: "User", file_name: str, error_msg: Optional[str] = None) -> None:
+    def get_email_context(self, user: "User", file_name: str, error_msg: Optional[str] = None) -> Dict:
         msg = "Celery task Importing Payment Records finished."
 
         if error_msg:
             msg = msg + f"\n{error_msg}"
         else:
             msg = msg + f"\nCashPlan ID: {self.cash_plan.ca_id}. File name: {file_name}"
-
         context = {
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
             "message": msg,
+            "title": "Importing Payment Records finished",
         }
-        text_body = render_to_string("admin/payment/payment_record/import_payment_records_email.txt", context=context)
-        html_body = render_to_string("admin/payment/payment_record/import_payment_records_email.html", context=context)
-
-        email = EmailMultiAlternatives(
-            subject="Importing Payment Records finished",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[context["email"]],
-            body=text_body,
-        )
-        email.attach_alternative(html_body, "text/html")
-        result = email.send()
-        if not result:
-            logger.error(f"Email couldn't be send to {context['email']}")
+        return context

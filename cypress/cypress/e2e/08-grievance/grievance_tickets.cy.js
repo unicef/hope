@@ -581,7 +581,7 @@ describe("Grievance", () => {
             newTicketPage.getButtonNext().contains("Save").click();
 
             grievanceDetailsPage.checkElementsOnPage(
-              grievanceDetailsPage.textStatusAssigned,
+              grievanceDetailsPage.textStatusNew,
               newTicket.priority,
               newTicket.urgency,
               grievanceDetailsPage.textNotAssigment,
@@ -657,7 +657,7 @@ describe("Grievance", () => {
           newTicketPage.getButtonNext().contains("Save").click();
 
           grievanceDetailsPage.checkElementsOnPage(
-            grievanceDetailsPage.textStatusAssigned,
+            grievanceDetailsPage.textStatusNew,
             newTicket.priority,
             newTicket.urgency,
             grievanceDetailsPage.textNotAssigment,
@@ -727,7 +727,7 @@ describe("Grievance", () => {
           newTicketPage.getButtonNext().contains("Save").click();
 
           grievanceDetailsPage.checkElementsOnPage(
-            grievanceDetailsPage.textStatusAssigned,
+            grievanceDetailsPage.textStatusNew,
             newTicket.priority,
             newTicket.urgency,
             grievanceDetailsPage.textNotAssigment,
@@ -796,7 +796,7 @@ describe("Grievance", () => {
           newTicketPage.getButtonNext().contains("Save").click();
 
           grievanceDetailsPage.checkElementsOnPage(
-            grievanceDetailsPage.textStatusAssigned,
+            grievanceDetailsPage.textStatusNew,
             newTicket.priority,
             newTicket.urgency,
             grievanceDetailsPage.textNotAssigment,
@@ -912,7 +912,7 @@ describe("Grievance", () => {
           }
 
           grievanceDetailsPage.checkElementsOnPage(
-            grievanceDetailsPage.textStatusAssigned,
+            grievanceDetailsPage.textStatusNew,
             newTicket.priority,
             newTicket.urgency,
             grievanceDetailsPage.textNotAssigment,
@@ -977,7 +977,7 @@ describe("Grievance", () => {
           newTicketPage.getButtonNext().contains("Save").click();
 
           grievanceDetailsPage.checkElementsOnPage(
-            grievanceDetailsPage.textStatusAssigned,
+            grievanceDetailsPage.textStatusNew,
             newTicket.priority,
             newTicket.urgency,
             grievanceDetailsPage.textNotAssigment,
