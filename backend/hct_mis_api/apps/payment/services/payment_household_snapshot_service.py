@@ -1,13 +1,15 @@
 import datetime
+from typing import Any
 from uuid import UUID
 
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
+
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.payment.models import PaymentHouseholdSnapshot, Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentHouseholdSnapshot
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
@@ -20,8 +22,10 @@ encode_typedict = {
     Point: lambda x: str(x),
 }
 
+page_size = 100
 
-def handle_type_mapping(value):
+
+def handle_type_mapping(value: Any) -> Any:
     value_type = type(value)
     if value_type in encode_typedict:
         value = encode_typedict[value_type](value)
@@ -30,7 +34,9 @@ def handle_type_mapping(value):
 
 def create_payment_plan_snapshot_data(payment_plan):
     payments_ids = list(
-        Payment.objects.filter(parent=payment_plan, household_snapshot__isnull=True).values_list("id", flat=True)
+        Payment.objects.filter(parent=payment_plan, household_snapshot__isnull=True)
+        .values_list("id", flat=True)
+        .order_by("id")
     )
     payments_queryset = (
         Payment.objects.filter(id__in=payments_ids)
@@ -38,13 +44,11 @@ def create_payment_plan_snapshot_data(payment_plan):
         .prefetch_related(
             "household__individuals", "household__individuals__documents", "household__individuals_and_roles"
         )
+        .order_by("id")
     )
-    page_size = 1000
     paginator = Paginator(payments_queryset, page_size)
-    queryset_count = payments_queryset.count()
     for page_number in paginator.page_range:
         to_create = []
-        print(f"Processing page {page_number}/{queryset_count / page_size}")
         payments = paginator.page(page_number).object_list
         for payment in payments:
             to_create.append(create_payment_snapshot_data(payment))
@@ -89,8 +93,6 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         all_household_data_dict["roles"].append(
             {"role": role.role, "individual": get_individual_snapshot(role.individual)}
         )
-    print(household_data)
-    print("-------------------" * 10)
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
