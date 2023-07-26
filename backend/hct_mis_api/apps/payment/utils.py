@@ -26,7 +26,9 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 
-def get_number_of_samples(payment_records_sample_count: int, confidence_interval: int, margin_of_error: int) -> int:
+def get_number_of_samples(
+    payment_records_sample_count: int, confidence_interval: int, margin_of_error: Union[int, float]
+) -> int:
     from statistics import NormalDist
 
     variable = 0.5
