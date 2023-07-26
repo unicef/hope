@@ -20,6 +20,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+import { Box } from '@material-ui/core';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -69,7 +70,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlan } = data;
 
   return (
-    <>
+    <Box display='flex' flexDirection='column'>
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         baseUrl={baseUrl}
@@ -98,6 +99,6 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan.id} />
       )}
-    </>
+    </Box>
   );
 };
