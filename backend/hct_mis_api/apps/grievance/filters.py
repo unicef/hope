@@ -22,7 +22,7 @@ from hct_mis_api.apps.geo.models import ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
@@ -108,53 +108,16 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
 class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
-            "individual": (
-                "full_name",
-                "unicef_id",
-                "phone_no",
-                "phone_no_alternative",
-                "preferred_language",
-            ),
-            "household": ("unicef_id",),
+            "individual": ("preferred_language",),
         },
         "sensitive_ticket_details": {
-            "individual": (
-                "full_name",
-                "unicef_id",
-                "phone_no",
-                "phone_no_alternative",
-                "preferred_language",
-            ),
-            "household": ("unicef_id",),
+            "individual": ("preferred_language",),
         },
         "individual_data_update_ticket_details": {
-            "individual": (
-                "full_name",
-                "unicef_id",
-                "phone_no",
-                "phone_no_alternative",
-                "preferred_language",
-            ),
+            "individual": ("preferred_language",),
         },
-        "add_individual_ticket_details": {"household": ("unicef_id",)},
-        "system_flagging_ticket_details": {
-            "golden_records_individual": (
-                "full_name",
-                "unicef_id",
-                "phone_no",
-                "phone_no_alternative",
-                "preferred_language",
-            )
-        },
-        "needs_adjudication_ticket_details": {
-            "golden_records_individual": (
-                "full_name",
-                "unicef_id",
-                "phone_no",
-                "phone_no_alternative",
-                "preferred_language",
-            )
-        },
+        "system_flagging_ticket_details": {"golden_records_individual": ("preferred_language",)},
+        "needs_adjudication_ticket_details": {"golden_records_individual": ("preferred_language",)},
     }
     TICKET_TYPES_WITH_FSP = (
         ("complaint_ticket_details", "payment_record__service_provider__full_name"),
@@ -230,19 +193,28 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        label, value = tuple(value.split(" ", 1))
-        if label == "ticket_id":
-            q = Q(unicef_id=value)
-        elif label == "ticket_hh_id":
-            q = Q(household_unicef_id=value)
-        else:
+        key, value = tuple(value.split(" ", 1))
+        if key == "ticket_id":
+            return qs.filter(Q(unicef_id=value))
+        elif key == "ticket_hh_id":
+            return qs.filter(Q(household_unicef_id=value))
+        elif key == "family_name":
             ids = (
-                Individual.objects.filter(Q(family_name=value) & Q(relationship="HEAD"))
+                Individual.objects.filter(Q(family_name=value) & Q(relationship=HEAD))
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
-            q = Q(household_unicef_id__in=ids)
-        return qs.filter(q)
+            return qs.filter(Q(household_unicef_id__in=ids))
+        elif DocumentType.objects.filter(key=key).exists():
+            ids = (
+                Individual.objects.filter(
+                    Q(relationship=HEAD) & Q(documents__type__key=key) & Q(documents__document_number__icontains=value)
+                )
+                .select_related("household")
+                .values_list("household__unicef_id", flat=True)
+            )
+            return qs.filter(Q(household_unicef_id__in=ids))
+        raise KeyError(f"Invalid search key '{key}'")
 
     def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:

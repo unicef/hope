@@ -118,6 +118,7 @@ export const CreateFollowUpPaymentPlan = ({
               variant='outlined'
               color='primary'
               onClick={() => setDialogOpen(true)}
+              disabled={!hasPermissions(PERMISSIONS.PM_CREATE, permissions)}
             >
               {t('Create Follow-up Payment Plan')}
             </Button>
