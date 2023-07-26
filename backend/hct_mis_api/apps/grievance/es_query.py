@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
+from hct_mis_api.apps.household.models import DocumentType
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +70,14 @@ def create_es_query(options: Dict) -> Dict:
             query_search.append({"term": {"unicef_id": value}})
         elif key == "ticket_hh_id":
             query_search.append({"term": {"household_unicef_id": {"value": value}}})
-        else:
+        elif key == "family_name":
             query_search.append({"term": {"ticket_details.household.head_of_household.family_name": {"value": value}}})
+        elif DocumentType.objects.filter(key=key).exists():
+            query_search.append(
+                {"term": {"ticket_details.household.head_of_household.documents.number": {"value": value}}}
+            )
+        else:
+            raise KeyError(f"Invalid search key '{key}'")
 
     order_by = options.pop("order_by", ["-created_at"])
     order_by = order_by[0]
