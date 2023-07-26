@@ -108,7 +108,9 @@ def undo_ticket_sensitive_migration(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
+    replaces = [('grievance', '0055_migration'), ('grievance', '0056_migration'), ('grievance', '0057_migration'),
+                ('grievance', '0058_migration'), ('grievance', '0059_migration'), ('grievance', '0060_migration'),
+                ('grievance', '0061_migration')]
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
         ('grievance', '0054_migration'),
