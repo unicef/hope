@@ -22,9 +22,15 @@ export const FeedbackTableRow = ({
   canViewDetails,
 }: FeedbackTableRowProps): React.ReactElement => {
   const history = useHistory();
+<<<<<<< HEAD
   const { baseUrl } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/accountability/feedback/${feedback.id}`;
   const householdDetailsPath = `/${baseUrl}/population/households/${feedback.householdLookup?.id}`;
+=======
+  const businessArea = useBusinessArea();
+  const feedbackDetailsPath = `/${businessArea}/grievance/feedback/${feedback.id}`;
+  const householdDetailsPath = `/${businessArea}/population/household/${feedback.householdLookup?.id}`;
+>>>>>>> develop
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
         feedback.linkedGrievance?.id,

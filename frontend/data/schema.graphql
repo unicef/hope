@@ -283,7 +283,7 @@ type BusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   isPaymentPlanApplicable: Boolean!
-  isAccountabilityApplicable: Boolean!
+  isAccountabilityApplicable: Boolean
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -854,10 +854,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CASH_BY_FSP
   CHEQUE
   DEPOSIT_TO_CARD
-  IN_KIND
   MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -978,7 +975,15 @@ type EditPaymentVerificationMutation {
   paymentPlan: GenericPaymentPlanNode
 }
 
+type EraseRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
 type ExcludeHouseholdsMutation {
+  paymentPlan: PaymentPlanNode
+}
+
+type ExportPDFPaymentPlanSummaryMutation {
   paymentPlan: PaymentPlanNode
 }
 
@@ -2271,7 +2276,7 @@ enum IndividualRelationship {
   BROTHER_SISTER
   COUSIN
   DAUGHTERINLAW_SONINLAW
-  GRANDDAUGHER_GRANDSON
+  GRANDDAUGHTER_GRANDSON
   GRANDMOTHER_GRANDFATHER
   HEAD
   MOTHER_FATHER
@@ -2457,6 +2462,7 @@ type LogEntryNode implements Node {
   businessArea: UserBusinessAreaNode
   program: ProgramNode
   timestamp: DateTime
+  isUserGenerated: Boolean
 }
 
 type LogEntryNodeConnection {
@@ -2540,6 +2546,7 @@ type Mutations {
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
+  exportPdfPaymentPlanSummary(paymentPlanId: ID!): ExportPDFPaymentPlanSummaryMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2559,8 +2566,9 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
-  refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
+  refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
+  eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
@@ -2628,10 +2636,7 @@ enum PaymentDeliveryType {
   CASH_BY_FSP
   CHEQUE
   DEPOSIT_TO_CARD
-  IN_KIND
   MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2983,10 +2988,7 @@ enum PaymentRecordDeliveryType {
   CASH_BY_FSP
   CHEQUE
   DEPOSIT_TO_CARD
-  IN_KIND
   MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -3082,6 +3084,7 @@ type PaymentVerificationLogEntryNode implements Node {
   businessArea: UserBusinessAreaNode
   program: ProgramNode
   timestamp: DateTime
+  isUserGenerated: Boolean
   contentObject: PaymentVerificationPlanNode
 }
 
@@ -3340,7 +3343,7 @@ type Query {
   recipients(offset: Int, before: String, after: String, first: Int, last: Int, survey: String!, orderBy: String): RecipientNodeConnection
   accountabilitySampleSize(input: AccountabilitySampleSizeInput): AccountabilitySampleSizeNode
   surveyCategoryChoices: [ChoiceObject]
-  availableFlows: [RapidProFlowNode]
+  surveyAvailableFlows: [RapidProFlowNode]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String): LogEntryNodeConnection
@@ -3371,6 +3374,7 @@ type Query {
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
   grievanceTicketPriorityChoices: [ChoiceObjectInt]
   grievanceTicketUrgencyChoices: [ChoiceObjectInt]
+  grievanceTicketSearchTypesChoices: [ChoiceObject]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean, type: String!): SteficonRuleNodeConnection
   payment(id: ID!): PaymentNode
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, programId: String, orderBy: String): PaymentNodeConnection
@@ -3440,6 +3444,8 @@ type Query {
   allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin2: ID, targetPopulations: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
   allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
+  allMergedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, rdiId: String, orderBy: String): HouseholdNodeConnection
+  allMergedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): IndividualNodeConnection
   sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   sectionIndividualsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   sectionChildReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
@@ -3632,7 +3638,12 @@ type RegistrationDataImportNode implements Node {
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
   excluded: Boolean!
+<<<<<<< HEAD
   program: ProgramNode
+=======
+  erased: Boolean!
+  refuseReason: String
+>>>>>>> develop
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -4786,7 +4797,7 @@ type UserBusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   isPaymentPlanApplicable: Boolean!
-  isAccountabilityApplicable: Boolean!
+  isAccountabilityApplicable: Boolean
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!

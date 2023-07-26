@@ -43,8 +43,8 @@ export const LookUpTargetPopulationTable = ({
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
-    numberOfHouseholdsMin: filter.numIndividuals.min,
-    numberOfHouseholdsMax: filter.numIndividuals.max,
+    numberOfHouseholdsMin: filter.numIndividualsMin,
+    numberOfHouseholdsMax: filter.numIndividualsMax,
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),

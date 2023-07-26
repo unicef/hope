@@ -2,19 +2,19 @@ import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  GrievanceTicketQuery,
+  GrievancesChoiceDataQuery,
+} from '../../../__generated__/graphql';
+import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
-  grievanceTicketBadgeColors,
   choicesToDict,
+  grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
-import {
-  GrievancesChoiceDataQuery,
-  GrievanceTicketQuery,
-} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';

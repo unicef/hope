@@ -8,18 +8,27 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
+import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 import { FspSection } from '../../../components/paymentmodule/PaymentPlanDetails/FspSection';
 import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
+<<<<<<< HEAD
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+=======
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+>>>>>>> develop
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+<<<<<<< HEAD
 import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+=======
+import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+>>>>>>> develop
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -67,6 +76,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
     status === PaymentPlanStatus.Finished;
 
   const { paymentPlan } = data;
+
   return (
     <>
       <PaymentPlanDetailsHeader
