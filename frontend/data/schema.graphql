@@ -267,7 +267,9 @@ type BusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProApiKey: String
+  rapidProPaymentVerificationToken: String
+  rapidProMessagesToken: String
+  rapidProSurveyToken: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!
@@ -855,6 +857,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2637,6 +2640,7 @@ enum PaymentDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -2989,6 +2993,7 @@ enum PaymentRecordDeliveryType {
   CHEQUE
   DEPOSIT_TO_CARD
   MOBILE_MONEY
+  PRE_PAID_CARD
   REFERRAL
   TRANSFER
   TRANSFER_TO_ACCOUNT
@@ -3638,12 +3643,9 @@ type RegistrationDataImportNode implements Node {
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
   excluded: Boolean!
-<<<<<<< HEAD
   program: ProgramNode
-=======
   erased: Boolean!
   refuseReason: String
->>>>>>> develop
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3698,6 +3700,7 @@ input RegistrationKoboImportMutationInput {
   pullPictures: Boolean
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: String
 }
 
 type RegistrationXlsxImportMutation {
@@ -4781,7 +4784,9 @@ type UserBusinessAreaNode implements Node {
   koboToken: String
   koboUrl: String
   rapidProHost: String
-  rapidProApiKey: String
+  rapidProPaymentVerificationToken: String
+  rapidProMessagesToken: String
+  rapidProSurveyToken: String
   slug: String!
   customFields: JSONString!
   hasDataSharingAgreement: Boolean!

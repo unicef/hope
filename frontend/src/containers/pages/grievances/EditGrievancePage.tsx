@@ -260,13 +260,11 @@ export const EditGrievancePage = (): React.ReactElement => {
     permissions,
   );
 
-<<<<<<< HEAD
   const grievanceDetailsPath = getGrievanceDetailsPath(
     ticket.id,
     ticket.category,
     baseUrl,
   );
-=======
   const categoryDescription =
     GRIEVANCE_CATEGORY_DESCRIPTIONS[
       GRIEVANCE_CATEGORIES_NAMES[ticket.category]
@@ -275,7 +273,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
       GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
     ] || '';
->>>>>>> develop
 
   return (
     <Formik

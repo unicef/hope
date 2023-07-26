@@ -96,16 +96,7 @@ export const LinkedGrievancesModal = ({
         key={row.id}
       >
         <TableCell align='left'>
-<<<<<<< HEAD
           <BlackLink to={grievanceDetailsPath}>{row.unicefId}</BlackLink>
-=======
-          <BlackLink
-            fullWidth
-            to={getGrievanceDetailsPath(row.id, row.category, businessArea)}
-          >
-            {row.unicefId}
-          </BlackLink>
->>>>>>> develop
         </TableCell>
         <TableCell align='left'>{categoryChoices[row.category]}</TableCell>
         <TableCell align='left'>
@@ -122,7 +113,6 @@ export const LinkedGrievancesModal = ({
 
   const renderGrievances = (): Array<React.ReactElement> => {
     return allGrievances.length
-<<<<<<< HEAD
       ? allGrievances.map((el) => {
           const grievanceDetailsPath = getGrievanceDetailsPath(
             el.node.id,
@@ -140,25 +130,6 @@ export const LinkedGrievancesModal = ({
             </span>
           );
         })
-=======
-      ? allGrievances.map((el) => (
-          <span key={el.node.id}>
-            <ContentLink
-              fullWidth
-              href={getGrievanceDetailsPath(
-                el.node.id,
-                el.node.category,
-                businessArea,
-              )}
-            >
-              {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${
-                statusChoices[el.node.status]
-              }`}
-            </ContentLink>{' '}
-            <br />
-          </span>
-        ))
->>>>>>> develop
       : [<span>-</span>];
   };
 

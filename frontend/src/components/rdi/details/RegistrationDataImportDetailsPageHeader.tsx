@@ -6,14 +6,10 @@ import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
-  useRefuseRdiMutation,
   useEraseRdiMutation,
+  useRefuseRdiMutation,
 } from '../../../__generated__/graphql';
-<<<<<<< HEAD
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-=======
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
->>>>>>> develop
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
@@ -21,7 +17,6 @@ import { PageHeader } from '../../core/PageHeader';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
-
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -43,17 +38,12 @@ export const RegistrationDataImportDetailsPageHeader = ({
   canRefuse,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-<<<<<<< HEAD
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const [mutate, { loading }] = useRefuseRdiMutation();
-=======
-  const businessArea = useBusinessArea();
   const confirm = useConfirmation();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 
->>>>>>> develop
   let buttons = null;
 
   const eraseButton = (
@@ -146,7 +136,6 @@ export const RegistrationDataImportDetailsPageHeader = ({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
-        isErased={registration.erased}
       >
         {registration.erased ? null : buttons}
       </PageHeader>
