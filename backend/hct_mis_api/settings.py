@@ -410,6 +410,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "django.contrib.postgres",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 OTHER_APPS = [
