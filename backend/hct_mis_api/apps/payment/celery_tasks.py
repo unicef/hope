@@ -15,11 +15,13 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportSevice,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -567,4 +569,3 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
         raise self.retry(exc=e)
-
