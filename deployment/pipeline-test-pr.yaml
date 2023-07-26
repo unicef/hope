@@ -300,6 +300,7 @@ stages:
                BUILD_ID=$(Build.BuildId)
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Test Report Artifacts'
+            condition: always()
             inputs:
               PathtoPublish: './cypress-reports'
           - task: PublishTestResults@2

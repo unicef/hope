@@ -493,13 +493,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_by_head_of_household_last_name(self, mock_execute_test_es_query: Any) -> None:
+    def test_grievance_query_es_search_by_head_of_household_family_name(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": "last_name Kowalska_1"},
+            variables={"search": "family_name Kowalska_1"},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)

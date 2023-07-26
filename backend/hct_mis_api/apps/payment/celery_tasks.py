@@ -2,12 +2,14 @@ import datetime
 import logging
 from typing import Any, Dict, List, Optional
 
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
@@ -82,7 +84,14 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 
             payment_verification_plan.xlsx_file_exporting = False
             payment_verification_plan.save()
-            service.send_email(user)
+
+            context = service.get_email_context(user)
+            user.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -133,7 +142,15 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+                    context = service.get_email_context(user)
+                    transaction.on_commit(
+                        lambda: user.email_user(
+                            context["title"],
+                            render_to_string(service.text_template, context=context),
+                            settings.EMAIL_HOST_USER,
+                            html_message=render_to_string(service.html_template, context=context),
+                        )
+                    )
 
             except Exception as e:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -170,7 +187,15 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+                    context = service.get_email_context(user)
+                    transaction.on_commit(
+                        lambda: user.email_user(
+                            context["title"],
+                            render_to_string(service.text_template, context=context),
+                            settings.EMAIL_HOST_USER,
+                            html_message=render_to_string(service.html_template, context=context),
+                        )
+                    )
 
             except Exception as e:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -307,7 +332,16 @@ def create_cash_plan_reconciliation_xlsx(
             except Exception as e:
                 error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
 
-            service.send_email(reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg)
+            context = service.get_email_context(
+                reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
+            )
+            reconciliation_xlsx_obj.created_by.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
+
             # remove file every time
             reconciliation_xlsx_obj.file.delete()
             reconciliation_xlsx_obj.delete()
@@ -559,7 +593,15 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
             # payment_plan.background_action_status_none()
             payment_plan.save()
 
-            transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+            context = service.get_email_context(user)
+            transaction.on_commit(
+                lambda: user.email_user(
+                    context["title"],
+                    render_to_string(service.text_template, context=context),
+                    settings.EMAIL_HOST_USER,
+                    html_message=render_to_string(service.html_template, context=context),
+                )
+            )
 
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
