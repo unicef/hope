@@ -128,7 +128,7 @@ describe("Grievance - Feedback", () => {
           "Check calendar popup",
           "Press button Apply",
           "Check if Creation date",
-          "Chose other day using calendar popup",
+          "Choose other day using calendar popup",
           "Press button Apply",
           `Check if Tickets List has 2 rows`,
         ]);
