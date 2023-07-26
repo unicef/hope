@@ -55,8 +55,6 @@ export const CreateFollowUpPaymentPlan = ({
   } = paymentPlan;
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
     dispersionStartDate: Yup.date().required(
