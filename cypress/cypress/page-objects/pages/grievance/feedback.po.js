@@ -20,6 +20,9 @@ export default class Feedback extends BaseComponent {
   creationDateToFilter = 'div[data-cy="filters-creation-date-to"]';
   dateTitleFilterPopup =
     'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]';
+  createdByFilter = 'div[data-cy="filters-created-by"]';
+  issueTypeFilter = 'div[data-cy="filters-issue-type"]';
+  option = 'li[role="option"]';
 
   // Texts
   textTitle = "Feedback";
@@ -52,6 +55,9 @@ export default class Feedback extends BaseComponent {
   getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
   getCreationDateToFilter = () => cy.get(this.creationDateToFilter);
   getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
+  getCreatedByFilter = () => cy.get(this.createdByFilter);
+  getIssueTypeFilter = () => cy.get(this.issueTypeFilter);
+  getOption = () => cy.get(this.option);
 
   checkElementsOnPage() {
     this.getTitlePage().contains(this.textTitle);
@@ -100,6 +106,19 @@ export default class Feedback extends BaseComponent {
   changeCreationDateTo(date) {
     // Date format (String): YYYY-MM-DD
     this.getCreationDateToFilter().type(date);
+  }
+
+  useCreatedByFilter(mail) {
+    this.getCreatedByFilter().click();
+    this.getCreatedByFilter().type(mail).type("{enter}");
+    this.getOption().first().contains(mail).click();
+    this.getButtonApply().click();
+  }
+
+  useIssueTypeFilter(issueType) {
+    this.getIssueTypeFilter().click();
+    this.getOption().contains(issueType).click();
+    this.getButtonApply().click();
   }
 
   checkDateFilterTo(date) {
