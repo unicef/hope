@@ -151,6 +151,8 @@ export const GRIEVANCE_CATEGORY_DESCRIPTIONS = {
     'A grievance submitted to direct the reporting individual to another service provider/actor to provide support/help that is beyond the scope of work of UNICEF',
   SENSITIVE_GRIEVANCE:
     'A grievance that shall be treated with sensitivity or which individual wishes to submit anonymously',
+  DEDUPLICATION:
+    'System-generated tickets for records that require a review to determine the appropriate action by either data correction or marking the record as a duplicate',
 };
 
 export const GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS = {
