@@ -32,7 +32,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
-    ServiceProvider,
+    ServiceProvider, PaymentHouseholdSnapshot,
 )
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
@@ -267,6 +267,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "target_population")
     search_fields = ("id", "unicef_id")
 
+class PaymentHouseholdSnapshotInline(admin.StackedInline):
+    model = PaymentHouseholdSnapshot
+    readonly_fields = ("snapshot_data","household_id")
 
 @admin.register(Payment)
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
@@ -291,6 +294,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "head_of_household",
         "financial_service_provider",
     )
+    inlines = [PaymentHouseholdSnapshotInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")
