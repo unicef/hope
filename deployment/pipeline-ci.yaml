@@ -30,6 +30,8 @@ variables:
     Docker.url: "uniappsakshope.azurecr.io"
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
   isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
+  isEphemeral: $[eq(variables['Build.SourceBranchName'], 'global-program-filter')]
+  isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
 
@@ -144,6 +146,7 @@ stages:
               --push \
               ./frontend
             displayName: Docker build dev
+            condition: and(succeeded(), eq(variables.isDev, true))
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -159,6 +162,19 @@ stages:
               ./frontend
             displayName: Docker build staging
             condition: and(succeeded(), eq(variables.isStaging, true))
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.frontend.repository):latest \
+              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
+              --build-arg SENTRY_ENVIRONMENT=ephemeral \
+              --push \
+              ./frontend
+            displayName: Docker build ephemeral
+            condition: and(succeeded(), eq(variables.isEphemeral, true))
           - script: |
               docker buildx create --use
               docker buildx build \

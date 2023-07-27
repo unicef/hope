@@ -63,6 +63,7 @@ psql-resources-default: &psql-resources-default
 #
 postgresql:
   enabled: true
+  ephemeral: true
   <<: *psql-image-default
   auth:
     database: hope-pm
@@ -73,6 +74,7 @@ postgresql:
 
 registrationdatahubpostgresql:
   enabled: true
+  ephemeral: true
   <<: *psql-image-default
   auth:
     database: registrationdatahubpostgresql
@@ -83,6 +85,7 @@ registrationdatahubpostgresql:
 
 cashassistdatahubpostgresql:
   <<: *psql-image-default
+  ephemeral: true
   enabled: true
   auth:
     database: cashassistdatahubpostgresql

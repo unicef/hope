@@ -529,7 +529,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
+    def execute(
+        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+    ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
@@ -560,7 +562,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         )
         if not self.business_area.postpone_deduplication:
             logger.info("Starting deduplication of %s", registration_data_import.id)
-            DeduplicateTask(self.business_area.slug).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
                 registration_data_import_datahub=registration_data_import
             )
             logger.info("Finished deduplication of %s", registration_data_import.id)
