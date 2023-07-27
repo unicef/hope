@@ -117,6 +117,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="registration_imports",
         on_delete=models.SET_NULL,
     )
+    programs = models.ManyToManyField(
+        "program.Program",
+        related_name="registration_data_imports",
+    )
 
     def __str__(self) -> str:
         return self.name
