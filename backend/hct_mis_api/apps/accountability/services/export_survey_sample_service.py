@@ -54,6 +54,7 @@ class ExportSurveySampleService:
             "email": self.user.email,
             "message": msg,
             "link": link,
+            "title": "Survey sample XLSX file generated",
         }
         text_body = render_to_string("survey/survey_sample_xlsx_file_generated_email.txt", context=context)
         html_body = render_to_string("survey/survey_sample_xlsx_file_generated_email.html", context=context)

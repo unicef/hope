@@ -48,7 +48,12 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
+from hct_mis_api.apps.household.filters import (
+    HouseholdFilter,
+    IndividualFilter,
+    MergedHouseholdFilter,
+    MergedIndividualFilter,
+)
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     DUPLICATE,
@@ -471,6 +476,20 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
+    )
+
+    # Emulation of imported_households query to switch links when RDI merged
+    all_merged_households = DjangoPermissionFilterFastConnectionField(
+        HouseholdNode,
+        filterset_class=MergedHouseholdFilter,
+        permission_classes=(hopeOneOfPermissionClass(Permissions.RDI_VIEW_DETAILS),),
+    )
+
+    # Emulation of imported_households query to switch links when RDI merged
+    all_merged_individuals = DjangoPermissionFilterFastConnectionField(
+        IndividualNode,
+        filterset_class=MergedIndividualFilter,
+        permission_classes=(hopeOneOfPermissionClass(Permissions.RDI_VIEW_DETAILS),),
     )
 
     section_households_reached = graphene.Field(
