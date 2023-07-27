@@ -1,10 +1,10 @@
+import contextlib
 import logging
 from typing import Dict, List, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
 from django.forms import model_to_dict
-from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
@@ -305,169 +305,158 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _update_individuals_and_households(self, individual_ids: List[str]) -> None:
-        # update mis_unicef_id for ImportedIndividual
-        individual_qs = Individual.objects.filter(id__in=individual_ids)
-        for individual in individual_qs:
-            imported_individual = get_object_or_404(ImportedIndividual, id=individual.imported_individual_id)
-            imported_individual.mis_unicef_id = individual.unicef_id
-            imported_individual.save()
-
-            if individual.household and imported_individual.household:
-                imported_individual.household.mis_unicef_id = individual.household.unicef_id
-                imported_individual.household.save()
-
     def execute(self, registration_data_import_id: str) -> None:
         individual_ids = []
         try:
-            with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
-                obj_hct = RegistrationDataImport.objects.get(
-                    id=registration_data_import_id,
-                )
+            obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
+            obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id)
+            imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
+            imported_individuals = ImportedIndividual.objects.filter(registration_data_import=obj_hub).order_by(
+                "first_registration_date"
+            )
+            imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
+                household__in=imported_households, individual__in=imported_individuals
+            )
+            imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(individual__in=imported_individuals)
 
-                obj_hub = RegistrationDataImportDatahub.objects.get(
-                    hct_id=registration_data_import_id,
-                )
+            try:
+                with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+                    old_obj_hct = copy_model_object(obj_hct)
 
-                old_obj_hct = copy_model_object(obj_hct)
-                imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
-                imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
-                    registration_data_import=obj_hub
-                )
+                    households_dict = self._prepare_households(imported_households, obj_hct)
+                    (
+                        individuals_dict,
+                        documents_to_create,
+                        identities_to_create,
+                    ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
 
-                imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
-                    household__in=imported_households,
-                    individual__in=imported_individuals,
-                )
+                    roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
+                    bank_account_infos_to_create = self._prepare_bank_account_info(
+                        imported_bank_account_infos, individuals_dict
+                    )
+                    logger.info(f"RDI:{registration_data_import_id} Creating {len(households_dict)} households")
+                    Household.objects.bulk_create(households_dict.values())
+                    Individual.objects.bulk_create(individuals_dict.values())
+                    Document.objects.bulk_create(documents_to_create)
+                    IndividualIdentity.objects.bulk_create(identities_to_create)
+                    IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
+                    BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
+                    logger.info(f"RDI:{registration_data_import_id} Created {len(households_dict)} households")
+                    individual_ids = [str(individual.id) for individual in individuals_dict.values()]
+                    household_ids = [str(household.id) for household in households_dict.values()]
 
-                imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(
-                    individual__in=imported_individuals
-                )
+                    transaction.on_commit(lambda: recalculate_population_fields_task(household_ids))
+                    logger.info(
+                        f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
+                    )
+                    kobo_submissions = []
+                    for imported_household in imported_households:
+                        kobo_submission_uuid = imported_household.kobo_submission_uuid
+                        kobo_asset_id = imported_household.kobo_asset_id
+                        kobo_submission_time = imported_household.kobo_submission_time
+                        if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
+                            submission = KoboImportedSubmission(
+                                kobo_submission_uuid=kobo_submission_uuid,
+                                kobo_asset_id=kobo_asset_id,
+                                kobo_submission_time=kobo_submission_time,
+                                registration_data_import=obj_hub,
+                                imported_household=imported_household,
+                            )
+                            kobo_submissions.append(submission)
+                    if kobo_submissions:
+                        KoboImportedSubmission.objects.bulk_create(kobo_submissions)
+                    logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
 
-                households_dict = self._prepare_households(imported_households, obj_hct)
-                (
-                    individuals_dict,
-                    documents_to_create,
-                    identities_to_create,
-                ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
+                    # DEDUPLICATION
 
-                roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
-                bank_account_infos_to_create = self._prepare_bank_account_info(
-                    imported_bank_account_infos, individuals_dict
-                )
-                logger.info(f"RDI:{registration_data_import_id} Creating {len(households_dict)} households")
-                Household.objects.bulk_create(households_dict.values())
-                Individual.objects.bulk_create(individuals_dict.values())
-                Document.objects.bulk_create(documents_to_create)
-                IndividualIdentity.objects.bulk_create(identities_to_create)
-                IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
-                BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
-                logger.info(f"RDI:{registration_data_import_id} Created {len(households_dict)} households")
-                individual_ids = [str(individual.id) for individual in individuals_dict.values()]
-                household_ids = [str(household.id) for household in households_dict.values()]
-
-                transaction.on_commit(lambda: recalculate_population_fields_task(household_ids))
-                logger.info(
-                    f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
-                )
-                kobo_submissions = []
-                for imported_household in imported_households:
-                    kobo_submission_uuid = imported_household.kobo_submission_uuid
-                    kobo_asset_id = imported_household.kobo_asset_id
-                    kobo_submission_time = imported_household.kobo_submission_time
-                    if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
-                        submission = KoboImportedSubmission(
-                            kobo_submission_uuid=kobo_submission_uuid,
-                            kobo_asset_id=kobo_asset_id,
-                            kobo_submission_time=kobo_submission_time,
-                            registration_data_import=obj_hub,
-                            imported_household=imported_household,
+                    populate_index(
+                        Individual.objects.filter(registration_data_import=obj_hct),
+                        get_individual_doc(obj_hct.business_area.slug),
+                    )
+                    logger.info(
+                        f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
+                    )
+                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    logger.info(
+                        f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
+                    )
+                    if not obj_hct.business_area.postpone_deduplication:
+                        individuals = evaluate_qs(
+                            Individual.objects.filter(registration_data_import=obj_hct)
+                            .select_for_update()
+                            .order_by("pk")
                         )
-                        kobo_submissions.append(submission)
-                if kobo_submissions:
-                    KoboImportedSubmission.objects.bulk_create(kobo_submissions)
-                logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
+                        DeduplicateTask(obj_hct.business_area.slug).deduplicate_individuals_against_population(
+                            individuals
+                        )
+                        logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
+                        golden_record_duplicates = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
+                        )
 
-                # DEDUPLICATION
+                        create_needs_adjudication_tickets(
+                            golden_record_duplicates,
+                            "duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct,
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
+                        )
 
-                populate_index(
-                    Individual.objects.filter(registration_data_import=obj_hct),
-                    get_individual_doc(obj_hct.business_area.slug),
+                        needs_adjudication = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
+                        )
+
+                        create_needs_adjudication_tickets(
+                            needs_adjudication,
+                            "possible_duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct,
+                        )
+                        logger.info(
+                            "RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                        )
+
+                    # SANCTION LIST CHECK
+                    if obj_hct.should_check_against_sanction_list():
+                        logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
+                        CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                        logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
+
+                    obj_hct.status = RegistrationDataImport.MERGED
+                    obj_hct.save()
+                    imported_households.delete()
+                    logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
+                    transaction.on_commit(lambda: deduplicate_documents.delay())
+                    log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+                    logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
+            except Exception:
+                # remove es individuals if exists
+                remove_elasticsearch_documents_by_matching_ids(
+                    individual_ids, get_individual_doc(obj_hct.business_area.slug)
                 )
-                logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals")
-                populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
-                logger.info(f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households")
-                if not obj_hct.business_area.postpone_deduplication:
-                    individuals = evaluate_qs(
-                        Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
-                    )
-                    DeduplicateTask(obj_hct.business_area.slug).deduplicate_individuals_against_population(individuals)
-                    logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
-                    golden_record_duplicates = Individual.objects.filter(
-                        registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
-                    )
-                    logger.info(f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates")
 
-                    create_needs_adjudication_tickets(
-                        golden_record_duplicates,
-                        "duplicates",
-                        obj_hct.business_area,
-                        registration_data_import=obj_hct,
-                    )
-                    logger.info(
-                        f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
-                    )
+                # remove es households if exists
+                remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
 
-                    needs_adjudication = Individual.objects.filter(
-                        registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                    )
-                    logger.info(f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication")
+                # proactively try to remove also es data for imported individuals
+                remove_elasticsearch_documents_by_matching_ids(
+                    list(imported_individuals.values_list("id", flat=True)),
+                    get_imported_individual_doc(obj_hct.business_area.slug),
+                )
+                raise
 
-                    create_needs_adjudication_tickets(
-                        needs_adjudication,
-                        "possible_duplicates",
-                        obj_hct.business_area,
-                        registration_data_import=obj_hct,
-                    )
-                    logger.info(
-                        "RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
-                    )
-
-                # SANCTION LIST CHECK
-                if obj_hct.should_check_against_sanction_list():
-                    logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
-                    CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
-                    logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
-
-                obj_hct.status = RegistrationDataImport.MERGED
-                obj_hct.save()
-                logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
-                transaction.on_commit(lambda: deduplicate_documents.delay())
-                log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
-
-            self._update_individuals_and_households(individual_ids)
-
-            imported_households.delete()
-
-            logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
-
-            cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
-            cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
+            with contextlib.suppress(ConnectionError):
+                cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
+                cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
 
         except Exception as e:
             logger.error(e)
-
-            # remove es individuals if exists
-            remove_elasticsearch_documents_by_matching_ids(
-                individual_ids, get_individual_doc(obj_hct.business_area.slug)
-            )
-
-            # remove es households if exists
-            remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
-
-            # proactively try to remove also es data for imported individuals
-            remove_elasticsearch_documents_by_matching_ids(
-                list(imported_individuals.values_list("id", flat=True)),
-                get_imported_individual_doc(obj_hct.business_area.slug),
-            )
             raise
