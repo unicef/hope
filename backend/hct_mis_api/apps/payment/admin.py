@@ -28,11 +28,12 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
-    ServiceProvider, PaymentHouseholdSnapshot,
+    ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
@@ -267,9 +268,11 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "target_population")
     search_fields = ("id", "unicef_id")
 
+
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
-    readonly_fields = ("snapshot_data","household_id")
+    readonly_fields = ("snapshot_data", "household_id")
+
 
 @admin.register(Payment)
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
