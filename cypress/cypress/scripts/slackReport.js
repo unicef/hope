@@ -67,9 +67,17 @@ fs.readFile(
     try {
       const report = JSON.parse(jsonString);
       let branchName = exec(`echo $BRANCH_NAME`).replace(/\s/g, "");
+      let authorName = process.env.AUTHOR_NAME;
+      let authorEmail = process.env.AUTHOR_EMAIL;
+      let authorName1 = exec(`echo $AUTHOR_NAME`).replace(/\s/g, "");
+      let authorEmail1 = exec(`echo $AUTHOR_EMAIL`).replace(/\s/g, "");
       let buildID = exec(`echo $BUILD_ID`).replace(/\s/g, "");
       let firstMessage = `Branch: <https://github.com/unicef/hct-mis/compare/${branchName}|${branchName}>`;
       let pipelineLink = `Pipeline: <https://unicef.visualstudio.com/ICTD-HCT-MIS/_build/results?buildId=${buildID}&view=results|${buildID}>`;
+      sendMessage({
+          text: `Janek is testing ${authorName} ${authorEmail} || ${authorName1} ${authorEmail1}`,
+          // channel: CHANNEL,
+        });
       if (report.stats.failures == "0") {
         sendMessage({
           text: `:tada: ${firstMessage}\n${pipelineLink}\n*PASSED*`,

@@ -297,6 +297,8 @@ stages:
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
                BRANCH_NAME=$(System.PullRequest.SourceBranch)
+               AUTHOR_NAME=$(Build.RequestedFor)
+               AUTHOR_EMAIL=$(Build.RequestedForEmail)
                BUILD_ID=$(Build.BuildId)
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Test Report Artifacts'
