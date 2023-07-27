@@ -487,8 +487,8 @@ class TestAdjustPayments(TestCase):
 class TestAdjustPaymentRecords(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        self.other_program = ProgramFactory(status=Program.ACTIVE)
-        self.target_population1 = TargetPopulationFactory(program=self.other_program)
+        self.other_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
+        self.target_population1 = TargetPopulationFactory(program=self.other_program, business_area=self.business_area)
         (
             self.household_other_program,
             self.individual_representation_other_program,
@@ -501,10 +501,11 @@ class TestAdjustPaymentRecords(TestCase):
             household=self.household_other_program,
             head_of_household=self.individual_representation_other_program,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
+            business_area=self.business_area,
         )
 
     def test_adjust_payment_records_other_program(self) -> None:
-        this_program = ProgramFactory(status=Program.ACTIVE)
+        this_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
 
         individual_representation_this_program = IndividualFactory(
             program_id=this_program.id,
@@ -528,6 +529,7 @@ class TestAdjustPaymentRecords(TestCase):
         adjust_payment_records(self.business_area)
 
         self.payment_record1.refresh_from_db()
+
         assert self.payment_record1.head_of_household == individual_representation_this_program
         assert self.payment_record1.household == household_this_program
 
@@ -654,8 +656,8 @@ class TestCopyRoles(TestCase):
 class TestGetBiggestProgram(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        small_program = ProgramFactory(status=Program.ACTIVE)
-        self.biggest_program = ProgramFactory(status=Program.ACTIVE)
+        small_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
+        self.biggest_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
 
         HouseholdFactory(
             program_id=small_program.id,
@@ -679,12 +681,11 @@ class TestGetBiggestProgram(TestCase):
 
 class TestAssignNonProgramRDIToBiggestProgram(TestCase):
     def setUp(self) -> None:
-        self.business_area = BusinessAreaFactory()
-        Program.objects.filter(business_area=self.business_area).delete()
-        self.program = ProgramFactory(status=Program.ACTIVE)
-        self.rdi1 = RegistrationDataImportFactory()
-        self.rdi2 = RegistrationDataImportFactory()
-        self.rdi3 = RegistrationDataImportFactory()
+        self.business_area = BusinessAreaFactory.create()
+        self.program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
+        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi2 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi3 = RegistrationDataImportFactory(business_area=self.business_area)
 
         individual_rdi1 = IndividualFactory(household=None, business_area=self.business_area)
         self.household_rdi1 = HouseholdFactory(
@@ -737,9 +738,9 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         assert self.rdi2.programs.count() == 1
         assert self.rdi3.programs.count() == 1
 
-        assert self.rdi1.programs.first() == self.program
-        assert self.rdi2.programs.first() == self.program
-        assert self.rdi3.programs.first() == self.program
+        assert self.rdi1.programs.first() == get_biggest_program(self.business_area)
+        assert self.rdi2.programs.first() == get_biggest_program(self.business_area)
+        assert self.rdi3.programs.first() == get_biggest_program(self.business_area)
 
         self.household_rdi1.refresh_from_db()
         self.household_rdi2.refresh_from_db()

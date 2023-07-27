@@ -19,8 +19,12 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.household.utils import migrate_data_to_representations
+from hct_mis_api.apps.household.utils import (
+    get_biggest_program,
+    migrate_data_to_representations,
+)
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentRecordFactory,
@@ -37,40 +41,46 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 class TestMigrateDataToRepresentations(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
-        Program.objects.filter(business_area=self.business_area).delete()
         # programs
         self.program_active = ProgramFactory(
             status=Program.ACTIVE,
+            business_area=self.business_area,
         )
         self.program_finished1 = ProgramFactory(
             status=Program.FINISHED,
+            business_area=self.business_area,
         )
         self.program_finished2 = ProgramFactory(
             status=Program.FINISHED,
+            business_area=self.business_area,
         )
         # RDIs
-        self.rdi1 = RegistrationDataImportFactory()
+        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
 
         # TargetPopulations
         # for active programs target population status does not matter
         self.target_population1 = TargetPopulationFactory(
             program=self.program_active,
             status=TargetPopulation.STATUS_OPEN,
+            business_area=self.business_area,
         )
 
         self.target_population2 = TargetPopulationFactory(
             program=self.program_finished1,
             status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+            business_area=self.business_area,
         )
 
         self.target_population_wrong = TargetPopulationFactory(
             program=self.program_finished1,
             status=TargetPopulation.STATUS_OPEN,
+            business_area=self.business_area,
         )
 
         self.target_population3 = TargetPopulationFactory(
             program=self.program_finished2,
             status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+            business_area=self.business_area,
         )
         # Make sure that program_active is the biggest
         for _ in range(10):
@@ -117,19 +127,26 @@ class TestMigrateDataToRepresentations(TestCase):
         # Payments 1
         payment_plan1 = PaymentPlanFactory(
             target_population=self.target_population1,
+            program=self.program_active,
         )
+
         self.payment1 = PaymentFactory(
             parent=payment_plan1,
             collector=self.individual1_2,
             household=self.household1,
             head_of_household=self.individual1_1,
+            program=self.program_active,
+        )
+        cash_plan = CashPlanFactory(
+            program=self.program_active,
         )
 
         self.payment_record1 = PaymentRecordFactory(
             target_population=self.target_population1,
             household=self.household1,
             head_of_household=self.individual1_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory() or ServiceProviderFactory(),
+            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
+            parent=cash_plan,
         )
 
         # Household2 and its data (no RDI, in 2 programs)
@@ -168,12 +185,14 @@ class TestMigrateDataToRepresentations(TestCase):
         # Payments 2
         payment_plan2 = PaymentPlanFactory(
             target_population=self.target_population2,
+            program=self.program_active,
         )
         self.payment2 = PaymentFactory(
             parent=payment_plan2,
             collector=self.collector2_1,
             household=self.household2,
             head_of_household=self.individual2_1,
+            program=self.program_active,
         )
 
         self.payment_record2 = PaymentRecordFactory(
@@ -181,6 +200,7 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household2,
             head_of_household=self.collector2_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
+            parent=cash_plan,
         )
 
         # Household3 and its data (in wrong target population)
@@ -268,12 +288,14 @@ class TestMigrateDataToRepresentations(TestCase):
         # Payments 5
         payment_plan5 = PaymentPlanFactory(
             target_population=self.target_population2,
+            program=self.program_active,
         )
         self.payment5 = PaymentFactory(
             parent=payment_plan5,
             collector=self.collector5_1,
             household=self.household5,
             head_of_household=self.individual5_1,
+            program=self.program_active,
         )
 
         self.payment_record5 = PaymentRecordFactory(
@@ -281,16 +303,19 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household5,
             head_of_household=self.individual5_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
+            parent=cash_plan,
         )
         # Payments 7
         payment_plan7 = PaymentPlanFactory(
             target_population=self.target_population3,
+            program=self.program_active,
         )
         self.payment7 = PaymentFactory(
             parent=payment_plan7,
             collector=self.collector5_1,
             household=self.household7,
             head_of_household=self.individual7_1,
+            program=self.program_active,
         )
 
         self.payment_record7 = PaymentRecordFactory(
@@ -298,6 +323,7 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household7,
             head_of_household=self.individual7_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
+            parent=cash_plan,
         )
 
     def refresh_objects(self) -> None:
@@ -495,20 +521,19 @@ class TestMigrateDataToRepresentations(TestCase):
         assert self.payment_record2.head_of_household == representation_role_primary2.individual
 
         # Household3
-        assert self.household3.program == self.program_active
+        biggest_program = get_biggest_program(self.business_area)
+        assert self.household3.program == biggest_program
         assert self.household3.copied_from == self.household3
         assert self.household3.origin_unicef_id == self.household3.unicef_id
         assert self.household3.copied_to.count() == 1
 
-        assert self.individual3_1.program == self.program_active
+        assert self.individual3_1.program == biggest_program
         assert self.individual3_1.copied_from == self.individual3_1
         assert self.individual3_1.origin_unicef_id == self.individual3_1.unicef_id
         assert self.individual3_1.copied_to.count() == 1
 
-        self.assertEqual(self.individual_helper3.copied_to.count(), 2)
-        individual_helper3_representation = self.individual_helper3.copied_to.filter(
-            program=self.program_active
-        ).first()
+        assert self.individual_helper3.copied_to.count() == 2
+        individual_helper3_representation = self.individual_helper3.copied_to.filter(program=biggest_program).first()
         assert (
             IndividualRoleInHousehold.objects.get(
                 household=self.household3,
@@ -520,18 +545,18 @@ class TestMigrateDataToRepresentations(TestCase):
         assert self.target_population_wrong.is_removed is True
 
         # Household4
-        assert self.household4.program == self.program_active
+        assert self.household4.program == biggest_program
         assert self.household4.copied_from == self.household4
         assert self.household4.origin_unicef_id == self.household4.unicef_id
         assert self.household4.copied_to.count() == 1
 
-        assert self.individual4_1.program == self.program_active
+        assert self.individual4_1.program == biggest_program
         assert self.individual4_1.copied_from == self.individual4_1
         assert self.individual4_1.origin_unicef_id == self.individual4_1.unicef_id
         assert self.individual4_1.copied_to.count() == 1
 
         assert self.rdi4_1.programs.count() == 1
-        assert self.rdi4_1.programs.first() == self.program_active
+        assert self.rdi4_1.programs.first() == biggest_program
 
         # Household 5, 6, 7
         assert self.household5.program == self.program_active

@@ -292,7 +292,7 @@ def copy_roles(households: QuerySet, program: Program, move_to_biggest_program: 
             role.refresh_from_db()
             # check if representation existing in this program is not an original
             # if it is, we don't need to copy the role
-            if household_representation.pk != role.household_id or individual_representation.pk != role.individual_id:
+            if household_representation != role.household or individual_representation != role.individual:
                 # wider query inside to limit number of queries - the condition above will pass only for non-originals
                 # check if there already is a role for this individual representation in this household representation
                 if IndividualRoleInHousehold.objects.filter(
