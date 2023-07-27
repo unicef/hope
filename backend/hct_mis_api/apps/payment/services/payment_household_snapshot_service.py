@@ -1,5 +1,5 @@
 import datetime
-from typing import Any
+from typing import Any, Callable, Dict
 from uuid import UUID
 
 from django.contrib.gis.geos import Point
@@ -9,11 +9,18 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.payment.models import Payment, PaymentHouseholdSnapshot
+from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+)
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
-encode_typedict = {
+
+
+encode_typedict: Dict[type, Callable[[Any], Any]] = {
     UUID: lambda x: str(x),
     PhoneNumber: lambda x: str(x),
     datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
@@ -32,7 +39,7 @@ def handle_type_mapping(value: Any) -> Any:
     return value
 
 
-def create_payment_plan_snapshot_data(payment_plan):
+def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
     payments_ids = list(
         Payment.objects.filter(parent=payment_plan, household_snapshot__isnull=True)
         .values_list("id", flat=True)
@@ -96,7 +103,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_individual_snapshot(individual):
+def get_individual_snapshot(individual: Individual) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}
@@ -122,7 +129,7 @@ def get_individual_snapshot(individual):
     return individual_data
 
 
-def get_needs_adjudication_tickets_count(individual):
+def get_needs_adjudication_tickets_count(individual: Individual) -> int:
     golden_records_count = TicketNeedsAdjudicationDetails.objects.filter(golden_records_individual=individual).count()
     PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
     possible_duplicates_count = (

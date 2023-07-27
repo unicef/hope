@@ -65,7 +65,7 @@ class TestBuildSnapshot(TestCase):
                 delivered_quantity_usd=100.00,
             )
 
-    def test_build_snapshot(self):
+    def test_build_snapshot(self) -> None:
         create_payment_plan_snapshot_data(self.pp)
         self.p1.refresh_from_db()
         self.p2.refresh_from_db()
@@ -76,7 +76,7 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(len(self.p1.household_snapshot.snapshot_data["individuals"]), self.hh1.individuals.count())
         self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
 
-    def test_batching(self):
+    def test_batching(self) -> None:
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
         pp = PaymentPlanFactory(
