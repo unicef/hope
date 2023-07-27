@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -20,7 +21,6 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
-import { Box } from '@material-ui/core';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
