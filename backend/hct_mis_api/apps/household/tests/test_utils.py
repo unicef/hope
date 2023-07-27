@@ -430,7 +430,7 @@ class TestAdjustPayments(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
         self.other_program = ProgramFactory(status=Program.ACTIVE)
-        self.target_population1 = TargetPopulationFactory(program=self.other_program)
+        self.target_population1 = TargetPopulationFactory(program=self.other_program, business_area=self.business_area)
         payment_plan = PaymentPlanFactory(target_population=self.target_population1)
         (
             self.household_other_program,
@@ -547,7 +547,9 @@ class TestAdjustHouseholdSelections(TestCase):
         self.other_program = ProgramFactory(status=Program.ACTIVE)
         self.current_program = ProgramFactory(status=Program.ACTIVE)
 
-        self.target_population1 = TargetPopulationFactory(program=self.current_program)
+        self.target_population1 = TargetPopulationFactory(
+            program=self.current_program, business_area=self.business_area
+        )
 
         self.household_other_program = HouseholdFactory(
             program_id=self.other_program.id,
