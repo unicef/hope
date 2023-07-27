@@ -544,6 +544,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
+
                 if service := registration.rdi_parser:
                     qs = (
                         Record.objects.defer("storage", "counters", "files", "fields")
@@ -553,10 +554,14 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                     if records_ids := qs.values_list("id", flat=True):
                         try:
                             project = registration.project
-                            # programme = project.programme TODO programme refactoring
                             organization = project.organization
                             rdi_name = name or {timezone.now()}
-                            rdi = service.create_rdi(request.user, f"{organization.slug} rdi {rdi_name}", is_open)
+                            rdi = service.create_rdi(
+                                imported_by=request.user,
+                                program=project.program,
+                                rdi_name=f"{organization.slug} rdi {rdi_name}",
+                                is_open=is_open,
+                            )
                             create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
