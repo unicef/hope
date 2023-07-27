@@ -448,13 +448,16 @@ def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[A
     return None
 
 
-def decode_and_get_object(encoded_id: Optional[str], model: Type, required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id: Optional[Union[int, str]], model: Type, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
-        decoded_id = decode_id_string(encoded_id)
-        return get_object_or_404(model, id=decoded_id)
-
+        if isinstance(encoded_id, int):
+            return get_object_or_404(model, id=encoded_id)
+        elif isinstance(encoded_id, str) and encoded_id.isnumeric():
+            return get_object_or_404(model, id=int(encoded_id))
+        else:
+            return get_object_or_404(model, id=decode_id_string(encoded_id))
     return None
 
 

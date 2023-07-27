@@ -250,7 +250,7 @@ if DEBUG:
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
-EMAIL_BACKEND = env("EMAIL_BACKEND")
+EMAIL_BACKEND = env("EMAIL_BACKEND") if not DEBUG else "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
@@ -375,7 +375,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.payment.apps.PaymentConfig",
     "hct_mis_api.apps.program.apps.ProgramConfig",
     "hct_mis_api.apps.changelog.apps.ChangelogConfig",
-    "hct_mis_api.apps.power_query.apps.Config",
+    "power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils.apps.UtilsConfig",
@@ -460,7 +460,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
-    "hct_mis_api.apps.power_query.backends.PowerQueryBackend",
+    "hct_mis_api.libs.power_query.backends.PowerQueryBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
@@ -745,6 +745,11 @@ Clear Cache,clear-cache/
         "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
         bool,
     ),
+    "REMOVE_RDI_LINKS_TIMEDELTA": (
+        90,
+        "The schedule (in days) which is applied to task remove_old_rdi_links_task",
+        "positive_integers",
+    ),
     "ADMIN_SYNC_REMOTE_SERVER": ("http://localhost:8000", "Remote server base URL", str),
     "ADMIN_SYNC_LOCAL_ADMIN_URL": ("/admin/", "Local server admin URL", str),
     "ADMIN_SYNC_REMOTE_ADMIN_URL": ("/admin/", "Remote server admin URL", str),
@@ -936,6 +941,9 @@ IMPERSONATE = {
 }
 
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
+POWER_QUERY_EXTRA_CONNECTIONS = [
+    "core.businessarea",
+]
 
 CONCURRENCY_ENABLED = False
 

@@ -199,7 +199,7 @@ export const HouseholdDetails = ({
           <Typography variant='h6'>{t('Benefits')}</Typography>
         </Title>
         <Grid container>
-          <Grid item xs={4}>
+          <Grid item xs={8}>
             <Grid container>
               <Grid item xs={6}>
                 <Label color='textSecondary'>
