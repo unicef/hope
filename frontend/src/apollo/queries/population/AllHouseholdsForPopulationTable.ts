@@ -9,7 +9,6 @@ export const AllHouseholdsForPopulationTable = gql`
     $businessArea: String
     $orderBy: String
     $familySize: String
-    $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
     $adminArea: ID
     $search: String
@@ -26,7 +25,6 @@ export const AllHouseholdsForPopulationTable = gql`
       businessArea: $businessArea
       size: $familySize
       orderBy: $orderBy
-      programs: $programs
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       adminArea: $adminArea
       search: $search

@@ -32,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 faker = Faker()
@@ -129,7 +130,7 @@ class HouseholdFactory(DjangoModelFactory):
     male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
     household_collection = factory.SubFactory(HouseholdCollectionFactory)
-    program_id = None  # TODO temporary solution until migration applied
+    # program = factory.SubFactory(ProgramFactory)
 
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
@@ -190,7 +191,7 @@ class IndividualFactory(DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
     unicef_id = factory.Sequence(lambda n: f"IND-{n}")
     individual_collection = factory.SubFactory(IndividualCollectionFactory)
-    program_id = None  # TODO temporary solution until migration applied
+    program = factory.SubFactory(ProgramFactory)
 
 
 class BankAccountInfoFactory(DjangoModelFactory):

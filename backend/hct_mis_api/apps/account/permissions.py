@@ -49,6 +49,7 @@ class Permissions(Enum):
     PROGRAMME_REMOVE = auto()
     PROGRAMME_ACTIVATE = auto()
     PROGRAMME_FINISH = auto()
+    PROGRAMME_DUPLICATE = auto()
 
     # Targeting
     TARGETING_VIEW_LIST = auto()
@@ -410,7 +411,11 @@ class BaseMutationPermissionMixin:
 
     @classmethod
     def has_permission(
-        cls, info: Any, permission: Any, business_area_arg: Union[str, BusinessArea], raise_error: bool = True
+        cls,
+        info: Any,
+        permission: Any,
+        business_area_arg: Union[str, BusinessArea],
+        raise_error: bool = True,
     ) -> bool:
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission

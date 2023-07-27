@@ -6,7 +6,7 @@ from django.db.models.functions import Lower
 from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.program.models import Program
 
 
@@ -81,3 +81,10 @@ class ChartProgramFilter(FilterSet):
             q_obj |= Q(last_name__startswith=value)
             q_obj |= Q(email__startswith=value)
         return qs.filter(q_obj)
+
+
+class GlobalProgramFilter(FilterSet):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        program_id = decode_id_string(self.request.headers.get("Program"))
+        queryset = queryset.filter(program_id=program_id)
+        return super().filter_queryset(queryset)
