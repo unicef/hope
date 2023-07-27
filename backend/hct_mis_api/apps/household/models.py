@@ -502,6 +502,7 @@ class Household(
         help_text="If this household was copied from another household, "
         "this field will contain the household it was copied from.",
     )
+    origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
@@ -930,6 +931,7 @@ class Individual(
         help_text="If this individual was copied from another individual, "
         "this field will contain the individual it was copied from.",
     )
+    origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
 
     vector_column = SearchVectorField(null=True)
 
