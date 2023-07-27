@@ -165,16 +165,16 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
         <GrievancesDashboardPage key='all' />
       </SentryRoute>
 
-      <SentryRoute path={`${path}/accountability/feedback/create`}>
+      <SentryRoute path={`${path}/grievance/feedback/create`}>
         <CreateFeedbackPage />
       </SentryRoute>
-      <SentryRoute path={`${path}/accountability/feedback/edit-ticket/:id`}>
+      <SentryRoute path={`${path}/grievance/feedback/edit-ticket/:id`}>
         <EditFeedbackPage />
       </SentryRoute>
-      <SentryRoute path={`${path}/accountability/feedback/:id`}>
+      <SentryRoute path={`${path}/grievance/feedback/:id`}>
         <FeedbackDetailsPage />
       </SentryRoute>
-      <SentryRoute path={`${path}/accountability/feedback`}>
+      <SentryRoute path={`${path}/grievance/feedback`}>
         <FeedbackPage />
       </SentryRoute>
       {/* TODO: uncomment when ready for deployment

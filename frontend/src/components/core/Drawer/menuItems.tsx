@@ -126,7 +126,7 @@ export const menuItems: MenuItem[] = [
   {
     name: 'Grievance',
     href: '/grievance/tickets',
-    selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
+    selectedRegexp: /^\/grievance\/tickets.*$/,
     icon: <Feedback />,
     collapsable: true,
     permissionModule: 'GRIEVANCES',
@@ -134,21 +134,21 @@ export const menuItems: MenuItem[] = [
       {
         name: 'Grievance Tickets',
         href: '/grievance/tickets/user-generated',
-        selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
+        selectedRegexp: /^\/grievance\/tickets.*$/,
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
       },
       {
         name: 'Grievance Dashboard',
         href: '/grievance/dashboard',
-        selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
+        selectedRegexp: /^\/grievance\/dashboard.*$/,
         icon: <Assessment />,
         permissionModule: 'GRIEVANCES',
       },
       {
         name: 'Feedback',
         href: '/grievance/feedback',
-        selectedRegexp: /^\/accountability\/feedback.*$/,
+        selectedRegexp: /^\/grievance\/feedback.*$/,
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
       },
