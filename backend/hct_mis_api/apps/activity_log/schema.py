@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -29,6 +29,7 @@ class ContentTypeObjectType(DjangoObjectType):
 class LogEntryNode(DjangoObjectType):
     timestamp = graphene.DateTime()
     changes = Arg()
+    is_user_generated = graphene.Boolean()
 
     class Meta:
         model = LogEntry
@@ -37,6 +38,13 @@ class LogEntryNode(DjangoObjectType):
 
     def resolve_changes_display_object(self, info: Any) -> Arg:
         return self.changes
+
+    def resolve_is_user_generated(self, info: Any) -> Optional[bool]:
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
+        if isinstance(self.content_object, GrievanceTicket):
+            return self.content_object.grievance_type_to_string() == "user"
+        return None
 
 
 class Query(graphene.ObjectType):

@@ -93,6 +93,7 @@ class CheckAgainstSanctionListTask:
             "results_count": len(results_dict),
             "file_name": original_file_name,
             "today_date": timezone.now(),
+            "title": "Sanction List Check",
         }
         text_body = render_to_string("sanction_list/check_results.txt", context)
         html_body = render_to_string("sanction_list/check_results.html", context)

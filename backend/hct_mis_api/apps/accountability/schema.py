@@ -39,9 +39,9 @@ from hct_mis_api.apps.accountability.services.message_crud_services import (
 from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -101,7 +101,7 @@ class Query(graphene.ObjectType):
         input=AccountabilitySampleSizeInput(),
     )
     survey_category_choices = graphene.List(ChoiceObject)
-    available_flows = graphene.List(RapidProFlowNode)
+    survey_available_flows = graphene.List(RapidProFlowNode)
 
     def resolve_all_accountability_communication_messages(self, info: Any, **kwargs: Any) -> QuerySet[Message]:
         business_area_slug = info.context.headers.get("Business-Area")
@@ -149,6 +149,6 @@ class Query(graphene.ObjectType):
             "sample_size": sample_size,
         }
 
-    def resolve_available_flows(self, info: Any, *args: Any, **kwargs: Any) -> List:
-        api = RapidProAPI(info.context.headers["Business-Area"])
+    def resolve_survey_available_flows(self, info: Any, *args: Any, **kwargs: Any) -> List:
+        api = RapidProAPI(info.context.headers["Business-Area"], RapidProAPI.MODE_SURVEY)
         return api.get_flows()

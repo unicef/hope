@@ -50,7 +50,9 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     kobo_url = models.URLField(max_length=255, null=True, blank=True)
     rapid_pro_host = models.URLField(null=True, blank=True)
-    rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
+    rapid_pro_payment_verification_token = models.CharField(max_length=40, null=True, blank=True)
+    rapid_pro_messages_token = models.CharField(max_length=40, null=True, blank=True)
+    rapid_pro_survey_token = models.CharField(max_length=40, null=True, blank=True)
     slug = models.CharField(
         max_length=250,
         unique=True,
