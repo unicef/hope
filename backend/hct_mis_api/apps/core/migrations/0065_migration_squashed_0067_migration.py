@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('core', '0060_migration_squashed_0064_migration'),
     ]
-
+    replaces = [('core', '0065_migration'), ('core', '0066_migration'), ('core', '0067_migration')]
     operations = [
         migrations.AddField(
             model_name='businessarea',
