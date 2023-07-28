@@ -12,6 +12,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   ticketUrgency = 'div[data-cy="label-Urgency"]';
   ticketAssigment = 'div[data-cy="label-Assigned to"]';
   ticketCategory = 'div[data-cy="label-Category"]';
+  labelIssueType = 'div[data-cy="label-Issue Type"]';
   ticketHouseholdID = 'div[data-cy="label-Household ID"]';
   ticketIndividualID = 'div[data-cy="label-Individual ID"]';
   ticketPaymentLabel = 'div[data-cy="label-Payment ID"]';
@@ -39,13 +40,48 @@ export default class GrievanceDetailsPage extends BaseComponent {
   cellVillage = 'th[data-cy="table-cell-village"]';
   newNoteField = 'textarea[data-cy="input-newNote"]';
   buttonNewNote = 'button[data-cy="button-add-note"]';
+  labelGENDER = 'div[data-cy="label-GENDER"]';
+  labelRole = 'div[data-cy="label-role"]';
+  labelPhoneNo = 'div[data-cy="label-phone no"]';
+  labelPregnant = 'div[data-cy="label-pregnant"]';
+  labelFullName = 'div[data-cy="label-full name"]';
+  labelBirthDate = 'div[data-cy="label-birth date"]';
+  labelDisability = 'div[data-cy="label-disability"]';
+  labelGivenName = 'div[data-cy="label-given name"]';
+  labelFamilyName = 'div[data-cy="label-family name"]';
+  labelMiddleName = 'div[data-cy="label-middle name"]';
+  labelWorkStatus = 'div[data-cy="label-work status"]';
+  labelRelationship = 'div[data-cy="label-relationship"]';
+  labelMaritalStatus = 'div[data-cy="label-marital status"]';
+  labelCommsDisability = 'div[data-cy="label-comms disability"]';
+  labelCommsDisability1 = 'div[data-cy="label-comms disability"]';
+  labelSeeingDisability = 'div[data-cy="label-seeing disability"]';
+  labelWhoAnswersPhone = 'div[data-cy="label-who answers phone"]';
+  labelHearingDisability = 'div[data-cy="label-hearing disability"]';
+  labelObservedDisability = 'div[data-cy="label-observed disability"]';
+  labelPhysicalDisability = 'div[data-cy="label-physical disability"]';
+  labelSelfcareDisability = 'div[data-cy="label-selfcare disability"]';
+  labelEstimatedBirthDate = 'div[data-cy="label-estimated birth date"]';
+  labelPhoneNoAlternative = 'div[data-cy="label-phone no alternative"]';
+  labelWhoAnswersAltPhone = 'div[data-cy="label-who answers alt phone"]';
+  labelTickets = 'div[data-cy="label-Tickets"]';
+  checkbox = 'tr[role="checkbox"]';
+  labelPartner = 'div[data-cy="label-Partner"]';
+
   // Texts
   textTitle = "Ticket ID: ";
   textStatusNew = "New";
+  textStatusAssigned = "Assigned";
   textPriorityNotSet = "Not set";
+  textPriorityMedium = "Medium";
+  textPriorityLow = "Low";
+  textPriorityHigh = "High";
+  textUrgencyNotUrgent = "Not urgent";
+  textUrgencyUrgent = "Urgent";
+  textUrgencyVeryUrgent = "Very urgent";
   textUrgencyNotSet = "Not set";
   textNotAssigment = "-";
-  textAssigmentRootRootkowski = "Root Rootkowski"
+  textAssigmentRootRootkowski = "Root Rootkowski";
   textNoCategory = "Needs Adjudication";
   // Elements
   getPageHeaderContainer = () => cy.get(this.pageHeaderContainer);
@@ -59,6 +95,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getTicketHouseholdID = () => cy.get(this.ticketHouseholdID);
   getTicketIndividualID = () => cy.get(this.ticketIndividualID);
   getTicketPaymentLabel = () => cy.get(this.ticketPaymentLabel);
+  getLabelPartner = () => cy.get(this.labelPartner);
   getTicketCategoryBy = () => cy.get(this.ticketCategoryBy);
   getDateCreation = () => cy.get(this.dateCreation);
   getLastModifiedDate = () => cy.get(this.lastModifiedDate);
@@ -71,6 +108,7 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getMarkDuplicate = () => cy.get(this.markDuplicate);
   getCellIndividualID = () => cy.get(this.cellIndividualID);
   getCellHouseholdID = () => cy.get(this.cellHouseholdID);
+  getLabelIssueType = () => cy.get(this.labelIssueType);
   getCellFullName = () => cy.get(this.cellFullName);
   getCellGender = () => cy.get(this.cellGender);
   getCellDateOfBirth = () => cy.get(this.cellDateOfBirth);
@@ -81,15 +119,46 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getCellAdminLevel2 = () => cy.get(this.cellAdminLevel2);
   getCellVillage = () => cy.get(this.cellVillage);
   getNewNoteField = () => cy.get(this.newNoteField);
+  getLabelGENDER = () => cy.get(this.labelGENDER);
+  getLabelRole = () => cy.get(this.labelRole);
+  getLabelPhoneNo = () => cy.get(this.labelPhoneNo);
+  getLabelPregnant = () => cy.get(this.labelPregnant);
+  getLabelFullName = () => cy.get(this.labelFullName);
+  getLabelBirthDate = () => cy.get(this.labelBirthDate);
+  getLabelDisability = () => cy.get(this.labelDisability);
+  getLabelGivenName = () => cy.get(this.labelGivenName);
+  getLabelFamilyName = () => cy.get(this.labelFamilyName);
+  getLabelMiddleName = () => cy.get(this.labelMiddleName);
+  getLabelWorkStatus = () => cy.get(this.labelWorkStatus);
+  getLabelRelationship = () => cy.get(this.labelRelationship);
+  getLabelMaritalStatus = () => cy.get(this.labelMaritalStatus);
+  getLabelCommsDisability = () => cy.get(this.labelCommsDisability);
+  getLabelCommsDisability1 = () => cy.get(this.labelCommsDisability1);
+  getLabelSeeingDisability = () => cy.get(this.labelSeeingDisability);
+  getLabelWhoAnswersPhone = () => cy.get(this.labelWhoAnswersPhone);
+  getLabelHearingDisability = () => cy.get(this.labelHearingDisability);
+  getLabelObservedDisability = () => cy.get(this.labelObservedDisability);
+  getLabelPhysicalDisability = () => cy.get(this.labelPhysicalDisability);
+  getLabelSelfcareDisability = () => cy.get(this.labelSelfcareDisability);
+  getLabelEstimatedBirthDate = () => cy.get(this.labelEstimatedBirthDate);
+  getLabelPhoneNoAlternative = () => cy.get(this.labelPhoneNoAlternative);
+  getLabelWhoAnswersAltPhone = () => cy.get(this.labelWhoAnswersAltPhone);
+  getLabelTickets = () => cy.get(this.labelTickets);
+  getCheckbox = () => cy.get(this.checkbox);
 
-  checkElementsOnPage() {
+  checkElementsOnPage(
+    status = this.textStatusNew,
+    priority = this.textPriorityNotSet,
+    urgency = this.textUrgencyNotSet,
+    assigment = this.textNotAssigment,
+    category = this.textNoCategory
+  ) {
     this.getTitle().contains(this.textTitle);
-    this.getTicketStatus().contains(this.textStatusNew);
-    this.getTicketPriority().contains(this.textPriorityNotSet);
-    this.getTicketUrgency().contains(this.textUrgencyNotSet);
-    this.getTicketAssigment().contains(this.textNotAssigment);
-    this.getTicketCategory().contains(this.textNoCategory);
-    this.getButtonAssignToMe().should("be.visible");
+    this.getTicketStatus().contains(status);
+    this.getTicketPriority().contains(priority);
+    this.getTicketUrgency().contains(urgency);
+    this.getTicketAssigment().contains(assigment);
+    this.getTicketCategory().contains(category);
     this.getTicketHouseholdID().should("be.visible");
     this.getTicketIndividualID().should("be.visible");
     this.getTicketPaymentLabel().should("be.visible");
@@ -101,8 +170,9 @@ export default class GrievanceDetailsPage extends BaseComponent {
     this.getLanguagesSpoken().should("be.visible");
     this.getDocumentation().should("be.visible");
     this.getTicketDescription().scrollIntoView().should("be.visible");
-    this.getCreateLinkedTicket().scrollIntoView().should("be.visible");
-    this.getMarkDuplicate().scrollIntoView().should("be.visible");
+  }
+
+  checkElementsCells() {
     this.getCellIndividualID().scrollIntoView().should("be.visible");
     this.getCellHouseholdID().scrollIntoView().should("be.visible");
     this.getCellFullName().scrollIntoView().should("be.visible");

@@ -1,27 +1,26 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
-import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  ImportedIndividualMinimalFragment,
-} from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
 
 interface ImportedIndividualsTableRowProps {
-  individual: ImportedIndividualMinimalFragment;
+  individual;
   choices: HouseholdChoiceDataQuery;
+  isMerged?: boolean;
 }
 
-export function ImportedIndividualsTableRow({
+export const ImportedIndividualsTableRow = ({
   individual,
   choices,
-}: ImportedIndividualsTableRowProps): React.ReactElement {
+  isMerged,
+}: ImportedIndividualsTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
 
@@ -34,10 +33,13 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const individualPath = `/${baseUrl}/registration-data-import/individual/${individual.id}`;
+  const importedIndividualPath = `/${baseUrl}/registration-data-import/individual/${individual.id}`;
+  const mergedIndividualPath = `/${baseUrl}/population/individuals/${individual.id}`;
+  const url = isMerged ? mergedIndividualPath : importedIndividualPath;
+
   const handleClick = (e): void => {
     e.stopPropagation();
-    history.push(individualPath);
+    history.push(url);
   };
   return (
     <ClickableTableRow
@@ -47,7 +49,9 @@ export function ImportedIndividualsTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        <BlackLink to={individualPath}>{individual.importId}</BlackLink>
+        <BlackLink to={url}>
+          {isMerged ? individual.unicefId : individual.importId}
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
@@ -95,4 +99,4 @@ export function ImportedIndividualsTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

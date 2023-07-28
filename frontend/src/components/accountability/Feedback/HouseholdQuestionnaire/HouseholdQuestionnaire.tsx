@@ -98,12 +98,6 @@ export const HouseholdQuestionnaire = ({
           size: 3,
         },
         {
-          name: 'unhcrId',
-          label: t('UNHCR CASE ID'),
-          value: selectedHouseholdData.unicefId,
-          size: 3,
-        },
-        {
           name: 'months_displaced_h_f',
           label: t('LENGTH OF TIME SINCE ARRIVAL'),
           value: selectedHouseholdData.flexFields?.months_displaced_h_f,

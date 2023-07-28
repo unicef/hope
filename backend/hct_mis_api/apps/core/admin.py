@@ -57,11 +57,11 @@ from hct_mis_api.apps.core.models import (
     StorageFile,
     XLSXKoboTemplate,
 )
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
 from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
@@ -410,7 +410,7 @@ UNICEF HOPE""",
             form = TestRapidproForm(request.POST)
             try:
                 if form.is_valid():
-                    api = RapidProAPI(self.object.slug)
+                    api = RapidProAPI(self.object.slug, RapidProAPI.MODE_VERIFICATION)
                     phone_number = form.cleaned_data["phone_number"]
                     flow_name = form.cleaned_data["flow_name"]
                     context["phone_number"] = phone_number

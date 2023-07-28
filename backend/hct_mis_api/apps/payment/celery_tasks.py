@@ -2,11 +2,14 @@ import datetime
 import logging
 from typing import Any, Dict, List, Optional
 
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
@@ -15,6 +18,9 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
+    PaymentPlanPDFExportSevice,
+)
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -22,7 +28,6 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -79,7 +84,14 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 
             payment_verification_plan.xlsx_file_exporting = False
             payment_verification_plan.save()
-            service.send_email(user)
+
+            context = service.get_email_context(user)
+            user.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -130,7 +142,15 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+                    context = service.get_email_context(user)
+                    transaction.on_commit(
+                        lambda: user.email_user(
+                            context["title"],
+                            render_to_string(service.text_template, context=context),
+                            settings.EMAIL_HOST_USER,
+                            html_message=render_to_string(service.html_template, context=context),
+                        )
+                    )
 
             except Exception as e:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -167,7 +187,15 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
+                    context = service.get_email_context(user)
+                    transaction.on_commit(
+                        lambda: user.email_user(
+                            context["title"],
+                            render_to_string(service.text_template, context=context),
+                            settings.EMAIL_HOST_USER,
+                            html_message=render_to_string(service.html_template, context=context),
+                        )
+                    )
 
             except Exception as e:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -304,7 +332,16 @@ def create_cash_plan_reconciliation_xlsx(
             except Exception as e:
                 error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
 
-            service.send_email(reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg)
+            context = service.get_email_context(
+                reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
+            )
+            reconciliation_xlsx_obj.created_by.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
+
             # remove file every time
             reconciliation_xlsx_obj.file.delete()
             reconciliation_xlsx_obj.delete()
@@ -407,18 +444,6 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
 
-    return True
-
-
-@app.task
-@sentry_tags
-def check_xlsx_exporting_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import xlsx_exporting_celery_manager
-
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        xlsx_exporting_celery_manager.execute()
     return True
 
 
@@ -530,4 +555,54 @@ def payment_plan_exclude_beneficiaries(
 
     except Exception as e:
         logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
+    """create PDF file with summary and sent an enail to request user"""
+    try:
+        from hct_mis_api.apps.core.models import FileTemp
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        user = get_user_model().objects.get(pk=user_id)
+
+        with transaction.atomic():
+            # regenerate PDF always
+            # remove old export_pdf_file_summary
+            if payment_plan.export_pdf_file_summary:
+                payment_plan.export_pdf_file_summary.file.delete()
+                payment_plan.export_pdf_file_summary.delete()
+                payment_plan.export_pdf_file_summary = None
+
+            service = PaymentPlanPDFExportSevice(payment_plan)
+            pdf, filename = service.generate_pdf_summary()
+
+            file_pdf_obj = FileTemp(
+                object_id=payment_plan.pk,
+                content_type=get_content_type_for_model(payment_plan),
+                created_by=user,
+            )
+            file_pdf_obj.file.save(filename, ContentFile(pdf))
+
+            payment_plan.export_pdf_file_summary = file_pdf_obj
+            # TODO: maybe will add background status
+            # payment_plan.background_action_status_none()
+            payment_plan.save()
+
+            context = service.get_email_context(user)
+            transaction.on_commit(
+                lambda: user.email_user(
+                    context["title"],
+                    render_to_string(service.text_template, context=context),
+                    settings.EMAIL_HOST_USER,
+                    html_message=render_to_string(service.html_template, context=context),
+                )
+            )
+
+    except Exception as e:
+        logger.exception("Export PDF Payment Plan Summary Error")
         raise self.retry(exc=e)

@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 import graphene
 from graphene_file_upload.scalars import Upload
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -36,6 +37,7 @@ from hct_mis_api.apps.registration_datahub.inputs import (
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedHousehold,
     ImportedIndividual,
     KoboImportData,
     RegistrationDataImportDatahub,
@@ -98,7 +100,13 @@ def create_registration_data_import_objects(
     created_obj_hct.datahub_id = created_obj_datahub.id
     created_obj_hct.save()
 
-    return created_obj_datahub, created_obj_hct, import_data_obj, business_area, program_id
+    return (
+        created_obj_datahub,
+        created_obj_hct,
+        import_data_obj,
+        business_area,
+        program_id,
+    )
 
 
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
@@ -304,6 +312,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        refuse_reason = graphene.String(required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -325,8 +334,12 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
 
         cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
-
         cls.validate(status=obj_hct.status)
+
+        ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+        refuse_reason = kwargs.get("refuse_reason")
+        if refuse_reason:
+            obj_hct.refuse_reason = refuse_reason
         obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
         obj_hct.save()
 
@@ -345,6 +358,51 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             obj_hct,
         )
         return RefuseRegistrationDataImportMutation(obj_hct)
+
+
+class EraseRegistrationDataImportMutation(PermissionMutation):
+    registration_data_import = graphene.Field(RegistrationDataImportNode)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
+    @is_authenticated
+    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
+        decode_id = decode_id_string(id)
+        old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
+        obj_hct = RegistrationDataImport.objects.get(id=decode_id)
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
+
+        cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
+
+        if obj_hct.status not in (
+            RegistrationDataImport.IMPORT_ERROR,
+            RegistrationDataImport.MERGE_ERROR,
+            RegistrationDataImport.DEDUPLICATION_FAILED,
+        ):
+            msg = "RDI can be erased only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+
+        obj_hct.erased = True
+        obj_hct.save()
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            obj_hct.program_id,
+            old_obj_hct,
+            obj_hct,
+        )
+        return EraseRegistrationDataImportMutation(registration_data_import=obj_hct)
 
 
 class UploadImportDataXLSXFileAsync(PermissionMutation):
@@ -428,3 +486,4 @@ class Mutations(graphene.ObjectType):
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
     refuse_registration_data_import = RefuseRegistrationDataImportMutation.Field()
     rerun_dedupe = RegistrationDeduplicationMutation.Field()
+    erase_registration_data_import = EraseRegistrationDataImportMutation.Field()
