@@ -46,6 +46,7 @@ services:
       - BUILD_ID=${BUILD_ID}
       - AUTHOR_NAME=${AUTHOR_NAME}
       - AUTHOR_EMAIL=${AUTHOR_EMAIL}
+      - QUEUED_BY=${QUEUED_BY}
     volumes:
       - ../cypress-results:/code/cypress/results
       - ../cypress-reports:/code/cypress/reports

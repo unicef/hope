@@ -299,6 +299,7 @@ stages:
                BRANCH_NAME=$(System.PullRequest.SourceBranch)
                AUTHOR_NAME=$(Build.RequestedFor)
                AUTHOR_EMAIL=$(Build.RequestedForEmail)
+               QUEUED_BY=$(Build.QueuedBy)
                BUILD_ID=$(Build.BuildId)
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Test Report Artifacts'
