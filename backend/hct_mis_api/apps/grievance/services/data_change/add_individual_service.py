@@ -127,7 +127,11 @@ class AddIndividualService(DataChangeService):
                 household_individuals = evaluate_qs(household.individuals.exclude(id=individual.id).select_for_update())
                 household_individuals.update(relationship=RELATIONSHIP_UNKNOWN)
                 household.save(update_fields=["head_of_household"])
-            household.size += 1
+
+            if not household.size:
+                household.size = Individual.objects.filter(household=household).count()
+            else:
+                household.size += 1
             household.save()
         else:
             individual.relationship = NON_BENEFICIARY

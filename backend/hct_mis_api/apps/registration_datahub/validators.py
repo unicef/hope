@@ -654,6 +654,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             combined_fields = self.combined_fields
 
             for name, fields in combined_fields.items():
+                if name.capitalize() not in wb.sheetnames:
+                    errors.append(
+                        {"row_number": 0, "header": "File", "message": f"Worksheet {name.capitalize()} does not exist."}
+                    )
+                    return errors
+
                 sheet = wb[name.capitalize()]
                 first_row = sheet[1]
 
@@ -703,7 +709,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 wb = openpyxl.load_workbook(xlsx_file, data_only=True)
             except BadZipfile:
                 return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
-            errors.extend(self.validate_file_with_template(wb))
+            errors = self.validate_file_with_template(wb)
+            if errors:
+                # return error if WS do not exist in the import file
+                return errors
             errors.extend(self.validate_collectors_size(wb))
             errors.extend(self.validate_collectors(wb))
             individuals_sheet = wb["Individuals"]
@@ -1144,12 +1153,18 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 item.append(submission["kobo_submission_time"].isoformat())
                 all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
             household: Dict[str, Any]
+            household_uuid_list: List[str] = []
             for household in reduced_submissions:
+                household_uuid = str(household.get("_uuid"))
+
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
-                    str(household.get("_uuid")), []
+                    household_uuid, []
                 )
-                if submission_exists is True:
+                submission_duplicate = household_uuid in household_uuid_list
+                if submission_exists or submission_duplicate:
                     continue
+
+                household_uuid_list.append(household_uuid)
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0

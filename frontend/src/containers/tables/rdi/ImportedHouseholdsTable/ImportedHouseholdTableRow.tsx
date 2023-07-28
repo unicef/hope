@@ -6,21 +6,26 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
-interface PaymentRecordTableRowProps {
-  household: ImportedHouseholdMinimalFragment;
+interface ImportedHouseholdTableRowProps {
+  isMerged?: boolean;
+  household;
 }
 
-export function ImportedHouseholdTableRow({
+export const ImportedHouseholdTableRow = ({
+  isMerged,
   household,
-}: PaymentRecordTableRowProps): React.ReactElement {
+}: ImportedHouseholdTableRowProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
-  const householdPath = `/${baseUrl}/registration-data-import/household/${household.id}`;
+
+  const importedHouseholdPath = `/${baseUrl}/registration-data-import/household/${household.id}`;
+  const mergedHouseholdPath = `/${baseUrl}/population/household/${household.id}`;
+  const url = isMerged ? mergedHouseholdPath : importedHouseholdPath;
+
   const handleClick = (): void => {
-    const win = window.open(householdPath, '_blank');
+    const win = window.open(url, '_blank');
     if (win != null) {
       win.focus();
     }
@@ -35,18 +40,22 @@ export function ImportedHouseholdTableRow({
     >
       <TableCell align='left'>
         {household.hasDuplicates && (
-          <WarningTooltip confirmed message={t('Houesehold has Duplicates')} />
+          <WarningTooltip confirmed message={t('Household has Duplicates')} />
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={householdPath}>{household.importId}</BlackLink>
+        <BlackLink to={url}>
+          {isMerged ? household.unicefId : household.importId}
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>
-      <TableCell align='left'>{household.admin2Title}</TableCell>
+      <TableCell align='left'>
+        {isMerged ? household.admin2?.name : household.admin2Title}
+      </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

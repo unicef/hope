@@ -161,7 +161,7 @@ class TicketCreatorService:
             created_by=user,
             user_modified=timezone.now(),
             assigned_to=assigned_to,
-            status=GrievanceTicket.STATUS_ASSIGNED,
+            status=GrievanceTicket.STATUS_ASSIGNED if assigned_to else GrievanceTicket.STATUS_NEW,
             partner=partner,
         )
         if program:

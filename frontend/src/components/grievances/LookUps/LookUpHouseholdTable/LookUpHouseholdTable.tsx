@@ -4,7 +4,7 @@ import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
-  useAllHouseholdsQuery,
+  useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { TableWrapper } from '../../../core/TableWrapper';
@@ -43,12 +43,26 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
+  const matchWithdrawnValue = (): boolean | undefined => {
+    if (filter.withdrawn === 'true') {
+      return true;
+    }
+    if (filter.withdrawn === 'false') {
+      return false;
+    }
+    return undefined;
+  };
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
+    familySize: JSON.stringify({
+      min: filter.householdSizeMin,
+      max: filter.householdSizeMax,
+    }),
     search: filter.search,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
-    familySize: JSON.stringify(filter.size),
+    withdrawn: matchWithdrawnValue(),
+    orderBy: filter.orderBy,
   };
 
   const [selected, setSelected] = useState<string[]>(
@@ -110,9 +124,10 @@ export const LookUpHouseholdTable = ({
       >
         headCells={householdMultiSelect ? headCells.slice(1) : headCells}
         rowsPerPageOptions={[5, 10, 15, 20]}
-        query={useAllHouseholdsQuery}
+        query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        filterOrderBy={filter.orderBy}
         onSelectAllClick={
           householdMultiSelect && handleSelectAllCheckboxesClick
         }

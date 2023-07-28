@@ -46,8 +46,8 @@ export const NewDocumentationFieldArray = ({
                 >
                   {t(
                     values.documentation?.length > 0
-                      ? 'Add another document'
-                      : 'Add document',
+                      ? 'Add more documentation'
+                      : 'Add documentation',
                   )}
                 </Button>
               </Grid>

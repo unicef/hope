@@ -177,7 +177,8 @@ export function validate(
   }
   if (
     category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   ) {
     if (!issueType) {
       errors.issueType = 'Issue Type is required';
@@ -415,7 +416,8 @@ export function validateUsingSteps(
   }
   if (
     category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   ) {
     if (!issueType) {
       errors.issueType = 'Issue Type is required';

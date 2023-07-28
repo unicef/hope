@@ -194,7 +194,7 @@ class Command(BaseCommand):
 
         filepath = os.path.join(generated_dir, f"rdi_import_{amount}_hh_{amount}_ind_seed_{seed}.xlsx")
         wb = openpyxl.Workbook()
-        wb.remove_sheet(wb.get_sheet_by_name(wb.get_sheet_names()[0]))
+        wb.remove_sheet(wb.get_sheet_by_name(wb.sheetnames[0]))
 
         households = wb.create_sheet("Households")
         for index, (_, (header, _)) in enumerate(household_header_mapping.items()):
