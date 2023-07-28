@@ -6,8 +6,10 @@ from django.utils import timezone
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 class TestLoadXML(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)

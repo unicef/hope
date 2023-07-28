@@ -10,7 +10,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household,
+)
 from hct_mis_api.apps.household.models import Household
 
 
@@ -52,6 +56,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         _, individuals = create_household({"size": 2}, {"family_name": "Kowalski"})
         cls.individual_1 = individuals[0]
         cls.individual_2 = individuals[1]
+
+        national_id_type = DocumentTypeFactory(key="national_id")
+        DocumentFactory(
+            document_number="test123",
+            type=national_id_type,
+            individual=individuals[0],
+        )
 
         Household.objects.all().update(unicef_id="HH-22-0059.7225")
 
@@ -143,4 +154,30 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
             variables={"search": f"family_name {self.individual_1.family_name}"},
+        )
+
+    def test_grievance_list_filtered_by_household_head_national_id_document_number(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SEARCH,
+            context={"user": self.user},
+            variables={"search": "national_id test123"},
+        )
+
+    def test_grievance_list_filtered_by_invalid_search_type(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SEARCH,
+            context={"user": self.user},
+            variables={"search": "invalid test123"},
         )

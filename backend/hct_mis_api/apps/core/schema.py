@@ -78,7 +78,7 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
         connection_class: Type = ExtendedConnection
-        exclude_fields: List = []
+        exclude: List = []
 
 
 class FlexibleAttributeNode(DjangoObjectType):
