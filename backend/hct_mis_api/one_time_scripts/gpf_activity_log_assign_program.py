@@ -1,6 +1,10 @@
+"""
+This migration has to be run after migration all Individuals and Households 'migrate_data_to_representations' and after migrate Grievances
+"""
+
 import abc
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Union
 
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
@@ -14,11 +18,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
-    def handle(self, *args: Any, **options: Any) -> None:
-        activity_log_assign_program()
-
-
 class GetProgramId(abc.ABC):
     obj: Any
     class_name: str
@@ -28,9 +27,8 @@ class GetProgramId(abc.ABC):
         self.class_name: str = obj.__class__.__name__
 
         if self.class_name == "GrievanceTicket":
-            # TODO: 'programme' removed in next migrations (m2m 'programs')
-            self.obj = obj
-            self.nested_field = "programme_id"
+            self.obj = obj.programs.all()
+            self.nested_field = "pk"
 
         elif self.class_name == "PaymentPlan":
             self.obj = obj.get_program
@@ -60,19 +58,21 @@ class GetProgramId(abc.ABC):
             self.obj = obj
             self.nested_field = "program_id"
 
-        # TODO: update after changes for Ind and HH collections/representations
-        # elif class_name == "Household":
-        #     self.obj = obj
-        #     self.nested_field = "program_id"
-        #
-        # elif class_name == "Individual":
-        #     self.obj = obj
-        #     self.nested_field = "program_id"
+        elif self.class_name == "Household":
+            self.obj = obj.programs.all()
+            self.nested_field = "pk"
+
+        elif self.class_name == "Individual":
+            self.obj = obj.household.programs.all()
+            self.nested_field = "pk"
         else:
             raise ValueError(f"Can not found 'class_name' and 'nested_field' for class {self.class_name}")
 
     @property
-    def get_id(self) -> Optional["UUID"]:
+    def get_id(self) -> Union["UUID", list, None]:
+        if self.class_name in ("GrievanceTicket", "Household", "Individual"):
+            return list(self.obj.values_list(self.nested_field, flat=True))
+
         return getattr(self.obj, self.nested_field, None)
 
 
@@ -90,7 +90,10 @@ def activity_log_assign_program() -> None:
 
         for log in paginator.page(page).object_list:
             program_id = GetProgramId(log.content_object).get_id
-            if program_id:
+            if isinstance(program_id, list):
+                for program in program_id:
+                    log.programs.add(program)
+            elif program_id:
                 log.programs.add(program_id)
 
     print("Finished Updating Activity Logs")
