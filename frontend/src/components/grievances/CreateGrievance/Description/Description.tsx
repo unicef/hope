@@ -49,10 +49,6 @@ export interface DescriptionProps {
   baseUrl: string;
   choicesData: GrievancesChoiceDataQuery;
   userChoices: UserChoiceDataQuery;
-  mappedPrograms: {
-    name: string;
-    value: string;
-  }[];
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
@@ -65,7 +61,6 @@ export const Description = ({
   baseUrl,
   choicesData,
   userChoices,
-  mappedPrograms,
   setFieldValue,
   errors,
   permissions,
@@ -228,18 +223,6 @@ export const Description = ({
               component={FormikSelectField}
             />
           </Grid>
-          {+values.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-            <Grid item xs={6}>
-              <Field
-                name='programme'
-                fullWidth
-                variant='outlined'
-                label={t('Programme Title')}
-                choices={mappedPrograms}
-                component={FormikSelectField}
-              />
-            </Grid>
-          )}
         </Grid>
         <Box pt={5}>
           <BoxWithBorders>
