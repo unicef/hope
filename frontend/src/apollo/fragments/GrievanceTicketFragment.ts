@@ -377,7 +377,7 @@ export const grievanceTicketDetailed = gql`
     }
     priority
     urgency
-    programme {
+    programs {
       name
       id
     }
