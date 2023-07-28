@@ -1,19 +1,19 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from uuid import UUID
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from hct_mis_api.apps.account.models import AbstractUser, User
+    from hct_mis_api.apps.program.models import Program
 
 
 class LogEntry(models.Model):
@@ -55,7 +55,7 @@ class LogEntry(models.Model):
         verbose_name=_("actor"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
-    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True)
+    programs = models.ManyToManyField("program.Program", related_name="activity_logs", blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
 
@@ -70,7 +70,7 @@ def log_create(
     mapping: Dict,
     business_area_field: Any,
     user: Optional[Union["AbstractUser", "User"]] = None,
-    program_id: Optional[Union["UUID", str]] = None,
+    programs: Union[UUID, QuerySet["Program"], str, None] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:
@@ -89,14 +89,22 @@ def log_create(
         if is_removed and is_removed_old != is_removed:
             action = LogEntry.SOFT_DELETE
     business_area = nested_getattr(instance, business_area_field)
-    return LogEntry.objects.create(
+    log = LogEntry.objects.create(
         action=action,
         content_object=instance,
         user=user,
-        program_id=program_id,
         business_area=business_area,
         object_repr=str(instance),
         changes=create_diff(old_object, new_object, mapping)
         if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
         else None,
     )
+    # if only one program
+    if programs and isinstance(programs, (UUID, str)):
+        log.programs.add(programs)
+    # if queryset
+    if programs and isinstance(programs, QuerySet):
+        for program in programs:
+            log.programs.add(program)
+
+    return log

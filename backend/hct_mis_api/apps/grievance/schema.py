@@ -107,7 +107,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     urgency = graphene.Int()
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
-    programme = graphene.Field(ProgramNode)
+    programs = graphene.List(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
@@ -183,8 +183,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return grievance_ticket.partner
 
     @staticmethod
-    def resolve_programme(grievance_ticket: GrievanceTicket, info: Any) -> Program:
-        return grievance_ticket.programme
+    def resolve_programs(grievance_ticket: GrievanceTicket, info: Any) -> Program:
+        return grievance_ticket.programs.all()
 
     @staticmethod
     def resolve_documentation(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet[GrievanceDocument]":
