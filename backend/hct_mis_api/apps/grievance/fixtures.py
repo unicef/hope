@@ -35,7 +35,6 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class GrievanceTicketFactory(DjangoModelFactory):
