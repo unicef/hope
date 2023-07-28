@@ -50,6 +50,17 @@ Cypress.Commands.add("initScenario", (scenario) => {
   });
 });
 
+Cypress.Commands.add(
+  "containsIfExist",
+  { prevSubject: "element" },
+  (subject, data) => {
+    if (data) {
+      return cy.get(subject).contains(data);
+    }
+    return cy.get(subject);
+  }
+);
+
 Cypress.Commands.add("scenario", (steps) => {
   let outputText = "";
   steps.forEach((step, index) => {
