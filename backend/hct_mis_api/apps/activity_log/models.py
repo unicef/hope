@@ -70,7 +70,7 @@ def log_create(
     mapping: Dict,
     business_area_field: Any,
     user: Optional[Union["AbstractUser", "User"]] = None,
-    program: Union[UUID, QuerySet["Program"], str, None] = None,
+    programs: Union[UUID, QuerySet["Program"], str, None] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:
@@ -99,11 +99,12 @@ def log_create(
         if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
         else None,
     )
-    if program and isinstance(program, UUID) or isinstance(program, str):
-        log.programs.add(program)
-
-    if program and isinstance(program, QuerySet):
-        for program_ in program:
-            log.programs.add(program_)
+    # if only one program
+    if programs and isinstance(programs, (UUID, str)):
+        log.programs.add(programs)
+    # if queryset
+    if programs and isinstance(programs, QuerySet):
+        for program in programs:
+            log.programs.add(program)
 
     return log
