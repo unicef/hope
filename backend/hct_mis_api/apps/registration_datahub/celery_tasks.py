@@ -562,10 +562,10 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
         while i <= count:
             logger.info(f"Page {i}/{count} processing...")
             rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
-            file_names_to_remove = (
+            file_names_to_remove = list(
                 ImportedDocument.objects.filter(individual__registration_data_import_id__in=rdi_datahub_ids_page)
                 .exclude(photo="")
-                .values("photo")
+                .values_list("photo", flat=True)
             )
 
             ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
