@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('activity_log', '0006_migration'),
-        ('grievance', '0062_migration'),
+        ('grievance', '0063_migration'),
 
     ]
 
