@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -69,7 +70,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlan } = data;
 
   return (
-    <>
+    <Box display='flex' flexDirection='column'>
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         businessArea={businessArea}
@@ -100,6 +101,6 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan.id} />
       )}
-    </>
+    </Box>
   );
 };
