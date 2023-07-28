@@ -1122,18 +1122,6 @@ celery = ">=5.2.7,<6.0"
 Django = ">=3.2.18"
 
 [[package]]
-name = "django-cleanup"
-version = "8.0.0"
-description = "Deletes old files."
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "django-cleanup-8.0.0.tar.gz", hash = "sha256:c739a05544e1e48dc848871c870dbf1595f8533d24523bc67360e43562edaf0d"},
-    {file = "django_cleanup-8.0.0-py2.py3-none-any.whl", hash = "sha256:8cd8872d67fe1501b19a843d006cdb5673cfbb74ac3d6d8f2c60e8e7723a7f5b"},
-]
-
-[[package]]
 name = "django-compressor"
 version = "4.4"
 description = "('Compresses linked and inline JavaScript or CSS into single cached files.',)"
@@ -5200,4 +5188,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.*"
-content-hash = "72c067ef67583f26a3d46a1770db0b17ca7ee02e9626566ebc64b43d52bac8a5"
+content-hash = "25cb1af6caac361ffdc5d485c0a8cefb66e172cbdac274bf5511cd9083305e04"
