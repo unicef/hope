@@ -22,7 +22,7 @@ from hct_mis_api.one_time_scripts.move_tickets_to_feedback import (
 )
 
 
-class TestMigrationFosterChild(TestCase):
+class TestMigrationTicketsToFeedback(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
