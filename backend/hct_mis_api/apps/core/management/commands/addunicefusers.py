@@ -17,6 +17,7 @@ emails = [
     "trncic",
     "aboncenne",
     "jyablonski",
+    "dhassooneh",
 ]
 
 
