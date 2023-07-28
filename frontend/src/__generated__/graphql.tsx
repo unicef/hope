@@ -2059,6 +2059,7 @@ export type HouseholdNode = Node & {
   familyId?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
   copiedFrom?: Maybe<HouseholdNode>,
+  originUnicefId?: Maybe<Scalars['String']>,
   copiedTo: HouseholdNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals?: Maybe<IndividualNodeConnection>,
@@ -3074,6 +3075,7 @@ export type IndividualNode = Node & {
   relationshipConfirmed: Scalars['Boolean'],
   program?: Maybe<ProgramNode>,
   copiedFrom?: Maybe<IndividualNode>,
+  originUnicefId?: Maybe<Scalars['String']>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -4923,6 +4925,7 @@ export type ProgramNode = Node & {
   householdSet: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   registrationImports: RegistrationDataImportNodeConnection,
+  registrationDataImports: RegistrationDataImportNodeConnection,
   paymentplanSet: PaymentPlanNodeConnection,
   cashplanSet: CashPlanNodeConnection,
   paymentSet: PaymentNodeConnection,
@@ -4977,6 +4980,15 @@ export type ProgramNodeIndividualsArgs = {
 
 
 export type ProgramNodeRegistrationImportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeRegistrationDataImportsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6465,6 +6477,7 @@ export type RegistrationDataImportNode = Node & {
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
   program?: Maybe<ProgramNode>,
+  programs: ProgramNodeConnection,
   erased: Scalars['Boolean'],
   refuseReason?: Maybe<Scalars['String']>,
   households: HouseholdNodeConnection,
@@ -6477,6 +6490,16 @@ export type RegistrationDataImportNode = Node & {
   goldenRecordPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
   batchUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
   goldenRecordUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
+};
+
+
+export type RegistrationDataImportNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -8816,10 +8839,10 @@ export type GrievanceTicketDetailedFragment = (
         )> }
       )> }
     )>> }
-  ), programme: Maybe<(
+  ), programs: Maybe<Array<Maybe<(
     { __typename?: 'ProgramNode' }
     & Pick<ProgramNode, 'name' | 'id'>
-  )>, documentation: Maybe<Array<Maybe<(
+  )>>>, documentation: Maybe<Array<Maybe<(
     { __typename?: 'GrievanceDocumentNode' }
     & Pick<GrievanceDocumentNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'fileSize' | 'contentType' | 'filePath' | 'fileName'>
     & { createdBy: Maybe<(
@@ -11540,305 +11563,6 @@ export type GrievanceTicketQuery = (
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
     & GrievanceTicketDetailedFragment
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency' | 'comments'>
-    & { partner: Maybe<(
-      { __typename?: 'PartnerType' }
-      & Pick<PartnerType, 'id' | 'name'>
-    )>, businessArea: (
-      { __typename?: 'UserBusinessAreaNode' }
-      & Pick<UserBusinessAreaNode, 'postponeDeduplication'>
-    ), createdBy: Maybe<(
-      { __typename?: 'UserNode' }
-      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-    )>, admin2: Maybe<(
-      { __typename?: 'AreaNode' }
-      & Pick<AreaNode, 'id' | 'name' | 'pCode'>
-    )>, assignedTo: Maybe<(
-      { __typename?: 'UserNode' }
-      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-    )>, individual: Maybe<(
-      { __typename?: 'IndividualNode' }
-      & { householdsAndRoles: Array<(
-        { __typename?: 'IndividualRoleInHouseholdNode' }
-        & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
-        & { individual: (
-          { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
-        ), household: (
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'unicefId'>
-        ) }
-      )> }
-      & IndividualDetailedFragment
-    )>, household: Maybe<(
-      { __typename?: 'HouseholdNode' }
-      & HouseholdDetailedFragment
-    )>, paymentRecord: Maybe<(
-      { __typename?: 'PaymentRecordAndPaymentNode' }
-      & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'objType'>
-    )>, relatedTickets: Maybe<Array<Maybe<(
-      { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
-      & { household: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId'>
-      )> }
-    )>>>, linkedTickets: Maybe<Array<Maybe<(
-      { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'category' | 'status'>
-      & { household: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId'>
-      )> }
-    )>>>, existingTickets: Maybe<Array<Maybe<(
-      { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'category' | 'unicefId' | 'status'>
-      & { household: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId'>
-      )> }
-    )>>>, addIndividualTicketDetails: Maybe<(
-      { __typename?: 'TicketAddIndividualDetailsNode' }
-      & Pick<TicketAddIndividualDetailsNode, 'id' | 'individualData' | 'approveStatus'>
-      & { household: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId'>
-      )> }
-    )>, individualDataUpdateTicketDetails: Maybe<(
-      { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
-      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData' | 'roleReassignData'>
-      & { individual: Maybe<(
-        { __typename?: 'IndividualNode' }
-        & IndividualDetailedFragment
-      )> }
-    )>, householdDataUpdateTicketDetails: Maybe<(
-      { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
-      & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
-      & { household: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & HouseholdDetailedFragment
-      )> }
-    )>, deleteIndividualTicketDetails: Maybe<(
-      { __typename?: 'TicketDeleteIndividualDetailsNode' }
-      & Pick<TicketDeleteIndividualDetailsNode, 'id' | 'roleReassignData' | 'approveStatus'>
-    )>, deleteHouseholdTicketDetails: Maybe<(
-      { __typename?: 'TicketDeleteHouseholdDetailsNode' }
-      & Pick<TicketDeleteHouseholdDetailsNode, 'id' | 'approveStatus'>
-      & { reasonHousehold: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId'>
-      )> }
-    )>, systemFlaggingTicketDetails: Maybe<(
-      { __typename?: 'TicketSystemFlaggingDetailsNode' }
-      & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
-      & { goldenRecordsIndividual: (
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate' | 'lastRegistrationDate'>
-        & { documents: (
-          { __typename?: 'DocumentNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'DocumentNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'DocumentNode' }
-              & Pick<DocumentNode, 'id' | 'documentNumber'>
-              & { type: (
-                { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'key'>
-              ) }
-            )> }
-          )>> }
-        ) }
-      ), sanctionListIndividual: (
-        { __typename?: 'SanctionListIndividualNode' }
-        & Pick<SanctionListIndividualNode, 'id' | 'fullName' | 'referenceNumber'>
-        & { datesOfBirth: (
-          { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'SanctionListIndividualDateOfBirthNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'SanctionListIndividualDateOfBirthNode' }
-              & Pick<SanctionListIndividualDateOfBirthNode, 'id' | 'date'>
-            )> }
-          )>> }
-        ), documents: (
-          { __typename?: 'SanctionListIndividualDocumentNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'SanctionListIndividualDocumentNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'SanctionListIndividualDocumentNode' }
-              & Pick<SanctionListIndividualDocumentNode, 'id' | 'documentNumber' | 'typeOfDocument'>
-            )> }
-          )>> }
-        ) }
-      ) }
-    )>, paymentVerificationTicketDetails: Maybe<(
-      { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'oldReceivedAmount' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
-      & { paymentVerification: Maybe<(
-        { __typename?: 'PaymentVerificationNode' }
-        & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
-      )>, paymentVerifications: (
-        { __typename?: 'PaymentVerificationNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'PaymentVerificationNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'PaymentVerificationNode' }
-            & Pick<PaymentVerificationNode, 'id'>
-          )> }
-        )>> }
-      ) }
-    )>, needsAdjudicationTicketDetails: Maybe<(
-      { __typename?: 'TicketNeedsAdjudicationDetailsNode' }
-      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'hasDuplicatedDocument' | 'isMultipleDuplicatesVersion' | 'roleReassignData'>
-      & { extraData: Maybe<(
-        { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode' }
-        & { goldenRecords: Maybe<Array<Maybe<(
-          { __typename?: 'DeduplicationResultNode' }
-          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
-        )>>>, possibleDuplicate: Maybe<Array<Maybe<(
-          { __typename?: 'DeduplicationResultNode' }
-          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
-        )>>> }
-      )>, goldenRecordsIndividual: (
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
-        & { documents: (
-          { __typename?: 'DocumentNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'DocumentNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'DocumentNode' }
-              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
-              & { type: (
-                { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'key'>
-              ) }
-            )> }
-          )>> }
-        ), household: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'unicefId' | 'village'>
-          & { admin2: Maybe<(
-            { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'id' | 'name'>
-          )> }
-        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
-          { __typename?: 'DeduplicationResultNode' }
-          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
-        )>>> }
-      ), possibleDuplicate: Maybe<(
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
-        & { documents: (
-          { __typename?: 'DocumentNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'DocumentNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'DocumentNode' }
-              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
-              & { type: (
-                { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'key'>
-              ) }
-            )> }
-          )>> }
-        ), household: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'unicefId' | 'id' | 'village'>
-          & { admin2: Maybe<(
-            { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'id' | 'name'>
-          )> }
-        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
-          { __typename?: 'DeduplicationResultNode' }
-          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
-        )>>> }
-      )>, possibleDuplicates: Maybe<Array<Maybe<(
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
-        & { documents: (
-          { __typename?: 'DocumentNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'DocumentNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'DocumentNode' }
-              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
-              & { type: (
-                { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'key'>
-              ) }
-            )> }
-          )>> }
-        ), household: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'unicefId' | 'id' | 'village'>
-          & { admin2: Maybe<(
-            { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'id' | 'name'>
-          )> }
-        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
-          { __typename?: 'DeduplicationResultNode' }
-          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
-        )>>> }
-      )>>>, selectedIndividual: Maybe<(
-        { __typename?: 'IndividualNode' }
-        & { household: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & HouseholdDetailedFragment
-        )>, householdsAndRoles: Array<(
-          { __typename?: 'IndividualRoleInHouseholdNode' }
-          & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
-          & { individual: (
-            { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
-          ), household: (
-            { __typename?: 'HouseholdNode' }
-            & Pick<HouseholdNode, 'id' | 'unicefId'>
-          ) }
-        )> }
-        & IndividualDetailedFragment
-      )>, selectedIndividuals: Maybe<Array<Maybe<(
-        { __typename?: 'IndividualNode' }
-        & { household: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & HouseholdDetailedFragment
-        )>, householdsAndRoles: Array<(
-          { __typename?: 'IndividualRoleInHouseholdNode' }
-          & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
-          & { individual: (
-            { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
-          ), household: (
-            { __typename?: 'HouseholdNode' }
-            & Pick<HouseholdNode, 'id' | 'unicefId'>
-          ) }
-        )> }
-        & IndividualDetailedFragment
-      )>>> }
-    )>, ticketNotes: (
-      { __typename?: 'TicketNoteNodeConnection' }
-      & { edges: Array<Maybe<(
-        { __typename?: 'TicketNoteNodeEdge' }
-        & { node: Maybe<(
-          { __typename?: 'TicketNoteNode' }
-          & Pick<TicketNoteNode, 'id' | 'createdAt' | 'updatedAt' | 'description'>
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-          )> }
-        )> }
-      )>> }
-    ), programs: Maybe<Array<Maybe<(
-      { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'name' | 'id'>
-    )>>>, documentation: Maybe<Array<Maybe<(
-      { __typename?: 'GrievanceDocumentNode' }
-      & Pick<GrievanceDocumentNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'fileSize' | 'contentType' | 'filePath' | 'fileName'>
-      & { createdBy: Maybe<(
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-      )> }
-    )>>> }
   )> }
 );
 
@@ -14843,7 +14567,7 @@ export const GrievanceTicketDetailedFragmentDoc = gql`
   }
   priority
   urgency
-  programme {
+  programs {
     name
     id
   }
@@ -16948,7 +16672,7 @@ export type ExportPdfPpSummaryComponentProps = Omit<ApolloReactComponents.Mutati
     export const ExportPdfPpSummaryComponent = (props: ExportPdfPpSummaryComponentProps) => (
       <ApolloReactComponents.Mutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> mutation={ExportPdfPpSummaryDocument} {...props} />
     );
-
+    
 export type ExportPdfPpSummaryProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables> & TChildProps;
 export function withExportPdfPpSummary<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -18509,7 +18233,7 @@ export type EraseRdiComponentProps = Omit<ApolloReactComponents.MutationComponen
     export const EraseRdiComponent = (props: EraseRdiComponentProps) => (
       <ApolloReactComponents.Mutation<EraseRdiMutation, EraseRdiMutationVariables> mutation={EraseRdiDocument} {...props} />
     );
-
+    
 export type EraseRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EraseRdiMutation, EraseRdiMutationVariables> & TChildProps;
 export function withEraseRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -21606,405 +21330,6 @@ export type ExistingGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<
 export const GrievanceTicketDocument = gql`
     query GrievanceTicket($id: ID!) {
   grievanceTicket(id: $id) {
-    id
-    unicefId
-    status
-    category
-    consent
-    partner {
-      id
-      name
-    }
-    businessArea {
-      postponeDeduplication
-    }
-    createdBy {
-      id
-      firstName
-      lastName
-      email
-    }
-    createdAt
-    updatedAt
-    description
-    language
-    admin
-    admin2 {
-      id
-      name
-      pCode
-    }
-    area
-    assignedTo {
-      id
-      firstName
-      lastName
-      email
-    }
-    individual {
-      ...individualDetailed
-      householdsAndRoles {
-        individual {
-          id
-          unicefId
-          fullName
-        }
-        household {
-          id
-          unicefId
-        }
-        id
-        role
-      }
-    }
-    household {
-      ...householdDetailed
-    }
-    paymentRecord {
-      id
-      caId
-      deliveredQuantity
-      objType
-    }
-    relatedTickets {
-      id
-      unicefId
-      status
-      household {
-        id
-        unicefId
-      }
-    }
-    linkedTickets {
-      id
-      unicefId
-      category
-      status
-      household {
-        id
-        unicefId
-      }
-    }
-    existingTickets {
-      id
-      category
-      unicefId
-      status
-      household {
-        id
-        unicefId
-      }
-    }
-    addIndividualTicketDetails {
-      id
-      individualData
-      approveStatus
-      household {
-        id
-        unicefId
-      }
-    }
-    individualDataUpdateTicketDetails {
-      id
-      individual {
-        ...individualDetailed
-      }
-      individualData
-      roleReassignData
-    }
-    householdDataUpdateTicketDetails {
-      id
-      household {
-        ...householdDetailed
-      }
-      householdData
-    }
-    deleteIndividualTicketDetails {
-      id
-      roleReassignData
-      approveStatus
-    }
-    deleteHouseholdTicketDetails {
-      id
-      approveStatus
-      reasonHousehold {
-        id
-        unicefId
-      }
-    }
-    systemFlaggingTicketDetails {
-      id
-      approveStatus
-      roleReassignData
-      goldenRecordsIndividual {
-        id
-        fullName
-        birthDate
-        lastRegistrationDate
-        documents {
-          edges {
-            node {
-              id
-              type {
-                label
-                key
-              }
-              documentNumber
-            }
-          }
-        }
-      }
-      sanctionListIndividual {
-        id
-        fullName
-        referenceNumber
-        datesOfBirth {
-          edges {
-            node {
-              id
-              date
-            }
-          }
-        }
-        documents {
-          edges {
-            node {
-              id
-              documentNumber
-              typeOfDocument
-            }
-          }
-        }
-      }
-    }
-    paymentVerificationTicketDetails {
-      id
-      newStatus
-      oldReceivedAmount
-      newReceivedAmount
-      approveStatus
-      paymentVerificationStatus
-      hasMultiplePaymentVerifications
-      paymentVerification {
-        id
-        receivedAmount
-      }
-      paymentVerifications {
-        edges {
-          node {
-            id
-          }
-        }
-      }
-    }
-    needsAdjudicationTicketDetails {
-      id
-      hasDuplicatedDocument
-      extraData {
-        goldenRecords {
-          hitId
-          proximityToScore
-          score
-        }
-        possibleDuplicate {
-          hitId
-          proximityToScore
-          score
-        }
-      }
-      goldenRecordsIndividual {
-        id
-        unicefId
-        documents {
-          edges {
-            node {
-              id
-              country
-              type {
-                label
-                key
-              }
-              documentNumber
-              photo
-            }
-          }
-        }
-        household {
-          id
-          unicefId
-          village
-          admin2 {
-            id
-            name
-          }
-        }
-        fullName
-        birthDate
-        lastRegistrationDate
-        sex
-        deduplicationGoldenRecordResults {
-          hitId
-          proximityToScore
-          score
-        }
-      }
-      possibleDuplicate {
-        id
-        documents {
-          edges {
-            node {
-              id
-              country
-              type {
-                label
-                key
-              }
-              documentNumber
-              photo
-            }
-          }
-        }
-        unicefId
-        lastRegistrationDate
-        household {
-          unicefId
-          id
-          village
-          admin2 {
-            id
-            name
-          }
-        }
-        fullName
-        birthDate
-        sex
-        deduplicationGoldenRecordResults {
-          hitId
-          proximityToScore
-          score
-        }
-      }
-      isMultipleDuplicatesVersion
-      possibleDuplicates {
-        id
-        documents {
-          edges {
-            node {
-              id
-              country
-              type {
-                label
-                key
-              }
-              documentNumber
-              photo
-            }
-          }
-        }
-        unicefId
-        lastRegistrationDate
-        household {
-          unicefId
-          id
-          village
-          admin2 {
-            id
-            name
-          }
-        }
-        fullName
-        birthDate
-        sex
-        deduplicationGoldenRecordResults {
-          hitId
-          proximityToScore
-          score
-        }
-      }
-      selectedIndividual {
-        ...individualDetailed
-        household {
-          ...householdDetailed
-        }
-        householdsAndRoles {
-          individual {
-            id
-            unicefId
-            fullName
-          }
-          household {
-            id
-            unicefId
-          }
-          id
-          role
-        }
-      }
-      selectedIndividuals {
-        ...individualDetailed
-        household {
-          ...householdDetailed
-        }
-        householdsAndRoles {
-          individual {
-            id
-            unicefId
-            fullName
-          }
-          household {
-            id
-            unicefId
-          }
-          id
-          role
-        }
-      }
-      roleReassignData
-    }
-    issueType
-    ticketNotes {
-      edges {
-        node {
-          id
-          createdAt
-          updatedAt
-          description
-          createdBy {
-            id
-            firstName
-            lastName
-            email
-          }
-        }
-      }
-    }
-    priority
-    urgency
-    programs {
-      name
-      id
-    }
-    comments
-    documentation {
-      id
-      createdAt
-      updatedAt
-      name
-      createdBy {
-        id
-        firstName
-        lastName
-        email
-      }
-      fileSize
-      contentType
-      filePath
-      fileName
-    }
-  }
-}
-    ${IndividualDetailedFragmentDoc}
-${HouseholdDetailedFragmentDoc}`;
     ...grievanceTicketDetailed
   }
 }
@@ -30018,6 +29343,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   familyId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, HouseholdNodeCopiedToArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, HouseholdNodeIndividualsArgs>,
@@ -30403,6 +29729,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -31067,6 +30394,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdSetArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, ProgramNodeIndividualsArgs>,
   registrationImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, ProgramNodeRegistrationImportsArgs>,
+  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, ProgramNodeRegistrationDataImportsArgs>,
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramNodePaymentplanSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
@@ -31376,6 +30704,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeProgramsArgs>,
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
