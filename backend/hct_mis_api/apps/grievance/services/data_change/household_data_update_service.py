@@ -148,7 +148,7 @@ class HouseholdDataUpdateService(DataChangeService):
             Household.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(self.grievance_ticket.programme, "pk", None),
+            self.grievance_ticket.programs.all(),
             old_household,
             updated_household,
         )

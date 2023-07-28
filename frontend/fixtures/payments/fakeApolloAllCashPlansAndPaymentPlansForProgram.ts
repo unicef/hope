@@ -36,7 +36,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
                 totalDeliveredQuantity: 1000,
                 startDate: '2023-07-01 00:00:00+00:00',
                 endDate: '2023-07-31 00:00:00+00:00',
-                programmeName: 'test_program',
+                programName: 'test_program',
                 updatedAt: '2023-06-07 10:40:04.741354+00:00',
                 verificationPlans: [
                   {
@@ -69,7 +69,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
                 totalDeliveredQuantity: 2800,
                 startDate: '1500-02-04 00:00:00+00:00',
                 endDate: '1500-02-05 00:00:00+00:00',
-                programmeName: 'Jekub test for spec',
+                programName: 'Jekub test for spec',
                 updatedAt: '2023-05-28 22:40:30.724728+00:00',
                 verificationPlans: [],
                 totalNumberOfHouseholds: null,
@@ -94,7 +94,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
                 totalDeliveredQuantity: 150,
                 startDate: '2023-04-20 00:00:00+00:00',
                 endDate: '2024-04-20 00:00:00+00:00',
-                programmeName: 'Test Program',
+                programName: 'Test Program',
                 updatedAt: '2023-04-21 10:43:49.390111+00:00',
                 verificationPlans: [
                   {
@@ -134,7 +134,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
                 totalDeliveredQuantity: 600,
                 startDate: '2023-03-01 00:00:00+00:00',
                 endDate: '2023-03-15 00:00:00+00:00',
-                programmeName: 'jkekljeil',
+                programName: 'jkekljeil',
                 updatedAt: '2023-04-05 11:04:12.583452+00:00',
                 verificationPlans: [
                   {
@@ -167,7 +167,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
                 totalDeliveredQuantity: 14923041.29,
                 startDate: '2021-07-07 15:22:22+00:00',
                 endDate: '2023-05-09 15:22:22+00:00',
-                programmeName:
+                programName:
                   'Total western including stay spring western issue.',
                 updatedAt: '2023-01-13 15:47:16.805453+00:00',
                 verificationPlans: [
