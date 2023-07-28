@@ -6,7 +6,6 @@ import abc
 import logging
 from typing import TYPE_CHECKING, Any, Union
 
-from django.core.management import BaseCommand
 from django.core.paginator import Paginator
 from django.db import transaction
 
