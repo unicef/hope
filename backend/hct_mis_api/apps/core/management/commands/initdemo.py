@@ -102,9 +102,10 @@ class Command(BaseCommand):
             "jbassette@unicef.org",
             "jyablonski@unicef.org",
             "nmkuzi@unicef.org",
+            "dhassooneh@unicef.org",
             "swaheed@unicef.org",
         ]
-        pm_list = [
+        tester_list = [
             "khaddad@unicef.org",
             "stoor@unicef.org",
             "jhalding@unicef.org",
@@ -119,7 +120,7 @@ class Command(BaseCommand):
         role_with_all_perms = Role.objects.get(name="Role with all permissions")
         afghanistan = BusinessArea.objects.get(slug="afghanistan")
 
-        for email in email_list + pm_list:
+        for email in email_list + tester_list:
             user = User.objects.create_user(email, email, "password")
             UserRole.objects.create(
                 user=user,
