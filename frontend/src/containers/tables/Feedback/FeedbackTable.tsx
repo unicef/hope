@@ -25,10 +25,10 @@ export const FeedbackTable = ({
     feedbackId: filter.feedbackId,
     issueType: filter.issueType || '',
     createdBy: decodeIdString(filter.createdBy) || '',
-    createdAtRange: JSON.stringify({
+    createdAtRange: filter.createdAtRangeMin || filter.createdAtRangeMax ? JSON.stringify({
       min: filter.createdAtRangeMin,
       max: filter.createdAtRangeMax,
-    }),
+    }) : "",
   };
   return (
     <TableWrapper>
