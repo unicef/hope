@@ -109,6 +109,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
+    # TODO: in future will use one program per RDI after migration
     program = models.ForeignKey(
         "program.Program",
         null=True,

@@ -643,7 +643,7 @@ export type CashPlanAndPaymentPlanNode = {
   totalDeliveredQuantity?: Maybe<Scalars['Float']>,
   startDate?: Maybe<Scalars['String']>,
   endDate?: Maybe<Scalars['String']>,
-  programmeName?: Maybe<Scalars['String']>,
+  programName?: Maybe<Scalars['String']>,
   updatedAt?: Maybe<Scalars['String']>,
   verificationPlans?: Maybe<Array<Maybe<PaymentVerificationPlanNode>>>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
@@ -1078,7 +1078,7 @@ export type CreateGrievanceTicketInput = {
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<Scalars['Int']>,
-  programme?: Maybe<Scalars['ID']>,
+  program?: Maybe<Scalars['ID']>,
   comments?: Maybe<Scalars['String']>,
   linkedFeedbackId?: Maybe<Scalars['ID']>,
   documentation?: Maybe<Array<Maybe<GrievanceDocumentInput>>>,
@@ -1869,7 +1869,7 @@ export type GrievanceTicketNode = Node & {
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<PartnerType>,
-  programme?: Maybe<ProgramNode>,
+  programs?: Maybe<Array<Maybe<ProgramNode>>>,
   comments?: Maybe<Scalars['String']>,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -3480,8 +3480,18 @@ export type LogEntryNode = Node & {
   changes?: Maybe<Scalars['Arg']>,
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
-  program?: Maybe<ProgramNode>,
+  programs: ProgramNodeConnection,
   timestamp?: Maybe<Scalars['DateTime']>,
+};
+
+
+export type LogEntryNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 export type LogEntryNodeConnection = {
@@ -4647,9 +4657,19 @@ export type PaymentVerificationLogEntryNode = Node & {
   changes?: Maybe<Scalars['Arg']>,
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
-  program?: Maybe<ProgramNode>,
+  programs: ProgramNodeConnection,
   timestamp?: Maybe<Scalars['DateTime']>,
   contentObject?: Maybe<PaymentVerificationPlanNode>,
+};
+
+
+export type PaymentVerificationLogEntryNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 export type PaymentVerificationLogEntryNodeConnection = {
@@ -4882,10 +4902,10 @@ export type ProgramNode = Node & {
   paymentplanSet: PaymentPlanNodeConnection,
   cashplanSet: CashPlanNodeConnection,
   paymentSet: PaymentNodeConnection,
-  grievanceticketSet: GrievanceTicketNodeConnection,
+  grievanceTickets: GrievanceTicketNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
-  logentrySet: PaymentVerificationLogEntryNodeConnection,
+  activityLogs: PaymentVerificationLogEntryNodeConnection,
   feedbackSet: FeedbackNodeConnection,
   surveys: SurveyNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -4968,7 +4988,7 @@ export type ProgramNodePaymentSetArgs = {
 };
 
 
-export type ProgramNodeGrievanceticketSetArgs = {
+export type ProgramNodeGrievanceTicketsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5014,7 +5034,7 @@ export type ProgramNodeReportsArgs = {
 };
 
 
-export type ProgramNodeLogentrySetArgs = {
+export type ProgramNodeActivityLogsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -7781,7 +7801,7 @@ export type UpdateGrievanceTicketInput = {
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<Scalars['Int']>,
-  programme?: Maybe<Scalars['ID']>,
+  program?: Maybe<Scalars['ID']>,
   comments?: Maybe<Scalars['String']>,
   documentation?: Maybe<Array<Maybe<GrievanceDocumentInput>>>,
   documentationToUpdate?: Maybe<Array<Maybe<GrievanceDocumentUpdateInput>>>,
@@ -11387,10 +11407,10 @@ export type GrievanceTicketQuery = (
           )> }
         )> }
       )>> }
-    ), programme: Maybe<(
+    ), programs: Maybe<Array<Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'name' | 'id'>
-    )>, documentation: Maybe<Array<Maybe<(
+    )>>>, documentation: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceDocumentNode' }
       & Pick<GrievanceDocumentNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'fileSize' | 'contentType' | 'filePath' | 'fileName'>
       & { createdBy: Maybe<(
@@ -11842,7 +11862,7 @@ export type AllCashPlansAndPaymentPlansQuery = (
       & Pick<CashPlanAndPaymentPlanEdges, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanAndPaymentPlanNode' }
-        & Pick<CashPlanAndPaymentPlanNode, 'objType' | 'id' | 'unicefId' | 'verificationStatus' | 'currency' | 'totalDeliveredQuantity' | 'startDate' | 'endDate' | 'programmeName' | 'updatedAt' | 'totalNumberOfHouseholds' | 'assistanceMeasurement' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'dispersionDate' | 'serviceProviderFullName'>
+        & Pick<CashPlanAndPaymentPlanNode, 'objType' | 'id' | 'unicefId' | 'verificationStatus' | 'currency' | 'totalDeliveredQuantity' | 'startDate' | 'endDate' | 'programName' | 'updatedAt' | 'totalNumberOfHouseholds' | 'assistanceMeasurement' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'dispersionDate' | 'serviceProviderFullName'>
         & { verificationPlans: Maybe<Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNode' }
           & Pick<PaymentVerificationPlanNode, 'id' | 'createdAt' | 'unicefId'>
@@ -11924,7 +11944,7 @@ export type AllPaymentRecordsAndPaymentsQuery = (
         & Pick<PaymentRecordAndPaymentNode, 'objType' | 'id' | 'fullName' | 'status' | 'caId' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
         & { parent: Maybe<(
           { __typename?: 'CashPlanAndPaymentPlanNode' }
-          & Pick<CashPlanAndPaymentPlanNode, 'id' | 'programmeName'>
+          & Pick<CashPlanAndPaymentPlanNode, 'id' | 'programName'>
         )>, verification: Maybe<(
           { __typename?: 'PaymentVerificationNode' }
           & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
@@ -20920,7 +20940,7 @@ export const GrievanceTicketDocument = gql`
     }
     priority
     urgency
-    programme {
+    programs {
       name
       id
     }
@@ -21982,7 +22002,7 @@ export const AllCashPlansAndPaymentPlansDocument = gql`
         totalDeliveredQuantity
         startDate
         endDate
-        programmeName
+        programName
         updatedAt
         verificationPlans {
           id
@@ -22177,7 +22197,7 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
         deliveryDate
         parent {
           id
-          programmeName
+          programName
         }
         verification {
           id
@@ -26857,6 +26877,8 @@ export type ResolversTypes = {
   PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
   PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
   LogEntryAction: LogEntryAction,
+  ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
+  ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   PaymentVerificationPlanSampling: PaymentVerificationPlanSampling,
   PaymentVerificationPlanVerificationChannel: PaymentVerificationPlanVerificationChannel,
   AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
@@ -26910,8 +26932,6 @@ export type ResolversTypes = {
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
-  ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
-  ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
@@ -27355,6 +27375,8 @@ export type ResolversParentTypes = {
   PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
   PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
   LogEntryAction: LogEntryAction,
+  ProgramNodeConnection: ProgramNodeConnection,
+  ProgramNodeEdge: ProgramNodeEdge,
   PaymentVerificationPlanSampling: PaymentVerificationPlanSampling,
   PaymentVerificationPlanVerificationChannel: PaymentVerificationPlanVerificationChannel,
   AgeFilterObject: AgeFilterObject,
@@ -27408,8 +27430,6 @@ export type ResolversParentTypes = {
   CountAndPercentageNode: CountAndPercentageNode,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
-  ProgramNodeConnection: ProgramNodeConnection,
-  ProgramNodeEdge: ProgramNodeEdge,
   TicketNoteNodeConnection: TicketNoteNodeConnection,
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
@@ -27968,7 +27988,7 @@ export type CashPlanAndPaymentPlanNodeResolvers<ContextType = any, ParentType ex
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   startDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   endDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  programmeName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  programName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   verificationPlans?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentVerificationPlanNode']>>>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -28664,7 +28684,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
-  programme?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  programs?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramNode']>>>, ParentType, ContextType>,
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -29329,7 +29349,7 @@ export type LogEntryNodeResolvers<ContextType = any, ParentType extends Resolver
   changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, LogEntryNodeProgramsArgs>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
 };
 
@@ -29699,7 +29719,7 @@ export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentTy
   changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, PaymentVerificationLogEntryNodeProgramsArgs>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   contentObject?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType>,
 };
@@ -29846,10 +29866,10 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramNodePaymentplanSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
-  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceticketSetArgs>,
+  grievanceTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceTicketsArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
-  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeLogentrySetArgs>,
+  activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeActivityLogsArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, ProgramNodeFeedbackSetArgs>,
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, ProgramNodeSurveysArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,

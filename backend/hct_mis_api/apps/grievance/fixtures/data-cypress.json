@@ -27,7 +27,6 @@
             "priority": 2,
             "urgency": 2,
             "partner": null,
-            "programme": null,
             "comments": null
         }
     },
@@ -59,7 +58,6 @@
             "priority": 3,
             "urgency": 3,
             "partner": null,
-            "programme": null,
             "comments": null
         }
     },
@@ -91,7 +89,6 @@
             "priority": 0,
             "urgency": 0,
             "partner": null,
-            "programme": null,
             "comments": null
         }
     },
@@ -123,7 +120,6 @@
             "priority": 2,
             "urgency": 2,
             "partner": null,
-            "programme": null,
             "comments": null
         }
     },
@@ -155,7 +151,6 @@
             "priority": 1,
             "urgency": 1,
             "partner": null,
-            "programme": null,
             "comments": null
         }
     },
