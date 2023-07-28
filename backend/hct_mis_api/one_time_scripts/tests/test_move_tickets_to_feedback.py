@@ -47,10 +47,10 @@ class TestMigrationTicketsToFeedback(TestCase):
         cls.ticket_positive_1 = PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.ticket_1)
 
         cls.ticket_2 = GrievanceTicketFactory(language="grievance_ticket_2_language")
+        cls.ticket_2.programs.add(cls.program_2)
         cls.ticket_positive_2 = PositiveFeedbackTicketWithoutExtrasFactory(
             ticket=cls.ticket_2, household=cls.household_1
         )
-        cls.ticket_2.programs.add(cls.program_2)
         cls.ticket_3 = GrievanceTicketFactory(consent=False)
         cls.ticket_3.programs.add(cls.program_2)
         cls.ticket_positive_3 = PositiveFeedbackTicketWithoutExtrasFactory(
@@ -118,13 +118,13 @@ class TestMigrationTicketsToFeedback(TestCase):
         # Specific values
 
         self.assertEqual(feedbacks[0].description, "grievance_ticket_1_description")
-        self.assertEqual(feedbacks[0].program, self.program_1)
+        self.assertEqual(feedbacks[0].program, feedbacks[0].linked_grievance.programs.first())
 
         self.assertEqual(feedbacks[1].language, "grievance_ticket_2_language")
         self.assertEqual(feedbacks[1].household_lookup, self.household_1)
 
         self.assertIs(feedbacks[2].consent, False)
-        self.assertEqual(feedbacks[2].program, self.program_2)
+        self.assertEqual(feedbacks[2].program, feedbacks[2].linked_grievance.programs.first())
         self.assertEqual(feedbacks[2].household_lookup, self.household_1)
         self.assertEqual(feedbacks[2].individual_lookup, self.individual_1)
 
