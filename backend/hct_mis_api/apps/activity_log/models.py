@@ -99,7 +99,7 @@ def log_create(
         if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
         else None,
     )
-    if program and isinstance(program, UUID):
+    if program and isinstance(program, UUID) or isinstance(program, str):
         log.programs.add(program)
 
     if program and isinstance(program, QuerySet):
