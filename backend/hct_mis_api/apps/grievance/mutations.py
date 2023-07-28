@@ -381,7 +381,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(grievance_ticket.programme, "pk", None),
+            grievance_ticket.programs.all(),
             old_grievance_ticket,
             grievance_ticket,
         )
@@ -411,8 +411,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         if partner := get_partner(input_data.pop("partner", None)):
             grievance_ticket.partner = partner
 
-        if programme := input_data.pop("programme", None):
-            grievance_ticket.programme = get_object_or_404(Program, pk=decode_id_string(programme))
+        if program := input_data.pop("program", None):
+            grievance_ticket.programs.add(get_object_or_404(Program, pk=decode_id_string(program)))
 
         assigned_to_id = decode_id_string(input_data.pop("assigned_to", None))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
@@ -600,7 +600,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
             user,
-            getattr(grievance_ticket.programme, "pk", None),
+            grievance_ticket.programs.all(),
             old_grievance_ticket,
             grievance_ticket,
         )

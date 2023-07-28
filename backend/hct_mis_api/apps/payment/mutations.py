@@ -713,7 +713,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -761,7 +761,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
@@ -788,7 +788,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -817,7 +817,7 @@ class DeletePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -856,7 +856,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1017,7 +1017,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
                 user=info.context.user,
-                program_id=payment_plan.get_program.pk,
+                programs=payment_plan.get_program.pk,
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
@@ -1064,7 +1064,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1114,7 +1114,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            program_id=payment_plan.get_program.pk,
+            programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
