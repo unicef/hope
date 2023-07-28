@@ -50,7 +50,7 @@ class TestMigrationFosterChild(TestCase):
         cls.ticket_positive_2 = PositiveFeedbackTicketWithoutExtrasFactory(
             ticket=cls.ticket_2, household=cls.household_1
         )
-
+        cls.ticket_2.programs.add(cls.program_2)
         cls.ticket_3 = GrievanceTicketFactory(consent=False)
         cls.ticket_3.programs.add(cls.program_2)
         cls.ticket_positive_3 = PositiveFeedbackTicketWithoutExtrasFactory(
