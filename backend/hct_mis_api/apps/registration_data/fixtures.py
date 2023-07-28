@@ -35,6 +35,7 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     number_of_households = factory.fuzzy.FuzzyInteger(3, 50)
     datahub_id = factory.Faker("uuid4")
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    erased = False
 
     @classmethod
     def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> RegistrationDataImport:

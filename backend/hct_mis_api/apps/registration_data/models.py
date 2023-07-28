@@ -8,6 +8,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import Q
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
@@ -122,6 +123,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         "program.Program",
         related_name="registration_data_imports",
     )
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
+    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -139,10 +142,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     @classmethod
     def get_choices(cls, business_area_slug: Optional[str] = None) -> List[Dict[str, Any]]:
-        filters = {}
+        query = ~Q(status__in=[cls.DEDUPLICATION_FAILED, cls.MERGE_ERROR, cls.IMPORT_ERROR, cls.REFUSED_IMPORT])
         if business_area_slug:
-            filters["business_area__slug"] = business_area_slug
-        queryset = cls.objects.filter(**filters)
+            query &= Q(business_area__slug=business_area_slug)
+        queryset = cls.objects.filter(query)
         return [
             {
                 "label": {"English(EN)": f"{rdi.name}"},

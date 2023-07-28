@@ -25,6 +25,7 @@ import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOn
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { ContentLink } from '../../../components/core/ContentLink';
+import { DividerLine } from '../../../components/core/DividerLine';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -59,7 +60,11 @@ import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import {
@@ -244,6 +249,14 @@ export const EditGrievancePage = (): React.ReactElement => {
     ticket.category,
     baseUrl,
   );
+  const categoryDescription =
+    GRIEVANCE_CATEGORY_DESCRIPTIONS[
+      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
+    ] || '';
+  const issueTypeDescription =
+    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
+      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
+    ] || '';
 
   return (
     <Formik
@@ -340,6 +353,26 @@ export const EditGrievancePage = (): React.ReactElement => {
                           />
                         </Grid>
                       ) : null}
+                      {values.category && (
+                        <>
+                          <DividerLine />
+                          <Grid item xs={6}>
+                            <LabelizedField label={t('Category Description')}>
+                              {categoryDescription}
+                            </LabelizedField>
+                          </Grid>
+                          {issueTypeDescription && (
+                            <Grid item xs={6}>
+                              <LabelizedField
+                                label={t('Issue Type Description')}
+                              >
+                                {issueTypeDescription}
+                              </LabelizedField>
+                            </Grid>
+                          )}
+                          <DividerLine />
+                        </>
+                      )}
                       <Grid container xs={12} item>
                         <Grid item xs={3}>
                           <LabelizedField label={t('Household ID')}>

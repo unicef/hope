@@ -13,7 +13,6 @@ import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
-  GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
   ISSUE_TYPE_CATEGORIES,
@@ -123,14 +122,13 @@ export const GrievancesFilters = ({
               data-cy='filters-search-type'
               fullWidth
             >
-              {Object.keys(GrievanceSearchTypes).map((key) => (
-                <MenuItem
-                  key={GrievanceSearchTypes[key]}
-                  value={GrievanceSearchTypes[key]}
-                >
-                  {key.replace(/\B([A-Z])\B/g, ' $1')}
-                </MenuItem>
-              ))}
+              {choicesData?.grievanceTicketSearchTypesChoices?.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
             </SelectFilter>
           </Grid>
         </Grid>
@@ -243,8 +241,8 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             filter={filter}
-            name='admin'
-            value={filter.admin}
+            name='admin2'
+            value={filter.admin2}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}

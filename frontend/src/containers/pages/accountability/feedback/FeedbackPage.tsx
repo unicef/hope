@@ -55,7 +55,7 @@ export const FeedbackPage = (): React.ReactElement => {
           variant='contained'
           color='primary'
           component={Link}
-          to={`/${baseUrl}/accountability/feedback/create`}
+          to={`/${baseUrl}/grievance/feedback/create`}
           data-cy='button-submit-new-feedback'
         >
           {t('Submit New Feedback')}

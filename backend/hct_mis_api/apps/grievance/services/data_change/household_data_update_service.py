@@ -140,10 +140,14 @@ class HouseholdDataUpdateService(DataChangeService):
         if household.flex_fields is not None:
             merged_flex_fields.update(household.flex_fields)
         merged_flex_fields.update(flex_fields)
+
+        Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+        updated_household = Household.objects.get(id=household.id)
+        updated_household.set_admin_areas()
+
         new_household = Household.objects.select_for_update().get(id=household.id)
-        Household.objects.filter(id=new_household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
-        updated_household = Household.objects.get(id=household.id)  # refresh_from_db() doesn't work here
         recalculate_data(new_household)
+        updated_household = Household.objects.get(id=household.id)  # refresh_from_db() doesn't work here
         log_create(
             Household.ACTIVITY_LOG_MAPPING,
             "business_area",

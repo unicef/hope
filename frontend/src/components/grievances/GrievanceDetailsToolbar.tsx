@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  GrievanceTicketDocument,
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
@@ -130,16 +129,13 @@ export const GrievanceDetailsToolbar = ({
     }
 
     if (!approved) {
-      const rejectionMessage = t(
+      return t(
         `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
       );
-      return rejectionMessage;
     }
 
-    const approvalMessage = `You approved ${approved} change${
-      approved > 1 ? 's' : ''
-    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
-    return approvalMessage;
+    const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
+    return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
   };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
@@ -227,12 +223,6 @@ export const GrievanceDetailsToolbar = ({
           grievanceTicketId: ticket.id,
           status,
         },
-        refetchQueries: () => [
-          {
-            query: GrievanceTicketDocument,
-            variables: { id: ticket.id },
-          },
-        ],
       });
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -265,7 +255,8 @@ export const GrievanceDetailsToolbar = ({
   };
 
   let closeButton = (
-    <Button
+    <LoadingButton
+      loading={loading}
       color='primary'
       variant='contained'
       onClick={() =>
@@ -285,7 +276,7 @@ export const GrievanceDetailsToolbar = ({
       data-cy='button-close-ticket'
     >
       {t('Close Ticket')}
-    </Button>
+    </LoadingButton>
   );
   if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
@@ -463,7 +454,8 @@ export const GrievanceDetailsToolbar = ({
               </Box>
             )}
             {isFeedbackType && canClose && (
-              <Button
+              <LoadingButton
+                loading={loading}
                 color='primary'
                 variant='contained'
                 onClick={() =>
@@ -475,7 +467,7 @@ export const GrievanceDetailsToolbar = ({
                 data-cy='button-close-ticket'
               >
                 {t('Close Ticket')}
-              </Button>
+              </LoadingButton>
             )}
           </>
         )}

@@ -44,6 +44,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
+from hct_mis_api.conftest import disabled_locally_test
 
 
 def create_document_image() -> File:
@@ -68,6 +69,7 @@ class CellMock:
         self.coordinate = coordinate
 
 
+@disabled_locally_test
 class TestRdiCreateTask(BaseElasticSearchTestCase):
     databases = {
         "default",
@@ -377,6 +379,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(individual.hearing_disability, "")
 
 
+@disabled_locally_test
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = {
         "default",

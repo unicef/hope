@@ -6,6 +6,7 @@ export const registrationMinimal = gql`
     createdAt
     name
     status
+    erased
     importDate
     importedBy {
       id
@@ -21,8 +22,9 @@ export const registrationMinimal = gql`
       name
       startDate
       endDate
-      status  
+      status
     }
+    refuseReason
   }
 `;
 

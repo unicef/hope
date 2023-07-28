@@ -66,8 +66,14 @@ function ObjectRepresentations({
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
-    //TODO: add grievance ticket url based on category
-    grievanceticket: `/${baseUrl}/grievance/tickets`,
+    grievanceticket: `/${baseUrl}/grievance/tickets/${
+      logEntry.isUserGenerated ? 'user-generated' : 'system-generated'
+    }/${btoa('GrievanceTicketNode:' + id)}`,
+    feedback: `/${baseUrl}/grievance/feedback/${btoa('FeedbackNode:' + id)}`,
+    survey: `/${baseUrl}/accountability/surveys/${btoa('SurveyNode:' + id)}`,
+    communication: `/${baseUrl}/accountability/communication/${btoa(
+      'CommunicationMessageNode:' + id,
+    )}`,
     household: `/${baseUrl}/population/household/${btoa(
       'HouseholdNode:' + id,
     )}`,
@@ -89,10 +95,10 @@ function ObjectRepresentations({
     logEntry.action === LogEntryAction.Delete ||
     logEntry.action === LogEntryAction.SoftDelete
   ) {
-    return <>{logEntry.objectRepr}</>;
+    return <>{logEntry.objectId}</>;
   }
   return (
-    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectRepr}</StyledLink>
+    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectId}</StyledLink>
   );
 }
 

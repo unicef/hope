@@ -41,16 +41,8 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.registration_datahub.celery_tasks.check_rdi_import_periodic_task",
         "schedule": crontab(minute="*/15"),
     },
-    "check_rdi_merge_periodic_task": {
-        "task": "hct_mis_api.apps.registration_datahub.celery_tasks.check_rdi_merge_periodic_task",
-        "schedule": crontab(minute="*/15"),
-    },
-    "check_send_tp_periodic_task": {
-        "task": "hct_mis_api.apps.targeting.celery_tasks.check_send_tp_periodic_task",
-        "schedule": crontab(minute="*/15"),
-    },
-    "check_xlsx_exporting_periodic_task": {
-        "task": "hct_mis_api.apps.payment.celery_tasks.check_xlsx_exporting_periodic_task",
-        "schedule": crontab(minute="*/15"),
-    },
+    # "remove_old_rdi_links_task": {
+    #     "task": "hct_mis_api.apps.registration_datahub.celery_tasks.remove_old_rdi_links_task",
+    #     "schedule": crontab(0, 0, day_of_month="1,15"),
+    # },
 }

@@ -212,7 +212,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${baseUrl}/accountability/feedback/`,
+      to: `/${baseUrl}/grievance/feedback/`,
     },
   ];
 
@@ -247,7 +247,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
               variables: { input: prepareVariables(values) },
             });
             showMessage(t('Feedback created'), {
-              pathname: `/${baseUrl}/accountability/feedback/${response.data.createFeedback.feedback.id}`,
+              pathname: `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -479,7 +479,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${baseUrl}/accountability/feedback`}
+                            to={`/${baseUrl}/grievance/feedback`}
                             data-cy='button-cancel'
                           >
                             {t('Cancel')}

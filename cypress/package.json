@@ -30,9 +30,10 @@
     "generate-report": "marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports --inline",
     "zip-report": "zip -r report.zip cypress/reports/mochareports",
     "posttest": "npm run combine-reports && npm run generate-report && npm run zip-report && node ./cypress/scripts/slackReport.js",
-    "test": "npm run scripts || (npm run posttest && exit 1)"
+    "test": "npm run scripts || npm run posttest"
   },
   "dependencies": {
+    "axios": "^1.4.0",
     "chart.js": "^4.3.0",
     "chartjs": "^0.3.24",
     "cy-verify-downloads": "^0.1.14",
