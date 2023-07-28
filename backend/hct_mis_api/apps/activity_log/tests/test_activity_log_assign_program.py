@@ -1,10 +1,11 @@
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentFactory,
@@ -16,6 +17,9 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.one_time_scripts.gpf_activity_log_assign_program import (
+    activity_log_assign_program,
+)
 
 
 class TestLogsAssignProgram(TestCase):
@@ -33,6 +37,7 @@ class TestLogsAssignProgram(TestCase):
 
         rdi = RegistrationDataImportFactory(business_area=self.business_area, program_id=self.program.pk)
         tp = TargetPopulationFactory(program=self.program, business_area=self.business_area)
+
         payment_plan = PaymentPlanFactory(
             business_area=self.business_area, program=self.program, program_cycle=program_cycle
         )
@@ -43,11 +48,13 @@ class TestLogsAssignProgram(TestCase):
         payment_verification = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan, generic_fk_obj=payment
         )
-        # grievance_ticket = GrievanceTicketFactory(business_area=self.business_area)
-        # grievance_ticket.programs.add(self.program)
-        # TODO: update after changes for Ind and HH collections/representations
-        # individual = IndividualFactory(household=None, program=cls.program)
-        # household = HouseholdFactory(head_of_household=individual, program=cls.program)
+        grievance_ticket = GrievanceTicketFactory(business_area=self.business_area)
+        grievance_ticket.programs.add(self.program)
+
+        household = HouseholdFactory(head_of_household=IndividualFactory(household=None), program=self.program)
+        household.programs.add(self.program)
+
+        individual = IndividualFactory(household=household)
 
         # log for Program
         LogEntry.objects.create(
@@ -113,40 +120,39 @@ class TestLogsAssignProgram(TestCase):
             changes=dict(),
         )
         # log for GrievanceTicket
-        # LogEntry.objects.create(
-        #     action=LogEntry.CREATE,
-        #     content_object=grievance_ticket,
-        #     user=self.user,
-        #     business_area=self.business_area,
-        #     object_repr=str(grievance_ticket),
-        #     changes=dict(),
-        # )
-        # TODO: update after changes for Ind and HH collections/representations
-        # # log for Individual
-        # LogEntry.objects.create(
-        #     action=LogEntry.CREATE,
-        #     content_object=individual,
-        #     user=cls.user,
-        #     business_area=cls.business_area,
-        #     object_repr=str(individual),
-        #     changes=dict(),
-        # )
-        # # log for Household
-        # LogEntry.objects.create(
-        #     action=LogEntry.CREATE,
-        #     content_object=household,
-        #     user=cls.user,
-        #     business_area=cls.business_area,
-        #     object_repr=str(household),
-        #     changes=dict(),
-        # )
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=grievance_ticket,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(grievance_ticket),
+            changes=dict(),
+        )
+        # log for Individual
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=individual,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(individual),
+            changes=dict(),
+        )
+        # log for Household
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=household,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(household),
+            changes=dict(),
+        )
 
-        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 7)
+        self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 10)
 
-        call_command("activity_log_assign_program")
+        activity_log_assign_program()
 
         self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 0)
-        self.assertEqual(LogEntry.objects.filter(programs__pk=self.program.pk).count(), 7)
+        self.assertEqual(LogEntry.objects.filter(programs__pk=self.program.pk).count(), 10)
 
     def test_raise_value_error_with_wrong_model(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area, program=self.program)
@@ -171,7 +177,7 @@ class TestLogsAssignProgram(TestCase):
         self.assertEqual(LogEntry.objects.filter(programs__isnull=True).count(), 2)
 
         with self.assertRaisesMessage(ValueError, "Can not found 'class_name' and 'nested_field' for class User"):
-            call_command("activity_log_assign_program")
+            activity_log_assign_program()
 
         # check transaction.atomic
         rdi_log.refresh_from_db()
