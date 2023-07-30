@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
@@ -219,12 +220,20 @@ class SriLankaRegistrationService(BaseRegistrationService):
         for individual_data_dict in individuals_list:
             if not bool(individual_data_dict):
                 continue
+
+            registration_creation_time = registration_data_import.created_at
+            if registration_creation_time.tzinfo is not None:
+                registration_creation_time.replace(tzinfo=None)
+
             individuals_to_create.append(
                 ImportedIndividual(
                     **{
                         **self._prepare_individual_data(individual_data_dict),
                         **base_individual_data_dict,
-                    }
+                    },
+                    age_at_registration=relativedelta(
+                        registration_creation_time, individual_data_dict.get("birth_date", registration_creation_time)
+                    ).years,
                 )
             )
 
