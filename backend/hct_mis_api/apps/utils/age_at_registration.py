@@ -1,21 +1,20 @@
-from dateutil import parser
-from typing import Union, Optional, Dict
+from typing import Dict, Optional, Union
 
+from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
-    RegistrationDataImportDatahub,
+    DiiaIndividual,
     ImportedIndividual,
-    DiiaIndividual
+    RegistrationDataImportDatahub,
 )
 
 
 def calculate_age_at_registration(
-        rdi: Optional[Union[RegistrationDataImport, RegistrationDataImportDatahub, DiiaIndividual]],
-        individual_data: Union[ImportedIndividual, Dict]
+    rdi: Optional[Union[RegistrationDataImport, RegistrationDataImportDatahub, DiiaIndividual]],
+    individual_data: Union[ImportedIndividual, Dict],
 ) -> Optional[int]:
-
     if isinstance(individual_data, (ImportedIndividual, DiiaIndividual)):
         birth_date = individual_data.birth_date
     else:

@@ -51,4 +51,3 @@ class RegistrationFactory(DjangoModelFactory):
             obj.created_at = created_at
             obj.save()
         return obj
-
