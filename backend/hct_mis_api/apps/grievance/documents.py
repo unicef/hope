@@ -87,6 +87,7 @@ class GrievanceTicketDocument(Document):
             )
         }
     )
+    programs = fields.ObjectField(properties={"id": fields.KeywordField(), "name": fields.KeywordField()})
 
     class Django:
         model = GrievanceTicket
