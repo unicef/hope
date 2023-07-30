@@ -268,7 +268,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     self._handle_exception("Individual", i_field, e)
                         individual_obj.last_registration_date = individual_obj.first_registration_date
                         individual_obj.registration_data_import = registration_data_import
-                        individual_obj.age_at_registration = calculate_age_at_registration(registration_data_import, individual_obj)
+                        individual_obj.age_at_registration = calculate_age_at_registration(
+                            registration_data_import, individual_obj
+                        )
 
                         if individual_obj.relationship == HEAD:
                             head_of_households_mapping[household_obj] = individual_obj
