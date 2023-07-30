@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 import dateutil.parser
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -196,6 +197,10 @@ class RdiDiiaCreateTask:
                         dateutil.parser.parse(individual.birth_date, dayfirst=True) if individual.birth_date else ""
                     )
 
+                    registration_creation_time = registration_data_import_data_hub.created_at
+                    if registration_creation_time.tzinfo is not None:
+                        registration_creation_time.replace(tzinfo=None)
+
                     individual_obj = ImportedIndividual(
                         individual_id=individual.individual_id.replace(" ", "") if individual.individual_id else "",
                         given_name=individual.first_name,
@@ -212,6 +217,7 @@ class RdiDiiaCreateTask:
                         last_registration_date=registration_data_import_data_hub.created_at,
                         household=household_obj,
                         email=individual.email,
+                        age_at_registration=relativedelta(registration_creation_time, individual.birth_date).years,
                     )
                     individuals_to_create_list.append(individual_obj)
 
