@@ -581,7 +581,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
-                    obj_to_create.age_at_registration = calculate_age_at_registration(registration_data_import, obj_to_create)
+                    obj_to_create.age_at_registration = calculate_age_at_registration(
+                        registration_data_import, obj_to_create
+                    )
                     self.individuals.append(obj_to_create)
             except Exception as e:
                 raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
