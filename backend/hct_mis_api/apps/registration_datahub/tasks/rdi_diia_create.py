@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 import dateutil.parser
-from dateutil.relativedelta import relativedelta
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -47,6 +46,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -217,7 +217,7 @@ class RdiDiiaCreateTask:
                         last_registration_date=registration_data_import_data_hub.created_at,
                         household=household_obj,
                         email=individual.email,
-                        age_at_registration=relativedelta(registration_creation_time, individual.birth_date).years,
+                        age_at_registration=calculate_age_at_registration(registration_data_import_data_hub, individual),
                     )
                     individuals_to_create_list.append(individual_obj)
 
