@@ -8,6 +8,7 @@ from django.core.files.storage import default_storage
 from django.db import transaction
 
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -267,6 +268,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     self._handle_exception("Individual", i_field, e)
                         individual_obj.last_registration_date = individual_obj.first_registration_date
                         individual_obj.registration_data_import = registration_data_import
+
+                        registration_creation_time = registration_data_import.created_at
+                        if registration_creation_time.tzinfo is not None:
+                            registration_creation_time.replace(tzinfo=None)
+
+                        individual_obj.age_at_registration = relativedelta(
+                            registration_creation_time, individual_obj.birth_date
+                        ).years
                         if individual_obj.relationship == HEAD:
                             head_of_households_mapping[household_obj] = individual_obj
 
