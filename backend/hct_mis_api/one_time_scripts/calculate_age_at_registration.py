@@ -1,8 +1,8 @@
 import logging
-from datetime import date
+
+from django.core.paginator import Paginator
 
 from dateutil.relativedelta import relativedelta
-from django.core.paginator import Paginator
 
 from hct_mis_api.apps.household.models import Individual
 
@@ -29,7 +29,7 @@ def calculate_at_registration_field(batch_size: int = 10_000) -> None:
             for individual_id, birth_date, rdi_created_at in page.object_list:
                 individual = Individual(
                     id=str(individual_id),
-                    age_at_registration=relativedelta(rdi_created_at.replace(tzinfo=None), birth_date).years
+                    age_at_registration=relativedelta(rdi_created_at.replace(tzinfo=None), birth_date).years,
                 )
                 individuals_to_update.append(individual)
             Individual.objects.bulk_update(individuals_to_update, ["age_at_registration"])
