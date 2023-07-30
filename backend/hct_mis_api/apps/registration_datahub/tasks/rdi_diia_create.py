@@ -197,10 +197,6 @@ class RdiDiiaCreateTask:
                         dateutil.parser.parse(individual.birth_date, dayfirst=True) if individual.birth_date else ""
                     )
 
-                    registration_creation_time = registration_data_import_data_hub.created_at
-                    if registration_creation_time.tzinfo is not None:
-                        registration_creation_time.replace(tzinfo=None)
-
                     individual_obj = ImportedIndividual(
                         individual_id=individual.individual_id.replace(" ", "") if individual.individual_id else "",
                         given_name=individual.first_name,
