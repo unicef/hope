@@ -12,7 +12,6 @@ from django.db import transaction
 from django.utils import timezone
 
 import openpyxl
-from dateutil.relativedelta import relativedelta
 from django_countries.fields import Country
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
@@ -47,6 +46,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 logger = logging.getLogger(__name__)
 
@@ -581,14 +581,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
-
-                    registration_creation_time = registration_data_import.created_at
-                    if registration_creation_time.tzinfo is not None:
-                        registration_creation_time.replace(tzinfo=None)
-
-                    obj_to_create.age_at_registration = relativedelta(
-                        registration_creation_time, obj_to_create.birth_date
-                    ).years
+                    obj_to_create.age_at_registration = calculate_age_at_registration(registration_data_import, obj_to_create)
                     self.individuals.append(obj_to_create)
             except Exception as e:
                 raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
