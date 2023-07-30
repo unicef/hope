@@ -280,6 +280,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     @property
     def age(self) -> int:

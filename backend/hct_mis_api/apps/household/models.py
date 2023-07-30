@@ -881,6 +881,7 @@ class Individual(
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
