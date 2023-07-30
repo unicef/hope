@@ -667,6 +667,7 @@ class DiiaIndividual(models.Model):
     doc_number = models.CharField(max_length=64, blank=True, null=True)
     doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
