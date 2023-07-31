@@ -2,6 +2,8 @@ const { defineConfig } = require("cypress");
 const { verifyDownloadTasks } = require("cy-verify-downloads");
 
 module.exports = defineConfig({
+  experimentalMemoryManagement: true,
+  numTestsKeptInMemory: 0,
   e2e: {
     setupNodeEvents(on, config) {
       on("task", verifyDownloadTasks);
