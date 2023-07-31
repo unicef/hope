@@ -1,5 +1,4 @@
 import logging
-from types import MethodType
 from typing import Any, Callable, List, Optional
 
 from django.conf import settings
@@ -115,5 +114,5 @@ class GrievanceTicketDocument(Document):
             return related_instance.tickets.all()
         return Model.objects.none()
 
-    def prepare_programs(self, instance):
+    def prepare_programs(self, instance: GrievanceTicket) -> List[str]:
         return list(instance.programs.values_list("id", flat=True))
