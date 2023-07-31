@@ -71,7 +71,7 @@ describe("Grievance", () => {
     context("Export", () => {
       it.skip("Export", () => {});
     });
-    context.skip("Grievance Filters", () => {
+    context("Grievance Filters", () => {
       [
         ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
         ["SYSTEM-GENERATED", "GRV-0000003", 1, "Ticket ID: GRV-0000003"],
