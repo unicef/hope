@@ -77,6 +77,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         "grievance_type",
         "grievance_status",
         "business_area",
+        "program",
     )
 
     def elasticsearch_filter_queryset(self) -> List[str]:
@@ -87,7 +88,9 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):
-                if field in (
+                if field == "program":
+                    filters["programs"] = decode_id_string(self.form.data[field])
+                elif field in (
                     "category",
                     "status",
                     "issue_type",

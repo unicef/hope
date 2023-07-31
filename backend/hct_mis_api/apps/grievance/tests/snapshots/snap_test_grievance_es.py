@@ -393,3 +393,25 @@ snapshots['TestGrievanceQueryElasticSearch::test_multiple_filters_should_return_
         }
     }
 }
+
+snapshots['TestGrievanceQueryElasticSearch::test_program_filter_returns_grievance_3 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'category': 5,
+                        'consent': True,
+                        'description': 'grievance_ticket_3',
+                        'householdUnicefId': 'HH-20-0000.0003',
+                        'issueType': None,
+                        'language': 'Polish',
+                        'priority': 3,
+                        'status': 4,
+                        'urgency': 1
+                    }
+                }
+            ]
+        }
+    }
+}
