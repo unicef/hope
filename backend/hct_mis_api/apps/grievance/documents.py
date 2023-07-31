@@ -1,4 +1,5 @@
 import logging
+from types import MethodType
 from typing import Any, Callable, List, Optional
 
 from django.conf import settings
@@ -87,7 +88,7 @@ class GrievanceTicketDocument(Document):
             )
         }
     )
-    programs = fields.ObjectField(properties={"id": fields.KeywordField(), "name": fields.KeywordField()})
+    programs = fields.ListField(fields.KeywordField())
 
     class Django:
         model = GrievanceTicket
@@ -113,3 +114,6 @@ class GrievanceTicketDocument(Document):
         if isinstance(related_instance, BusinessArea):
             return related_instance.tickets.all()
         return Model.objects.none()
+
+    def prepare_programs(self, instance):
+        return list(instance.programs.values_list("id", flat=True))
