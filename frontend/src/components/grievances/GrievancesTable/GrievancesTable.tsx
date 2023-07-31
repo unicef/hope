@@ -231,7 +231,7 @@ export const GrievancesTable = ({
           >
             headCells={headCells}
             title={t('Grievance Tickets List')}
-            rowsPerPageOptions={[10, 15, 20]}
+            rowsPerPageOptions={[10, 15, 20, 40]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}
             numSelected={selected.length}
