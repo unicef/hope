@@ -9,6 +9,7 @@ export const USERS_FILTER_QUERY = gql`
     $before: String
     $orderBy: String
     $search: String
+    $isTicketCreator: Boolean
   ) {
     allUsers(
       businessArea: $businessArea
@@ -18,6 +19,7 @@ export const USERS_FILTER_QUERY = gql`
       before: $before
       orderBy: $orderBy
       search: $search
+      isTicketCreator: $isTicketCreator
     ) {
       edges {
         node {

@@ -163,6 +163,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             "assigned_to": ["exact"],
             "registration_data_import": ["exact"],
             "admin2": ["exact"],
+            "created_by": ["exact"],
         }
         model = GrievanceTicket
 
@@ -195,7 +196,8 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         key, value = tuple(value.split(" ", 1))
         if key == "ticket_id":
-            return qs.filter(Q(unicef_id=value))
+            values = list(map(str.strip, value.split(",")))
+            return qs.filter(Q(unicef_id__in=values))
         elif key == "ticket_hh_id":
             return qs.filter(Q(household_unicef_id=value))
         elif key == "family_name":
