@@ -214,7 +214,7 @@ class RdiDiiaCreateTask:
                         household=household_obj,
                         email=individual.email,
                         age_at_registration=calculate_age_at_registration(
-                            registration_data_import_data_hub, individual
+                            registration_data_import_data_hub, individual.birth_date
                         ),
                     )
                     individuals_to_create_list.append(individual_obj)
