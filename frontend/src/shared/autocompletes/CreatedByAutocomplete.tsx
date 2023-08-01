@@ -18,7 +18,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')};
 `;
 
-export const AssigneeAutocomplete = ({
+export const CreatedByAutocomplete = ({
   disabled,
   fullWidth = true,
   name,
@@ -31,7 +31,7 @@ export const AssigneeAutocomplete = ({
   setFilter,
   dataCy,
 }: {
-  disabled?;
+  disabled?: boolean;
   fullWidth?: boolean;
   name: string;
   filter;
@@ -57,6 +57,7 @@ export const AssigneeAutocomplete = ({
       first: 20,
       orderBy: 'first_name,last_name,email',
       search: debouncedInputText,
+      isTicketCreator: true,
     },
   });
 
@@ -121,7 +122,7 @@ export const AssigneeAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label || t('Assignee')}
+          label={label || t('Created By')}
           variant='outlined'
           margin='dense'
           value={inputValue}

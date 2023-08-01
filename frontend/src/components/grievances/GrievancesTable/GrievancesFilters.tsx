@@ -24,6 +24,7 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
+import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface GrievancesFiltersProps {
   filter;
@@ -262,6 +263,20 @@ export const GrievancesFilters = ({
             dataCy='filters-assignee'
           />
         </Grid>
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
+          <Grid item xs={3}>
+            <CreatedByAutocomplete
+              filter={filter}
+              name='createdBy'
+              value={filter.createdBy}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              dataCy='filters-created-by'
+            />
+          </Grid>
+        )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid container item xs={6} spacing={3} alignItems='flex-end'>
             <Grid item xs={6}>
