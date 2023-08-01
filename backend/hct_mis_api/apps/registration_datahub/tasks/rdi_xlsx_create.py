@@ -582,7 +582,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
                     obj_to_create.age_at_registration = calculate_age_at_registration(
-                        registration_data_import, obj_to_create
+                        registration_data_import, obj_to_create.birth_date
                     )
                     self.individuals.append(obj_to_create)
             except Exception as e:

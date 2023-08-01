@@ -269,7 +269,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         individual_obj.last_registration_date = individual_obj.first_registration_date
                         individual_obj.registration_data_import = registration_data_import
                         individual_obj.age_at_registration = calculate_age_at_registration(
-                            registration_data_import, individual_obj
+                            registration_data_import, str(individual_obj.birth_date)
                         )
 
                         if individual_obj.relationship == HEAD:
