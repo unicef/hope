@@ -1,5 +1,4 @@
 import logging
-import os.path
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
