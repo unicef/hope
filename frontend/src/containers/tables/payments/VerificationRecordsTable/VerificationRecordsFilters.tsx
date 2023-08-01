@@ -9,24 +9,9 @@ import {
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-
-  flex-direction: row;
-  align-items: center;
-
-  && > div {
-    margin: 5px;
-  }
-`;
 
 interface VerificationRecordsFiltersProps {
   onFilterChange;
@@ -81,22 +66,24 @@ export function VerificationRecordsFilters({
           </Button>
         )}
       </Box>
-      <Container>
+      <Box>
         <Collapse in={show}>
           <Grid container spacing={3}>
-            <Grid item>
+            <Grid item xs={3}>
               <SearchTextField
                 value={filter.search}
                 label={t('Search')}
                 onChange={(e) => handleFilterChange(e, 'search')}
                 data-cy='filters-search'
+                fullWidth
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <SelectFilter
                 onChange={(e) => handleFilterChange(e, 'status')}
                 label={t('Verification Status')}
                 value={filter.status}
+                fullWidth
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -110,7 +97,7 @@ export function VerificationRecordsFilters({
                 })}
               </SelectFilter>
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <SelectFilter
                 onChange={(e) => handleFilterChange(e, 'verificationChannel')}
                 label={t('Verification Channel')}
@@ -130,7 +117,7 @@ export function VerificationRecordsFilters({
                 )}
               </SelectFilter>
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <SelectFilter
                 onChange={(e) =>
                   handleFilterChange(e, 'paymentVerificationPlan')
@@ -146,7 +133,7 @@ export function VerificationRecordsFilters({
             </Grid>
           </Grid>
         </Collapse>
-      </Container>
+      </Box>
     </>
   );
 }
