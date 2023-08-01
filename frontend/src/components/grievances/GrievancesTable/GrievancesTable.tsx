@@ -54,6 +54,7 @@ export const GrievancesTable = ({
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
+    createdBy: filter.createdBy,
     admin2: filter.admin2,
     registrationDataImport: filter.registrationDataImport,
     cashPlan: filter.cashPlan,
