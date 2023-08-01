@@ -124,7 +124,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             individual_data["sex"] = sex.upper()
 
         individual_data["age_at_registration"] = calculate_age_at_registration(
-            registration_data_import, individual_data
+            registration_data_import, individual_data.get("birth_date", "")
         )
         return individual_data
 
