@@ -39,6 +39,9 @@
     "priority" : {
       "type" : "keyword"
     },
+    "programs" : {
+      "type" : "keyword"
+    },
     "registration_data_import" : {
       "properties" : {
         "id" : {

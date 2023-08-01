@@ -27,6 +27,7 @@ export const AllGrievanceTicket = gql`
     $priority: String
     $urgency: String
     $preferredLanguage: String
+    $program: String
   ) {
     allGrievanceTicket(
       before: $before
@@ -54,6 +55,7 @@ export const AllGrievanceTicket = gql`
       priority: $priority
       urgency: $urgency
       preferredLanguage: $preferredLanguage
+      program: $program
     ) {
       totalCount
       pageInfo {

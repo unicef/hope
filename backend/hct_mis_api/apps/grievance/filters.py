@@ -18,6 +18,7 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo.models import ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
@@ -76,6 +77,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         "grievance_type",
         "grievance_status",
         "business_area",
+        "program",
     )
 
     def elasticsearch_filter_queryset(self) -> List[str]:
@@ -86,7 +88,9 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):
-                if field in (
+                if field == "program":
+                    filters["programs"] = decode_id_string(self.form.data[field])
+                elif field in (
                     "category",
                     "status",
                     "issue_type",
@@ -154,6 +158,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
     total_days = IntegerFilter(field_name="total_days")
+    program = CharFilter(method="filter_by_program")
 
     class Meta:
         fields = {
@@ -182,6 +187,11 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             "total_days",
         )
     )
+
+    def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value:
+            return qs.filter(programs__in=[decode_id_string(value)])
+        return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         q_obj = Q()
