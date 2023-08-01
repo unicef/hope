@@ -499,7 +499,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                             label={t('Priority')}
                             choices={choicesData.grievanceTicketPriorityChoices}
                             component={FormikSelectField}
-                            disabled={ticket.priority !== 0}
                           />
                         </Grid>
                         <Grid item xs={3}>
@@ -511,7 +510,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
-                            disabled={ticket.urgency !== 0}
                           />
                         </Grid>
                         {ticket.issueType?.toString() !==
