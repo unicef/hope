@@ -402,11 +402,11 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             validate_grievance_documents_size(grievance_ticket.id, documents)
             create_grievance_documents(approver, grievance_ticket, documents)
 
-        priority = input_data.pop("priority", None)
+        priority = input_data.pop("priority", grievance_ticket.priority)
         if priority != grievance_ticket.priority:
             grievance_ticket.priority = priority
 
-        urgency = input_data.pop("urgency", None)
+        urgency = input_data.pop("urgency", grievance_ticket.urgency)
         if urgency != grievance_ticket.urgency:
             grievance_ticket.urgency = urgency
 
