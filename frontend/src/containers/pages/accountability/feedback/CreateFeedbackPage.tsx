@@ -383,7 +383,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 </Grid>
                                 <Grid item xs={6}>
                                   <LabelizedField label={t('Issue Type')}>
-                                    {values.issueType === 'POSITIVE_FEEDACK'
+                                    {values.issueType === 'POSITIVE_FEEDBACK'
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>
