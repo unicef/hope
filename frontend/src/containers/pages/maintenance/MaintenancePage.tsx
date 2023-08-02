@@ -87,10 +87,10 @@ export const MaintenancePage: React.FC = () => {
       </SquareLogo>
 
       <TextContainer>
-        <Title>Page under maintenance</Title>
+        <Title>System under maintenance</Title>
         <Paragraph>
           Sorry for the inconvenience. Maintenance is underway to enhance our
-          services. We&apos;ll be back shortly!
+          services. System will be back shortly!
         </Paragraph>
       </TextContainer>
 
