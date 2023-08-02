@@ -43,7 +43,10 @@ def download_payment_verification_plan(  # type: ignore
             xlsx_file.was_downloaded = True
             xlsx_file.save()
         return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)  # type: ignore # FIXME
-    log_and_raise(f"XLSX File not found. PaymentVerificationPlan ID: {payment_verification_plan.unicef_id}")
+    log_and_raise(
+        f"XLSX File not found. PaymentVerificationPlan ID: {payment_verification_plan.unicef_id}",
+        error_type=FileNotFoundError,
+    )
 
 
 @login_required
@@ -64,7 +67,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
     if payment_plan.has_export_file:
         return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
 
-    log_and_raise(f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}")
+    log_and_raise(f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}", error_type=FileNotFoundError)
 
 
 @login_required
@@ -85,4 +88,4 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
     if payment_plan.export_pdf_file_summary and payment_plan.export_pdf_file_summary.file:
         return redirect(payment_plan.export_pdf_file_summary.file.url)
 
-    log_and_raise(f"PDF file not found. PaymentPlan ID: {payment_plan.unicef_id}")
+    log_and_raise(f"PDF file not found. PaymentPlan ID: {payment_plan.unicef_id}", error_type=FileNotFoundError)
