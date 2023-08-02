@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
@@ -15,9 +15,12 @@ import { VerificationPlanDetails } from '../../../components/payments/Verificati
 import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
+import {
+  decodeIdString,
+  getFilterFromQueryParams,
+  isPermissionDeniedError,
+} from '../../../utils/utils';
 import {
   PaymentVerificationPlanStatus,
   useCashPlanQuery,
@@ -48,17 +51,24 @@ const BottomTitle = styled.div`
   padding: 70px;
 `;
 
-export function CashPlanVerificationDetailsPage(): React.ReactElement {
+const initialFilter = {
+  search: '',
+  status: '',
+  verificationChannel: '',
+  paymentVerificationPlan: '',
+};
+
+export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const [filter, setFilter] = useState({
-    search: null,
-    status: null,
-    verificationChannel: null,
-    paymentVerificationPlan: null,
-  });
-  const debouncedFilter = useDebounce(filter, 500);
+  const location = useLocation();
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const { id } = useParams();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
@@ -174,14 +184,17 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           <Container>
             <VerificationRecordsFilters
               filter={filter}
-              onFilterChange={setFilter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
               verifications={cashPlan.verificationPlans}
             />
           </Container>
           <TableWrapper>
             <VerificationRecordsTable
               paymentPlanId={cashPlan.id}
-              filter={debouncedFilter}
+              filter={appliedFilter}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
@@ -210,4 +223,4 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
         )}
     </>
   );
-}
+};
