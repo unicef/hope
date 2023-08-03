@@ -24,9 +24,12 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         console.error(`Permission denied for mutation`);
       }
     });
-  const maintenanceError = graphQLErrors.find(
-    (error) => error.extensions && error.extensions.code === 'MAINTENANCE',
-  );
+
+  const maintenanceError =
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    networkError?.result?.message ===
+    'Migrations are running, please try again later';
 
   if (maintenanceError) {
     window.location.href = '/maintenance';

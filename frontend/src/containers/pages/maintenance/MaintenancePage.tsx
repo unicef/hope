@@ -62,7 +62,7 @@ const Icon = styled.img`
 `;
 
 export const MaintenancePage: React.FC = () => {
-  const goBack = () => {
+  const goBack = (): void => {
     window.history.back();
   };
 
