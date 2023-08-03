@@ -1,5 +1,6 @@
 from typing import Any
 
+import django.db.utils
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -17,6 +18,8 @@ class Command(BaseCommand):
         try:
             migration = MigrationStatus.objects.get_or_create(is_running=True)[0]
             self.stdout.write(self.style.SUCCESS("Starting migration"))
+        except django.db.utils.ProgrammingError:
+            pass
         finally:
             try:
                 for db in settings.DATABASES:
