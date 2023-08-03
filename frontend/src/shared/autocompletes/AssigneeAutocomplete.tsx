@@ -12,10 +12,10 @@ import TextField from '../TextField';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
+  .MuiFormControl-marginDense {
     margin-top: 4px;
   }
+  width: ${(props) => (props.fullWidth ? '100%' : '232px')};
 `;
 
 export const AssigneeAutocomplete = ({

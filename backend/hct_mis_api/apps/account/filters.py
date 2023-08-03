@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
+from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -23,6 +23,7 @@ class UsersFilter(FilterSet):
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
     partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
     roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
+    is_ticket_creator = BooleanFilter(method="is_ticket_creator_filter")
 
     class Meta:
         model = get_user_model()
@@ -38,6 +39,9 @@ class UsersFilter(FilterSet):
             "email",
         )
     )
+
+    def is_ticket_creator_filter(self, qs: "QuerySet[User]", name: str, value: bool) -> "QuerySet[User]":
+        return qs.exclude(created_tickets__isnull=value)
 
     def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         values = value.split(" ")
