@@ -21,8 +21,8 @@ export function PaymentRecordTable({
 }: PaymentRecordTableProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables = {
-    cashPlan: cashPlan.id,
+  const initialVariables: AllPaymentRecordsQueryVariables = {
+    parent: cashPlan.id,
     businessArea,
     program: programId,
   };
