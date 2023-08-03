@@ -291,7 +291,7 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getDescription().type("Test Description");
         newFeedbackPage.getButtonNext().contains("Save").click();
       });
-      it.only("Create Linked Ticket", () => {
+      it("Create Linked Ticket", () => {
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Negative");
         newFeedbackPage.getButtonNext().click();
