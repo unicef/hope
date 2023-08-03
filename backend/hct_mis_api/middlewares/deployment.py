@@ -7,7 +7,7 @@ from hct_mis_api.apps.core.models import MigrationStatus
 
 
 class DisableTrafficDuringMigrationsMiddleware:
-    def __init__(self, get_response: Any):
+    def __init__(self, get_response: Any) -> None:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
