@@ -50,4 +50,5 @@ stages:
                 ingress.scheme=https,\
                 ingress.tls=true,\
                 kpi.ravenDsn=$(KPI_SENTRY_DSN),\
+                ingress.annotations.appgw.ingress.kubernetes.io/appgw-ssl-certificate=kv-cert-hope,\
                 kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),"

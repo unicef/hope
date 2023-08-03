@@ -2418,6 +2418,22 @@
             "deprecationReason": null
           },
           {
+            "name": "grievanceTicketSearchTypesChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allSteficonRules",
             "description": null,
             "args": [
@@ -14539,7 +14555,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GRANDDAUGHER_GRANDSON",
+            "name": "GRANDDAUGHTER_GRANDSON",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -62026,6 +62042,16 @@
             "defaultValue": null
           },
           {
+            "name": "email",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "relationship",
             "description": null,
             "type": {
@@ -62933,6 +62959,16 @@
           },
           {
             "name": "phoneNoAlternative",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "email",
             "description": null,
             "type": {
               "kind": "SCALAR",

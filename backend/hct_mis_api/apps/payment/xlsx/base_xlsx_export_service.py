@@ -4,8 +4,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.urls import reverse
 
 import openpyxl
@@ -79,21 +77,6 @@ class XlsxExportBaseService:
         if api_url:
             return link
         return ""
-
-    def send_email(self, context: Dict) -> None:
-        text_body = render_to_string(self.text_template, context=context)
-        html_body = render_to_string(self.html_template, context=context)
-
-        email = EmailMultiAlternatives(
-            subject=context["title"],
-            from_email=settings.EMAIL_HOST_USER,
-            to=[context["email"]],
-            body=text_body,
-        )
-        email.attach_alternative(html_body, "text/html")
-        result = email.send()
-        if not result:
-            logger.error(f"Email couldn't be send to {context['email']}")
 
     def get_email_context(self, user: "User") -> Dict:
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
