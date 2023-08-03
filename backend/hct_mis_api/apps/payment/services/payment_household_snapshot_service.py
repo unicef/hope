@@ -68,7 +68,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     all_household_data_dict = household.__dict__
     keys = [key for key in all_household_data_dict.keys() if key not in excluded_household_fields]
     household_data["individuals"] = []
-    all_household_data_dict["roles"] = []
+    household_data["roles"] = []
     for key in keys:
         value = all_household_data_dict[key]
         household_data[key] = handle_type_mapping(value)
@@ -97,7 +97,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
                 "needs_adjudication_tickets_count"
             ]
     for role in household.individuals_and_roles.all():
-        all_household_data_dict["roles"].append(
+        household_data["roles"].append(
             {"role": role.role, "individual": get_individual_snapshot(role.individual)}
         )
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
