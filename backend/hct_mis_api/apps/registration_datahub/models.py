@@ -283,9 +283,13 @@ class ImportedIndividual(TimeStampedUUIDModel):
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
+<<<<<<< HEAD
     program_id = models.UUIDField(
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
+=======
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+>>>>>>> origin
 
     @property
     def age(self) -> int:
@@ -672,6 +676,7 @@ class DiiaIndividual(models.Model):
     doc_number = models.CharField(max_length=64, blank=True, null=True)
     doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",

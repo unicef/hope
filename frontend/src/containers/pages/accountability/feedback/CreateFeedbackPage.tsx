@@ -40,6 +40,7 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { FeedbackSteps } from '../../../../utils/constants';
 import {
   CreateFeedbackInput,
+  FeedbackIssueType,
   useAllProgramsQuery,
   useAllUsersQuery,
   useCreateFeedbackTicketMutation,
@@ -383,7 +384,8 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 </Grid>
                                 <Grid item xs={6}>
                                   <LabelizedField label={t('Issue Type')}>
-                                    {values.issueType === 'POSITIVE_FEEDACK'
+                                    {values.issueType ===
+                                    FeedbackIssueType.PositiveFeedback
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>
