@@ -6,6 +6,7 @@ export default class NewFeedback extends BaseComponent {
   labelCategory = 'div[data-cy="label-Category"]';
   selectIssueType = 'div[data-cy="select-issueType"]';
   issueType = 'div[data-cy="label-Issue Type"]';
+  inputIssueType = 'div[data-cy="input-issue-type"]';
   buttonCancel = 'a[data-cy="button-cancel"]';
   buttonBack = 'button[data-cy="button-back"]';
   buttonNext = 'button[data-cy="button-submit"]';
@@ -44,6 +45,7 @@ export default class NewFeedback extends BaseComponent {
   getInputArea = () => cy.get(this.inputArea);
   getAdminAreaAutocomplete = () => cy.get(this.adminAreaAutocomplete);
   getIssueType = () => cy.get(this.issueType);
+  getInputIssueType = () => cy.get(this.inputIssueType);
 
   checkElementsOnPage() {
     this.getTitlePage().contains(this.textTitle);

@@ -228,9 +228,30 @@ describe("Grievance - Feedback", () => {
         feedbackDetailsPage.getLanguagesSpoken().contains("Random Language");
         feedbackDetailsPage.getTitlePage().contains("Feedback");
       });
-      it.skip("Create New Feedback - Cancel", () => {
-        // ToDo
+      it("Create New Feedback - Cancel", () => {
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.getButtonBack().should("be.disabled");
+        newFeedbackPage.getButtonCancel().click();
+        feedbackPage.getTitlePage().contains("Feedback");
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getInputIssueType().contains("Issue Type is required");
+        newFeedbackPage.chooseOptionByName("Positive");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonCancel().click();
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Negative");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonBack().click();
+        newFeedbackPage.chooseOptionByName("Positive");
+        newFeedbackPage.getButtonBack().should("be.disabled");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonNext().click();
       });
+      it.skip("Create Linked Ticket", () => {});
     });
 
     context("Edit Feedback", () => {
