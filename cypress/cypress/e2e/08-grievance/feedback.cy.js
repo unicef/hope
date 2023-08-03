@@ -196,6 +196,12 @@ describe("Grievance - Feedback", () => {
           "Press Feedback button in menu",
           "Press Submit New Feedback button",
           "Choose Issue Type: Positive Feedback",
+          "Press button Next",
+          "Choose household and press Next button",
+          "Select 'Received Consent*' and press Next button",
+          "Fill all fields",
+          `Press button Save`,
+          `Check data in details page`,
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Positive");
@@ -231,15 +237,42 @@ describe("Grievance - Feedback", () => {
           "Go to Grievance page",
           "Press Feedback button in menu",
           "Press Submit New Feedback button",
-          "Choose Issue Type: Negative Feedback",
+          "Press button Cancel",
+          "Press Submit New Feedback button",
+          "Press button Next",
+          "Issue Type is required",
+          "Choose Issue Type: Positive Feedback",
+          "Press button Next",
+          "Press button Back",
+          "Press button Next",
+          "Press button Cancel",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Positive Feedback",
           "Press button Next",
           "Choose household and individual",
-          "Press Next button",
-          "Select 'Received Consent*' and press Next button",
+          "Press button Next",
+          "Press button Back",
+          "Press button Next",
+          "Press button Cancel",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Positive Feedback",
+          "Press button Next",
+          "Choose household and individual",
+          "Press button Next",
+          "Select 'Received Consent*'",
+          "Press button Next",
+          "Press button Back",
+          "Press button Next",
+          "Press button Cancel",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Positive Feedback",
+          "Press button Next",
+          "Choose household and individual",
+          "Press button Next",
+          "Select 'Received Consent*'",
+          "Press button Next",
           "Fill all fields",
           `Press button Save`,
-          `Check data in details page`,
-          `Press Create Linked Ticket`,
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.getButtonBack().should("be.disabled");
@@ -292,6 +325,22 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getButtonNext().contains("Save").click();
       });
       it("Create Linked Ticket", () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Press Feedback button in menu",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Negative Feedback",
+          "Press button Next",
+          "Choose household and individual",
+          "Press Next button",
+          "Select 'Received Consent*' and press Next button",
+          "Fill all fields",
+          `Press button Save`,
+          `Check data in details page`,
+          `Press Create Linked Ticket`,
+          "Create Grievance Ticket",
+          "Check If Grievance Ticket is linked to Feedback",
+        ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Negative");
         newFeedbackPage.getButtonNext().click();
