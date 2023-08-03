@@ -57,9 +57,16 @@ export const FormikBoolFieldGrievances = ({
     const correctValue = toExternalValue(targetValue);
     form.setFieldValue(field.name, correctValue);
   };
+
   return (
     <>
-      <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
+      <FormControl
+        required={required}
+        variant='outlined'
+        margin='dense'
+        fullWidth
+        {...otherProps}
+      >
         <InputLabel>{otherProps.label}</InputLabel>
         <Select
           {...field}
