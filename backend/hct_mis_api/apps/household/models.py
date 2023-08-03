@@ -918,7 +918,6 @@ class Individual(
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
-<<<<<<< HEAD
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
     )  # TODO set null=False after migration
@@ -933,9 +932,7 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-=======
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
->>>>>>> origin
 
     vector_column = SearchVectorField(null=True)
 
