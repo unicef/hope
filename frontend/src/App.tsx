@@ -7,6 +7,7 @@ import { LoginPage } from './containers/pages/core/LoginPage';
 import { ProfilePage } from './containers/pages/core/ProfilePage';
 import { Providers } from './providers';
 import { SentryRoute } from './components/core/SentryRoute';
+import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage';
 
 export const App: React.FC = () => {
   return (
@@ -16,6 +17,9 @@ export const App: React.FC = () => {
         <Switch>
           <SentryRoute path='/login'>
             <LoginPage />
+          </SentryRoute>
+          <SentryRoute path='/maintenance'>
+            <MaintenancePage />
           </SentryRoute>
           <SentryRoute path='/sentry-check'>
             <button
