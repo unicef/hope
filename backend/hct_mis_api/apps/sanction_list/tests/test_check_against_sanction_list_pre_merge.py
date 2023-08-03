@@ -21,8 +21,10 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
     CheckAgainstSanctionListPreMergeTask,
 )
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from hct_mis_api.conftest import disabled_locally_test
 
 
+@disabled_locally_test
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     databases = "__all__"

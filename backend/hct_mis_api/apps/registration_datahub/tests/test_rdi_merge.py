@@ -29,6 +29,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hct_mis_api.conftest import disabled_locally_test
 
 
 @contextmanager
@@ -52,6 +53,7 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
+@disabled_locally_test
 class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = [

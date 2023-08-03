@@ -84,7 +84,7 @@ export const fakeHouseholdChoices = {
     },
     {
       name: 'Granddaughter / Grandson',
-      value: 'GRANDDAUGHER_GRANDSON',
+      value: 'GRANDDAUGHTER_GRANDSON',
       __typename: 'ChoiceObject',
     },
     {

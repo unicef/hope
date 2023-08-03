@@ -1,6 +1,6 @@
-from django.http import HttpRequest, HttpResponse
+from tempfile import NamedTemporaryFile
 
-from openpyxl.writer.excel import save_virtual_workbook
+from django.http import HttpRequest, HttpResponse
 
 from hct_mis_api.apps.registration_datahub.template_generator import (
     TemplateFileGenerator,
@@ -12,6 +12,11 @@ def download_template(request: HttpRequest) -> HttpResponse:
     filename = "registration_data_import_template.xlsx"
     response = HttpResponse(content_type=mimetype)
     response["Content-Disposition"] = f"attachment; filename={filename}"
-    response.write(save_virtual_workbook(TemplateFileGenerator.get_template_file()))
+    wb = TemplateFileGenerator.get_template_file()
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = bytes(tmp.read())
+
+    response.write(file)
 
     return response

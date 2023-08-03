@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from itertools import permutations
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 from django.conf import settings
@@ -11,7 +12,6 @@ from django.utils import timezone
 import dateutil.parser
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
@@ -126,7 +126,9 @@ class CheckAgainstSanctionListTask:
             )
         for i in range(1, len(header_row_names) + 1):
             attachment_ws.column_dimensions[get_column_letter(i)].width = 30
-        attachment = save_virtual_workbook(attachment_wb)
+
+        with NamedTemporaryFile() as tmp:
+            attachment = bytes(tmp.read())
 
         msg = EmailMultiAlternatives(
             subject=subject,

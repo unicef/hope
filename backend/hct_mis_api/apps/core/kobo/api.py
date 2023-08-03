@@ -79,7 +79,7 @@ class KoboAPI:
 
     def _get_token(self) -> None:
         self._client = KoboRequestsSession()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=False)
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))
 
         if self.business_area is None:
