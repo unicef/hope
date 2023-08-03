@@ -12,6 +12,7 @@ export default class NewFeedback extends BaseComponent {
   buttonNext = 'button[data-cy="button-submit"]';
   option = 'li[role="option"]';
   householdTableRow = 'tr[data-cy="household-table-row"]';
+  individualTableRow = 'tr[data-cy="individual-table-row"';
   lookUpTabs = 'button[role="tab"]';
   receivedConsent = 'span[data-cy="input-consent"]';
   description = 'textarea[data-cy="input-description"]';
@@ -36,8 +37,11 @@ export default class NewFeedback extends BaseComponent {
   getHouseholdTab = () =>
     cy.get(this.lookUpTabs).contains(this.textLookUpHousehold);
   getLookUpIndividual = () =>
-    cy.get(this.lookUpTabs).contains(this.textLookUpHousehold);
+    cy.get(this.lookUpTabs).contains(this.textLookUpIndividual);
   getHouseholdTableRows = (number) => cy.get(this.householdTableRow).eq(number);
+  getIndividualTableRow = (number) =>
+    cy.get(this.individualTableRow).eq(number);
+
   getReceivedConsent = () => cy.get(this.receivedConsent);
   getDescription = () => cy.get(this.description);
   getComments = () => cy.get(this.comments);

@@ -69,6 +69,7 @@ export const FeedbackDetailsToolbar = ({
               }
               variant='contained'
               color='primary'
+              data-cy='button-create-linked-ticket'
             >
               {t('Create Linked Ticket')}
             </Button>

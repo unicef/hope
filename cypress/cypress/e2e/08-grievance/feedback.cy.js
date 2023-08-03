@@ -1,10 +1,14 @@
 import Feedback from "../../page-objects/pages/grievance/feedback.po";
 import FeedbackDetailsPage from "../../page-objects/pages/grievance/details_feedback_page.po";
 import NewFeedback from "../../page-objects/pages/grievance/new_feedback.po";
+import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
+import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 
 let feedbackPage = new Feedback();
 let feedbackDetailsPage = new FeedbackDetailsPage();
 let newFeedbackPage = new NewFeedback();
+let grievanceNewTicketPage = new NewTicket();
+let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
   beforeEach(() => {
@@ -192,12 +196,6 @@ describe("Grievance - Feedback", () => {
           "Press Feedback button in menu",
           "Press Submit New Feedback button",
           "Choose Issue Type: Positive Feedback",
-          "Press button Next",
-          "Choose household and press Next button",
-          "Select 'Received Consent*' and press Next button",
-          "Fill all fields",
-          `Press button Save`,
-          `Check data in details page`,
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Positive");
@@ -229,6 +227,20 @@ describe("Grievance - Feedback", () => {
         feedbackDetailsPage.getTitlePage().contains("Feedback");
       });
       it("Create New Feedback - Cancel", () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Press Feedback button in menu",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Negative Feedback",
+          "Press button Next",
+          "Choose household and individual",
+          "Press Next button",
+          "Select 'Received Consent*' and press Next button",
+          "Fill all fields",
+          `Press button Save`,
+          `Check data in details page`,
+          `Press Create Linked Ticket`,
+        ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.getButtonBack().should("be.disabled");
         newFeedbackPage.getButtonCancel().click();
@@ -250,8 +262,84 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getButtonNext().click();
         newFeedbackPage.getHouseholdTab().should("be.visible");
         newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonBack().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonCancel().click();
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Negative");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getDescription().should("be.visible");
+        newFeedbackPage.getButtonBack().click();
+        newFeedbackPage.getReceivedConsent().should("be.visible");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getDescription().should("be.visible");
+        newFeedbackPage.getButtonCancel().click();
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Negative");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getDescription().type("Test Description");
+        newFeedbackPage.getButtonNext().contains("Save").click();
       });
-      it.skip("Create Linked Ticket", () => {});
+      it.only("Create Linked Ticket", () => {
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Negative");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getHouseholdTableRows(1).click();
+        newFeedbackPage.getLookUpIndividual().click();
+        newFeedbackPage.getIndividualTableRow(0).click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getDescription().type("Test Description");
+        newFeedbackPage.getButtonNext().contains("Save").click();
+        feedbackDetailsPage
+          .getTitlePage()
+          .contains("Feedback ID:")
+          .then(($textFeedbackID) => {
+            const feedbackID = $textFeedbackID.text().split("ID: ")[1];
+            feedbackDetailsPage.getButtonCreateLinkedTicket().click();
+            grievanceNewTicketPage.chooseCategory("Referral");
+            grievanceNewTicketPage.getButtonNext().click();
+            grievanceNewTicketPage.getReceivedConsent().click();
+            grievanceNewTicketPage.getButtonNext().click();
+            grievanceNewTicketPage
+              .getDescription()
+              .type("Test Grievance Ticket");
+            grievanceNewTicketPage.getButtonNext().contains("Save").click();
+            grievanceDetailsPage
+              .getTitle()
+              .contains("Ticket ID: ")
+              .then(($textGrievanceID) => {
+                const grievanceID = $textGrievanceID.text().split("ID: ")[1];
+                feedbackPage.clickMenuButtonFeedback();
+                feedbackPage
+                  .getRows()
+                  .contains(feedbackID)
+                  .parent()
+                  .parent()
+                  .contains(grievanceID)
+                  .parent()
+                  .parent()
+                  .click();
+                feedbackDetailsPage
+                  .getLabelTicketId()
+                  .contains(grievanceID)
+                  .click();
+              });
+          });
+      });
     });
 
     context("Edit Feedback", () => {
