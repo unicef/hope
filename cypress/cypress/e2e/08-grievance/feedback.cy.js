@@ -147,11 +147,86 @@ describe("Grievance - Feedback", () => {
       });
     });
     context("Create New Feedback", () => {
-      it.skip("Create New Feedback - Negative Feedback", () => {
-        // ToDo
+      it("Create New Feedback - Negative Feedback", () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Press Feedback button in menu",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Negative Feedback",
+          "Press button Next",
+          "Choose household and press Next button",
+          "Select 'Received Consent*' and press Next button",
+          "Fill all fields",
+          `Press button Save`,
+          `Check data in details page`,
+        ]);
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Negative");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getHouseholdTableRows(0).click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getLabelCategory().contains("Feedback");
+        newFeedbackPage.getIssueType().contains("Negative Feedback");
+        newFeedbackPage.getDescription().type("Test Description");
+        newFeedbackPage.getComments().type("Test comment");
+        newFeedbackPage.getAdminAreaAutocomplete().click();
+        newFeedbackPage.getOption().contains("Zari").click();
+        newFeedbackPage.getInputArea().type("Test Area");
+        newFeedbackPage.getInputLanguage().type("Random Language");
+        newFeedbackPage.getButtonNext().contains("Save").click();
+        feedbackDetailsPage.getDescription().contains("Test Description");
+        feedbackDetailsPage.getComments().contains("Test comment");
+        feedbackDetailsPage.getAdministrativeLevel2().contains("Zari");
+        feedbackDetailsPage.getCategory().contains("Feedback");
+        feedbackDetailsPage.getIssueType().contains("Negative Feedback");
+        feedbackDetailsPage.getAreaVillagePayPoint().contains("Test Area");
+        feedbackDetailsPage.getLanguagesSpoken().contains("Random Language");
+        feedbackDetailsPage.getTitlePage().contains("Feedback");
       });
-      it.skip("Create New Feedback - Positive Feedback", () => {
-        // ToDo
+      it("Create New Feedback - Positive Feedback", () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Press Feedback button in menu",
+          "Press Submit New Feedback button",
+          "Choose Issue Type: Positive Feedback",
+          "Press button Next",
+          "Choose household and press Next button",
+          "Select 'Received Consent*' and press Next button",
+          "Fill all fields",
+          `Press button Save`,
+          `Check data in details page`,
+        ]);
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Positive");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getHouseholdTableRows(1).click();
+        newFeedbackPage.getLookUpIndividual().click();
+        newFeedbackPage.getHouseholdTableRows(0).click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getLabelCategory().contains("Feedback");
+        // ToDo Add after fix bug: XXX
+        // newFeedbackPage.getIssueType().contains("Positive Feedback");
+        newFeedbackPage.getDescription().type("Test Description");
+        newFeedbackPage.getComments().type("Test comment");
+        newFeedbackPage.getAdminAreaAutocomplete().click();
+        newFeedbackPage.getOption().contains("Zari").click();
+        newFeedbackPage.getInputArea().type("Test Area");
+        newFeedbackPage.getInputLanguage().type("Random Language");
+        newFeedbackPage.getButtonNext().contains("Save").click();
+        feedbackDetailsPage.getDescription().contains("Test Description");
+        feedbackDetailsPage.getComments().contains("Test comment");
+        feedbackDetailsPage.getAdministrativeLevel2().contains("Zari");
+        feedbackDetailsPage.getCategory().contains("Feedback");
+        feedbackDetailsPage.getIssueType().contains("Positive Feedback");
+        feedbackDetailsPage.getAreaVillagePayPoint().contains("Test Area");
+        feedbackDetailsPage.getLanguagesSpoken().contains("Random Language");
+        feedbackDetailsPage.getTitlePage().contains("Feedback");
       });
       it.skip("Create New Feedback - Cancel", () => {
         // ToDo
