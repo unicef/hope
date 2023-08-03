@@ -647,7 +647,7 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
             grievance_tickets.filter(status=GrievanceTicket.STATUS_NEW).update(status=GrievanceTicket.STATUS_ASSIGNED)
             grievance_tickets.update(assigned_to=assigned_to_obj)
             bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id)
-            # need remove cache for correct filtering grievance tickets
+            # count cache must be removed for proper filtering in grievance tickets
             cache_key = f"count_{business_area_slug}_GrievanceTicketNodeConnection_"
             clear_cache_for_key(cache_key)
 
