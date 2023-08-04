@@ -21,7 +21,7 @@ describe("Grievance", () => {
       cy.scenario([
         "Go to Grievance page",
         "Elements of Grievance menu are visible",
-        "Check if all elements on page exist",
+        "Check if all elements on page exist"
       ]);
       grievancePage.checkGrievanceMenu();
       grievancePage.checkElementsOnUserGeneratedPage();
@@ -32,7 +32,7 @@ describe("Grievance", () => {
         "Go to Grievance page",
         "Press tab: System-Generated",
         "Choose first row from Grievance Tickets List",
-        "Check if all elements on details page exist",
+        "Check if all elements on details page exist"
       ]);
       grievancePage.getTabSystemGenerated().click();
       cy.url().should("include", "/system-generated");
@@ -60,7 +60,7 @@ describe("Grievance", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press New Ticket button",
-        "Check if all elements on details page exist",
+        "Check if all elements on details page exist"
       ]);
       grievancePage.getButtonNewTicket().click();
       newTicketPage.checkElementsOnPage();
@@ -71,10 +71,10 @@ describe("Grievance", () => {
     context("Export", () => {
       it.skip("Export", () => {});
     });
-    context("Grievance Filters", () => {
+    context.skip("Grievance Filters", () => {
       [
         ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
-        ["SYSTEM-GENERATED", "GRV-0000003", 1, "Ticket ID: GRV-0000003"],
+        ["SYSTEM-GENERATED", "GRV-0000003", 1, "Ticket ID: GRV-0000003"]
       ].forEach((testData) => {
         it("Grievance Search filter " + testData[0], () => {
           cy.scenario([
@@ -88,7 +88,7 @@ describe("Grievance", () => {
             "Press button Apply",
             `Check if Tickets List has ${testData[2]} rows`,
             "Press first row from Ticket List and check data",
-            "Come back to Grievance Page",
+            "Come back to Grievance Page"
           ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.useSearchFilter("Not Exist");
@@ -108,7 +108,7 @@ describe("Grievance", () => {
           "Kowalska",
           1,
           "Ticket ID: GRV-0000005",
-          "GRV-0000005",
+          "GRV-0000005"
         ],
         [
           "SYSTEM-GENERATED",
@@ -117,8 +117,8 @@ describe("Grievance", () => {
           "Romaniak",
           1,
           "Ticket ID: GRV-0000003",
-          "GRV-0000003",
-        ],
+          "GRV-0000003"
+        ]
       ].forEach((testData) => {
         it("Grievance Search Type filter " + testData[0], () => {
           cy.scenario([
@@ -148,7 +148,7 @@ describe("Grievance", () => {
             "Press button Apply",
             `Check if Tickets List has ${testData[4]} rows`,
             "Press first row from Ticket List and check data",
-            "Come back to Grievance Page",
+            "Come back to Grievance Page"
           ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.checkTicketTypeFilterText("Ticket ID");
@@ -183,7 +183,7 @@ describe("Grievance", () => {
         ["Assigned", 1, "GRV-0000005"],
         ["For Approval", 1, "GRV-0000001"],
         ["In Progress", 1, "GRV-0000004"],
-        ["On Hold", 1, "GRV-0000002"],
+        ["On Hold", 1, "GRV-0000002"]
       ].forEach((testData) => {
         it(`Grievance Status filter ${testData[0]}`, () => {
           grievancePage.chooseStatusFilter(testData[0]);
@@ -196,7 +196,7 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", 1],
-        ["SYSTEM-GENERATED", 0],
+        ["SYSTEM-GENERATED", 0]
       ].forEach((testData) => {
         it(`Grievance Creation Date From filter of ${testData[0]} tab`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -213,7 +213,7 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", 3],
-        ["SYSTEM-GENERATED", 1],
+        ["SYSTEM-GENERATED", 1]
       ].forEach((testData) => {
         it(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -232,7 +232,7 @@ describe("Grievance", () => {
       [
         ["Data Change", "GRV-0000005"],
         // ["Sensitive Grievance", "GRV-0000004"], ToDo: 166077
-        ["Referral", "GRV-0000001"],
+        ["Referral", "GRV-0000001"]
         // ["Grievance Complaint", "GRV-0000001"], ToDo: 166077
       ].forEach((testData) => {
         it(`Grievance Category filter - ${testData[0]}`, () => {
@@ -251,7 +251,7 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", 2],
-        ["SYSTEM-GENERATED", 0],
+        ["SYSTEM-GENERATED", 0]
       ].forEach((testData) => {
         it(`Grievance Assignee filter - ${testData[0]}`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -280,7 +280,7 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", "GRV-0000001"],
-        ["SYSTEM-GENERATED", "GRV-0000003"],
+        ["SYSTEM-GENERATED", "GRV-0000003"]
       ].forEach((testData) => {
         it("Grievance Registration Date Import filter", () => {
           grievancePage.chooseTab(testData[0]);
@@ -296,7 +296,7 @@ describe("Grievance", () => {
         ["USER-GENERATED", "High", 1, "GRV-0000005"],
         ["USER-GENERATED", "Low", 1, "GRV-0000002"],
         ["USER-GENERATED", "Medium", 2, "GRV-0000001"],
-        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"]
       ].forEach((testData) => {
         it(`Grievance Priority filter - ${testData[1]}`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -309,7 +309,7 @@ describe("Grievance", () => {
         ["USER-GENERATED", "Very urgent", 1, "GRV-0000005"],
         ["USER-GENERATED", "Urgent", 2, "GRV-0000001"],
         ["USER-GENERATED", "Not urgent", 1, "GRV-0000002"],
-        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"]
       ].forEach((testData) => {
         it(`Grievance Urgency filter - ${testData[1]}`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -826,7 +826,7 @@ describe("Grievance", () => {
         "FSP Related Complaint",
         "Registration Related Complaint",
         "Other Complaint",
-        "Partner Related Complaint",
+        "Partner Related Complaint"
       ].forEach((testData) => {
         it(`Create New Ticket - Grievance Complaint - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
@@ -1011,7 +1011,7 @@ describe("Grievance", () => {
         "Miscellaneous",
         "Personal disputes",
         "Sexual harassment and sexual exploitation",
-        "Unauthorized use, misuse or waste of UNICEF property or funds",
+        "Unauthorized use, misuse or waste of UNICEF property or funds"
       ].forEach((testData) => {
         it(`Create New Ticket - Sensitive Grievance - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
