@@ -76,7 +76,7 @@ fs.readFile(
           // channel: CHANNEL,
         });
       } else {
-        const text = `Passed: ${report.stats.passes} \tFailed: ${report.stats.failures} \tToDo: ${report.stats.pending}\n`;
+        const text = `Passed: ${report.stats.passes} \tFailed: ${report.stats.failures} \tToDo: ${report.stats.pending} \tSkipped: ${report.stats.skipped}\n `;
         console.log(`Branch name: ${branchName} Build ID: ${buildID}`);
 
         sendMessage({
@@ -101,15 +101,17 @@ fs.readFile(
                   report.stats.passes,
                   report.stats.failures,
                   report.stats.pending,
+                  report.stats.skipped,
                 ],
                 backgroundColor: [
                   "rgb(75, 192, 192)",
                   "rgb(255, 99, 132)",
                   "rgb(54, 162, 235)",
+                  "rgb(235,129,54)",
                 ],
               },
             ],
-            labels: ["Pass", "Failed", "ToDo"],
+            labels: ["Pass", "Failed", "ToDo", "Skipped"],
           },
           options: {
             plugins: {
