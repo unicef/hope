@@ -373,6 +373,7 @@ class Household(
             "unhcr_id",
             "kobo_asset_id",
             "row_id",
+            "registration_id",
         ]
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -464,6 +465,7 @@ class Household(
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     total_cash_received_usd = models.DecimalField(
         null=True,
         decimal_places=2,
@@ -786,6 +788,7 @@ class Individual(
             "who_answers_alt_phone",
             "kobo_asset_id",
             "row_id",
+            "registration_id",
         ]
     )
     duplicate = models.BooleanField(default=False, db_index=True)
@@ -878,6 +881,7 @@ class Individual(
     child_hoh = models.BooleanField(default=False)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
