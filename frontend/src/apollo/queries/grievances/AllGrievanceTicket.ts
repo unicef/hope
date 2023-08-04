@@ -18,6 +18,7 @@ export const AllGrievanceTicket = gql`
     $orderBy: String
     $registrationDataImport: ID
     $assignedTo: ID
+    $createdBy: ID
     $cashPlan: String
     $scoreMin: String
     $scoreMax: String
@@ -46,6 +47,7 @@ export const AllGrievanceTicket = gql`
       admin2: $admin2
       registrationDataImport: $registrationDataImport
       assignedTo: $assignedTo
+      createdBy: $createdBy
       cashPlan: $cashPlan
       scoreMin: $scoreMin
       scoreMax: $scoreMax

@@ -932,6 +932,7 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 

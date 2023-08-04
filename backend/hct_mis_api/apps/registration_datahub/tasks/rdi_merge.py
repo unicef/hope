@@ -143,6 +143,7 @@ class RdiMergeTask:
         "row_id",
         "disability_certificate_picture",
         "preferred_language",
+        "age_at_registration",
     )
 
     def merge_admin_areas(
