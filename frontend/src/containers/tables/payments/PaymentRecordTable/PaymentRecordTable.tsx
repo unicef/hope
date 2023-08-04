@@ -6,7 +6,6 @@ import {
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
 } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentRecordTableHeadCells';
 import { PaymentRecordTableRow } from './PaymentRecordTableRow';
@@ -15,16 +14,13 @@ interface PaymentRecordTableProps {
   cashPlan: CashPlanNode;
   openInNewTab?: boolean;
 }
-export function PaymentRecordTable({
+export const PaymentRecordTable = ({
   cashPlan,
   openInNewTab = false,
-}: PaymentRecordTableProps): ReactElement {
+}: PaymentRecordTableProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllPaymentRecordsQueryVariables = {
     parent: cashPlan.id,
-    businessArea,
-    program: programId,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
@@ -42,4 +38,4 @@ export function PaymentRecordTable({
       )}
     />
   );
-}
+};
