@@ -86,9 +86,11 @@ def init_targeting(seed: str) -> None:
     create_household_with_individual(address=f"TargetingVille-{seed}")
     ProgramFactory(name=f"TargetingProgram-{seed}", status=Program.ACTIVE)
 
+
 def init_clear(seed: str) -> None:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.settings")
     execute_from_command_line(["init-e2e-scenario.py", "initcypress", "--skip-drop"])
+
 
 def init_payment_plan(seed: str) -> None:
     afghanistan = BusinessArea.objects.get(name="Afghanistan")
@@ -162,4 +164,6 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         print("Initializing scenario with options:", {k: v for k, v in options.items() if k in ["scenario", "seed"]})
-        {"targeting": init_targeting, "payment_plan": init_payment_plan, "init_clear": init_clear}[options["scenario"]](options["seed"])
+        {"targeting": init_targeting, "payment_plan": init_payment_plan, "init_clear": init_clear}[options["scenario"]](
+            options["seed"]
+        )
