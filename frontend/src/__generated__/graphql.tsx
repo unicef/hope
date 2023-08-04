@@ -8813,7 +8813,10 @@ export type IndividualMinimalFragment = (
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
   & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
-  & { documents: (
+  & { paymentChannels: Maybe<Array<Maybe<(
+    { __typename?: 'BankAccountInfoNode' }
+    & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+  )>>>, documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
       { __typename?: 'DocumentNodeEdge' }
@@ -13762,6 +13765,11 @@ export const IndividualDetailedFragmentDoc = gql`
   disability
   photo
   workStatus
+  paymentChannels {
+    id
+    bankName
+    bankAccountNumber
+  }
   documents {
     edges {
       node {
