@@ -18,6 +18,7 @@ from constance import config
 from rest_framework.response import Response
 from rest_framework import status
 
+
 class RejectPolicy(models.TextChoices):
     STRICT = "STRICT", "Strict"
     LAX = "LAX", "Lax"
