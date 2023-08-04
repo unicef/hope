@@ -46,6 +46,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -222,6 +223,9 @@ class RdiDiiaCreateTask:
                         household=household_obj,
                         email=individual.email,
                         program_id=program.id,
+                        age_at_registration=calculate_age_at_registration(
+                            registration_data_import_data_hub, individual.birth_date
+                        ),
                     )
                     individuals_to_create_list.append(individual_obj)
 

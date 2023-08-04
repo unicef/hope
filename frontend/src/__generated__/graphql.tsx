@@ -2864,6 +2864,7 @@ export type ImportedIndividualNode = Node & {
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
   programId?: Maybe<Scalars['UUID']>,
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -3076,6 +3077,7 @@ export type IndividualNode = Node & {
   program?: Maybe<ProgramNode>,
   copiedFrom?: Maybe<IndividualNode>,
   originUnicefId?: Maybe<Scalars['String']>,
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -5521,6 +5523,7 @@ export type QueryAllGrievanceTicketArgs = {
   assignedTo?: Maybe<Scalars['ID']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   admin2?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -6201,6 +6204,7 @@ export type QueryAllUsersArgs = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   roles?: Maybe<Array<Maybe<Scalars['String']>>>,
+  isTicketCreator?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -11073,7 +11077,8 @@ export type AllUsersForFiltersQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  search?: Maybe<Scalars['String']>
+  search?: Maybe<Scalars['String']>,
+  isTicketCreator?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -11465,6 +11470,7 @@ export type AllGrievanceTicketQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['ID']>,
   cashPlan?: Maybe<Scalars['String']>,
   scoreMin?: Maybe<Scalars['String']>,
   scoreMax?: Maybe<Scalars['String']>,
@@ -20005,8 +20011,8 @@ export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const AllUsersForFiltersDocument = gql`
-    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String) {
-  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search) {
+    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator) {
     edges {
       node {
         id
@@ -20055,6 +20061,7 @@ export function withAllUsersForFilters<TProps, TChildProps = {}>(operationOption
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
+ *      isTicketCreator: // value for 'isTicketCreator'
  *   },
  * });
  */
@@ -21127,8 +21134,8 @@ export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAl
 export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
 export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin2, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage, program: $program) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin2, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, createdBy: $createdBy, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage, program: $program) {
     totalCount
     pageInfo {
       startCursor
@@ -21216,6 +21223,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      orderBy: // value for 'orderBy'
  *      registrationDataImport: // value for 'registrationDataImport'
  *      assignedTo: // value for 'assignedTo'
+ *      createdBy: // value for 'createdBy'
  *      cashPlan: // value for 'cashPlan'
  *      scoreMin: // value for 'scoreMin'
  *      scoreMax: // value for 'scoreMax'
@@ -29606,6 +29614,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
@@ -29733,6 +29742,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,

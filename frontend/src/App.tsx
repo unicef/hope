@@ -5,6 +5,7 @@ import { SentryRoute } from './components/core/SentryRoute';
 import { DefaultRoute } from './containers/DefaultRoute';
 import { LoginPage } from './containers/pages/core/LoginPage';
 import { ProfilePage } from './containers/pages/core/ProfilePage';
+import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage';
 import { AllProgramsRoutesSwitch } from './containers/routers/AllProgramsRoutesSwitch';
 import { BaseHomeRouter } from './containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from './containers/routers/SelectedProgramRoutesSwitch';
@@ -18,6 +19,9 @@ export const App: React.FC = () => {
         <Switch>
           <SentryRoute path='/login'>
             <LoginPage />
+          </SentryRoute>
+          <SentryRoute path='/maintenance'>
+            <MaintenancePage />
           </SentryRoute>
           <SentryRoute path='/sentry-check'>
             <button

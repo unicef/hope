@@ -150,7 +150,7 @@ class TestSriLankaRegistrationService(TestCase):
         cls.user = UserFactory.create()
         cls.organization = OrganizationFactory.create(slug="sri-lanka")
         project = ProjectFactory.create(organization=cls.organization)
-        cls.registration = RegistrationFactory.create(project=project)
+        cls.registration = RegistrationFactory.create(project=project, created_at="2022-05-06")
 
     def test_import_data_to_datahub(self) -> None:
         service = SriLankaRegistrationService(self.registration)
@@ -195,6 +195,7 @@ class TestSriLankaRegistrationService(TestCase):
             },
         )
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
+        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)

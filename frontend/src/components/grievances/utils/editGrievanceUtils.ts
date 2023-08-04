@@ -14,8 +14,8 @@ import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHousehol
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 
 interface EditValuesTypes {
-  priority?: number;
-  urgency?: number;
+  priority?: number | string;
+  urgency?: number | string;
   description?: string;
   assignedTo?: string;
   issueType?: string | number;
@@ -199,8 +199,8 @@ export function prepareInitialValues(
 ): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
-    priority: ticket.priority,
-    urgency: ticket.urgency,
+    priority: ticket.priority === 0 ? 'Not set' : ticket.priority,
+    urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
     partner: ticket.partner?.id,
     comments: ticket.comments,
     program: [ticket.programs[0]?.id],
@@ -504,8 +504,8 @@ export function prepareVariables(businessArea, values, ticket) {
     area: values.area,
     household: values.selectedHousehold?.id,
     individual: values.selectedIndividual?.id,
-    priority: values.priority,
-    urgency: values.urgency,
+    priority: values.priority === 'Not set' ? 0 : values.priority,
+    urgency: values.urgency === 'Not set' ? 0 : values.urgency,
     partner: values.partner,
     comments: values.comments,
     program: ticket.programs?.[0]?.id,
