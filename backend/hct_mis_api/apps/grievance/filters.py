@@ -201,13 +201,23 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         elif key == "ticket_hh_id":
             return qs.filter(Q(household_unicef_id=value))
         elif key == "family_name":
+            value = value.strip()
             ids = (
                 Individual.objects.filter(Q(family_name=value) & Q(relationship=HEAD))
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(Q(household_unicef_id__in=ids))
+        elif key == "registration_id":
+            value = value.strip()
+            ids = (
+                Individual.objects.filter(relationship=HEAD, registration_id=value)
+                .select_related("household")
+                .values_list("household__unicef_id", flat=True)
+            )
+            return qs.filter(Q(household_unicef_id__in=ids))
         elif DocumentType.objects.filter(key=key).exists():
+            value = value.strip()
             ids = (
                 Individual.objects.filter(
                     Q(relationship=HEAD) & Q(documents__type__key=key) & Q(documents__document_number__icontains=value)
