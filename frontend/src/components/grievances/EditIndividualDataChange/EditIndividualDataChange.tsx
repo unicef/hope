@@ -138,7 +138,7 @@ export const EditIndividualDataChange = ({
           <ExistingDocumentFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={individual}
+            individual={fullIndividual.individual}
             addIndividualFieldsData={addIndividualFieldsData}
           />
           {!isEditTicket && (
@@ -158,7 +158,7 @@ export const EditIndividualDataChange = ({
           <ExistingIdentityFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={individual}
+            individual={fullIndividual.individual}
             addIndividualFieldsData={addIndividualFieldsData}
           />
           {!isEditTicket && (
@@ -177,7 +177,7 @@ export const EditIndividualDataChange = ({
           <ExistingPaymentChannelFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={individual}
+            individual={fullIndividual.individual}
           />
           {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
         </Box>
