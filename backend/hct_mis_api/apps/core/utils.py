@@ -825,8 +825,8 @@ def clear_cache_for_dashboard_totals() -> None:
 def clear_cache_for_key(key: str) -> None:
     """remove cache if key starts with"""
     if hasattr(cache, "keys"):
-        all_cache_keys = cache.keys("*")
-        for k in [cached_key for cached_key in all_cache_keys if cached_key.startswith(key)]:
+        all_cache_keys = cache.keys(f"{key}*")
+        for k in all_cache_keys:
             cache.delete(k)
 
 
