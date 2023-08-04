@@ -18,6 +18,10 @@ describe("Grievance - Feedback", () => {
     feedbackPage.clickMenuButtonFeedback();
   });
 
+  after(() => {
+    cy.initScenario("init_clear");
+  });
+
   describe("Smoke tests Feedback", () => {
     it("Check Feedback page", () => {
       cy.scenario([
@@ -190,7 +194,7 @@ describe("Grievance - Feedback", () => {
         feedbackDetailsPage.getLanguagesSpoken().contains("Random Language");
         feedbackDetailsPage.getTitlePage().contains("Feedback");
       });
-      it("Create New Feedback - Positive Feedback", () => {
+      it.only("Create New Feedback - Positive Feedback", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
@@ -209,7 +213,7 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getHouseholdTab().should("be.visible");
         newFeedbackPage.getHouseholdTableRows(1).click();
         newFeedbackPage.getLookUpIndividual().click();
-        newFeedbackPage.getHouseholdTableRows(0).click();
+        newFeedbackPage.getIndividualTableRow(0).click();
         newFeedbackPage.getButtonNext().click();
         newFeedbackPage.getReceivedConsent().click();
         newFeedbackPage.getButtonNext().click();
@@ -392,12 +396,11 @@ describe("Grievance - Feedback", () => {
     });
 
     context("Edit Feedback", () => {
-      it.skip("Edit Feedback", () => {
-        // ToDo
+      it.only("Edit Feedback", () => {
+        cy.log("nic");
       });
     });
   });
   describe.skip("E2E tests Feedback", () => {});
-
   describe.skip("Regression tests Feedback", () => {});
 });
