@@ -24,15 +24,24 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         console.error(`Permission denied for mutation`);
       }
     });
-  }
 
-  if (networkError) {
-    // eslint-disable-next-line no-console
-    console.error(
-      `[Network error]: ${networkError}`,
-      networkError,
-      graphQLErrors,
-    );
+    const maintenanceError =
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      networkError?.result?.message ===
+      'Migrations are running, please try again later';
+
+    if (maintenanceError) {
+      window.location.href = '/maintenance';
+    }
+
+    if (networkError)
+      // eslint-disable-next-line no-console
+      console.error(
+        `[Network error]: ${networkError}`,
+        networkError,
+        graphQLErrors,
+      );
   }
 });
 

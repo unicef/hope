@@ -54,6 +54,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    MigrationStatus,
     StorageFile,
     XLSXKoboTemplate,
 )
@@ -703,3 +704,8 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
             self.message_user(request, "Creation of TargetPopulation started")
             return redirect("..")
+
+
+@admin.register(MigrationStatus)
+class MigrationStatusAdmin(admin.ModelAdmin):
+    pass
