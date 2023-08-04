@@ -1,5 +1,4 @@
 import os
-import sys
 from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Any, Tuple
