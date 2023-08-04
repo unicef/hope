@@ -30,10 +30,10 @@ Cypress.Commands.add("createExcel", () => {
   });
 });
 Cypress.Commands.add("adminLogin", () => {
-    cy.visit("/api/unicorn/");
-    cy.get('input[name="username"]').type(Cypress.env("username"));
-    cy.get('input[name="password"]').type(Cypress.env("password"));
-    cy.get("input").contains("Log in").click();
+  cy.visit("/api/unicorn/");
+  cy.get('input[name="username"]').type(Cypress.env("username"));
+  cy.get('input[name="password"]').type(Cypress.env("password"));
+  cy.get("input").contains("Log in").click();
 });
 
 Cypress.Commands.add("navigateToHomePage", () => {
@@ -69,7 +69,7 @@ Cypress.Commands.add("scenario", (steps) => {
       { test },
       {
         title: "Scenario",
-        value: outputText,
+        value: outputText
       }
     );
   });
@@ -81,7 +81,7 @@ Cypress.on("fail", (error, runnable) => {
       { test },
       {
         title: "Error",
-        value: error.stack,
+        value: error.stack
       }
     );
   });
