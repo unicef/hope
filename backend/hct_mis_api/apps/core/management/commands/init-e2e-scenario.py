@@ -1,8 +1,8 @@
+import os
+import sys
 from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Any, Tuple
-import os
-import sys
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
