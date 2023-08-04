@@ -15,7 +15,7 @@ from power_query.widget import PythonFormatterEditor
 from hct_mis_api.apps.steficon.config import config
 from hct_mis_api.apps.steficon.interpreters import Interpreter, mapping
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
-from hct_mis_api.apps.steficon.widget import ContentTypeChoiceField, PythonEditor
+from hct_mis_api.apps.steficon.widget import ContentTypeChoiceField
 
 if TYPE_CHECKING:
     from django.db.models.fields import _ChoicesCallable
@@ -193,7 +193,7 @@ class RuleTestForm(forms.Form):
 
 
 class RuleForm(forms.ModelForm):
-    definition = forms.CharField(widget=PythonEditor)
+    definition = forms.CharField(widget=PythonFormatterEditor)
 
     class Meta:
         model = Rule

@@ -1,6 +1,7 @@
 node_modules
 *.log
 *.aes
+report.zip
 cypress/screenshots
 cypress/videos
 cypress/logs

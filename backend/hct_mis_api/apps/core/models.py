@@ -408,3 +408,7 @@ class FileTemp(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.file.name} - {self.created}"
+
+
+class MigrationStatus(TimeStampedModel):
+    is_running = models.BooleanField()

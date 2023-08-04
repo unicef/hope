@@ -1,3 +1,5 @@
+from typing import Any
+
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -40,3 +42,12 @@ class RegistrationFactory(DjangoModelFactory):
     name = factory.LazyFunction(faker.city)
     project = factory.SubFactory(ProjectFactory)
     source_id = factory.fuzzy.FuzzyInteger(1, 100)
+
+    @classmethod
+    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> Registration:
+        created_at = kwargs.pop("created_at", None)
+        obj = super()._create(target_class, *args, **kwargs)
+        if created_at:
+            obj.created_at = created_at
+            obj.save()
+        return obj

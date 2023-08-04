@@ -77,10 +77,9 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
-                topNumber={`${(
-                  (userWeightedTime + systemWeightedTime) /
-                  numberOfClosedTickets
-                ).toFixed(2)} days`}
+                topNumber={`${numberOfClosedTickets > 0 ? (
+                  (userWeightedTime + systemWeightedTime) / numberOfClosedTickets
+                ).toFixed(2) : 0} days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
                 userGenerated={`${userGeneratedAvgResolution} days`}
                 dataCy='tickets-average-resolution'
