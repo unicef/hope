@@ -509,7 +509,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=BackgroundActionStatus.XLSX_EXPORTING,
+        source=[BackgroundActionStatus.XLSX_EXPORTING, BackgroundActionStatus.XLSX_EXPORT_ERROR],
         target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[
             lambda obj: obj.status
@@ -530,7 +530,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.RULE_ENGINE_RUN],
+        source=[BackgroundActionStatus.RULE_ENGINE_RUN, BackgroundActionStatus.RULE_ENGINE_ERROR],
         target=BackgroundActionStatus.RULE_ENGINE_ERROR,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -563,6 +563,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=[
             BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
             BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],
         target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[
