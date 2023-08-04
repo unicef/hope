@@ -349,6 +349,7 @@ type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
   startDate: DateTime!
@@ -2037,6 +2038,7 @@ type ImportedIndividualNode implements Node {
   disabilityCertificatePicture: String
   preferredLanguage: String
   misUnicefId: String
+  ageAtRegistration: Int
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -2203,6 +2205,7 @@ type IndividualNode implements Node {
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
+  ageAtRegistration: Int
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2491,7 +2494,7 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
-  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!): CreateVerificationPlanMutation
+  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!, version: BigInt): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
   importXlsxPaymentVerificationPlanFile(file: Upload!, paymentVerificationPlanId: ID!): ImportXlsxPaymentVerificationPlanFile
@@ -2858,6 +2861,7 @@ type PaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   unicefId: String
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!

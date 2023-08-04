@@ -348,7 +348,7 @@ class GenericPayment(TimeStampedUUIDModel):
         return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
 
 
-class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
+class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -1225,7 +1225,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         self.sent_by = sent_by
 
 
-class CashPlan(GenericPaymentPlan):
+class CashPlan(ConcurrencyModel, GenericPaymentPlan):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
