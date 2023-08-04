@@ -170,7 +170,7 @@ class RdiMergeTask:
 
     def _prepare_households(
         self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
-    ) -> Dict:
+    ) -> Dict[int, Household]:
         households_dict = {}
         countries = {}
         for imported_household in imported_households:
@@ -188,6 +188,9 @@ class RdiMergeTask:
 
             if country_origin := countries.get(country_origin.code):
                 household_data["country_origin"] = country_origin
+
+            if record := imported_household.flex_registrations_record:
+                household_data["registration_id"] = record.registration
 
             if enumerator_rec_id := imported_household.enumerator_rec_id:
                 household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
@@ -234,7 +237,10 @@ class RdiMergeTask:
         return documents_to_create, identities_to_create
 
     def _prepare_individuals(
-        self, imported_individuals: List[ImportedIndividual], households_dict: Dict, obj_hct: RegistrationDataImport
+        self,
+        imported_individuals: List[ImportedIndividual],
+        households_dict: Dict[int, Household],
+        obj_hct: RegistrationDataImport,
     ) -> Tuple[Dict, List, List]:
         individuals_dict = {}
         documents_to_create = []
@@ -259,6 +265,7 @@ class RdiMergeTask:
             individual = Individual(
                 **values,
                 household=household,
+                registration_id=household.registration_id,
                 business_area=obj_hct.business_area,
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
