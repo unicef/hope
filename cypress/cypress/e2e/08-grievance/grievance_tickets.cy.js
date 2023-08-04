@@ -10,6 +10,7 @@ describe("Grievance", () => {
   before(function () {
     cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");
+    cy.adminLogin();
     cy.navigateToHomePage();
     grievancePage.clickMenuButtonGrievance();
   });
