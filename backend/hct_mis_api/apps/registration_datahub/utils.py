@@ -1,5 +1,8 @@
+import re
 import sys
 from typing import Any, Dict, List, Optional
+
+from hct_mis_api.apps.core.kobo.common import get_field_name
 
 
 def post_process_dedupe_results(record: Any) -> None:
@@ -38,3 +41,13 @@ def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: b
         else:
             a[key] = b[key]
     return a
+
+
+def find_attachment_in_kobo(attachments: List[Dict], value: str) -> Optional[Dict]:
+    file_extension = value.split(".")[-1]
+    filename = re.escape(".".join(value.split(".")[:-1]))
+    regex_name = re.compile(f"{filename}(_\\w+)?\\.{file_extension}")
+    for attachment in attachments:
+        if regex_name.match(get_field_name(attachment["filename"])):
+            return attachment
+    return None

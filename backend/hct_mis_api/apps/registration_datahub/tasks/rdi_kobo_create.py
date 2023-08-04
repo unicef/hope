@@ -43,6 +43,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
+from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -54,7 +55,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     reduced_submissions = None
     business_area = None
-    attachments = None
+    attachments: Optional[List[Dict]] = None
 
     def __init__(
         self,
@@ -67,16 +68,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
         if not self.registration_data_import_mis.pull_pictures:
             return None
-        download_url = ""
-        for attachment in self.attachments:
-            filename = attachment.get("filename", "")
-            current_download_url = attachment.get("download_url", "")
-            if filename.endswith(value):
-                download_url = current_download_url.replace("?format=json", "")
-
-        if not download_url:
-            return download_url
-
+        if self.attachments is None:
+            return None
+        attachment = find_attachment_in_kobo(self.attachments, value)
+        if attachment is None:
+            return None
+        current_download_url = attachment.get("download_url", "")
+        download_url = current_download_url.replace("?format=json", "")
+        print(download_url)
         api = KoboAPI(self.business_area.slug)
         image_bytes = api.get_attached_file(download_url)
         file = File(image_bytes, name=value)
