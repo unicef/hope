@@ -12,7 +12,6 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     feedbackPage.clickMenuButtonGrievance();
     feedbackPage.clickMenuButtonFeedback();
@@ -194,7 +193,7 @@ describe("Grievance - Feedback", () => {
         feedbackDetailsPage.getLanguagesSpoken().contains("Random Language");
         feedbackDetailsPage.getTitlePage().contains("Feedback");
       });
-      it.only("Create New Feedback - Positive Feedback", () => {
+      it("Create New Feedback - Positive Feedback", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
@@ -396,9 +395,7 @@ describe("Grievance - Feedback", () => {
     });
 
     context("Edit Feedback", () => {
-      it.only("Edit Feedback", () => {
-        cy.log("nic");
-      });
+      it.skip("Edit Feedback", () => {});
     });
   });
   describe.skip("E2E tests Feedback", () => {});
