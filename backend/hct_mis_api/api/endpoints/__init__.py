@@ -1,4 +1,5 @@
 from hct_mis_api.api.endpoints.area import AreaList, AreaTypeList  # noqa: F401
+from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.lookups import (  # noqa: F401
     Country,
     DataCollectingPolicy,

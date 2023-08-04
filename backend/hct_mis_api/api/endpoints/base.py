@@ -14,6 +14,9 @@ from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
 from hct_mis_api.api.models import APILogEntry, Grant
 from hct_mis_api.apps.core.models import BusinessArea
 
+from constance import config
+from rest_framework.response import Response
+from rest_framework import status
 
 class RejectPolicy(models.TextChoices):
     STRICT = "STRICT", "Strict"
@@ -67,3 +70,13 @@ class HOPEAPIBusinessAreaView(SelectedBusinessAreaMixin, HOPEAPIView):
 
 class HOPEAPIBusinessAreaViewSet(SelectedBusinessAreaMixin, HOPEAPIViewSet):
     pass
+
+
+class ConstanceSettingsAPIView(HOPEAPIView):
+    def get(self, request, format=None):
+        rest_settings = {}
+        for setting_name, setting_value, _ in config.CONFIG:
+            rest_setting_name = "REST_" + setting_name
+            rest_settings[rest_setting_name] = setting_value
+
+        return Response(rest_settings, status=status.HTTP_200_OK)
