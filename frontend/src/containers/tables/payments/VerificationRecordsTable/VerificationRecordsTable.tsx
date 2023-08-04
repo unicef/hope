@@ -11,26 +11,21 @@ import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 
 interface Props {
   paymentPlanId?: string;
-  filter?: AllPaymentVerificationsQueryVariables;
+  filter;
   canViewRecordDetails: boolean;
   businessArea: string;
 }
 
-export function VerificationRecordsTable({
+export const VerificationRecordsTable = ({
   paymentPlanId,
   filter,
   canViewRecordDetails,
   businessArea,
-}: Props): ReactElement {
+}: Props): ReactElement => {
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     ...filter,
-    // TODO: cleanup
-    // paymentVerificationPlan: filter.cashPlanPaymentVerification,
-    // search: filter.search,
-    // status: filter.status,
-    // verificationChannel: filter.verificationChannel,
     businessArea,
     paymentPlanId,
   };
@@ -54,4 +49,4 @@ export function VerificationRecordsTable({
       )}
     />
   );
-}
+};

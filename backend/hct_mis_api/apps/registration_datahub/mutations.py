@@ -144,6 +144,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
         created_obj_hct.status = RegistrationDataImport.IMPORT_SCHEDULED
         created_obj_hct.save(update_fields=["status"])
+
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
 
 
