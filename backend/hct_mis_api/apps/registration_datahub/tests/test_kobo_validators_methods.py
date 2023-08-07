@@ -559,19 +559,23 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 449127,
             }
         ]
-        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
-        expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
+        result = validator.image_validator("signature-17_10_32.png", "test_field", invalid_attachments)
+        expected = "Specified image signature-17_10_32.png for field " "test_field is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
-        expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
+        result = validator.image_validator("signature-17_10_32.png", "test_field", [])
+        expected = "Specified image signature-17_10_32.png for field " "test_field is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = validator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
-        expected = "Specified image signature-17_10_32.txt for field " "consent_sign_h_c is not a valid image file"
+        result = validator.image_validator("signature-17_10_32.txt", "test_field", [])
+        expected = "Specified image signature-17_10_32.txt for field " "test_field is not a valid image file"
         self.assertEqual(result, expected)
+
+        # Kobo not always returns consent_sign_h_c in attachments, according to AB#168823 we should skip it
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
+        self.assertIsNone(result)
 
     def test_geopoint_validator(self) -> None:
         valid_geolocations = (
@@ -704,15 +708,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "expected": {
                     "header": "hh_geopoint_h_c",
                     "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
-                },
-            },
-            # IMAGE
-            {
-                "args": ("consent_sign_h_c", "signature-17_10_3.png", attachments),
-                "expected": {
-                    "header": "consent_sign_h_c",
-                    "message": "Specified image signature-17_10_3.png "
-                    "for field consent_sign_h_c is not in attachments",
                 },
             },
         )
