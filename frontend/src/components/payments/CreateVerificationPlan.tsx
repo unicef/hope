@@ -28,6 +28,7 @@ import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { getPercentage } from '../../utils/utils';
 import {
+  PaymentVerificationPlanVerificationChannel,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
@@ -156,7 +157,10 @@ export function CreateVerificationPlan({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      if (formValues.verificationChannel === 'RAPIDPRO') {
+      if (
+        formValues.verificationChannel ===
+        PaymentVerificationPlanVerificationChannel.Rapidpro
+      ) {
         loadRapidProFlows();
       }
     }
