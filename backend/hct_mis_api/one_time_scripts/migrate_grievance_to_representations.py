@@ -146,7 +146,8 @@ def handle_payment_related_tickets() -> None:
             program = payment_obj.target_population.program
         else:
             program = None
-        payment_verification_ticket.ticket.programs.set([program])
+        if program:
+            payment_verification_ticket.ticket.programs.set([program])
 
 
 def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDetails, TicketSensitiveDetails]) -> tuple:
@@ -179,9 +180,9 @@ def handle_non_payment_related_tickets() -> None:
     Copy grievance tickets to representations.
     Applied for tickets not connected to specific payment but connected to household or its individual.
     """
-    print("Handle TicketComplaintDetails")
+    print("Handle TicketComplaintDetails without payment")
     handle_complaint_tickets_without_payments()
-    print("Handle TicketSensitiveDetails")
+    print("Handle TicketSensitiveDetails without payment")
     handle_sensitive_tickets_without_payments()
     print("Handle TicketHouseholdDataUpdateDetails")
     handle_household_data_update_tickets()
@@ -405,7 +406,6 @@ def copy_ticket_with_individual(active_ticket: Any, program: Program, individual
 
     ticket.pk = None
     ticket = copy_grievance_ticket(ticket, program, active_ticket)
-
     ticket.save()
 
 
@@ -728,6 +728,54 @@ def copy_feedback(feedback_obj: Feedback, program: Program) -> None:
         message.save()
 
 
+def copy_grievance_ticket(
+    related_ticket: Any,
+    program: Program,
+    active_ticket: Any,
+    related_grievance_field: str = "ticket",
+) -> Any:
+    grievance_ticket = getattr(related_ticket, related_grievance_field)
+    original_grievance_ticket_id = grievance_ticket.pk
+    grievance_ticket.pk = None
+    grievance_ticket.unicef_id = None
+
+    grievance_ticket.save()
+    grievance_ticket.programs.set([program])
+    grievance_ticket.linked_tickets.set(getattr(active_ticket, related_grievance_field).linked_tickets.distinct())
+    grievance_ticket.linked_tickets.add(original_grievance_ticket_id)
+
+    for note in getattr(active_ticket, related_grievance_field).ticket_notes.all():
+        note.pk = None
+        note.ticket = grievance_ticket
+        note.save()
+
+    for document in getattr(active_ticket, related_grievance_field).support_documents.all():
+        document.pk = None
+        document.grievance_ticket = grievance_ticket
+        document.save()
+
+    setattr(related_ticket, related_grievance_field, grievance_ticket)
+    return related_ticket
+
+
+def create_void_program(business_area: BusinessArea) -> Program:
+    return Program.objects.get_or_create(
+        name="Void Program",
+        business_area=business_area,
+        defaults=dict(
+            status=Program.DRAFT,
+            start_date=timezone.now(),
+            end_date=timezone.datetime.max,
+            budget=0,
+            frequency_of_payments=Program.ONE_OFF,
+            sector=Program.CHILD_PROTECTION,
+            scope=Program.SCOPE_FOR_PARTNERS,
+            cash_plus=True,
+            population_goal=1,
+        ),
+    )[0]
+
+
 def handle_non_program_tickets() -> None:
     """
     Handle tickets that are not connected to any project. They should be moved to dummy program.
@@ -771,24 +819,6 @@ def handle_non_program_tickets() -> None:
                 object_list = []
         if object_list:
             through_model.objects.bulk_create(object_list)
-
-
-def create_void_program(business_area: BusinessArea) -> Program:
-    return Program.objects.get_or_create(
-        name="Void Program",
-        business_area=business_area,
-        defaults=dict(
-            status=Program.DRAFT,
-            start_date=timezone.now(),
-            end_date=timezone.datetime.max,
-            budget=0,
-            frequency_of_payments=Program.ONE_OFF,
-            sector=Program.CHILD_PROTECTION,
-            scope=Program.SCOPE_FOR_PARTNERS,
-            cash_plus=True,
-            population_goal=1,
-        ),
-    )[0]
 
 
 def handle_non_program_feedback() -> None:
@@ -839,49 +869,59 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
         ...
     }
     """
+
+    def retrieve_household_representation(
+        household_from_json: Household, program: Program, role_data: dict
+    ) -> Optional[Household]:
+        if household_from_json_in_program := household_from_json.copied_to.filter(program=program).first():
+            encoded_id = encode_id_base64(household_from_json_in_program.id, "Household")
+            role_data["household"] = encoded_id
+        return household_from_json_in_program
+
+    def retrieve_individual_representation(
+        individual_from_json: Individual, program: Program, role_data: dict
+    ) -> Optional[Individual]:
+        if individual_from_json_in_program := individual_from_json.copied_to.filter(program=program).first():
+            encoded_id = encode_id_base64(individual_from_json_in_program.id, "Individual")
+            role_data["individual"] = encoded_id
+        return individual_from_json_in_program
+
     if not ticket.role_reassign_data:
         return ticket
 
     new_role_reassign_data = {}
     for role_uuid, role_data in ticket.role_reassign_data.items():
         original_data = copy.deepcopy(role_data)
-        household_id = decode_id_string(role_data.get("household"))
-        household = Household.objects.filter(id=household_id).first()
-        if household:
-            if household_in_program := household.copied_to.filter(program=program).first():
-                encoded_id = encode_id_base64(household_in_program.id, "Household")
-                role_data["household"] = encoded_id
-        else:
-            household_in_program = None
-
-        individual_id = decode_id_string(role_data.get("individual"))
-        individual = Individual.objects.filter(id=individual_id).first()
-
-        if individual:
-            if individual_in_program := individual.copied_to.filter(program=program).first():
-                encoded_id = encode_id_base64(individual_in_program.id, "Individual")
-                role_data["individual"] = encoded_id
-        else:
-            individual_in_program = None
-
         role_data_to_extend = {}
-        if individual and household:
+
+        household_from_json = Household.objects.filter(id=decode_id_string(role_data.get("household"))).first()
+
+        individual_from_json = Individual.objects.filter(id=decode_id_string(role_data.get("individual"))).first()
+
+        if individual_from_json and household_from_json:
+            # Fetch correct household representation from JSON
+            household_from_json_in_program = retrieve_household_representation(household_from_json, program, role_data)
+            # Fetch correct individual representation from JSON
+            individual_from_json_in_program = retrieve_individual_representation(
+                individual_from_json, program, role_data
+            )
             if hasattr(ticket, individual_field_name):
                 # Fetch role for individual that is connected to ticket (individual losing this role)
                 role_for_program = IndividualRoleInHousehold.objects.filter(
                     individual=getattr(ticket, individual_field_name).copied_to.filter(program=program).first(),
-                    household=household_in_program,
+                    household=household_from_json_in_program,
                 ).first()
                 if role_for_program:
                     role_data_to_extend[str(role_for_program.id)] = role_data
                 else:
                     # Fetch role for individual that is in a JSON field of ticket (individual receiving this role)
                     role_for_program = IndividualRoleInHousehold.objects.filter(
-                        individual=individual_in_program,
-                        household=household_in_program,
+                        individual=individual_from_json_in_program,
+                        household=household_from_json_in_program,
                     ).first()
                     if role_for_program:
                         role_data_to_extend[str(role_for_program.id)] = role_data
+
             elif hasattr(ticket, "household"):
                 # Fetch role for household provided in JSON and individual that is a part of household
                 # connected to ticket (individual losing this role)
@@ -889,7 +929,7 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
                 role_for_program = IndividualRoleInHousehold.objects.filter(
                     individual__household=household_assigned_in_program,
                     role=role_data.get("role"),
-                    household=household_in_program,
+                    household=household_from_json_in_program,
                 ).first()
                 if role_for_program:
                     role_data_to_extend[str(role_for_program.id)] = role_data
@@ -897,12 +937,11 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
                     # Fetch role for household provided in JSON and individual provided in JSON
                     # (individual receiving this role)
                     role_for_program = IndividualRoleInHousehold.objects.filter(
-                        individual=individual_in_program,
-                        household=household_in_program,
+                        individual=individual_from_json_in_program,
+                        household=household_from_json_in_program,
                     ).first()
                     if role_for_program:
                         role_data_to_extend[str(role_for_program.id)] = role_data
-
         if not role_data_to_extend:
             role_data_to_extend = {role_uuid: original_data}
         new_role_reassign_data.update(role_data_to_extend)
@@ -910,36 +949,6 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
     ticket.role_reassign_data = new_role_reassign_data
     ticket.save()
     return ticket
-
-
-def copy_grievance_ticket(
-    related_ticket: Any,
-    program: Program,
-    active_ticket: Any,
-    related_grievance_field: str = "ticket",
-) -> Any:
-    grievance_ticket = getattr(related_ticket, related_grievance_field)
-    original_grievance_ticket_id = grievance_ticket.pk
-    grievance_ticket.pk = None
-    grievance_ticket.unicef_id = None
-
-    grievance_ticket.save()
-    grievance_ticket.programs.set([program])
-    grievance_ticket.linked_tickets.set(getattr(active_ticket, related_grievance_field).linked_tickets.distinct())
-    grievance_ticket.linked_tickets.add(original_grievance_ticket_id)
-
-    for note in getattr(active_ticket, related_grievance_field).ticket_notes.all():
-        note.pk = None
-        note.ticket = grievance_ticket
-        note.save()
-
-    for document in getattr(active_ticket, related_grievance_field).support_documents.all():
-        document.pk = None
-        document.grievance_ticket = grievance_ticket
-        document.save()
-
-    setattr(related_ticket, related_grievance_field, grievance_ticket)
-    return related_ticket
 
 
 def handle_individual_data(
