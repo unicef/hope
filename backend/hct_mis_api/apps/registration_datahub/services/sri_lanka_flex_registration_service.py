@@ -30,6 +30,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
@@ -101,7 +102,12 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         return household_data
 
-    def _prepare_individual_data(self, head_of_household_info: Dict, **kwargs: Any) -> Dict:
+    def _prepare_individual_data(
+        self,
+        head_of_household_info: Dict,
+        registration_data_import: Optional[RegistrationDataImportDatahub] = None,
+        **kwargs: Any,
+    ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(
                 head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_MAPPING_DICT
@@ -117,6 +123,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if sex := individual_data.get("sex").strip():
             individual_data["sex"] = sex.upper()
 
+        individual_data["age_at_registration"] = calculate_age_at_registration(
+            registration_data_import, individual_data.get("birth_date", "")
+        )
         return individual_data
 
     def _prepare_national_id(
@@ -193,7 +202,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
 
         head_of_household = ImportedIndividual.objects.create(
-            **base_individual_data_dict, **self._prepare_individual_data(head_of_household_dict), relationship=HEAD
+            **base_individual_data_dict,
+            **self._prepare_individual_data(head_of_household_dict, registration_data_import),
+            relationship=HEAD,
         )
         self._prepare_national_id(head_of_household_dict, head_of_household)
 
@@ -203,7 +214,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             primary_collector = head_of_household
         else:
             primary_collector = ImportedIndividual.objects.create(
-                **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
+                **base_individual_data_dict, **self._prepare_individual_data(collector_dict, registration_data_import)
             )
             self._prepare_national_id(collector_dict, primary_collector)
         self._prepare_bank_statement_document(collector_dict, primary_collector)
@@ -219,12 +230,13 @@ class SriLankaRegistrationService(BaseRegistrationService):
         for individual_data_dict in individuals_list:
             if not bool(individual_data_dict):
                 continue
+
             individuals_to_create.append(
                 ImportedIndividual(
                     **{
-                        **self._prepare_individual_data(individual_data_dict),
+                        **self._prepare_individual_data(individual_data_dict, registration_data_import),
                         **base_individual_data_dict,
-                    }
+                    },
                 )
             )
 

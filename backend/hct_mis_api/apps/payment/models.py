@@ -83,7 +83,7 @@ class ChoiceArrayFieldDM(ArrayField):
         }
         defaults.update(kwargs)
 
-        return super(ArrayField, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):

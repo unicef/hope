@@ -73,7 +73,7 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ca
     }
 }
 
-snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_head_of_household_last_name 1'] = {
+snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_head_of_household_family_name 1'] = {
     'data': {
         'allGrievanceTicket': {
             'edges': [

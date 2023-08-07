@@ -13,7 +13,7 @@ variables:
   # ========================================================================
   Kubernetes.serviceConnection: "ICTD-HOPE-TRN-uni-apps-aks-hope-dev-ictd-hope-trn-1616938354772"
   Kubernetes.namespace: "ictd-hope-trn"
-  Chart.version: "2.023.12"
+  Chart.version: "0.1.0"
 
 stages:
   - stage: deploy
@@ -52,4 +52,5 @@ stages:
                 kpi.subdomain=kf-hope,\
                 kobocat.subdomain=kc-hope,\
                 enketo.subdomain=ek-hope,\
+                ingress.annotations.appgw.ingress.kubernetes.io/appgw-ssl-certificate=kv-cert-unitst,\
                 ingress.scheme=https"
