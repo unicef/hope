@@ -2,13 +2,13 @@ import { Box, Grid } from '@material-ui/core';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React from 'react';
-import { AllIndividualsQuery } from '../../../__generated__/graphql';
+import { IndividualQuery } from '../../../__generated__/graphql';
 import { EditPaymentChannelRow } from './EditPaymentChannelRow';
 
 export interface ExistingPaymentChannelFieldArrayProps {
   setFieldValue;
   values;
-  individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+  individual: IndividualQuery['individual'];
 }
 
 export function ExistingPaymentChannelFieldArray({
