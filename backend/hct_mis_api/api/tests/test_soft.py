@@ -242,10 +242,10 @@ class PushLaxToRDITests(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
         data: Dict[Any, Any] = response.json()
-        self.assertEquals(len(data["households"]), 6)
-        self.assertEquals(data["processed"], 6)
-        self.assertEquals(data["errors"], 2)
-        self.assertEquals(data["accepted"], 4)
+        self.assertEqual(len(data["households"]), 6)
+        self.assertEqual(data["processed"], 6)
+        self.assertEqual(data["errors"], 2)
+        self.assertEqual(data["accepted"], 4)
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
         for valid in ["village1", "village4", "village5"]:

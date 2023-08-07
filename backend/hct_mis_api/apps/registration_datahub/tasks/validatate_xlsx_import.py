@@ -26,22 +26,23 @@ class ValidateXlsxImport:
 
         wb = openpyxl.load_workbook(import_data.file)
 
-        hh_sheet = wb["Households"]
-        ind_sheet = wb["Individuals"]
-
         number_of_households = 0
         number_of_individuals = 0
+        hh_sheet = wb["Households"] if "Households" in wb.sheetnames else None
+        ind_sheet = wb["Individuals"] if "Individuals" in wb.sheetnames else None
 
         # Could just return max_row if openpyxl won't count empty rows too
-        for row in hh_sheet.iter_rows(min_row=3):
-            if not any([cell.value for cell in row]):
-                continue
-            number_of_households += 1
+        if hh_sheet:
+            for row in hh_sheet.iter_rows(min_row=3):
+                if not any([cell.value for cell in row]):
+                    continue
+                number_of_households += 1
 
-        for row in ind_sheet.iter_rows(min_row=3):
-            if not any([cell.value for cell in row]):
-                continue
-            number_of_individuals += 1
+        if ind_sheet:
+            for row in ind_sheet.iter_rows(min_row=3):
+                if not any([cell.value for cell in row]):
+                    continue
+                number_of_individuals += 1
         import_data.number_of_households = number_of_households
         import_data.number_of_individuals = number_of_individuals
         import_data.save()

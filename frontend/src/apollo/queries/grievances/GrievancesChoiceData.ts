@@ -40,5 +40,10 @@ export const GrievancesChoiceData = gql`
         value
       }
     }
+
+    grievanceTicketSearchTypesChoices {
+      name
+      value
+    }
   }
 `;

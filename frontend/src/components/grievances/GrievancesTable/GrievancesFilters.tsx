@@ -13,7 +13,6 @@ import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
-  GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
   ISSUE_TYPE_CATEGORIES,
@@ -25,6 +24,7 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
+import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface GrievancesFiltersProps {
   filter;
@@ -123,14 +123,13 @@ export const GrievancesFilters = ({
               data-cy='filters-search-type'
               fullWidth
             >
-              {Object.keys(GrievanceSearchTypes).map((key) => (
-                <MenuItem
-                  key={GrievanceSearchTypes[key]}
-                  value={GrievanceSearchTypes[key]}
-                >
-                  {key.replace(/\B([A-Z])\B/g, ' $1')}
-                </MenuItem>
-              ))}
+              {choicesData?.grievanceTicketSearchTypesChoices?.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
             </SelectFilter>
           </Grid>
         </Grid>
@@ -264,6 +263,20 @@ export const GrievancesFilters = ({
             dataCy='filters-assignee'
           />
         </Grid>
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
+          <Grid item xs={3}>
+            <CreatedByAutocomplete
+              filter={filter}
+              name='createdBy'
+              value={filter.createdBy}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              dataCy='filters-created-by'
+            />
+          </Grid>
+        )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid container item xs={6} spacing={3} alignItems='flex-end'>
             <Grid item xs={6}>

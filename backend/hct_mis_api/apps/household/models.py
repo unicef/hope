@@ -106,7 +106,7 @@ GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
 MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
 DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
 SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
-GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
+GRANDDAUGHTER_GRANDSON = "GRANDDAUGHTER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 FOSTER_CHILD = "FOSTER_CHILD"
@@ -120,7 +120,7 @@ RELATIONSHIP_CHOICE = (
     (BROTHER_SISTER, "Brother / Sister"),
     (COUSIN, "Cousin"),
     (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
-    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
+    (GRANDDAUGHTER_GRANDSON, "Granddaughter / Grandson"),
     (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
     (HEAD, "Head of household (self)"),
     (MOTHER_FATHER, "Mother / Father"),
@@ -304,7 +304,11 @@ logger = logging.getLogger(__name__)
 
 
 class Household(
-    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+    SoftDeletableModelWithDate,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    UnicefIdentifiedModel,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -369,6 +373,7 @@ class Household(
             "unhcr_id",
             "kobo_asset_id",
             "row_id",
+            "registration_id",
         ]
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -460,6 +465,7 @@ class Household(
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     total_cash_received_usd = models.DecimalField(
         null=True,
         decimal_places=2,
@@ -689,7 +695,10 @@ class IndividualIdentity(models.Model):
         max_length=255,
     )
     partner = models.ForeignKey(
-        "account.Partner", related_name="individual_identities", null=True, on_delete=models.PROTECT
+        "account.Partner",
+        related_name="individual_identities",
+        null=True,
+        on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
 
@@ -725,7 +734,11 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
 
 
 class Individual(
-    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+    SoftDeletableModelWithDate,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    UnicefIdentifiedModel,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -775,6 +788,7 @@ class Individual(
             "who_answers_alt_phone",
             "kobo_asset_id",
             "row_id",
+            "registration_id",
         ]
     )
     duplicate = models.BooleanField(default=False, db_index=True)
@@ -867,9 +881,11 @@ class Individual(
     child_hoh = models.BooleanField(default=False)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
@@ -1079,7 +1095,11 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
 
 
 class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
-    individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="bank_account_info",
+        on_delete=models.CASCADE,
+    )
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")

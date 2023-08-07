@@ -54,6 +54,7 @@ export const GrievancesTable = ({
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
+    createdBy: filter.createdBy,
     admin2: filter.admin2,
     registrationDataImport: filter.registrationDataImport,
     cashPlan: filter.cashPlan,
@@ -231,7 +232,7 @@ export const GrievancesTable = ({
           >
             headCells={headCells}
             title={t('Grievance Tickets List')}
-            rowsPerPageOptions={[10, 15, 20]}
+            rowsPerPageOptions={[10, 15, 20, 40]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}
             numSelected={selected.length}
