@@ -49,7 +49,7 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
                         consent=obj.ticket.consent,
                         comments=obj.ticket.comments,
                         program=getattr(obj.ticket, "programme", None),
-                        created_by_id=obj.ticket.created_by.id,
+                        created_by_id=getattr(obj.ticket.created_by, "id", None),
                         linked_grievance_id=obj.ticket.id,
                     )
                 )
