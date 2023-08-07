@@ -42,7 +42,6 @@ from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.program.models import Program
 
 BATCH_SIZE = 500
-# Migrate grievance tickets and feedback into representations
 
 
 def migrate_grievance_tickets_and_feedback() -> None:
