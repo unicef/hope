@@ -1,6 +1,6 @@
 import copy
 from itertools import chain
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from django.db.models import Count, Q, QuerySet
 from django.utils import timezone
@@ -109,7 +109,8 @@ def handle_payment_related_tickets() -> None:
         household, individual, program = get_program_and_representations_for_payment(ticket)
         ticket.household = household
         ticket.individual = individual
-        ticket.ticket.programs.set([program])
+        if program:
+            ticket.ticket.programs.set([program])
 
     # Perform a bulk update for the household and individual fields of TicketComplaintDetails and TicketSensitiveDetails
     TicketComplaintDetails.objects.bulk_update(complaint_tickets_with_payments, ["household", "individual"])
@@ -175,7 +176,8 @@ def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDet
 
 def handle_non_payment_related_tickets() -> None:
     """
-    Copy grievance tickets to representations. Applied for tickets not connected to specific payment but connected to household or its individual.
+    Copy grievance tickets to representations.
+    Applied for tickets not connected to specific payment but connected to household or its individual.
     """
     print("Handle TicketComplaintDetails")
     handle_complaint_tickets_without_payments()
@@ -203,36 +205,6 @@ def handle_non_payment_related_tickets() -> None:
     handle_needs_adjudication_tickets()
 
 
-def copy_grievance_ticket(
-    related_ticket: Any,
-    program: Program,
-    active_ticket: Any,
-    related_grievance_field: str = "ticket",
-) -> Any:
-    grievance_ticket = getattr(related_ticket, related_grievance_field)
-    original_grievance_ticket_id = grievance_ticket.pk
-    grievance_ticket.pk = None
-    grievance_ticket.unicef_id = None
-
-    grievance_ticket.save()
-    grievance_ticket.programs.set([program])
-    grievance_ticket.linked_tickets.set(getattr(active_ticket, related_grievance_field).linked_tickets.distinct())
-    grievance_ticket.linked_tickets.add(original_grievance_ticket_id)
-
-    for note in getattr(active_ticket, related_grievance_field).ticket_notes.all():
-        note.pk = None
-        note.ticket = grievance_ticket
-        note.save()
-
-    for document in getattr(active_ticket, related_grievance_field).support_documents.all():
-        document.pk = None
-        document.grievance_ticket = grievance_ticket
-        document.save()
-
-    setattr(related_ticket, related_grievance_field, grievance_ticket)
-    return related_ticket
-
-
 def handle_complaint_tickets_without_payments() -> None:
     complaint_tickets_without_payments = TicketComplaintDetails.objects.filter(
         payment_object_id__isnull=True, ticket__programs=None
@@ -251,7 +223,8 @@ def handle_sensitive_tickets_without_payments() -> None:
 
 def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> None:
     """
-    In case of closed complaint ticket, we need to make sure it is not assigned to household representation from different program than indyvidual representation.
+    In case of closed complaint ticket, we need to make sure it is not assigned to household representation
+    from different program than individual representation.
     """
     print("Handle closed tickets with household and individual")
     closed_tickets = tickets.filter(ticket__status=GrievanceTicket.STATUS_CLOSED)
@@ -389,7 +362,7 @@ def copy_ticket_with_household(active_ticket: Any, program: Program) -> None:
 
 
 def handle_tickets_with_individual(model: Any, individual_field_name: str = "individual") -> None:
-    tickets_with_ind = model.objects.filter(ticket__programs=None, **{f"{individual_field_name}" + "__isnull": False})
+    tickets_with_ind = model.objects.filter(ticket__programs=None, **{f"{individual_field_name}__isnull": False})
     # Handle closed tickets
     for closed_ticket in tickets_with_ind.filter(ticket__status=GrievanceTicket.STATUS_CLOSED):
         closed_ticket.ticket.programs.set([getattr(closed_ticket, individual_field_name).program])
@@ -910,7 +883,8 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
                     if role_for_program:
                         role_data_to_extend[str(role_for_program.id)] = role_data
             elif hasattr(ticket, "household"):
-                # Fetch role for household provided in JSON and individual that is a part of household connected to ticket (individual losing this role)
+                # Fetch role for household provided in JSON and individual that is a part of household
+                # connected to ticket (individual losing this role)
                 household_assigned_in_program = ticket.household.copied_to.filter(program=program).first()
                 role_for_program = IndividualRoleInHousehold.objects.filter(
                     individual__household=household_assigned_in_program,
@@ -920,7 +894,8 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
                 if role_for_program:
                     role_data_to_extend[str(role_for_program.id)] = role_data
                 else:
-                    # Fetch role for household provided in JSON and individual provided in JSON (individual receiving this role)
+                    # Fetch role for household provided in JSON and individual provided in JSON
+                    # (individual receiving this role)
                     role_for_program = IndividualRoleInHousehold.objects.filter(
                         individual=individual_in_program,
                         household=household_in_program,
@@ -935,6 +910,36 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
     ticket.role_reassign_data = new_role_reassign_data
     ticket.save()
     return ticket
+
+
+def copy_grievance_ticket(
+    related_ticket: Any,
+    program: Program,
+    active_ticket: Any,
+    related_grievance_field: str = "ticket",
+) -> Any:
+    grievance_ticket = getattr(related_ticket, related_grievance_field)
+    original_grievance_ticket_id = grievance_ticket.pk
+    grievance_ticket.pk = None
+    grievance_ticket.unicef_id = None
+
+    grievance_ticket.save()
+    grievance_ticket.programs.set([program])
+    grievance_ticket.linked_tickets.set(getattr(active_ticket, related_grievance_field).linked_tickets.distinct())
+    grievance_ticket.linked_tickets.add(original_grievance_ticket_id)
+
+    for note in getattr(active_ticket, related_grievance_field).ticket_notes.all():
+        note.pk = None
+        note.ticket = grievance_ticket
+        note.save()
+
+    for document in getattr(active_ticket, related_grievance_field).support_documents.all():
+        document.pk = None
+        document.grievance_ticket = grievance_ticket
+        document.save()
+
+    setattr(related_ticket, related_grievance_field, grievance_ticket)
+    return related_ticket
 
 
 def handle_individual_data(
@@ -986,149 +991,164 @@ def handle_individual_data(
     if not individual_data:
         return ticket
 
-    documents_to_remove_data = individual_data.get("documents_to_remove", [])
-    documents_previous_data = individual_data.get("previous_documents", {})
-    documents_to_edit_data = individual_data.get("documents_to_edit", [])
-
-    identities_to_remove_data = individual_data.get("identities_to_remove", [])
-    identities_previous_data = individual_data.get("previous_identities", {})
-    identities_to_edit_data = individual_data.get("identities_to_edit", [])
-
-    payment_channels_to_remove_data = individual_data.get("payment_channels_to_remove", [])
-    payment_channels_previous_data = individual_data.get("previous_payment_channels", {})
-    payment_channels_to_edit_data = individual_data.get("payment_channels_to_edit", [])
-
-    for index, documents_to_remove in enumerate(documents_to_remove_data):
-        document_id = documents_to_remove.get("value")
-        previous_document = documents_previous_data.get(document_id, {})
-        if not previous_document:
-            continue
-        document = Document.objects.filter(
-            individual=individual_in_program,
-            document_number=previous_document.get("document_number"),
-            type__key=previous_document.get("key"),
-            country__iso_code3=previous_document.get("country"),
-        ).first()
-        if document:
-            encoded_id = encode_id_base64(document.id, "Document")
-            individual_data["documents_to_remove"][index]["value"] = encoded_id
-            individual_data["previous_documents"][document_id]["id"] = encoded_id
-            individual_data["previous_documents"][document_id]["individual"] = encoded_individual_id
-            if encoded_id != document_id:
-                individual_data["previous_documents"][encoded_id] = copy.deepcopy(
-                    individual_data["previous_documents"][document_id]
-                )
-                del individual_data["previous_documents"][document_id]
-
-    for index, identities_to_remove in enumerate(identities_to_remove_data):
-        identity_id = identities_to_remove.get("value")
-        previous_identity = identities_previous_data.get(identity_id, {})
-        if not previous_identity:
-            continue
-        identity = IndividualIdentity.objects.filter(
-            individual=individual_in_program,
-            number=previous_identity.get("number"),
-            partner__name=previous_identity.get("partner"),
-            country__iso_code3=previous_identity.get("country"),
-        ).first()
-        if identity:
-            encoded_id = encode_id_base64(identity.id, "IndividualIdentity")
-            individual_data["identities_to_remove"][index]["value"] = encoded_id
-            individual_data["previous_identities"][identity_id]["id"] = encoded_id
-            individual_data["previous_identities"][identity_id]["individual"] = encoded_individual_id
-            if encoded_id != identity_id:
-                individual_data["previous_identities"][encoded_id] = copy.deepcopy(
-                    individual_data["previous_identities"][identity_id]
-                )
-                del individual_data["previous_identities"][identity_id]
-
-    for index, payment_channels_to_remove in enumerate(payment_channels_to_remove_data):
-        bank_account_id = payment_channels_to_remove.get("value")
-        previous_bank_account_id = payment_channels_previous_data.get(bank_account_id, {})
-        if not previous_bank_account_id:
-            continue
-        bank_account = BankAccountInfo.objects.filter(
-            individual=individual_in_program,
-            bank_name=previous_bank_account_id.get("bank_name"),
-            bank_account_number=previous_bank_account_id.get("bank_account_number"),
-        ).first()
-        if bank_account:
-            encoded_id = encode_id_base64(bank_account.id, "BankAccountInfo")
-            individual_data["payment_channels_to_remove"][index]["value"] = encoded_id
-            individual_data["previous_payment_channels"][bank_account_id]["id"] = encoded_id
-            individual_data["previous_payment_channels"][bank_account_id]["individual"] = encoded_individual_id
-            if encoded_id != bank_account_id:
-                individual_data["previous_payment_channels"][encoded_id] = copy.deepcopy(
-                    individual_data["previous_payment_channels"][bank_account_id]
-                )
-                del individual_data["previous_payment_channels"][bank_account_id]
-
-    for index, documents_to_edit in enumerate(documents_to_edit_data):
-        value = documents_to_edit.get("value", {})
-        previous_value = documents_to_edit.get("previous_value", {})
-        document = Document.objects.filter(
-            individual=individual_in_program,
-            document_number=previous_value.get("number"),
-            country__iso_code3=previous_value.get("country"),
-        ).first()
-        if not document:
-            document = Document.objects.filter(
-                individual=individual_in_program,
-                document_number=value.get("number"),
-                country__iso_code3=value.get("country"),
-            ).first()
-            if not document:
-                continue
-        encoded_id = encode_id_base64(document.id, "Document")
-        individual_data["documents_to_edit"][index]["value"]["id"] = encoded_id
-        individual_data["documents_to_edit"][index]["previous_value"]["id"] = encoded_id
-
-    for index, identities_to_edit in enumerate(identities_to_edit_data):
-        value = identities_to_edit.get("value", {})
-        previous_value = identities_to_edit.get("previous_value", {})
-        identity = IndividualIdentity.objects.filter(
-            individual=individual_in_program,
-            country__iso_code3=previous_value.get("country"),
-            number=previous_value.get("number"),
-            partner__name=previous_value.get("partner"),
-        ).first()
-        if not identity:
-            identity = IndividualIdentity.objects.filter(
-                individual=individual_in_program,
-                country__iso_code3=value.get("country"),
-                number=value.get("number"),
-                partner__name=value.get("partner"),
-            ).first()
-            if not identity:
-                continue
-        encoded_id = encode_id_base64(identity.id, "IndividualIdentity")
-        individual_data["identities_to_edit"][index]["value"]["id"] = encoded_id
-        individual_data["identities_to_edit"][index]["previous_value"]["id"] = encoded_id
-        individual_data["identities_to_edit"][index]["value"]["individual"] = encoded_individual_id
-        individual_data["identities_to_edit"][index]["previous_value"]["individual"] = encoded_individual_id
-
-    for index, payment_channels_to_edit in enumerate(payment_channels_to_edit_data):
-        value = payment_channels_to_edit.get("value", {})
-        previous_value = payment_channels_to_edit.get("previous_value", {})
-        bank_account = BankAccountInfo.objects.filter(
-            individual=individual_in_program,
-            bank_name=previous_value.get("bank_name"),
-            bank_account_number=previous_value.get("bank_account_number"),
-        ).first()
-        if not bank_account:
-            bank_account = BankAccountInfo.objects.filter(
-                individual=individual_in_program,
-                bank_name=value.get("bank_name"),
-                bank_account_number=value.get("bank_account_number"),
-            ).first()
-            if not bank_account:
-                continue
-        encoded_id = encode_id_base64(bank_account.id, "BankAccountInfo")
-        individual_data["payment_channels_to_edit"][index]["value"]["id"] = encoded_id
-        individual_data["payment_channels_to_edit"][index]["previous_value"]["id"] = encoded_id
-        individual_data["payment_channels_to_edit"][index]["value"]["individual"] = encoded_individual_id
-        individual_data["payment_channels_to_edit"][index]["previous_value"]["individual"] = encoded_individual_id
+    for model in [Document, IndividualIdentity, BankAccountInfo]:
+        IndividualDataObjectsToEditHandler(
+            individual_data,
+            individual_in_program,
+            model,
+            encoded_individual_id,
+        ).handle_objects_to_edit()
+        IndividualDataObjectsToRemoveHandler(
+            individual_data,
+            individual_in_program,
+            model,
+            encoded_individual_id,
+        ).handle_objects_to_remove()
 
     ticket.individual_data = individual_data
     ticket.save()
     return ticket
+
+
+class IndividualDataObjectsToRemoveHandler:
+    def __init__(
+        self,
+        individual_data: dict,
+        individual_in_program: Individual,
+        model: Any,
+        encoded_individual_id: Optional[str],
+    ):
+        self.individual_data = individual_data
+        self.model = model
+        self.objects_to_remove_string, self.previous_objects_string = self.object_specific_update_fields()
+        self.individual_in_program = individual_in_program
+        self.encoded_individual_id = encoded_individual_id
+
+    def object_specific_update_fields(self) -> tuple[str, str]:
+        model_related_string = {
+            Document: "documents",
+            IndividualIdentity: "identities",
+            BankAccountInfo: "payment_channels",
+        }[self.model]
+        return f"{model_related_string}_to_remove", f"previous_{model_related_string}"
+
+    def object_specific_get_fields(self, previous_object: dict) -> dict:
+        if self.model == IndividualIdentity:
+            return {
+                "country__iso_code3": previous_object.get("country"),
+                "number": previous_object.get("number"),
+                "partner__name": previous_object.get("partner"),
+            }
+        elif self.model == Document:
+            return {
+                "document_number": previous_object.get("document_number"),
+                "country__iso_code3": previous_object.get("country"),
+                "type__key": previous_object.get("key"),
+            }
+        else:
+            return {
+                "bank_name": previous_object.get("bank_name"),
+                "bank_account_number": previous_object.get("bank_account_number"),
+            }
+
+    def handle_individual_data_update(
+        self,
+        index: int,
+        object_in_program_encoded_id: Optional[str],
+        object_to_remove_id: str,
+    ) -> None:
+        self.individual_data[self.objects_to_remove_string][index]["value"] = object_in_program_encoded_id
+        self.individual_data[self.previous_objects_string][object_to_remove_id]["id"] = object_in_program_encoded_id
+        self.individual_data[self.previous_objects_string][object_to_remove_id][
+            "individual"
+        ] = self.encoded_individual_id
+        if object_in_program_encoded_id != object_to_remove_id:
+            self.individual_data[self.previous_objects_string][object_in_program_encoded_id] = copy.deepcopy(
+                self.individual_data[self.previous_objects_string][object_to_remove_id]
+            )
+            del self.individual_data[self.previous_objects_string][object_to_remove_id]
+
+    def handle_objects_to_remove(self) -> None:
+        for index, object_to_remove in enumerate(self.individual_data.get(self.objects_to_remove_string, [])):
+            object_to_remove_id = object_to_remove.get("value")
+            previous_object = self.individual_data.get(self.previous_objects_string, {}).get(object_to_remove_id, {})
+            if not previous_object:
+                continue
+            object_in_program = self.model.objects.filter(
+                individual=self.individual_in_program,
+                **self.object_specific_get_fields(previous_object),
+            ).first()
+            if object_in_program:
+                object_in_program_encoded_id = encode_id_base64(object_in_program.id, self.model.__name__)
+                self.handle_individual_data_update(
+                    index,
+                    object_in_program_encoded_id,
+                    object_to_remove_id,
+                )
+
+
+class IndividualDataObjectsToEditHandler:
+    def __init__(
+        self,
+        individual_data: dict,
+        individual_in_program: Individual,
+        model: Any,
+        encoded_individual_id: Optional[str],
+    ):
+        self.individual_data = individual_data
+        self.model = model
+        self.objects_to_edit_string = self.object_specific_edit_fields()
+        self.individual_in_program = individual_in_program
+        self.encoded_individual_id = encoded_individual_id
+
+    def object_specific_edit_fields(self) -> str:
+        model_related_string = {
+            Document: "documents",
+            IndividualIdentity: "identities",
+            BankAccountInfo: "payment_channels",
+        }[self.model]
+        return f"{model_related_string}_to_edit"
+
+    def get_object_specific_fields(self, previous_value: dict) -> dict:
+        if self.model == IndividualIdentity:
+            return {
+                "country__iso_code3": previous_value.get("country"),
+                "number": previous_value.get("number"),
+                "partner__name": previous_value.get("partner"),
+            }
+        elif self.model == Document:
+            return {
+                "document_number": previous_value.get("number"),
+                "country__iso_code3": previous_value.get("country"),
+            }
+        else:
+            return {
+                "bank_name": previous_value.get("bank_name"),
+                "bank_account_number": previous_value.get("bank_account_number"),
+            }
+
+    def handle_objects_to_edit(self) -> None:
+        for index, object_to_edit in enumerate(self.individual_data.get(self.objects_to_edit_string, [])):
+            object_in_program = self.model.objects.filter(
+                individual=self.individual_in_program,
+                **self.get_object_specific_fields(object_to_edit.get("previous_value", {})),
+            ).first()
+            if not object_in_program:
+                object_in_program = self.model.objects.filter(
+                    individual=self.individual_in_program,
+                    **self.get_object_specific_fields(object_to_edit.get("value", {})),
+                ).first()
+                if not object_in_program:
+                    continue
+            object_in_program_encoded_id = encode_id_base64(object_in_program.id, self.model.__name__)
+            self.individual_data[self.objects_to_edit_string][index]["value"]["id"] = object_in_program_encoded_id
+            self.individual_data[self.objects_to_edit_string][index]["previous_value"][
+                "id"
+            ] = object_in_program_encoded_id
+            if self.model != Document:
+                self.individual_data[self.objects_to_edit_string][index]["value"][
+                    "individual"
+                ] = self.encoded_individual_id
+                self.individual_data[self.objects_to_edit_string][index]["previous_value"][
+                    "individual"
+                ] = self.encoded_individual_id
