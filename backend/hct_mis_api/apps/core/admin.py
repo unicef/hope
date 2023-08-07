@@ -419,11 +419,10 @@ UNICEF HOPE""",
 
                     error, response = api.test_connection_start_flow(flow_name, phone_number)
                     if response:
-                        for index, entry in enumerate(response):
-                            context[index] = {}
-                            context[index]["flow_uuid"] = entry["flow"]["uuid"]
-                            context[index]["flow_status"] = entry["status"]
-                            context[index]["timestamp"] = entry["created_on"]
+                        for entry in response:
+                            context["flow_uuid"] = entry.response["flow"]["uuid"]
+                            context["flow_status"] = entry.response["status"]
+                            context["timestamp"] = entry.response["created_on"]
 
                     if error:
                         messages.error(request, error)
