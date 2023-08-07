@@ -9,39 +9,55 @@ import {
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { useHistory, useLocation } from 'react-router-dom';
+import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
+import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-
-  flex-direction: row;
-  align-items: center;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 interface VerificationRecordsFiltersProps {
-  onFilterChange;
   filter;
   verifications;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
-export function VerificationRecordsFilters({
-  onFilterChange,
+export const VerificationRecordsFilters = ({
   filter,
   verifications,
-}: VerificationRecordsFiltersProps): React.ReactElement {
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+}: VerificationRecordsFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
   const { data: choicesData } = usePaymentVerificationChoicesQuery();
   if (!choicesData) {
     return null;
@@ -81,22 +97,24 @@ export function VerificationRecordsFilters({
           </Button>
         )}
       </Box>
-      <Container>
+      <Box>
         <Collapse in={show}>
           <Grid container spacing={3}>
-            <Grid item>
+            <Grid item xs={3}>
               <SearchTextField
                 value={filter.search}
                 label={t('Search')}
-                onChange={(e) => handleFilterChange(e, 'search')}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
                 data-cy='filters-search'
+                fullWidth
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <SelectFilter
-                onChange={(e) => handleFilterChange(e, 'status')}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
                 label={t('Verification Status')}
                 value={filter.status}
+                fullWidth
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -110,9 +128,11 @@ export function VerificationRecordsFilters({
                 })}
               </SelectFilter>
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <SelectFilter
-                onChange={(e) => handleFilterChange(e, 'verificationChannel')}
+                onChange={(e) =>
+                  handleFilterChange('verificationChannel', e.target.value)
+                }
                 label={t('Verification Channel')}
                 value={filter.verificationChannel}
               >
@@ -130,10 +150,10 @@ export function VerificationRecordsFilters({
                 )}
               </SelectFilter>
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <SelectFilter
                 onChange={(e) =>
-                  handleFilterChange(e, 'paymentVerificationPlan')
+                  handleFilterChange('paymentVerificationPlan', e.target.value)
                 }
                 label={t('Verification Plan Id')}
                 value={filter.paymentVerificationPlan}
@@ -145,8 +165,12 @@ export function VerificationRecordsFilters({
               </SelectFilter>
             </Grid>
           </Grid>
+          <ClearApplyButtons
+            clearHandler={handleClearFilter}
+            applyHandler={handleApplyFilter}
+          />
         </Collapse>
-      </Container>
+      </Box>
     </>
   );
-}
+};

@@ -1,8 +1,13 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  PaymentVerificationPlanStatus,
+  useCashPlanVerificationSamplingChoicesQuery,
+  usePaymentPlanQuery,
+} from '../../../__generated__/graphql';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -13,19 +18,17 @@ import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDet
 import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
 import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  PaymentVerificationPlanStatus,
-  useCashPlanVerificationSamplingChoicesQuery,
-  usePaymentPlanQuery,
-} from '../../../__generated__/graphql';
+  decodeIdString,
+  getFilterFromQueryParams,
+  isPermissionDeniedError,
+} from '../../../utils/utils';
+import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 
 const Container = styled.div`
   display: flex;
@@ -48,17 +51,24 @@ const BottomTitle = styled.div`
   padding: 70px;
 `;
 
-export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
+const initialFilter = {
+  search: '',
+  status: '',
+  verificationChannel: '',
+  paymentVerificationPlan: '',
+};
+
+export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const [filter, setFilter] = useState({
-    search: null,
-    status: null,
-    verificationChannel: null,
-    paymentVerificationPlan: null,
-  });
-  const debouncedFilter = useDebounce(filter, 500);
+  const location = useLocation();
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const { id } = useParams();
   const { data, loading, error } = usePaymentPlanQuery({
     variables: { id },
@@ -179,14 +189,17 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
           <Container>
             <VerificationRecordsFilters
               filter={filter}
-              onFilterChange={setFilter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
               verifications={paymentPlan.verificationPlans}
             />
           </Container>
           <TableWrapper>
             <VerificationsTable
               paymentPlanId={paymentPlan.id}
-              filter={debouncedFilter}
+              filter={appliedFilter}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
@@ -216,4 +229,4 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
         )}
     </>
   );
-}
+};

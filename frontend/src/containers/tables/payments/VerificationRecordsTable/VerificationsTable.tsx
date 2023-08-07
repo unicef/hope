@@ -11,7 +11,7 @@ import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 
 interface Props {
   paymentPlanId?: string;
-  filter?: AllPaymentVerificationsQueryVariables;
+  filter;
   canViewRecordDetails: boolean;
   businessArea: string;
 }
