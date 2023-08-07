@@ -39,6 +39,7 @@ from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
 
 logger = logging.getLogger(__name__)
 
@@ -941,13 +942,11 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
             message = f"Specified image {value} for field {field} is not in attachments"
 
-            is_correct_attachment = False
+            is_correct_attachment = find_attachment_in_kobo(attachments, value)
 
-            for attachment in attachments:
-                if get_field_name(attachment["filename"]) == value:
-                    is_correct_attachment = True
-                    break
-
+            # Kobo not always returns consent_sign_h_c in attachments, according to AB#168823 we should skip it
+            if not is_correct_attachment and field == "consent_sign_h_c":
+                return None
             is_valid_image = isinstance(value, str) and is_correct_attachment
 
             return None if is_valid_image else message
@@ -1088,6 +1087,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             errors = []
             # have fun debugging this ;_;
             # thx
+            # thx again
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {"partner": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
