@@ -418,7 +418,6 @@ UNICEF HOPE""",
                     context["flow_name"] = flow_name
 
                     error, response = api.test_connection_start_flow(flow_name, phone_number)
-                    print(error, response)
                     if response:
                         for entry in response:
                             context["flow_uuid"] = entry.response["flow"]["uuid"]
