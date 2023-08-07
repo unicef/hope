@@ -2,6 +2,7 @@ import itertools
 from typing import Any, Dict, Tuple
 
 from django.db.models import Avg, Case, CharField, Count, F, Q, QuerySet, Value, When
+from django.db.models.functions import Extract
 from django.utils.encoding import force_str
 
 import graphene
@@ -107,7 +108,7 @@ class Query(graphene.ObjectType):
             GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
-                days_diff=F("updated_at__day") - F("created_at__day"),
+                days_diff=Extract(F("updated_at") - F("created_at"), "days"),
             )
             .values_list("category_name", "days_diff")
             .aggregate(
