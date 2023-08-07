@@ -44,6 +44,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
 from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -265,6 +266,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     self._handle_exception("Individual", i_field, e)
                         individual_obj.last_registration_date = individual_obj.first_registration_date
                         individual_obj.registration_data_import = registration_data_import
+                        individual_obj.age_at_registration = calculate_age_at_registration(
+                            registration_data_import, str(individual_obj.birth_date)
+                        )
+
                         if individual_obj.relationship == HEAD:
                             head_of_households_mapping[household_obj] = individual_obj
 

@@ -11,7 +11,7 @@ from hct_mis_api.apps.geo.models import Area, AreaType
 class AreaNode(DjangoObjectType):
     class Meta:
         model = Area
-        exclude_fields = ["geom", "point"]
+        exclude = ["geom", "point"]
         filter_fields = ["name"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

@@ -1770,6 +1770,16 @@
                 "defaultValue": null
               },
               {
+                "name": "createdBy",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "businessArea",
                 "description": null,
                 "type": {
@@ -2411,6 +2421,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ChoiceObjectInt",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "grievanceTicketSearchTypesChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
                 "ofType": null
               }
             },
@@ -7841,6 +7867,16 @@
                     "name": "String",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "isTicketCreator",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -14539,7 +14575,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GRANDDAUGHER_GRANDSON",
+            "name": "GRANDDAUGHTER_GRANDSON",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -62026,6 +62062,16 @@
             "defaultValue": null
           },
           {
+            "name": "email",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "relationship",
             "description": null,
             "type": {
@@ -62933,6 +62979,16 @@
           },
           {
             "name": "phoneNoAlternative",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "email",
             "description": null,
             "type": {
               "kind": "SCALAR",

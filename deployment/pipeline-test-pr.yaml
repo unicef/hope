@@ -297,6 +297,12 @@ stages:
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
                BRANCH_NAME=$(System.PullRequest.SourceBranch)
+               BUILD_ID=$(Build.BuildId)
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Test Report Artifacts'
+            condition: always()
+            inputs:
+              PathtoPublish: './cypress-reports'
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
@@ -307,7 +313,3 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST E2E Results'
-          - task: PublishBuildArtifacts@1 
-            displayName: 'Publish Test Report Artifacts'
-            inputs:
-              PathtoPublish: './cypress-reports'
