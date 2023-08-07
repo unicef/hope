@@ -97,9 +97,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
                 "needs_adjudication_tickets_count"
             ]
     for role in household.individuals_and_roles.all():
-        household_data["roles"].append(
-            {"role": role.role, "individual": get_individual_snapshot(role.individual)}
-        )
+        household_data["roles"].append({"role": role.role, "individual": get_individual_snapshot(role.individual)})
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
