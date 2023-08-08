@@ -111,6 +111,9 @@
             "name": "DeliveryMechanismNode"
           },
           {
+            "name": "PaymentHouseholdSnapshotNode"
+          },
+          {
             "name": "ReportNode"
           },
           {
