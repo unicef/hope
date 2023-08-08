@@ -442,6 +442,7 @@ class ReconciliationSummaryNode(graphene.ObjectType):
     not_delivered = graphene.Int()
     unsuccessful = graphene.Int()
     pending = graphene.Int()
+    force_failed = graphene.Int()
     number_of_payments = graphene.Int()
     reconciled = graphene.Int()
 
@@ -546,6 +547,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
+            force_failed=Count("id", filter=Q(status=GenericPayment.STATUS_FORCE_FAILED)),
             pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
