@@ -168,23 +168,23 @@ def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan"
 
 
 def get_payment_status(payment: Union[Payment, PaymentRecord]) -> str:
-    if payment.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
-        status = GenericPayment.STATUS_SUCCESS  # Delivered Fully
+    status = "-"
+    if payment.status == GenericPayment.STATUS_PENDING:
+        status = "Pending"
 
-    elif payment.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
-        status = GenericPayment.STATUS_NOT_DISTRIBUTED  # Not Delivered (0)
-
-    elif payment.status == GenericPayment.STATUS_ERROR:
-        status = GenericPayment.STATUS_ERROR  # Unsuccessful
-
-    elif payment.status == GenericPayment.STATUS_FORCE_FAILED:
-        status = GenericPayment.STATUS_FORCE_FAILED  # Force Failed
+    elif payment.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
+        status = "Delivered Fully"
 
     elif payment.status == GenericPayment.STATUS_DISTRIBUTION_PARTIAL:
-        status = GenericPayment.STATUS_DISTRIBUTION_PARTIAL  # Delivered Partially
+        status = "Delivered Partially"
 
-    elif payment.status == GenericPayment.STATUS_PENDING:
-        status = GenericPayment.STATUS_PENDING  # Pending
+    elif payment.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
+        status = "Not Delivered"
 
+    elif payment.status == GenericPayment.STATUS_ERROR:
+        status = "Unsuccessful"
+
+    elif payment.status == GenericPayment.STATUS_FORCE_FAILED:
+        status = "Force Failed"
 
     return status
