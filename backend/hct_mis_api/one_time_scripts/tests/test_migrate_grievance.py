@@ -50,6 +50,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import (
+    HEAD,
     ROLE_PRIMARY,
     Household,
     Individual,
@@ -621,7 +622,12 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 "household": encode_id_base64(ticket_active_3ind_2notes_2docs_original_role.household.id, "Household"),
                 "individual": encode_id_base64(ticket_active_3ind_2notes_2docs_individual_for_role.id, "Individual"),
                 "role": ROLE_PRIMARY,
-            }
+            },
+            "HEAD": {
+                "household": encode_id_base64(ticket_active_3ind_2notes_2docs_original_role.household.id, "Household"),
+                "individual": encode_id_base64(ticket_active_3ind_2notes_2docs_individual_for_role.id, "Individual"),
+                "role": HEAD,
+            },
         }
         if is_individual_data_update:
             self.create_individual_related_data(individual, [self.program2, self.program3])
@@ -922,6 +928,33 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.referral_active_gt_no_hh_1ind.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         self.referral_active_gt_no_hh_1ind.ticket.save()
 
+    def create_extra_data_for_needs_adjudication(self, golden_records_ids: list, possible_duplicates_ids: list) -> dict:
+        data = {"golden_records": [], "possible_duplicate": []}
+
+        for golden_record_id in golden_records_ids:
+            data["golden_records"].append(
+                {
+                    "dob": "date_of_birth",
+                    "full_name": "full_name",
+                    "hit_id": str(golden_record_id),
+                    "location": "location",
+                    "proximity_to_score": "proximity_to_score",
+                    "score": "score",
+                }
+            )
+        for possible_duplicate_id in possible_duplicates_ids:
+            data["possible_duplicate"].append(
+                {
+                    "dob": "date_of_birth",
+                    "full_name": "full_name",
+                    "hit_id": str(possible_duplicate_id),
+                    "location": "location",
+                    "proximity_to_score": "proximity_to_score",
+                    "score": "score",
+                },
+            )
+        return data
+
     def create_needs_adjudication_tickets(self) -> None:
         # GT not closed, golden ind pr1 repr pr3, selected ind 2 and 3
         self.golden_rec_needs_adjudication_not_closed = self.create_individual_with_representations(
@@ -937,8 +970,14 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.possible_dup4_needs_adjudication_not_closed = self.create_individual_with_representations(
             self.program3, [self.program2]
         )
+        extra_data = self.create_extra_data_for_needs_adjudication(
+            [self.golden_rec_needs_adjudication_not_closed.id],
+            [self.possible_dup1_needs_adjudication_not_closed.id, self.possible_dup4_needs_adjudication_not_closed.id],
+        )
+
         self.needs_adjudication_not_closed = TicketNeedsAdjudicationDetailsFactory(
-            golden_records_individual=self.golden_rec_needs_adjudication_not_closed
+            golden_records_individual=self.golden_rec_needs_adjudication_not_closed,
+            extra_data=extra_data,
         )
         self.needs_adjudication_not_closed.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         self.needs_adjudication_not_closed.ticket.save()
@@ -1502,7 +1541,18 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                         "Individual",
                     ),
                     "role": ROLE_PRIMARY,
-                }
+                },
+                "HEAD": {
+                    "household": encode_id_base64(
+                        ticket_active_3ind_2notes_2docs_other_roles[self.program1.id].household.id,
+                        "Household",
+                    ),
+                    "individual": encode_id_base64(
+                        ticket_active_3ind_2notes_2docs_individual_for_role.id,
+                        "Individual",
+                    ),
+                    "role": HEAD,
+                },
             },
         )
         if is_individual_data_update:
@@ -1546,7 +1596,18 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                         "Individual",
                     ),
                     "role": ROLE_PRIMARY,
-                }
+                },
+                "HEAD": {
+                    "household": encode_id_base64(
+                        ticket_active_3ind_2notes_2docs_other_roles[self.program2.id].household.id,
+                        "Household",
+                    ),
+                    "individual": encode_id_base64(
+                        ticket_active_3ind_2notes_2docs_individual_for_role.copied_to.get(program=self.program2).id,
+                        "Individual",
+                    ),
+                    "role": HEAD,
+                },
             },
         )
         if is_individual_data_update:
@@ -1580,7 +1641,18 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                         "Individual",
                     ),
                     "role": ROLE_PRIMARY,
-                }
+                },
+                "HEAD": {
+                    "household": encode_id_base64(
+                        ticket_active_3ind_2notes_2docs_original_role.household.id,
+                        "Household",
+                    ),
+                    "individual": encode_id_base64(
+                        ticket_active_3ind_2notes_2docs_individual_for_role.copied_to.get(program=self.program3).id,
+                        "Individual",
+                    ),
+                    "role": HEAD,
+                },
             },
         )
         if is_individual_data_update:
@@ -2547,6 +2619,13 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 self.possible_dup2_needs_adjudication_not_closed,
             ],
         )
+        self.assertEqual(
+            ticket_pr1.extra_data,
+            self.create_extra_data_for_needs_adjudication(
+                [self.golden_rec_needs_adjudication_not_closed.id],
+                [self.possible_dup1_needs_adjudication_not_closed.copied_to.get(program=self.program1).id],
+            ),
+        )
 
         ticket_pr2 = self.assert_needs_adjudication_ticket(
             [
@@ -2559,7 +2638,16 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 self.possible_dup3_needs_adjudication_not_closed,
             ],
         )
-
+        self.assertEqual(
+            ticket_pr2.extra_data,
+            self.create_extra_data_for_needs_adjudication(
+                [],
+                [
+                    self.possible_dup1_needs_adjudication_not_closed.copied_to.get(program=self.program2).id,
+                    self.possible_dup4_needs_adjudication_not_closed.copied_to.get(program=self.program2).id,
+                ],
+            ),
+        )
         ticket_pr3 = self.assert_needs_adjudication_ticket(
             [
                 self.possible_dup1_needs_adjudication_not_closed.copied_to.get(program=self.program3),
@@ -2569,7 +2657,16 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             self.program3,
             [],
         )
-
+        self.assertEqual(
+            ticket_pr3.extra_data,
+            self.create_extra_data_for_needs_adjudication(
+                [self.golden_rec_needs_adjudication_not_closed.copied_to.get(program=self.program3).id],
+                [
+                    self.possible_dup1_needs_adjudication_not_closed.copied_to.get(program=self.program3).id,
+                    self.possible_dup4_needs_adjudication_not_closed.id,
+                ],
+            ),
+        )
         self.check_tickets_unicef_id_uniqueness([ticket_pr1, ticket_pr2, ticket_pr3])
         self.check_created_at_equality(
             [ticket_pr1, ticket_pr2, ticket_pr3],

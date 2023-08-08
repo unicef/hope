@@ -479,6 +479,8 @@ def handle_needs_adjudication_tickets() -> None:
             needs_adjudication_ticket_copy = copy.deepcopy(needs_adjudication_ticket)
             if hasattr(needs_adjudication_ticket_copy, "role_reassign_data"):
                 needs_adjudication_ticket_copy = handle_role_reassign_data(needs_adjudication_ticket_copy, program)
+            if hasattr(needs_adjudication_ticket_copy, "extra_data"):
+                needs_adjudication_ticket_copy = handle_extra_data(needs_adjudication_ticket_copy, program)
             needs_adjudication_ticket_copy.pk = None
             # Copy Grievance Ticket
             needs_adjudication_ticket_copy = copy_grievance_ticket(
@@ -541,6 +543,8 @@ def handle_needs_adjudication_tickets() -> None:
         needs_adjudication_ticket.possible_duplicates.set(possible_duplicates)
         if hasattr(needs_adjudication_ticket, "role_reassign_data"):
             handle_role_reassign_data(needs_adjudication_ticket, current_program)  # type: ignore
+        if hasattr(needs_adjudication_ticket, "extra_data"):
+            handle_extra_data(needs_adjudication_ticket, current_program)  # type: ignore
 
 
 def migrate_messages() -> None:
@@ -929,6 +933,55 @@ def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
             new_role_reassign_data.update(role_data_to_extend)
 
     ticket.role_reassign_data = new_role_reassign_data
+    ticket.save()
+    return ticket
+
+
+def handle_extra_data(ticket: Any, program: Program) -> Any:
+    """
+    extra_data structure:
+    {
+    "golden_records": [
+        {
+            "dob": date_of_birth,
+            "full_name": full_name,
+            "hit_id": hit_id,
+            "location": location,
+            "proximity_to_score": proximity_to_score,
+            "score": score
+        },
+        ...
+    ],
+    "possible_duplicate": [
+        {
+            "dob": date_of_birth,
+            "full_name": full_name,
+            "hit_id":  hit_id,
+            "location": location,
+            "proximity_to_score": proximity_to_score,
+            "score": score
+        },
+        ...
+    ]
+    }
+    """
+
+    if not ticket.extra_data:
+        return ticket
+
+    for list_data in ticket.extra_data.values():
+        for ind_data in list_data:
+            id_found = False
+            hit_from_json = Individual.objects.filter(id=ind_data.get("hit_id")).first()
+            # Fetch correct individual representation from JSON
+            if hit_from_json:
+                hit_from_json_in_program = hit_from_json.copied_to.filter(program=program).first()
+                if hit_from_json_in_program:
+                    id_found = True
+                    ind_data["hit_id"] = str(hit_from_json_in_program.id)
+            if id_found is False:
+                list_data.remove(ind_data)
+
     ticket.save()
     return ticket
 
