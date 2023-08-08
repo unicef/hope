@@ -349,6 +349,7 @@ type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
   startDate: DateTime!
@@ -2495,7 +2496,7 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
-  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!): CreateVerificationPlanMutation
+  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!, version: BigInt): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
   importXlsxPaymentVerificationPlanFile(file: Upload!, paymentVerificationPlanId: ID!): ImportXlsxPaymentVerificationPlanFile
@@ -2872,6 +2873,7 @@ type PaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   unicefId: String
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
