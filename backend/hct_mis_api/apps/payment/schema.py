@@ -100,6 +100,7 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 from hct_mis_api.apps.payment.utils import (
     get_payment_items_for_dashboard,
     get_payment_plan_object,
+    get_payment_status,
 )
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -371,6 +372,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         """parse list of conflicted payment plans data from Payment model json annotations"""
         return [json.loads(conflict) for conflict in conflicts_data]
 
+    def resolve_status(self, info: Any) -> str:
+        return get_payment_status(self)
+
 
 class DeliveryMechanismNode(DjangoObjectType):
     name = graphene.String()
@@ -615,6 +619,9 @@ class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    def resolve_status(self, info: Any) -> str:
+        return get_payment_status(self)
+
 
 class PaymentVerificationLogEntryNode(LogEntryNode):
     content_object = graphene.Field(PaymentVerificationPlanNode)
@@ -707,7 +714,8 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
         return to_global_id(self.__class__.__name__ + "Node", self.id)
 
     def resolve_status(self, info: Any, **kwargs: Any) -> str:
-        return self.status.replace(" ", "_").upper()
+        status = get_payment_status(self)
+        return status.replace(" ", "_").upper()
 
 
 class PageInfoNode(graphene.ObjectType):
