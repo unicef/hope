@@ -153,20 +153,20 @@ export function paymentStatusDisplayMap(
   switch (status) {
     case PaymentStatus.Pending:
     case PaymentRecordStatus.Pending:
-      return PaymentStatus.Pending;
+      return "PENDING";
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
     case PaymentRecordStatus.DistributionSuccessful:
     case PaymentRecordStatus.TransactionSuccessful:
-      return "DELIVERED_FULLY";
+      return "DELIVERED FULLY";
     case PaymentStatus.PartiallyDistributed:
-      return "DELIVERED_PARTIALLY";
+      return "DELIVERED PARTIALLY";
     case PaymentRecordStatus.NotDistributed:
     case PaymentStatus.NotDistributed:
-      return "NOT_DELIVERED";
+      return "NOT DELIVERED";
     case PaymentRecordStatus.ForceFailed:
     case PaymentStatus.ForceFailed:
-      return "FORCE_FAILED";
+      return "FORCE FAILED";
     default:
       return "UNSUCCESSFUL";
   }
