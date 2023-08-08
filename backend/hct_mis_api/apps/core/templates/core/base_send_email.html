@@ -9,56 +9,60 @@
     <title>{{ title }}</title>
     <style>
         html, body {
-          margin: 0;
-          padding: 0;
-          font-size: 16px;
-          height: 100%;
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+            height: 100%;
         }
         div.wrapper {
-          min-height: 100%;
-          display: flex;
-          flex-direction: column;
+            min-height: 100%;
         }
         header img {
-          width: 100%;
-          height: auto;
+            width: 100%;
+            height: auto;
         }
         main {
-          padding: 0 70px;
-          flex: 1;
+            padding: 0 70px;
         }
         h1 {
-          font-weight: bold;
-          font-size: 16px;
+            font-weight: bold;
+            font-size: 16px;
         }
         h1.title {
-          margin-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        div.block {
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgb(228, 228, 228);
+            border-radius: 4px;
         }
         div.block_1 {
-          padding: 20px;
+            background-color: white;
         }
         div.block_2 {
-          padding: 20px;
-          background-color: rgb(228, 228, 228);
+            background-color: rgb(228, 228, 228);
         }
         div.block_3 {
-          padding: 20px;
-          text-align: center;
+            text-align: center;
         }
         ul {
-          list-style: disc;
+            list-style: disc;
+            margin-left: 20px;
         }
         button {
-          background-color: #033F91;
-          color: white;
-          font-size: 20px;
-          padding: 10px 20px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
+            background-color: #033F91;
+            color: white;
+            font-size: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
         footer {
-          text-align: center;
+            text-align: center;
+            padding: 20px;
+            background-color: rgb(228, 228, 228);
         }
     </style>
 </head>
@@ -70,19 +74,19 @@
 
         <main>
             {% block body %}
-                <div class="block_1">
+                <div class="block block_1">
                     <h1 class="title">Hello,</h1>
                     <p>Some text here</p>
                 </div>
-                <div class="block_2">
+                <div class="block block_2">
                     <h1 class="title">Here's some list:</h1>
                     <ul>
                         <li>item 1</li>
                         <li>item 2</li>
                     </ul>
                 </div>
-                <div class="block_3">
-                <h1 class="title">Please click the button below and complete the process</h1>
+                <div class="block block_3">
+                    <h1 class="title">Please click the button below and complete the process</h1>
                     <button>ACTIVATE LINK</button>
                 </div>
             {% endblock %}
