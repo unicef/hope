@@ -85,6 +85,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -304,6 +305,13 @@ class GenericPaymentNode(graphene.ObjectType):
         return self.household
 
 
+class PaymentHouseholdSnapshotNode(BaseNodePermissionMixin, DjangoObjectType):
+    class Meta:
+        model = PaymentHouseholdSnapshot
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
@@ -316,6 +324,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     total_persons_covered = graphene.Int()
     service_provider = graphene.Field(FinancialServiceProviderNode)
+    household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
 
     class Meta:
         model = Payment
