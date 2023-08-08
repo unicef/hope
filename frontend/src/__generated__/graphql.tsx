@@ -2024,6 +2024,7 @@ export type HouseholdNode = Node & {
   userFields: Scalars['JSONString'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  registrationId?: Maybe<Scalars['Int']>,
   totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   familyId?: Maybe<Scalars['String']>,
@@ -2815,6 +2816,7 @@ export type ImportedIndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -3021,9 +3023,11 @@ export type IndividualNode = Node & {
   childHoh: Scalars['Boolean'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  registrationId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   relationshipConfirmed: Scalars['Boolean'],
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -4108,6 +4112,16 @@ export type PaymentDetailsApproveMutation = {
   grievanceTicket?: Maybe<GrievanceTicketNode>,
 };
 
+export type PaymentHouseholdSnapshotNode = Node & {
+   __typename?: 'PaymentHouseholdSnapshotNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  snapshotData: Scalars['JSONString'],
+  householdId: Scalars['UUID'],
+  payment: PaymentNode,
+};
+
 export type PaymentNode = Node & {
    __typename?: 'PaymentNode',
   isRemoved: Scalars['Boolean'],
@@ -4141,6 +4155,7 @@ export type PaymentNode = Node & {
   orderNumber?: Maybe<Scalars['Int']>,
   tokenNumber?: Maybe<Scalars['Int']>,
   followUps: PaymentNodeConnection,
+  householdSnapshot?: Maybe<PaymentHouseholdSnapshotNode>,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
   paymentPlanSoftConflicted?: Maybe<Scalars['Boolean']>,
@@ -6221,6 +6236,7 @@ export type ReconciliationSummaryNode = {
   notDelivered?: Maybe<Scalars['Int']>,
   unsuccessful?: Maybe<Scalars['Int']>,
   pending?: Maybe<Scalars['Int']>,
+  forceFailed?: Maybe<Scalars['Int']>,
   numberOfPayments?: Maybe<Scalars['Int']>,
   reconciled?: Maybe<Scalars['Int']>,
 };
@@ -27163,6 +27179,7 @@ export type ResolversTypes = {
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>,
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentHouseholdSnapshotNode: ResolverTypeWrapper<PaymentHouseholdSnapshotNode>,
   PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
@@ -27661,6 +27678,7 @@ export type ResolversParentTypes = {
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge,
   DeliveryMechanismNode: DeliveryMechanismNode,
   DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentHouseholdSnapshotNode: PaymentHouseholdSnapshotNode,
   PaymentConflictDataNode: PaymentConflictDataNode,
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
@@ -29073,6 +29091,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  registrationId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   familyId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -29332,6 +29351,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
@@ -29453,9 +29473,11 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  registrationId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -29711,7 +29733,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'RegistrationDataImportNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'DeliveryMechanismNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'RegistrationDataImportNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'DeliveryMechanismNode' | 'PaymentHouseholdSnapshotNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -29764,6 +29786,15 @@ export type PaymentDetailsApproveMutationResolvers<ContextType = any, ParentType
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
+export type PaymentHouseholdSnapshotNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentHouseholdSnapshotNode'] = ResolversParentTypes['PaymentHouseholdSnapshotNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  snapshotData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  householdId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  payment?: Resolver<ResolversTypes['PaymentNode'], ParentType, ContextType>,
+};
+
 export type PaymentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentNode'] = ResolversParentTypes['PaymentNode']> = {
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
@@ -29796,6 +29827,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   orderNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
+  householdSnapshot?: Resolver<Maybe<ResolversTypes['PaymentHouseholdSnapshotNode']>, ParentType, ContextType>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
   paymentPlanSoftConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -30367,6 +30399,7 @@ export type ReconciliationSummaryNodeResolvers<ContextType = any, ParentType ext
   notDelivered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   unsuccessful?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   pending?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  forceFailed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   numberOfPayments?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reconciled?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
@@ -31614,6 +31647,7 @@ export type Resolvers<ContextType = any> = {
   PartnerType?: PartnerTypeResolvers<ContextType>,
   PaymentConflictDataNode?: PaymentConflictDataNodeResolvers<ContextType>,
   PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>,
+  PaymentHouseholdSnapshotNode?: PaymentHouseholdSnapshotNodeResolvers<ContextType>,
   PaymentNode?: PaymentNodeResolvers<ContextType>,
   PaymentNodeConnection?: PaymentNodeConnectionResolvers<ContextType>,
   PaymentNodeEdge?: PaymentNodeEdgeResolvers<ContextType>,

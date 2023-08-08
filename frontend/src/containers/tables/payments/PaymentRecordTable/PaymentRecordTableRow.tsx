@@ -11,6 +11,7 @@ import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   paymentRecordStatusToColor,
+  paymentStatusDisplayMap,
 } from '../../../../utils/utils';
 import { PaymentRecordNode } from '../../../../__generated__/graphql';
 
@@ -47,6 +48,7 @@ export function PaymentRecordTableRow({
         <StatusBox
           status={paymentRecord.status}
           statusToColor={paymentRecordStatusToColor}
+          statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
       <AnonTableCell>{paymentRecord.headOfHousehold?.fullName}</AnonTableCell>
