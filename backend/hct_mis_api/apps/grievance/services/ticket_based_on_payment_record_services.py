@@ -94,7 +94,6 @@ def update_ticket_based_on_payment_record_service(
         payment_record: Union["Payment", "PaymentRecord"] = get_object_or_404(  # type: ignore
             Payment if node_name == "PaymentNode" else PaymentRecord, id=obj_id
         )
-        ticket_details.payment_content_type = get_content_type_for_model(payment_record)
-        ticket_details.payment_object_id = payment_record.pk
+        ticket_details.payment_obj = payment_record
     ticket_details.save()
     return grievance_ticket
