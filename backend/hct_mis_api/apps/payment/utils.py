@@ -18,6 +18,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
+    GenericPayment,
 )
 
 if TYPE_CHECKING:
@@ -164,3 +165,26 @@ def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan"
         payment_plan_object = get_object_or_404(PaymentPlan, pk=obj_id)
 
     return payment_plan_object
+
+
+def get_payment_status(payment: Union[Payment, PaymentRecord]) -> str:
+    if payment.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
+        status = GenericPayment.STATUS_SUCCESS  # Delivered Fully
+
+    elif payment.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
+        status = GenericPayment.STATUS_NOT_DISTRIBUTED  # Not Delivered (0)
+
+    elif payment.status == GenericPayment.STATUS_ERROR:
+        status = GenericPayment.STATUS_ERROR  # Unsuccessful
+
+    elif payment.status == GenericPayment.STATUS_FORCE_FAILED:
+        status = GenericPayment.STATUS_FORCE_FAILED  # Force Failed
+
+    elif payment.status == GenericPayment.STATUS_DISTRIBUTION_PARTIAL:
+        status = GenericPayment.STATUS_DISTRIBUTION_PARTIAL  # Delivered Partially
+
+    elif payment.status == GenericPayment.STATUS_PENDING:
+        status = GenericPayment.STATUS_PENDING  # Pending
+
+
+    return status
