@@ -222,9 +222,9 @@ class GenericPayment(TimeStampedUUIDModel):
     STATUS_PENDING = "Pending"
 
     STATUS_CHOICE = (
-        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")), # Delivered Fully
+        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),  # Delivered Fully
         (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),  # Not Delivered
-        (STATUS_SUCCESS, _("Transaction Successful")), # Delivered Fully
+        (STATUS_SUCCESS, _("Transaction Successful")),  # Delivered Fully
         (STATUS_ERROR, _("Transaction Erroneous")),  # Unsuccessful
         (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
         (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
