@@ -385,7 +385,7 @@ def handle_tickets_with_individual(model: Any, individual_field_name: str = "ind
                 copy_ticket_with_individual(active_ticket, program, individual_field_name=individual_field_name)
 
             if hasattr(active_ticket, "role_reassign_data"):
-                handle_role_reassign_data(active_ticket, current_program, individual_field_name)
+                handle_role_reassign_data(active_ticket, current_program)
             if hasattr(active_ticket, "individual_data") and isinstance(
                 active_ticket, TicketIndividualDataUpdateDetails
             ):
@@ -395,7 +395,7 @@ def handle_tickets_with_individual(model: Any, individual_field_name: str = "ind
 def copy_ticket_with_individual(active_ticket: Any, program: Program, individual_field_name: str) -> None:
     ticket = copy.deepcopy(active_ticket)
     if hasattr(ticket, "role_reassign_data"):
-        ticket = handle_role_reassign_data(ticket, program, individual_field_name)
+        ticket = handle_role_reassign_data(ticket, program)
     if hasattr(active_ticket, "individual_data") and isinstance(active_ticket, TicketIndividualDataUpdateDetails):
         handle_individual_data(ticket, program)
     individual_representation = get_individual_representation_per_program_by_old_individual_id(
@@ -477,6 +477,8 @@ def handle_needs_adjudication_tickets() -> None:
 
         for program in programs_without_current:
             needs_adjudication_ticket_copy = copy.deepcopy(needs_adjudication_ticket)
+            if hasattr(needs_adjudication_ticket_copy, "role_reassign_data"):
+                needs_adjudication_ticket_copy = handle_role_reassign_data(needs_adjudication_ticket_copy, program)
             needs_adjudication_ticket_copy.pk = None
             # Copy Grievance Ticket
             needs_adjudication_ticket_copy = copy_grievance_ticket(
@@ -537,7 +539,8 @@ def handle_needs_adjudication_tickets() -> None:
 
         needs_adjudication_ticket.selected_individuals.set(selected_individuals)
         needs_adjudication_ticket.possible_duplicates.set(possible_duplicates)
-        needs_adjudication_ticket.ticket.programs.set([current_program])
+        if hasattr(needs_adjudication_ticket, "role_reassign_data"):
+            handle_role_reassign_data(needs_adjudication_ticket, current_program)  # type: ignore
 
 
 def migrate_messages() -> None:
@@ -857,7 +860,7 @@ def handle_non_program_messages() -> None:
             non_program_messages.update(program=void_program)
 
 
-def handle_role_reassign_data(ticket: Any, program: Program, individual_field_name: str = "individual") -> Any:
+def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
     """
     role_reassign_data structure:
     {
@@ -870,81 +873,60 @@ def handle_role_reassign_data(ticket: Any, program: Program, individual_field_na
     }
     """
 
-    def retrieve_household_representation(
-        household_from_json: Household, program: Program, role_data: dict
-    ) -> Optional[Household]:
+    def retrieve_household_representation(household_from_json: Household, program: Program) -> Optional[Household]:
         if household_from_json_in_program := household_from_json.copied_to.filter(program=program).first():
             encoded_id = encode_id_base64(household_from_json_in_program.id, "Household")
             role_data["household"] = encoded_id
         return household_from_json_in_program
 
-    def retrieve_individual_representation(
-        individual_from_json: Individual, program: Program, role_data: dict
-    ) -> Optional[Individual]:
+    def retrieve_individual_representation(individual_from_json: Individual, program: Program) -> Optional[Individual]:
         if individual_from_json_in_program := individual_from_json.copied_to.filter(program=program).first():
             encoded_id = encode_id_base64(individual_from_json_in_program.id, "Individual")
             role_data["individual"] = encoded_id
         return individual_from_json_in_program
+
+    def retrieve_role_from_program(role_from_json: IndividualRoleInHousehold, program: Program) -> Optional[Individual]:
+        role_household_in_program = role_from_json.household.copied_from.copied_to.filter(program=program).first()
+        role_individual_in_program = role_from_json.individual.copied_from.copied_to.filter(program=program).first()
+
+        role_from_json_in_program = IndividualRoleInHousehold.objects.filter(
+            household=role_household_in_program, individual=role_individual_in_program
+        ).first()
+        return role_from_json_in_program
 
     if not ticket.role_reassign_data:
         return ticket
 
     new_role_reassign_data = {}
     for role_uuid, role_data in ticket.role_reassign_data.items():
-        original_data = copy.deepcopy(role_data)
         role_data_to_extend = {}
 
         household_from_json = Household.objects.filter(id=decode_id_string(role_data.get("household"))).first()
+        # Fetch correct household representation from JSON
+        household_from_json_in_program = (
+            retrieve_household_representation(household_from_json, program) if household_from_json else None
+        )
 
         individual_from_json = Individual.objects.filter(id=decode_id_string(role_data.get("individual"))).first()
+        # Fetch correct individual representation from JSON
+        individual_from_json_in_program = (
+            retrieve_individual_representation(individual_from_json, program) if individual_from_json else None
+        )
 
-        if individual_from_json and household_from_json:
-            # Fetch correct household representation from JSON
-            household_from_json_in_program = retrieve_household_representation(household_from_json, program, role_data)
-            # Fetch correct individual representation from JSON
-            individual_from_json_in_program = retrieve_individual_representation(
-                individual_from_json, program, role_data
-            )
-            if hasattr(ticket, individual_field_name):
-                # Fetch role for individual that is connected to ticket (individual losing this role)
-                role_for_program = IndividualRoleInHousehold.objects.filter(
-                    individual=getattr(ticket, individual_field_name).copied_to.filter(program=program).first(),
-                    household=household_from_json_in_program,
-                ).first()
-                if role_for_program:
-                    role_data_to_extend[str(role_for_program.id)] = role_data
-                else:
-                    # Fetch role for individual that is in a JSON field of ticket (individual receiving this role)
-                    role_for_program = IndividualRoleInHousehold.objects.filter(
-                        individual=individual_from_json_in_program,
-                        household=household_from_json_in_program,
-                    ).first()
-                    if role_for_program:
-                        role_data_to_extend[str(role_for_program.id)] = role_data
+        if household_from_json_in_program and individual_from_json_in_program:
+            if role_uuid == "HEAD":
+                role_data_to_extend["HEAD"] = role_data
+            else:
+                role_from_json = IndividualRoleInHousehold.objects.filter(id=role_uuid).first()
+                # Fetch correct role representation from JSON
+                role_from_json_in_program = (
+                    retrieve_role_from_program(role_from_json, program) if role_from_json else None
+                )
+                if role_from_json_in_program:
+                    role_data_to_extend[str(role_from_json_in_program.id)] = role_data
 
-            elif hasattr(ticket, "household"):
-                # Fetch role for household provided in JSON and individual that is a part of household
-                # connected to ticket (individual losing this role)
-                household_assigned_in_program = ticket.household.copied_to.filter(program=program).first()
-                role_for_program = IndividualRoleInHousehold.objects.filter(
-                    individual__household=household_assigned_in_program,
-                    role=role_data.get("role"),
-                    household=household_from_json_in_program,
-                ).first()
-                if role_for_program:
-                    role_data_to_extend[str(role_for_program.id)] = role_data
-                else:
-                    # Fetch role for household provided in JSON and individual provided in JSON
-                    # (individual receiving this role)
-                    role_for_program = IndividualRoleInHousehold.objects.filter(
-                        individual=individual_from_json_in_program,
-                        household=household_from_json_in_program,
-                    ).first()
-                    if role_for_program:
-                        role_data_to_extend[str(role_for_program.id)] = role_data
-        if not role_data_to_extend:
-            role_data_to_extend = {role_uuid: original_data}
-        new_role_reassign_data.update(role_data_to_extend)
+        if role_data_to_extend:
+            new_role_reassign_data.update(role_data_to_extend)
 
     ticket.role_reassign_data = new_role_reassign_data
     ticket.save()
