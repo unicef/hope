@@ -38,6 +38,6 @@ class APITestCase(TestCase):
             ],
         )
         self.client.force_login(self.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, "You need to be logged in and superuser")
-        self.assertIn(str(instance.version), response.content.decode("utf-8"))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, "You need to be logged in and superuser")
+        self.assertIn(str(instance.version), resp.content.decode("utf-8"))
