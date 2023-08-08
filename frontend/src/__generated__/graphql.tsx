@@ -658,6 +658,7 @@ export type CashPlanNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   businessArea: UserBusinessAreaNode,
   statusDate: Scalars['DateTime'],
   startDate: Scalars['DateTime'],
@@ -3711,7 +3712,8 @@ export type MutationsReassignRoleArgs = {
 
 
 export type MutationsCreatePaymentVerificationPlanArgs = {
-  input: CreatePaymentVerificationInput
+  input: CreatePaymentVerificationInput,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -4374,6 +4376,7 @@ export type PaymentPlanNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   unicefId?: Maybe<Scalars['String']>,
   businessArea: UserBusinessAreaNode,
   statusDate: Scalars['DateTime'],
@@ -9858,7 +9861,8 @@ export type ActivatePaymentVerificationPlanMutation = (
 );
 
 export type CreatePaymentVerificationPlanMutationVariables = {
-  input: CreatePaymentVerificationInput
+  input: CreatePaymentVerificationInput,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -11602,7 +11606,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'version' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -11969,7 +11973,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
+    & Pick<CashPlanNode, 'id' | 'version' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -16979,8 +16983,8 @@ export type ActivatePaymentVerificationPlanMutationHookResult = ReturnType<typeo
 export type ActivatePaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<ActivatePaymentVerificationPlanMutation>;
 export type ActivatePaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>;
 export const CreatePaymentVerificationPlanDocument = gql`
-    mutation CreatePaymentVerificationPlan($input: CreatePaymentVerificationInput!) {
-  createPaymentVerificationPlan(input: $input) {
+    mutation CreatePaymentVerificationPlan($input: CreatePaymentVerificationInput!, $version: BigInt) {
+  createPaymentVerificationPlan(input: $input, version: $version) {
     paymentPlan {
       id
     }
@@ -17020,6 +17024,7 @@ export function withCreatePaymentVerificationPlan<TProps, TChildProps = {}>(oper
  * const [createPaymentVerificationPlanMutation, { data, loading, error }] = useCreatePaymentVerificationPlanMutation({
  *   variables: {
  *      input: // value for 'input'
+ *      version: // value for 'version'
  *   },
  * });
  */
@@ -21724,6 +21729,7 @@ export const PaymentPlanDocument = gql`
     query PaymentPlan($id: ID!) {
   paymentPlan(id: $id) {
     id
+    version
     unicefId
     status
     canCreateFollowUp
@@ -22505,6 +22511,7 @@ export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
     id
+    version
     canCreatePaymentVerificationPlan
     availablePaymentRecordsCount
     name
@@ -28279,6 +28286,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -29857,6 +29865,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
