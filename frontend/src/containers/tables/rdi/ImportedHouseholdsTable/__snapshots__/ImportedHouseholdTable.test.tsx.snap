@@ -206,7 +206,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
           class="MuiTableBody-root"
         >
           <tr
-            class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+            class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
             data-cy="imported-households-row"
             role="checkbox"
           >
@@ -216,9 +216,8 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             <td
               class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
             >
-              <a
-                class="sc-gzVnrw cjWhti"
-                href="/afghanistan/registration-data-import/household/SW1wb3J0ZWRIb3VzZWhvbGROb2RlOjNlYjE5Y2RiLTBjZTYtNDgwZS1iZTI5LTczYjY0ZWI1ZjI3Mg=="
+              <div
+                class="sc-dnqmqq jbBufH"
               />
             </td>
             <td

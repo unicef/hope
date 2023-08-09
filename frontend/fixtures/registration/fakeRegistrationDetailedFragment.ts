@@ -2,7 +2,7 @@ import { RegistrationDetailedFragment } from '../../src/__generated__/graphql';
 
 export const fakeRegistrationDetailedFragment = {
   id:
-    'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6OGNjODY1YmItYzk5My00ODlkLWE2YjUtNWNlYjIxYzZhMGMz',
+    'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl',
   createdAt: '2022-02-07T11:45:52.336426',
   name: 'romaniaks',
   status: 'MERGED',
