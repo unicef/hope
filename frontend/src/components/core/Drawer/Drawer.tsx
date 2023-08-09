@@ -104,6 +104,13 @@ const Text = styled(ListItemText)`
   }
 `;
 
+const ResourcesText = styled('p')`
+  text-align: left;
+  font-size: 14px;
+  color: #aaa;
+  margin-left: 16px;
+`;
+
 const ToolbarScrollBox = styled(Box)`
   overflow-y: auto;
   height: 100%;
@@ -123,12 +130,12 @@ interface Props {
   dataCy: string;
 }
 
-export function Drawer({
+export const Drawer = ({
   open,
   handleDrawerClose,
   currentLocation,
   dataCy,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   const classes = useStyles({});
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
@@ -175,9 +182,7 @@ export function Drawer({
         </Box>
         {open && (
           <Box mb={2}>
-            <Typography variant='subtitle2' align='center'>
-              {t('Resources')}
-            </Typography>
+            <ResourcesText>{t('Resources')}</ResourcesText>
           </Box>
         )}
         {resourcesItems.map((item) => (
@@ -207,4 +212,4 @@ export function Drawer({
       />
     </DrawerMaterial>
   );
-}
+};
