@@ -36,7 +36,7 @@ If you would like to use a different flow, please enter the flow name below (cas
 
 {% if flow_uuid and flow_status %}
 <div>
-<h3>Test flow {{flow_name}} for phone number {{phone_number }} was initiated with status {{flow_status}}. You can check flow run result by clicking the button bellow (after you receive and respond to phone message).</h3>
+<h3>Test flow {{flow_name}} for phone number {{phone_number }} was initiated with status {{flow_status}}.</h3>
 </div>
 {% endif %}
 
@@ -73,10 +73,6 @@ If you would like to use a different flow, please enter the flow name below (cas
 
 <br>
 <br>
-
-{% if phone_number and flow_uuid%}
-    <a href="{{request.path}}?phone_number={{phone_number|urlencode}}&flow_uuid={{flow_uuid|urlencode}}&flow_name={{flow_name|urlencode}}&timestamp={{timestamp|urlencode}}"><button>Check flow results</button> </a>
-{% endif%}
 
 {% endblock%}
 
