@@ -1,11 +1,9 @@
-import styled from 'styled-components';
 import {
   Box,
   ListItem,
   ListItemIcon,
   ListItemText,
   makeStyles,
-  Typography,
 } from '@material-ui/core';
 import Divider from '@material-ui/core/Divider';
 import DrawerMaterial from '@material-ui/core/Drawer';
@@ -15,11 +13,12 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBackendVersion } from '../../../hooks/useBackendVersion';
+import { useFrontendVersion } from '../../../hooks/useFrontendVersion';
 import { theme as themeObj } from '../../../theme';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
-import { useFrontendVersion } from '../../../hooks/useFrontendVersion';
-import { useBackendVersion } from '../../../hooks/useBackendVersion';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 
