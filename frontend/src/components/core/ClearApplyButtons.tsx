@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@material-ui/core';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ClearApplyButtonsProps {
@@ -12,15 +12,34 @@ export const ClearApplyButtons = ({
   applyHandler,
 }: ClearApplyButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
+
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        applyHandler();
+      }
+    },
+    [applyHandler],
+  );
+
+  useEffect(() => {
+    const handleDocumentKeyPress = (event: KeyboardEvent): void => {
+      handleKeyPress(event);
+    };
+
+    document.addEventListener('keydown', handleDocumentKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleDocumentKeyPress);
+    };
+  }, [handleKeyPress]);
+
   return (
     <Grid container justifyContent='flex-end' spacing={3}>
       <Box mt={4}>
         <Button
           color='primary'
           data-cy='button-filters-clear'
-          onClick={() => {
-            clearHandler();
-          }}
+          onClick={clearHandler}
         >
           {t('Clear')}
         </Button>
@@ -28,7 +47,7 @@ export const ClearApplyButtons = ({
           color='primary'
           variant='outlined'
           data-cy='button-filters-apply'
-          onClick={() => applyHandler()}
+          onClick={applyHandler}
         >
           {t('Apply')}
         </Button>
