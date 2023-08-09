@@ -80,17 +80,8 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
       width: theme.spacing(14),
     },
   },
-  list: {
-    borderRightWidth: 2,
-    borderRightColor: '#E1E1E1',
-    borderRightStyle: 'solid',
-    height: '100%',
-  },
   version: {
-    borderRightWidth: 2,
-    borderRightColor: '#E1E1E1',
     color: '#aaa',
-    borderRightStyle: 'solid',
     padding: 4,
     textAlign: 'center',
   },
@@ -113,13 +104,10 @@ const Text = styled(ListItemText)`
   }
 `;
 
-const ResourcesBox = styled(Box)`
+const ToolbarScrollBox = styled(Box)`
+  overflow-y: auto;
+  height: 100%;
   border-right: 2px solid #e1e1e1;
-`;
-
-const BorderBox = styled(Box)`
-  border-right: 2px solid #e1e1e1;
-  height: 30px;
 `;
 
 const Icon = styled(ListItemIcon)`
@@ -178,10 +166,10 @@ export function Drawer({
         </IconButton>
       </div>
       <Divider />
-      <List className={classes.list}>
-        <DrawerItems open={open} currentLocation={currentLocation} />
-      </List>
-      <ResourcesBox>
+      <ToolbarScrollBox>
+        <List>
+          <DrawerItems open={open} currentLocation={currentLocation} />
+        </List>
         <Box mb={2}>
           <Divider />
         </Box>
@@ -206,14 +194,13 @@ export function Drawer({
             </StyledLink>
           </ListItem>
         ))}
-      </ResourcesBox>
-      <BorderBox />
-      {open && (
-        <div className={classes.version}>
-          <div>Backend Version: {backendVersion}</div>
-          <div>Frontend Version: {frontendVersion}</div>
-        </div>
-      )}
+        {open && (
+          <div className={classes.version}>
+            <div>Backend Version: {backendVersion}</div>
+            <div>Frontend Version: {frontendVersion}</div>
+          </div>
+        )}
+      </ToolbarScrollBox>
       <AlertDialog
         show={showMismatchedDialog}
         message={t('Version mismatch, please refresh page')}
