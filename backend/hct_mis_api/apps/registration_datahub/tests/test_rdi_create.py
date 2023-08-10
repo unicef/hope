@@ -560,15 +560,39 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
                 "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
                 "id": 35027752,
                 "xform": 549831,
-            }
+            },
+            {
+                "mimetype": "image/png",
+                "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=xD"
+                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-21_37.png",
+                "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=xD"
+                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-21_37.png",
+                "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=xD"
+                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-21_37.png",
+                "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/c09130af-6c9c-4dba-8c7f-1b2ff1970d19"
+                "/signature-21_37_xDDD.png",
+                "instance": 102612403,
+                "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-21_37.png",
+                "id": 35027752,
+                "xform": 549831,
+            },
         ]
 
         result = task._handle_image_field("image_is_not_there.gif", False)
-        self.assertEqual(result, "")
+        self.assertEqual(result, None)
 
         result = task._handle_image_field("signature-14_59_24.png", False)
         self.assertIsInstance(result, File)
         self.assertEqual(result.name, "signature-14_59_24.png", False)
+
+        result = task._handle_image_field("signature-21_37.png", False)
+        self.assertIsInstance(result, File)
+        self.assertEqual(result.name, "signature-21_37.png", False)
 
     def test_handle_geopoint_field(self) -> None:
         geopoint = "51.107883 17.038538"
