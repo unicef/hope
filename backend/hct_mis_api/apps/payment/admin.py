@@ -28,6 +28,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -268,6 +269,11 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
     search_fields = ("id", "unicef_id")
 
 
+class PaymentHouseholdSnapshotInline(admin.StackedInline):
+    model = PaymentHouseholdSnapshot
+    readonly_fields = ("snapshot_data", "household_id")
+
+
 @admin.register(Payment)
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "household", "status", "parent")
@@ -291,6 +297,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "head_of_household",
         "financial_service_provider",
     )
+    inlines = [PaymentHouseholdSnapshotInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")

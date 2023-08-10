@@ -146,6 +146,31 @@ export function paymentStatusToColor(
       return theme.palette.error.main;
   }
 }
+
+export function paymentStatusDisplayMap(
+  status: string,
+): string {
+  switch (status) {
+    case PaymentStatus.Pending:
+    case PaymentRecordStatus.Pending:
+      return "PENDING";
+    case PaymentStatus.DistributionSuccessful:
+    case PaymentStatus.TransactionSuccessful:
+    case PaymentRecordStatus.DistributionSuccessful:
+    case PaymentRecordStatus.TransactionSuccessful:
+      return "DELIVERED FULLY";
+    case PaymentStatus.PartiallyDistributed:
+      return "DELIVERED PARTIALLY";
+    case PaymentRecordStatus.NotDistributed:
+    case PaymentStatus.NotDistributed:
+      return "NOT DELIVERED";
+    case PaymentRecordStatus.ForceFailed:
+    case PaymentStatus.ForceFailed:
+      return "FORCE FAILED";
+    default:
+      return "UNSUCCESSFUL";
+  }
+}
 export function paymentVerificationStatusToColor(
   theme: typeof themeObj,
   status: string,
