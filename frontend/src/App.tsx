@@ -8,6 +8,8 @@ import { ProfilePage } from './containers/pages/core/ProfilePage';
 import { Providers } from './providers';
 import { SentryRoute } from './components/core/SentryRoute';
 import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage';
+import { SanctionList } from './containers/pages/core/SanctionList';
+import { ProtectedRoute } from './components/core/ProtectedRoute';
 
 export const App: React.FC = () => {
   return (
@@ -31,6 +33,11 @@ export const App: React.FC = () => {
               Throw new error
             </button>
           </SentryRoute>
+          <ProtectedRoute
+            path='/sanction-list'
+            component={SanctionList}
+            location={window.location}
+          />
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
