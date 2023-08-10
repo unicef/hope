@@ -85,6 +85,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -304,6 +305,13 @@ class GenericPaymentNode(graphene.ObjectType):
         return self.household
 
 
+class PaymentHouseholdSnapshotNode(BaseNodePermissionMixin, DjangoObjectType):
+    class Meta:
+        model = PaymentHouseholdSnapshot
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
@@ -316,6 +324,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     total_persons_covered = graphene.Int()
     service_provider = graphene.Field(FinancialServiceProviderNode)
+    household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
 
     class Meta:
         model = Payment
@@ -433,6 +442,7 @@ class ReconciliationSummaryNode(graphene.ObjectType):
     not_delivered = graphene.Int()
     unsuccessful = graphene.Int()
     pending = graphene.Int()
+    force_failed = graphene.Int()
     number_of_payments = graphene.Int()
     reconciled = graphene.Int()
 
@@ -537,6 +547,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
+            force_failed=Count("id", filter=Q(status=GenericPayment.STATUS_FORCE_FAILED)),
             pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),

@@ -822,6 +822,14 @@ def clear_cache_for_dashboard_totals() -> None:
             cache.delete(k)
 
 
+def clear_cache_for_key(key: str) -> None:
+    """remove cache if key starts with"""
+    if hasattr(cache, "keys"):
+        all_cache_keys = cache.keys(f"{key}*")
+        for k in all_cache_keys:
+            cache.delete(k)
+
+
 """Constants for the identification type field to key mapping, used until other systems are updated to use the new keys"""
 
 IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"

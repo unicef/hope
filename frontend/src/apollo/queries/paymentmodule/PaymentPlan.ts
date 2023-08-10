@@ -4,6 +4,7 @@ export const PAYMENT_PLAN_QUERY = gql`
   query PaymentPlan($id: ID!) {
     paymentPlan(id: $id) {
       id
+      version
       unicefId
       status
       canCreateFollowUp

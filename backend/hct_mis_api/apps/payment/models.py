@@ -222,13 +222,13 @@ class GenericPayment(TimeStampedUUIDModel):
     STATUS_PENDING = "Pending"
 
     STATUS_CHOICE = (
-        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
-        (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
-        (STATUS_SUCCESS, _("Transaction Successful")),
-        (STATUS_ERROR, _("Transaction Erroneous")),
-        (STATUS_FORCE_FAILED, _("Force failed")),
-        (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),
-        (STATUS_PENDING, _("Pending")),
+        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),  # Delivered Fully
+        (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),  # Not Delivered
+        (STATUS_SUCCESS, _("Transaction Successful")),  # Delivered Fully
+        (STATUS_ERROR, _("Transaction Erroneous")),  # Unsuccessful
+        (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
+        (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
+        (STATUS_PENDING, _("Pending")),  # Pending
     )
 
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
@@ -348,7 +348,7 @@ class GenericPayment(TimeStampedUUIDModel):
         return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
 
 
-class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
+class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -509,7 +509,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=BackgroundActionStatus.XLSX_EXPORTING,
+        source=[BackgroundActionStatus.XLSX_EXPORTING, BackgroundActionStatus.XLSX_EXPORT_ERROR],
         target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[
             lambda obj: obj.status
@@ -530,7 +530,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.RULE_ENGINE_RUN],
+        source=[BackgroundActionStatus.RULE_ENGINE_RUN, BackgroundActionStatus.RULE_ENGINE_ERROR],
         target=BackgroundActionStatus.RULE_ENGINE_ERROR,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -563,6 +563,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=[
             BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
             BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],
         target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[
@@ -1224,7 +1225,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         self.sent_by = sent_by
 
 
-class CashPlan(GenericPaymentPlan):
+class CashPlan(ConcurrencyModel, GenericPaymentPlan):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
@@ -1887,3 +1888,9 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
             f"Authorization: {self.authorization_number_required} "
             f"Finance Releases: {self.finance_release_number_required}"
         )
+
+
+class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
+    snapshot_data = JSONField(default=dict)
+    household_id = models.UUIDField()
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")

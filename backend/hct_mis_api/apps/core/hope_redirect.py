@@ -103,7 +103,7 @@ class HopeRedirectCashPlan(HopeRedirect):
             return cash_plan.business_area.slug
         return "/"
 
-    def _get_cash_plan(self) -> CashPlan:
+    def _get_cash_plan(self) -> Optional[CashPlan]:
         return CashPlan.objects.filter(Q(ca_id=self.ca_id) | Q(program__pk=self.program_id)).first()
 
 
