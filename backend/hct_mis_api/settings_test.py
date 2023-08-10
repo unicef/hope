@@ -90,6 +90,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_HSTS_SECONDS = False
 CACHE_ENABLED = False
-
+CONSTANCE_CONFIG["REST_BANNER_MESSAGE"] = ("Default banner message", "Description", str)
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
