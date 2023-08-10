@@ -117,6 +117,9 @@
             "name": "VolumeByDeliveryMechanismNode"
           },
           {
+            "name": "PaymentHouseholdSnapshotNode"
+          },
+          {
             "name": "ReportNode"
           },
           {

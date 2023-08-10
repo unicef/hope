@@ -41,7 +41,7 @@ export const RegistrationDataImportTable = ({
   noTitle,
 }: RegistrationDataImportProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const initialVariables = {
     search: filter.search,
     importDate: filter.importDate
@@ -52,9 +52,11 @@ export const RegistrationDataImportTable = ({
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
-    importDateRange: JSON.stringify(filter.importDateRange),
-    size: JSON.stringify(filter.size),
-    program: programId,
+    importDateRange: JSON.stringify({
+      min: filter.importDateRangeMin,
+      max: filter.importDateRangeMax,
+    }),
+    size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
   };
 
   const handleRadioChange = (id: string): void => {
