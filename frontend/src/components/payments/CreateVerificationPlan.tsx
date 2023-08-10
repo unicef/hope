@@ -28,6 +28,7 @@ import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { getPercentage } from '../../utils/utils';
 import {
+  PaymentVerificationPlanVerificationChannel,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
@@ -111,11 +112,13 @@ export interface Props {
   cashOrPaymentPlanId: string;
   disabled: boolean;
   canCreatePaymentVerificationPlan: boolean;
+  version: number;
 }
 export function CreateVerificationPlan({
   cashOrPaymentPlanId,
   disabled,
   canCreatePaymentVerificationPlan,
+  version,
 }: Props): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
@@ -154,29 +157,39 @@ export function CreateVerificationPlan({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      if (formValues.verificationChannel === 'RAPIDPRO') {
+      if (
+        formValues.verificationChannel ===
+        PaymentVerificationPlanVerificationChannel.Rapidpro
+      ) {
         loadRapidProFlows();
       }
     }
   }, [formValues, open, loadSampleSize, loadRapidProFlows]);
 
   const submit = async (values): Promise<void> => {
-    const { errors } = await mutate({
-      variables: prepareVariables(
-        cashOrPaymentPlanId,
-        selectedTab,
-        values,
-        businessArea,
-      ),
-      refetchQueries,
-    });
-    setOpen(false);
+    try {
+      const { errors } = await mutate({
+        variables: {
+          ...prepareVariables(
+            cashOrPaymentPlanId,
+            selectedTab,
+            values,
+            businessArea,
+          ),
+          version,
+        },
+        refetchQueries,
+      });
+      setOpen(false);
 
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
+      if (errors) {
+        showMessage(t('Error while submitting'));
+        return;
+      }
+      showMessage(t('New verification plan created.'));
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
-    showMessage(t('New verification plan created.'));
   };
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
