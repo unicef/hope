@@ -9,6 +9,8 @@ export const fakeApolloAllRegistrationDataImports = [
         importDate: null,
         businessArea: 'afghanistan',
         importDateRange: '{}',
+        program:
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
         size: '{}',
         first: 10,
         orderBy: '-import_date',

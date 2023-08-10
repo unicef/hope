@@ -41,7 +41,7 @@ export const RegistrationDataImportTable = ({
   noTitle,
 }: RegistrationDataImportProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
     search: filter.search,
     importDate: filter.importDate
@@ -52,6 +52,7 @@ export const RegistrationDataImportTable = ({
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
+    programId,
     importDateRange: JSON.stringify({
       min: filter.importDateRangeMin,
       max: filter.importDateRangeMax,
