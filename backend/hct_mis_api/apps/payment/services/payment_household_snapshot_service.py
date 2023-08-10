@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 from typing import Any, Callable, Dict
 from uuid import UUID
 
@@ -27,6 +28,7 @@ encode_typedict: Dict[type, Callable[[Any], Any]] = {
     datetime.date: lambda x: x.strftime("%Y-%m-%d"),
     Country: lambda x: x.iso_code3,
     Point: lambda x: str(x),
+    Decimal: lambda x: str(x),
 }
 
 page_size = 100
