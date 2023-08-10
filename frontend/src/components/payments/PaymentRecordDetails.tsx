@@ -7,6 +7,7 @@ import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentRecordStatusToColor,
+  paymentStatusDisplayMap,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import {
@@ -54,6 +55,7 @@ export const PaymentRecordDetails = ({
               <StatusBox
                 status={paymentRecord.status}
                 statusToColor={paymentRecordStatusToColor}
+                statusNameMapping={paymentStatusDisplayMap}
               />
             </LabelizedField>
           </Grid>

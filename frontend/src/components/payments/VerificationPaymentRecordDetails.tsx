@@ -8,6 +8,7 @@ import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentRecordStatusToColor,
+  paymentStatusDisplayMap,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { PaymentRecordQuery } from '../../__generated__/graphql';
@@ -54,6 +55,7 @@ export function VerificationPaymentRecordDetails({
               <StatusBox
                 status={paymentRecord.status}
                 statusToColor={paymentRecordStatusToColor}
+                statusNameMapping={paymentStatusDisplayMap}
               />
             </LabelizedField>
           </Grid>
