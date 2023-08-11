@@ -68,7 +68,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
-    migrate_grievance_tickets_and_feedback,
+    migrate_grievance_to_representations,
 )
 
 
@@ -3238,7 +3238,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
     def test(self) -> None:
         needs_adjudication_count = TicketNeedsAdjudicationDetails.objects.count()
-        migrate_grievance_tickets_and_feedback()
+        migrate_grievance_to_representations()
 
         self.refresh_objects()
         self.assertEqual(needs_adjudication_count + 4, TicketNeedsAdjudicationDetails.objects.count())

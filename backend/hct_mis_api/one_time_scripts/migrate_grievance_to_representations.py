@@ -44,7 +44,7 @@ from hct_mis_api.apps.program.models import Program
 BATCH_SIZE = 500
 
 
-def migrate_grievance_tickets_and_feedback() -> None:
+def migrate_grievance_to_representations() -> None:
     """
     Migrate grievance tickets and feedback into representations.
     """
@@ -941,28 +941,28 @@ def handle_extra_data(ticket: Any, program: Program) -> Any:
     """
     extra_data structure:
     {
-    "golden_records": [
-        {
-            "dob": date_of_birth,
-            "full_name": full_name,
-            "hit_id": hit_id,
-            "location": location,
-            "proximity_to_score": proximity_to_score,
-            "score": score
-        },
-        ...
-    ],
-    "possible_duplicate": [
-        {
-            "dob": date_of_birth,
-            "full_name": full_name,
-            "hit_id":  hit_id,
-            "location": location,
-            "proximity_to_score": proximity_to_score,
-            "score": score
-        },
-        ...
-    ]
+        "golden_records": [
+            {
+                "dob": date_of_birth,
+                "full_name": full_name,
+                "hit_id": hit_id,
+                "location": location,
+                "proximity_to_score": proximity_to_score,
+                "score": score
+            },
+            ...
+        ],
+        "possible_duplicate": [
+            {
+                "dob": date_of_birth,
+                "full_name": full_name,
+                "hit_id":  hit_id,
+                "location": location,
+                "proximity_to_score": proximity_to_score,
+                "score": score
+            },
+            ...
+        ]
     }
     """
 
@@ -993,35 +993,37 @@ def handle_individual_data(
     individual_data consists of multiple values, but only some have ids.
     These are: [documents/identities/payment_channels]_to_remove and _to_edit.
     Structure of individual_data:
-    "_to_remove": [
-        {
-            "approve_status": bool,
-            "value": "base64_id_of_object_to_remove"
-        }
-    ]
-    "_to_edit": [
-        {
-            "approve_status": bool,
-            "previous_value": {
-                "id": base64_object_id,
-                (if not document)
-                "individual": base64_individual_id,
-                **other_object_specific_fields
-            },
-            "value": {
-                "id": base64_object_id(the same as the one above),
-                (if not document)
-                "individual": base64_individual_id,
-                **other_object_specific_fields
-            }
-        }
-    ],
-    also for _to_remove objects there are corresponding previous_[documents/identities/payment_channels].
     {
-        "base64_object_id": {
-            "id": same as base64_object_id(same as value in _to_remove),
-            "individual" base64_document_individual_id,
-            **object specific data
+        "_to_remove": [
+            {
+                "approve_status": bool,
+                "value": "base64_id_of_object_to_remove"
+            }
+        ]
+        "_to_edit": [
+            {
+                "approve_status": bool,
+                "previous_value": {
+                    "id": base64_object_id,
+                    (if not document)
+                    "individual": base64_individual_id,
+                    **other_object_specific_fields
+                },
+                "value": {
+                    "id": base64_object_id(the same as the one above),
+                    (if not document)
+                    "individual": base64_individual_id,
+                    **other_object_specific_fields
+                }
+            }
+        ],
+        also for _to_remove objects there are corresponding previous_[documents/identities/payment_channels].
+        {
+            "base64_object_id": {
+                "id": same as base64_object_id(same as value in _to_remove),
+                "individual" base64_document_individual_id,
+                **object specific data
+            }
         }
     }
     """
