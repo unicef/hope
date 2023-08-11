@@ -111,13 +111,13 @@
             "name": "PaymentNode"
           },
           {
+            "name": "PaymentHouseholdSnapshotNode"
+          },
+          {
             "name": "ApprovalProcessNode"
           },
           {
             "name": "VolumeByDeliveryMechanismNode"
-          },
-          {
-            "name": "PaymentHouseholdSnapshotNode"
           },
           {
             "name": "ReportNode"
