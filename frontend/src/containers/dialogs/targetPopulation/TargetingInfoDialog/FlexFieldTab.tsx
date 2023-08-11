@@ -29,21 +29,23 @@ export const FlexFieldTab = (): React.ReactElement => {
   return (
     <Box p={3}>
       <Grid container spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           {selectOptions.length && (
             <SelectFilter
               onChange={(e) => setSelectedOption(e.target.value)}
               variant='outlined'
               label={t('Type')}
               value={selectedOption}
+              fullWidth
             >
               <MenuItem value=''>
                 <em>{t('All')}</em>
@@ -58,11 +60,12 @@ export const FlexFieldTab = (): React.ReactElement => {
             </SelectFilter>
           )}
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => setSelectedFieldType(e.target.value)}
             label={t('Field Type')}
             value={selectedFieldType}
+            fullWidth
           >
             <MenuItem value={t('All')}>
               <em>{t('All')}</em>

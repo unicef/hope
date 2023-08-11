@@ -6,7 +6,6 @@ import {
   Grid,
   Typography,
 } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +81,8 @@ export const ExcludeSection = ({
   };
 
   const initialValues = {
-    exclusionReason: '',
+    exclusionReason:
+      initialExcludedIds.length > 0 ? paymentPlan.exclusionReason : '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string()
@@ -226,7 +226,7 @@ export const ExcludeSection = ({
             setEdit(false);
           }}
         >
-          {t('Preview')}
+          {t('Preview Exclusion')}
         </Button>
       );
     }
@@ -244,8 +244,7 @@ export const ExcludeSection = ({
               color='primary'
               title={getTooltipText()}
               disabled={editExclusionsDisabled}
-              variant='outlined'
-              startIcon={<EditIcon />}
+              variant='contained'
               onClick={() => setEdit(true)}
             >
               {t('Edit')}
@@ -280,6 +279,16 @@ export const ExcludeSection = ({
       return (
         <Box mt={2} display='flex' alignItems='center'>
           <Grid alignItems='flex-start' container spacing={3}>
+            <Grid item xs={12}>
+              <Field
+                name='exclusionReason'
+                fullWidth
+                multiline
+                variant='outlined'
+                label={t('Reason')}
+                component={FormikTextField}
+              />
+            </Grid>
             <Grid item xs={6}>
               <Box mr={2}>
                 <StyledTextField
@@ -303,16 +312,6 @@ export const ExcludeSection = ({
               >
                 {t('Apply')}
               </ButtonTooltip>
-            </Grid>
-            <Grid item xs={12}>
-              <Field
-                name='exclusionReason'
-                fullWidth
-                multiline
-                variant='outlined'
-                label={t('Exclusion Reason')}
-                component={FormikTextField}
-              />
             </Grid>
           </Grid>
         </Box>
@@ -354,45 +353,23 @@ export const ExcludeSection = ({
               ) : null}
               <Collapse in={isExclusionsOpen}>
                 <Box display='flex' flexDirection='column'>
-                  {renderInputAndApply()}
-                  <Grid container item xs={6}>
-                    {errors?.map((formError) => (
-                      <Grid item xs={12}>
-                        <FormHelperText error>{formError}</FormHelperText>
-                      </Grid>
-                    ))}
-                  </Grid>
-                  {numberOfExcluded > 0 && (
-                    <Box mt={2} mb={2}>
-                      <GreyText>{`${numberOfExcluded} ${
-                        numberOfExcluded === 1 ? 'Household' : 'Households'
-                      } excluded`}</GreyText>
-                    </Box>
-                  )}
-                  <Grid container direction='column' item xs={3}>
-                    {excludedIds.map((id) => (
-                      <Grid item xs={12}>
-                        <ExcludedItem
-                          key={id}
-                          id={id}
-                          onDelete={() => handleDelete(id)}
-                          onUndo={() => handleUndo(id)}
-                          isDeleted={handleCheckIfDeleted(id)}
-                          isEdit={isEdit}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                  {isExclusionsOpen && exclusionReason ? (
+                  {isExclusionsOpen && exclusionReason && !isEdit ? (
                     <Grid container>
                       <Grid item xs={8}>
                         <Box display='flex' flexDirection='column'>
-                          <Box mt={4} mb={2}>
-                            <Typography variant='subtitle2'>
-                              {t('Exclusion Reason')}:
-                            </Typography>
-                          </Box>
-                          <Box>
+                          <Box
+                            display='flex'
+                            alignItems={
+                              exclusionReason.length > 100
+                                ? 'flex-start'
+                                : 'center'
+                            }
+                            mt={4}
+                            mb={2}
+                          >
+                            <Box mr={2}>
+                              <GreyText>{t('Reason')}:</GreyText>
+                            </Box>
                             <Typography>{exclusionReason}</Typography>
                           </Box>
                           {excludeHouseholdError && (
@@ -408,6 +385,28 @@ export const ExcludeSection = ({
                       </Grid>
                     </Grid>
                   ) : null}
+                  {renderInputAndApply()}
+                  <Grid container item xs={6}>
+                    {errors?.map((formError) => (
+                      <Grid item xs={12}>
+                        <FormHelperText error>{formError}</FormHelperText>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <Grid container direction='column' item xs={3}>
+                    {excludedIds.map((id) => (
+                      <Grid item xs={12}>
+                        <ExcludedItem
+                          key={id}
+                          id={id}
+                          onDelete={() => handleDelete(id)}
+                          onUndo={() => handleUndo(id)}
+                          isDeleted={handleCheckIfDeleted(id)}
+                          isEdit={isEdit}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
                 </Box>
               </Collapse>
             </PaperContainer>
