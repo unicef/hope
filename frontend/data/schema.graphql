@@ -349,6 +349,7 @@ type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
   startDate: DateTime!
@@ -1473,6 +1474,7 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
+  registrationId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
@@ -2230,6 +2232,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  registrationId: Int
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
@@ -2527,7 +2530,7 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
-  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!): CreateVerificationPlanMutation
+  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!, version: BigInt): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
   importXlsxPaymentVerificationPlanFile(file: Upload!, paymentVerificationPlanId: ID!): ImportXlsxPaymentVerificationPlanFile
@@ -2657,6 +2660,15 @@ type PaymentDetailsApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
 
+type PaymentHouseholdSnapshotNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  snapshotData: JSONString!
+  householdId: UUID!
+  payment: PaymentNode!
+}
+
 type PaymentNode implements Node {
   isRemoved: Boolean!
   id: ID!
@@ -2689,6 +2701,7 @@ type PaymentNode implements Node {
   orderNumber: Int
   tokenNumber: Int
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  householdSnapshot: PaymentHouseholdSnapshotNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
@@ -2895,6 +2908,7 @@ type PaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   unicefId: String
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
@@ -3576,6 +3590,7 @@ type ReconciliationSummaryNode {
   notDelivered: Int
   unsuccessful: Int
   pending: Int
+  forceFailed: Int
   numberOfPayments: Int
   reconciled: Int
 }

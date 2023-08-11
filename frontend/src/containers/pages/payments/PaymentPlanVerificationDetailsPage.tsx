@@ -146,6 +146,7 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
             canCreatePaymentVerificationPlan={
               paymentPlan.canCreatePaymentVerificationPlan
             }
+            version={paymentPlan.version}
           />
         )}
 

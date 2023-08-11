@@ -9,7 +9,7 @@ from hct_mis_api.apps.household.models import Individual
 logger = logging.getLogger(__name__)
 
 
-def calculate_at_registration_field(batch_size: int = 10_000) -> None:
+def calculate_age_at_registration_field(batch_size: int = 10_000) -> None:
     individual_queryset = (
         Individual.objects.select_related("registration_data_import")
         .order_by("created_at")

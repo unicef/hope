@@ -10,6 +10,8 @@ import { AllProgramsRoutesSwitch } from './containers/routers/AllProgramsRoutesS
 import { BaseHomeRouter } from './containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from './containers/routers/SelectedProgramRoutesSwitch';
 import { Providers } from './providers';
+import { SanctionList } from './containers/pages/core/SanctionList';
+import { ProtectedRoute } from './components/core/ProtectedRoute';
 
 export const App: React.FC = () => {
   return (
@@ -33,6 +35,11 @@ export const App: React.FC = () => {
               Throw new error
             </button>
           </SentryRoute>
+          <ProtectedRoute
+            path='/sanction-list'
+            component={SanctionList}
+            location={window.location}
+          />
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>

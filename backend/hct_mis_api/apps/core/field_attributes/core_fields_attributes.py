@@ -1701,6 +1701,19 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "preferred_language",
         "scope": [Scope.XLSX],
     },
+    {
+        "id": "32fcdace-6e72-48ac-9ce8-469e552cfafe",
+        "type": TYPE_INTEGER,
+        "name": "age_at_registration",
+        "lookup": "age_at_registration",
+        "label": {"English(EN)": "Age at registration"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "age_at_registration",
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 

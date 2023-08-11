@@ -111,6 +111,9 @@
             "name": "PaymentNode"
           },
           {
+            "name": "PaymentHouseholdSnapshotNode"
+          },
+          {
             "name": "ApprovalProcessNode"
           },
           {
