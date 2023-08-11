@@ -1,11 +1,9 @@
-import styled from 'styled-components';
 import {
   Box,
   ListItem,
   ListItemIcon,
   ListItemText,
   makeStyles,
-  Typography,
 } from '@material-ui/core';
 import Divider from '@material-ui/core/Divider';
 import DrawerMaterial from '@material-ui/core/Drawer';
@@ -15,11 +13,12 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBackendVersion } from '../../../hooks/useBackendVersion';
+import { useFrontendVersion } from '../../../hooks/useFrontendVersion';
 import { theme as themeObj } from '../../../theme';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
-import { useFrontendVersion } from '../../../hooks/useFrontendVersion';
-import { useBackendVersion } from '../../../hooks/useBackendVersion';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 
@@ -81,17 +80,8 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
       width: theme.spacing(14),
     },
   },
-  list: {
-    borderRightWidth: 2,
-    borderRightColor: '#E1E1E1',
-    borderRightStyle: 'solid',
-    height: '100%',
-  },
   version: {
-    borderRightWidth: 2,
-    borderRightColor: '#E1E1E1',
     color: '#aaa',
-    borderRightStyle: 'solid',
     padding: 4,
     textAlign: 'center',
   },
@@ -114,13 +104,17 @@ const Text = styled(ListItemText)`
   }
 `;
 
-const ResourcesBox = styled(Box)`
-  border-right: 2px solid #e1e1e1;
+const ResourcesText = styled('p')`
+  text-align: left;
+  font-size: 14px;
+  color: #aaa;
+  margin-left: 16px;
 `;
 
-const BorderBox = styled(Box)`
+const ToolbarScrollBox = styled(Box)`
+  overflow-y: auto;
+  height: 100%;
   border-right: 2px solid #e1e1e1;
-  height: 30px;
 `;
 
 const Icon = styled(ListItemIcon)`
@@ -136,12 +130,12 @@ interface Props {
   dataCy: string;
 }
 
-export function Drawer({
+export const Drawer = ({
   open,
   handleDrawerClose,
   currentLocation,
   dataCy,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   const classes = useStyles({});
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
@@ -179,18 +173,16 @@ export function Drawer({
         </IconButton>
       </div>
       <Divider />
-      <List className={classes.list}>
-        <DrawerItems open={open} currentLocation={currentLocation} />
-      </List>
-      <ResourcesBox>
+      <ToolbarScrollBox>
+        <List>
+          <DrawerItems open={open} currentLocation={currentLocation} />
+        </List>
         <Box mb={2}>
           <Divider />
         </Box>
         {open && (
           <Box mb={2}>
-            <Typography variant='subtitle2' align='center'>
-              {t('Resources')}
-            </Typography>
+            <ResourcesText>{t('Resources')}</ResourcesText>
           </Box>
         )}
         {resourcesItems.map((item) => (
@@ -207,18 +199,17 @@ export function Drawer({
             </StyledLink>
           </ListItem>
         ))}
-      </ResourcesBox>
-      <BorderBox />
-      {open && (
-        <div className={classes.version}>
-          <div>Backend Version: {backendVersion}</div>
-          <div>Frontend Version: {frontendVersion}</div>
-        </div>
-      )}
+        {open && (
+          <div className={classes.version}>
+            <div>Backend Version: {backendVersion}</div>
+            <div>Frontend Version: {frontendVersion}</div>
+          </div>
+        )}
+      </ToolbarScrollBox>
       <AlertDialog
         show={showMismatchedDialog}
         message={t('Version mismatch, please refresh page')}
       />
     </DrawerMaterial>
   );
-}
+};

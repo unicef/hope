@@ -569,7 +569,7 @@
   "Sanction List Possible Match": "Sanction List Possible Match",
   "Houesehold has Duplicates": "Houesehold has Duplicates",
   "Excluded Target Population Entries (Households or Individuals)": "Excluded Target Population Entries (Households or Individuals)",
-  "Exclusion Reason": "Exclusion Reason",
+  "Reason": "Reason",
   "Household or Individual IDs to exclude": "Household or Individual IDs to exclude",
   "ID is not in the correct format": "ID is not in the correct format",
   "Linked Households": "Linked Households",
@@ -823,5 +823,6 @@
   "Programme Duplicated": "Programme Duplicated",
   "Copy Programme": "Copy Programme",
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
-  "PDF generated. Please check your email.": "PDF generated. Please check your email."
+  "PDF generated. Please check your email.": "PDF generated. Please check your email.",
+  "Preview Exclusion": "Preview Exclusion"
 }
