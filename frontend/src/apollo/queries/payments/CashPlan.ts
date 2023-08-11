@@ -4,6 +4,7 @@ export const CashPlan = gql`
   query CashPlan($id: ID!) {
     cashPlan(id: $id) {
       id
+      version
       canCreatePaymentVerificationPlan
       availablePaymentRecordsCount
       name

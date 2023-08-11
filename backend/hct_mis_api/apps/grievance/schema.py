@@ -552,6 +552,7 @@ class Query(graphene.ObjectType):
             ("ticket_id", "Ticket ID"),
             ("ticket_hh_id", "Household ID"),
             ("family_name", "Last Name"),
+            ("registration_id", "Registration ID (Aurora)"),
         ]
         search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
         return [{"name": name, "value": value} for value, name in search_types_choices]

@@ -7,6 +7,7 @@ import { StatusBox } from '../../../../components/core/StatusBox';
 import {
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
+  paymentStatusDisplayMap,
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
@@ -56,6 +57,7 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
         <StatusBox
           status={paymentRecordOrPayment.status}
           statusToColor={paymentRecordStatusToColor}
+          statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
       <TableCell align='left'>{paymentRecordOrPayment.fullName}</TableCell>

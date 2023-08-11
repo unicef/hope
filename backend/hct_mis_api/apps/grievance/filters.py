@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Sequence, Tuple
 
 from django.db import models
@@ -25,6 +26,8 @@ from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_quer
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+
+logger = logging.getLogger(__name__)
 
 
 class IsNull(Func):
@@ -204,20 +207,35 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        key, value = tuple(value.split(" ", 1))
+        try:
+            key, value = tuple(value.split(" ", 1))
+        except ValueError:
+            logger.info("Search term cannot be empty string or space")
+            return qs.none()
+
         if key == "ticket_id":
             values = list(map(str.strip, value.split(",")))
             return qs.filter(Q(unicef_id__in=values))
         elif key == "ticket_hh_id":
             return qs.filter(Q(household_unicef_id=value))
         elif key == "family_name":
+            value = value.strip()
             ids = (
                 Individual.objects.filter(Q(family_name=value) & Q(relationship=HEAD))
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(Q(household_unicef_id__in=ids))
+        elif key == "registration_id":
+            value = value.strip()
+            ids = (
+                Individual.objects.filter(relationship=HEAD, registration_id=value)
+                .select_related("household")
+                .values_list("household__unicef_id", flat=True)
+            )
+            return qs.filter(Q(household_unicef_id__in=ids))
         elif DocumentType.objects.filter(key=key).exists():
+            value = value.strip()
             ids = (
                 Individual.objects.filter(
                     Q(relationship=HEAD) & Q(documents__type__key=key) & Q(documents__document_number__icontains=value)
