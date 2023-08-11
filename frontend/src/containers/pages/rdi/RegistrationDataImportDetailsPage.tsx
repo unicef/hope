@@ -57,7 +57,7 @@ function TabPanel({
   }
   return <div style={style}>{children}</div>;
 }
-export function RegistrationDataImportDetailsPage(): React.ReactElement {
+export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -121,7 +121,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
                 <ImportedHouseholdTable
                   key={`${data.registrationDataImport.status}-household`}
                   isMerged={isMerged}
-                  rdiId={id}
+                  rdi={data.registrationDataImport}
                   businessArea={businessArea}
                 />
               </TabPanel>
@@ -157,4 +157,4 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
       <RegistrationContainer isErased={data.registrationDataImport.erased} />
     </div>
   );
-}
+};

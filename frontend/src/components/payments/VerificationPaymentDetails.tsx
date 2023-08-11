@@ -7,6 +7,7 @@ import {
   choicesToDict,
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
+  paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
@@ -51,6 +52,7 @@ export function VerificationPaymentDetails({
               <StatusBox
                 status={payment.status}
                 statusToColor={paymentStatusToColor}
+                statusNameMapping={paymentStatusDisplayMap}
               />
             </LabelizedField>
           </Grid>

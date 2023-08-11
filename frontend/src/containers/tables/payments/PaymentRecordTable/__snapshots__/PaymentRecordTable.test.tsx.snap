@@ -314,7 +314,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                     class="sc-dnqmqq fBXPNU"
                     data-cy="status-container"
                   >
-                    DISTRIBUTION SUCCESSFUL
+                    DELIVERED FULLY
                   </div>
                 </div>
               </td>
