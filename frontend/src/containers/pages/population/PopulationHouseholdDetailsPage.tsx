@@ -2,7 +2,7 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { FlagTooltip } from '../../../components/core/FlagTooltip';
@@ -61,6 +61,7 @@ const SubTitle = styled(Typography)`
 export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const history = useHistory();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -100,12 +101,23 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   )
     return null;
 
-  const breadCrumbsItems: BreadCrumbsItem[] = [
+  let breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Households'),
       to: `/${businessArea}/population/household`,
     },
   ];
+  const breadcrumbTitle = history.location?.state?.breadcrumbTitle;
+  const breadcrumbUrl = history.location?.state?.breadcrumbUrl;
+
+  if (breadcrumbTitle && breadcrumbUrl) {
+    breadCrumbsItems = [
+      {
+        title: breadcrumbTitle,
+        to: breadcrumbUrl,
+      },
+    ];
+  }
 
   const { household } = data;
 
