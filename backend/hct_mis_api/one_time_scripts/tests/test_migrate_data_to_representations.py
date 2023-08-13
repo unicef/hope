@@ -19,10 +19,6 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.household.utils import (
-    get_biggest_program,
-    migrate_data_to_representations,
-)
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentFactory,
@@ -36,6 +32,10 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    get_biggest_program,
+    migrate_data_to_representations_per_business_area,
+)
 
 
 class TestMigrateDataToRepresentations(TestCase):
@@ -366,7 +366,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.rdi_with_3_hhs.refresh_from_db()
         self.individual_helper3.refresh_from_db()
 
-    def test_migrate_data_to_representations(self) -> None:
+    def test_migrate_data_to_representations_per_business_area(self) -> None:
         household_count = Household.objects.filter(business_area=self.business_area).count()
         individual_count = Individual.objects.filter(business_area=self.business_area).count()
         document_count = Document.objects.filter(individual__business_area=self.business_area).count()
@@ -378,7 +378,7 @@ class TestMigrateDataToRepresentations(TestCase):
         payment_count = Payment.objects.filter(business_area=self.business_area).count()
         payment_record_count = PaymentRecord.objects.filter(business_area=self.business_area).count()
 
-        migrate_data_to_representations(business_area=self.business_area)
+        migrate_data_to_representations_per_business_area(business_area=self.business_area)
 
         assert Household.objects.filter(business_area=self.business_area).count() - household_count == 8
         assert Individual.objects.filter(business_area=self.business_area).count() - individual_count == 17

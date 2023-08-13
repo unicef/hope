@@ -200,7 +200,7 @@ class BankAccountInfoFactory(DjangoModelFactory):
 
     individual = factory.SubFactory(IndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = random.randint(10**26, 10**27 - 1)
+    bank_account_number = factory.LazyAttribute(lambda x: random.randint(10**26, 10**27 - 1))
 
 
 class DocumentTypeFactory(DjangoModelFactory):
@@ -214,12 +214,13 @@ class DocumentTypeFactory(DjangoModelFactory):
 class DocumentFactory(DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("document_number", "type", "country")
+        django_get_or_create = ("document_number", "type", "country", "program")
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)
     individual = factory.SubFactory(IndividualFactory)
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    program = factory.SubFactory(ProgramFactory)
 
 
 class DocumentAllowDuplicatesFactory(DjangoModelFactory):
