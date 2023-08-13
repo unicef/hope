@@ -99,8 +99,14 @@ def handle_payment_related_tickets() -> None:
     """
 
     # Fetch all objects of TicketComplaintDetails and TicketSensitiveDetails with non-null payment_obj
-    complaint_tickets_with_payments = TicketComplaintDetails.objects.filter(payment_object_id__isnull=False)
-    sensitive_tickets_with_payments = TicketSensitiveDetails.objects.filter(payment_object_id__isnull=False)
+    complaint_tickets_with_payments = TicketComplaintDetails.objects.select_related(
+        "household",
+        "individual",
+    ).filter(payment_object_id__isnull=False)
+    sensitive_tickets_with_payments = TicketSensitiveDetails.objects.select_related(
+        "household",
+        "individual",
+    ).filter(payment_object_id__isnull=False)
 
     complaint_and_sensitive_details_tickets = chain(complaint_tickets_with_payments, sensitive_tickets_with_payments)
 
@@ -133,11 +139,18 @@ def handle_payment_related_tickets() -> None:
     GrievanceTicket.objects.bulk_update(grievance_tickets, ["household_unicef_id"])
 
     # Update programs for TicketPaymentVerificationDetails with payment_obj
-    payment_verification_tickets = TicketPaymentVerificationDetails.objects.filter(
-        payment_verification__isnull=False,
-        payment_verification__payment_object_id__isnull=False,
-        ticket__programs=None,
-    ).distinct()
+    payment_verification_tickets = (
+        TicketPaymentVerificationDetails.objects.select_related(
+            "payment_verification",
+        )
+        .filter(
+            payment_verification__isnull=False,
+            payment_verification__payment_object_id__isnull=False,
+            ticket__programs=None,
+        )
+        .distinct()
+        .iterator()
+    )
     for payment_verification_ticket in payment_verification_tickets:
         payment_obj = payment_verification_ticket.payment_verification.payment_obj
         if isinstance(payment_obj, Payment):
@@ -207,17 +220,21 @@ def handle_non_payment_related_tickets() -> None:
 
 
 def handle_complaint_tickets_without_payments() -> None:
-    complaint_tickets_without_payments = TicketComplaintDetails.objects.filter(
-        payment_object_id__isnull=True, ticket__programs=None
-    )
+    complaint_tickets_without_payments = TicketComplaintDetails.objects.select_related(
+        "ticket",
+        "household",
+        "individual",
+    ).filter(payment_object_id__isnull=True, ticket__programs=None)
     handle_closed_tickets_with_household_and_individual(complaint_tickets_without_payments)
     handle_active_tickets_with_household_and_individual(complaint_tickets_without_payments)
 
 
 def handle_sensitive_tickets_without_payments() -> None:
-    sensitive_tickets_without_payments = TicketSensitiveDetails.objects.filter(
-        payment_object_id__isnull=True, ticket__programs=None
-    )
+    sensitive_tickets_without_payments = TicketSensitiveDetails.objects.select_related(
+        "ticket",
+        "household",
+        "individual",
+    ).filter(payment_object_id__isnull=True, ticket__programs=None)
     handle_closed_tickets_with_household_and_individual(sensitive_tickets_without_payments)
     handle_active_tickets_with_household_and_individual(sensitive_tickets_without_payments)
 
@@ -229,7 +246,7 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> No
     """
     print("Handle closed tickets with household and individual")
     closed_tickets = tickets.filter(ticket__status=GrievanceTicket.STATUS_CLOSED)
-    for closed_ticket in closed_tickets:
+    for closed_ticket in closed_tickets.iterator():
         if closed_ticket.household:
             program = closed_ticket.household.program
         elif closed_ticket.individual:
@@ -243,7 +260,7 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> No
                 old_individual_id=closed_ticket.individual.copied_from_id,
             )
             closed_ticket.individual = individual_representation
-            closed_ticket.save()
+            closed_ticket.save(update_fields=["individual"])
 
         if program:
             closed_ticket.ticket.programs.set([program])
@@ -254,7 +271,7 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet) -> No
     For active complaint tickets, we need to copy tickets for every household/individual representation
     """
     print("Handle active tickets with household and individual")
-    active_tickets = tickets.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+    active_tickets = tickets.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator()
 
     for active_ticket in active_tickets:
         current_program = None
@@ -318,17 +335,27 @@ def handle_current_program_ticket_with_household_and_individual(
         )
         current_program_ticket.individual = individual_representation
 
-    current_program_ticket.save()
+        current_program_ticket.save(update_fields=["individual"])
 
 
 def handle_tickets_with_household(model: Any) -> None:
-    tickets_with_hh = model.objects.filter(household__isnull=False, ticket__programs=None)
+    tickets_with_hh = (
+        model.objects.select_related(
+            "ticket",
+            "household",
+            "household__program",
+        )
+        .prefetch_related(
+            "household__copied_to",
+        )
+        .filter(household__isnull=False, ticket__programs=None)
+    )
     # Handle closed tickets
-    for closed_ticket in tickets_with_hh.filter(ticket__status=GrievanceTicket.STATUS_CLOSED):
+    for closed_ticket in tickets_with_hh.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
         closed_ticket.ticket.programs.set([closed_ticket.household.program])
 
     # Handle active tickets
-    for active_ticket in tickets_with_hh.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED):
+    for active_ticket in tickets_with_hh.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
         if active_ticket.household:
             household_representations = active_ticket.household.copied_to.all()
 
@@ -340,7 +367,7 @@ def handle_tickets_with_household(model: Any) -> None:
                 household_representations.values_list("program", flat=True).distinct().exclude(program=current_program)
             )
 
-            for program in household_programs:
+            for program in household_programs.iterator():
                 copy_ticket_with_household(active_ticket, program)
 
             if hasattr(active_ticket, "role_reassign_data"):
@@ -363,14 +390,24 @@ def copy_ticket_with_household(active_ticket: Any, program: Program) -> None:
 
 
 def handle_tickets_with_individual(model: Any, individual_field_name: str = "individual") -> None:
-    tickets_with_ind = model.objects.filter(ticket__programs=None, **{f"{individual_field_name}__isnull": False})
+    tickets_with_ind = (
+        model.objects.select_related(
+            "ticket",
+            individual_field_name,
+            f"{individual_field_name}__program",
+        )
+        .prefetch_related(
+            f"{individual_field_name}__copied_to",
+        )
+        .filter(ticket__programs=None, **{f"{individual_field_name}__isnull": False})
+    )
     # Handle closed tickets
-    for closed_ticket in tickets_with_ind.filter(ticket__status=GrievanceTicket.STATUS_CLOSED):
+    for closed_ticket in tickets_with_ind.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
         closed_ticket.ticket.programs.set([getattr(closed_ticket, individual_field_name).program])
 
     # Handle active tickets
-    for active_ticket in tickets_with_ind.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED):
-        if active_ticket.individual:
+    for active_ticket in tickets_with_ind.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
+        if getattr(active_ticket, individual_field_name):
             individual_representations = getattr(active_ticket, individual_field_name).copied_to.all()
 
             # Handle current program ticket
@@ -381,7 +418,7 @@ def handle_tickets_with_individual(model: Any, individual_field_name: str = "ind
                 individual_representations.values_list("program", flat=True).distinct().exclude(program=current_program)
             )
 
-            for program in individual_programs:
+            for program in individual_programs.iterator():
                 copy_ticket_with_individual(active_ticket, program, individual_field_name=individual_field_name)
 
             if hasattr(active_ticket, "role_reassign_data"):
@@ -400,7 +437,7 @@ def copy_ticket_with_individual(active_ticket: Any, program: Program, individual
         handle_individual_data(ticket, program)
     individual_representation = get_individual_representation_per_program_by_old_individual_id(
         program=program,
-        old_individual_id=ticket.individual.copied_from_id,
+        old_individual_id=getattr(ticket, individual_field_name).copied_from_id,
     )
     setattr(ticket, individual_field_name, individual_representation)
 
@@ -452,9 +489,19 @@ def handle_referral_tickets() -> None:
 
 
 def handle_needs_adjudication_tickets() -> None:
-    needs_adjudication_tickets = TicketNeedsAdjudicationDetails.objects.filter(ticket__programs=None)
+    needs_adjudication_tickets = (
+        TicketNeedsAdjudicationDetails.objects.select_related(
+            "ticket",
+            "golden_records_individual",
+        )
+        .prefetch_related(
+            "possible_duplicates",
+            "selected_individuals",
+        )
+        .filter(ticket__programs=None)
+    )
 
-    for needs_adjudication_ticket in needs_adjudication_tickets:
+    for needs_adjudication_ticket in needs_adjudication_tickets.iterator():
         individuals = [
             needs_adjudication_ticket.golden_records_individual,
             *needs_adjudication_ticket.possible_duplicates.all(),
@@ -537,7 +584,7 @@ def handle_needs_adjudication_tickets() -> None:
         selected_individuals = [individual for individual in selected_individuals if individual]
 
         needs_adjudication_ticket.golden_records_individual = possible_duplicates.pop()
-        needs_adjudication_ticket.save()
+        needs_adjudication_ticket.save(update_fields=["golden_records_individual"])
 
         needs_adjudication_ticket.selected_individuals.set(selected_individuals)
         needs_adjudication_ticket.possible_duplicates.set(possible_duplicates)
@@ -549,8 +596,18 @@ def handle_needs_adjudication_tickets() -> None:
 
 def migrate_messages() -> None:
     print("Handle Messages")
-    message_objects = Message.objects.filter(program__isnull=True)
-    for message in message_objects:
+    message_objects = (
+        Message.objects.select_related(
+            "target_population",
+            "target_population__program",
+        )
+        .prefetch_related(
+            "households",
+            "households__copied_to",
+        )
+        .filter(program__isnull=True)
+    )
+    for message in message_objects.iterator():
         if message.target_population:
             program = message.target_population.program
             if message.households.exists():
@@ -564,7 +621,7 @@ def migrate_messages() -> None:
                 households_representations = [household for household in households_representations if household]
                 message.households.set(households_representations)
             message.program_id = program
-            message.save()
+            message.save(update_fields=["program_id"])
         else:
             if message.households.exists():
                 programs = list(message.households.values_list("copied_to__program", flat=True).distinct())
@@ -585,7 +642,7 @@ def migrate_messages() -> None:
                 households_representations = [household for household in households_representations if household]
                 message.households.set(households_representations)
                 message.program_id = current_program
-                message.save()
+                message.save(update_fields=["program_id"])
         print("Handle Messages not connected to any program")
         handle_non_program_messages()
 
@@ -594,6 +651,7 @@ def copy_message(active_message: Message, program: Program) -> None:
     message = copy.deepcopy(active_message)
     message.pk = None
     message.unicef_id = None
+    message.program_id = program
     message.save()
 
     households_representations = [
@@ -605,31 +663,33 @@ def copy_message(active_message: Message, program: Program) -> None:
     ]
     households_representations = [household for household in households_representations if household]
     message.households.set(households_representations)
-    message.program_id = program
-    message.save()
 
 
 def migrate_feedback() -> None:
     print("Handle Feedback objects")
     # Handle closed Feedback (Feedback related to a closed grievance ticket) OR Feedback with program
-    feedback_objects_for_specific_program = Feedback.objects.filter(
-        Q(linked_grievance__status=GrievanceTicket.STATUS_CLOSED) | Q(program__isnull=False)
-    ).distinct()
-    assign_feedback_to_program(feedback_objects_for_specific_program)
+    assign_feedback_to_program()
     # Handle active Feedback objects without program -
     # (Feedback with active tickets OR Feedback not related to any ticket) AND without defined program
-    active_feedback_objects = Feedback.objects.filter(
-        (Q(linked_grievance__isnull=True) | ~Q(linked_grievance__status=GrievanceTicket.STATUS_CLOSED))
-        & Q(program__isnull=True)
-    ).distinct()
-
-    handle_active_feedback(active_feedback_objects)
+    handle_active_feedback()
     print("Handle Feedback not connected to any program")
     handle_non_program_feedback()
 
 
-def assign_feedback_to_program(feedback_objects_for_specific_program: QuerySet) -> None:
-    for feedback_obj in feedback_objects_for_specific_program:
+def assign_feedback_to_program() -> None:
+    feedback_objects_for_specific_program = (
+        Feedback.objects.select_related(
+            "program",
+            "household_lookup",
+            "individual_lookup",
+            "linked_grievance",
+            "household_lookup__program",
+            "individual_lookup__program",
+        )
+        .filter(Q(linked_grievance__status=GrievanceTicket.STATUS_CLOSED) | Q(program__isnull=False))
+        .distinct()
+    )
+    for feedback_obj in feedback_objects_for_specific_program.iterator():
         if feedback_obj.program:
             program = feedback_obj.program
         elif feedback_obj.household_lookup:
@@ -655,11 +715,29 @@ def assign_feedback_to_program(feedback_objects_for_specific_program: QuerySet) 
             if feedback_obj.linked_grievance:
                 feedback_obj.linked_grievance.programs.set([program])
             feedback_obj.program = program
-            feedback_obj.save()
+            feedback_obj.save(update_fields=["program", "household_lookup", "individual_lookup"])
 
 
-def handle_active_feedback(active_feedback_objects: QuerySet) -> None:
-    for feedback_obj in active_feedback_objects:
+def handle_active_feedback() -> None:
+    active_feedback_objects = (
+        Feedback.objects.select_related(
+            "linked_grievance",
+            "program",
+            "household_lookup",
+            "individual_lookup",
+            "household_lookup__program",
+            "individual_lookup__program",
+        )
+        .prefetch_related(
+            "feedback_messages",
+        )
+        .filter(
+            (Q(linked_grievance__isnull=True) | ~Q(linked_grievance__status=GrievanceTicket.STATUS_CLOSED))
+            & Q(program__isnull=True)
+        )
+        .distinct()
+    )
+    for feedback_obj in active_feedback_objects.iterator():
         current_program = None
         if feedback_obj.individual_lookup:
             individual_representations = feedback_obj.individual_lookup.copied_to.all()
@@ -701,7 +779,7 @@ def handle_active_feedback(active_feedback_objects: QuerySet) -> None:
             if feedback_obj.linked_grievance:
                 feedback_obj.linked_grievance.programs.set([current_program])
             feedback_obj.program = current_program
-            feedback_obj.save()
+            feedback_obj.save(update_fields=["program", "household_lookup", "individual_lookup"])
 
 
 def copy_feedback(feedback_obj: Feedback, program: Program) -> None:
@@ -771,7 +849,7 @@ def create_void_program(business_area: BusinessArea) -> Program:
         business_area=business_area,
         defaults=dict(
             status=Program.DRAFT,
-            start_date=timezone.now(),
+            start_date=timezone.datetime.min,
             end_date=timezone.datetime.max,
             budget=0,
             frequency_of_payments=Program.ONE_OFF,
@@ -787,7 +865,7 @@ def handle_non_program_tickets() -> None:
     """
     Handle tickets that are not connected to any project. They should be moved to dummy program.
     """
-    for business_area in BusinessArea.objects.all():
+    for business_area in BusinessArea.objects.all().iterator():
         non_program_query = Q(ticket__programs__isnull=True) & Q(ticket__business_area=business_area)
         non_program_tickets = chain(
             TicketComplaintDetails.objects.filter(non_program_query),
@@ -832,7 +910,7 @@ def handle_non_program_feedback() -> None:
     """
     Handle feedback that is not connected to any project. They should be moved to dummy program.
     """
-    for business_area in BusinessArea.objects.all():
+    for business_area in BusinessArea.objects.all().iterator():
         non_program_feedback_objects = Feedback.objects.filter(Q(program__isnull=True) & Q(business_area=business_area))
         if non_program_feedback_objects:
             void_program = create_void_program(business_area)
@@ -857,7 +935,7 @@ def handle_non_program_feedback() -> None:
 
 
 def handle_non_program_messages() -> None:
-    for business_area in BusinessArea.objects.all():
+    for business_area in BusinessArea.objects.all().iterator():
         non_program_messages = Message.objects.filter(Q(program__isnull=True) & Q(business_area=business_area))
         if non_program_messages:
             void_program = create_void_program(business_area)
@@ -933,7 +1011,7 @@ def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
             new_role_reassign_data.update(role_data_to_extend)
 
     ticket.role_reassign_data = new_role_reassign_data
-    ticket.save()
+    ticket.save(update_fields=["role_reassign_data"])
     return ticket
 
 
@@ -1037,7 +1115,7 @@ def handle_individual_data(
     if not individual_data:
         return ticket
 
-    for model in [Document, IndividualIdentity, BankAccountInfo]:
+    for model in (Document, IndividualIdentity, BankAccountInfo):
         IndividualDataObjectsToEditHandler(
             individual_data,
             individual_in_program,
@@ -1052,7 +1130,7 @@ def handle_individual_data(
         ).handle_objects_to_remove()
 
     ticket.individual_data = individual_data
-    ticket.save()
+    ticket.save(update_fields=["individual_data"])
     return ticket
 
 
@@ -1063,7 +1141,7 @@ class IndividualDataObjectsToRemoveHandler:
         individual_in_program: Individual,
         model: Any,
         encoded_individual_id: Optional[str],
-    ):
+    ) -> None:
         self.individual_data = individual_data
         self.model = model
         self.objects_to_remove_string, self.previous_objects_string = self.object_specific_update_fields()
@@ -1140,7 +1218,7 @@ class IndividualDataObjectsToEditHandler:
         individual_in_program: Individual,
         model: Any,
         encoded_individual_id: Optional[str],
-    ):
+    ) -> None:
         self.individual_data = individual_data
         self.model = model
         self.objects_to_edit_string = self.object_specific_edit_fields()
