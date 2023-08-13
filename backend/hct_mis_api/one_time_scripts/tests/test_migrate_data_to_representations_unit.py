@@ -24,7 +24,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.household.utils import (
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     adjust_household_selections,
     adjust_payment_records,
     adjust_payments,
