@@ -20,7 +20,14 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 BATCH_SIZE = 500
 
 
-def migrate_data_to_representations(business_area: BusinessArea) -> None:
+def migrate_data_to_representations() -> None:
+    for business_area in BusinessArea.objects.all():
+        print("----- NEW BUSINESS AREA -----")
+        print("Handling business area: ", business_area)
+        migrate_data_to_representations_per_business_area(business_area=business_area)
+
+
+def migrate_data_to_representations_per_business_area(business_area: BusinessArea) -> None:
     """
     This function is used to migrate data from old models to new representations per business_area.
     Take TargetPopulations:
@@ -39,6 +46,8 @@ def migrate_data_to_representations(business_area: BusinessArea) -> None:
     for program in Program.objects.filter(
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
+        print("----- NEW PROGRAM -----")
+        print("Creating representations for program: ", program)
         if program.status == Program.ACTIVE:
             target_populations_ids = TargetPopulation.objects.filter(
                 program=program,
@@ -61,16 +70,25 @@ def migrate_data_to_representations(business_area: BusinessArea) -> None:
         households = Household.objects.filter(id__in=household_ids)
 
         for household in households:
+            print(f"Creating representation for household: {household} in program: {program}")
             copy_household_representation(household, program)
+            print(f"Created representation for household: {household} in program: {program}")
 
+        print("Handling RDIs for program: ", program)
         handle_rdis(households, program)
 
+        print("Copying roles for program: ", program)
         copy_roles(households, program=program)
 
+        print("Adjusting household selections for program: ", program)
         adjust_household_selections(household_selections, program)
 
+        print("Finished creating representations for program: ", program)
+
+    print("Handling objects without any representations yet - enrolling to biggest program")
     assign_non_program_objects_to_biggest_program(business_area)
 
+    print("Adjusting payments and payment records")
     adjust_payments(business_area)
     adjust_payment_records(business_area)
 
