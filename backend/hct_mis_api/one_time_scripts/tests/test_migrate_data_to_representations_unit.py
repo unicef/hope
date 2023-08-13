@@ -24,21 +24,6 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    adjust_household_selections,
-    adjust_payment_records,
-    adjust_payments,
-    assign_non_program_objects_to_biggest_program,
-    copy_bank_account_info_per_individual,
-    copy_document_per_individual,
-    copy_entitlement_card_per_household,
-    copy_household_representation,
-    copy_individual_identity_per_individual,
-    copy_individual_representation,
-    copy_roles,
-    get_biggest_program,
-    handle_rdis,
-)
 from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
@@ -54,6 +39,21 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    adjust_household_selections,
+    adjust_payment_records,
+    adjust_payments,
+    assign_non_program_objects_to_biggest_program,
+    copy_bank_account_info_per_individual,
+    copy_document_per_individual,
+    copy_entitlement_card_per_household,
+    copy_household_representation,
+    copy_individual_identity_per_individual,
+    copy_individual_representation,
+    copy_roles,
+    get_biggest_program,
+    handle_rdis,
+)
 
 
 def create_origin_household_with_individual(
