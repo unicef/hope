@@ -34,12 +34,12 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.household.utils import (
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     get_household_representation_per_program_by_old_household_id,
     get_individual_representation_per_program_by_old_individual_id,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
-from hct_mis_api.apps.program.models import Program
 
 BATCH_SIZE = 500
 
