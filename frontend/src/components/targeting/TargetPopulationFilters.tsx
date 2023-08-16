@@ -85,7 +85,6 @@ export const TargetPopulationFilters = ({
             fullWidth
             data-cy='filters-status'
           >
-            <MenuItem value=''>None</MenuItem>
             {Object.values(TargetPopulationStatus)
               .sort()
               .map((key) => (
@@ -104,9 +103,6 @@ export const TargetPopulationFilters = ({
             fullWidth
             data-cy='filters-program'
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}

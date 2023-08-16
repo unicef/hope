@@ -88,9 +88,6 @@ export const CommunicationFilters = ({
             label={t('Programme')}
             value={filter.program}
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}
@@ -106,9 +103,6 @@ export const CommunicationFilters = ({
             label={t('Target Population')}
             value={filter.targetPopulation}
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {targetPopulations.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}
