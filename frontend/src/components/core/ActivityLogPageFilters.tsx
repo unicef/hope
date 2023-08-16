@@ -83,9 +83,6 @@ export function ActivityLogPageFilters({
               'data-cy': 'filters-residence-status-options',
             }}
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {Object.entries(modules)
               .sort()
               .map(([key, value]) => (

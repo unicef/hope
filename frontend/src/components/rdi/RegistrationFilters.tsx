@@ -93,9 +93,6 @@ export const RegistrationFilters = ({
               onChange={(e) => handleFilterChange('status', e.target.value)}
               data-cy='filter-status'
             >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
               {registrationChoicesData.registrationDataStatusChoices.map(
                 (item) => {
                   return (

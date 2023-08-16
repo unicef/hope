@@ -87,9 +87,6 @@ export const SurveysFilters = ({
             icon={<FlashOnIcon />}
             fullWidth
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}

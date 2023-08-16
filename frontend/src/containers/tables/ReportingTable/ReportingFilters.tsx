@@ -61,9 +61,6 @@ export const ReportingFilters = ({
             onChange={(e) => handleFilterChange('type', e.target.value)}
             value={filter.type}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.reportTypesChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -108,9 +105,6 @@ export const ReportingFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.reportStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
