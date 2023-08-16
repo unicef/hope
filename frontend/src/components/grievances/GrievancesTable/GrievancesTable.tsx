@@ -44,7 +44,8 @@ export const GrievancesTable = ({
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
-    search: `${filter.search && filter.searchType} ${filter.search}`,
+    search: `${filter.search.trim() &&
+      [filter.searchType, filter.search.trim()].join(' ')}`,
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify({
