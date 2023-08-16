@@ -77,9 +77,6 @@ export const FeedbackFilters = ({
             value={filter.issueType}
             data-cy='filters-issue-type'
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {choicesData.feedbackIssueTypeChoices.map((issueType) => (
               <MenuItem key={issueType.name} value={issueType.value}>
                 {issueType.name}

@@ -116,9 +116,6 @@ export const VerificationRecordsFilters = ({
                 value={filter.status}
                 fullWidth
               >
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
                 {choicesData.paymentVerificationStatusChoices.map((item) => {
                   return (
                     <MenuItem key={item.value} value={item.value}>
@@ -136,9 +133,6 @@ export const VerificationRecordsFilters = ({
                 label={t('Verification Channel')}
                 value={filter.verificationChannel}
               >
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
                 {choicesData.cashPlanVerificationVerificationChannelChoices.map(
                   (item) => {
                     return (
@@ -158,9 +152,6 @@ export const VerificationRecordsFilters = ({
                 label={t('Verification Plan Id')}
                 value={filter.paymentVerificationPlan}
               >
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
                 {verificationPlanOptions}
               </SelectFilter>
             </Grid>

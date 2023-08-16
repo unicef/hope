@@ -70,9 +70,6 @@ export const ProgrammesFilters = ({
             label='Status'
             value={filter.status}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.programStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -107,9 +104,6 @@ export const ProgrammesFilters = ({
             value={filter.sector}
             multiple
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.programSectorChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
