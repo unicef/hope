@@ -1,5 +1,6 @@
-import { Box, InputAdornment } from '@material-ui/core';
+import { Box, IconButton, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { Close } from '@material-ui/icons';
 import React from 'react';
 import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
@@ -8,6 +9,13 @@ import { StyledFormControl } from '../StyledFormControl';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
+`;
+const EndInputAdornment = styled(InputAdornment)`
+  margin-right: 10px;
+`;
+
+const XIcon = styled(Close)`
+  color: #707070;
 `;
 
 const useStyles = makeStyles(() => ({
@@ -56,17 +64,27 @@ export const SelectFilter = ({
             MenuProps={{
               getContentAnchorEl: null,
             }}
-            InputProps={
-              icon
-                ? {
-                    startAdornment: (
-                      <StartInputAdornment position='start'>
-                        {icon}
-                      </StartInputAdornment>
-                    ),
-                  }
-                : null
-            }
+            InputProps={{
+              startAdornment: icon ? (
+                <StartInputAdornment position='start'>
+                  {icon}
+                </StartInputAdornment>
+              ) : null,
+              endAdornment: otherProps.value ? (
+                <EndInputAdornment position='end'>
+                  <IconButton
+                    size='small'
+                    onClick={() => {
+                      onChange({
+                        target: { value: otherProps.multiple ? [] : '' },
+                      });
+                    }}
+                  >
+                    <XIcon fontSize='small' />
+                  </IconButton>
+                </EndInputAdornment>
+              ) : null,
+            }}
             {...otherProps}
           >
             {children}

@@ -71,9 +71,6 @@ export const UsersListFilters = ({
             label={t('Partner')}
             value={filter.partner}
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {choices.userPartnerChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -89,9 +86,6 @@ export const UsersListFilters = ({
             label={t('Role')}
             value={filter.roles}
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {choices.userRolesChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -107,9 +101,6 @@ export const UsersListFilters = ({
             label={t('Status')}
             value={filter.status}
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {choices.userStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
