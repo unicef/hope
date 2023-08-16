@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -6,7 +6,10 @@ from django.http import Http404, HttpRequest
 from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
+from constance import config
+from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
@@ -67,3 +70,15 @@ class HOPEAPIBusinessAreaView(SelectedBusinessAreaMixin, HOPEAPIView):
 
 class HOPEAPIBusinessAreaViewSet(SelectedBusinessAreaMixin, HOPEAPIViewSet):
     pass
+
+
+class ConstanceSettingsAPIView(HOPEAPIView):
+    def get(self, request: HttpRequest) -> Response:
+        rest_settings: Dict[str, Any] = {}
+        for setting_name in dir(config):
+            if setting_name.startswith("REST_"):
+                setting_value = getattr(config, setting_name)
+                rest_setting_name = setting_name[len("REST_") :]
+                rest_settings[rest_setting_name] = setting_value
+
+        return Response(rest_settings, status=status.HTTP_200_OK)
