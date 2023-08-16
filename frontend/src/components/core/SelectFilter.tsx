@@ -30,9 +30,6 @@ const useStyles = makeStyles(() => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    '& .MuiMenuItem-root:hover': {
-      backgroundColor: 'yellow',
-    },
   },
 }));
 
