@@ -33,7 +33,7 @@ export const EditIndividualDataChangeFieldRow = ({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  // eslint-disable-next-line
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
     `individualDataUpdateFields[${index}].isFlexField`,
   );

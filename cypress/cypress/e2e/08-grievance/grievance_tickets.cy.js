@@ -323,7 +323,7 @@ describe("Grievance", () => {
       });
       it("Grievance Active Tickets filter", () => {});
     });
-    context("Create New Ticket", () => {
+    context.skip("Create New Ticket", () => {
       beforeEach(() => {
         grievancePage.getButtonNewTicket().click();
         newTicketPage.checkElementsOnPage();

@@ -52,8 +52,11 @@ export function RegistrationDataImportTable({
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
-    importDateRange: JSON.stringify(filter.importDateRange),
-    size: JSON.stringify(filter.size),
+    importDateRange: JSON.stringify({
+      min: filter.importDateRangeMin,
+      max: filter.importDateRangeMax,
+    }),
+    size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
   };
 
   const handleRadioChange = (id: string): void => {
