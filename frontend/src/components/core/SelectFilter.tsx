@@ -30,6 +30,9 @@ const useStyles = makeStyles(() => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    '& .MuiMenuItem-root:hover': {
+      backgroundColor: 'yellow',
+    },
   },
 }));
 
@@ -75,7 +78,9 @@ export const SelectFilter = ({
                   <IconButton
                     size='small'
                     onClick={() => {
-                      onChange({ target: { value: '' } });
+                      onChange({
+                        target: { value: otherProps.multiple ? [] : '' },
+                      });
                     }}
                   >
                     <XIcon fontSize='small' />
