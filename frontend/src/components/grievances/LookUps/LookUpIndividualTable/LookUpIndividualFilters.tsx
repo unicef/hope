@@ -58,9 +58,6 @@ export function LookUpIndividualFilters({
             icon={<FlashOnIcon />}
             fullWidth
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}
@@ -142,9 +139,6 @@ export function LookUpIndividualFilters({
             }}
             fullWidth
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             <MenuItem value='MALE'>{t('Male')}</MenuItem>
             <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
           </SelectFilter>

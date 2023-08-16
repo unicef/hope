@@ -115,9 +115,6 @@ export const PaymentFilters = ({
             fullWidth
             icon={<MonetizationOnIcon />}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {statusChoicesData.paymentRecordDeliveryTypeChoices.map((item) => (
               <MenuItem key={item.name} value={item.value}>
                 {item.name}
@@ -166,9 +163,6 @@ export const PaymentFilters = ({
             value={filter.program}
             icon={<FlashOnIcon />}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}

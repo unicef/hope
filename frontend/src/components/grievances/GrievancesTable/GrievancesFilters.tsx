@@ -128,9 +128,6 @@ export const GrievancesFilters = ({
             fullWidth
             data-cy='filters-status'
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.grievanceTicketStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
@@ -189,9 +186,6 @@ export const GrievancesFilters = ({
             fullWidth
             data-cy='filters-category'
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {categoryChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -209,9 +203,6 @@ export const GrievancesFilters = ({
               value={filter.issueType}
               fullWidth
             >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
               {issueTypeDict[
                 GRIEVANCE_CATEGORIES[
                   filter.category.replace(/\s/g, '_').toUpperCase()
@@ -319,9 +310,6 @@ export const GrievancesFilters = ({
             data-cy='filters-priority'
             fullWidth
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.grievanceTicketPriorityChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -339,9 +327,6 @@ export const GrievancesFilters = ({
             data-cy='filters-urgency'
             fullWidth
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.grievanceTicketUrgencyChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
