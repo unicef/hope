@@ -29,11 +29,38 @@ Cypress.Commands.add("createExcel", () => {
     );
   });
 });
-Cypress.Commands.add("adminLogin", () => {
-  cy.visit("/api/unicorn/");
-  cy.get('input[name="username"]').type(Cypress.env("username"));
-  cy.get('input[name="password"]').type(Cypress.env("password"));
-  cy.get("input").contains("Log in").click();
+Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
+  Cypress.session.clearCurrentSessionData();
+  Cypress.session.clearAllSavedSessions();
+  cy.navigateToHomePage();
+  const expected_url =
+    Cypress.config().baseUrl + "/api/unicorn/login/?next=/api/unicorn/";
+  function resolveAThing(n) {
+    cy.visit("/api/unicorn/");
+    cy.url().then((url) => {
+      if (expected_url !== url) {
+        cy.reload();
+        cy.visit("/api/unicorn/");
+      }
+    });
+    cy.get('input[name="username"]').type(Cypress.env("username"));
+    cy.get('input[name="password"]').type(Cypress.env("password"));
+    cy.get("input").contains("Log in").click();
+    cy.navigateToHomePage();
+    cy.get("div")
+      .find("div")
+      .find("div")
+      .eq(1)
+      .then(($text) => {
+        if ($text.text() === "Sign in" && n > 0) {
+          cy.log("retry: " + (10 - n + 1));
+          return resolveAThing(n - 1);
+        }
+      });
+  }
+
+  return resolveAThing(10);
+  // }
 });
 
 Cypress.Commands.add("navigateToHomePage", () => {
@@ -69,7 +96,7 @@ Cypress.Commands.add("scenario", (steps) => {
       { test },
       {
         title: "Scenario",
-        value: outputText
+        value: outputText,
       }
     );
   });
@@ -81,7 +108,7 @@ Cypress.on("fail", (error, runnable) => {
       { test },
       {
         title: "Error",
-        value: error.stack
+        value: error.stack,
       }
     );
   });

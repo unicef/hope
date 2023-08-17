@@ -4,7 +4,6 @@ let rdi = new RegistrationDataImport();
 
 describe("Registration Data Import", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("span").contains("Registration Data Import").click();
   });

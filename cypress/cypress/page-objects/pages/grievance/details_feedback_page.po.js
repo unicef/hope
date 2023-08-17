@@ -17,7 +17,8 @@ export default class FeedbackDetailsPage extends BaseComponent {
   labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"  ]';
   labelDescription = 'div[data-cy="label-Description"]';
   labelComments = 'div[data-cy="label-Comments"]';
-
+  buttonCreateLinkedTicket = 'button[data-cy="button-create-linked-ticket"]';
+  labelTicketId = 'div[data-cy="label-Ticket Id"]';
   // Texts
   textTitle = "Feedback ID: ";
   textCategory = "Feedback";
@@ -39,6 +40,9 @@ export default class FeedbackDetailsPage extends BaseComponent {
   getLanguagesSpoken = () => cy.get(this.labelLanguagesSpoken);
   getDescription = () => cy.get(this.labelDescription);
   getComments = () => cy.get(this.labelComments);
+  getButtonCreateLinkedTicket = () => cy.get(this.buttonCreateLinkedTicket);
+  getLabelTicketId = () => cy.get(this.labelTicketId);
+
   checkElementsOnPage() {
     this.getTitlePage().contains(this.textTitle);
     this.getButtonEdit().should("be.visible");

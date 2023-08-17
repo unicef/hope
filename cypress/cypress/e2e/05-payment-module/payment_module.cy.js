@@ -7,9 +7,10 @@ let td = new PMDetailsPage();
 let tcn = new NewPaymentPlan();
 
 describe("Payment Module", () => {
-  beforeEach(() => {
+  before(() => {
     cy.initScenario("payment_plan");
-    cy.adminLogin();
+  });
+  beforeEach(() => {
     cy.navigateToHomePage();
     cy.visit("/api/unicorn/core/businessarea/");
     cy.get("th").contains("Afghanistan").parent().find("a").click();

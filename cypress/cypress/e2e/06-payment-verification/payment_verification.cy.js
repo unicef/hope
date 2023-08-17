@@ -7,7 +7,6 @@ let defaultNumberOfVPlans016 = 0;
 
 describe("Payment Verification", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
   });
@@ -16,7 +15,7 @@ describe("Payment Verification", () => {
     it("Check Payment Verification page", () => {
       cy.scenario([
         "Go to Payment Verification page",
-        "Check if all elements on page exist"
+        "Check if all elements on page exist",
       ]);
       paymentVerificationPage.checkPaymentVerificationTitle();
       paymentVerificationPage.checkListOfPaymentPlansTitle();
@@ -30,7 +29,7 @@ describe("Payment Verification", () => {
         cy.scenario([
           "Go to Payment Verification page",
           "Choose and open cash plan",
-          "Check if all elements on page exist"
+          "Check if all elements on page exist",
         ]);
         paymentVerificationPage.choosePaymentPlan(row_no).click();
         paymentVerificationDetailsPage.checkPaymentVerificationTitle();
@@ -61,7 +60,7 @@ describe("Payment Verification", () => {
           "Check if Create Verification Plan title occurs",
           "Choose Random Sampling tab",
           "Press Save button",
-          "Check if Verification Plan was created"
+          "Check if Verification Plan was created",
         ]);
         paymentVerificationPage.selectStatus("Pending");
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
@@ -110,7 +109,7 @@ describe("Payment Verification", () => {
         cy.scenario([
           "Press Delete button",
           "Press Delete button on pop-up",
-          "Check if Verification Plan was deleted"
+          "Check if Verification Plan was deleted",
         ]);
         paymentVerificationDetailsPage.getDeletePlan().scrollIntoView().click();
         paymentVerificationDetailsPage.getDelete().scrollIntoView().click();
@@ -136,7 +135,7 @@ describe("Payment Verification", () => {
           "Press Activate button on pop-up",
           "Check if Summary status = ACTIVE",
           "Check if Activation Date was set",
-          "Check if verification plan has status Active"
+          "Check if verification plan has status Active",
         ]);
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
@@ -190,7 +189,7 @@ describe("Payment Verification", () => {
       it(`Compare data in Payment Plan Details Page - Row: ${row_no}`, () => {
         paymentVerificationPage.choosePaymentPlan(row_no).click();
         cy.get('[data-cy="page-header-container"]', {
-          timeout: 10000
+          timeout: 10000,
         }).contains("Payment Plan");
         paymentVerificationDetailsPage.checkPaymentPlanDetailsTitle();
         paymentVerificationDetailsPage.checkVerificationPlansSummaryTitle();
