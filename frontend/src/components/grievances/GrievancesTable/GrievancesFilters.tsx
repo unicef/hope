@@ -126,7 +126,7 @@ export const GrievancesFilters = ({
           <Grid container item xs={4}>
             <SelectFilter
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={undefined}
+              label='Search Type'
               value={filter.searchType}
               borderRadius='0px 4px 4px 0px'
               data-cy='filters-search-type'
