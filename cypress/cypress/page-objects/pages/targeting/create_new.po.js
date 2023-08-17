@@ -2,12 +2,12 @@ import BaseComponent from "../../base.component";
 
 export default class CreateNew extends BaseComponent {
   // Locators
-  targetingCriteriaTitle = 'h6[data-cy="title-targeting-criteria"]';
+  programmeTitle = 'h6[data-cy="program-title"]';
   // Texts
-  textTargetingCriteriaTitle = "Targeting Criteria";
+  textProgrammeTitle = "Programme";
   // Elements
-  getProgrammeTitle = () => cy.get(this.targetingCriteriaTitle);
+  getProgrammeTitle = () => cy.get(this.programmeTitle);
   checkElementsOnPage() {
-    this.getProgrammeTitle().contains(this.textTargetingCriteriaTitle);
+    this.getProgrammeTitle().contains(this.textProgrammeTitle);
   }
 }

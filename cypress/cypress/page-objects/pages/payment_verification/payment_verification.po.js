@@ -9,6 +9,7 @@ export default class PaymentVerification extends BaseComponent {
   modality = 'div[data-cy="filter-Modality"]';
   startDate = 'div[data-cy="filter-start-date"]';
   endDate = 'div[data-cy="filter-end-date"]';
+  programme = 'div[data-cy="filter-program"]';
   statusOptions = 'li[role="option"]';
   listOfPaymentPlansTitle = 'h6[data-cy="table-title"]';
   buttonApply = 'button[data-cy="button-filters-apply"]';
@@ -30,6 +31,7 @@ export default class PaymentVerification extends BaseComponent {
   textVerificationStatus = "Verification Status";
   textCashAmount = "Cash Amount";
   textTimeframe = "Timeframe";
+  textColumnProgramme = "Programme";
   textLastModifiedDate = "Last Modified Date";
 
   // Elements
@@ -41,12 +43,14 @@ export default class PaymentVerification extends BaseComponent {
   getModality = () => cy.get(this.modality);
   getStartDate = () => cy.get(this.startDate);
   getEndDate = () => cy.get(this.endDate);
+  getProgramme = () => cy.get(this.programme);
   getTable = () => cy.get(this.tableTitle);
   getPaymentPlanID = () => cy.get(this.tableColumn).eq(0);
   getVerificationStatus = () => cy.get(this.tableColumn).eq(1);
   getCashAmount = () => cy.get(this.tableColumn).eq(2);
   getTimeFrame = () => cy.get(this.tableColumn).eq(3);
-  getLastModifiedDate = () => cy.get(this.tableColumn).eq(4);
+  getColumnProgramme = () => cy.get(this.tableColumn).eq(4);
+  getLastModifiedDate = () => cy.get(this.tableColumn).eq(5);
   getPaymentPlanRows = () => cy.get(this.rows);
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);
@@ -72,6 +76,8 @@ export default class PaymentVerification extends BaseComponent {
     this.getStartDate().get("span").contains(this.textStartDate);
     this.getEndDate().should("be.visible");
     this.getEndDate().get("span").contains(this.textEndDate);
+    this.getProgramme().should("be.visible");
+    this.getProgramme().get("span").contains(this.textProgramme);
   }
 
   checkPaymentPlansTableVisible() {
@@ -84,6 +90,9 @@ export default class PaymentVerification extends BaseComponent {
       .contains(this.textVerificationStatus);
     this.getCashAmount().should("be.visible").contains(this.textCashAmount);
     this.getTimeFrame().should("be.visible").contains(this.textTimeframe);
+    this.getColumnProgramme()
+      .should("be.visible")
+      .contains(this.textColumnProgramme);
     this.getLastModifiedDate()
       .scrollIntoView()
       .should("be.visible")
