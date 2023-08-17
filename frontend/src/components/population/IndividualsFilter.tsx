@@ -101,9 +101,6 @@ export const IndividualsFilter = ({
             data-cy='ind-filters-gender'
             fullWidth
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
             <MenuItem value='MALE'>{t('Male')}</MenuItem>
           </SelectFilter>
@@ -163,9 +160,6 @@ export const IndividualsFilter = ({
             fullWidth
             data-cy='ind-filters-order-by'
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {orderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
