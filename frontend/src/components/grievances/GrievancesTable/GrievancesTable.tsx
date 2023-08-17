@@ -62,8 +62,8 @@ export const GrievancesTable = ({
     scoreMax: filter.scoreMax,
     grievanceType: filter.grievanceType,
     grievanceStatus: filter.grievanceStatus,
-    priority: filter.priority,
-    urgency: filter.urgency,
+    priority: filter.priority === 'Not Set' ? 0 : filter.priority,
+    urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
   };
 
