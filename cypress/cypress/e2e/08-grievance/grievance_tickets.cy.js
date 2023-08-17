@@ -8,12 +8,14 @@ let newTicketPage = new NewTicket();
 
 describe("Grievance", () => {
   before(function () {
+    cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");
-  });
-  beforeEach(() => {
     cy.adminLogin();
     cy.navigateToHomePage();
     grievancePage.clickMenuButtonGrievance();
+  });
+  beforeEach(() => {
+    grievancePage.clickMenuButtonGrievanceTickets();
   });
 
   describe("Smoke tests Grievance", () => {
@@ -189,6 +191,7 @@ describe("Grievance", () => {
           grievancePage.chooseStatusFilter(testData[0]);
           grievancePage.expectedNumberOfRows(testData[1]);
           grievancePage.chooseTicketListRow(0, testData[2]);
+          grievancePage.getButtonClear().click();
         });
       });
       it("Grievance FSP filter", () => {
@@ -320,7 +323,7 @@ describe("Grievance", () => {
       });
       it("Grievance Active Tickets filter", () => {});
     });
-    context.skip("Create New Ticket", () => {
+    context("Create New Ticket", () => {
       beforeEach(() => {
         grievancePage.getButtonNewTicket().click();
         newTicketPage.checkElementsOnPage();
@@ -1055,6 +1058,8 @@ describe("Grievance", () => {
           newTicketPage.getCheckbox().eq(0).click();
           newTicketPage.getButtonNext().eq(1).click();
           newTicketPage.getButtonNext().contains("Save").click();
+          grievanceDetailsPage.getTitle().contains("Ticket");
+          cy.get("div").contains("Grievance Ticket created.");
         });
       });
 
