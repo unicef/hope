@@ -12,6 +12,7 @@ import {
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
+  IndividualDisability,
   IndividualNode,
 } from '../../../__generated__/graphql';
 import { ContentLink } from '../../core/ContentLink';
@@ -265,7 +266,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Disability')}>
-            {individual?.disability === 'DISABLED'
+            {individual?.disability === IndividualDisability.Disabled
               ? 'Disabled'
               : 'Not Disabled'}
           </LabelizedField>
