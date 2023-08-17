@@ -88,6 +88,28 @@ export const GrievancesFilters = ({
     filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
     filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
+  const updatedPriorityChoices = useMemo(() => {
+    const priorityChoices = choicesData.grievanceTicketPriorityChoices;
+    return priorityChoices.map((item) => {
+      if (item.value === 0) {
+        return { ...item, value: 'Not Set' };
+      }
+      return item;
+    });
+  }, [choicesData.grievanceTicketPriorityChoices]);
+
+  const updatedUrgencyChoices = useMemo(() => {
+    const urgencyChoices = choicesData.grievanceTicketUrgencyChoices;
+    return urgencyChoices
+      .map((item) => {
+        if (item.value === 0) {
+          return { ...item, value: 'Not Set' };
+        }
+        return item;
+      })
+      .reverse();
+  }, [choicesData.grievanceTicketUrgencyChoices]);
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -310,7 +332,7 @@ export const GrievancesFilters = ({
             data-cy='filters-priority'
             fullWidth
           >
-            {choicesData.grievanceTicketPriorityChoices.map((item) => {
+            {updatedPriorityChoices?.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -327,7 +349,7 @@ export const GrievancesFilters = ({
             data-cy='filters-urgency'
             fullWidth
           >
-            {choicesData.grievanceTicketUrgencyChoices.map((item) => {
+            {updatedUrgencyChoices?.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -344,6 +366,7 @@ export const GrievancesFilters = ({
             label={undefined}
             value={filter.grievanceStatus}
             fullWidth
+            disableClearable
             data-cy='filters-active-tickets'
           >
             <MenuItem value={GrievanceStatuses.Active}>
