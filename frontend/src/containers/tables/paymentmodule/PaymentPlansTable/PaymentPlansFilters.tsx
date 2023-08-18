@@ -148,13 +148,13 @@ export const PaymentPlansFilters = ({
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
-                  dateToIsoString(date, 'startOfDay'),
+                  moment(date).format('YYYY-MM-DD'),
                 );
                 handleFilterChange('dispersionEndDate', undefined);
               } else {
                 handleFilterChange(
                   'dispersionStartDate',
-                  dateToIsoString(date, 'startOfDay'),
+                  moment(date).format('YYYY-MM-DD'),
                 );
               }
             }}
@@ -167,7 +167,7 @@ export const PaymentPlansFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'dispersionEndDate',
-                dateToIsoString(date, 'endOfDay'),
+                moment(date).format('YYYY-MM-DD'),
               )
             }
             value={filter.dispersionEndDate}

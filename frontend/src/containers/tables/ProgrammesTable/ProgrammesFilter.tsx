@@ -86,10 +86,7 @@ export const ProgrammesFilters = ({
           <DatePickerFilter
             label='Start Date'
             onChange={(date) =>
-              handleFilterChange(
-                'startDate',
-                dateToIsoString(date, 'startOfDay'),
-              )
+              handleFilterChange('startDate', moment(date).format('YYYY-MM-DD'))
             }
             value={filter.startDate}
           />
@@ -98,7 +95,7 @@ export const ProgrammesFilters = ({
           <DatePickerFilter
             label='End Date'
             onChange={(date) =>
-              handleFilterChange('endDate', dateToIsoString(date, 'endOfDay'))
+              handleFilterChange('endDate', moment(date).format('YYYY-MM-DD'))
             }
             value={filter.endDate}
           />
