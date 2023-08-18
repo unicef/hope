@@ -1,22 +1,18 @@
 import { Box } from '@material-ui/core';
-import {
-  KeyboardDatePicker,
-  KeyboardDatePickerProps,
-} from '@material-ui/pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
 import React from 'react';
 import { FieldLabel } from './FieldLabel';
 
-export interface DatePickerFieldProps extends KeyboardDatePickerProps {
-  topLabel?: string | null;
-}
-
-export function DatePickerFilter({
+export const DatePickerFilter = ({
   topLabel = null,
   onChange,
   value = null,
   fullWidth = true,
   ...props
-}: DatePickerFieldProps): React.ReactElement {
+}): React.ReactElement => {
+  const utcValue = value ? moment.utc(value) : null;
+
   return (
     <Box display='flex' flexDirection='column'>
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
@@ -26,11 +22,13 @@ export function DatePickerFilter({
         margin='dense'
         autoOk
         onChange={(date) => {
-          if (date?.valueOf()) {
-            onChange(date);
+          if (date && date?.valueOf()) {
+            const momentDate = moment(date); // Convert JavaScript Date to Moment.js instance
+
+            onChange(momentDate?.toISOString());
           }
         }}
-        value={value}
+        value={utcValue}
         format='YYYY-MM-DD'
         InputAdornmentProps={{ position: 'end' }}
         fullWidth={fullWidth}
@@ -38,4 +36,4 @@ export function DatePickerFilter({
       />
     </Box>
   );
-}
+};

@@ -107,7 +107,7 @@ export const RegistrationFilters = ({
           <Grid item xs={3}>
             <NumberTextField
               id='minFilter'
-              topLabel={t('Household Size')}
+              topLabel={t('Num. of Households')}
               value={filter.sizeMin}
               placeholder='From'
               icon={<GroupIcon />}
