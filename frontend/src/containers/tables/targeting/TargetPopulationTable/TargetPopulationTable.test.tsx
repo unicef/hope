@@ -13,6 +13,7 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
     program: '',
     totalHouseholdsCountMin: null,
     totalHouseholdsCountMax: null,
+    createdAtRange: {},
   };
 
   it('should render with data', async () => {
