@@ -195,5 +195,5 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": "001-296-358-5428-607"},
+            variables={"search": "full_name Jenna Franklin"},
         )
