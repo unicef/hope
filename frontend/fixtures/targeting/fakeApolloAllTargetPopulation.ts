@@ -6,8 +6,8 @@ export const fakeApolloAllTargetPopulation = [
       query: AllTargetPopulationsDocument,
       variables: {
         name: '',
-        numberOfHouseholdsMin: null,
-        numberOfHouseholdsMax: null,
+        totalHouseholdsCountMin: null,
+        totalHouseholdsCountMax: null,
         status: '',
         businessArea: 'afghanistan',
         first: 10,

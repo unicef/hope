@@ -11,8 +11,8 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
     name: '',
     status: '',
     program: '',
-    numIndividualsMin: null,
-    numIndividualsMax: null,
+    totalHouseholdsCountMin: null,
+    totalHouseholdsCountMax: null,
   };
 
   it('should render with data', async () => {
