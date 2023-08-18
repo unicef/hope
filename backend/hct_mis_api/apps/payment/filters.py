@@ -12,7 +12,7 @@ from django_filters import (
     BooleanFilter,
     CharFilter,
     ChoiceFilter,
-    DateTimeFilter,
+    DateFilter,
     FilterSet,
     MultipleChoiceFilter,
     NumberFilter,
@@ -297,8 +297,8 @@ class PaymentPlanFilter(FilterSet):
     status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
-    dispersion_start_date = DateTimeFilter(field_name="dispersion_start_date", lookup_expr="gte")
-    dispersion_end_date = DateTimeFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
+    dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
 

@@ -3,7 +3,7 @@ from typing import Any, Dict
 from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, DateTimeFilter, FilterSet, MultipleChoiceFilter
+from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -17,8 +17,8 @@ class ProgramFilter(FilterSet):
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
     number_of_households = IntegerRangeFilter(method="filter_number_of_households")
     budget = DecimalRangeFilter(field_name="budget")
-    start_date = DateTimeFilter(field_name="start_date", lookup_expr="gte")
-    end_date = DateTimeFilter(field_name="end_date", lookup_expr="lte")
+    start_date = DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = DateFilter(field_name="end_date", lookup_expr="lte")
 
     class Meta:
         fields = (
