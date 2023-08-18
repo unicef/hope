@@ -9,7 +9,10 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../../utils/utils';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 
@@ -104,9 +107,7 @@ export const FeedbackFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMin',
-                moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdAtRangeMin}
@@ -119,9 +120,7 @@ export const FeedbackFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMax',
-                moment(date)
-                  .endOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.createdAtRangeMax}

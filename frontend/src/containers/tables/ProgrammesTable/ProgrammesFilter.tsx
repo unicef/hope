@@ -10,7 +10,10 @@ import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
 import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../utils/utils';
 
 interface ProgrammesFilterProps {
   filter;
@@ -83,7 +86,10 @@ export const ProgrammesFilters = ({
           <DatePickerFilter
             label='Start Date'
             onChange={(date) =>
-              handleFilterChange('startDate', moment(date).format('YYYY-MM-DD'))
+              handleFilterChange(
+                'startDate',
+                dateToIsoString(date, 'startOfDay'),
+              )
             }
             value={filter.startDate}
           />
@@ -92,7 +98,7 @@ export const ProgrammesFilters = ({
           <DatePickerFilter
             label='End Date'
             onChange={(date) =>
-              handleFilterChange('endDate', moment(date).format('YYYY-MM-DD'))
+              handleFilterChange('endDate', dateToIsoString(date, 'endOfDay'))
             }
             value={filter.endDate}
           />

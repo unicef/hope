@@ -1,9 +1,11 @@
-import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
-import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
+import moment from 'moment';
+import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
+
 import {
   AllProgramsQuery,
   ChoiceObject,
@@ -147,28 +149,26 @@ export function paymentStatusToColor(
   }
 }
 
-export function paymentStatusDisplayMap(
-  status: string,
-): string {
+export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentStatus.Pending:
     case PaymentRecordStatus.Pending:
-      return "PENDING";
+      return 'PENDING';
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
     case PaymentRecordStatus.DistributionSuccessful:
     case PaymentRecordStatus.TransactionSuccessful:
-      return "DELIVERED FULLY";
+      return 'DELIVERED FULLY';
     case PaymentStatus.PartiallyDistributed:
-      return "DELIVERED PARTIALLY";
+      return 'DELIVERED PARTIALLY';
     case PaymentRecordStatus.NotDistributed:
     case PaymentStatus.NotDistributed:
-      return "NOT DELIVERED";
+      return 'NOT DELIVERED';
     case PaymentRecordStatus.ForceFailed:
     case PaymentStatus.ForceFailed:
-      return "FORCE FAILED";
+      return 'FORCE FAILED';
     default:
-      return "UNSUCCESSFUL";
+      return 'UNSUCCESSFUL';
   }
 }
 export function paymentVerificationStatusToColor(
@@ -943,4 +943,20 @@ export const removeBracketsAndQuotes = (str: string): string => {
   let modifiedStr = str;
   modifiedStr = modifiedStr.replace(/\[|\]|"|'/g, '');
   return modifiedStr;
+};
+
+type DateType = 'startOfDay' | 'endOfDay';
+
+export const dateToIsoString = (date: Date, type: DateType): string => {
+  if (type === 'startOfDay') {
+    return moment(date)
+      .startOf('day')
+      .toISOString();
+  }
+  if (type === 'endOfDay') {
+    return moment(date)
+      .endOf('day')
+      .toISOString();
+  }
+  throw new Error('Invalid type specified');
 };

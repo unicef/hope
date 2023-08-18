@@ -19,7 +19,10 @@ import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../../utils/utils';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -145,13 +148,13 @@ export const PaymentPlansFilters = ({
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
-                  moment(date).format('YYYY-MM-DD'),
+                  dateToIsoString(date, 'startOfDay'),
                 );
                 handleFilterChange('dispersionEndDate', undefined);
               } else {
                 handleFilterChange(
                   'dispersionStartDate',
-                  moment(date).format('YYYY-MM-DD'),
+                  dateToIsoString(date, 'startOfDay'),
                 );
               }
             }}
@@ -164,7 +167,7 @@ export const PaymentPlansFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'dispersionEndDate',
-                moment(date).format('YYYY-MM-DD'),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.dispersionEndDate}

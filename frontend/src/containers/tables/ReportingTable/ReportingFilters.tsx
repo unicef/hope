@@ -6,7 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../utils/utils';
 import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 
 interface ReportingFiltersProps {
@@ -77,9 +80,7 @@ export const ReportingFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdFrom',
-                moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdFrom}
@@ -89,12 +90,7 @@ export const ReportingFilters = ({
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
-              handleFilterChange(
-                'createdTo',
-                moment(date)
-                  .endOf('day')
-                  .toISOString(),
-              )
+              handleFilterChange('createdTo', dateToIsoString(date, 'endOfDay'))
             }
             value={filter.createdTo}
           />

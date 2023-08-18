@@ -17,7 +17,10 @@ import {
   GrievanceTypes,
   ISSUE_TYPE_CATEGORIES,
 } from '../../../utils/constants';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
@@ -152,9 +155,7 @@ export const GrievancesFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMin',
-                moment(date)
-                  .set({ hour: 0, minute: 0 })
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdAtRangeMin}
@@ -168,9 +169,7 @@ export const GrievancesFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMax',
-                moment(date)
-                  .set({ hour: 23, minute: 59 })
-                  .toISOString(),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.createdAtRangeMax}

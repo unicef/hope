@@ -22,8 +22,8 @@ export const DatePickerFilter = ({
         margin='dense'
         autoOk
         onChange={(date) => {
-          if (date && date?.valueOf()) {
-            const momentDate = moment(date); // Convert JavaScript Date to Moment.js instance
+          if (date?.valueOf()) {
+            const momentDate = moment(date);
 
             onChange(momentDate?.toISOString());
           }

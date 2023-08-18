@@ -7,7 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -218,9 +221,7 @@ export const IndividualsFilter = ({
             onChange={(date) =>
               handleFilterChange(
                 'lastRegistrationDateMin',
-                moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.lastRegistrationDateMin}
@@ -233,9 +234,7 @@ export const IndividualsFilter = ({
             onChange={(date) =>
               handleFilterChange(
                 'lastRegistrationDateMax',
-                moment(date)
-                  .endOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.lastRegistrationDateMax}

@@ -11,6 +11,7 @@ import {
 } from '../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
+  dateToIsoString,
   targetPopulationStatusMapping,
 } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
@@ -140,7 +141,7 @@ export const TargetPopulationFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMin',
-                moment(date).format('YYYY-MM-DD'),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdAtRangeMin}
@@ -152,7 +153,7 @@ export const TargetPopulationFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMax',
-                moment(date).format('YYYY-MM-DD'),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.createdAtRangeMax}

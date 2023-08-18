@@ -5,7 +5,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -132,7 +135,7 @@ export const RegistrationFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'importDateRangeMin',
-                  moment(date).format('YYYY-MM-DD'),
+                  dateToIsoString(date, 'startOfDay'),
                 )
               }
               value={filter.importDateRangeMin}
@@ -145,7 +148,7 @@ export const RegistrationFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'importDateRangeMax',
-                  moment(date).format('YYYY-MM-DD'),
+                  dateToIsoString(date, 'endOfDay'),
                 )
               }
               value={filter.importDateRangeMax}

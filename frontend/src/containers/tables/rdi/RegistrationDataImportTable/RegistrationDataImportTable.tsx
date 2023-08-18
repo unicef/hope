@@ -44,9 +44,6 @@ export function RegistrationDataImportTable({
   const businessArea = useBusinessArea();
   const initialVariables = {
     search: filter.search,
-    importDate: filter.importDate
-      ? moment(filter.importDate).format('YYYY-MM-DD')
-      : null,
     importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
       : undefined,
