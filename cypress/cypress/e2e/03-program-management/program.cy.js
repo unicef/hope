@@ -6,7 +6,6 @@ let pmd = new PMDetailsPage();
 
 describe("Program Management", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("span").contains("Programme Management").click();
   });
