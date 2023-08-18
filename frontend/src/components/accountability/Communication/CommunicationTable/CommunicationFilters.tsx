@@ -1,5 +1,4 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';

@@ -1,10 +1,10 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
+import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 import {
   createHandleApplyFilterChange,
   dateToIsoString,
@@ -15,7 +15,6 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 
 interface RegistrationFiltersProps {
   filter;

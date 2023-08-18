@@ -5,7 +5,6 @@ import moment from 'moment';
 import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
-
 import {
   AllProgramsQuery,
   ChoiceObject,

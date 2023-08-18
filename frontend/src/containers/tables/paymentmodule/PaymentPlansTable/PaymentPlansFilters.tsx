@@ -19,10 +19,7 @@ import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,

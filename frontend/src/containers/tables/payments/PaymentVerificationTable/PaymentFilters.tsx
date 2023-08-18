@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
-import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {

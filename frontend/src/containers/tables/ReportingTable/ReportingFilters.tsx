@@ -1,8 +1,8 @@
 import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
-import moment from 'moment';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
@@ -10,7 +10,6 @@ import {
   createHandleApplyFilterChange,
   dateToIsoString,
 } from '../../../utils/utils';
-import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 
 interface ReportingFiltersProps {
   filter;

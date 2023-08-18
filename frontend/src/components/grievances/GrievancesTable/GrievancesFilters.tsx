@@ -1,6 +1,5 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
+import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
@@ -27,7 +27,6 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface GrievancesFiltersProps {
   filter;

@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
