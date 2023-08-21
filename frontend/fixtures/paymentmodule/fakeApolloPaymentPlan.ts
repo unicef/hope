@@ -37,7 +37,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   program: {
     id: 'UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy',
     name: 'Already attention fear well hit instead person.',
-    __typename: 'ProgramNode',
+    __typename: 'ProgramNodeForAccountability',
   },
   targetPopulation: {
     id:
