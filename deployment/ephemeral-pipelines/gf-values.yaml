@@ -63,7 +63,7 @@ psql-resources-default: &psql-resources-default
 #
 postgresql:
   enabled: true
-  ephemeral: false # to use the dev db (not container)
+  ephemeral: false # to use the dev db
   <<: *psql-image-default
   auth:
     database: dump_hope_tmp
