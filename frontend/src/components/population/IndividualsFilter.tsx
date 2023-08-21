@@ -1,13 +1,15 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -32,6 +34,14 @@ const orderOptions = [
   { name: 'Individual: descending', value: '-full_name' },
   { name: 'Gender: ascending', value: 'sex' },
   { name: 'Gender: descending', value: '-sex' },
+];
+
+const searchTypeOptions = [
+  { name: 'Individual ID', value: 'individual_id' },
+  { name: 'Household ID', value: 'household_id' },
+  { name: 'Full Name', value: 'full_name' },
+  { name: 'National ID', value: 'national_id' },
+  { name: 'Passport Number', value: 'national_passport' },
 ];
 
 export const IndividualsFilter = ({
@@ -72,13 +82,31 @@ export const IndividualsFilter = ({
   const filtersComponent = (
     <>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={3}>
-          <SearchTextField
-            label={t('Search')}
-            value={filter.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='ind-filters-search'
-          />
+        <Grid container item xs={6} spacing={0}>
+          <Grid item xs={8}>
+            <SearchTextField
+              label={t('Search')}
+              value={filter.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              data-cy='ind-filters-search'
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('searchType', e.target.value)}
+              label={undefined}
+              value={filter.searchType}
+              borderRadius='0px 4px 4px 0px'
+              data-cy='filter-search-type'
+              fullWidth
+            >
+              {searchTypeOptions.map(({ name, value }) => (
+                <MenuItem key={value} value={value}>
+                  {name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
@@ -192,9 +220,7 @@ export const IndividualsFilter = ({
             onChange={(date) =>
               handleFilterChange(
                 'lastRegistrationDateMin',
-                moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.lastRegistrationDateMin}
@@ -207,9 +233,7 @@ export const IndividualsFilter = ({
             onChange={(date) =>
               handleFilterChange(
                 'lastRegistrationDateMax',
-                moment(date)
-                  .endOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.lastRegistrationDateMax}

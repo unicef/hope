@@ -1,5 +1,4 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -9,7 +8,10 @@ import {
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
@@ -130,9 +132,7 @@ export const CommunicationFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'createdAtRangeMin',
-                  moment(date)
-                    .startOf('day')
-                    .toISOString(),
+                  dateToIsoString(date, 'startOfDay'),
                 )
               }
               value={filter.createdAtRangeMin}
@@ -144,9 +144,7 @@ export const CommunicationFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'createdAtRangeMax',
-                  moment(date)
-                    .endOf('day')
-                    .toISOString(),
+                  dateToIsoString(date, 'endOfDay'),
                 )
               }
               value={filter.createdAtRangeMax}

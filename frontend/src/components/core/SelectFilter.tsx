@@ -40,9 +40,19 @@ export const SelectFilter = ({
   icon = null,
   borderRadius = '4px',
   fullWidth = true,
+  disableClearable = false,
   ...otherProps
 }): React.ReactElement => {
   const classes = useStyles();
+
+  const checkValue = (value): boolean => {
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return Boolean(value);
+  };
+
+  const isValue = checkValue(otherProps.value);
 
   return (
     <div className={classes.selectWrapper}>
@@ -70,20 +80,21 @@ export const SelectFilter = ({
                   {icon}
                 </StartInputAdornment>
               ) : null,
-              endAdornment: otherProps.value ? (
-                <EndInputAdornment position='end'>
-                  <IconButton
-                    size='small'
-                    onClick={() => {
-                      onChange({
-                        target: { value: otherProps.multiple ? [] : '' },
-                      });
-                    }}
-                  >
-                    <XIcon fontSize='small' />
-                  </IconButton>
-                </EndInputAdornment>
-              ) : null,
+              endAdornment:
+                isValue && !disableClearable ? (
+                  <EndInputAdornment position='end'>
+                    <IconButton
+                      size='small'
+                      onClick={() => {
+                        onChange({
+                          target: { value: otherProps.multiple ? [] : '' },
+                        });
+                      }}
+                    >
+                      <XIcon fontSize='small' />
+                    </IconButton>
+                  </EndInputAdornment>
+                ) : null,
             }}
             {...otherProps}
           >

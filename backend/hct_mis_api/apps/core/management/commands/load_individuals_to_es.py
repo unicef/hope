@@ -56,7 +56,7 @@ class Command(BaseCommand):
         model = options["model"]
 
         for business_area in business_areas:
-            document_type = get_document_type(model, business_area)
+            document_type = get_document_type(model.lower(), business_area.lower())
             self.load_to_es(business_area, document_type)
 
     def load_to_es(self, business_area: str, document_type: Type[object]) -> None:
@@ -65,17 +65,16 @@ class Command(BaseCommand):
         else:
             queryset = ImportedIndividual.objects.filter(registration_data_import__business_area_slug=business_area)
 
-        document_list = []
-        paginator = Paginator(queryset, BATCH_SIZE)
+        paginator = Paginator(queryset.order_by("created_at"), BATCH_SIZE)
         number_of_pages = paginator.num_pages
 
         for page in paginator.page_range:
-            print(f"Loading page {page} of {number_of_pages}")
+            document_list = []
+            self.stdout.write(f"Loading page {page} of {number_of_pages}")
 
             for individual in paginator.page(page).object_list:
                 document = {**document_type().prepare(individual), "_id": individual.id}
                 document_list.append(document)
             bulk(self.es, document_list, index=document_type.Index.name)
-            document_list = []
 
         self.stdout.write(f"Data for {business_area} loaded successfully.")

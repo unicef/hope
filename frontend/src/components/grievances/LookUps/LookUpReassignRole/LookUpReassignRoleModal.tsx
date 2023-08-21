@@ -61,6 +61,7 @@ export const LookUpReassignRoleModal = ({
 
   const initialFilterIND = {
     search: '',
+    searchType: 'individual_id',
     admin2: '',
     sex: '',
     ageMin: '',

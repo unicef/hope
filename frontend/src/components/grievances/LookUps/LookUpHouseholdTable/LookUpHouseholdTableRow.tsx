@@ -26,6 +26,7 @@ interface LookUpHouseholdTableRowProps {
   selected?: Array<string>;
   householdMultiSelect: boolean;
   redirectedFromRelatedTicket?: boolean;
+  isFeedbackWithHouseholdOnly?: boolean;
 }
 
 export function LookUpHouseholdTableRow({
@@ -36,6 +37,7 @@ export function LookUpHouseholdTableRow({
   selected,
   householdMultiSelect,
   redirectedFromRelatedTicket,
+  isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const isSelected = (id: string): boolean => selected.includes(id);
@@ -55,10 +57,13 @@ export function LookUpHouseholdTableRow({
     );
     return programNames?.length ? programNames.join(', ') : '-';
   };
+
+  const isSelectionDisabled =
+    redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
   return (
     <ClickableTableRow
       onClick={(event) => {
-        if (redirectedFromRelatedTicket) return;
+        if (redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly) return;
         handleClick(event);
       }}
       hover
@@ -74,7 +79,7 @@ export function LookUpHouseholdTableRow({
             checked={isItemSelected}
             data-cy='input-checkbox-household'
             inputProps={{ 'aria-labelledby': household.id }}
-            disabled={redirectedFromRelatedTicket || false}
+            disabled={isSelectionDisabled}
           />
         ) : (
           <Radio
@@ -87,7 +92,7 @@ export function LookUpHouseholdTableRow({
             name='radio-button-household'
             inputProps={{ 'aria-label': household.id }}
             data-cy='input-radio-household'
-            disabled={redirectedFromRelatedTicket || false}
+            disabled={isSelectionDisabled}
           />
         )}
       </TableCell>

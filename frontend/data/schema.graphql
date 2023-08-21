@@ -74,7 +74,7 @@ input AddIndividualDataObjectType {
   phoneNoAlternative: String
   email: String
   relationship: String!
-  disability: Boolean
+  disability: String
   workStatus: String
   enrolledInNutritionProgramme: Boolean
   administrationOfRutf: Boolean

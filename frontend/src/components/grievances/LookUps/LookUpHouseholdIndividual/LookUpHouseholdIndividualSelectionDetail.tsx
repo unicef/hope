@@ -33,6 +33,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   setSelectedIndividual,
   setSelectedHousehold,
   redirectedFromRelatedTicket,
+  isFeedbackWithHouseholdOnly,
 }: {
   onValueChange;
   initialValues;
@@ -41,6 +42,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   setSelectedIndividual;
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;
+  isFeedbackWithHouseholdOnly?: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -57,6 +59,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   };
   const initialFilterIND = {
     search: '',
+    searchType: 'individual_id',
     admin2: '',
     sex: '',
     ageMin: '',
@@ -163,6 +166,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             setSelectedHousehold={setSelectedHousehold}
             setSelectedIndividual={setSelectedIndividual}
             redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+            isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
             noTableStyling
           />
         </TabPanel>
