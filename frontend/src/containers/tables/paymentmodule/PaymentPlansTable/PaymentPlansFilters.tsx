@@ -5,6 +5,7 @@ import {
   Grid,
   MenuItem,
 } from '@material-ui/core';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -139,17 +140,17 @@ export const PaymentPlansFilters = ({
             onChange={(date) => {
               if (
                 filter.dispersionEndDate &&
-                date.isAfter(filter.dispersionEndDate)
+                moment(date).isAfter(filter.dispersionEndDate)
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
-                  date.format('YYYY-MM-DD'),
+                  moment(date).format('YYYY-MM-DD'),
                 );
                 handleFilterChange('dispersionEndDate', undefined);
               } else {
                 handleFilterChange(
                   'dispersionStartDate',
-                  date.format('YYYY-MM-DD'),
+                  moment(date).format('YYYY-MM-DD'),
                 );
               }
             }}
@@ -160,7 +161,10 @@ export const PaymentPlansFilters = ({
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
-              handleFilterChange('dispersionEndDate', date.format('YYYY-MM-DD'))
+              handleFilterChange(
+                'dispersionEndDate',
+                moment(date).format('YYYY-MM-DD'),
+              )
             }
             value={filter.dispersionEndDate}
             minDate={filter.dispersionStartDate}

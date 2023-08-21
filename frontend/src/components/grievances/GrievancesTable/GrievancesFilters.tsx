@@ -1,6 +1,5 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
+import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
@@ -17,14 +17,16 @@ import {
   GrievanceTypes,
   ISSUE_TYPE_CATEGORIES,
 } from '../../../utils/constants';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface GrievancesFiltersProps {
   filter;
@@ -174,9 +176,7 @@ export const GrievancesFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMin',
-                moment(date)
-                  .set({ hour: 0, minute: 0 })
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdAtRangeMin}
@@ -190,9 +190,7 @@ export const GrievancesFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMax',
-                moment(date)
-                  .set({ hour: 23, minute: 59 })
-                  .toISOString(),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.createdAtRangeMax}
