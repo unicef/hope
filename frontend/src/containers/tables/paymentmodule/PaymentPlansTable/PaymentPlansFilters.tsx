@@ -15,10 +15,10 @@ import {
 import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
-import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { SelectFilter } from '../../../../components/core/SelectFilter';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -89,14 +89,13 @@ export const PaymentPlansFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <FlexSelectFilter
+          <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant='outlined'
             label={t('Status')}
             multiple
             value={filter.status}
             fullWidth
-            autoWidth
           >
             {statusChoicesData.paymentPlanStatusChoices.map((item) => {
               return (
@@ -105,7 +104,7 @@ export const PaymentPlansFilters = ({
                 </MenuItem>
               );
             })}
-          </FlexSelectFilter>
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
