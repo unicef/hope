@@ -11,6 +11,7 @@ export const LookUpHouseholdIndividualSelection = ({
   errors,
   touched,
   redirectedFromRelatedTicket,
+  isFeedbackWithHouseholdOnly,
 }: {
   onValueChange: (field: string, value, shouldValidate?: boolean) => void;
   values;
@@ -18,6 +19,7 @@ export const LookUpHouseholdIndividualSelection = ({
   errors?;
   touched?;
   redirectedFromRelatedTicket?: boolean;
+  isFeedbackWithHouseholdOnly?: boolean;
 }): React.ReactElement => {
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
@@ -35,11 +37,16 @@ export const LookUpHouseholdIndividualSelection = ({
         setSelectedHousehold={setSelectedHousehold}
         setSelectedIndividual={setSelectedIndividual}
         redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+        isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
       />
       <Box display='flex' flexDirection='column'>
         <LookUpHouseholdIndividualSelectionDisplay
           values={values}
-          disabled={disabled || redirectedFromRelatedTicket}
+          disabled={
+            disabled ||
+            redirectedFromRelatedTicket ||
+            isFeedbackWithHouseholdOnly
+          }
           onValueChange={onValueChange}
           selectedHousehold={selectedHousehold}
           setSelectedHousehold={setSelectedHousehold}
