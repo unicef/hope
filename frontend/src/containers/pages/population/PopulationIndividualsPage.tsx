@@ -18,6 +18,7 @@ import { IndividualsListTable } from '../../tables/population/IndividualsListTab
 
 const initialFilter = {
   search: '',
+  searchType: 'individual_id',
   admin2: '',
   sex: '',
   ageMin: '',
