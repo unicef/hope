@@ -17,7 +17,9 @@ class ProgramFilter(FilterSet):
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
     number_of_households = IntegerRangeFilter(method="filter_number_of_households")
-    number_of_households_with_tp_in_program = IntegerRangeFilter(method="filter_number_of_households_with_tp_in_program")
+    number_of_households_with_tp_in_program = IntegerRangeFilter(
+        method="filter_number_of_households_with_tp_in_program"
+    )
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
