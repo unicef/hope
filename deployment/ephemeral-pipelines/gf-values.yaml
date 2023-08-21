@@ -67,6 +67,7 @@ postgresql:
   <<: *psql-image-default
   auth:
     database: dump_hope_tmp
+    host: ""
     username: ""
     password: ""
   persistence:
