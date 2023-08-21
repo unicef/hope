@@ -32,7 +32,7 @@ Cypress.Commands.add("createExcel", () => {
 Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
   Cypress.session.clearCurrentSessionData();
   Cypress.session.clearAllSavedSessions();
-  cy.navigateToHomePage();
+  cy.visit("/");
   const expected_url =
     Cypress.config().baseUrl + "/api/unicorn/login/?next=/api/unicorn/";
   function resolveAThing(n) {
