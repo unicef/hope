@@ -58,8 +58,91 @@ describe("Country Dashboard", () => {
       programmesPage.getBudget().should("be.visible");
       programmesPage.getProgrammesRows().should("have.length", 2);
     });
-    it.skip("Choose program", () => {});
-    it.skip("Come back to All Programmes", () => {});
+    it("Choose program", () => {
+      cy.scenario([
+        "1. Go to main page (All programmes set)",
+        "2. Choose program (Test Programm)",
+        "3. Check if all elements on page exist",
+      ]);
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage
+        .getProgrammesOptions()
+        .contains(programmesPage.textTestProgramm)
+        .click();
+      cy.url().should("include", "details");
+      programmesPage
+        .getGlobalProgramFilter()
+        .contains(programmesPage.textTestProgramm);
+
+      programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
+      programmesPage.getMenuButtonFeedback().should("not.be.visible");
+      programmesPage.getMenuButtonRegistrationDataImport().should("be.visible");
+      programmesPage.getMenuButtonProgrammePopulation().should("be.visible");
+      programmesPage.getMenuButtonHouseholds().should("not.be.visible");
+      programmesPage.getMenuButtonIndividuals().should("not.be.visible");
+      programmesPage.getMenuButtonProgrammeDetails().should("be.visible");
+      programmesPage.getMenuButtonCashAssist().should("be.visible");
+      programmesPage.getMenuButtonPaymentModule().should("be.visible");
+      programmesPage.getMenuButtonReporting().should("be.visible");
+      programmesPage.getMenuButtonProgrammeUsers().should("be.visible");
+      programmesPage.getMenuButtonActivityLog().should("be.visible");
+      programmesPage.getMenuButtonResourcesKnowledgeBase().should("be.visible");
+      programmesPage.getMenuButtonResourcesConversations().should("be.visible");
+      programmesPage
+        .getMenuButtonResourcesToolsAndMaterials()
+        .scrollIntoView()
+        .should("be.visible");
+      programmesPage
+        .getMenuButtonResourcesReleaseNote()
+        .scrollIntoView()
+        .should("be.visible");
+      programmesPage
+        .getMenuButtonGrievanceTickets()
+        .scrollIntoView()
+        .should("not.be.visible");
+    });
+    it("Come back to All Programmes", () => {
+      cy.scenario([
+        "1. Go to main page (All programmes set)",
+        "2. Choose program (Test Programm)",
+        "3. Come back to All Programmes",
+        "4. Check if all elements on page exist",
+      ]);
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage
+        .getProgrammesOptions()
+        .contains(programmesPage.textTestProgramm)
+        .click();
+      cy.url().should("include", "details");
+      programmesPage
+        .getGlobalProgramFilter()
+        .contains(programmesPage.textTestProgramm);
+      programmesPage
+        .getProgrammesOptions()
+        .contains(programmesPage.textAllProgrammes)
+        .click();
+      cy.url().should("include", "programs/all/list");
+
+      programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
+      programmesPage.getMenuButtonFeedback().should("not.exist");
+      programmesPage.getMenuButtonRegistrationDataImport().should("not.exist");
+      programmesPage.getMenuButtonProgrammePopulation().should("not.exist");
+      programmesPage.getMenuButtonHouseholds().should("not.exist");
+      programmesPage.getMenuButtonIndividuals().should("not.exist");
+      programmesPage.getMenuButtonProgrammeDetails().should("not.exist");
+      programmesPage.getMenuButtonCashAssist().should("not.exist");
+      programmesPage.getMenuButtonPaymentModule().should("not.exist");
+      programmesPage.getMenuButtonReporting().should("not.exist");
+      programmesPage.getMenuButtonProgrammeUsers().should("not.exist");
+      programmesPage.getMenuButtonActivityLog().should("not.exist");
+      programmesPage.getMenuButtonResourcesKnowledgeBase().should("be.visible");
+      programmesPage.getMenuButtonResourcesConversations().should("be.visible");
+      programmesPage
+        .getMenuButtonResourcesToolsAndMaterials()
+        .should("be.visible");
+      programmesPage.getMenuButtonResourcesReleaseNote().should("be.visible");
+      programmesPage.getMenuButtonGrievanceTickets().should("not.exist");
+    });
   });
 
   describe("Component tests All Programmes - Global Program Filter", () => {

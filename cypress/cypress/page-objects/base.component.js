@@ -7,7 +7,7 @@ export default class BaseComponent {
   navProgrammeManagement = 'a[data-cy="nav-Programme Management"]';
   navProgrammeDetails = 'a[data-cy="nav-Programme Details"]';
   navTargeting = 'a[data-cy="nav-Targeting"]';
-  navCashAssist = 'a[data-cy="nav-Cash Assist"]';
+  navCashAssist = 'div[data-cy="nav-Cash Assist"]';
   navPaymentModule = 'a[data-cy="nav-Payment Module"]';
   navPaymentVerification = 'a[data-cy="nav-Payment Verification"]';
   navGrievance = 'div[data-cy="nav-Grievance"]';
@@ -32,6 +32,7 @@ export default class BaseComponent {
   buttonGrievanceTicketsText = "Grievance Tickets";
   buttonGrievanceDashboardText = "Grievance Dashboard";
   buttonFeedbackText = "Feedback";
+  textTestProgramm = "Test Programm";
 
   // Elements)
   getMenuButtonRegistrationDataImport = () =>
