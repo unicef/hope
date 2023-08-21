@@ -7,6 +7,7 @@ import { decodeIdString } from '../../../../utils/utils';
 import {
   AllActiveTargetPopulationsQueryVariables,
   TargetPopulationNode,
+  TargetPopulationStatus,
   useAllActiveTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
@@ -48,6 +49,7 @@ export const LookUpTargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
+    statusNot: TargetPopulationStatus.Open,
   };
 
   const handleRadioChange = (id: string): void => {
