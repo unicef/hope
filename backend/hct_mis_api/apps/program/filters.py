@@ -8,6 +8,7 @@ from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilt
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class ProgramFilter(FilterSet):
@@ -16,6 +17,7 @@ class ProgramFilter(FilterSet):
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
     number_of_households = IntegerRangeFilter(method="filter_number_of_households")
+    number_of_households_with_tp_in_program = IntegerRangeFilter(method="filter_number_of_households_with_tp_in_program")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
@@ -50,6 +52,22 @@ class ProgramFilter(FilterSet):
                 distinct=True,
             ),
         ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
+
+        if min_value := value.get("min"):
+            queryset = queryset.filter(total_hh_count__gte=min_value)
+        if max_value := value.get("max"):
+            queryset = queryset.filter(total_hh_count__lte=max_value)
+
+        return queryset
+
+    def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
+        queryset = queryset.annotate(
+            total_hh_count=Count(
+                "targetpopulation__households",
+                filter=~Q(targetpopulation__status=TargetPopulation.STATUS_OPEN),
+                distinct=True,
+            ),
+        )
 
         if min_value := value.get("min"):
             queryset = queryset.filter(total_hh_count__gte=min_value)

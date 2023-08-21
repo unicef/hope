@@ -16,7 +16,7 @@ export const fakeCashPlan = {
     id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
     name: 'Surface campaign practice actually about about will what.',
     caId: '123-21-PRG-00001',
-    __typename: 'ProgramNodeForAccountability',
+    __typename: 'ProgramNode',
   },
   exchangeRate: 1.0,
   totalEntitledQuantity: 0,

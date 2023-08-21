@@ -73,6 +73,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_delivered_quantity = graphene.Decimal()
     total_undelivered_quantity = graphene.Decimal()
     total_number_of_households = graphene.Int()
+    total_number_of_households_with_tp_in_program = graphene.Int()
     individual_data_needed = graphene.Boolean()
 
     class Meta:
@@ -90,17 +91,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
         return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
 
-
-class ProgramNodeForAccountability(ProgramNode):
-    class Meta:
-        model = Program
-        filter_fields = [
-            "name",
-        ]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
+    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
 
 
@@ -185,7 +176,7 @@ class Query(graphene.ObjectType):
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
     all_active_programs = DjangoPermissionFilterConnectionField(
-        ProgramNodeForAccountability,
+        ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
     )
