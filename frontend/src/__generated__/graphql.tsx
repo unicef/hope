@@ -120,7 +120,7 @@ export type AddIndividualDataObjectType = {
   phoneNoAlternative?: Maybe<Scalars['String']>,
   email?: Maybe<Scalars['String']>,
   relationship: Scalars['String'],
-  disability?: Maybe<Scalars['Boolean']>,
+  disability?: Maybe<Scalars['String']>,
   workStatus?: Maybe<Scalars['String']>,
   enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
   administrationOfRutf?: Maybe<Scalars['Boolean']>,
