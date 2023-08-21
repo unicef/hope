@@ -15,7 +15,22 @@ describe("Country Dashboard", () => {
       ]);
       programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
       programmesPage.getMenuButtonFeedback().should("not.exist");
-      // programmesPage.getMenuButtonPaymentVerification().should("not.exist");
+      programmesPage.getMenuButtonRegistrationDataImport().should("not.exist");
+      programmesPage.getMenuButtonProgrammePopulation().should("not.exist");
+      programmesPage.getMenuButtonHouseholds().should("not.exist");
+      programmesPage.getMenuButtonIndividuals().should("not.exist");
+      programmesPage.getMenuButtonProgrammeDetails().should("not.exist");
+      programmesPage.getMenuButtonCashAssist().should("not.exist");
+      programmesPage.getMenuButtonPaymentModule().should("not.exist");
+      programmesPage.getMenuButtonReporting().should("not.exist");
+      programmesPage.getMenuButtonProgrammeUsers().should("not.exist");
+      programmesPage.getMenuButtonActivityLog().should("not.exist");
+      programmesPage.getMenuButtonResourcesKnowledgeBase().should("be.visible");
+      programmesPage.getMenuButtonResourcesConversations().should("be.visible");
+      programmesPage
+        .getMenuButtonResourcesToolsAndMaterials()
+        .should("be.visible");
+      programmesPage.getMenuButtonResourcesReleaseNote().should("be.visible");
       programmesPage.getMenuButtonGrievanceTickets().should("not.exist");
       programmesPage.getButtonNewProgram().should("be.visible");
       programmesPage.getFiltersSearch().should("be.visible");
