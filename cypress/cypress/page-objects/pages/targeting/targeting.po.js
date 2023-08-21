@@ -6,8 +6,8 @@ export default class Targeting extends BaseComponent {
   searchFilter = 'div[data-cy="filters-search"]';
   statusFilter = 'div[data-cy="filters-status"]';
   programFilter = 'div[data-cy="filters-program"]';
-  minNumberOfHouseholds = 'div[data-cy="filters-num-individuals-min"]';
-  maxNumberOfHouseholds = 'div[data-cy="filters-num-individuals-max"]';
+  minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]';
+  maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]';
   buttonCreateNew = 'a[data-cy="button-target-population-create-new"]';
   tabTitle = 'h6[data-cy="table-title"]';
   tabColumnLabel = 'span[data-cy="table-label"]';
