@@ -8,11 +8,11 @@ context("Login", () => {
   it("login with valid username and valid password", () => {
     cy.adminLogin();
     cy.navigateToHomePage();
-    cy.get("h5").should("contain", "Dashboard");
+    cy.get("h5").should("contain", "Test Programm");
   });
   it("Check the login with valid username and Invalid password", () => {
     Cypress.session.clearCurrentSessionData();
-    cy.navigateToHomePage();
+    cy.visit("/");
     l.navigateToLoginPage();
     cy.get('input[name="username"]').type(Cypress.env("username"));
     cy.get('input[name="password"]').type("wrong-password");
