@@ -62,7 +62,7 @@ class TargetPopulationFilter(FilterSet):
     )
     business_area = CharFilter(field_name="business_area__slug")
     program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
-    created_at_range = DateTimeRangeFilter(field_name="created_at__date")
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
 

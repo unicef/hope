@@ -11,7 +11,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 class RegistrationDataImportFilter(FilterSet):
     import_date = DateFilter(field_name="import_date__date")
     business_area = CharFilter(field_name="business_area__slug")
-    import_date_range = DateTimeRangeFilter(field_name="import_date__date")
+    import_date_range = DateTimeRangeFilter(field_name="import_date")
     size = IntegerRangeFilter(field_name="number_of_households")
 
     class Meta:
