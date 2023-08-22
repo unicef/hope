@@ -1390,7 +1390,7 @@ type HouseholdNode implements Node {
   consentSign: String!
   consent: Boolean
   consentSharing: [String]
-  residenceStatus: HouseholdResidenceStatus!
+  residenceStatus: String
   countryOrigin: String
   country: String
   address: String!
@@ -1505,15 +1505,6 @@ enum HouseholdRegistrationMethod {
   A_
   COMMUNITY
   HH_REGISTRATION
-}
-
-enum HouseholdResidenceStatus {
-  A_
-  IDP
-  REFUGEE
-  OTHERS_OF_CONCERN
-  HOST
-  NON_HOST
 }
 
 type HouseholdSelectionNode {
