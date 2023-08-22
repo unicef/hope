@@ -3,10 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  useAllProgramsForChoicesQuery,
-  useProgrammeChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
 import { ProgrammesFilters } from '../../../../containers/tables/ProgrammesTable/ProgrammesFilter';
 import { SurveyTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
@@ -78,14 +75,6 @@ export const LookUpSelection = ({
     variables: { businessArea },
   });
 
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
   const handleChange = (type: number, value: string): void => {
     setValues({
       ...values,
@@ -100,7 +89,7 @@ export const LookUpSelection = ({
     });
   };
 
-  if (programsLoading || choicesLoading) return null;
+  if (choicesLoading) return null;
 
   return (
     <Box>

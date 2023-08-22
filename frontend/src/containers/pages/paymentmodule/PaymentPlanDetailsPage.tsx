@@ -21,6 +21,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+import { PaymentInstructionsSection } from '../../../components/paymentmodule/SetUpPaymentInstructions/PaymentInstructionsSection';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -84,6 +85,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayFsp && (
         <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
       )}
+      <PaymentInstructionsSection paymentPlan={paymentPlan} />
       <ExcludeSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
