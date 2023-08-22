@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import {
   AllActiveTargetPopulationsQueryVariables,
   TargetPopulationNode,
+  TargetPopulationStatus,
   useAllActiveTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
@@ -49,6 +50,7 @@ export const LookUpTargetPopulationTable = ({
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
     program: decodeIdString(programId),
+    statusNot: TargetPopulationStatus.Open,
   };
 
   const handleRadioChange = (id: string): void => {

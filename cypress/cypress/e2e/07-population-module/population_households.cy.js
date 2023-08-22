@@ -7,7 +7,6 @@ let phdp = new HPDetailsPage();
 describe("Households Module", () => {
   beforeEach(() => {
     cy.initScenario("payment_plan");
-    cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("span").contains("Population").click();
     cy.get("span").contains("Individuals");
