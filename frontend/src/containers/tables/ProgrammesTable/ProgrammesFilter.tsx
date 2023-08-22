@@ -69,6 +69,7 @@ export const ProgrammesFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label='Status'
             value={filter.status}
+            data-cy='filters-status'
           >
             <MenuItem value=''>
               <em>None</em>
@@ -85,6 +86,7 @@ export const ProgrammesFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label='Start Date'
+            data-cy='filters-start-date'
             onChange={(date) =>
               handleFilterChange('startDate', moment(date).format('YYYY-MM-DD'))
             }
@@ -94,6 +96,7 @@ export const ProgrammesFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label='End Date'
+            data-cy='filters-end-date'
             onChange={(date) =>
               handleFilterChange('endDate', moment(date).format('YYYY-MM-DD'))
             }
@@ -104,6 +107,7 @@ export const ProgrammesFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label='Sector'
+            data-cy='filters-sector'
             value={filter.sector}
             multiple
           >
@@ -121,6 +125,7 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
+            data-cy='filters-number-of-households-min'
             topLabel='Num. of Households'
             placeholder='From'
             value={filter.numberOfHouseholdsMin}
@@ -132,6 +137,7 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
+            data-cy='filters-number-of-households-max'
             value={filter.numberOfHouseholdsMax}
             placeholder='To'
             onChange={(e) =>
@@ -142,6 +148,7 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
+            data-cy='filters-budget-min'
             topLabel='Budget (USD)'
             value={filter.budgetMin}
             placeholder='From'
@@ -150,6 +157,7 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
+            data-cy='filters-budget-max'
             value={filter.budgetMax}
             placeholder='To'
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
