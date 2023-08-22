@@ -5,7 +5,7 @@ global:
 backend:
   image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
   replicaCount: 1
-  initCommand: "python3 /code/manage.py initdemo"
+  # initCommand: "python3 /code/manage.py initdemo"
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
@@ -63,11 +63,13 @@ psql-resources-default: &psql-resources-default
 #
 postgresql:
   enabled: true
-  ephemeral: true
+  ephemeral: false # to use the dev db
   <<: *psql-image-default
   auth:
-    database: hope-pm
-    <<: *psql-auth-default
+    database: dump_hope_tmp
+    host: ""
+    username: ""
+    password: ""
   persistence:
     enabled: false
   <<: *psql-resources-default
