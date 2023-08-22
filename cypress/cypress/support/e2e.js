@@ -101,7 +101,7 @@ Cypress.Commands.add("scenario", (steps) => {
       { test },
       {
         title: "Scenario",
-        value: outputText,
+        value: outputText
       }
     );
   });
@@ -113,7 +113,7 @@ Cypress.on("fail", (error, runnable) => {
       { test },
       {
         title: "Error",
-        value: error.stack,
+        value: error.stack
       }
     );
   });
