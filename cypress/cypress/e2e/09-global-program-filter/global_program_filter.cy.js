@@ -116,7 +116,8 @@ describe("Country Dashboard", () => {
       cy.url().should("include", "details");
       programmesPage
         .getGlobalProgramFilter()
-        .contains(programmesPage.textTestProgramm);
+        .contains(programmesPage.textTestProgramm)
+        .click();
       programmesPage
         .getProgrammesOptions()
         .contains(programmesPage.textAllProgrammes)
