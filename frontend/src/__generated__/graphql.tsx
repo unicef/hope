@@ -12697,11 +12697,11 @@ export type AllActiveProgramsQueryVariables = {
   sector?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
-  numberOfHouseholds?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>
 };
 
 
@@ -24347,8 +24347,8 @@ export type IndividualFlexFieldsQueryHookResult = ReturnType<typeof useIndividua
 export type IndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useIndividualFlexFieldsLazyQuery>;
 export type IndividualFlexFieldsQueryResult = ApolloReactCommon.QueryResult<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>;
 export const AllActiveProgramsDocument = gql`
-    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
-  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
+    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $numberOfHouseholdsWithTpInProgram: String) {
+  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate, numberOfHouseholdsWithTpInProgram: $numberOfHouseholdsWithTpInProgram) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -24412,11 +24412,11 @@ export function withAllActivePrograms<TProps, TChildProps = {}>(operationOptions
  *      sector: // value for 'sector'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
- *      numberOfHouseholds: // value for 'numberOfHouseholds'
  *      budget: // value for 'budget'
  *      startDate: // value for 'startDate'
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
+ *      numberOfHouseholdsWithTpInProgram: // value for 'numberOfHouseholdsWithTpInProgram'
  *   },
  * });
  */

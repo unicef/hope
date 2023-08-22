@@ -10,11 +10,11 @@ export const ALL_ACTIVE_PROGRAMS_QUERY = gql`
     $sector: [String]
     $businessArea: String!
     $search: String
-    $numberOfHouseholds: String
     $budget: String
     $startDate: Date
     $endDate: Date
     $orderBy: String
+    $numberOfHouseholdsWithTpInProgram: String
   ) {
     allActivePrograms(
       before: $before
@@ -25,11 +25,11 @@ export const ALL_ACTIVE_PROGRAMS_QUERY = gql`
       sector: $sector
       businessArea: $businessArea
       search: $search
-      numberOfHouseholds: $numberOfHouseholds
       budget: $budget
       orderBy: $orderBy
       startDate: $startDate
       endDate: $endDate
+      numberOfHouseholdsWithTpInProgram: $numberOfHouseholdsWithTpInProgram
     ) {
       pageInfo {
         hasNextPage
