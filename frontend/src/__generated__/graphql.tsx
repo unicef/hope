@@ -12718,7 +12718,7 @@ export type AllActiveProgramsQuery = (
       & Pick<ProgramNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'sector' | 'totalNumberOfHouseholds' | 'budget'>
+        & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'budget'>
       )> }
     )>> }
   )> }
@@ -12805,7 +12805,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
   )> }
 );
 
@@ -24367,6 +24367,7 @@ export const AllActiveProgramsDocument = gql`
         endDate
         sector
         totalNumberOfHouseholds
+        totalNumberOfHouseholdsWithTpInProgram
         budget
       }
     }
@@ -24610,6 +24611,7 @@ export const ProgramDocument = gql`
     scope
     sector
     totalNumberOfHouseholds
+    totalNumberOfHouseholdsWithTpInProgram
     administrativeAreasOfImplementation
     individualDataNeeded
     version

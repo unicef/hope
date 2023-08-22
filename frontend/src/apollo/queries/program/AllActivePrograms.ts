@@ -49,6 +49,7 @@ export const ALL_ACTIVE_PROGRAMS_QUERY = gql`
           endDate
           sector
           totalNumberOfHouseholds
+          totalNumberOfHouseholdsWithTpInProgram
           budget
         }
       }
