@@ -30,6 +30,9 @@ def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
                     if field_value is None:
                         continue
                     field_value = parse(field_value, fuzzy=True)
+                if isinstance(field_instance, IntegerField):
+                    if not field_value:
+                        continue
                 clean_data[field_name] = field_instance.clean(field_value)
         return clean_data or None
     else:

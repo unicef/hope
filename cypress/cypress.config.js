@@ -5,6 +5,7 @@ module.exports = defineConfig({
   experimentalMemoryManagement: true,
   numTestsKeptInMemory: 0,
   e2e: {
+    testIsolation: false,
     setupNodeEvents(on, config) {
       on("task", verifyDownloadTasks);
     },

@@ -29,7 +29,8 @@ export const IndividualsListTable = ({
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
     sex: [filter.sex],
-    search: filter.search,
+    search: `${filter.search.trim() &&
+      [filter.searchType, filter.search.trim()].join(' ')}`,
     admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,

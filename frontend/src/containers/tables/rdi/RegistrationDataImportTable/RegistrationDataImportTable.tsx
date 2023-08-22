@@ -1,4 +1,3 @@
-import moment from 'moment';
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -44,9 +43,6 @@ export const RegistrationDataImportTable = ({
   const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
     search: filter.search,
-    importDate: filter.importDate
-      ? moment(filter.importDate).format('YYYY-MM-DD')
-      : null,
     importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
       : undefined,
