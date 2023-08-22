@@ -9,7 +9,6 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 export const SetUpFspPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
-
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions))
     return <PermissionDenied />;
