@@ -43,12 +43,15 @@ export const TargetPopulationTable = ({
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
-    numberOfHouseholdsMin: filter.numIndividualsMin,
-    numberOfHouseholdsMax: filter.numIndividualsMax,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin,
+    totalHouseholdsCountMax: filter.totalHouseholdsCountMax,
     status: filter.status,
     businessArea,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
     program: decodeIdString(programId),
+    createdAtRange: JSON.stringify({
+      min: filter.createdAtRangeMin,
+      max: filter.createdAtRangeMax,
+    }),
   };
   const handleRadioChange = (id: string): void => {
     handleChange(id);

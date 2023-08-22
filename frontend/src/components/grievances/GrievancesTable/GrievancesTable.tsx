@@ -44,7 +44,8 @@ export const GrievancesTable = ({
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
-    search: `${filter.search && filter.searchType} ${filter.search}`,
+    search: `${filter.search.trim() &&
+      [filter.searchType, filter.search.trim()].join(' ')}`,
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify({
@@ -62,8 +63,8 @@ export const GrievancesTable = ({
     scoreMax: filter.scoreMax,
     grievanceType: filter.grievanceType,
     grievanceStatus: filter.grievanceStatus,
-    priority: filter.priority,
-    urgency: filter.urgency,
+    priority: filter.priority === 'Not Set' ? 0 : filter.priority,
+    urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
     program: programId,
   };

@@ -9,8 +9,8 @@ export const AllTargetPopulations = gql`
     $orderBy: String
     $name: String
     $status: String
-    $numberOfHouseholdsMin: Int
-    $numberOfHouseholdsMax: Int
+    $totalHouseholdsCountMin: Int
+    $totalHouseholdsCountMax: Int
     $businessArea: String
     $program: ID
     $createdAtRange: String
@@ -24,8 +24,8 @@ export const AllTargetPopulations = gql`
       orderBy: $orderBy
       name: $name
       status: $status
-      totalHouseholdsCountMin: $numberOfHouseholdsMin
-      totalHouseholdsCountMax: $numberOfHouseholdsMax
+      totalHouseholdsCountMin: $totalHouseholdsCountMin
+      totalHouseholdsCountMax: $totalHouseholdsCountMax
       businessArea: $businessArea
       program: $program
       createdAtRange: $createdAtRange

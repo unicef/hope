@@ -152,6 +152,11 @@ class TestIndividualQuery(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
+<<<<<<< HEAD
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": "001-296-358-5428-607"},
+=======
+            context={"user": self.user},
+            variables={"search": "full_name Jenna Franklin"},
+>>>>>>> origin
         )
