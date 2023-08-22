@@ -1965,7 +1965,7 @@ export type HouseholdNode = Node & {
   consentSign: Scalars['String'],
   consent?: Maybe<Scalars['Boolean']>,
   consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
-  residenceStatus: HouseholdResidenceStatus,
+  residenceStatus?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
   address: Scalars['String'],
@@ -2269,15 +2269,6 @@ export enum HouseholdRegistrationMethod {
   A = 'A_',
   Community = 'COMMUNITY',
   HhRegistration = 'HH_REGISTRATION'
-}
-
-export enum HouseholdResidenceStatus {
-  A = 'A_',
-  Idp = 'IDP',
-  Refugee = 'REFUGEE',
-  OthersOfConcern = 'OTHERS_OF_CONCERN',
-  Host = 'HOST',
-  NonHost = 'NON_HOST'
 }
 
 export type HouseholdSelectionNode = {
@@ -27225,7 +27216,6 @@ export type ResolversTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
   AreaNode: ResolverTypeWrapper<AreaNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>,
@@ -27727,7 +27717,6 @@ export type ResolversParentTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   HouseholdNode: HouseholdNode,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
   AreaNode: AreaNode,
   UUID: Scalars['UUID'],
   AreaTypeNode: AreaTypeNode,
@@ -29217,7 +29206,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
+  residenceStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
