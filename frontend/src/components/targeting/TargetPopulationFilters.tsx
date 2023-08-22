@@ -41,6 +41,7 @@ export const TargetPopulationFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const isAccountability = location.pathname.includes('accountability');
 
   const {
     handleFilterChange,
@@ -64,6 +65,10 @@ export const TargetPopulationFilters = ({
     clearFilter();
   };
 
+  const preparedStatusChoices = isAccountability
+    ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
+    : Object.values(TargetPopulationStatus);
+
   const renderTable = (): React.ReactElement => (
     <>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -85,13 +90,11 @@ export const TargetPopulationFilters = ({
             fullWidth
             data-cy='filters-status'
           >
-            {Object.values(TargetPopulationStatus)
-              .sort()
-              .map((key) => (
-                <MenuItem key={key} value={key}>
-                  {targetPopulationStatusMapping(key)}
-                </MenuItem>
-              ))}
+            {preparedStatusChoices.sort().map((key) => (
+              <MenuItem key={key} value={key}>
+                {targetPopulationStatusMapping(key)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>

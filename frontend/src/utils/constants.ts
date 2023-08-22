@@ -17,6 +17,7 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.SteficonCompleted]: 'Entitlement Formula Completed',
   [TargetPopulationStatus.SteficonError]: 'Entitlement Formula Error',
   [TargetPopulationStatus.Assigned]: 'Assigned',
+  [TargetPopulationStatus.SendingToCashAssist]: 'Sending To Cash Assist',
 };
 
 export const PROGRAM_STATES = {
