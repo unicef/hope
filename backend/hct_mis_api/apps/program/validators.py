@@ -41,3 +41,22 @@ class ProgramDeletionValidator(BaseValidator):
 
 class CashPlanValidator(BaseValidator):
     pass
+
+
+class ProgramCycleValidator(BaseValidator):
+    '''
+            -The program is in Active status.
+            - Upon creation, a Program Cycle is in the Draft status.
+            - All cycles in the Program have to have an end date for a user to create a new Cycle.
+
+
+            '''
+
+
+    @classmethod
+    def validate_start_end_dates(cls, *args: Any, **kwargs: Any) -> None:
+        """
+        - Program cycles' timeframes mustn't overlap.
+        """
+        pass
+
