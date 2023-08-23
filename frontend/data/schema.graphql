@@ -167,7 +167,7 @@ type AreaNode implements Node {
   areaSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeForAccountabilityConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
 }
@@ -300,7 +300,7 @@ type BusinessAreaNode implements Node {
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
-  programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeForAccountabilityConnection!
+  programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
@@ -354,7 +354,7 @@ type CashPlanNode implements Node {
   statusDate: DateTime!
   startDate: DateTime!
   endDate: DateTime!
-  program: ProgramNodeForAccountability!
+  program: ProgramNode!
   exchangeRate: Float
   totalEntitledQuantity: Float
   totalEntitledQuantityUsd: Float
@@ -1031,7 +1031,7 @@ type FeedbackNode implements Node {
   area: String!
   language: String!
   consent: Boolean!
-  program: ProgramNodeForAccountability
+  program: ProgramNode
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
@@ -1430,7 +1430,7 @@ type HouseholdNode implements Node {
   maleChildrenDisabledCount: Int
   femaleChildrenDisabledCount: Int
   registrationDataImport: RegistrationDataImportNode
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeForAccountabilityConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
@@ -2653,7 +2653,7 @@ type PaymentNode implements Node {
   sourcePayment: PaymentNode
   isFollowUp: Boolean!
   reasonForUnsuccessfulPayment: String
-  program: ProgramNodeForAccountability
+  program: ProgramNode
   orderNumber: Int
   tokenNumber: Int
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -2870,7 +2870,7 @@ type PaymentPlanNode implements Node {
   statusDate: DateTime!
   startDate: Date
   endDate: Date
-  program: ProgramNodeForAccountability!
+  program: ProgramNode!
   exchangeRate: Float
   totalEntitledQuantity: Float
   totalEntitledQuantityUsd: Float
@@ -3265,6 +3265,7 @@ type ProgramNode implements Node {
   totalDeliveredQuantity: Decimal
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
+  totalNumberOfHouseholdsWithTpInProgram: Int
 }
 
 type ProgramNodeConnection {
@@ -3276,57 +3277,6 @@ type ProgramNodeConnection {
 
 type ProgramNodeEdge {
   node: ProgramNode
-  cursor: String!
-}
-
-type ProgramNodeForAccountability implements Node {
-  isRemoved: Boolean!
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  lastSyncAt: DateTime
-  version: BigInt!
-  name: String!
-  status: ProgramStatus!
-  startDate: Date!
-  endDate: Date!
-  description: String!
-  caId: String
-  caHashId: String
-  adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
-  businessArea: UserBusinessAreaNode!
-  budget: Decimal
-  frequencyOfPayments: ProgramFrequencyOfPayments!
-  sector: ProgramSector!
-  scope: ProgramScope!
-  cashPlus: Boolean!
-  populationGoal: Int!
-  administrativeAreasOfImplementation: String!
-  individualDataNeeded: Boolean
-  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
-  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
-  totalEntitledQuantity: Decimal
-  totalDeliveredQuantity: Decimal
-  totalUndeliveredQuantity: Decimal
-  totalNumberOfHouseholds: Int
-}
-
-type ProgramNodeForAccountabilityConnection {
-  pageInfo: PageInfo!
-  edges: [ProgramNodeForAccountabilityEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ProgramNodeForAccountabilityEdge {
-  node: ProgramNodeForAccountability
   cursor: String!
 }
 
@@ -3451,7 +3401,7 @@ type Query {
   cashAssistUrlPrefix: String
   allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
@@ -3461,7 +3411,7 @@ type Query {
   programSectorChoices: [ChoiceObject]
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeForAccountabilityConnection
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
@@ -3748,7 +3698,7 @@ type ReportNode implements Node {
   dateFrom: Date!
   dateTo: Date!
   numberOfRecords: Int
-  program: ProgramNodeForAccountability
+  program: ProgramNode
   adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   fileUrl: String
   adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
@@ -4103,7 +4053,7 @@ type SurveyNode implements Node {
   createdBy: UserNode
   recipients(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   targetPopulation: TargetPopulationNode
-  program: ProgramNodeForAccountability
+  program: ProgramNode
   businessArea: UserBusinessAreaNode!
   sampleFile: String
   sampleFileGeneratedAt: DateTime
@@ -4165,7 +4115,7 @@ type TargetPopulationNode implements Node {
   buildStatus: TargetPopulationBuildStatus!
   builtAt: DateTime
   households(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
-  program: ProgramNodeForAccountability
+  program: ProgramNode
   targetingCriteria: TargetingCriteriaNode
   sentToDatahub: Boolean!
   steficonRule: RuleCommitNode
@@ -4836,7 +4786,7 @@ type UserBusinessAreaNode implements Node {
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
-  programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeForAccountabilityConnection!
+  programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!

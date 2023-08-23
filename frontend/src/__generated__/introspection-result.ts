@@ -51,7 +51,7 @@
             "name": "PaymentPlanNode"
           },
           {
-            "name": "ProgramNodeForAccountability"
+            "name": "ProgramNode"
           },
           {
             "name": "CashPlanNode"
@@ -127,9 +127,6 @@
           },
           {
             "name": "VolumeByDeliveryMechanismNode"
-          },
-          {
-            "name": "ProgramNode"
           },
           {
             "name": "TicketNoteNode"
