@@ -42,7 +42,10 @@ export const LookUpProgrammesTable = ({
     endDate: filter.endDate,
     status: filter.status,
     sector: filter.sector,
-    numberOfHouseholds: JSON.stringify(filter.numberOfHouseholds),
+    numberOfHouseholdsWithTpInProgram: JSON.stringify({
+      min: filter.numberOfHouseholdsMin,
+      max: filter.numberOfHouseholdsMax,
+    }),
     budget: JSON.stringify(filter.budget),
   };
 
