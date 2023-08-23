@@ -49,3 +49,10 @@ class CopyProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
+
+
+class CreateProgramCycleInput(graphene.InputObjectType):
+    program_id = graphene.ID(required=True)
+    name = graphene.String(required=True)
+    start_date = graphene.Date(required=True)
+    end_date = graphene.Date()

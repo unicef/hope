@@ -181,9 +181,11 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
             "description",
         ],
     )
+    DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
     STATUS_CHOICE = (
+        (DRAFT, _("Draft")),
         (ACTIVE, _("Active")),
         (CLOSED, _("Closed")),
     )
@@ -195,20 +197,41 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
         db_index=True,
         default=1,
     )
+    name = CICharField(
+        max_length=255,
+        validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],
+        default="Default Program Cycle",
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
-    description = models.CharField(
-        blank=True,
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
 
     class Meta:
-        unique_together = ("iteration", "program")
+        unique_together = [("iteration", "program"), ("name", "program")]
         ordering = ["program", "iteration"]
         verbose_name = "ProgrammeCycle"
 
     def __str__(self) -> str:
         return f"{self.program.name} - cycle {self.iteration}"
+
+    @property
+    def total_entitled_quantity(self) -> Decimal:
+        # TODO: update this one
+        return Decimal(0.0)
+
+    @property
+    def total_undelivered_quantity(self) -> Decimal:
+        # TODO: update this one
+        return Decimal(0.0)
+
+    @property
+    def total_delivered_quantity(self) -> Decimal:
+        # TODO: update this one
+        return Decimal(0.0)
