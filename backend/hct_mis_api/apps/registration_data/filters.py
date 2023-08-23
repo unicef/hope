@@ -3,13 +3,8 @@ from django.db.models.functions import Lower
 
 from django_filters import CharFilter, DateFilter, FilterSet
 
-<<<<<<< HEAD
-from hct_mis_api.apps.core.filters import DateRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
-=======
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter
->>>>>>> origin
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
