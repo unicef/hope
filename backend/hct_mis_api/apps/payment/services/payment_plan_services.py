@@ -334,7 +334,10 @@ class PaymentPlanService:
 
         program_cycle_id = decode_id_string(input_data["program_cycle_id"])
         program_cycle = ProgramCycle.objects.get(id=program_cycle_id)
-        # TODO: add validation for ProgramCycle
+        if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
+            raise GraphQLError(
+                "Impossible to create Payment Plans/Follow-Up Payment Plans for Program Cycle within Finished status"
+            )
 
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
