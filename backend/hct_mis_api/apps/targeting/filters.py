@@ -9,14 +9,14 @@ from django_filters import (
     CharFilter,
     DateTimeFilter,
     FilterSet,
-    NumericRangeFilter,
     ModelMultipleChoiceFilter,
+    NumericRangeFilter,
 )
 
 import hct_mis_api.apps.targeting.models as target_models
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
