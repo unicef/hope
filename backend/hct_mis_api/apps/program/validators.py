@@ -4,7 +4,7 @@ from typing import Any, Optional
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 logger = logging.getLogger(__name__)
 
@@ -44,14 +44,11 @@ class CashPlanValidator(BaseValidator):
 
 
 class ProgramCycleValidator(BaseValidator):
-    '''
-            -The program is in Active status.
-            - Upon creation, a Program Cycle is in the Draft status.
-            - All cycles in the Program have to have an end date for a user to create a new Cycle.
-
-
-            '''
-
+    """
+    -The program is in Active status.
+    - Upon creation, a Program Cycle is in the Draft status.
+    - All cycles in the Program have to have an end date for a user to create a new Cycle.
+    """
 
     @classmethod
     def validate_start_end_dates(cls, *args: Any, **kwargs: Any) -> None:
@@ -60,3 +57,24 @@ class ProgramCycleValidator(BaseValidator):
         """
         pass
 
+
+class UpdateProgramCycleValidator(BaseValidator):
+    """ """
+
+    @classmethod
+    def validate_start_end_dates(cls, *args: Any, **kwargs: Any) -> None:
+        """
+        - Program cycles' timeframes mustn't overlap.
+        """
+        pass
+
+
+class ProgramCycleDeletionValidator(BaseValidator):
+    @classmethod
+    def validate_is_deletable(cls, program: Program, program_cycle: ProgramCycle, *args: Any, **kwargs: Any) -> None:
+        if program.status != Program.ACTIVE:
+            logger.error("Only Program Cycle for Active Program can be deleted.")
+            raise ValidationError("Only Program Cycle for Active Program can be deleted.")
+        if program_cycle.status != ProgramCycle.DRAFT:
+            logger.error("Only Draft Program Cycle can be deleted.")
+            raise ValidationError("Only Draft Program Cycle can be deleted.")

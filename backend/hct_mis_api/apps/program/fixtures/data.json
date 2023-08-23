@@ -37,10 +37,10 @@
         "last_sync_at": null,
         "version": 1687185127096102,
         "iteration": 1,
-        "status": "ACTIVE",
+        "status": "DRAFT",
         "start_date": "2023-06-19",
         "end_date": "2023-12-24",
-        "description": "",
+        "name": "Default Program Cycle",
         "program": "939ff91b-7f89-4e3c-9519-26ed62f51718"
     }
 }

@@ -831,6 +831,7 @@ export type CommunicationMessageNode = Node & {
   fullListArguments?: Maybe<Scalars['JSONString']>,
   randomSamplingArguments?: Maybe<Scalars['JSONString']>,
   sampleSize: Scalars['Int'],
+  program?: Maybe<ProgramNode>,
 };
 
 
@@ -1124,6 +1125,19 @@ export type CreateProgram = {
   program?: Maybe<ProgramNode>,
 };
 
+export type CreateProgramCycle = {
+   __typename?: 'CreateProgramCycle',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  program?: Maybe<ProgramNode>,
+};
+
+export type CreateProgramCycleInput = {
+  programId: Scalars['ID'],
+  name: Scalars['String'],
+  startDate: Scalars['Date'],
+  endDate?: Maybe<Scalars['Date']>,
+};
+
 export type CreateProgramInput = {
   name?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
@@ -1232,6 +1246,11 @@ export type DeletePaymentVerificationPlan = {
 
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
+  ok?: Maybe<Scalars['Boolean']>,
+};
+
+export type DeleteProgramCycle = {
+   __typename?: 'DeleteProgramCycle',
   ok?: Maybe<Scalars['Boolean']>,
 };
 
@@ -3615,6 +3634,9 @@ export type Mutations = {
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
   copyProgram?: Maybe<CopyProgram>,
+  createProgramCycle?: Maybe<CreateProgramCycle>,
+  updateProgramCycle?: Maybe<UpdateProgramCycle>,
+  deleteProgramCycle?: Maybe<DeleteProgramCycle>,
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>,
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
   registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>,
@@ -4022,6 +4044,22 @@ export type MutationsDeleteProgramArgs = {
 
 export type MutationsCopyProgramArgs = {
   programData: CopyProgramInput
+};
+
+
+export type MutationsCreateProgramCycleArgs = {
+  programCycleData: CreateProgramCycleInput
+};
+
+
+export type MutationsUpdateProgramCycleArgs = {
+  programData?: Maybe<UpdateProgramCycleInput>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsDeleteProgramCycleArgs = {
+  programCycleId: Scalars['String']
 };
 
 
@@ -4472,6 +4510,7 @@ export type PaymentPlanNode = Node & {
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  programCycle?: Maybe<ProgramCycleNode>,
   createdBy: UserNode,
   status: PaymentPlanStatus,
   backgroundActionStatus?: Maybe<PaymentPlanBackgroundActionStatus>,
@@ -4909,6 +4948,55 @@ export type PositiveFeedbackTicketExtras = {
   individual?: Maybe<Scalars['ID']>,
 };
 
+export type ProgramCycleNode = Node & {
+   __typename?: 'ProgramCycleNode',
+  isRemoved: Scalars['Boolean'],
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
+  iteration: Scalars['Int'],
+  name: Scalars['String'],
+  status: ProgramCycleStatus,
+  startDate: Scalars['Date'],
+  endDate?: Maybe<Scalars['Date']>,
+  program: ProgramNode,
+  paymentplanSet: PaymentPlanNodeConnection,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
+};
+
+
+export type ProgramCycleNodePaymentplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type ProgramCycleNodeConnection = {
+   __typename?: 'ProgramCycleNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ProgramCycleNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ProgramCycleNodeEdge = {
+   __typename?: 'ProgramCycleNodeEdge',
+  node?: Maybe<ProgramCycleNode>,
+  cursor: Scalars['String'],
+};
+
+export enum ProgramCycleStatus {
+  Draft = 'DRAFT',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
+}
+
 export enum ProgramFrequencyOfPayments {
   OneOff = 'ONE_OFF',
   Regular = 'REGULAR'
@@ -4948,9 +5036,11 @@ export type ProgramNode = Node & {
   cashplanSet: CashPlanNodeConnection,
   paymentSet: PaymentNodeConnection,
   grievanceTickets: GrievanceTicketNodeConnection,
+  cycles: ProgramCycleNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   activityLogs: PaymentVerificationLogEntryNodeConnection,
+  messages: CommunicationMessageNodeConnection,
   feedbackSet: FeedbackNodeConnection,
   surveys: SurveyNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -5051,6 +5141,16 @@ export type ProgramNodeGrievanceTicketsArgs = {
 };
 
 
+export type ProgramNodeCyclesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
 export type ProgramNodeTargetpopulationSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -5089,6 +5189,15 @@ export type ProgramNodeReportsArgs = {
 
 
 export type ProgramNodeActivityLogsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeMessagesArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -7951,6 +8060,19 @@ export type UpdateProgram = {
    __typename?: 'UpdateProgram',
   validationErrors?: Maybe<Scalars['Arg']>,
   program?: Maybe<ProgramNode>,
+};
+
+export type UpdateProgramCycle = {
+   __typename?: 'UpdateProgramCycle',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  program?: Maybe<ProgramNode>,
+};
+
+export type UpdateProgramCycleInput = {
+  id: Scalars['ID'],
+  name: Scalars['String'],
+  startDate: Scalars['Date'],
+  endDate?: Maybe<Scalars['Date']>,
 };
 
 export type UpdateProgramInput = {
@@ -27361,6 +27483,8 @@ export type ResolversTypes = {
   PaymentPlanNodeConnection: ResolverTypeWrapper<PaymentPlanNodeConnection>,
   PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>,
   PaymentPlanNode: ResolverTypeWrapper<PaymentPlanNode>,
+  ProgramCycleNode: ResolverTypeWrapper<ProgramCycleNode>,
+  ProgramCycleStatus: ProgramCycleStatus,
   PaymentPlanStatus: PaymentPlanStatus,
   PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
@@ -27471,6 +27595,8 @@ export type ResolversTypes = {
   ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
   VolumeByDeliveryMechanismNode: ResolverTypeWrapper<VolumeByDeliveryMechanismNode>,
   ReconciliationSummaryNode: ResolverTypeWrapper<ReconciliationSummaryNode>,
+  ProgramCycleNodeConnection: ResolverTypeWrapper<ProgramCycleNodeConnection>,
+  ProgramCycleNodeEdge: ResolverTypeWrapper<ProgramCycleNodeEdge>,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
@@ -27785,6 +27911,11 @@ export type ResolversTypes = {
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
   CopyProgramInput: CopyProgramInput,
   CopyProgram: ResolverTypeWrapper<CopyProgram>,
+  CreateProgramCycleInput: CreateProgramCycleInput,
+  CreateProgramCycle: ResolverTypeWrapper<CreateProgramCycle>,
+  UpdateProgramCycleInput: UpdateProgramCycleInput,
+  UpdateProgramCycle: ResolverTypeWrapper<UpdateProgramCycle>,
+  DeleteProgramCycle: ResolverTypeWrapper<DeleteProgramCycle>,
   UploadImportDataXLSXFileAsync: ResolverTypeWrapper<UploadImportDataXlsxFileAsync>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
@@ -27862,6 +27993,8 @@ export type ResolversParentTypes = {
   PaymentPlanNodeConnection: PaymentPlanNodeConnection,
   PaymentPlanNodeEdge: PaymentPlanNodeEdge,
   PaymentPlanNode: PaymentPlanNode,
+  ProgramCycleNode: ProgramCycleNode,
+  ProgramCycleStatus: ProgramCycleStatus,
   PaymentPlanStatus: PaymentPlanStatus,
   PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   TargetPopulationNode: TargetPopulationNode,
@@ -27972,6 +28105,8 @@ export type ResolversParentTypes = {
   ApprovalNode: ApprovalNode,
   VolumeByDeliveryMechanismNode: VolumeByDeliveryMechanismNode,
   ReconciliationSummaryNode: ReconciliationSummaryNode,
+  ProgramCycleNodeConnection: ProgramCycleNodeConnection,
+  ProgramCycleNodeEdge: ProgramCycleNodeEdge,
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
@@ -28286,6 +28421,11 @@ export type ResolversParentTypes = {
   DeleteProgram: DeleteProgram,
   CopyProgramInput: CopyProgramInput,
   CopyProgram: CopyProgram,
+  CreateProgramCycleInput: CreateProgramCycleInput,
+  CreateProgramCycle: CreateProgramCycle,
+  UpdateProgramCycleInput: UpdateProgramCycleInput,
+  UpdateProgramCycle: UpdateProgramCycle,
+  DeleteProgramCycle: DeleteProgramCycle,
   UploadImportDataXLSXFileAsync: UploadImportDataXlsxFileAsync,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
@@ -28681,6 +28821,7 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type CommunicationMessageNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNodeConnection'] = ResolversParentTypes['CommunicationMessageNodeConnection']> = {
@@ -28783,6 +28924,11 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
+export type CreateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgramCycle'] = ResolversParentTypes['CreateProgramCycle']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+};
+
 export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
 };
@@ -28838,6 +28984,10 @@ export type DeletePaymentVerificationPlanResolvers<ContextType = any, ParentType
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type DeleteProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgramCycle'] = ResolversParentTypes['DeleteProgramCycle']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
@@ -30018,6 +30168,9 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
   copyProgram?: Resolver<Maybe<ResolversTypes['CopyProgram']>, ParentType, ContextType, RequireFields<MutationsCopyProgramArgs, 'programData'>>,
+  createProgramCycle?: Resolver<Maybe<ResolversTypes['CreateProgramCycle']>, ParentType, ContextType, RequireFields<MutationsCreateProgramCycleArgs, 'programCycleData'>>,
+  updateProgramCycle?: Resolver<Maybe<ResolversTypes['UpdateProgramCycle']>, ParentType, ContextType, MutationsUpdateProgramCycleArgs>,
+  deleteProgramCycle?: Resolver<Maybe<ResolversTypes['DeleteProgramCycle']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramCycleArgs, 'programCycleId'>>,
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
@@ -30035,7 +30188,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'RegistrationDataImportNode' | 'ProgramNode' | 'PaymentPlanNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'SurveyNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentHouseholdSnapshotNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'RegistrationDataImportNode' | 'ProgramNode' | 'PaymentPlanNode' | 'ProgramCycleNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'SurveyNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentHouseholdSnapshotNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -30175,6 +30328,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  programCycle?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
   backgroundActionStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBackgroundActionStatus']>, ParentType, ContextType>,
@@ -30424,6 +30578,37 @@ export type PaymentVerificationSummaryNodeEdgeResolvers<ContextType = any, Paren
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNode'] = ResolversParentTypes['ProgramCycleNode']> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  iteration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['ProgramCycleStatus'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
+  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramCycleNodePaymentplanSetArgs>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
+export type ProgramCycleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNodeConnection'] = ResolversParentTypes['ProgramCycleNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ProgramCycleNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ProgramCycleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNodeEdge'] = ResolversParentTypes['ProgramCycleNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type ProgramNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']> = {
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
@@ -30457,9 +30642,11 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
   grievanceTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceTicketsArgs>,
+  cycles?: Resolver<ResolversTypes['ProgramCycleNodeConnection'], ParentType, ContextType, ProgramNodeCyclesArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeActivityLogsArgs>,
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, ProgramNodeMessagesArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, ProgramNodeFeedbackSetArgs>,
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, ProgramNodeSurveysArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -31607,6 +31794,11 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
+export type UpdateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgramCycle'] = ResolversParentTypes['UpdateProgramCycle']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+};
+
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
@@ -31831,6 +32023,7 @@ export type Resolvers<ContextType = any> = {
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
+  CreateProgramCycle?: CreateProgramCycleResolvers<ContextType>,
   CreateReport?: CreateReportResolvers<ContextType>,
   CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
@@ -31844,6 +32037,7 @@ export type Resolvers<ContextType = any> = {
   DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>,
   DeletePaymentVerificationPlan?: DeletePaymentVerificationPlanResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
+  DeleteProgramCycle?: DeleteProgramCycleResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>,
@@ -31983,6 +32177,9 @@ export type Resolvers<ContextType = any> = {
   PaymentVerificationSummaryNode?: PaymentVerificationSummaryNodeResolvers<ContextType>,
   PaymentVerificationSummaryNodeConnection?: PaymentVerificationSummaryNodeConnectionResolvers<ContextType>,
   PaymentVerificationSummaryNodeEdge?: PaymentVerificationSummaryNodeEdgeResolvers<ContextType>,
+  ProgramCycleNode?: ProgramCycleNodeResolvers<ContextType>,
+  ProgramCycleNodeConnection?: ProgramCycleNodeConnectionResolvers<ContextType>,
+  ProgramCycleNodeEdge?: ProgramCycleNodeEdgeResolvers<ContextType>,
   ProgramNode?: ProgramNodeResolvers<ContextType>,
   ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>,
   ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>,
@@ -32110,6 +32307,7 @@ export type Resolvers<ContextType = any> = {
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>,
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
+  UpdateProgramCycle?: UpdateProgramCycleResolvers<ContextType>,
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>,

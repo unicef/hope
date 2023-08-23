@@ -56,3 +56,10 @@ class CreateProgramCycleInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     start_date = graphene.Date(required=True)
     end_date = graphene.Date()
+
+
+class UpdateProgramCycleInput(graphene.InputObjectType):
+    id = graphene.ID(required=True)
+    name = graphene.String()
+    start_date = graphene.Date()
+    end_date = graphene.Date()
