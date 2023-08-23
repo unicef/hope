@@ -675,6 +675,7 @@ type CreateGrievanceTicketMutation {
 input CreatePaymentPlanInput {
   businessAreaSlug: String!
   targetingId: ID!
+  programCycleId: ID!
   startDate: Date!
   endDate: Date!
   dispersionStartDate: Date!
@@ -2590,8 +2591,8 @@ type Mutations {
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
   createProgramCycle(programCycleData: CreateProgramCycleInput!): CreateProgramCycle
-  updateProgramCycle(programData: UpdateProgramCycleInput, version: BigInt): UpdateProgramCycle
-  deleteProgramCycle(programCycleId: String!): DeleteProgramCycle
+  updateProgramCycle(programCycleData: UpdateProgramCycleInput, version: BigInt): UpdateProgramCycle
+  deleteProgramCycle(programCycleId: ID!): DeleteProgramCycle
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
@@ -4821,8 +4822,8 @@ type UpdateProgramCycle {
 
 input UpdateProgramCycleInput {
   id: ID!
-  name: String!
-  startDate: Date!
+  name: String
+  startDate: Date
   endDate: Date
 }
 
