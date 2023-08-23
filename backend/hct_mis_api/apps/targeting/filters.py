@@ -10,9 +10,11 @@ from django_filters import (
     DateTimeFilter,
     FilterSet,
     NumericRangeFilter,
+    ModelMultipleChoiceFilter,
 )
 
 import hct_mis_api.apps.targeting.models as target_models
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 
@@ -59,22 +61,12 @@ class TargetPopulationFilter(FilterSet):
         lookup_expr="lte",
     )
     business_area = CharFilter(field_name="business_area__slug")
-<<<<<<< HEAD
-    created_at_range = DateRangeFilter(field_name="created_at__date")
-
-    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
-
-=======
     program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
     created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
-
-    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
-
     status_not = CharFilter(field_name="status", exclude=True)
 
->>>>>>> origin
     @staticmethod
     def filter_created_by_name(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         """Gets full name of the associated user from query."""
