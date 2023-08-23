@@ -61735,7 +61735,7 @@
             "description": null,
             "args": [
               {
-                "name": "programData",
+                "name": "programCycleData",
                 "description": null,
                 "type": {
                   "kind": "INPUT_OBJECT",
@@ -61775,7 +61775,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "String",
+                    "name": "ID",
                     "ofType": null
                   }
                 },
@@ -67386,6 +67386,20 @@
             "defaultValue": null
           },
           {
+            "name": "programCycleId",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
             "name": "startDate",
             "description": null,
             "type": {
@@ -69513,13 +69527,9 @@
             "name": "name",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null
           },
@@ -69527,13 +69537,9 @@
             "name": "startDate",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Date",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Date",
+              "ofType": null
             },
             "defaultValue": null
           },

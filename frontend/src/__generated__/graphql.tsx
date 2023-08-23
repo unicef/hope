@@ -1097,6 +1097,7 @@ export type CreateGrievanceTicketMutation = {
 export type CreatePaymentPlanInput = {
   businessAreaSlug: Scalars['String'],
   targetingId: Scalars['ID'],
+  programCycleId: Scalars['ID'],
   startDate: Scalars['Date'],
   endDate: Scalars['Date'],
   dispersionStartDate: Scalars['Date'],
@@ -4053,13 +4054,13 @@ export type MutationsCreateProgramCycleArgs = {
 
 
 export type MutationsUpdateProgramCycleArgs = {
-  programData?: Maybe<UpdateProgramCycleInput>,
+  programCycleData?: Maybe<UpdateProgramCycleInput>,
   version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsDeleteProgramCycleArgs = {
-  programCycleId: Scalars['String']
+  programCycleId: Scalars['ID']
 };
 
 
@@ -8070,8 +8071,8 @@ export type UpdateProgramCycle = {
 
 export type UpdateProgramCycleInput = {
   id: Scalars['ID'],
-  name: Scalars['String'],
-  startDate: Scalars['Date'],
+  name?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
 };
 
