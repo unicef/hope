@@ -10,6 +10,7 @@ const PaperContainer = styled(Paper)`
   margin: ${({ theme }) => theme.spacing(5)}px;
   flex-direction: column;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
+  width: 100%;
 `;
 
 interface BaseSectionProps {
@@ -27,7 +28,7 @@ export const BaseSection = ({
 
   return (
     <PaperContainer>
-      <Box display='flex' justifyContent='space-between'>
+      <Box display='flex' justifyContent='space-between' alignItems='center'>
         <Typography variant='h6'>{t(title)}</Typography>
         {buttons}
       </Box>
