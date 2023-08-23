@@ -1,4 +1,5 @@
 import { AllTargetPopulationsDocument } from '../../src/__generated__/graphql';
+import { fakeProgram } from '../programs/fakeProgram';
 
 export const fakeApolloAllTargetPopulation = [
   {
@@ -10,7 +11,7 @@ export const fakeApolloAllTargetPopulation = [
         totalHouseholdsCountMax: null,
         createdAtRange: '{}',
         status: '',
-        program: 'c4d5657d-1a29-46e1-8190-df7f85a0d2ef',
+        program: [fakeProgram.id],
         businessArea: 'afghanistan',
         first: 10,
         orderBy: '-created_at',

@@ -32,7 +32,7 @@ export const CommunicationFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const {
     handleFilterChange,
     applyFilterChanges,
@@ -59,7 +59,7 @@ export const CommunicationFilters = ({
     data: allTargetPopulationForChoices,
     loading: targetPopulationsLoading,
   } = useAllTargetPopulationForChoicesQuery({
-    variables: { businessArea },
+    variables: { businessArea, program: [programId] },
     fetchPolicy: 'cache-and-network',
   });
 

@@ -1,240 +1,233 @@
-export interface IntrospectionResultData {
-  __schema: {
-    types: {
-      kind: string;
-      name: string;
-      possibleTypes: {
-        name: string;
-      }[];
-    }[];
-  };
-}
-const result: IntrospectionResultData = {
-  __schema: {
-    types: [
+
+      export interface IntrospectionResultData {
+        __schema: {
+          types: {
+            kind: string;
+            name: string;
+            possibleTypes: {
+              name: string;
+            }[];
+          }[];
+        };
+      }
+      const result: IntrospectionResultData = {
+  "__schema": {
+    "types": [
       {
-        kind: 'INTERFACE',
-        name: 'Node',
-        possibleTypes: [
+        "kind": "INTERFACE",
+        "name": "Node",
+        "possibleTypes": [
           {
-            name: 'CommunicationMessageNode',
+            "name": "CommunicationMessageNode"
           },
           {
-            name: 'UserNode',
+            "name": "UserNode"
           },
           {
-            name: 'IndividualIdentityNode',
+            "name": "IndividualIdentityNode"
           },
           {
-            name: 'IndividualNode',
+            "name": "IndividualNode"
           },
           {
-            name: 'HouseholdNode',
+            "name": "HouseholdNode"
           },
           {
-            name: 'AreaNode',
+            "name": "AreaNode"
           },
           {
-            name: 'AreaTypeNode',
+            "name": "AreaTypeNode"
           },
           {
-            name: 'GrievanceTicketNode',
+            "name": "GrievanceTicketNode"
           },
           {
-            name: 'UserBusinessAreaNode',
+            "name": "UserBusinessAreaNode"
           },
           {
-            name: 'RegistrationDataImportNode',
+            "name": "RegistrationDataImportNode"
           },
           {
-            name: 'PaymentPlanNode',
+            "name": "ProgramNodeForAccountability"
           },
           {
-            name: 'ProgramNodeForAccountability',
+            "name": "PaymentPlanNode"
           },
           {
-            name: 'PaymentPlanNode',
+            "name": "TargetPopulationNode"
           },
           {
-            name: 'TargetPopulationNode',
+            "name": "RuleCommitNode"
           },
           {
-            name: 'RuleCommitNode',
+            "name": "SteficonRuleNode"
           },
           {
-            name: 'SteficonRuleNode',
+            "name": "PaymentRecordNode"
           },
           {
-            name: 'PaymentRecordNode',
+            "name": "CashPlanNode"
           },
           {
-            name: 'CashPlanNode',
+            "name": "ServiceProviderNode"
           },
           {
-            name: 'ServiceProviderNode',
+            "name": "PaymentVerificationPlanNode"
           },
           {
-            name: 'PaymentVerificationPlanNode',
+            "name": "PaymentVerificationNode"
           },
           {
-            name: 'PaymentVerificationNode',
+            "name": "TicketPaymentVerificationDetailsNode"
           },
           {
-            name: 'TicketPaymentVerificationDetailsNode',
+            "name": "PaymentVerificationSummaryNode"
           },
           {
-            name: 'PaymentVerificationSummaryNode',
+            "name": "TicketComplaintDetailsNode"
           },
           {
-            name: 'TicketComplaintDetailsNode',
+            "name": "TicketSensitiveDetailsNode"
           },
           {
-            name: 'TicketSensitiveDetailsNode',
+            "name": "PaymentVerificationLogEntryNode"
           },
           {
-            name: 'PaymentVerificationLogEntryNode',
+            "name": "SurveyNode"
           },
           {
-            name: 'SurveyNode',
+            "name": "DeliveryMechanismNode"
           },
           {
-            name: 'DeliveryMechanismNode',
+            "name": "FinancialServiceProviderNode"
           },
           {
-            name: 'FinancialServiceProviderNode',
+            "name": "FinancialServiceProviderXlsxTemplateNode"
           },
           {
-            name: 'FinancialServiceProviderXlsxTemplateNode',
+            "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
-            name: 'FinancialServiceProviderXlsxReportNode',
+            "name": "PaymentNode"
           },
           {
-            name: 'PaymentNode',
+            "name": "PaymentHouseholdSnapshotNode"
           },
           {
-            name: 'PaymentHouseholdSnapshotNode',
+            "name": "ApprovalProcessNode"
           },
           {
-            name: 'ApprovalProcessNode',
+            "name": "VolumeByDeliveryMechanismNode"
           },
           {
-            name: 'VolumeByDeliveryMechanismNode',
+            "name": "ReportNode"
           },
           {
-            name: 'ReportNode',
+            "name": "FeedbackNode"
           },
           {
-            name: 'FeedbackNode',
+            "name": "FeedbackMessageNode"
           },
           {
-            name: 'FeedbackMessageNode',
+            "name": "ProgramNode"
           },
           {
-            name: 'ApprovalProcessNode',
+            "name": "TicketNoteNode"
           },
           {
-            name: 'VolumeByDeliveryMechanismNode',
+            "name": "TicketHouseholdDataUpdateDetailsNode"
           },
           {
-            name: 'ProgramNode',
+            "name": "TicketIndividualDataUpdateDetailsNode"
           },
           {
-            name: 'TicketNoteNode',
+            "name": "TicketAddIndividualDetailsNode"
           },
           {
-            name: 'TicketHouseholdDataUpdateDetailsNode',
+            "name": "TicketDeleteIndividualDetailsNode"
           },
           {
-            name: 'TicketIndividualDataUpdateDetailsNode',
+            "name": "TicketDeleteHouseholdDetailsNode"
           },
           {
-            name: 'TicketAddIndividualDetailsNode',
+            "name": "TicketSystemFlaggingDetailsNode"
           },
           {
-            name: 'TicketDeleteIndividualDetailsNode',
+            "name": "SanctionListIndividualNode"
           },
           {
-            name: 'TicketDeleteHouseholdDetailsNode',
+            "name": "SanctionListIndividualDocumentNode"
           },
           {
-            name: 'TicketSystemFlaggingDetailsNode',
+            "name": "SanctionListIndividualNationalitiesNode"
           },
           {
-            name: 'SanctionListIndividualNode',
+            "name": "SanctionListIndividualCountriesNode"
           },
           {
-            name: 'SanctionListIndividualDocumentNode',
+            "name": "SanctionListIndividualAliasNameNode"
           },
           {
-            name: 'SanctionListIndividualNationalitiesNode',
+            "name": "SanctionListIndividualDateOfBirthNode"
           },
           {
-            name: 'SanctionListIndividualCountriesNode',
+            "name": "TicketNeedsAdjudicationDetailsNode"
           },
           {
-            name: 'SanctionListIndividualAliasNameNode',
+            "name": "TicketPositiveFeedbackDetailsNode"
           },
           {
-            name: 'SanctionListIndividualDateOfBirthNode',
+            "name": "TicketNegativeFeedbackDetailsNode"
           },
           {
-            name: 'TicketNeedsAdjudicationDetailsNode',
+            "name": "TicketReferralDetailsNode"
           },
           {
-            name: 'TicketPositiveFeedbackDetailsNode',
+            "name": "GrievanceDocumentNode"
           },
           {
-            name: 'TicketNegativeFeedbackDetailsNode',
+            "name": "DocumentNode"
           },
           {
-            name: 'TicketReferralDetailsNode',
+            "name": "BankAccountInfoNode"
           },
           {
-            name: 'GrievanceDocumentNode',
+            "name": "CommunicationMessageRecipientMapNode"
           },
           {
-            name: 'DocumentNode',
+            "name": "RecipientNode"
           },
           {
-            name: 'BankAccountInfoNode',
+            "name": "LogEntryNode"
           },
           {
-            name: 'CommunicationMessageRecipientMapNode',
+            "name": "BusinessAreaNode"
           },
           {
-            name: 'RecipientNode',
+            "name": "ImportedHouseholdNode"
           },
           {
-            name: 'LogEntryNode',
+            "name": "ImportedIndividualNode"
           },
           {
-            name: 'BusinessAreaNode',
+            "name": "RegistrationDataImportDatahubNode"
           },
           {
-            name: 'ImportedHouseholdNode',
+            "name": "ImportDataNode"
           },
           {
-            name: 'ImportedIndividualNode',
+            "name": "KoboImportDataNode"
           },
           {
-            name: 'RegistrationDataImportDatahubNode',
+            "name": "ImportedDocumentNode"
           },
           {
-            name: 'ImportDataNode',
-          },
-          {
-            name: 'KoboImportDataNode',
-          },
-          {
-            name: 'ImportedDocumentNode',
-          },
-          {
-            name: 'ImportedIndividualIdentityNode',
-          },
-        ],
-      },
-    ],
-  },
+            "name": "ImportedIndividualIdentityNode"
+          }
+        ]
+      }
+    ]
+  }
 };
-export default result;
+      export default result;
+    

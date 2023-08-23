@@ -5,12 +5,13 @@ import wait from 'waait';
 import { fakeApolloAllTargetPopulation } from '../../../../../fixtures/targeting/fakeApolloAllTargetPopulation';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { TargetPopulationTable } from '.';
+import { fakeProgram } from '../../../../../fixtures/programs/fakeProgram';
 
 describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', () => {
   const initialFilter = {
     name: '',
     status: '',
-    program: '',
+    program: [fakeProgram.id],
     totalHouseholdsCountMin: null,
     totalHouseholdsCountMax: null,
     createdAtRange: {},
