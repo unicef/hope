@@ -172,6 +172,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+    # TODO: id?? Unicef ID?? # P-84123
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "iteration",
@@ -183,11 +184,11 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
     )
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
-    CLOSED = "CLOSED"
+    FINISHED = "FINISHED"
     STATUS_CHOICE = (
         (DRAFT, _("Draft")),
         (ACTIVE, _("Active")),
-        (CLOSED, _("Closed")),
+        (FINISHED, _("Finished")),
     )
 
     iteration = models.PositiveIntegerField(
@@ -235,3 +236,13 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
     def total_delivered_quantity(self) -> Decimal:
         # TODO: update this one
         return Decimal(0.0)
+
+    def set_active(self) -> None:
+        if self.status in (ProgramCycle.DRAFT, ProgramCycle.FINISHED):
+            self.status = ProgramCycle.ACTIVE
+            self.save()
+
+    def set_draft(self) -> None:
+        if self.status == ProgramCycle.ACTIVE:
+            self.status = ProgramCycle.DRAFT
+            self.save()

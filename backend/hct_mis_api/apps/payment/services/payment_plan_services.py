@@ -30,6 +30,7 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
 )
+from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
@@ -331,6 +332,10 @@ class PaymentPlanService:
         if not target_population.program:
             raise GraphQLError("TargetPopulation should have related Program defined")
 
+        program_cycle_id = decode_id_string(input_data["program_cycle_id"])
+        program_cycle = ProgramCycle.objects.get(id=program_cycle_id)
+        # TODO: add validation for ProgramCycle
+
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
@@ -350,7 +355,7 @@ class PaymentPlanService:
             created_by=user,
             target_population=target_population,
             program=target_population.program,
-            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
+            program_cycle=program_cycle,
             currency=input_data["currency"],
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
@@ -359,6 +364,7 @@ class PaymentPlanService:
             end_date=input_data["end_date"],
             status=PaymentPlan.Status.PREPARING,
         )
+        program_cycle.set_active()
 
         TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
             status=TargetPopulation.STATUS_ASSIGNED
@@ -463,6 +469,10 @@ class PaymentPlanService:
         if not self.payment_plan.is_follow_up:
             self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
             self.payment_plan.target_population.save()
+
+        if self.payment_plan.program_cycle.paymentplan_set.count() == 1:
+            # move from Active to Draft need to delete all Payment Plans from a Cycle
+            self.payment_plan.program_cycle.set_draft()
 
         self.payment_plan.payment_items.all().delete()
         self.payment_plan.delete()

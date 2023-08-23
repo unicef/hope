@@ -488,6 +488,7 @@ type CommunicationMessageNode implements Node {
   fullListArguments: JSONString
   randomSamplingArguments: JSONString
   sampleSize: Int!
+  program: ProgramNode
 }
 
 type CommunicationMessageNodeConnection {
@@ -700,6 +701,18 @@ type CreateProgram {
   program: ProgramNode
 }
 
+type CreateProgramCycle {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input CreateProgramCycleInput {
+  programId: ID!
+  name: String!
+  startDate: Date!
+  endDate: Date
+}
+
 input CreateProgramInput {
   name: String
   startDate: Date
@@ -801,6 +814,10 @@ type DeletePaymentVerificationPlan {
 }
 
 type DeleteProgram {
+  ok: Boolean
+}
+
+type DeleteProgramCycle {
   ok: Boolean
 }
 
@@ -2572,6 +2589,9 @@ type Mutations {
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
+  createProgramCycle(programCycleData: CreateProgramCycleInput!): CreateProgramCycle
+  updateProgramCycle(programData: UpdateProgramCycleInput, version: BigInt): UpdateProgramCycle
+  deleteProgramCycle(programCycleId: String!): DeleteProgramCycle
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
@@ -2924,6 +2944,7 @@ type PaymentPlanNode implements Node {
   totalDeliveredQuantityUsd: Float
   totalUndeliveredQuantity: Float
   totalUndeliveredQuantityUsd: Float
+  programCycle: ProgramCycleNode
   createdBy: UserNode!
   status: PaymentPlanStatus!
   backgroundActionStatus: PaymentPlanBackgroundActionStatus
@@ -3268,6 +3289,43 @@ input PositiveFeedbackTicketExtras {
   individual: ID
 }
 
+type ProgramCycleNode implements Node {
+  isRemoved: Boolean!
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastSyncAt: DateTime
+  version: BigInt!
+  iteration: Int!
+  name: String!
+  status: ProgramCycleStatus!
+  startDate: Date!
+  endDate: Date
+  program: ProgramNode!
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  totalDeliveredQuantity: Float
+  totalEntitledQuantity: Float
+  totalUndeliveredQuantity: Float
+}
+
+type ProgramCycleNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ProgramCycleNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ProgramCycleNodeEdge {
+  node: ProgramCycleNode
+  cursor: String!
+}
+
+enum ProgramCycleStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+}
+
 enum ProgramFrequencyOfPayments {
   ONE_OFF
   REGULAR
@@ -3306,9 +3364,11 @@ type ProgramNode implements Node {
   cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  cycles(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramCycleNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalEntitledQuantity: Decimal
@@ -4752,6 +4812,18 @@ type UpdatePaymentVerificationStatusAndReceivedAmount {
 type UpdateProgram {
   validationErrors: Arg
   program: ProgramNode
+}
+
+type UpdateProgramCycle {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input UpdateProgramCycleInput {
+  id: ID!
+  name: String!
+  startDate: Date!
+  endDate: Date
 }
 
 input UpdateProgramInput {

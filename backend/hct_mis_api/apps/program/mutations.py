@@ -19,15 +19,19 @@ from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
 from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
+    CreateProgramCycleInput,
     CreateProgramInput,
-    UpdateProgramInput, CreateProgramCycleInput,
+    UpdateProgramCycleInput,
+    UpdateProgramInput,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.utils import copy_program_object
 from hct_mis_api.apps.program.validators import (
+    ProgramCycleDeletionValidator,
     ProgramDeletionValidator,
     ProgramValidator,
+    UpdateProgramCycleValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -79,7 +83,6 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
     @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
-
         # When a Program is Finished, no changes can be applied to the Program and its children (Payment Plan, Follow-Up Payment Plan).
 
         program_id = decode_id_string(program_data.pop("id", None))
@@ -168,10 +171,6 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
         return CopyProgram(program=program)
 
 
-    # TODO: A user can activate a Program Cycle by creating a Payment Plan in it.
-    # To move a Program Cycle from active to draft status a user has to delete all Payment Plans from a Cycle.
-
-
 class CreateProgramCycle(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
@@ -186,33 +185,36 @@ class CreateProgramCycle(CommonValidator, PermissionMutation, ValidationErrorMut
 
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, program.business_area)
 
-        cls.validate(
-            start_date=datetime.combine(program_cycle_data["start_date"], datetime.min.time()),
-            end_date=datetime.combine(program_cycle_data["end_date"], datetime.min.time()),
-        )
+        new_iteration = program.cycles.order_by("iteration").last().iteration + 1
+        # TODO: add validation name and start and dates
+        # cls.validate(
+        #     start_date=datetime.combine(program_cycle_data["start_date"], datetime.min.time()),
+        #     end_date=datetime.combine(program_cycle_data.get("end_date"), datetime.min.time()),
+        # )
 
         ProgramCycle.objects.create(
             name=program_cycle_data["name"],
             program=program,
             start_date=program_cycle_data["start_date"],
             end_date=program_cycle_data.get("end_date", None),
+            iteration=new_iteration,
             status=ProgramCycle.DRAFT,
         )
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgramCycle(program=program)
 
 
-class UpdateProgramCycle(ProgramValidator, PermissionMutation, ValidationErrorMutationMixin):
+class UpdateProgramCycle(UpdateProgramCycleValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
-        program_data = UpdateProgramCycleInput()
+        program_cycle_data = UpdateProgramCycleInput()
         version = BigInt(required=False)
 
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
+    def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
         # To finish a Program Cycle, a user has to finish its Program.
         # When a Program Cycle is Finished, it is only possible to preview it.
         # When a Program Cycle is Finished, it is only possible to preview Payment Plans and Follow-Up Payment Plans.
@@ -223,65 +225,49 @@ class UpdateProgramCycle(ProgramValidator, PermissionMutation, ValidationErrorMu
         # A user can’t leave the Program Cycle name empty.
         # A user can leave the Program Cycle end date empty if it was empty upon starting the edit.
 
-        program_id = decode_id_string(program_data.pop("id", None))
+        program_cycle_id = decode_id_string(program_cycle_data.pop("id", None))
 
-        program = Program.objects.select_for_update().get(id=program_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), program)
-        old_program = Program.objects.get(id=program_id)
+        program_cycle = ProgramCycle.objects.select_for_update().get(id=program_cycle_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), program_cycle)
+        program = program_cycle.program
         business_area = program.business_area
 
-        # status update permissions if status is passed
-        status_to_set = program_data.get("status")
-        if status_to_set and program.status != status_to_set:
-            if status_to_set == Program.ACTIVE:
-                cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
-            elif status_to_set == Program.FINISHED:
-                cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+        cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
-        # permission if updating any other fields
-        if [k for k, v in program_data.items() if k != "status"]:
-            cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
-        cls.validate(
-            program_data=program_data,
-            program=program,
-            start_date=program_data.get("start_date"),
-            end_date=program_data.get("end_date"),
-        )
+        # TODO: add validation here dates and name as well
 
-        for attrib, value in program_data.items():
-            if hasattr(program, attrib):
-                setattr(program, attrib, value)
-        program.full_clean()
-        program.save()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
-        return UpdateProgram(program=program)
+        if end_date := program_cycle_data.get("end_date"):
+            program_cycle.end_date = end_date
+
+        if name := program_cycle_data.get("name"):
+            program_cycle.name = name
+
+        program_cycle.save()
+        # TODO: do we need logs for Program Cycle?
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
+        return UpdateProgramCycle(program=program)
 
 
-class DeleteProgramCycle(ProgramDeletionValidator, PermissionMutation):
+class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
     ok = graphene.Boolean()
 
     class Arguments:
-        program_id = graphene.String(required=True)
+        program_cycle_id = graphene.ID(required=True)
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "DeleteProgram":
-        """
-        # The Program Cycle is in Draft status.
-        # The program is in Active status.
-        """
-
-
-        decoded_id = decode_id_string(kwargs.get("program_id"))
-        program = Program.objects.get(id=decoded_id)
-        old_program = Program.objects.get(id=decoded_id)
+    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "DeleteProgramCycle":
+        decoded_id = decode_id_string(kwargs.get("program_cycle_id"))
+        program_cycle = ProgramCycle.objects.get(id=decoded_id)
+        old_program_cycle = ProgramCycle.objects.get(id=decoded_id)
+        program = old_program_cycle.program
 
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
-        cls.validate(program=program)
+        cls.validate(program=program, program_cycle=program_cycle)
 
-        program.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
+        program_cycle.delete()
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
         return cls(ok=True)
 
 
@@ -292,6 +278,6 @@ class Mutations(graphene.ObjectType):
     copy_program = CopyProgram.Field()
 
     # program cycle
-    create_program_cycle =  CreateProgramCycle.Field()
+    create_program_cycle = CreateProgramCycle.Field()
     update_program_cycle = UpdateProgramCycle.Field()
     delete_program_cycle = DeleteProgramCycle.Field()
