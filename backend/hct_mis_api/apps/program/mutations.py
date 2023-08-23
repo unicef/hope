@@ -29,9 +29,9 @@ from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.utils import copy_program_object
 from hct_mis_api.apps.program.validators import (
     ProgramCycleDeletionValidator,
+    ProgramCycleValidator,
     ProgramDeletionValidator,
     ProgramValidator,
-    UpdateProgramCycleValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -96,12 +96,12 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
         status_to_set = program_data.get("status")
         if status_to_set and program.status != status_to_set:
             if status_to_set == Program.ACTIVE:
-                # TODO: activate first Cycle as well??
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 # TODO: maybe add validation
                 # All Payment Plans and Follow-Up Payment Plans have to be Reconciled.
                 # The Program is in Active status.
+                # To finish a Program Cycle, a user has to finish its Program.
 
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
 
@@ -171,7 +171,7 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
         return CopyProgram(program=program)
 
 
-class CreateProgramCycle(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -204,7 +204,7 @@ class CreateProgramCycle(CommonValidator, PermissionMutation, ValidationErrorMut
         return CreateProgramCycle(program=program)
 
 
-class UpdateProgramCycle(UpdateProgramCycleValidator, PermissionMutation, ValidationErrorMutationMixin):
+class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -215,16 +215,6 @@ class UpdateProgramCycle(UpdateProgramCycleValidator, PermissionMutation, Valida
     @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
-        # To finish a Program Cycle, a user has to finish its Program.
-        # When a Program Cycle is Finished, it is only possible to preview it.
-        # When a Program Cycle is Finished, it is only possible to preview Payment Plans and Follow-Up Payment Plans.
-        # When a Program Cycle is Finished, it's impossible to create Payment Plans and Follow-Up Payment Plans.
-
-        # The Program is in Active status.!!!
-        # The Program Cycle is in Draft or Active status.
-        # A user can’t leave the Program Cycle name empty.
-        # A user can leave the Program Cycle end date empty if it was empty upon starting the edit.
-
         program_cycle_id = decode_id_string(program_cycle_data.pop("id", None))
 
         program_cycle = ProgramCycle.objects.select_for_update().get(id=program_cycle_id)
