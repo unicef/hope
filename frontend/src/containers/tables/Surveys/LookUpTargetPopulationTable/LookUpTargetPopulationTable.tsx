@@ -49,7 +49,7 @@ export const LookUpTargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    program: decodeIdString(programId),
+    program: [programId],
     statusNot: TargetPopulationStatus.Open,
   };
 
