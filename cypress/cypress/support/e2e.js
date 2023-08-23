@@ -32,7 +32,7 @@ Cypress.Commands.add("createExcel", () => {
 Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
   Cypress.session.clearCurrentSessionData();
   Cypress.session.clearAllSavedSessions();
-  cy.navigateToHomePage();
+  cy.visit("/");
   const expected_url =
     Cypress.config().baseUrl + "/api/unicorn/login/?next=/api/unicorn/";
   function resolveAThing(n) {
@@ -101,7 +101,7 @@ Cypress.Commands.add("scenario", (steps) => {
       { test },
       {
         title: "Scenario",
-        value: outputText
+        value: outputText,
       }
     );
   });
@@ -113,7 +113,7 @@ Cypress.on("fail", (error, runnable) => {
       { test },
       {
         title: "Error",
-        value: error.stack
+        value: error.stack,
       }
     );
   });
