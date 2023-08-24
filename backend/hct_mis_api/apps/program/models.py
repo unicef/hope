@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Union
 
 from django.contrib.postgres.fields import CICharField
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -247,12 +248,24 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
         # TODO: update this one
         return Decimal(0.0)
 
+    def validate_program_active_status(self) -> None:
+        # all changes with Program Cycle are possible within Active Program
+        if self.program.status != Program.ACTIVE:
+            raise ValidationError("Program should be within Active status.")
+
     def set_active(self) -> None:
+        self.validate_program_active_status()
         if self.status in (ProgramCycle.DRAFT, ProgramCycle.FINISHED):
             self.status = ProgramCycle.ACTIVE
             self.save()
 
     def set_draft(self) -> None:
+        self.validate_program_active_status()
         if self.status == ProgramCycle.ACTIVE:
             self.status = ProgramCycle.DRAFT
             self.save()
+
+    def set_finish(self) -> None:
+        self.validate_program_active_status()
+        self.status = ProgramCycle.FINISHED
+        self.save()

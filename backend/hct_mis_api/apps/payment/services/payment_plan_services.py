@@ -345,13 +345,13 @@ class PaymentPlanService:
 
         start_date = input_data["start_date"]
         start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
-        if start_date < target_population.program.start_date:
-            raise GraphQLError("Start date cannot be earlier than start date in the program")
+        if start_date < program_cycle.start_date:
+            raise GraphQLError("Start date cannot be earlier than start date in the program cycle")
 
         end_date = input_data["end_date"]
         end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
-        if end_date > target_population.program.end_date:
-            raise GraphQLError("End date cannot be later that end date in the program")
+        if end_date > program_cycle.end_date:
+            raise GraphQLError("End date cannot be later that end date in the program cycle")
 
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,

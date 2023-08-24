@@ -4,6 +4,7 @@ from typing import Any, Optional
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator, CommonValidator
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,15 @@ class ProgramValidator(BaseValidator):
         elif current_status == Program.FINISHED and status_to_set != Program.ACTIVE:
             logger.error("Finished status can only be changed to Active")
             raise ValidationError("Finished status can only be changed to Active")
+
+        # Finish Program -> check all Payment Plans
+        if status_to_set == Program.FINISHED:
+            # TODO: update after PaymentPlan status update
+            # status=PaymentPlan.Status.RECONCILED
+            if program.paymentplan_set.exclude(
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            ).exists():
+                raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
 
 
 class ProgramDeletionValidator(BaseValidator):

@@ -3298,6 +3298,7 @@ type ProgramCycleNode implements Node {
   totalDeliveredQuantity: Float
   totalEntitledQuantity: Float
   totalUndeliveredQuantity: Float
+  unicefId: String
 }
 
 type ProgramCycleNodeConnection {
