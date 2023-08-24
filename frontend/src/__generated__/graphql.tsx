@@ -120,7 +120,7 @@ export type AddIndividualDataObjectType = {
   phoneNoAlternative?: Maybe<Scalars['String']>,
   email?: Maybe<Scalars['String']>,
   relationship: Scalars['String'],
-  disability?: Maybe<Scalars['Boolean']>,
+  disability?: Maybe<Scalars['String']>,
   workStatus?: Maybe<Scalars['String']>,
   enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
   administrationOfRutf?: Maybe<Scalars['Boolean']>,
@@ -433,8 +433,8 @@ export type BusinessAreaNode = Node & {
   paymentSet: PaymentNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
   tickets: GrievanceTicketNodeConnection,
-  programSet: ProgramNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
+  programSet: ProgramNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
   messageSet: CommunicationMessageNodeConnection,
@@ -534,23 +534,13 @@ export type BusinessAreaNodeTicketsArgs = {
 };
 
 
-export type BusinessAreaNodeProgramSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>
-};
-
-
 export type BusinessAreaNodeTargetpopulationSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -568,7 +558,18 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type BusinessAreaNodeProgramSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -1995,7 +1996,7 @@ export type HouseholdNode = Node & {
   consentSign: Scalars['String'],
   consent?: Maybe<Scalars['Boolean']>,
   consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
-  residenceStatus: HouseholdResidenceStatus,
+  residenceStatus?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
   address: Scalars['String'],
@@ -2242,7 +2243,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -2260,6 +2261,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2315,15 +2317,6 @@ export enum HouseholdRegistrationMethod {
   A = 'A_',
   Community = 'COMMUNITY',
   HhRegistration = 'HH_REGISTRATION'
-}
-
-export enum HouseholdResidenceStatus {
-  A = 'A_',
-  Idp = 'IDP',
-  Refugee = 'REFUGEE',
-  OthersOfConcern = 'OTHERS_OF_CONCERN',
-  Host = 'HOST',
-  NonHost = 'NON_HOST'
 }
 
 export type HouseholdSelectionNode = {
@@ -4959,6 +4952,7 @@ export type ProgramNode = Node & {
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  totalNumberOfHouseholdsWithTpInProgram?: Maybe<Scalars['Int']>,
 };
 
 
@@ -5059,7 +5053,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -5077,6 +5071,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5949,6 +5944,7 @@ export type QueryAllProgramsArgs = {
   budget?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6013,6 +6009,7 @@ export type QueryAllActiveProgramsArgs = {
   budget?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6028,7 +6025,7 @@ export type QueryAllTargetPopulationArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -6046,6 +6043,7 @@ export type QueryAllTargetPopulationArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6068,7 +6066,7 @@ export type QueryAllActiveTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -6086,6 +6084,7 @@ export type QueryAllActiveTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6773,7 +6772,7 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -6791,6 +6790,7 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8050,8 +8050,8 @@ export type UserBusinessAreaNode = Node & {
   paymentSet: PaymentNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
   tickets: GrievanceTicketNodeConnection,
-  programSet: ProgramNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
+  programSet: ProgramNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
   messageSet: CommunicationMessageNodeConnection,
@@ -8152,23 +8152,13 @@ export type UserBusinessAreaNodeTicketsArgs = {
 };
 
 
-export type UserBusinessAreaNodeProgramSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>
-};
-
-
 export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -8186,7 +8176,18 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserBusinessAreaNodeProgramSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -8390,7 +8391,7 @@ export type UserNodeTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -8408,6 +8409,7 @@ export type UserNodeTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8418,7 +8420,7 @@ export type UserNodeChangedTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -8436,6 +8438,7 @@ export type UserNodeChangedTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8446,7 +8449,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAt?: Maybe<Scalars['DateTime']>,
   createdAt_Lte?: Maybe<Scalars['DateTime']>,
   createdAt_Gte?: Maybe<Scalars['DateTime']>,
@@ -8464,6 +8467,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
+  statusNot?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -12908,11 +12912,11 @@ export type AllActiveProgramsQueryVariables = {
   sector?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
-  numberOfHouseholds?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>
 };
 
 
@@ -12929,7 +12933,7 @@ export type AllActiveProgramsQuery = (
       & Pick<ProgramNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'sector' | 'totalNumberOfHouseholds' | 'budget'>
+        & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'budget'>
       )> }
     )>> }
   )> }
@@ -13016,7 +13020,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
   )> }
 );
 
@@ -13737,8 +13741,9 @@ export type AllActiveTargetPopulationsQueryVariables = {
   numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
   numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Scalars['ID']>,
-  createdAtRange?: Maybe<Scalars['String']>
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  statusNot?: Maybe<Scalars['String']>
 };
 
 
@@ -13808,7 +13813,7 @@ export type AllTargetPopulationForChoicesQueryVariables = {
   numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
   numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Scalars['ID']>
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
 
 
@@ -13836,10 +13841,10 @@ export type AllTargetPopulationsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
-  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
-  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountMin?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Scalars['ID']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>
 };
@@ -24615,8 +24620,8 @@ export type IndividualFlexFieldsQueryHookResult = ReturnType<typeof useIndividua
 export type IndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useIndividualFlexFieldsLazyQuery>;
 export type IndividualFlexFieldsQueryResult = ApolloReactCommon.QueryResult<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>;
 export const AllActiveProgramsDocument = gql`
-    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
-  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
+    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $numberOfHouseholdsWithTpInProgram: String) {
+  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate, numberOfHouseholdsWithTpInProgram: $numberOfHouseholdsWithTpInProgram) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -24635,6 +24640,7 @@ export const AllActiveProgramsDocument = gql`
         endDate
         sector
         totalNumberOfHouseholds
+        totalNumberOfHouseholdsWithTpInProgram
         budget
       }
     }
@@ -24679,11 +24685,11 @@ export function withAllActivePrograms<TProps, TChildProps = {}>(operationOptions
  *      sector: // value for 'sector'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
- *      numberOfHouseholds: // value for 'numberOfHouseholds'
  *      budget: // value for 'budget'
  *      startDate: // value for 'startDate'
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
+ *      numberOfHouseholdsWithTpInProgram: // value for 'numberOfHouseholdsWithTpInProgram'
  *   },
  * });
  */
@@ -24878,6 +24884,7 @@ export const ProgramDocument = gql`
     scope
     sector
     totalNumberOfHouseholds
+    totalNumberOfHouseholdsWithTpInProgram
     administrativeAreasOfImplementation
     individualDataNeeded
     version
@@ -26781,8 +26788,8 @@ export type SurveysChoiceDataQueryHookResult = ReturnType<typeof useSurveysChoic
 export type SurveysChoiceDataLazyQueryHookResult = ReturnType<typeof useSurveysChoiceDataLazyQuery>;
 export type SurveysChoiceDataQueryResult = ApolloReactCommon.QueryResult<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>;
 export const AllActiveTargetPopulationsDocument = gql`
-    query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: ID, $createdAtRange: String) {
-  allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange) {
+    query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $statusNot: String) {
+  allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, statusNot: $statusNot) {
     edges {
       node {
         id
@@ -26851,6 +26858,7 @@ export function withAllActiveTargetPopulations<TProps, TChildProps = {}>(operati
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
+ *      statusNot: // value for 'statusNot'
  *   },
  * });
  */
@@ -26974,7 +26982,7 @@ export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRu
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
 export const AllTargetPopulationForChoicesDocument = gql`
-    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: ID) {
+    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
   allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {
     edges {
       node {
@@ -27042,8 +27050,8 @@ export type AllTargetPopulationForChoicesQueryHookResult = ReturnType<typeof use
 export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesLazyQuery>;
 export type AllTargetPopulationForChoicesQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: ID, $createdAtRange: String, $paymentPlanApplicable: Boolean) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, paymentPlanApplicable: $paymentPlanApplicable) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $paymentPlanApplicable: Boolean) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, paymentPlanApplicable: $paymentPlanApplicable) {
     edges {
       node {
         ...targetPopulationMinimal
@@ -27092,8 +27100,8 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
  *      status: // value for 'status'
- *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
- *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
+ *      totalHouseholdsCountMin: // value for 'totalHouseholdsCountMin'
+ *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
@@ -27335,7 +27343,6 @@ export type ResolversTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
   AreaNode: ResolverTypeWrapper<AreaNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>,
@@ -27836,7 +27843,6 @@ export type ResolversParentTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   HouseholdNode: HouseholdNode,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
   AreaNode: AreaNode,
   UUID: Scalars['UUID'],
   AreaTypeNode: AreaTypeNode,
@@ -28523,8 +28529,8 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, BusinessAreaNodeTicketsArgs>,
-  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
+  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
   messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, BusinessAreaNodeMessageSetArgs>,
@@ -29332,7 +29338,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
+  residenceStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -30479,6 +30485,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfHouseholdsWithTpInProgram?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ProgramNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']> = {
@@ -31678,8 +31685,8 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeServiceproviderSetArgs>,
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTicketsArgs>,
-  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeProgramSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
+  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeProgramSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
   messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeMessageSetArgs>,

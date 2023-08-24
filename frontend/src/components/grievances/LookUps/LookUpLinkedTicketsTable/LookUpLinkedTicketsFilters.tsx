@@ -44,9 +44,6 @@ export function LookUpLinkedTicketsFilters({
             value={filter.status || null}
             data-cy='filters-status'
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.grievanceTicketStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>

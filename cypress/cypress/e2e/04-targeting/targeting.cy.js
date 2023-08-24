@@ -11,7 +11,6 @@ let programName = "TargetingProgram";
 describe("Targeting", () => {
   beforeEach(() => {
     cy.initScenario("targeting");
-    cy.adminLogin();
     cy.navigateToHomePage();
     targetingPage.clickMenuButtonTargeting();
   });

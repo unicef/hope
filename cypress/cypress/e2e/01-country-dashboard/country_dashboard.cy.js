@@ -4,7 +4,6 @@ let cd = new CountryDashboard();
 
 describe("Country Dashboard", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
   });
 

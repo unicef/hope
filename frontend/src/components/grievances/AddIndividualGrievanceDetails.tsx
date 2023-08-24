@@ -67,10 +67,6 @@ export function AddIndividualGrievanceDetails({
           fieldAttribute.choices.find((item) => item.value === value)
             ?.labelEn || '-';
       }
-
-      if (fieldAttribute.name === 'disability') {
-        textValue = value ? 'Disabled' : 'Not Disabled';
-      }
       if (Array.isArray(value)) {
         textValue = value.map((el) => capitalize(el)).join(', ');
       }
