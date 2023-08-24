@@ -1,5 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { Grid } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +10,6 @@ import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
 
 interface SurveysFiltersProps {
   filter;

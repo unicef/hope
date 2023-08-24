@@ -47,6 +47,13 @@ import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopul
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
+import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
+import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
+import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
+import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
+import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
+import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
+import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -102,6 +109,7 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       >
         <EditFollowUpPaymentPlanPage />
       </SentryRoute>
+
       <SentryRoute
         path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/create`}
       >
@@ -121,6 +129,11 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
         path={`${path}/payment-module/payment-plans/:id/setup-fsp/edit`}
       >
         <EditSetUpFspPage />
+      </SentryRoute>
+      <SentryRoute
+        path={`${path}/payment-module/payment-plans/:id/setup-payment-instructions/create`}
+      >
+        <SetUpPaymentInstructionsPage />
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/payment-plans/:id/edit`}>
         <EditPaymentPlanPage />
@@ -164,7 +177,6 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/grievance/dashboard`}>
         <GrievancesDashboardPage key='all' />
       </SentryRoute>
-
       <SentryRoute path={`${path}/grievance/feedback/create`}>
         <CreateFeedbackPage />
       </SentryRoute>
@@ -177,26 +189,24 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/grievance/feedback`}>
         <FeedbackPage />
       </SentryRoute>
-      {/* TODO: uncomment when ready for deployment
-          <SentryRoute path={`${path}/accountability/surveys/create`}>
-            <CreateSurveyPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/surveys/:id`}>
-            <SurveyDetailsPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/surveys`}>
-            <SurveysPage />
-          </SentryRoute>
-             <SentryRoute path={`${path}/accountability/communication/create`}>
-            <CreateCommunicationPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/communication/:id`}>
-            <CommunicationDetailsPage />
-          </SentryRoute>
-          <SentryRoute path={`${path}/accountability/communication`}>
-            <CommunicationPage />
-          </SentryRoute>
-          */}
+      <SentryRoute path={`${path}/accountability/surveys/create`}>
+        <CreateSurveyPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/accountability/surveys/:id`}>
+        <SurveyDetailsPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/accountability/surveys`}>
+        <SurveysPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/accountability/communication/create`}>
+        <CreateCommunicationPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/accountability/communication/:id`}>
+        <CommunicationDetailsPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/accountability/communication`}>
+        <CommunicationPage />
+      </SentryRoute>
       <SentryRoute path={`${path}/population/household`}>
         <PopulationHouseholdPage />
       </SentryRoute>

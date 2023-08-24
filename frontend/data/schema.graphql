@@ -488,6 +488,7 @@ type CommunicationMessageNode implements Node {
   fullListArguments: JSONString
   randomSamplingArguments: JSONString
   sampleSize: Int!
+  program: ProgramNode
 }
 
 type CommunicationMessageNodeConnection {
@@ -3309,6 +3310,7 @@ type ProgramNode implements Node {
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalEntitledQuantity: Decimal
