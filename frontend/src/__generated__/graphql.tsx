@@ -3232,7 +3232,7 @@ export enum IndividualRelationship {
   BrotherSister = 'BROTHER_SISTER',
   Cousin = 'COUSIN',
   DaughterinlawSoninlaw = 'DAUGHTERINLAW_SONINLAW',
-  GranddaughterGrandson = 'GRANDDAUGHTER_GRANDSON',
+  GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
   GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
   Head = 'HEAD',
   MotherFather = 'MOTHER_FATHER',

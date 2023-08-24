@@ -245,7 +245,7 @@ export const fakeApolloAllIndividuals = [
                   admin2: null,
                   __typename: 'HouseholdNode',
                 },
-                relationship: 'GRANDDAUGHTER_GRANDSON',
+                relationship: 'GRANDDAUGHER_GRANDSON',
                 age: 35,
                 sex: 'MALE',
                 __typename: 'IndividualNode',
