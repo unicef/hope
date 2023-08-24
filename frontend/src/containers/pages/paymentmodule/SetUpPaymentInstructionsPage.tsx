@@ -1,15 +1,14 @@
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { Box, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import React from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
+import { v4 as uuidv4 } from 'uuid';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { reorder } from '../../../components/paymentmodule/SetUpPaymentInstructions/helpers';
 import { PaymentInstructionDraggableList } from '../../../components/paymentmodule/SetUpPaymentInstructions/PaymentInstructionDraggableList';
 import { SetUpPaymentInstructionsHeader } from '../../../components/paymentmodule/SetUpPaymentInstructions/SetUpPaymentInstructionsHeader';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { reorder } from '../../../components/paymentmodule/SetUpPaymentInstructions/helpers';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 
@@ -79,20 +78,11 @@ export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
         permissions={permissions}
         buttons={buttons}
       />
-      <ContainerColumnWithBorder>
-        <PaymentInstructionDraggableList
-          items={items}
-          onDragEnd={onDragEnd}
-          handleDeletePaymentInstruction={handleDeletePaymentInstruction}
-        />
-      </ContainerColumnWithBorder>
-      <pre>
-        {JSON.stringify(
-          items.map((item) => item.id),
-          null,
-          2,
-        )}
-      </pre>
+      <PaymentInstructionDraggableList
+        items={items}
+        onDragEnd={onDragEnd}
+        handleDeletePaymentInstruction={handleDeletePaymentInstruction}
+      />
     </>
   );
 };

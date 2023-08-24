@@ -100,8 +100,8 @@ export function mapFiltersToInitialValues(filters): any[] {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function mapCriteriaToInitialValues(criteria) {
-  const filters = criteria.filters || [];
-  const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+  const filters = criteria?.filters || [];
+  const individualsFiltersBlocks = criteria?.individualsFiltersBlocks || [];
   return {
     filters: mapFiltersToInitialValues(filters),
     individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
@@ -110,6 +110,61 @@ export function mapCriteriaToInitialValues(criteria) {
       ),
     })),
   };
+}
+
+export function addFieldAttributesToCriteria(
+  criteria,
+  individualFieldsDict,
+  householdFieldsDict,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  const filters = criteria.filters || [];
+  const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+  const newFilters = filters.map((filter) => {
+    const { fieldName } = filter;
+    const fieldAttribute =
+      householdFieldsDict[fieldName] || filter.fieldAttribute;
+    return {
+      ...filter,
+      fieldAttribute,
+    };
+  });
+  const newIndividualsFiltersBlocks = individualsFiltersBlocks.map((block) => {
+    const newIndividualBlockFilters = block.individualBlockFilters.map(
+      (filter) => {
+        const { fieldName } = filter;
+        const fieldAttribute =
+          individualFieldsDict[fieldName] || filter.fieldAttribute;
+        return {
+          ...filter,
+          fieldAttribute,
+        };
+      },
+    );
+    return {
+      ...block,
+      individualBlockFilters: newIndividualBlockFilters,
+    };
+  });
+  return {
+    ...criteria,
+    filters: newFilters,
+    individualsFiltersBlocks: newIndividualsFiltersBlocks,
+  };
+}
+export function addFieldAttributesToRules(
+  rules,
+  individualFieldsDict,
+  householdFieldsDict,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  return rules.map((rule) =>
+    addFieldAttributesToCriteria(
+      rule,
+      individualFieldsDict,
+      householdFieldsDict,
+    ),
+  );
 }
 
 // TODO Marącin make Type to this function
@@ -193,9 +248,6 @@ function mapFilterToVariable(
 export function getTargetingCriteriaVariables(values) {
   return {
     targetingCriteria: {
-      flagExcludeIfActiveAdjudicationTicket:
-        values.flagExcludeIfActiveAdjudicationTicket,
-      flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
       rules: values.criterias.map((rule) => {
         return {
           filters: rule.filters.map(mapFilterToVariable),
