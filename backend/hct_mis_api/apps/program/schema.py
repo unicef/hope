@@ -91,6 +91,19 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
 
 
+class ProgramNodeForAccountability(ProgramNode):
+    class Meta:
+        model = Program
+        filter_fields = [
+            "name",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
+        return self.households_with_tp_in_program.count()
+
+
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
@@ -172,7 +185,7 @@ class Query(graphene.ObjectType):
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
     all_active_programs = DjangoPermissionFilterConnectionField(
-        ProgramNode,
+        ProgramNodeForAccountability,
         filterset_class=ProgramFilter,
         permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
     )

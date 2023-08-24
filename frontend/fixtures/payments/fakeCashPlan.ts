@@ -4,7 +4,8 @@ export const fakeCashPlan = {
   id: 'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
   updatedAt: '2022-02-16T10:53:05.636703',
   businessArea: {
-    id: 'QnVzaW5lc3NBcmVOb2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
+    id:
+      'QnVzaW5lc3NBcmVOb2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
     name: 'Afghanistan',
     slug: 'afghanistan',
   },
@@ -15,7 +16,7 @@ export const fakeCashPlan = {
     id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
     name: 'Surface campaign practice actually about about will what.',
     caId: '123-21-PRG-00001',
-    __typename: 'ProgramNode',
+    __typename: 'ProgramNodeForAccountability',
   },
   exchangeRate: 1.0,
   totalEntitledQuantity: 0,

@@ -48,7 +48,7 @@
             "name": "RegistrationDataImportNode"
           },
           {
-            "name": "ProgramNode"
+            "name": "ProgramNodeForAccountability"
           },
           {
             "name": "PaymentPlanNode"
@@ -127,6 +127,9 @@
           },
           {
             "name": "FeedbackMessageNode"
+          },
+          {
+            "name": "ProgramNode"
           },
           {
             "name": "TicketNoteNode"

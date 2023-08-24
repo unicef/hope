@@ -29,10 +29,10 @@ export const FeedbackDetailsToolbar = ({
     },
   ];
 
-  const canCreateLinkedGrievance =
-    feedback.householdLookup && feedback.individualLookup;
-
   const hasLinkedGrievance = Boolean(feedback.linkedGrievance?.id);
+  const isFeedbackWithHouseholdOnly = Boolean(
+    feedback.householdLookup?.id && !feedback.individualLookup?.id,
+  );
 
   return (
     <PageHeader
@@ -54,22 +54,23 @@ export const FeedbackDetailsToolbar = ({
             </Button>
           </Box>
         )}
-        {canCreateLinkedGrievance && !hasLinkedGrievance && (
+        {!hasLinkedGrievance && (
           <Box mr={3}>
             <Button
               onClick={() =>
                 history.push({
                   pathname: `/${baseUrl}/grievance/new-ticket`,
                   state: {
-                    selectedHousehold: feedback.householdLookup,
-                    selectedIndividual: feedback.individualLookup,
+                    selectedHousehold: feedback?.householdLookup,
+                    selectedIndividual: feedback?.individualLookup,
                     linkedFeedbackId: id,
+                    isFeedbackWithHouseholdOnly,
                   },
                 })
               }
               variant='contained'
               color='primary'
-              data-cy="button-create-linked-ticket"
+              data-cy='button-create-linked-ticket'
             >
               {t('Create Linked Ticket')}
             </Button>
