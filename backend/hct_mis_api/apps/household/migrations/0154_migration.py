@@ -93,22 +93,4 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(create_hh_and_ind_collections, migrations.RunPython.noop),
-        migrations.AlterField(
-            model_name='household',
-            name='household_collection',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name='households',
-                to='household.HouseholdCollection',
-            ),
-        ),
-        migrations.AlterField(
-            model_name='individual',
-            name='individual_collection',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name='individuals',
-                to='household.IndividualCollection',
-            ),
-        ),
     ]
