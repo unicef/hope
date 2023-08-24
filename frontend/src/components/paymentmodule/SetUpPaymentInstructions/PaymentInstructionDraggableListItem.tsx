@@ -2,8 +2,8 @@ import { Box, Button, Grid } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Delete } from '@material-ui/icons';
-import { Field, Formik } from 'formik';
-import React, { ReactElement } from 'react';
+import { Field, FieldArray, Form, Formik } from 'formik';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -11,10 +11,15 @@ import {
   useAllDeliveryMechanismsQuery,
   useAvailableFspsForDeliveryMechanismsQuery,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { associatedWith, isNot } from '../../../utils/utils';
 import { BaseSection } from '../../core/BaseSection';
 import { ErrorButton } from '../../core/ErrorButton';
 import { LoadingComponent } from '../../core/LoadingComponent';
+import { UniversalCriteriaPlainComponent } from '../../core/UniversalCriteriaComponent/UniversalCriteriaPlainComponent';
+import { DividerLine } from '../../core/DividerLine';
 
 type Item = {
   id: string;
@@ -39,7 +44,10 @@ export const PaymentInstructionDraggableListItem = ({
 }: PaymentInstructionDraggableListItemProps): ReactElement => {
   const classes = useStyles();
   const { id } = useParams();
+  const [individualData, setIndividualData] = useState(null);
+  const [householdData, setHouseholdData] = useState(null);
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   const {
     data: deliveryMechanismsData,
     loading: deliveryMechanismLoading,
@@ -58,6 +66,27 @@ export const PaymentInstructionDraggableListItem = ({
     },
     fetchPolicy: 'network-only',
   });
+
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+  );
+  useEffect(() => {
+    if (loading) return;
+    const filteredIndividualData = {
+      allFieldsAttributes: data?.allFieldsAttributes
+        ?.filter(associatedWith('Individual'))
+        .filter(isNot('IMAGE')),
+    };
+    setIndividualData(filteredIndividualData);
+
+    const filteredHouseholdData = {
+      allFieldsAttributes: data?.allFieldsAttributes?.filter(
+        associatedWith('Household'),
+      ),
+    };
+    setHouseholdData(filteredHouseholdData);
+  }, [data, loading]);
+
   if (!deliveryMechanismsData || !fspsData) return null;
   if (deliveryMechanismLoading || fspsLoading) return <LoadingComponent />;
 
@@ -65,6 +94,7 @@ export const PaymentInstructionDraggableListItem = ({
     id: item.id,
     deliveryMechanism: '',
     fsp: '',
+    criteria: [],
   };
 
   return (
@@ -82,10 +112,7 @@ export const PaymentInstructionDraggableListItem = ({
           }),
         );
 
-        const computeFspsChoices = (): Array<{
-          name: string;
-          value: string;
-        }> => {
+        const computeFspsChoices = () => {
           if (!values.deliveryMechanism || !fspsData) return [];
 
           const matchedDeliveryMechanism = fspsData.availableFspsForDeliveryMechanisms.find(
@@ -105,7 +132,7 @@ export const PaymentInstructionDraggableListItem = ({
         const buttons = (
           <>
             <Box display='flex' justifyContent='center' alignItems='center'>
-              <Box mr={2}>
+              <Box mr={4}>
                 <ErrorButton
                   variant='outlined'
                   onClick={() => handleDeletePaymentInstruction(item.id)}
@@ -120,47 +147,76 @@ export const PaymentInstructionDraggableListItem = ({
           </>
         );
         return (
-          <Draggable draggableId={item.id} index={index}>
-            {(provided, snapshot) => (
-              <ListItem
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                className={snapshot.isDragging ? classes.draggingListItem : ''}
-              >
-                <BaseSection
-                  title={`Payment Instruction #${item.id}`}
-                  buttons={buttons}
+          <Form>
+            <Draggable draggableId={item.id} index={index}>
+              {(provided, snapshot) => (
+                <ListItem
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  className={
+                    snapshot.isDragging ? classes.draggingListItem : ''
+                  }
                 >
-                  <Grid container>
-                    <Grid item xs={4}>
-                      <Box mr={4}>
-                        <Field
-                          name='deliveryMechanism'
-                          variant='outlined'
-                          label={t('Delivery Mechanism')}
-                          component={FormikSelectField}
-                          additionalOnChange={() => {
-                            setFieldValue('fsp', '');
-                          }}
-                          choices={deliveryMechanismsChoices}
-                        />
+                  <BaseSection
+                    title={`Payment Instruction #${item.id}`}
+                    buttons={buttons}
+                  >
+                    <>
+                      <Box mt={2}>
+                        <Grid container>
+                          <Grid item xs={4}>
+                            <Box mr={4}>
+                              <Field
+                                name='deliveryMechanism'
+                                variant='outlined'
+                                label={t('Delivery Mechanism')}
+                                component={FormikSelectField}
+                                additionalOnChange={() => {
+                                  setFieldValue('fsp', '');
+                                }}
+                                choices={deliveryMechanismsChoices}
+                              />
+                            </Box>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Field
+                              name='fsp'
+                              variant='outlined'
+                              label={t('FSP')}
+                              component={FormikSelectField}
+                              choices={fspsChoices}
+                            />
+                          </Grid>
+                        </Grid>
                       </Box>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Field
-                        name='fsp'
-                        variant='outlined'
-                        label={t('FSP')}
-                        component={FormikSelectField}
-                        choices={fspsChoices}
-                      />
-                    </Grid>
-                  </Grid>
-                </BaseSection>
-              </ListItem>
-            )}
-          </Draggable>
+                      <DividerLine />
+                      <Grid container>
+                        <Box mb={2}>
+                          <FieldArray
+                            name='criteria'
+                            render={(arrayHelpers) => (
+                              <UniversalCriteriaPlainComponent
+                                isEdit
+                                arrayHelpers={arrayHelpers}
+                                rules={values.criteria}
+                                householdFieldsChoices={
+                                  householdData?.allFieldsAttributes || []
+                                }
+                                individualFieldsChoices={
+                                  individualData?.allFieldsAttributes || []
+                                }
+                              />
+                            )}
+                          />
+                        </Box>
+                      </Grid>
+                    </>
+                  </BaseSection>
+                </ListItem>
+              )}
+            </Draggable>
+          </Form>
         );
       }}
     </Formik>

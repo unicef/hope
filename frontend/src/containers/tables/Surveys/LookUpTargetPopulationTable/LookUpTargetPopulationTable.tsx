@@ -9,7 +9,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCells';
 import { LookUpTargetPopulationTableRow } from './LookUpTargetPopulationTableRow';

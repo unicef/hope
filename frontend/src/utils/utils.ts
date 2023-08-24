@@ -959,3 +959,6 @@ export const dateToIsoString = (date: Date, type: DateType): string => {
   }
   throw new Error('Invalid type specified');
 };
+
+export const associatedWith = (type) => (item) => item.associatedWith === type;
+export const isNot = (type) => (item) => item.type !== type;
