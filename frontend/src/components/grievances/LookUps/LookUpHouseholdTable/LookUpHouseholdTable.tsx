@@ -22,6 +22,7 @@ interface LookUpHouseholdTableProps {
   noTableStyling?;
   householdMultiSelect?: boolean;
   redirectedFromRelatedTicket?: boolean;
+  isFeedbackWithHouseholdOnly?: boolean;
 }
 
 const NoTableStyling = styled.div`
@@ -42,6 +43,7 @@ export const LookUpHouseholdTable = ({
   noTableStyling = false,
   householdMultiSelect,
   redirectedFromRelatedTicket,
+  isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
@@ -143,6 +145,7 @@ export const LookUpHouseholdTable = ({
             selected={selected}
             householdMultiSelect={householdMultiSelect}
             redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+            isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
           />
         )}
       />

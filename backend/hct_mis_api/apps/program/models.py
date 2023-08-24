@@ -9,12 +9,15 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -158,6 +161,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def total_number_of_households(self) -> int:
         qs = ExtendedQuerySetSequence(self.paymentplan_set.all(), self.cashplan_set.all())
         return self.get_total_number_of_households_from_payments(qs)
+
+    @property
+    def households_with_tp_in_program(self) -> QuerySet:
+        target_populations_in_program = TargetPopulation.objects.filter(program=self).exclude(
+            status=TargetPopulation.STATUS_OPEN
+        )
+        return Household.objects.filter(target_populations__in=target_populations_in_program).distinct()
 
     @property
     def admin_areas_log(self) -> str:

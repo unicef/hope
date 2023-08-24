@@ -5,13 +5,30 @@ import {
   MenuItem,
   InputLabel,
   Select,
+  IconButton,
+  InputAdornment,
 } from '@material-ui/core';
+import styled from 'styled-components';
 import get from 'lodash/get';
+import { Close } from '@material-ui/icons';
+
+const StartInputAdornment = styled(InputAdornment)`
+  margin-right: 0;
+`;
+const EndInputAdornment = styled(InputAdornment)`
+  margin-right: 10px;
+`;
+
+const XIcon = styled(Close)`
+  color: #707070;
+`;
 
 export const FormikSelectField = ({
   field,
   form,
   multiple,
+  icon = null,
+  disableClearable = false,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -21,6 +38,17 @@ export const FormikSelectField = ({
     ? field.value || otherProps.value || []
     : field.value || otherProps.value || '';
 
+  const checkValue = (v): boolean => {
+    if (Array.isArray(v)) {
+      return v.length > 0;
+    }
+    return Boolean(v);
+  };
+
+  const isValue = checkValue(otherProps.value || field.value);
+
+  const showX = isValue && !disableClearable && !otherProps.disabled;
+
   return (
     <>
       <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
@@ -28,6 +56,12 @@ export const FormikSelectField = ({
         <Select
           {...field}
           {...otherProps}
+          onChange={(e) => {
+            form.setFieldValue(field.name, e.target.value);
+            if (otherProps.additionalOnChange) {
+              otherProps.additionalOnChange();
+            }
+          }}
           name={field.name}
           multiple={multiple}
           value={value}
@@ -38,6 +72,25 @@ export const FormikSelectField = ({
             'data-cy': `select-options-${field.name}`,
             getContentAnchorEl: null,
             MenuListProps: { 'data-cy': 'select-options-container' },
+          }}
+          endAdornment={
+            showX && (
+              <EndInputAdornment position='end'>
+                <IconButton
+                  size='small'
+                  onClick={() => {
+                    form.setFieldValue(field.name, multiple ? [] : '');
+                  }}
+                >
+                  <XIcon fontSize='small' />
+                </IconButton>
+              </EndInputAdornment>
+            )
+          }
+          InputProps={{
+            startAdornment: icon ? (
+              <StartInputAdornment position='start'>{icon}</StartInputAdornment>
+            ) : null,
           }}
         >
           {otherProps.choices.map((each) => (

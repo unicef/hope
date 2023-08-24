@@ -85,9 +85,7 @@ export const ExcludeSection = ({
       initialExcludedIds.length > 0 ? paymentPlan.exclusionReason : '',
   };
   const validationSchema = Yup.object().shape({
-    exclusionReason: Yup.string()
-      .max(500, t('Too long'))
-      .required(t('Exclusion reason is required')),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   const handleSave = async (values): Promise<void> => {
@@ -189,8 +187,7 @@ export const ExcludeSection = ({
     const saveExclusionsDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      excludedIds.length === 0 ||
-      !values.exclusionReason;
+      excludedIds.length === 0;
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -199,7 +196,7 @@ export const ExcludeSection = ({
       return (
         <Box display='flex' alignItems='center' justifyContent='center'>
           <Box mr={2}>
-            <Button variant='text' color='primary' onClick={resetExclusions}>
+            <Button variant='text' color='primary' data-cy='button-cancel-exclusions' onClick={resetExclusions}>
               {t('Cancel')}
             </Button>
           </Box>
@@ -209,6 +206,7 @@ export const ExcludeSection = ({
             color='primary'
             disabled={saveExclusionsDisabled}
             onClick={saveExclusions}
+            data-cy="button-save-exclusions"
           >
             {t('Save')}
           </ButtonTooltip>
@@ -225,6 +223,7 @@ export const ExcludeSection = ({
             setExclusionsOpen(true);
             setEdit(false);
           }}
+          data-cy="button-preview-exclusions"
         >
           {t('Preview Exclusion')}
         </Button>
@@ -246,6 +245,7 @@ export const ExcludeSection = ({
               disabled={editExclusionsDisabled}
               variant='contained'
               onClick={() => setEdit(true)}
+              data-cy="button-edit-exclusions"
             >
               {t('Edit')}
             </ButtonTooltip>
@@ -259,6 +259,7 @@ export const ExcludeSection = ({
         <Button
           variant='contained'
           color='primary'
+          data-cy="button-create-exclusions"
           onClick={() => {
             setExclusionsOpen(true);
             setEdit(true);
@@ -306,6 +307,7 @@ export const ExcludeSection = ({
                 variant='contained'
                 color='primary'
                 disabled={!idsValue || applyDisabled}
+                data-cy="button-apply-exclusions"
                 onClick={() => {
                   handleApply();
                 }}

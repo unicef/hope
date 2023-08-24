@@ -36,14 +36,18 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const {
     data: allTargetPopulationsData,
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
-    variables: { businessArea, paymentPlanApplicable: false },
+    variables: {
+      businessArea,
+      paymentPlanApplicable: false,
+      program: [programId],
+    },
   });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;

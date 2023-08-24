@@ -14,6 +14,7 @@ from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
 from hct_mis_api.apps.grievance.utils import traverse_sibling_tickets
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import (
     UNIQUE,
     UNIQUE_IN_BATCH,
@@ -23,6 +24,9 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
 )
 
 if TYPE_CHECKING:
@@ -162,41 +166,48 @@ def create_needs_adjudication_tickets(
     results_key: str,
     business_area: BusinessArea,
     registration_data_import: Optional[RegistrationDataImport] = None,
-) -> Optional[List[TicketNeedsAdjudicationDetails]]:
+) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
         return None
 
-    ticket_details_to_create = []
+    unique_individuals = set()
+    individuals_to_remove_from_es = set()
     for possible_duplicate in individuals_queryset:
-        linked_tickets = []
         possible_duplicates = []
 
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
-            duplicate = Individual.objects.filter(id=individual.get("hit_id")).first()
-            if not duplicate:
-                continue
+            if duplicate := Individual.objects.filter(id=individual.get("hit_id")).first():
+                possible_duplicates.append(duplicate)
+            else:
+                individuals_to_remove_from_es.add(individual.get("hit_id"))
 
-            possible_duplicates.append(duplicate)
+        if possible_duplicates:
+            ticket, ticket_details = create_grievance_ticket_with_details(
+                main_individual=possible_duplicate,
+                possible_duplicate=possible_duplicate,  # for backward compatibility
+                business_area=business_area,
+                registration_data_import=registration_data_import,
+                possible_duplicates=possible_duplicates,
+                is_multiple_duplicates_version=True,
+            )
 
-        ticket, ticket_details = create_grievance_ticket_with_details(
-            main_individual=possible_duplicate,
-            possible_duplicate=possible_duplicate,  # for backward compatibility
-            business_area=business_area,
-            registration_data_import=registration_data_import,
-            possible_duplicates=possible_duplicates,
-            is_multiple_duplicates_version=True,
-        )
+            linked_tickets = []
+            if ticket and ticket_details:
+                linked_tickets.append(ticket)
 
-        if ticket and ticket_details:
-            linked_tickets.append(ticket)
-            ticket_details_to_create.append(ticket_details)
+            for ticket in linked_tickets:
+                ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
+        else:
+            unique_individuals.add(possible_duplicate.id)
 
-        for ticket in linked_tickets:
-            ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
-
-    return ticket_details_to_create
+    # Sometimes we have an old records in the Elasticsearch, this will resolve false positive signals if the individual is indeed unique
+    Individual.objects.filter(id__in=unique_individuals).update(
+        deduplication_golden_record_status=UNIQUE, deduplication_golden_record_results={}
+    )
+    doc = get_individual_doc(business_area.slug)
+    remove_elasticsearch_documents_by_matching_ids(list(individuals_to_remove_from_es), doc)
 
 
 def mark_as_duplicate_individual_and_reassign_roles(

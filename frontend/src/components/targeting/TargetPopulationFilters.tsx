@@ -1,12 +1,12 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { Group, Person } from '@material-ui/icons';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TargetPopulationStatus } from '../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
+  dateToIsoString,
   targetPopulationStatusMapping,
 } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
@@ -35,6 +35,7 @@ export const TargetPopulationFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const isAccountability = location.pathname.includes('accountability');
 
   const {
     handleFilterChange,
@@ -58,6 +59,10 @@ export const TargetPopulationFilters = ({
     clearFilter();
   };
 
+  const preparedStatusChoices = isAccountability
+    ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
+    : Object.values(TargetPopulationStatus);
+
   const renderTable = (): React.ReactElement => (
     <>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -79,37 +84,34 @@ export const TargetPopulationFilters = ({
             fullWidth
             data-cy='filters-status'
           >
-            <MenuItem value=''>None</MenuItem>
-            {Object.values(TargetPopulationStatus)
-              .sort()
-              .map((key) => (
-                <MenuItem key={key} value={key}>
-                  {targetPopulationStatusMapping(key)}
-                </MenuItem>
-              ))}
+            {preparedStatusChoices.sort().map((key) => (
+              <MenuItem key={key} value={key}>
+                {targetPopulationStatusMapping(key)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Number of Households')}
-            value={filter.numIndividualsMin}
+            value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
             onChange={(e) =>
-              handleFilterChange('numIndividualsMin', e.target.value)
+              handleFilterChange('totalHouseholdsCountMin', e.target.value)
             }
             icon={<Group />}
-            data-cy='filters-num-individuals-min'
+            data-cy='filters-total-households-count-min'
           />
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            value={filter.numIndividualsMax}
+            value={filter.totalHouseholdsCountMax}
             placeholder={t('To')}
             onChange={(e) =>
-              handleFilterChange('numIndividualsMax', e.target.value)
+              handleFilterChange('totalHouseholdsCountMax', e.target.value)
             }
             icon={<Group />}
-            data-cy='filters-num-individuals-max'
+            data-cy='filters-total-households-count-max'
           />
         </Grid>
         <Grid item xs={3}>
@@ -119,7 +121,7 @@ export const TargetPopulationFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMin',
-                moment(date).format('YYYY-MM-DD'),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdAtRangeMin}
@@ -131,7 +133,7 @@ export const TargetPopulationFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMax',
-                moment(date).format('YYYY-MM-DD'),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.createdAtRangeMax}
