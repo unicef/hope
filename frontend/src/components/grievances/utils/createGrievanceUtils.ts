@@ -337,8 +337,14 @@ export function prepareVariables(businessArea, values) {
     language: values.language,
     admin: values?.admin?.node?.pCode,
     area: values.area,
-    priority: values.priority === 'Not set' ? 0 : values.priority,
-    urgency: values.urgency === 'Not set' ? 0 : values.urgency,
+    priority:
+      values.priority === 'Not set' || values.priority === null
+        ? 0
+        : values.priority,
+    urgency:
+      values.urgency === 'Not set' || values.urgency === null
+        ? 0
+        : values.urgency,
     partner: values.partner,
     comments: values.comments,
     programme: values.programme,

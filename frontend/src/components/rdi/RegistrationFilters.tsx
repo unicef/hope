@@ -1,18 +1,20 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 
 interface RegistrationFiltersProps {
   filter;
@@ -93,9 +95,6 @@ export const RegistrationFilters = ({
               onChange={(e) => handleFilterChange('status', e.target.value)}
               data-cy='filter-status'
             >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
               {registrationChoicesData.registrationDataStatusChoices.map(
                 (item) => {
                   return (
@@ -110,7 +109,7 @@ export const RegistrationFilters = ({
           <Grid item xs={3}>
             <NumberTextField
               id='minFilter'
-              topLabel={t('Household Size')}
+              topLabel={t('Num. of Households')}
               value={filter.sizeMin}
               placeholder='From'
               icon={<GroupIcon />}
@@ -135,7 +134,7 @@ export const RegistrationFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'importDateRangeMin',
-                  moment(date).format('YYYY-MM-DD'),
+                  dateToIsoString(date, 'startOfDay'),
                 )
               }
               value={filter.importDateRangeMin}
@@ -148,7 +147,7 @@ export const RegistrationFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'importDateRangeMax',
-                  moment(date).format('YYYY-MM-DD'),
+                  dateToIsoString(date, 'endOfDay'),
                 )
               }
               value={filter.importDateRangeMax}

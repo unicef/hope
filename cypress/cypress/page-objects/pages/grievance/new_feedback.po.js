@@ -6,11 +6,13 @@ export default class NewFeedback extends BaseComponent {
   labelCategory = 'div[data-cy="label-Category"]';
   selectIssueType = 'div[data-cy="select-issueType"]';
   issueType = 'div[data-cy="label-Issue Type"]';
+  inputIssueType = 'div[data-cy="input-issue-type"]';
   buttonCancel = 'a[data-cy="button-cancel"]';
   buttonBack = 'button[data-cy="button-back"]';
   buttonNext = 'button[data-cy="button-submit"]';
   option = 'li[role="option"]';
   householdTableRow = 'tr[data-cy="household-table-row"]';
+  individualTableRow = 'tr[data-cy="individual-table-row"';
   lookUpTabs = 'button[role="tab"]';
   receivedConsent = 'span[data-cy="input-consent"]';
   description = 'textarea[data-cy="input-description"]';
@@ -35,8 +37,11 @@ export default class NewFeedback extends BaseComponent {
   getHouseholdTab = () =>
     cy.get(this.lookUpTabs).contains(this.textLookUpHousehold);
   getLookUpIndividual = () =>
-    cy.get(this.lookUpTabs).contains(this.textLookUpHousehold);
+    cy.get(this.lookUpTabs).contains(this.textLookUpIndividual);
   getHouseholdTableRows = (number) => cy.get(this.householdTableRow).eq(number);
+  getIndividualTableRow = (number) =>
+    cy.get(this.individualTableRow).eq(number);
+
   getReceivedConsent = () => cy.get(this.receivedConsent);
   getDescription = () => cy.get(this.description);
   getComments = () => cy.get(this.comments);
@@ -44,6 +49,7 @@ export default class NewFeedback extends BaseComponent {
   getInputArea = () => cy.get(this.inputArea);
   getAdminAreaAutocomplete = () => cy.get(this.adminAreaAutocomplete);
   getIssueType = () => cy.get(this.issueType);
+  getInputIssueType = () => cy.get(this.inputIssueType);
 
   checkElementsOnPage() {
     this.getTitlePage().contains(this.textTitle);

@@ -1,6 +1,5 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
+import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
@@ -17,14 +17,16 @@ import {
   GrievanceTypes,
   ISSUE_TYPE_CATEGORIES,
 } from '../../../utils/constants';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface GrievancesFiltersProps {
   filter;
@@ -88,18 +90,27 @@ export const GrievancesFilters = ({
     filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
     filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
-  const preparedStatusChoices = useMemo(() => {
-    //No status NEW for user generated grievances
-    if (
-      filter.grievanceType ===
-      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
-    ) {
-      return choicesData.grievanceTicketStatusChoices.filter(
-        (item) => item.name !== 'New',
-      );
-    }
-    return choicesData.grievanceTicketStatusChoices;
-  }, [choicesData, filter.grievanceType]);
+  const updatedPriorityChoices = useMemo(() => {
+    const priorityChoices = choicesData.grievanceTicketPriorityChoices;
+    return priorityChoices.map((item) => {
+      if (item.value === 0) {
+        return { ...item, value: 'Not Set' };
+      }
+      return item;
+    });
+  }, [choicesData.grievanceTicketPriorityChoices]);
+
+  const updatedUrgencyChoices = useMemo(() => {
+    const urgencyChoices = choicesData.grievanceTicketUrgencyChoices;
+    return urgencyChoices
+      .map((item) => {
+        if (item.value === 0) {
+          return { ...item, value: 'Not Set' };
+        }
+        return item;
+      })
+      .reverse();
+  }, [choicesData.grievanceTicketUrgencyChoices]);
 
   return (
     <ContainerWithBorder>
@@ -117,7 +128,7 @@ export const GrievancesFilters = ({
           <Grid container item xs={4}>
             <SelectFilter
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={undefined}
+              label='Search Type'
               value={filter.searchType}
               borderRadius='0px 4px 4px 0px'
               data-cy='filters-search-type'
@@ -141,10 +152,7 @@ export const GrievancesFilters = ({
             fullWidth
             data-cy='filters-status'
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
-            {preparedStatusChoices.map((item) => (
+            {choicesData.grievanceTicketStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
@@ -168,9 +176,7 @@ export const GrievancesFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMin',
-                moment(date)
-                  .set({ hour: 0, minute: 0 })
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdAtRangeMin}
@@ -184,9 +190,7 @@ export const GrievancesFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdAtRangeMax',
-                moment(date)
-                  .set({ hour: 23, minute: 59 })
-                  .toISOString(),
+                dateToIsoString(date, 'endOfDay'),
               )
             }
             value={filter.createdAtRangeMax}
@@ -202,9 +206,6 @@ export const GrievancesFilters = ({
             fullWidth
             data-cy='filters-category'
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {categoryChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -222,9 +223,6 @@ export const GrievancesFilters = ({
               value={filter.issueType}
               fullWidth
             >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
               {issueTypeDict[
                 GRIEVANCE_CATEGORIES[
                   filter.category.replace(/\s/g, '_').toUpperCase()
@@ -332,10 +330,7 @@ export const GrievancesFilters = ({
             data-cy='filters-priority'
             fullWidth
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
-            {choicesData.grievanceTicketPriorityChoices.map((item) => {
+            {updatedPriorityChoices?.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -352,10 +347,7 @@ export const GrievancesFilters = ({
             data-cy='filters-urgency'
             fullWidth
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
-            {choicesData.grievanceTicketUrgencyChoices.map((item) => {
+            {updatedUrgencyChoices?.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -372,6 +364,7 @@ export const GrievancesFilters = ({
             label={undefined}
             value={filter.grievanceStatus}
             fullWidth
+            disableClearable
             data-cy='filters-active-tickets'
           >
             <MenuItem value={GrievanceStatuses.Active}>
