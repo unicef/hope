@@ -1,4 +1,4 @@
-import json
+import logging
 import re
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List
 
@@ -44,6 +44,8 @@ from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 def _prepare_kobo_asset_id_value(code: str) -> str:
@@ -262,32 +264,27 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
         return qs.filter(Q(id__in=es_ids)).distinct()
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        if value.upper().startswith("IND-"):
-            return qs.filter(unicef_id__istartswith=value)
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
     def _search_db(self, qs: QuerySet, value: str) -> QuerySet:
-        if re.match(r"([\"\']).+\1", value):
-            values = [value.replace('"', "").strip()]
-        else:
-            values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            inner_query = Q(household__admin_area__name__istartswith=value)
-            inner_query |= Q(unicef_id__istartswith=value)
-            inner_query |= Q(unicef_id__iendswith=value)
-            inner_query |= Q(household__unicef_id__istartswith=value)
-            inner_query |= Q(full_name__istartswith=value)
-            inner_query |= Q(given_name__istartswith=value)
-            inner_query |= Q(middle_name__istartswith=value)
-            inner_query |= Q(family_name__istartswith=value)
-            inner_query |= Q(documents__document_number__istartswith=value)
-            inner_query |= Q(phone_no__istartswith=value)
-            inner_query |= Q(phone_no_alternative__istartswith=value)
-            q_obj &= inner_query
-        return qs.filter(q_obj).distinct()
+        try:
+            key, value = tuple(value.split(" ", 1))
+        except ValueError:
+            logger.info("Search term cannot be empty string or space")
+            return qs.none()
+
+        value = value.strip()
+        if key == "individual_id":
+            return qs.filter(unicef_id__icontains=value)
+        if key == "household_id":
+            return qs.filter(household__unicef_id__icontains=value)
+        if key == "full_name":
+            return qs.filter(full_name__icontains=value)
+        if key in ["national_id", "national_passport"]:
+            return qs.filter(documents__type__key=key, documents__document_number__icontains=value)
+        raise KeyError(f"Invalid search key '{key}'")
 
     def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()
@@ -305,73 +302,90 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
 
 
 def get_elasticsearch_query_for_individuals(value: str, business_area: "BusinessArea") -> Dict:
-    match_fields = [
-        "phone_no_text",
-        "phone_no_alternative",
-        "documents.number",
-        "admin1",
-        "admin2",
-    ]
-    prefix_fields = [
-        "middle_name",
-        "unicef_id",
-        "household.unicef_id",
-        "phone_no_text",
-    ]
-    wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
+    try:
+        key, search = tuple(value.split(" ", 1))
+    except ValueError as e:
+        logger.info("Search term cannot be empty string or space")
+        raise ValueError("Search value should have following format 'searchType searchTerm'") from e
 
-    match_queries: Iterable = [
-        {
-            "match": {
-                x: {
-                    "query": value,
-                }
-            }
-        }
-        for x in match_fields
-    ]
-    prefix_queries: Iterable = [
-        {
-            "match_phrase_prefix": {
-                x: {
-                    "query": value,
-                }
-            }
-        }
-        for x in prefix_fields
-    ]
-    wildcard_queries: Iterable = [
-        {
-            "wildcard": {
-                x: {
-                    "value": f"*{value}",
-                }
-            }
-        }
-        for x in wildcard_fields
-    ]
     all_queries: List = []
-    all_queries.extend(wildcard_queries)
-    all_queries.extend(prefix_queries)
-    all_queries.extend(match_queries)
 
-    values = value.split(" ")
-    if len(values) == 2:
+    if key == "individual_id":
+        all_queries.append({"match_phrase_prefix": {"unicef_id": {"query": search}}})
+    elif key == "household_id":
+        all_queries.append({"match_phrase_prefix": {"household.unicef_id": {"query": search}}})
+    elif key == "full_name":
+        values = search.split(" ")
+        if len(values) == 2:
+            all_queries.append(
+                {
+                    "bool": {
+                        "must": [
+                            {
+                                "match_phrase_prefix": {
+                                    "given_name": {
+                                        "query": values[0],
+                                    }
+                                }
+                            },
+                            {
+                                "match_phrase_prefix": {
+                                    "family_name": {
+                                        "query": values[1],
+                                    }
+                                }
+                            },
+                        ],
+                    },
+                }
+            )
+        elif len(values) == 1:
+            all_queries.append(
+                {
+                    "match_phrase_prefix": {
+                        "given_name": {
+                            "query": search,
+                            "boost": 1.1,
+                        }
+                    }
+                }
+            )
+            all_queries.append(
+                {
+                    "match_phrase_prefix": {
+                        "family_name": {
+                            "query": search,
+                            "boost": 1.1,
+                        }
+                    }
+                },
+            )
+        else:
+            all_queries.append(
+                {
+                    "match_phrase_prefix": {
+                        "full_name": {
+                            "query": search,
+                        }
+                    }
+                },
+            )
+    elif key in ["national_id", "national_passport"]:
         all_queries.append(
             {
                 "bool": {
                     "must": [
                         {
-                            "match_phrase_prefix": {
-                                "given_name": {
-                                    "query": values[0],
+                            "match": {
+                                "documents.number": {
+                                    "query": search,
                                 }
                             }
                         },
                         {
-                            "match_phrase_prefix": {
-                                "family_name": {
-                                    "query": values[1],
+                            "match": {
+                                "documents.key": {
+                                    "query": key,
                                 }
                             }
                         },
@@ -379,39 +393,10 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
                 },
             }
         )
-    elif len(values) == 1:
-        all_queries.append(
-            {
-                "match_phrase_prefix": {
-                    "given_name": {
-                        "query": value,
-                        "boost": 1.1,
-                    }
-                }
-            }
-        )
-        all_queries.append(
-            {
-                "match_phrase_prefix": {
-                    "family_name": {
-                        "query": value,
-                        "boost": 1.1,
-                    }
-                }
-            },
-        )
     else:
-        all_queries.append(
-            {
-                "match_phrase_prefix": {
-                    "full_name": {
-                        "query": value,
-                    }
-                }
-            },
-        )
+        raise KeyError(f"Invalid search key '{key}'")
 
-    query = {
+    return {
         "size": "100",
         "_source": False,
         "query": {
@@ -422,8 +407,6 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
             }
         },
     }
-    json.dumps(query)
-    return query
 
 
 def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessArea") -> Dict:

@@ -94,6 +94,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const category = history.location.state?.category;
   const linkedFeedbackId = history.location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
+  const isFeedbackWithHouseholdOnly =
+    history.location.state?.isFeedbackWithHouseholdOnly;
 
   const initialValues = {
     description: '',
@@ -108,8 +110,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     selectedLinkedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
-    priority: 3,
-    urgency: 3,
+    priority: null,
+    urgency: null,
     partner: null,
     program: programId,
     comments: null,
@@ -224,7 +226,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     'Description',
   ];
   // if creating a linked G&F ticket from Feedback page skip Look Up
-  if (linkedFeedbackId) {
+  if (linkedFeedbackId && selectedHousehold && selectedIndividual) {
     steps = ['Category Selection', 'Identity Verification', 'Description'];
   }
 
@@ -264,8 +266,13 @@ export const CreateGrievancePage = (): React.ReactElement => {
         } else {
           setValidateData(false);
           handleNext();
-          // if creating a linked G&F ticket from Feedback page skip Look Up
-          if (activeStep === 0 && linkedFeedbackId) {
+          // if creating a linked G&F ticket from Feedback page and IND and HH selected skip Look Up
+          if (
+            activeStep === 0 &&
+            linkedFeedbackId &&
+            selectedHousehold &&
+            selectedIndividual
+          ) {
             handleNext();
           }
         }
@@ -341,6 +348,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               touched={touched}
                               redirectedFromRelatedTicket={
                                 redirectedFromRelatedTicket
+                              }
+                              isFeedbackWithHouseholdOnly={
+                                isFeedbackWithHouseholdOnly
                               }
                             />
                           </Box>

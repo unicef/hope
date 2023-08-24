@@ -195,7 +195,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     phone_no_alternative = graphene.String()
     email = graphene.String()
     relationship = graphene.String(required=True)
-    disability = graphene.Boolean()
+    disability = graphene.String()
     work_status = graphene.String()
     enrolled_in_nutrition_programme = graphene.Boolean()
     administration_of_rutf = graphene.Boolean()

@@ -85,9 +85,7 @@ export const ExcludeSection = ({
       initialExcludedIds.length > 0 ? paymentPlan.exclusionReason : '',
   };
   const validationSchema = Yup.object().shape({
-    exclusionReason: Yup.string()
-      .max(500, t('Too long'))
-      .required(t('Exclusion reason is required')),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   const handleSave = async (values): Promise<void> => {
@@ -189,8 +187,7 @@ export const ExcludeSection = ({
     const saveExclusionsDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      excludedIds.length === 0 ||
-      !values.exclusionReason;
+      excludedIds.length === 0;
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;

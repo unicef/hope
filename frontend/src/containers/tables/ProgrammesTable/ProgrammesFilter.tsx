@@ -4,12 +4,12 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
+import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
+import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { createHandleApplyFilterChange } from '../../../utils/utils';
 
 interface ProgrammesFilterProps {
@@ -71,9 +71,6 @@ export const ProgrammesFilters = ({
             value={filter.status}
             data-cy='filters-status'
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.programStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -111,9 +108,6 @@ export const ProgrammesFilters = ({
             value={filter.sector}
             multiple
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.programSectorChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
