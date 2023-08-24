@@ -39,6 +39,7 @@ urlpatterns = [
     ),
     path("areas/", endpoints.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.AreaTypeList().as_view(), name="areatype-list"),
+    path("constance/", endpoints.ConstanceSettingsAPIView().as_view(), name="constance-list"),
     path("lookups/document/", endpoints.DocumentType().as_view(), name="document-list"),
     path("lookups/country/", endpoints.Country().as_view(), name="country-list"),
     path("lookups/residencestatus/", endpoints.ResidenceStatus().as_view(), name="residencestatus-list"),

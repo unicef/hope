@@ -8,7 +8,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -43,12 +42,15 @@ export const TargetPopulationTable = ({
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
-    numberOfHouseholdsMin: filter.numIndividualsMin,
-    numberOfHouseholdsMax: filter.numIndividualsMax,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin,
+    totalHouseholdsCountMax: filter.totalHouseholdsCountMax,
     status: filter.status,
     businessArea,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
-    program: decodeIdString(programId),
+    program: [programId],
+    createdAtRange: JSON.stringify({
+      min: filter.createdAtRangeMin,
+      max: filter.createdAtRangeMax,
+    }),
   };
   const handleRadioChange = (id: string): void => {
     handleChange(id);
