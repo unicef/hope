@@ -60,5 +60,8 @@ stages:
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
+                postgresql.auth.username=$(DEV_POSTGRES_USERNAME),\
+                postgresql.auth.password=$(DEV_POSTGRES_PASSWORD),\
+                postgresql.auth.host=$(DEV_DATABASE_HOST),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY)"
 

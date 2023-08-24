@@ -47,7 +47,7 @@ export const TargetPopulationAutocomplete = ({
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
 
   const [
     loadData,
@@ -58,6 +58,7 @@ export const TargetPopulationAutocomplete = ({
       first: 20,
       orderBy: 'name',
       name: debouncedInputText,
+      program: [programId],
     },
   });
 

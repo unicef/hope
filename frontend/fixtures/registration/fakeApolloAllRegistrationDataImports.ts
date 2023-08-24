@@ -6,7 +6,6 @@ export const fakeApolloAllRegistrationDataImports = [
     request: {
       query: AllRegistrationDataImportsDocument,
       variables: {
-        importDate: null,
         businessArea: 'afghanistan',
         importDateRange: '{}',
         program:

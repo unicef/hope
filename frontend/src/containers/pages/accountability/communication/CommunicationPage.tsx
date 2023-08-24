@@ -17,7 +17,7 @@ import { CommunicationTable } from '../../../tables/Communication/CommunicationT
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const CommunicationPage = (): React.ReactElement => {
-  const { baseUrl, programId } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();

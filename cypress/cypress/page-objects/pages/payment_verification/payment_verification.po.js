@@ -25,11 +25,11 @@ export default class PaymentVerification extends BaseComponent {
   textModality = "Modality";
   textStartDate = "Start Date";
   textEndDate = "End Date";
-  textProgramme = "Programme";
   textPaymentPlanID = "Payment Plan ID";
   textVerificationStatus = "Verification Status";
   textCashAmount = "Cash Amount";
   textTimeframe = "Timeframe";
+  textColumnProgramme = "Programme";
   textLastModifiedDate = "Last Modified Date";
 
   // Elements

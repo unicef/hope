@@ -1,17 +1,17 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import moment from 'moment';
+import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
 
 interface SurveysFiltersProps {
   filter;
@@ -94,9 +94,7 @@ export const SurveysFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'createdAtRangeMin',
-                  moment(date)
-                    .startOf('day')
-                    .toISOString(),
+                  dateToIsoString(date, 'startOfDay'),
                 )
               }
               value={filter.createdAtRangeMin}
@@ -108,9 +106,7 @@ export const SurveysFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'createdAtRangeMax',
-                  moment(date)
-                    .endOf('day')
-                    .toISOString(),
+                  dateToIsoString(date, 'endOfDay'),
                 )
               }
               value={filter.createdAtRangeMax}
