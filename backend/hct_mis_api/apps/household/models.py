@@ -386,6 +386,7 @@ class Household(
         HouseholdCollection,
         related_name="households",
         on_delete=models.CASCADE,
+        null=True,
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
     withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -827,6 +828,7 @@ class Individual(
         IndividualCollection,
         related_name="individuals",
         on_delete=models.CASCADE,
+        null=True,
     )
     duplicate = models.BooleanField(default=False, db_index=True)
     duplicate_date = models.DateTimeField(null=True, blank=True)
