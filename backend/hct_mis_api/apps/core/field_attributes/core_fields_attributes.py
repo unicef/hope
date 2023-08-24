@@ -46,6 +46,26 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
+from hct_mis_api.apps.core.field_attributes.lookup_functions import (
+    get_birth_certificate_issuer,
+    get_birth_certificate_no,
+    get_drivers_license_issuer,
+    get_drivers_license_no,
+    get_electoral_card_issuer,
+    get_electoral_card_no,
+    get_national_id_issuer,
+    get_national_id_no,
+    get_national_passport_issuer,
+    get_national_passport_no,
+    get_other_id_no,
+    get_scope_id_issuer,
+    get_scope_id_no,
+    get_tax_id_issuer,
+    get_tax_id_no,
+    get_unhcr_id_issuer,
+    get_unhcr_id_no,
+    get_other_id_issuer,
+)
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
 )
@@ -550,6 +570,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_certificate_no_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_birth_certificate_no,
     },
     {
         "id": "0d8bc4b6-c2c7-4b8b-ab64-cd2e80b70717",
@@ -565,6 +586,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_certificate_issuer_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_birth_certificate_issuer,
     },
     {
         "id": "12ceb917-8942-4cb6-a9d0-6a97a097258a",
@@ -592,6 +614,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_no_i_c",
         "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
+        "lookup_function": get_tax_id_no,
     },
     {
         "id": "762cb2a8-b05a-47dc-81da-c71e4b1fd68f",
@@ -606,6 +629,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_issuer_i_c",
         "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
+        "lookup_function": get_tax_id_issuer,
     },
     {
         "id": "d0e84bc0-9ac5-4c5b-bbdc-0644f5349d53",
@@ -633,6 +657,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "drivers_license_no_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_drivers_license_no,
     },
     {
         "id": "00b95153-976e-4653-b9a8-843d513df873",
@@ -648,6 +673,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "drivers_license_issuer_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_drivers_license_issuer,
     },
     {
         "id": "7e6a41c5-0fbd-4f99-98ba-2c6a7da8dbe4",
@@ -675,6 +701,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "electoral_card_no_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_electoral_card_no,
     },
     {
         "id": "acca5a63-538a-47d1-b343-da22a86783b0",
@@ -690,6 +717,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "electoral_card_issuer_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_electoral_card_issuer,
     },
     {
         "id": "ffb6a487-a806-47d6-a12f-fe3c6c516976",
@@ -717,6 +745,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "unhcr_id_no_i_c",
         "get_query": get_unhcr_id_number_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_unhcr_id_no,
     },
     {
         "id": "801bdd67-d27d-4afa-9d23-823e1c8d1313",
@@ -732,6 +761,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "unhcr_id_issuer_i_c",
         "get_query": get_unhcr_id_issuer_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_unhcr_id_issuer,
     },
     {
         "id": "2f9ca147-afde-4311-9d61-e906a8ef2334",
@@ -759,6 +789,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_passport_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_national_passport_no,
     },
     {
         "id": "3da62c17-66ee-4c08-adbf-74402f31dce2",
@@ -774,6 +805,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_passport_issuer_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_national_passport_issuer,
     },
     {
         "id": "234a1b5b-7900-4f67-86a9-5fcaede3d09d",
@@ -801,6 +833,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_id_no_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_national_id_no,
     },
     {
         "id": "2bd255a7-1273-4a52-930f-6660573b2743",
@@ -816,6 +849,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_id_issuer_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_national_id_issuer,
     },
     {
         "id": "d43304d9-91e4-4317-9356-f7066b898b16",
@@ -843,6 +877,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "scope_id_no_i_c",
         "get_query": get_scope_id_number_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_scope_id_no,
     },
     {
         "id": "638a6383-6e87-4c4f-842c-6c5433599267",
@@ -858,6 +893,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "scope_id_issuer_i_c",
         "get_query": get_scope_id_issuer_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_scope_id_issuer,
     },
     {
         "id": "4aa3d595-131a-48df-8752-ec171eabe3be",
@@ -898,6 +934,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_no_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_other_id_no,
     },
     {
         "id": "cd181a09-f4c5-4a47-8713-25bdc4a64058",
@@ -913,6 +950,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_issuer_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "lookup_function": get_other_id_issuer,
     },
     {
         "id": "d4279a74-377f-4f74-baf2-e1ebd001ec5c",

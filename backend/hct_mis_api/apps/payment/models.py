@@ -965,6 +965,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         lookup = attr["lookup"]
         lookup = lookup.replace("__", ".")
         if attr["associated_with"] == _INDIVIDUAL:
+            if lookup_function := attr.get("lookup_function"):
+                return lookup_function(collector)
             return nested_getattr(collector, lookup, None)
         if attr["associated_with"] == _HOUSEHOLD:
             if core_field_name in {"admin1", "admin2", "admin3", "admin4"}:
