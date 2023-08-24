@@ -50,6 +50,9 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         )
         program.full_clean()
         program.save()
+        raise Exception("sddsasdadsds")
+
+
         ProgramCycle.objects.create(
             program=program,
             start_date=program.start_date,
