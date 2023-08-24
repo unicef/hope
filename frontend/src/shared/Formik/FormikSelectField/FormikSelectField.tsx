@@ -28,6 +28,12 @@ export const FormikSelectField = ({
         <Select
           {...field}
           {...otherProps}
+          onChange={(e) => {
+            form.setFieldValue(field.name, e.target.value);
+            if (otherProps.additionalOnChange) {
+              otherProps.additionalOnChange();
+            }
+          }}
           name={field.name}
           multiple={multiple}
           value={value}

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useHouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { CommunicationTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
@@ -35,7 +34,6 @@ export const LookUpSelection = ({
   setSelectedTab;
 }): React.ReactElement => {
   const location = useLocation();
-  const { programId } = useBaseUrl();
 
   const initialFilterRDI = {
     search: '',

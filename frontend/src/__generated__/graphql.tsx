@@ -831,6 +831,7 @@ export type CommunicationMessageNode = Node & {
   fullListArguments?: Maybe<Scalars['JSONString']>,
   randomSamplingArguments?: Maybe<Scalars['JSONString']>,
   sampleSize: Scalars['Int'],
+  program?: Maybe<ProgramNode>,
 };
 
 
@@ -4951,6 +4952,7 @@ export type ProgramNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   activityLogs: PaymentVerificationLogEntryNodeConnection,
+  messages: CommunicationMessageNodeConnection,
   feedbackSet: FeedbackNodeConnection,
   surveys: SurveyNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -5089,6 +5091,15 @@ export type ProgramNodeReportsArgs = {
 
 
 export type ProgramNodeActivityLogsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeMessagesArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -28681,6 +28692,7 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type CommunicationMessageNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNodeConnection'] = ResolversParentTypes['CommunicationMessageNodeConnection']> = {
@@ -30460,6 +30472,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeActivityLogsArgs>,
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, ProgramNodeMessagesArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, ProgramNodeFeedbackSetArgs>,
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, ProgramNodeSurveysArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,

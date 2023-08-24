@@ -8,7 +8,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -48,7 +47,7 @@ export const TargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    program: decodeIdString(programId),
+    program: programId,
   };
   const handleRadioChange = (id: string): void => {
     handleChange(id);
