@@ -4,7 +4,8 @@ export const fakeCashPlan = {
   id: 'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
   updatedAt: '2022-02-16T10:53:05.636703',
   businessArea: {
-    id: 'QnVzaW5lc3NBcmVOb2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
+    id:
+      'QnVzaW5lc3NBcmVOb2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
     name: 'Afghanistan',
     slug: 'afghanistan',
   },

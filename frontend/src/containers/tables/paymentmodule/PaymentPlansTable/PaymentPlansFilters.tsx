@@ -5,6 +5,7 @@ import {
   Grid,
   MenuItem,
 } from '@material-ui/core';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -15,10 +16,10 @@ import {
 import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
-import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { SelectFilter } from '../../../../components/core/SelectFilter';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -89,14 +90,13 @@ export const PaymentPlansFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <FlexSelectFilter
+          <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant='outlined'
             label={t('Status')}
             multiple
             value={filter.status}
             fullWidth
-            autoWidth
           >
             {statusChoicesData.paymentPlanStatusChoices.map((item) => {
               return (
@@ -105,7 +105,7 @@ export const PaymentPlansFilters = ({
                 </MenuItem>
               );
             })}
-          </FlexSelectFilter>
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
@@ -140,17 +140,17 @@ export const PaymentPlansFilters = ({
             onChange={(date) => {
               if (
                 filter.dispersionEndDate &&
-                date.isAfter(filter.dispersionEndDate)
+                moment(date).isAfter(filter.dispersionEndDate)
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
-                  date.format('YYYY-MM-DD'),
+                  moment(date).format('YYYY-MM-DD'),
                 );
                 handleFilterChange('dispersionEndDate', undefined);
               } else {
                 handleFilterChange(
                   'dispersionStartDate',
-                  date.format('YYYY-MM-DD'),
+                  moment(date).format('YYYY-MM-DD'),
                 );
               }
             }}
@@ -161,7 +161,10 @@ export const PaymentPlansFilters = ({
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
-              handleFilterChange('dispersionEndDate', date.format('YYYY-MM-DD'))
+              handleFilterChange(
+                'dispersionEndDate',
+                moment(date).format('YYYY-MM-DD'),
+              )
             }
             value={filter.dispersionEndDate}
             minDate={filter.dispersionStartDate}

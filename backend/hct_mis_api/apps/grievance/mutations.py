@@ -949,6 +949,10 @@ class DeleteHouseholdApproveMutation(PermissionMutation):
             reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
             if reason_hh_obj.withdrawn:
                 raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
+            if reason_hh_obj == ticket_details.household:
+                raise ValidationError(
+                    f"The provided household {reason_hh_obj.unicef_id} is the same as the one being withdrawn."
+                )
 
         # update reason_household value
         ticket_details.reason_household = reason_hh_obj  # set HH or None
