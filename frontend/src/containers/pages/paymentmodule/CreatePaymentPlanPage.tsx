@@ -23,14 +23,18 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const {
     data: allTargetPopulationsData,
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
-    variables: { businessArea, paymentPlanApplicable: true },
+    variables: {
+      businessArea,
+      paymentPlanApplicable: true,
+      program: [programId],
+    },
     fetchPolicy: 'network-only',
   });
 

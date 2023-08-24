@@ -3,10 +3,10 @@
 exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-ifAKCX lpinpR MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-gzVnrw fGlstP MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-bxivhb jsIVNl"
+      class="sc-bZQynM ghLfwz"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -15,13 +15,13 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-htpNat eMBxKf"
+      class="sc-EHOje cfBXHC"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-EHOje YINzU"
+        class="MuiBox-root MuiBox-root-1 sc-htoDjs kKCJWi"
       >
         <div
-          class="sc-bdVaJa jiAojl"
+          class="sc-bxivhb mHfGh"
         >
           Select Target Population
         </div>
@@ -54,6 +54,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                 choices="[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
                 data-cy="input-target-population"
+                inputprops="[object Object]"
                 required=""
               >
                 <div
