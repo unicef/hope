@@ -18,6 +18,7 @@ export const PROGRAM_QUERY = gql`
       scope
       sector
       totalNumberOfHouseholds
+      totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
       individualDataNeeded
       version

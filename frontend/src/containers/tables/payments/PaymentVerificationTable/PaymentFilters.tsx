@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
-import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
@@ -13,7 +12,10 @@ import { ContainerWithBorder } from '../../../../components/core/ContainerWithBo
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../../utils/utils';
 
 interface PaymentFiltersProps {
   filter;
@@ -115,9 +117,6 @@ export const PaymentFilters = ({
             fullWidth
             icon={<MonetizationOnIcon />}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {statusChoicesData.paymentRecordDeliveryTypeChoices.map((item) => (
               <MenuItem key={item.name} value={item.value}>
                 {item.name}
@@ -133,9 +132,7 @@ export const PaymentFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
-                moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.startDate}
@@ -147,12 +144,7 @@ export const PaymentFilters = ({
             fullWidth
             data-cy='filter-end-date'
             onChange={(date) =>
-              handleFilterChange(
-                'endDate',
-                moment(date)
-                  .endOf('day')
-                  .toISOString(),
-              )
+              handleFilterChange('endDate', dateToIsoString(date, 'endOfDay'))
             }
             value={filter.endDate}
           />
@@ -166,9 +158,6 @@ export const PaymentFilters = ({
             value={filter.program}
             icon={<FlashOnIcon />}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}

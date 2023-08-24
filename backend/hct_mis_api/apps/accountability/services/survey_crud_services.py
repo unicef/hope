@@ -29,7 +29,7 @@ class SurveyCrudServices:
             survey.target_population = obj
         elif program := input_data.get("program"):
             obj = get_object_or_404(Program, id=decode_id_string(program))
-            households = Household.objects.filter(target_populations__program=obj)
+            households = obj.households_with_tp_in_program
             survey.program = obj
         else:
             raise ValidationError("Target population or program should be provided.")

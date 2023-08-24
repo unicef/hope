@@ -1,21 +1,23 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import get from 'lodash/get';
-import moment from 'moment';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../../utils/utils';
+import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 
 interface SurveysFiltersProps {
   filter;
@@ -87,9 +89,6 @@ export const SurveysFilters = ({
             icon={<FlashOnIcon />}
             fullWidth
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}
@@ -128,9 +127,7 @@ export const SurveysFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'createdAtRangeMin',
-                  moment(date)
-                    .startOf('day')
-                    .toISOString(),
+                  dateToIsoString(date, 'startOfDay'),
                 )
               }
               value={filter.createdAtRangeMin}
@@ -142,9 +139,7 @@ export const SurveysFilters = ({
               onChange={(date) =>
                 handleFilterChange(
                   'createdAtRangeMax',
-                  moment(date)
-                    .endOf('day')
-                    .toISOString(),
+                  dateToIsoString(date, 'endOfDay'),
                 )
               }
               value={filter.createdAtRangeMax}

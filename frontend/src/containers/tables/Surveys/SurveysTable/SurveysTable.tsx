@@ -28,9 +28,8 @@ export const SurveysTable = ({
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
     createdBy: decodeIdString(filter.createdBy) || '',
-    createdAtRange: filter.createdAtRange
-      ? JSON.stringify(filter.createdAtRange)
-      : '',
+    createdAtRange:
+     JSON.stringify({min: filter.createdAtRangeMin, max: filter.createdAtRangeMax}),
     program: filter.program || '',
   };
   const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);

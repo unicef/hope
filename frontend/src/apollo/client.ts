@@ -145,6 +145,7 @@ export async function getClient(): Promise<
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     storage: localForage,
+    maxSize: false,
   });
   client = new ApolloClient({
     cache,

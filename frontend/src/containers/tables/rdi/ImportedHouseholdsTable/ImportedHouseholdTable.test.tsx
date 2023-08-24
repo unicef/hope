@@ -5,6 +5,7 @@ import wait from 'waait';
 import { ImportedHouseholdTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeApolloAllImportedHouseholds } from '../../../../../fixtures/registration/fakeApolloAllImportedHouseholds';
+import { fakeRegistrationDetailedFragment } from '../../../../../fixtures/registration/fakeRegistrationDetailedFragment';
 
 describe('containers/tables/rdi/ImportedHouseholdTable', () => {
   it('should render with data', async () => {
@@ -12,7 +13,8 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
       <MockedProvider mocks={fakeApolloAllImportedHouseholds}>
         <ImportedHouseholdTable
           businessArea='afghanistan'
-          rdiId='UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl'
+          rdi={fakeRegistrationDetailedFragment}
+          isMerged={false}
         />
       </MockedProvider>,
     );
@@ -29,7 +31,8 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
       >
         <ImportedHouseholdTable
           businessArea='afghanistan'
-          rdiId='UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl'
+          rdi={fakeRegistrationDetailedFragment}
+          isMerged={false}
         />
       </MockedProvider>,
     );

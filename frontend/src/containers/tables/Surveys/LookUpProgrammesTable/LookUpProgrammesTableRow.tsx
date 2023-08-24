@@ -75,7 +75,9 @@ export const LookUpProgrammesTableRow = ({
       <TableCell align='left'>
         {programSectorChoiceDict[program.sector]}
       </TableCell>
-      <TableCell align='right'>{program.totalNumberOfHouseholds}</TableCell>
+      <TableCell align='right'>
+        {program.totalNumberOfHouseholdsWithTpInProgram}
+      </TableCell>
       <TableCell align='right'>{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
