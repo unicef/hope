@@ -186,12 +186,14 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
 
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, program.business_area)
 
+        cls.validate(
+            start_date=program_cycle_data["start_date"],
+            end_date=program_cycle_data.get("end_date"),
+            name=program_cycle_data["name"],
+            program=program,
+        )
+
         new_iteration = program.cycles.order_by("iteration").last().iteration + 1
-        # TODO: add validation name and start and dates
-        # cls.validate(
-        #     start_date=datetime.combine(program_cycle_data["start_date"], datetime.min.time()),
-        #     end_date=datetime.combine(program_cycle_data.get("end_date"), datetime.min.time()),
-        # )
 
         ProgramCycle.objects.create(
             name=program_cycle_data["name"],
@@ -225,7 +227,12 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
 
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
-        # TODO: add validation here dates and name as well
+        cls.validate(
+            start_date=program_cycle_data["start_date"],
+            end_date=program_cycle_data.get("end_date"),
+            name=program_cycle_data["name"],
+            program=program,
+        )
 
         if end_date := program_cycle_data.get("end_date"):
             program_cycle.end_date = end_date
@@ -255,7 +262,7 @@ class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
 
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
-        cls.validate(program=program, program_cycle=program_cycle)
+        cls.validate(program_cycle=program_cycle)
 
         program_cycle.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
