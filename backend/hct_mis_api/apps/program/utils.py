@@ -34,7 +34,7 @@ def create_program_cycle(program: Program) -> None:
         program=program,
         start_date=program.start_date,
         end_date=program.end_date,
-        status=ProgramCycle.ACTIVE,
+        status=ProgramCycle.DRAFT,
     )
 
 

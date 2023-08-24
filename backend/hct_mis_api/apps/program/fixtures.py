@@ -16,7 +16,7 @@ class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
 
-    status = ProgramCycle.ACTIVE
+    status = ProgramCycle.DRAFT
     start_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,

@@ -91,6 +91,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
+        finish_all_program_cycles = False
 
         # status update permissions if status is passed
         status_to_set = program_data.get("status")
@@ -98,12 +99,8 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
             if status_to_set == Program.ACTIVE:
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
-                # TODO: maybe add validation
-                # All Payment Plans and Follow-Up Payment Plans have to be Reconciled.
-                # The Program is in Active status.
-                # To finish a Program Cycle, a user has to finish its Program.
-
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+                finish_all_program_cycles = True
 
         # permission if updating any other fields
         if [k for k, v in program_data.items() if k != "status"]:
@@ -120,6 +117,10 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
                 setattr(program, attrib, value)
         program.full_clean()
         program.save()
+
+        if finish_all_program_cycles:
+            program.cycles.update(status=ProgramCycle.FINISHED)
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 

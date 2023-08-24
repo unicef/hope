@@ -371,6 +371,8 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     )
 
     class Status(models.TextChoices):
+        # all new flow
+        # Open -> Locked -> Entitlements_Saved -> In_Approval -> Approved -> Ongoing -> Reconciled
         PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
