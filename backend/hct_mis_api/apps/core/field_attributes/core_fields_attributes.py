@@ -57,6 +57,7 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_national_id_no,
     get_national_passport_issuer,
     get_national_passport_no,
+    get_other_id_issuer,
     get_other_id_no,
     get_scope_id_issuer,
     get_scope_id_no,
@@ -64,7 +65,6 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_tax_id_no,
     get_unhcr_id_issuer,
     get_unhcr_id_no,
-    get_other_id_issuer,
 )
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
