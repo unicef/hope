@@ -805,6 +805,7 @@ if SENTRY_DSN:
             "PermissionDenied",
             "Http404",
             "AuthCanceled",
+            "TokenNotProvided",
         ],
         environment=env("SENTRY_ENVIRONMENT", default=None),
     )

@@ -27,6 +27,7 @@ def _create_collections(representation_model, collection_model, related_name, bu
         all_representations = representation_model.objects.filter(business_area=business_area).all()
 
         for batch_start in range(0, total_representations, batch_size):
+            logging.info(f"{business_area.name}: {representation_model} batch {batch_start}/{total_representations}")
             batch_end = batch_start + batch_size
             representations = all_representations[batch_start:batch_end]
             _batch_create_collections(representation_model, collection_model, related_name, representations)
@@ -93,22 +94,4 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(create_hh_and_ind_collections, migrations.RunPython.noop),
-        migrations.AlterField(
-            model_name='household',
-            name='household_collection',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name='households',
-                to='household.HouseholdCollection',
-            ),
-        ),
-        migrations.AlterField(
-            model_name='individual',
-            name='individual_collection',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name='individuals',
-                to='household.IndividualCollection',
-            ),
-        ),
     ]
