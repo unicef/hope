@@ -16,7 +16,7 @@ const PaperContainer = styled(Paper)`
 interface BaseSectionProps {
   children: ReactElement;
   buttons?: ReactElement;
-  title: string;
+  title: string | ReactElement;
 }
 
 export const BaseSection = ({
@@ -25,11 +25,14 @@ export const BaseSection = ({
   title,
 }: BaseSectionProps): React.ReactElement => {
   const { t } = useTranslation();
-
   return (
     <PaperContainer>
       <Box display='flex' justifyContent='space-between' alignItems='center'>
-        <Typography variant='h6'>{t(title)}</Typography>
+        {typeof title === 'string' ? (
+          <Typography variant='h6'>{t(title)}</Typography>
+        ) : (
+          title
+        )}
         {buttons}
       </Box>
       {children}
