@@ -70,7 +70,7 @@ export const ProgramForm = ({
     name: Yup.string()
       .required(t('Programme name is required'))
       .min(2, t('Too short'))
-      .max(255, t('Too long')),
+      .max(150, t('Too long')),
     scope: Yup.string()
       .required(t('CashAssist Scope is required'))
       .min(2, t('Too short'))
