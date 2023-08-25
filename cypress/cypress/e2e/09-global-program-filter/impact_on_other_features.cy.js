@@ -11,6 +11,9 @@ let paymentModulePage = new PaymentModule();
 let feedbackPage = new Feedback();
 
 describe("Global Program Filter - Impacts", () => {
+  before(() => {
+    cy.initScenario("init_clear");
+  });
   beforeEach(() => {
     programmesPage.navigateToProgrammePage();
   });
