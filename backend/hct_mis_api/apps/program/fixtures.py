@@ -23,7 +23,7 @@ class ProgramCycleFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(10, 20)))
     name = factory.Faker(
         "sentence",
         nb_words=3,

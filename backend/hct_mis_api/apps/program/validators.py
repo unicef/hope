@@ -63,8 +63,9 @@ class ProgramCycleValidator(CommonValidator):
     @classmethod
     def validate_program_start_end_dates(cls, *args: Any, **kwargs: Any) -> None:
         program = kwargs.get("program")
-        if kwargs.get("start_date") < program.start_date:
-            raise ValidationError("Program Cycle start date can't be earlier then Program start date")
+        if start_date := kwargs.get("start_date"):
+            if start_date < program.start_date:
+                raise ValidationError("Program Cycle start date can't be earlier then Program start date")
         if end_date := kwargs.get("end_date"):
             if end_date > program.end_date:
                 raise ValidationError("Program Cycle end date can't be later then Program end date")
@@ -72,8 +73,9 @@ class ProgramCycleValidator(CommonValidator):
     @classmethod
     def validate_cycles_has_end_date(cls, *args: Any, **kwargs: Any) -> None:
         program = kwargs.get("program")
-        if program.cycles.filter(end_date__isnull=True).exists():
-            raise ValidationError("All Program Cycles should have end date for creation new one.")
+        if kwargs.get("is_create_action"):
+            if program.cycles.filter(end_date__isnull=True).exists():
+                raise ValidationError("All Program Cycles should have end date for creation new one.")
 
     @classmethod
     def validate_timeframes_overlaping(cls, *args: Any, **kwargs: Any) -> None:
