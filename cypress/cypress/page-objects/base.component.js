@@ -28,6 +28,7 @@ export default class BaseComponent {
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
   buttonTargetingText = "Targeting";
+  buttonPaymentModuleText = "Payment Module";
   buttonGrievanceText = "Grievance";
   buttonGrievanceTicketsText = "Grievance Tickets";
   buttonGrievanceDashboardText = "Grievance Dashboard";
@@ -97,6 +98,12 @@ export default class BaseComponent {
 
   clickMenuButtonTargeting() {
     this.getMenuButtonTargeting().contains(this.buttonTargetingText).click();
+  }
+
+  clickMenuButtonPaymentModule() {
+    this.getMenuButtonPaymentModule()
+      .contains(this.buttonPaymentModuleText)
+      .click();
   }
 
   pressEscapeFromElement(element) {
