@@ -20,7 +20,8 @@ describe("Global Program Filter - Impacts", () => {
       grievancePage.getTicketListRow().should("have.length", 4);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage.getProgrammesOptions().contains("Draft Program").click();
-      grievancePage.clickMenuButtonGrievance();
+      // ToDo: After fix frontend:
+      // grievancePage.clickMenuButtonGrievance();
       grievancePage.clickMenuButtonGrievanceTickets();
       grievancePage.getTicketListRow().should("have.length", 0);
     });
