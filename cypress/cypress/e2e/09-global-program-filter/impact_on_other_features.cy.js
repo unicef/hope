@@ -13,6 +13,8 @@ let feedbackPage = new Feedback();
 describe("Global Program Filter - Impacts", () => {
   before(() => {
     cy.initScenario("init_clear");
+    cy.adminLogin();
+    cy.navigateToHomePage();
   });
   beforeEach(() => {
     programmesPage.navigateToProgrammePage();
