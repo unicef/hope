@@ -43,5 +43,5 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label",)
-    list_display = ("label", "key")
-    list_filter = ("label", "key")
+    list_display = ("label", "key", "is_identity_document", "unique_for_individual", "valid_for_deduplication")
+    list_filter = ("label", "key", "is_identity_document", "unique_for_individual", "valid_for_deduplication")
