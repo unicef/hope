@@ -191,6 +191,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
             end_date=program_cycle_data.get("end_date"),
             name=program_cycle_data["name"],
             program=program,
+            is_create_action=True,
         )
 
         new_iteration = program.cycles.order_by("iteration").last().iteration + 1
@@ -228,7 +229,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
         cls.validate(
-            start_date=program_cycle_data["start_date"],
+            start_date=program_cycle_data.get("start_date"),
             end_date=program_cycle_data.get("end_date"),
             name=program_cycle_data["name"],
             program=program,
