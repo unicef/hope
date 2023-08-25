@@ -234,7 +234,7 @@ class ImportDataAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
-    list_display = ("label",)
+    list_display = ("label", "key", "is_identity_document")
     list_filter = ("label", QueryStringFilter)
 
 
