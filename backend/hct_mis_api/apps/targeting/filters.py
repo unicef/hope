@@ -16,6 +16,7 @@ from django_filters import (
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
 
 
-class TargetPopulationFilter(FilterSet):
+class TargetPopulationFilter(GlobalProgramFilter, FilterSet):
     """Query target population records.
 
     Loads associated entries for Households and TargetRules.
