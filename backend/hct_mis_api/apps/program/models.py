@@ -174,7 +174,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return ", ".join(self.admin_areas.all())
 
     class Meta:
-        unique_together = ("name", "business_area")
+        unique_together = ("name", "business_area", "is_removed")
         verbose_name = "Programme"
 
     def __str__(self) -> str:
