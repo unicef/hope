@@ -1,7 +1,8 @@
 from decimal import Decimal
-from typing import Union
+from typing import Union, Optional, Collection
 
 from django.contrib.postgres.fields import CICharField
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -179,6 +180,14 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     def __str__(self) -> str:
         return self.name
+
+    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:
+        try:
+            super(Program, self).validate_unique()
+        except ValidationError:
+            raise ValidationError(
+                f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists"
+            )
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
