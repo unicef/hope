@@ -171,11 +171,11 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
     def test_filtering_feedbacks(self) -> None:
         self.create_new_feedback(
             data=self.create_dummy_correct_input()
-                 | {
-                     "householdLookup": encode_id_base64(self.household.pk, "Household"),
-                     "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
-                     "program": encode_id_base64(self.program.pk, "Program"),
-                 }
+            | {
+                "householdLookup": encode_id_base64(self.household.pk, "Household"),
+                "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
+                "program": encode_id_base64(self.program.pk, "Program"),
+            }
         )
 
         def filter_it(variables: Dict) -> List:
@@ -402,8 +402,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 "user": self.user,
                 "headers": {
                     "Business-Area": self.business_area.slug,
-                    "Program": encode_id_base64(self.program.id, "ProgramNode")
-                }
+                    "Program": encode_id_base64(self.program.id, "ProgramNode"),
+                },
             },
             variables={"orderBy": "issue_type"},
         )
