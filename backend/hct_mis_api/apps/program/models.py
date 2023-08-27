@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Union, Optional, Collection
+from typing import Collection, Optional, Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -181,7 +181,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def __str__(self) -> str:
         return self.name
 
-    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:
+    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:  # type: ignore
         try:
             super(Program, self).validate_unique()
         except ValidationError:
