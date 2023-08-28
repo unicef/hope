@@ -189,7 +189,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.name
 
     def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:  # type: ignore
-        if Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False).exists():
+        query = Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False)
+        if query.exists() and query.first() != self:
             raise ValidationError(
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
