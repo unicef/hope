@@ -1,9 +1,8 @@
 import logging
-from typing import TYPE_CHECKING, Any, List, Union, Optional, Collection
+from typing import TYPE_CHECKING, Any, List, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
-from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -122,7 +121,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     )
 
     name = CICharField(
-        unique=True,
         db_index=True,
         max_length=255,
         validators=[
@@ -318,16 +316,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             )
         ]
         verbose_name = "Target Population"
-
-    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:  # type: ignore
-        query = TargetPopulation.objects.filter(
-            name=self.name, business_area=self.business_area, program=self.program, is_removed=False
-        )
-        if query.exists() and query.first() != self:
-            raise ValidationError(
-                f"TargetPopulation for name: {self.name}, program: {self.program.name} and business_area: {self.business_area.slug} already exists."
-            )
-        super(TargetPopulation, self).validate_unique()
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
