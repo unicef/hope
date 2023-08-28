@@ -21,6 +21,7 @@ import { headCells } from './ProgramCyclesTableHeadCells';
 import { choicesToDict } from '../../../utils/utils';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { Add } from '@material-ui/icons';
+import { AddNewProgramCycle } from '../../../containers/dialogs/programs/AddNewProgramCycle';
 
 interface ProgramCyclesTableProps {
   filter?;
@@ -85,11 +86,7 @@ export const ProgramCyclesTable = ({
     permissions,
   );
 
-  const addNewProgramCycleButton = [
-    <Button startIcon={<Add />} variant='outlined' color='primary'>
-      {t('Add New Program Cycle')}
-    </Button>,
-  ];
+  const addNewProgramCycleButton = [<AddNewProgramCycle program={program} />];
 
   return (
     <TableWrapper>
