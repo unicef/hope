@@ -78,10 +78,10 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.PAYMENT_CT_ID = ContentType.objects.get(app_label="payment", model="payment").id
 
         self.business_area = BusinessAreaFactory()
-        self.program1 = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.program2 = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.program3 = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
-        self.program4 = ProgramFactory(business_area=self.business_area, status=Program.ACTIVE)
+        self.program1 = ProgramFactory(name="program1", business_area=self.business_area, status=Program.ACTIVE)
+        self.program2 = ProgramFactory(name="program2", business_area=self.business_area, status=Program.ACTIVE)
+        self.program3 = ProgramFactory(name="program3", business_area=self.business_area, status=Program.ACTIVE)
+        self.program4 = ProgramFactory(name="program4", business_area=self.business_area, status=Program.ACTIVE)
 
         self.create_complaint_tickets()
 
