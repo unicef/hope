@@ -1,5 +1,4 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -15,6 +14,8 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ErrorButton } from '../../../components/core/ErrorButton';
+import { Delete } from '@material-ui/icons';
 
 const RemoveButton = styled(Button)`
   && {
@@ -86,13 +87,14 @@ export function DeleteProgram({
   };
   return (
     <span>
-      <RemoveButton
-        startIcon={<CloseIcon />}
+      <ErrorButton
         onClick={() => setOpen(true)}
         data-cy='button-remove-program'
+        variant='outlined'
       >
-        {t('REMOVE')}
-      </RemoveButton>
+        <Delete />
+      </ErrorButton>
+
       <MidDialog
         open={open}
         onClose={() => setOpen(false)}

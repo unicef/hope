@@ -17,6 +17,8 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+import { TableWrapper } from '../../../components/core/TableWrapper';
+import { ProgramCyclesTable } from '../../../components/programs/ProgramCyclesTable';
 
 const Container = styled.div`
   && {
@@ -24,14 +26,6 @@ const Container = styled.div`
     flex-direction: column;
     min-width: 100%;
   }
-`;
-
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
 `;
 
 const NoCashPlansContainer = styled.div`
@@ -88,22 +82,9 @@ export const ProgramDetailsPage = (): React.ReactElement => {
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
-        {program.status === ProgramStatus.Draft ? (
-          <NoCashPlansContainer>
-            <NoCashPlansTitle>
-              {t('To see more details please Activate your Programme')}
-            </NoCashPlansTitle>
-            <NoCashPlansSubTitle>
-              {t(
-                'All data will be pushed to CashAssist. You can edit this plan even if it is active.',
-              )}
-            </NoCashPlansSubTitle>
-          </NoCashPlansContainer>
-        ) : (
-          <TableWrapper>
-            <CashPlanTable program={program} />
-          </TableWrapper>
-        )}
+        <TableWrapper>
+          <ProgramCyclesTable program={program} />
+        </TableWrapper>
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={program.id} />
         )}
