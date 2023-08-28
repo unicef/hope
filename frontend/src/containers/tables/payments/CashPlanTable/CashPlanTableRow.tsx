@@ -16,9 +16,9 @@ interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
 }
 
-export function CashPlanTableRow({
+export const CashPlanTableRow = ({
   cashAndPaymentPlan,
-}: CashPlanTableRowProps): React.ReactElement {
+}: CashPlanTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const objectPath =
@@ -102,4 +102,4 @@ export function CashPlanTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};
