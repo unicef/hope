@@ -1,8 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, List, Union, Optional, Collection
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -10,6 +11,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField, Q
+from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
@@ -308,8 +310,24 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.name
 
     class Meta:
-        unique_together = ("name", "business_area")
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "business_area", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="target_population_unique_if_not_removed",
+            )
+        ]
         verbose_name = "Target Population"
+
+    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:  # type: ignore
+        query = TargetPopulation.objects.filter(
+            name=self.name, business_area=self.business_area, program=self.program, is_removed=False
+        )
+        if query.exists() and query.first() != self:
+            raise ValidationError(
+                f"TargetPopulation for name: {self.name}, program: {self.program.name} and business_area: {self.business_area.slug} already exists."
+            )
+        super(TargetPopulation, self).validate_unique()
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
