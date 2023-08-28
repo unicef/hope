@@ -133,7 +133,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
 
         variables = {
             "createTargetPopulationInput": {
-                "name": "Example name 5 ",
+                "name": "Example name 5",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "excludedIds": "",
@@ -171,10 +171,11 @@ class TestCreateTargetPopulationMutation(APITestCase):
             context={"user": self.user},
             variables=variables,
         )
+        assert "errors" in response_error
         self.assertEqual(TargetPopulation.objects.count(), 1)
-        self.assertEqual(
-            response_error["data"]["createTargetPopulation"]["validationErrors"]["__all__"][0],
-            f"Program for name: {variables['createTargetPopulationInput']['name']}, program: program1 and business_area: {variables['createTargetPopulationInput']['businessAreaSlug']} already exists.",
+        self.assertIn(
+            f"Target population with name: {variables['createTargetPopulationInput']['name']}, program: {self.program.name} and business_area: {variables['createTargetPopulationInput']['businessAreaSlug']} already exists.",
+            response_error["errors"][0]["message"],
         )
 
         # Third, we remove tp with given name, program and business area
