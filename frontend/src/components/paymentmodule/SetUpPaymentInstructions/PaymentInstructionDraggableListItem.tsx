@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Avatar, Box, Button, Grid } from '@material-ui/core';
+import styled from 'styled-components';
 import ListItem from '@material-ui/core/ListItem';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Delete } from '@material-ui/icons';
@@ -24,6 +25,25 @@ import { DividerLine } from '../../core/DividerLine';
 type Item = {
   id: string;
 };
+
+const StyledAvatar = styled(Avatar)`
+  color: #000 !important;
+  background-color: #e6e6e6 !important;
+`;
+
+const AvatarTitle = styled(Box)`
+  color: #000 !important;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+`;
+
+const AvatarId = styled(Box)`
+  color: #000 !important;
+  font-size: 20px;
+  font-weight: 500;
+`;
 
 const useStyles = makeStyles({
   draggingListItem: {
@@ -146,75 +166,85 @@ export const PaymentInstructionDraggableListItem = ({
             </Box>
           </>
         );
+
+        const title = (
+          <Box display='flex' alignItems='center'>
+            <StyledAvatar>#{index + 1}</StyledAvatar>
+            <Box ml={4} display='flex' flexDirection='column'>
+              <AvatarTitle>{t('Payment Instruction')}</AvatarTitle>
+              <AvatarId>ID: {item.id}</AvatarId>
+            </Box>
+          </Box>
+        );
+
         return (
           <Form>
             <Draggable draggableId={item.id} index={index}>
-              {(provided, snapshot) => (
-                <ListItem
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  className={
-                    snapshot.isDragging ? classes.draggingListItem : ''
-                  }
-                >
-                  <BaseSection
-                    title={`Payment Instruction #${item.id}`}
-                    buttons={buttons}
+              {(provided, snapshot) => {
+                return (
+                  <ListItem
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className={
+                      snapshot.isDragging ? classes.draggingListItem : ''
+                    }
                   >
-                    <>
-                      <Box mt={2}>
-                        <Grid container>
-                          <Grid item xs={4}>
-                            <Box mr={4}>
+                    <BaseSection title={title} buttons={buttons}>
+                      <>
+                        <Box mt={2}>
+                          <Grid container>
+                            <Grid item xs={4}>
+                              <Box mr={4}>
+                                <Field
+                                  name='deliveryMechanism'
+                                  variant='outlined'
+                                  label={t('Delivery Mechanism')}
+                                  component={FormikSelectField}
+                                  additionalOnChange={() => {
+                                    setFieldValue('fsp', '');
+                                  }}
+                                  choices={deliveryMechanismsChoices}
+                                />
+                              </Box>
+                            </Grid>
+                            <Grid item xs={4}>
                               <Field
-                                name='deliveryMechanism'
+                                name='fsp'
                                 variant='outlined'
-                                label={t('Delivery Mechanism')}
+                                label={t('FSP')}
                                 component={FormikSelectField}
-                                additionalOnChange={() => {
-                                  setFieldValue('fsp', '');
-                                }}
-                                choices={deliveryMechanismsChoices}
+                                choices={fspsChoices}
                               />
-                            </Box>
+                            </Grid>
                           </Grid>
-                          <Grid item xs={4}>
-                            <Field
-                              name='fsp'
-                              variant='outlined'
-                              label={t('FSP')}
-                              component={FormikSelectField}
-                              choices={fspsChoices}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Box>
-                      <DividerLine />
-                      <Grid container>
-                        <Box mb={2}>
-                          <FieldArray
-                            name='criteria'
-                            render={(arrayHelpers) => (
-                              <UniversalCriteriaPlainComponent
-                                isEdit
-                                arrayHelpers={arrayHelpers}
-                                rules={values.criteria}
-                                householdFieldsChoices={
-                                  householdData?.allFieldsAttributes || []
-                                }
-                                individualFieldsChoices={
-                                  individualData?.allFieldsAttributes || []
-                                }
-                              />
-                            )}
-                          />
                         </Box>
-                      </Grid>
-                    </>
-                  </BaseSection>
-                </ListItem>
-              )}
+                        <DividerLine />
+                        <Grid container>
+                          <Box mb={2}>
+                            <FieldArray
+                              name='criteria'
+                              render={(arrayHelpers) => (
+                                <UniversalCriteriaPlainComponent
+                                  isEdit
+                                  arrayHelpers={arrayHelpers}
+                                  rules={values.criteria}
+                                  householdFieldsChoices={
+                                    householdData?.allFieldsAttributes || []
+                                  }
+                                  individualFieldsChoices={
+                                    individualData?.allFieldsAttributes || []
+                                  }
+                                />
+                              )}
+                            />
+                          </Box>
+                        </Grid>
+                      </>
+                    </BaseSection>
+                  </ListItem>
+                );
+              }}
             </Draggable>
           </Form>
         );
