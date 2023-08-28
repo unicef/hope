@@ -93,13 +93,8 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
 
   return (
     <span>
-      <Button
-        variant='outlined'
-        color='primary'
-        startIcon={<EditIcon />}
-        onClick={() => setOpen(true)}
-      >
-        {t('EDIT PROGRAMME')}
+      <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
+        <EditIcon />
       </Button>
       <ProgramForm
         onSubmit={submitFormHandler}
