@@ -44,7 +44,7 @@ def _create_collections(
             logging.info(
                 f"{business_area.name}: {representation_model} batch {batch_start}-{batch_end}/{total_representations}"
             )
-            representations = all_representations[batch_start:batch_end]
+            representations = all_representations[0:batch_size]
             _batch_create_collections(representation_model, collection_model, related_name, representations)
         logger.info(
             f"Finished batch collection creation for {representation_model} in business area: {business_area.name}"
