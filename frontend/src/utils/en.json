@@ -828,5 +828,10 @@
   "Organization": "Organization",
   "Program Population Size": "Program Population Size",
   "Activate the programme to create a cycle": "Activate the programme to create a cycle",
-  "Add New Program Cycle": "Add New Program Cycle"
+  "Add New Program Cycle": "Add New Program Cycle",
+  "Before you create a new cycle, it is necessary to specify the end date of the existing cycle": "Before you create a new cycle, it is necessary to specify the end date of the existing cycle",
+  "Enter data for the new Programme cycle": "Enter data for the new Programme cycle",
+  "Programme Cycle Title": "Programme Cycle Title",
+  "Default Programme Cycle": "Default Programme Cycle",
+  "Programme Cycle title is required": "Programme Cycle title is required"
 }
