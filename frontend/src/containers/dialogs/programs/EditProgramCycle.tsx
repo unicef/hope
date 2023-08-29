@@ -1,14 +1,14 @@
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
+  IconButton,
 } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { Add } from '@material-ui/icons';
 import { Field, Formik } from 'formik';
 import moment from 'moment';
 import React, { useState } from 'react';
@@ -24,25 +24,25 @@ import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms'
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../components/core/GreyText';
-import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { Missing } from '../../../components/core/Missing';
-import { DialogDescription } from '../DialogDescription';
-import { DialogFooter } from '../DialogFooter';
-import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
-import { programCompare, today } from '../../../utils/utils';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { programCompare, today } from '../../../utils/utils';
+import { DialogDescription } from '../DialogDescription';
+import { DialogFooter } from '../DialogFooter';
+import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
-interface AddNewProgramCycleProps {
+interface EditProgramCycleProps {
   program: ProgramNode;
+  canEditProgramCycle: boolean;
 }
 
-export const AddNewProgramCycle = ({
+export const EditProgramCycle = ({
   program,
-}: AddNewProgramCycleProps): React.ReactElement => {
+  canEditProgramCycle,
+}: EditProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -100,23 +100,8 @@ export const AddNewProgramCycle = ({
       .required(t('Programme Cycle title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    newProgramCycleStartDate: Yup.date().required(t('Start Date is required')),
-    newProgramCycleEndDate: Yup.date()
-      .required(t('End Date is required'))
-      .min(today, t('End Date cannot be in the past'))
-      .when(
-        'newProgramCycleStartDate',
-        (newProgramCycleStartDate, schema) =>
-          newProgramCycleStartDate &&
-          schema.min(
-            newProgramCycleStartDate,
-            `${t('End date have to be greater than')} ${moment(
-              newProgramCycleStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      ),
-    existingProgramCycleEndDate: Yup.date()
+    startDate: Yup.date().required(t('Start Date is required')),
+    endDate: Yup.date()
       .required(t('End Date is required'))
       .min(today, t('End Date cannot be in the past'))
       .when(
@@ -137,22 +122,20 @@ export const AddNewProgramCycle = ({
     [key: string]: string | boolean | number;
   } = {
     title: '',
-    existingProgramCycleStartDate: '',
-    newProgramCycleStartDate: '',
-    newProgramCycleEndDate: '',
+    startDate: '',
+    endDate: '',
   };
 
   return (
     <>
-      <Button
-        startIcon={<Add />}
-        variant='outlined'
-        color='primary'
-        data-cy='button-add-new-program-cycle'
+      <IconButton
         onClick={() => setOpen(true)}
+        color='primary'
+        data-cy='button-edit-program-cycle'
+        disabled={!canEditProgramCycle}
       >
-        {t('Add New Programme Cycle')}
-      </Button>
+        <Edit />
+      </IconButton>
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <Formik
           initialValues={initialValues}
@@ -166,86 +149,49 @@ export const AddNewProgramCycle = ({
             <>
               {open && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
-                <DialogTitle>
-                  <Box display='flex' justifyContent='space-between'>
-                    <Box>{t('Add New Programme Cycle')}</Box>
-                    <Box>{step === 1 ? '1/2' : '2/2'}</Box>
-                  </Box>
-                </DialogTitle>
+                <DialogTitle>{t('Edit Programme Cycle')}</DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
                   <GreyText>
-                    {step === 1
-                      ? t(
-                          'Before you create a new cycle, it is necessary to specify the end date of the existing cycle',
-                        )
-                      : t('Enter data for the new Programme Cycle')}
+                    {t('Change details of the Programme Cycle')}
                   </GreyText>
                 </DialogDescription>
-                {step === 1 ? (
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      <LabelizedField label={t('Programme Cycle Title')}>
-                        {t('Default Programme Cycle')}
-                      </LabelizedField>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <LabelizedField label={t('Start Date')}>
-                        <Missing />
-                      </LabelizedField>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Field
-                        name='existingProgramCycleEndDate'
-                        label={t('End Date')}
-                        component={FormikDateField}
-                        required
-                        fullWidth
-                        decoratorEnd={
-                          <CalendarTodayRoundedIcon color='disabled' />
-                        }
-                        data-cy='input-existing-end-date'
-                      />
-                    </Grid>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <Field
+                      name='title'
+                      fullWidth
+                      variant='outlined'
+                      label={t('Programme Cycle Title')}
+                      component={FormikTextField}
+                      required
+                    />
                   </Grid>
-                ) : (
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <Field
-                        name='programCycleTitle'
-                        fullWidth
-                        variant='outlined'
-                        label={t('Programme Cycle Title')}
-                        component={FormikTextField}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Field
-                        name='newProgramCycleStartDate'
-                        label={t('Start Date')}
-                        component={FormikDateField}
-                        required
-                        fullWidth
-                        decoratorEnd={
-                          <CalendarTodayRoundedIcon color='disabled' />
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Field
-                        name='newProgramCycleEndDate'
-                        label={t('End Date')}
-                        component={FormikDateField}
-                        fullWidth
-                        decoratorEnd={
-                          <CalendarTodayRoundedIcon color='disabled' />
-                        }
-                      />
-                    </Grid>
+                  <Grid item xs={6}>
+                    <Field
+                      name='startDate'
+                      label={t('Start Date')}
+                      component={FormikDateField}
+                      required
+                      fullWidth
+                      decoratorEnd={
+                        <CalendarTodayRoundedIcon color='disabled' />
+                      }
+                    />
                   </Grid>
-                )}
+                  <Grid item xs={6}>
+                    <Field
+                      name='endDate'
+                      label={t('End Date')}
+                      component={FormikDateField}
+                      fullWidth
+                      decoratorEnd={
+                        <CalendarTodayRoundedIcon color='disabled' />
+                      }
+                    />
+                  </Grid>
+                </Grid>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>

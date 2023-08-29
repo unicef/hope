@@ -132,7 +132,10 @@ export const PaymentInstructionDraggableListItem = ({
           }),
         );
 
-        const computeFspsChoices = () => {
+        const computeFspsChoices = (): Array<{
+          name: string;
+          value: string;
+        }> => {
           if (!values.deliveryMechanism || !fspsData) return [];
 
           const matchedDeliveryMechanism = fspsData.availableFspsForDeliveryMechanisms.find(
