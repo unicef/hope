@@ -555,6 +555,8 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2214,6 +2216,8 @@ export type HouseholdNodeTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4933,6 +4937,8 @@ export type ProgramNodeTargetpopulationSetArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5876,6 +5882,8 @@ export type QueryAllTargetPopulationArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5913,6 +5921,8 @@ export type QueryAllActiveTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6148,6 +6158,8 @@ export type QueryAllRegistrationDataImportsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   importDateRange?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6602,6 +6614,8 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -7985,6 +7999,8 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8214,6 +8230,8 @@ export type UserNodeTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8239,6 +8257,8 @@ export type UserNodeChangedTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8264,6 +8284,8 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
