@@ -47,7 +47,6 @@ export const EditProgramCycle = ({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const [step, setStep] = useState(1);
 
   const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
@@ -198,34 +197,21 @@ export const EditProgramCycle = ({
                   <Button
                     onClick={() => {
                       setOpen(false);
-                      setStep(1);
                     }}
                     data-cy='button-cancel'
                   >
                     {t('CANCEL')}
                   </Button>
-                  {step === 2 && (
-                    <LoadingButton
-                      loading={loading}
-                      type='submit'
-                      color='primary'
-                      variant='contained'
-                      onClick={submitForm}
-                      data-cy='button-create'
-                    >
-                      {t('Create')}
-                    </LoadingButton>
-                  )}
-                  {step === 1 && (
-                    <Button
-                      color='primary'
-                      variant='contained'
-                      onClick={() => setStep(2)}
-                      data-cy='button-next'
-                    >
-                      {t('Next')}
-                    </Button>
-                  )}
+                  <LoadingButton
+                    loading={loading}
+                    type='submit'
+                    color='primary'
+                    variant='contained'
+                    onClick={submitForm}
+                    data-cy='button-save'
+                  >
+                    {t('Save')}
+                  </LoadingButton>
                 </DialogActions>
               </DialogFooter>
             </>
