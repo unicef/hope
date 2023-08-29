@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import {
   ProgramNode,
   ProgramStatus,
+  useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../../__generated__/graphql';
@@ -17,6 +18,7 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   && {
@@ -57,17 +59,26 @@ export const ProgramDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const { businessArea } = useBaseUrl();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
   const permissions = usePermissions();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.program || !choices || permissions === null) return null;
+  if (!data?.program || !choices || !businessAreaData || permissions === null)
+    return null;
 
   const program = data.program as ProgramNode;
   return (
@@ -85,6 +96,9 @@ export const ProgramDetailsPage = (): React.ReactElement => {
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
         )}
+        isPaymentPlanApplicable={
+          businessAreaData.businessArea.isPaymentPlanApplicable
+        }
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
