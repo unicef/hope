@@ -181,7 +181,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
     @classmethod
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict) -> "CreateProgramCycle":
-        program_id = decode_id_string_required(program_cycle_data.pop("program_id"))
+        program_id = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
 
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, program.business_area)
@@ -200,7 +200,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
             name=program_cycle_data["name"],
             program=program,
             start_date=program_cycle_data["start_date"],
-            end_date=program_cycle_data.get("end_date", None),
+            end_date=program_cycle_data.get("end_date"),
             iteration=new_iteration,
             status=ProgramCycle.DRAFT,
         )
@@ -226,14 +226,18 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         program = program_cycle.program
         business_area = program.business_area
 
-        cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
+        cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
 
         cls.validate(
-            start_date=program_cycle_data.get("start_date"),
+            start_date=program_cycle_data.get("start_date") or program_cycle.start_date,
             end_date=program_cycle_data.get("end_date"),
-            name=program_cycle_data["name"],
+            name=program_cycle_data.get("name"),
             program=program,
+            program_cycle_id=program_cycle.pk,
         )
+
+        if start_date := program_cycle_data.get("start_date"):
+            program_cycle.start_date = start_date
 
         if end_date := program_cycle_data.get("end_date"):
             program_cycle.end_date = end_date

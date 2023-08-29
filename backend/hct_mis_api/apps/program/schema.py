@@ -108,6 +108,7 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_unicef_id(self, info: Any, **kwargs: Any) -> str:
         # TODO: will update this one
+        # self.pk or self.unicef_id
         return "P-11223399"
 
     def resolve_total_delivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
@@ -123,6 +124,7 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
         model = ProgramCycle
         filter_fields = [
             "name",
+            "status",
         ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

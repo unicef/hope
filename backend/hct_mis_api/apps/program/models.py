@@ -10,7 +10,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -226,7 +226,17 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
 
     class Meta:
-        unique_together = [("iteration", "program"), ("name", "program")]
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="program_cycle_name_unique_if_not_removed",
+            ),
+            UniqueConstraint(
+                fields=["iteration", "program"],
+                name="program_cycle_iteration_unique",
+            ),
+        ]
         ordering = ["program", "iteration"]
         verbose_name = "ProgrammeCycle"
 

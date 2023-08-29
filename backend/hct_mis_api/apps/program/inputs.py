@@ -52,7 +52,6 @@ class CopyProgramInput(graphene.InputObjectType):
 
 
 class CreateProgramCycleInput(graphene.InputObjectType):
-    program_id = graphene.ID(required=True)
     name = graphene.String(required=True)
     start_date = graphene.Date(required=True)
     end_date = graphene.Date()

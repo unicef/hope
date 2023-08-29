@@ -5552,7 +5552,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5562,7 +5562,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5572,7 +5572,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5582,7 +5582,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5592,7 +5592,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5602,7 +5602,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -31244,7 +31244,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "Date",
                 "ofType": null
               }
             },
@@ -31260,7 +31260,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DateTime",
+                "name": "Date",
                 "ofType": null
               }
             },
@@ -67533,34 +67533,6 @@
             "defaultValue": null
           },
           {
-            "name": "startDate",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Date",
-                "ofType": null
-              }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "endDate",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Date",
-                "ofType": null
-              }
-            },
-            "defaultValue": null
-          },
-          {
             "name": "dispersionStartDate",
             "description": null,
             "type": {
@@ -67679,26 +67651,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "ID",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "startDate",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Date",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "endDate",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Date",
               "ofType": null
             },
             "defaultValue": null
@@ -69544,20 +69496,6 @@
         "description": null,
         "fields": null,
         "inputFields": [
-          {
-            "name": "programId",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "defaultValue": null
-          },
           {
             "name": "name",
             "description": null,
