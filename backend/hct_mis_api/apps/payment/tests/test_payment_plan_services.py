@@ -9,7 +9,6 @@ from freezegun import freeze_time
 from graphql import GraphQLError
 from pytz import utc
 
-from hct_mis_api.apps.program.models import ProgramCycle, Program
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -29,6 +28,7 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -136,7 +136,7 @@ class TestPaymentPlanServices(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            program_cycle_id = cycle_id,
+            program_cycle_id=cycle_id,
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
@@ -180,7 +180,6 @@ class TestPaymentPlanServices(APITestCase):
 
         input_data = dict(
             targeting_id=self.id_to_base64(new_targeting.id, "Targeting"),
-
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
@@ -250,7 +249,6 @@ class TestPaymentPlanServices(APITestCase):
             self.assertEqual(updated_pp_1.target_population.status, TargetPopulation.STATUS_ASSIGNED)
             self.assertEqual(updated_pp_1.program, updated_pp_1.target_population.program)
             self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
-
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)

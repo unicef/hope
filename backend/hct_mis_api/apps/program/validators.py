@@ -2,6 +2,7 @@ import logging
 from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from hct_mis_api.apps.core.validators import BaseValidator, CommonValidator
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -73,24 +74,35 @@ class ProgramCycleValidator(CommonValidator):
     @classmethod
     def validate_cycles_has_end_date(cls, *args: Any, **kwargs: Any) -> None:
         program = kwargs.get("program")
-        if kwargs.get("is_create_action"):
-            if program.cycles.filter(end_date__isnull=True).exists():
-                raise ValidationError("All Program Cycles should have end date for creation new one.")
+        if kwargs.get("is_create_action") and program.cycles.filter(end_date__isnull=True).exists():
+            raise ValidationError("All Program Cycles should have end date for creation new one.")
 
     @classmethod
-    def validate_timeframes_overlaping(cls, *args: Any, **kwargs: Any) -> None:
+    def validate_timeframes_overlapping(cls, *args: Any, **kwargs: Any) -> None:
         # A user can leave the Program Cycle end date empty if it was empty upon starting the edit.
         program = kwargs.get("program")
-        cycles = program.cycles.all().order_by("iteration")
-        for i in range(1, len(cycles)):
-            if cycles[i].start_date < cycles[i - 1].end_date:
-                raise ValidationError("Program Cycles' timeframes mustn't overlap.")
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
+        program_cycle_id = kwargs.get("program_cycle_id")
+
+        cycles = program.cycles.exclude(id=program_cycle_id) if program_cycle_id else program.cycles.all()
+
+        if start_date:
+            cycles = cycles.filter(Q(start_date__lte=start_date, end_date__gte=start_date))
+
+        if end_date:
+            cycles = cycles.filter(start_date__lte=end_date, end_date__gte=end_date)
+
+        if cycles.exists():
+            raise ValidationError("Program Cycles' timeframes mustn't overlap.")
 
     @classmethod
     def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
         # A user can’t leave the Program Cycle name empty.
         program = kwargs.get("program")
-        if program.cycles.filter(name=kwargs["name"]).exists():
+        program_cycle_id = kwargs.get("program_cycle_id")
+        cycles = program.cycles.exclude(id=program_cycle_id) if program_cycle_id else program.cycles.all()
+        if cycles.filter(name=kwargs["name"]).exists():
             raise ValidationError("Program Cycles' name should be unique.")
 
 

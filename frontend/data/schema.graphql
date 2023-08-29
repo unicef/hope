@@ -352,8 +352,8 @@ type CashPlanNode implements Node {
   version: BigInt!
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
-  startDate: DateTime!
-  endDate: DateTime!
+  startDate: Date!
+  endDate: Date!
   program: ProgramNode!
   exchangeRate: Float
   totalEntitledQuantity: Float
@@ -676,8 +676,6 @@ input CreatePaymentPlanInput {
   businessAreaSlug: String!
   targetingId: ID!
   programCycleId: ID!
-  startDate: Date!
-  endDate: Date!
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
@@ -708,7 +706,6 @@ type CreateProgramCycle {
 }
 
 input CreateProgramCycleInput {
-  programId: ID!
   name: String!
   startDate: Date!
   endDate: Date
@@ -3508,7 +3505,7 @@ type Query {
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
+  allCashPlans(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: Date, startDate_Lte: Date, startDate_Gte: Date, endDate: Date, endDate_Lte: Date, endDate_Gte: Date, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]
@@ -4784,8 +4781,6 @@ input UpdateIndividualDataUpdateIssueTypeExtras {
 input UpdatePaymentPlanInput {
   paymentPlanId: ID!
   targetingId: ID
-  startDate: Date
-  endDate: Date
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String

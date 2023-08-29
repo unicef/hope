@@ -20,7 +20,6 @@ from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -56,6 +55,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
+from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 
@@ -309,6 +309,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
             Permissions.PROGRAMME_CREATE,
+            Permissions.PROGRAMME_UPDATE,
             Permissions.PROGRAMME_ACTIVATE,
             Permissions.TARGETING_CREATE,
             Permissions.TARGETING_LOCK,
@@ -421,14 +422,15 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(status, "READY_FOR_PAYMENT_MODULE")
 
         # all cycles should have end_date before creation new one
-        ProgramCycle.objects.filter(program_id=decode_id_string(program_id)).update(end_date=timezone.datetime(2022, 8, 25, tzinfo=utc).date())
+        ProgramCycle.objects.filter(program_id=decode_id_string(program_id)).update(
+            end_date=timezone.datetime(2022, 8, 25, tzinfo=utc).date()
+        )
 
         create_program_cycle_response = self.graphql_request(
             request_string=CREATE_PROGRAM_CYCLE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": program_id}},
             variables={
                 "programCycleData": {
-                    "programId": program_id,
                     "name": "Test Name Program Cycle 001",
                     "startDate": timezone.datetime(2022, 8, 26, tzinfo=utc).date(),
                 }
@@ -443,12 +445,12 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         update_program_cycle_response = self.graphql_request(
             request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": program_id}},
             variables={
                 "programCycleData": {
                     "id": encoded_cycle_id,
                     "name": "NEW NEW NAME",
-                    "endDate": timezone.datetime(2022, 8, 29, tzinfo=utc).date()
+                    "endDate": timezone.datetime(2022, 8, 29, tzinfo=utc).date(),
                 }
             },
         )

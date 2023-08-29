@@ -66,8 +66,6 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
     targeting_id = graphene.ID(required=True)
     program_cycle_id = graphene.ID(required=True)
-    # start_date = graphene.Date(required=True) # get from program cycle
-    # end_date = graphene.Date(required=True) # get from program cycle
     dispersion_start_date = graphene.Date(required=True)
     dispersion_end_date = graphene.Date(required=True)
     currency = graphene.String(required=True)
@@ -76,8 +74,6 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
 class UpdatePaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     targeting_id = graphene.ID(required=False)
-    # start_date = graphene.Date(required=False) # get from program cycle
-    # end_date = graphene.Date(required=False) # get from program cycle
     dispersion_start_date = graphene.Date(required=False)
     dispersion_end_date = graphene.Date(required=False)
     currency = graphene.String(required=False)
