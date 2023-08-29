@@ -52,8 +52,6 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
     isImportDisabled = true
   }
 
-  console.log(isImportDisabled)
-
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
