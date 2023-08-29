@@ -1,8 +1,7 @@
-import { IconButton } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
-import { Delete } from '@material-ui/icons';
 import React from 'react';
 import { EditProgramCycle } from '../../../containers/dialogs/programs/EditProgramCycle';
+import { RemoveProgramCycle } from '../../../containers/dialogs/programs/RemoveProgramCycle';
 import { programCycleStatusToColor } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { StatusBox } from '../../core/StatusBox';
@@ -59,16 +58,10 @@ export const ProgramCyclesTableRow = ({
         />
       </TableCell>
       <TableCell align='left'>
-        <IconButton
-          onClick={() => {
-            //eslint-disable-next-line no-console
-            console.log('remove');
-          }}
-          disabled={!canRemoveProgramCycle}
-          color='primary'
-        >
-          <Delete />
-        </IconButton>
+        <RemoveProgramCycle
+          program={row}
+          canRemoveProgramCycle={canRemoveProgramCycle}
+        />
       </TableCell>
     </ClickableTableRow>
   );
