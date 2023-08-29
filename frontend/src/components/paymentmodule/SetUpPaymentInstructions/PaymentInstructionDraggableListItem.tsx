@@ -1,26 +1,27 @@
 import { Avatar, Box, Button, Grid } from '@material-ui/core';
-import styled from 'styled-components';
 import ListItem from '@material-ui/core/ListItem';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import { Delete } from '@material-ui/icons';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   useAllDeliveryMechanismsQuery,
   useAvailableFspsForDeliveryMechanismsQuery,
 } from '../../../__generated__/graphql';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { associatedWith, isNot } from '../../../utils/utils';
 import { BaseSection } from '../../core/BaseSection';
-import { ErrorButton } from '../../core/ErrorButton';
+import { DividerLine } from '../../core/DividerLine';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { UniversalCriteriaPlainComponent } from '../../core/UniversalCriteriaComponent/UniversalCriteriaPlainComponent';
-import { DividerLine } from '../../core/DividerLine';
+import { DeletePaymentInstruction } from './DeletePaymentInstruction';
 
 type Item = {
   id: string;
@@ -68,6 +69,11 @@ export const PaymentInstructionDraggableListItem = ({
   const [householdData, setHouseholdData] = useState(null);
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
+  const permissions = usePermissions();
+  const canDeletePaymentInstruction = hasPermissions(
+    PERMISSIONS.PM_DELETE_PAYMENT_INSTRUCTIONS,
+    permissions,
+  );
   const {
     data: deliveryMechanismsData,
     loading: deliveryMechanismLoading,
@@ -157,12 +163,15 @@ export const PaymentInstructionDraggableListItem = ({
           <>
             <Box display='flex' justifyContent='center' alignItems='center'>
               <Box mr={4}>
-                <ErrorButton
-                  variant='outlined'
-                  onClick={() => handleDeletePaymentInstruction(item.id)}
-                >
-                  <Delete />
-                </ErrorButton>
+                <DeletePaymentInstruction
+                  canDeletePaymentInstruction={canDeletePaymentInstruction}
+                  handleDeletePaymentInstruction={
+                    handleDeletePaymentInstruction
+                  }
+                  index={index}
+                  program={null}
+                  item={item}
+                />
               </Box>
               <Button onClick={submitForm} variant='contained' color='primary'>
                 {t('Save')}
