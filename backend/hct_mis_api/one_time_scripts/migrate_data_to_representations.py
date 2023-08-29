@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from django.db.models import Count, F, Q, QuerySet
@@ -17,13 +18,15 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
+logger = logging.getLogger(__name__)
+
 BATCH_SIZE = 500
 
 
 def migrate_data_to_representations() -> None:
     for business_area in BusinessArea.objects.all():
-        print("----- NEW BUSINESS AREA -----")
-        print("Handling business area: ", business_area)
+        logger.info("----- NEW BUSINESS AREA -----")
+        logger.info("Handling business area: ", business_area)
         migrate_data_to_representations_per_business_area(business_area=business_area)
 
 
@@ -46,8 +49,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     for program in Program.objects.filter(
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
-        print("----- NEW PROGRAM -----")
-        print("Creating representations for program: ", program)
+        logger.info("----- NEW PROGRAM -----")
+        logger.info("Creating representations for program: ", program)
         if program.status == Program.ACTIVE:
             target_populations_ids = TargetPopulation.objects.filter(
                 program=program,
@@ -70,25 +73,25 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         households = Household.objects.filter(id__in=household_ids)
 
         for household in households:
-            print(f"Creating representation for household: {household} in program: {program}")
+            logger.info(f"Creating representation for household: {household} in program: {program}")
             copy_household_representation(household, program)
-            print(f"Created representation for household: {household} in program: {program}")
+            logger.info(f"Created representation for household: {household} in program: {program}")
 
-        print("Handling RDIs for program: ", program)
+        logger.info("Handling RDIs for program: ", program)
         handle_rdis(households, program)
 
-        print("Copying roles for program: ", program)
+        logger.info("Copying roles for program: ", program)
         copy_roles(households, program=program)
 
-        print("Adjusting household selections for program: ", program)
+        logger.info("Adjusting household selections for program: ", program)
         adjust_household_selections(household_selections, program)
 
-        print("Finished creating representations for program: ", program)
+        logger.info("Finished creating representations for program: ", program)
 
-    print("Handling objects without any representations yet - enrolling to biggest program")
+    logger.info("Handling objects without any representations yet - enrolling to biggest program")
     assign_non_program_objects_to_biggest_program(business_area)
 
-    print("Adjusting payments and payment records")
+    logger.info("Adjusting payments and payment records")
     adjust_payments(business_area)
     adjust_payment_records(business_area)
 
@@ -401,6 +404,7 @@ def adjust_household_selections(household_selections: QuerySet, program: Program
     Because TargetPopulation is per program, HouseholdSelections are per program. It requires only to change
     household in this relation to corresponding representation for this program.
     """
+    household_selections = household_selections.order_by("id")
     household_selections_count = household_selections.count()
     for batch_start in range(0, household_selections_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
