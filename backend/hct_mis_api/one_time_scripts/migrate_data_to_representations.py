@@ -72,10 +72,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
         households = Household.objects.filter(id__in=household_ids)
 
+        logger.info(f"Handling households for program: {program}")
         for household in households:
-            logger.info(f"Creating representation for household: {household} in program: {program}")
             copy_household_representation(household, program)
-            logger.info(f"Created representation for household: {household} in program: {program}")
 
         logger.info("Handling RDIs for program: ", program)
         handle_rdis(households, program)
