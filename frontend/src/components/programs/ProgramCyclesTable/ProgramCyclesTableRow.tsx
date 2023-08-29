@@ -1,13 +1,13 @@
+import { IconButton } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
+import { Delete } from '@material-ui/icons';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { EditProgramCycle } from '../../../containers/dialogs/programs/EditProgramCycle';
 import { programCycleStatusToColor } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../core/UniversalMoment';
-import { IconButton } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
 
 interface ProgramCyclesTableRowProps {
   canViewProgramCycleDetails: boolean;
@@ -24,8 +24,6 @@ export const ProgramCyclesTableRow = ({
   row,
   statusChoices,
 }: ProgramCyclesTableRowProps): React.ReactElement => {
-  console.log(row);
-  const { t } = useTranslation();
   const detailsPath = '';
   const handleRowClick = (): void => {
     //eslint-disable-next-line no-console
@@ -55,16 +53,10 @@ export const ProgramCyclesTableRow = ({
         <UniversalMoment>date</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <IconButton
-          onClick={() => {
-            //eslint-disable-next-line no-console
-            console.log('edit');
-          }}
-          color='primary'
-          disabled={!canEditProgramCycle}
-        >
-          <Edit />
-        </IconButton>
+        <EditProgramCycle
+          program={row}
+          canEditProgramCycle={canEditProgramCycle}
+        />
       </TableCell>
       <TableCell align='left'>
         <IconButton

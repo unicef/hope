@@ -1,27 +1,21 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   AllProgramsQuery,
   ProgramNode,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { ErrorButton } from '../../../components/core/ErrorButton';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { ErrorButton } from '../../../components/core/ErrorButton';
-import { Delete } from '@material-ui/icons';
-
-const RemoveButton = styled(Button)`
-  && {
-    color: ${({ theme }) => theme.palette.error.main};
-  }
-`;
 
 const RemoveModalButton = styled(Button)`
   && {

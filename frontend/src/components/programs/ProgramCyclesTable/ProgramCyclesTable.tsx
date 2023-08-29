@@ -1,27 +1,25 @@
-import React, { ReactElement } from 'react';
+import { Box } from '@material-ui/core';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Box, Button } from '@material-ui/core';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   ProgramNode,
   ProgramStatus,
-  ProgrammeChoiceDataQuery,
   useAllGrievanceTicketQuery,
   useProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { AddNewProgramCycle } from '../../../containers/dialogs/programs/AddNewProgramCycle';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { choicesToDict } from '../../../utils/utils';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
-import { ProgramCyclesTableRow } from './ProgramCyclesTableRow';
 import { headCells } from './ProgramCyclesTableHeadCells';
-import { choicesToDict } from '../../../utils/utils';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { Add } from '@material-ui/icons';
-import { AddNewProgramCycle } from '../../../containers/dialogs/programs/AddNewProgramCycle';
+import { ProgramCyclesTableRow } from './ProgramCyclesTableRow';
 
 interface ProgramCyclesTableProps {
   filter?;
