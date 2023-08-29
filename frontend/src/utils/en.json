@@ -327,7 +327,6 @@
   "Population Goal (# of Individuals)": "Population Goal (# of Individuals)",
   "Num. of Households": "Num. of Households",
   "SECTOR": "SECTOR",
-  "Programme Details": "Programme Details",
   "START DATE": "START DATE",
   "END DATE": "END DATE",
   "Sector": "Sector",
@@ -825,5 +824,18 @@
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
   "Preview Exclusion": "Preview Exclusion",
-  "Set up Payment Instructions": "Set up Payment Instructions"
+  "Set up Payment Instructions": "Set up Payment Instructions",
+  "Organization": "Organization",
+  "Program Population Size": "Program Population Size",
+  "Activate the programme to create a cycle": "Activate the programme to create a cycle",
+  "Add New Program Cycle": "Add New Program Cycle",
+  "Before you create a new cycle, it is necessary to specify the end date of the existing cycle": "Before you create a new cycle, it is necessary to specify the end date of the existing cycle",
+  "Enter data for the new Programme cycle": "Enter data for the new Programme cycle",
+  "Programme Cycle Title": "Programme Cycle Title",
+  "Default Programme Cycle": "Default Programme Cycle",
+  "Programme Cycle title is required": "Programme Cycle title is required",
+  "Change details of the Programme Cycle": "Change details of the Programme Cycle",
+  "Are you sure you want to delete the Program Cycle from the system?": "Are you sure you want to delete the Program Cycle from the system?",
+  "This action cannot be undone.": "This action cannot be undone.",
+  "Delete Program Cycle": "Delete Program Cycle"
 }

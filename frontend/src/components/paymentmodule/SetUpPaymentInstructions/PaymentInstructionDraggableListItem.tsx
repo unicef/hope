@@ -121,6 +121,7 @@ export const PaymentInstructionDraggableListItem = ({
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
+        // eslint-disable-next-line no-console
         console.log(values);
       }}
     >
@@ -132,7 +133,10 @@ export const PaymentInstructionDraggableListItem = ({
           }),
         );
 
-        const computeFspsChoices = () => {
+        const computeFspsChoices = (): Array<{
+          name: string;
+          value: string;
+        }> => {
           if (!values.deliveryMechanism || !fspsData) return [];
 
           const matchedDeliveryMechanism = fspsData.availableFspsForDeliveryMechanisms.find(

@@ -56,6 +56,7 @@ export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
         variant='contained'
         color='primary'
         onClick={() =>
+          // eslint-disable-next-line no-console
           console.log(
             'new order:',
             items.map((item) => item.id),
