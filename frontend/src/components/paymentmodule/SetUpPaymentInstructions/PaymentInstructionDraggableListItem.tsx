@@ -121,6 +121,7 @@ export const PaymentInstructionDraggableListItem = ({
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
+        // eslint-disable-next-line no-console
         console.log(values);
       }}
     >
