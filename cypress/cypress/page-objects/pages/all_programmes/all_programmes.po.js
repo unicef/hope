@@ -20,7 +20,6 @@ export default class AllProgrammes extends BaseComponent {
   tabTitle = 'h6[data-cy="table-title"]';
   tableColumns = 'span[data-cy="table-label"]';
   rows = 'tr[role="checkbox"]';
-  option = 'li[role="option"]';
 
   // Texts
   textAllProgrammes = "All Programmes";
@@ -51,12 +50,4 @@ export default class AllProgrammes extends BaseComponent {
   getNumOfouseholds = () => cy.get(this.tableColumns).eq(4);
   getBudget = () => cy.get(this.tableColumns).eq(5);
   getProgrammesRows = () => cy.get(this.rows);
-  getProgrammesOptions = () => cy.get(this.option);
-
-  navigateToProgrammePage() {
-    cy.visit("/");
-    this.getGlobalProgramFilter().click();
-    this.getProgrammesOptions().contains(this.textAllProgrammes).click();
-    cy.visit("/");
-  }
 }
