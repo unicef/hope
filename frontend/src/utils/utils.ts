@@ -70,6 +70,22 @@ export function programStatusToColor(
       return theme.hctPalette.orange;
   }
 }
+
+export function programCycleStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  //TODO: program cycle status colors
+  switch (status) {
+    case ProgramStatus.Draft:
+      return theme.hctPalette.gray;
+    case ProgramStatus.Active:
+      return theme.hctPalette.green;
+    default:
+      return theme.hctPalette.orange;
+  }
+}
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,

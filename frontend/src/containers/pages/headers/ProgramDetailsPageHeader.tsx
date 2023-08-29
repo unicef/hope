@@ -27,7 +27,7 @@ export const ProgramDetailsPageHeader = ({
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   let buttons;
   const { t } = useTranslation();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   switch (program.status) {
     case ProgramStatus.Active:
       buttons = (
@@ -46,7 +46,6 @@ export const ProgramDetailsPageHeader = ({
           canRemove={canRemove}
           canEdit={canEdit}
           canActivate={canActivate}
-          canDuplicate={canDuplicate}
         />
       );
       break;
@@ -59,13 +58,12 @@ export const ProgramDetailsPageHeader = ({
         />
       );
   }
-  const breadCrumbsItems: BreadCrumbsItem[] = [];
-  if (isAllPrograms) {
-    breadCrumbsItems.unshift({
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
       title: t('Programme Management'),
       to: `/${baseUrl}/list/`,
-    });
-  }
+    },
+  ];
 
   return (
     <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>

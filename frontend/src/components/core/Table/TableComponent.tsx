@@ -71,6 +71,7 @@ interface TableComponentProps<T> {
   actions?: Array<React.ReactElement>;
   onSelectAllClick?: (event, rows) => void;
   numSelected?: number;
+  componentInsteadOfRows?: React.ReactElement | null;
 }
 
 export function TableComponent<T>({
@@ -93,6 +94,7 @@ export function TableComponent<T>({
   actions = [],
   onSelectAllClick,
   numSelected = 0,
+  componentInsteadOfRows,
 }: TableComponentProps<T>): React.ReactElement {
   const { t } = useTranslation();
   const classes = useStyles({});
@@ -173,8 +175,9 @@ export function TableComponent<T>({
             data={data}
             numSelected={numSelected}
           />
-          <TableBody>{body}</TableBody>
+          <TableBody>{!componentInsteadOfRows ? body : null}</TableBody>
         </Table>
+        {componentInsteadOfRows}
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
