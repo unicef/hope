@@ -26,7 +26,7 @@ BATCH_SIZE = 500
 def migrate_data_to_representations() -> None:
     for business_area in BusinessArea.objects.all():
         logger.info("----- NEW BUSINESS AREA -----")
-        logger.info("Handling business area: ", business_area)
+        logger.info(f"Handling business area: {business_area}")
         migrate_data_to_representations_per_business_area(business_area=business_area)
 
 
@@ -50,7 +50,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
         logger.info("----- NEW PROGRAM -----")
-        logger.info("Creating representations for program: ", program)
+        logger.info(f"Creating representations for program: {program}")
         if program.status == Program.ACTIVE:
             target_populations_ids = TargetPopulation.objects.filter(
                 program=program,
@@ -73,19 +73,22 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         households = Household.objects.filter(id__in=household_ids)
 
         logger.info(f"Handling households for program: {program}")
-        for household in households:
+        households_count = households.count()
+        for i, household in enumerate(households):
+            if i % 100 == 0:
+                logger.info(f"Handling {i} - {i+99}/{households_count} households")
             copy_household_representation(household, program)
 
-        logger.info("Handling RDIs for program: ", program)
+        logger.info(f"Handling RDIs for program: {program}")
         handle_rdis(households, program)
 
-        logger.info("Copying roles for program: ", program)
+        logger.info(f"Copying roles for program: {program}")
         copy_roles(households, program=program)
 
-        logger.info("Adjusting household selections for program: ", program)
+        logger.info(f"Adjusting household selections for program: {program}")
         adjust_household_selections(household_selections, program)
 
-        logger.info("Finished creating representations for program: ", program)
+        logger.info(f"Finished creating representations for program: {program}")
 
     logger.info("Handling objects without any representations yet - enrolling to biggest program")
     assign_non_program_objects_to_biggest_program(business_area)
@@ -294,6 +297,7 @@ def copy_roles(households: QuerySet, program: Program, move_to_biggest_program: 
     roles_count = roles.count()
     for batch_start in range(0, roles_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
+        logger.info(f"Handling {batch_start} - {batch_end}/{roles_count} roles")
         roles_list = []
         for role in roles[batch_start:batch_end]:
             if move_to_biggest_program:
@@ -435,6 +439,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
 
     for batch_start in range(0, payments_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
+        logger.info(f"Adjusting payments {batch_start} - {batch_end}/{payments_count}")
         payment_updates = []
 
         for payment in payments[batch_start:batch_end]:
@@ -488,6 +493,7 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
     payment_records_count = payment_records.count()
     for batch_start in range(0, payment_records_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
+        logger.info(f"Adjusting payment records {batch_start} - {batch_end}/{payment_records_count}")
         payment_record_updates = []
 
         for payment_record in payment_records[batch_start:batch_end]:
@@ -521,7 +527,10 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
 def handle_rdis(households: QuerySet, program: Program) -> None:
     rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
     rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
-    for rdi in rdis:
+    rdis_count = rdis.count()
+    for i, rdi in enumerate(rdis):
+        if i % 100 == 0:
+            logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
         rdi_households = rdi.households.exclude(Q(copied_to=None) & Q(copied_from__isnull=False))
         for rdi_household in rdi_households:
             copy_household_representation(rdi_household, program)
