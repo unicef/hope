@@ -13005,7 +13005,7 @@ export type AllProgramsForChoicesQuery = (
       & Pick<ProgramNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded' | 'status'>
+        & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
       )> }
     )>> }
   )> }
@@ -24806,7 +24806,6 @@ export const AllProgramsForChoicesDocument = gql`
         id
         name
         individualDataNeeded
-        status
       }
     }
   }

@@ -9,7 +9,11 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import {useAllProgramsForChoicesQuery, useProgrammeChoiceDataQuery} from "../../../__generated__/graphql";
+import {
+  useAllProgramsForChoicesQuery,
+  useProgrammeChoiceDataQuery,
+  useProgramQuery
+} from "../../../__generated__/graphql";
 import {useBaseUrl} from "../../../hooks/useBaseUrl";
 
 const initialFilter = {
@@ -35,20 +39,15 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
+  const { data, loading: programLoading, error } = useProgramQuery({
+    variables: { id: programId },
     fetchPolicy: 'cache-and-network',
   });
 
-  if (permissions === null || programsLoading) return null;
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
-  const currentProgram = programs.filter((programObj) => programObj.id === programId);
+  if (permissions === null || programLoading) return null;
 
   let isImportDisabled = false;
-  if (currentProgram[0] && currentProgram[0]?.status && currentProgram[0].status !== "ACTIVE") {
+  if (data.program && data.program.status !== "ACTIVE") {
     isImportDisabled = true
   }
 
