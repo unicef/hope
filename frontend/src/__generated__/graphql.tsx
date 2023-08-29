@@ -6348,6 +6348,7 @@ export type RegistrationDataImportNode = Node & {
   goldenRecordPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
   batchUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
   goldenRecordUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']>,
 };
 
 
@@ -7188,6 +7189,7 @@ export type TargetPopulationNode = Node & {
   surveys: SurveyNodeConnection,
   totalFamilySize?: Maybe<Scalars['Int']>,
   householdList?: Maybe<HouseholdNodeConnection>,
+  totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']>,
 };
 
 
@@ -30481,6 +30483,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   goldenRecordPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
   batchUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
   goldenRecordUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeConnection'] = ResolversParentTypes['RegistrationDataImportNodeConnection']> = {
@@ -30945,6 +30948,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, TargetPopulationNodeSurveysArgs>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeHouseholdListArgs>,
+  totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
