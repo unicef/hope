@@ -84,6 +84,15 @@ export const DrawerItems = ({
   );
   if (permissions === null || !businessAreaData) return null;
 
+  const {
+    isPaymentPlanApplicable,
+    isAccountabilityApplicable,
+  } = businessAreaData.businessArea;
+  const flags = {
+    isPaymentPlanApplicable,
+    isAccountabilityApplicable,
+  };
+
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     const updatedMenuItems = [...items];
     const getIndexByName = (name: string): number => {
@@ -96,6 +105,10 @@ export const DrawerItems = ({
     //Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =
       cashAssistUrlData?.cashAssistUrlPrefix;
+
+    if (cashAssistIndex !== -1 && isPaymentPlanApplicable) {
+      updatedMenuItems.splice(cashAssistIndex, 1);
+    }
 
     //When GlobalProgramFilter applied
     if (!isAllPrograms) {
@@ -110,15 +123,6 @@ export const DrawerItems = ({
   };
 
   const preparedMenuItems = prepareMenuItems(menuItems);
-
-  const {
-    isPaymentPlanApplicable,
-    isAccountabilityApplicable,
-  } = businessAreaData.businessArea;
-  const flags = {
-    isPaymentPlanApplicable,
-    isAccountabilityApplicable,
-  };
 
   const getInitialHrefForCollapsible = (secondaryActions): string => {
     let resultHref = '';
