@@ -3628,6 +3628,7 @@ type RegistrationDataImportNode implements Node {
   goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
   batchUniqueCountAndPercentage: CountAndPercentageNode
   goldenRecordUniqueCountAndPercentage: CountAndPercentageNode
+  totalHouseholdsCountWithValidPhoneNo: Int
 }
 
 type RegistrationDataImportNodeConnection {
@@ -4137,6 +4138,7 @@ type TargetPopulationNode implements Node {
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  totalHouseholdsCountWithValidPhoneNo: Int
 }
 
 type TargetPopulationNodeConnection {
