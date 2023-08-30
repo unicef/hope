@@ -184,7 +184,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         program_id = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
 
-        cls.has_permission(info, Permissions.PROGRAMME_CREATE, program.business_area)
+        cls.has_permission(info, Permissions.PROGRAMME_CYCLE_CREATE, program.business_area)
 
         cls.validate(
             start_date=program_cycle_data["start_date"],
@@ -223,7 +223,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         program = program_cycle.program
         business_area = program.business_area
 
-        cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
+        cls.has_permission(info, Permissions.PROGRAMME_CYCLE_UPDATE, business_area)
 
         cls.validate(
             start_date=program_cycle_data.get("start_date") or program_cycle.start_date,
@@ -262,7 +262,7 @@ class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
         old_program_cycle = ProgramCycle.objects.get(id=decoded_id)
         program = old_program_cycle.program
 
-        cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
+        cls.has_permission(info, Permissions.PROGRAMME_CYCLE_REMOVE, program.business_area)
 
         cls.validate(program_cycle=program_cycle)
 

@@ -78,7 +78,7 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_INVALID = auto()
     PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
-   # Programme Cycle
+    # Programme Cycle
     PROGRAMME_CYCLE_VIEW_LIST = auto()
     PROGRAMME_CYCLE_VIEW_DETAILS = auto()
     PROGRAMME_CYCLE_CREATE = auto()
