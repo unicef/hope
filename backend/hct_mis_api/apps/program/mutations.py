@@ -194,14 +194,11 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
             is_create_action=True,
         )
 
-        new_iteration = program.cycles.order_by("iteration").last().iteration + 1
-
         ProgramCycle.objects.create(
             name=program_cycle_data["name"],
             program=program,
             start_date=program_cycle_data["start_date"],
             end_date=program_cycle_data.get("end_date"),
-            iteration=new_iteration,
             status=ProgramCycle.DRAFT,
         )
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)

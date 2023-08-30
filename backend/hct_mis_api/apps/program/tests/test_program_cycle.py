@@ -20,7 +20,6 @@ mutation createProgramCycle($programCycleData: CreateProgramCycleInput!){
           node{
             status
             name
-            iteration
             startDate
             endDate
           }
@@ -42,7 +41,6 @@ mutation updateProgramCycle($programCycleData: UpdateProgramCycleInput!){
           node{
             status
             name
-            iteration
             startDate
             endDate
           }
@@ -76,7 +74,6 @@ class TestProgramCycle(APITestCase):
         )
         cls.program_cycle = ProgramCycleFactory(
             program=cls.program,
-            iteration=2,
             start_date="2021-01-01",
             end_date="2022-01-01",
             name="Default Cycle",
@@ -97,6 +94,12 @@ class TestProgramCycle(APITestCase):
                 [Permissions.PROGRAMME_CREATE],
                 Program.ACTIVE,
                 {"end_date": "2999-01-01"},
+            ),
+            (
+                    "with_permission_program_in_active_end_date_is_more_then_start_date",
+                    [Permissions.PROGRAMME_CREATE],
+                    Program.ACTIVE,
+                    {"start_date": "2098-02-22", "end_date": "2098-02-11"},
             ),
         ]
     )
@@ -261,7 +264,7 @@ class TestProgramCycle(APITestCase):
             variables={"programCycleData": inputs},
         )
 
-        cycle = self.program.cycles.filter(iteration=2).first()
+        cycle = self.program.cycles.filter(name="New Cycle 001").first()
         encoded_cycle_id = self.id_to_base64(cycle.pk, "ProgramCycleNode")
         self.snapshot_graphql_request(
             request_string=DELETE_PROGRAM_CYCLE_MUTATION,

@@ -186,7 +186,6 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
     # TODO: id?? Unicef ID?? # P-84123
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
-            "iteration",
             "status",
             "start_date",
             "end_date",
@@ -200,14 +199,6 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
         (DRAFT, _("Draft")),
         (ACTIVE, _("Active")),
         (FINISHED, _("Finished")),
-    )
-
-    iteration = models.PositiveIntegerField(
-        validators=[
-            MinValueValidator(1),
-        ],
-        db_index=True,
-        default=1,
     )
     name = CICharField(
         max_length=255,
@@ -232,16 +223,12 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
                 condition=Q(is_removed=False),
                 name="program_cycle_name_unique_if_not_removed",
             ),
-            UniqueConstraint(
-                fields=["iteration", "program"],
-                name="program_cycle_iteration_unique",
-            ),
         ]
-        ordering = ["program", "iteration"]
+        ordering = ["start_date"]
         verbose_name = "ProgrammeCycle"
 
     def __str__(self) -> str:
-        return f"{self.program.name} - cycle {self.iteration}"
+        return f"{self.program.name} - cycle start date {self.start_date}"
 
     @property
     def total_entitled_quantity(self) -> Decimal:

@@ -39,7 +39,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_1_with_permission_program
                     'line': 3
                 }
             ],
-            'message': 'Create/Update Program Cycle is possible only for Active Program.',
+            'message': "Create/Update Program Cycle is possible only for Active Program., Program Cycles' timeframes mustn't overlap.",
             'path': [
                 'createProgramCycle'
             ]
@@ -87,6 +87,26 @@ snapshots['TestProgramCycle::test_create_program_cycle_3_with_permission_program
     ]
 }
 
+snapshots['TestProgramCycle::test_create_program_cycle_4_with_permission_program_in_active_end_date_is_more_then_start_date 1'] = {
+    'data': {
+        'createProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Start date cannot be greater than the end date.',
+            'path': [
+                'createProgramCycle'
+            ]
+        }
+    ]
+}
+
 snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 1'] = {
     'data': {
         'createProgramCycle': None
@@ -115,17 +135,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
                     'edges': [
                         {
                             'node': {
-                                'endDate': '2020-01-25',
-                                'iteration': 1,
-                                'name': 'Last whatever.',
-                                'startDate': '2020-01-13',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
                                 'endDate': '2022-01-01',
-                                'iteration': 2,
                                 'name': 'Default Cycle',
                                 'startDate': '2021-01-01',
                                 'status': 'DRAFT'
@@ -133,8 +143,15 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
                         },
                         {
                             'node': {
+                                'endDate': '2022-11-27',
+                                'name': 'Begin meet.',
+                                'startDate': '2022-11-07',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
                                 'endDate': '2055-11-30',
-                                'iteration': 3,
                                 'name': 'Test Name Program Cycle New 002',
                                 'startDate': '2055-11-11',
                                 'status': 'DRAFT'
@@ -143,7 +160,6 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
                         {
                             'node': {
                                 'endDate': '2055-12-12',
-                                'iteration': 4,
                                 'name': 'Cycle New 444',
                                 'startDate': '2055-11-25',
                                 'status': 'DRAFT'
@@ -159,22 +175,40 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
 
 snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_without_end_date 1'] = {
     'data': {
-        'createProgramCycle': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 3,
-                    'line': 3
+        'createProgramCycle': {
+            'program': {
+                'cycles': {
+                    'edges': [
+                        {
+                            'node': {
+                                'endDate': '2022-01-01',
+                                'name': 'Default Cycle',
+                                'startDate': '2021-01-01',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
+                                'endDate': '2022-11-27',
+                                'name': 'Begin meet.',
+                                'startDate': '2022-11-07',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
+                                'endDate': '2022-12-12',
+                                'name': 'Cycle New Name',
+                                'startDate': '2022-11-25',
+                                'status': 'DRAFT'
+                            }
+                        }
+                    ],
+                    'totalCount': 3
                 }
-            ],
-            'message': 'All Program Cycles should have end date for creation new one.',
-            'path': [
-                'createProgramCycle'
-            ]
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestProgramCycle::test_create_program_cycle_with_the_same_name 1'] = {
@@ -293,17 +327,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                     'edges': [
                         {
                             'node': {
-                                'endDate': '2020-01-25',
-                                'iteration': 1,
-                                'name': 'Last whatever.',
-                                'startDate': '2020-01-13',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
                                 'endDate': '2022-01-01',
-                                'iteration': 2,
                                 'name': 'Default Cycle',
                                 'startDate': '2021-01-01',
                                 'status': 'DRAFT'
@@ -311,8 +335,15 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                         },
                         {
                             'node': {
+                                'endDate': '2022-11-27',
+                                'name': 'Begin meet.',
+                                'startDate': '2022-11-07',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
                                 'endDate': None,
-                                'iteration': 3,
                                 'name': 'NEW NEW NAME 22',
                                 'startDate': '2055-11-13',
                                 'status': 'DRAFT'
@@ -334,17 +365,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                     'edges': [
                         {
                             'node': {
-                                'endDate': '2020-01-25',
-                                'iteration': 1,
-                                'name': 'Last whatever.',
-                                'startDate': '2020-01-13',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
                                 'endDate': '2022-01-01',
-                                'iteration': 2,
                                 'name': 'Default Cycle',
                                 'startDate': '2021-01-01',
                                 'status': 'DRAFT'
@@ -352,8 +373,15 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                         },
                         {
                             'node': {
+                                'endDate': '2022-11-27',
+                                'name': 'Begin meet.',
+                                'startDate': '2022-11-07',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
                                 'endDate': '2055-11-22',
-                                'iteration': 3,
                                 'name': 'NEW NEW NAME 333',
                                 'startDate': '2055-11-14',
                                 'status': 'DRAFT'
