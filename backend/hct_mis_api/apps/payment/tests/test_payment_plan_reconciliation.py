@@ -106,7 +106,6 @@ mutation createProgramCycle($programCycleData: CreateProgramCycleInput!){
             unicefId
             status
             name
-            iteration
             startDate
             endDate
           }
@@ -129,7 +128,6 @@ mutation updateProgramCycle($programCycleData: UpdateProgramCycleInput!){
             unicefId
             status
             name
-            iteration
             startDate
             endDate
           }
