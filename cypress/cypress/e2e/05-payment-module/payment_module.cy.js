@@ -32,6 +32,7 @@ describe("Payment Module", () => {
       let fspXlsxFilenames;
 
       //New Payment Plan page
+      t.navigateToProgrammePage("PaymentPlanProgram");
       t.createPaymentPlan(targetPopulationName);
 
       cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
