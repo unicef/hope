@@ -105,6 +105,7 @@ class Permissions(Enum):
     PM_MARK_PAYMENT_AS_FAILED = auto()
     PM_EXPORT_PDF_SUMMARY = auto()
     PM_SET_UP_PAYMENT_INSTRUCTIONS = auto()
+    PM_DELETE_PAYMENT_INSTRUCTIONS = auto()
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
