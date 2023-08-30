@@ -40,6 +40,8 @@ export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
     setItems(items.filter((item) => item.id !== id));
   };
 
+
+
   const buttons = (
     <Box display='flex' justifyContent='center'>
       <Box mr={2}>
