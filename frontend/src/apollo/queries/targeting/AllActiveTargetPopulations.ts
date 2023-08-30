@@ -45,6 +45,7 @@ export const AllActiveTargetPopulations = gql`
             name
           }
           totalHouseholdsCount
+          totalHouseholdsCountWithValidPhoneNo
           createdAt
           updatedAt
           createdBy {

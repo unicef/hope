@@ -8961,7 +8961,7 @@ export type PaymentRecordDetailsFragment = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'refuseReason'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'refuseReason' | 'totalHouseholdsCountWithValidPhoneNo'>
   & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13559,7 +13559,7 @@ export type AllActiveTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'totalHouseholdsCount' | 'createdAt' | 'updatedAt'>
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'totalHouseholdsCount' | 'totalHouseholdsCountWithValidPhoneNo' | 'createdAt' | 'updatedAt'>
         & { program: Maybe<(
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
@@ -14583,6 +14583,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   numberOfHouseholds
   numberOfIndividuals
   refuseReason
+  totalHouseholdsCountWithValidPhoneNo
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -26546,6 +26547,7 @@ export const AllActiveTargetPopulationsDocument = gql`
           name
         }
         totalHouseholdsCount
+        totalHouseholdsCountWithValidPhoneNo
         createdAt
         updatedAt
         createdBy {
