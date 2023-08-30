@@ -77,7 +77,7 @@ export const LookUpTargetPopulationTableRowCommunication = ({
         {targetPopulation.program?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.totalHouseholdsCountWithValidPhoneNo || '-'}
+        {targetPopulation.totalHouseholdsCountWithValidPhoneNo || 0}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>

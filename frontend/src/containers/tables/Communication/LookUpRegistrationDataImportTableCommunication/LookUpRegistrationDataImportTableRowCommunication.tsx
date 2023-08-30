@@ -84,7 +84,7 @@ export const LookUpRegistrationDataImportTableRowCommunication = ({
         </UniversalMoment>
       </TableCell>
       <TableCell align='right'>
-        {registrationDataImport.totalHouseholdsCountWithValidPhoneNo}
+        {registrationDataImport.totalHouseholdsCountWithValidPhoneNo || 0}
       </TableCell>
       <TableCell align='left'>{renderImportedBy()}</TableCell>
       <TableCell align='left'>{registrationDataImport.dataSource}</TableCell>
