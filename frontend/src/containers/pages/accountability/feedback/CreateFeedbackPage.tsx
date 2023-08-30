@@ -235,7 +235,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     area: values.area,
     language: values.language,
     consent: values.consent,
-    program: values.program,
   });
 
   return (
@@ -456,17 +455,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 label={t('Languages Spoken')}
                                 component={FormikTextField}
                                 data-cy='input-languages'
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='program'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Programme Title')}
-                                choices={mappedPrograms}
-                                component={FormikSelectField}
-                                data-cy='input-program'
                               />
                             </Grid>
                           </Grid>
