@@ -24,6 +24,7 @@ export default class BaseComponent {
   navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]';
   headerTitle = 'h5[data-cy="page-header-title"]';
   globalProgramFilter = 'div[data-cy="global-program-filter"]';
+  option = 'li[role="option"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -112,5 +113,14 @@ export default class BaseComponent {
         element.type("{esc}");
       }
     });
+  }
+
+  getProgrammesOptions = () => cy.get(this.option);
+
+  navigateToProgrammePage(program = this.textAllProgrammes) {
+    cy.visit("/");
+    this.getGlobalProgramFilter().click();
+    cy.log(`Program: ${program}`);
+    this.getProgrammesOptions().contains(program).first().click();
   }
 }
