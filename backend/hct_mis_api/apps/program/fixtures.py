@@ -16,17 +16,17 @@ class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
 
-    status = ProgramCycle.ACTIVE
+    status = ProgramCycle.DRAFT
     start_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
         after_now=False,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    description = factory.Faker(
+    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(10, 20)))
+    name = factory.Faker(
         "sentence",
-        nb_words=10,
+        nb_words=3,
         variable_nb_words=True,
         ext_word_list=None,
     )
@@ -83,8 +83,8 @@ class ProgramFactory(DjangoModelFactory):
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
 
     @factory.post_generation
-    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)

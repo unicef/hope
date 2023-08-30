@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Union
 
 from django.contrib.postgres.fields import CICharField
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -9,7 +10,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -182,43 +183,92 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+    # TODO: id?? Unicef ID?? # P-84123
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
-            "iteration",
             "status",
             "start_date",
             "end_date",
             "description",
         ],
     )
+    DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
-    CLOSED = "CLOSED"
+    FINISHED = "FINISHED"
     STATUS_CHOICE = (
+        (DRAFT, _("Draft")),
         (ACTIVE, _("Active")),
-        (CLOSED, _("Closed")),
+        (FINISHED, _("Finished")),
     )
-
-    iteration = models.PositiveIntegerField(
+    name = CICharField(
+        max_length=255,
         validators=[
-            MinValueValidator(1),
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
         ],
-        db_index=True,
-        default=1,
+        default="Default Program Cycle",
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
-    description = models.CharField(
-        blank=True,
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
 
     class Meta:
-        unique_together = ("iteration", "program")
-        ordering = ["program", "iteration"]
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="program_cycle_name_unique_if_not_removed",
+            ),
+        ]
+        ordering = ["start_date"]
         verbose_name = "ProgrammeCycle"
 
     def __str__(self) -> str:
-        return f"{self.program.name} - cycle {self.iteration}"
+        return f"{self.program.name} - cycle start date {self.start_date}"
+
+    @property
+    def total_entitled_quantity(self) -> Decimal:
+        result = Decimal(0.0)
+        for payment_plan in self.paymentplan_set.all():
+            result += payment_plan.total_entitled_quantity
+        return result
+
+    @property
+    def total_undelivered_quantity(self) -> Decimal:
+        result = Decimal(0.0)
+        for payment_plan in self.paymentplan_set.all():
+            result += payment_plan.total_undelivered_quantity
+        return result
+
+    @property
+    def total_delivered_quantity(self) -> Decimal:
+        result = Decimal(0.0)
+        for payment_plan in self.paymentplan_set.all():
+            result += payment_plan.total_delivered_quantity
+        return result
+
+    def validate_program_active_status(self) -> None:
+        # all changes with Program Cycle are possible within Active Program
+        if self.program.status != Program.ACTIVE:
+            raise ValidationError("Program should be within Active status.")
+
+    def set_active(self) -> None:
+        self.validate_program_active_status()
+        if self.status in (ProgramCycle.DRAFT, ProgramCycle.FINISHED):
+            self.status = ProgramCycle.ACTIVE
+            self.save()
+
+    def set_draft(self) -> None:
+        self.validate_program_active_status()
+        if self.status == ProgramCycle.ACTIVE:
+            self.status = ProgramCycle.DRAFT
+            self.save()
+
+    def set_finish(self) -> None:
+        self.validate_program_active_status()
+        self.status = ProgramCycle.FINISHED
+        self.save()

@@ -30,6 +30,7 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
 )
+from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
@@ -331,34 +332,36 @@ class PaymentPlanService:
         if not target_population.program:
             raise GraphQLError("TargetPopulation should have related Program defined")
 
+        program_cycle_id = decode_id_string(input_data["program_cycle_id"])
+        program_cycle = ProgramCycle.objects.get(id=program_cycle_id)
+        if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
+            raise GraphQLError(
+                "Impossible to create Payment Plans/Follow-Up Payment Plans for Program Cycle within Finished status"
+            )
+        if not program_cycle.start_date or not program_cycle.end_date:
+            raise GraphQLError(
+                "Impossible to create Payment Plan/Follow-Up Payment Plan for Program Cycle without start and/or end dates"
+            )
+
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-
-        start_date = input_data["start_date"]
-        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
-        if start_date < target_population.program.start_date:
-            raise GraphQLError("Start date cannot be earlier than start date in the program")
-
-        end_date = input_data["end_date"]
-        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
-        if end_date > target_population.program.end_date:
-            raise GraphQLError("End date cannot be later that end date in the program")
 
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
             created_by=user,
             target_population=target_population,
             program=target_population.program,
-            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
+            program_cycle=program_cycle,
             currency=input_data["currency"],
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
             status_date=timezone.now(),
-            start_date=input_data["start_date"],
-            end_date=input_data["end_date"],
+            start_date=program_cycle.start_date,
+            end_date=program_cycle.end_date,
             status=PaymentPlan.Status.PREPARING,
         )
+        program_cycle.set_active()
 
         TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
             status=TargetPopulation.STATUS_ASSIGNED
@@ -375,19 +378,11 @@ class PaymentPlanService:
         recreate_payments = False
         recalculate_payments = False
 
-        basic_fields = ["start_date", "end_date"]
-
         if self.payment_plan.is_follow_up:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
             # remove not editable fields
             input_data.pop("targeting_id", None)
             input_data.pop("currency", None)
-            input_data.pop("start_date", None)
-            input_data.pop("end_date", None)
-
-        for basic_field in basic_fields:
-            if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):
-                setattr(self.payment_plan, basic_field, input_data[basic_field])
 
         targeting_id = decode_id_string(input_data.get("targeting_id"))
         if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
@@ -463,6 +458,10 @@ class PaymentPlanService:
         if not self.payment_plan.is_follow_up:
             self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
             self.payment_plan.target_population.save()
+
+        if self.payment_plan.program_cycle.paymentplan_set.count() == 1:
+            # move from Active to Draft need to delete all Payment Plans from a Cycle
+            self.payment_plan.program_cycle.set_draft()
 
         self.payment_plan.payment_items.all().delete()
         self.payment_plan.delete()
