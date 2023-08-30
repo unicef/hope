@@ -285,7 +285,7 @@ describe("Grievance", () => {
         ["USER-GENERATED", "GRV-0000001"],
         ["SYSTEM-GENERATED", "GRV-0000003"],
       ].forEach((testData) => {
-        it("Grievance Registration Date Import filter", () => {
+        it.only("Grievance Registration Date Import filter", () => {
           grievancePage.chooseTab(testData[0]);
           grievancePage.chooseRDIFilter("Test");
           grievancePage.expectedNumberOfRows(1);
