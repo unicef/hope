@@ -12,8 +12,8 @@ export const AllCashPlans = gql`
     $serviceProvider: String
     $deliveryType: [String]
     $verificationStatus: [String]
-    $startDateGte: DateTime
-    $endDateLte: DateTime
+    $startDateGte: Date
+    $endDateLte: Date
     $businessArea: String
   ) {
     allCashPlans(

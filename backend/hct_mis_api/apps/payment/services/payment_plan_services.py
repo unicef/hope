@@ -460,7 +460,8 @@ class PaymentPlanService:
             self.payment_plan.target_population.save()
 
         if self.payment_plan.program_cycle.paymentplan_set.count() == 1:
-            # move from Active to Draft need to delete all Payment Plans from a Cycle
+            # if it's the last Payment Plan in this Cycle need to update Cycle status
+            # move from Active to Draft Cycle need to delete all Payment Plans
             self.payment_plan.program_cycle.set_draft()
 
         self.payment_plan.payment_items.all().delete()

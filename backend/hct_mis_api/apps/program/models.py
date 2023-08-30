@@ -234,21 +234,21 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
     def total_entitled_quantity(self) -> Decimal:
         result = Decimal(0.0)
         for payment_plan in self.paymentplan_set.all():
-            result += payment_plan.total_entitled_quantity
+            result += payment_plan.total_entitled_quantity_usd
         return result
 
     @property
     def total_undelivered_quantity(self) -> Decimal:
         result = Decimal(0.0)
         for payment_plan in self.paymentplan_set.all():
-            result += payment_plan.total_undelivered_quantity
+            result += payment_plan.total_undelivered_quantity_usd
         return result
 
     @property
     def total_delivered_quantity(self) -> Decimal:
         result = Decimal(0.0)
         for payment_plan in self.paymentplan_set.all():
-            result += payment_plan.total_delivered_quantity
+            result += payment_plan.total_delivered_quantity_usd
         return result
 
     def validate_program_active_status(self) -> None:

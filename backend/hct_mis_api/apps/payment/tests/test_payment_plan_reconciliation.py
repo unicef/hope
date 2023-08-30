@@ -309,6 +309,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             Permissions.PROGRAMME_CREATE,
             Permissions.PROGRAMME_UPDATE,
             Permissions.PROGRAMME_ACTIVATE,
+            Permissions.PROGRAMME_CYCLE_CREATE,
+            Permissions.PROGRAMME_CYCLE_UPDATE,
             Permissions.TARGETING_CREATE,
             Permissions.TARGETING_LOCK,
             Permissions.TARGETING_SEND,
