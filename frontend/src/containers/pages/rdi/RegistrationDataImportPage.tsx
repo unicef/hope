@@ -9,11 +9,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import {
-  useAllProgramsForChoicesQuery,
-  useProgrammeChoiceDataQuery,
-  useProgramQuery
-} from "../../../__generated__/graphql";
+import { useProgramQuery } from "../../../__generated__/graphql";
 import {useBaseUrl} from "../../../hooks/useBaseUrl";
 
 const initialFilter = {
@@ -28,7 +24,7 @@ const initialFilter = {
 
 export const RegistrationDataImportPage = (): React.ReactElement => {
   const location = useLocation();
-  const { businessArea, programId } = useBaseUrl();
+  const { programId } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
 
@@ -39,7 +35,7 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data, loading: programLoading, error } = useProgramQuery({
+  const { data, loading: programLoading } = useProgramQuery({
     variables: { id: programId },
     fetchPolicy: 'cache-and-network',
   });
