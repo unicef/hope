@@ -14,13 +14,13 @@ const PaperContainer = styled(Paper)`
 `;
 
 interface BaseSectionProps {
-  children: ReactElement;
+  children?: ReactElement;
   buttons?: ReactElement;
   title: string | ReactElement;
 }
 
 export const BaseSection = ({
-  children,
+  children = <></>,
   buttons,
   title,
 }: BaseSectionProps): React.ReactElement => {
