@@ -135,17 +135,17 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
                     'edges': [
                         {
                             'node': {
-                                'endDate': '2022-01-01',
-                                'name': 'Default Cycle',
-                                'startDate': '2021-01-01',
+                                'endDate': '2020-01-02',
+                                'name': 'Default Cycle 001',
+                                'startDate': '2020-01-01',
                                 'status': 'DRAFT'
                             }
                         },
                         {
                             'node': {
-                                'endDate': '2022-04-05',
-                                'name': 'Official consumer song.',
-                                'startDate': '2022-03-18',
+                                'endDate': '2022-01-01',
+                                'name': 'Cycle 002',
+                                'startDate': '2021-01-01',
                                 'status': 'DRAFT'
                             }
                         },
@@ -309,17 +309,17 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                     'edges': [
                         {
                             'node': {
-                                'endDate': '2022-01-01',
-                                'name': 'Default Cycle',
-                                'startDate': '2021-01-01',
+                                'endDate': '2020-01-02',
+                                'name': 'Default Cycle 001',
+                                'startDate': '2020-01-01',
                                 'status': 'DRAFT'
                             }
                         },
                         {
                             'node': {
-                                'endDate': '2022-04-05',
-                                'name': 'Official consumer song.',
-                                'startDate': '2022-03-18',
+                                'endDate': '2022-01-01',
+                                'name': 'Cycle 002',
+                                'startDate': '2021-01-01',
                                 'status': 'DRAFT'
                             }
                         },
@@ -347,17 +347,17 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                     'edges': [
                         {
                             'node': {
-                                'endDate': '2022-01-01',
-                                'name': 'Default Cycle',
-                                'startDate': '2021-01-01',
+                                'endDate': '2020-01-02',
+                                'name': 'Default Cycle 001',
+                                'startDate': '2020-01-01',
                                 'status': 'DRAFT'
                             }
                         },
                         {
                             'node': {
-                                'endDate': '2022-04-05',
-                                'name': 'Official consumer song.',
-                                'startDate': '2022-03-18',
+                                'endDate': '2022-01-01',
+                                'name': 'Cycle 002',
+                                'startDate': '2021-01-01',
                                 'status': 'DRAFT'
                             }
                         },

@@ -83,8 +83,8 @@ class ProgramFactory(DjangoModelFactory):
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
 
     @factory.post_generation
-    def create_program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)

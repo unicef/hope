@@ -66,17 +66,20 @@ class TestProgramCycle(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(
+        cls.program = ProgramFactory(
             status=Program.DRAFT,
             business_area=cls.business_area,
             start_date="2020-01-01",
             end_date="2099-12-31",
+            cycle__name="Default Cycle 001",
+            cycle__start_date="2020-01-01",
+            cycle__end_date="2020-01-02",
         )
         cls.program_cycle = ProgramCycleFactory(
             program=cls.program,
             start_date="2021-01-01",
             end_date="2022-01-01",
-            name="Default Cycle",
+            name="Cycle 002",
         )
 
     @parameterized.expand(
