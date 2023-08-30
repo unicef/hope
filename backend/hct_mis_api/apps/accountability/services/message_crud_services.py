@@ -71,10 +71,10 @@ class MessageCrudServices:
                 head_of_household__phone_no_alternative_valid=False,
             )
         elif target_population_id := input_data.get("target_population"):
-            return Household.objects.filter(
-                Q(selections__target_population__id=decode_id_string(target_population_id))
-                & ~Q(selections__target_population__status=TargetPopulation.STATUS_OPEN)
-            ).exclude(
+            target_population = TargetPopulation.objects.get(id=decode_id_string(target_population_id))
+            if target_population.status == TargetPopulation.STATUS_OPEN:
+                return Household.objects.none()
+            return Household.objects.filter(selections__target_population=target_population).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
