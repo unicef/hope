@@ -39,7 +39,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_1_with_permission_program
                     'line': 3
                 }
             ],
-            'message': "Create/Update Program Cycle is possible only for Active Program., Program Cycles' timeframes mustn't overlap.",
+            'message': 'Create/Update Program Cycle is possible only for Active Program.',
             'path': [
                 'createProgramCycle'
             ]
@@ -143,9 +143,9 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
                         },
                         {
                             'node': {
-                                'endDate': '2022-11-27',
-                                'name': 'Begin meet.',
-                                'startDate': '2022-11-07',
+                                'endDate': '2022-04-05',
+                                'name': 'Official consumer song.',
+                                'startDate': '2022-03-18',
                                 'status': 'DRAFT'
                             }
                         },
@@ -175,40 +175,22 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
 
 snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_without_end_date 1'] = {
     'data': {
-        'createProgramCycle': {
-            'program': {
-                'cycles': {
-                    'edges': [
-                        {
-                            'node': {
-                                'endDate': '2022-01-01',
-                                'name': 'Default Cycle',
-                                'startDate': '2021-01-01',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
-                                'endDate': '2022-11-27',
-                                'name': 'Begin meet.',
-                                'startDate': '2022-11-07',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
-                                'endDate': '2022-12-12',
-                                'name': 'Cycle New Name',
-                                'startDate': '2022-11-25',
-                                'status': 'DRAFT'
-                            }
-                        }
-                    ],
-                    'totalCount': 3
+        'createProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
                 }
-            }
+            ],
+            'message': 'All Program Cycles should have end date for creation new one.',
+            'path': [
+                'createProgramCycle'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestProgramCycle::test_create_program_cycle_with_the_same_name 1'] = {
@@ -335,9 +317,9 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                         },
                         {
                             'node': {
-                                'endDate': '2022-11-27',
-                                'name': 'Begin meet.',
-                                'startDate': '2022-11-07',
+                                'endDate': '2022-04-05',
+                                'name': 'Official consumer song.',
+                                'startDate': '2022-03-18',
                                 'status': 'DRAFT'
                             }
                         },
@@ -373,9 +355,9 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                         },
                         {
                             'node': {
-                                'endDate': '2022-11-27',
-                                'name': 'Begin meet.',
-                                'startDate': '2022-11-07',
+                                'endDate': '2022-04-05',
+                                'name': 'Official consumer song.',
+                                'startDate': '2022-03-18',
                                 'status': 'DRAFT'
                             }
                         },
