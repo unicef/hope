@@ -96,10 +96,10 @@ class TestProgramCycle(APITestCase):
                 {"end_date": "2999-01-01"},
             ),
             (
-                    "with_permission_program_in_active_end_date_is_more_then_start_date",
-                    [Permissions.PROGRAMME_CREATE],
-                    Program.ACTIVE,
-                    {"start_date": "2098-02-22", "end_date": "2098-02-11"},
+                "with_permission_program_in_active_end_date_is_more_then_start_date",
+                [Permissions.PROGRAMME_CREATE],
+                Program.ACTIVE,
+                {"start_date": "2098-02-22", "end_date": "2098-02-11"},
             ),
         ]
     )
