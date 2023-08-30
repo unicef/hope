@@ -13,19 +13,19 @@ import {
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
 
-interface LookUpTargetPopulationTableRowProps {
+interface LookUpTargetPopulationTableRowSurveysProps {
   targetPopulation: TargetPopulationNode;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
 }
 
-export function LookUpTargetPopulationTableRow({
+export function LookUpTargetPopulationTableRowSurveys({
   targetPopulation,
   canViewDetails,
   radioChangeHandler,
   selectedTargetPopulation,
-}: LookUpTargetPopulationTableRowProps): React.ReactElement {
+}: LookUpTargetPopulationTableRowSurveysProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
@@ -77,7 +77,7 @@ export function LookUpTargetPopulationTableRow({
         {targetPopulation.program?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.totalHouseholdsCount || '-'}
+        {targetPopulation.totalHouseholdsCountWithValidPhoneNo || '-'}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
