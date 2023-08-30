@@ -352,8 +352,8 @@ type CashPlanNode implements Node {
   version: BigInt!
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
-  startDate: DateTime!
-  endDate: DateTime!
+  startDate: Date!
+  endDate: Date!
   program: ProgramNode!
   exchangeRate: Float
   totalEntitledQuantity: Float
@@ -675,8 +675,7 @@ type CreateGrievanceTicketMutation {
 input CreatePaymentPlanInput {
   businessAreaSlug: String!
   targetingId: ID!
-  startDate: Date!
-  endDate: Date!
+  programCycleId: ID!
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
@@ -699,6 +698,17 @@ input CreatePaymentVerificationInput {
 type CreateProgram {
   validationErrors: Arg
   program: ProgramNode
+}
+
+type CreateProgramCycle {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input CreateProgramCycleInput {
+  name: String!
+  startDate: Date!
+  endDate: Date
 }
 
 input CreateProgramInput {
@@ -802,6 +812,10 @@ type DeletePaymentVerificationPlan {
 }
 
 type DeleteProgram {
+  ok: Boolean
+}
+
+type DeleteProgramCycle {
   ok: Boolean
 }
 
@@ -2564,6 +2578,9 @@ type Mutations {
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
+  createProgramCycle(programCycleData: CreateProgramCycleInput!): CreateProgramCycle
+  updateProgramCycle(programCycleData: UpdateProgramCycleInput, version: BigInt): UpdateProgramCycle
+  deleteProgramCycle(programCycleId: ID!): DeleteProgramCycle
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
@@ -2916,6 +2933,7 @@ type PaymentPlanNode implements Node {
   totalDeliveredQuantityUsd: Float
   totalUndeliveredQuantity: Float
   totalUndeliveredQuantityUsd: Float
+  programCycle: ProgramCycleNode
   createdBy: UserNode!
   status: PaymentPlanStatus!
   backgroundActionStatus: PaymentPlanBackgroundActionStatus
@@ -3260,6 +3278,44 @@ input PositiveFeedbackTicketExtras {
   individual: ID
 }
 
+type ProgramCycleNode implements Node {
+  isRemoved: Boolean!
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastSyncAt: DateTime
+  version: BigInt!
+  iteration: Int!
+  name: String!
+  status: ProgramCycleStatus!
+  startDate: Date!
+  endDate: Date
+  program: ProgramNode!
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  totalDeliveredQuantity: Float
+  totalEntitledQuantity: Float
+  totalUndeliveredQuantity: Float
+  unicefId: String
+}
+
+type ProgramCycleNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ProgramCycleNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ProgramCycleNodeEdge {
+  node: ProgramCycleNode
+  cursor: String!
+}
+
+enum ProgramCycleStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+}
+
 enum ProgramFrequencyOfPayments {
   ONE_OFF
   REGULAR
@@ -3299,6 +3355,7 @@ type ProgramNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  cycles(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramCycleNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
@@ -3448,7 +3505,7 @@ type Query {
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
+  allCashPlans(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: Date, startDate_Lte: Date, startDate_Gte: Date, endDate: Date, endDate_Lte: Date, endDate_Gte: Date, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]
@@ -4724,8 +4781,6 @@ input UpdateIndividualDataUpdateIssueTypeExtras {
 input UpdatePaymentPlanInput {
   paymentPlanId: ID!
   targetingId: ID
-  startDate: Date
-  endDate: Date
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String
@@ -4746,6 +4801,18 @@ type UpdatePaymentVerificationStatusAndReceivedAmount {
 type UpdateProgram {
   validationErrors: Arg
   program: ProgramNode
+}
+
+type UpdateProgramCycle {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input UpdateProgramCycleInput {
+  id: ID!
+  name: String
+  startDate: Date
+  endDate: Date
 }
 
 input UpdateProgramInput {

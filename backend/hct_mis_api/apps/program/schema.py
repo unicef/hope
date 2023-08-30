@@ -57,7 +57,7 @@ from hct_mis_api.apps.payment.schema import (
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -93,6 +93,41 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
+
+
+class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+    total_delivered_quantity = graphene.Float()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
+    unicef_id = graphene.String()
+
+    def resolve_unicef_id(self, info: Any, **kwargs: Any) -> str:
+        # TODO: will update this one
+        # self.pk or self.unicef_id
+        return "P-11223399"
+
+    def resolve_total_delivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_delivered_quantity
+
+    def resolve_total_entitled_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_entitled_quantity
+
+    def resolve_total_undelivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_undelivered_quantity
+
+    class Meta:
+        model = ProgramCycle
+        filter_fields = [
+            "name",
+            "status",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):

@@ -33,7 +33,7 @@ class TestLogsAssignProgram(TestCase):
         cls.program = ProgramFactory(business_area=cls.business_area)
 
     def test_assign_program_to_existing_logs(self) -> None:
-        program_cycle = ProgramCycleFactory(program=self.program, iteration=2)
+        program_cycle = ProgramCycleFactory(program=self.program)
 
         rdi = RegistrationDataImportFactory(business_area=self.business_area, program_id=self.program.pk)
         tp = TargetPopulationFactory(program=self.program, business_area=self.business_area)

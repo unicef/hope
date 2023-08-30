@@ -97,8 +97,8 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
-    start_date = models.DateTimeField(db_index=True)
-    end_date = models.DateTimeField(db_index=True)
+    start_date = models.DateField(db_index=True)
+    end_date = models.DateField(db_index=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
 
@@ -371,6 +371,8 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     )
 
     class Status(models.TextChoices):
+        # new flow will update in next PRs
+        # Open -> Locked -> Entitlements_Saved -> In_Approval -> Approved -> Ongoing -> Reconciled
         PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"

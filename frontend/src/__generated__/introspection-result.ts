@@ -54,6 +54,9 @@
             "name": "PaymentPlanNode"
           },
           {
+            "name": "ProgramCycleNode"
+          },
+          {
             "name": "TargetPopulationNode"
           },
           {
