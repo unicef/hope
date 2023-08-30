@@ -1,12 +1,12 @@
 import React from 'react';
+import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { LookUpProgrammesTable } from '../../../../containers/tables/Surveys/LookUpProgrammesTable/LookUpProgrammesTable';
-import { LookUpTargetPopulationTable } from '../../../../containers/tables/Surveys/LookUpTargetPopulationTable';
+import { LookUpProgrammesTableSurveys } from '../../../../containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
+import { LookUpTargetPopulationTableSurveys } from '../../../../containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { SurveyTabsValues } from '../../../../utils/constants';
-import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
 
-interface LookUpSelectionTablesProps {
+interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;
   choicesData: ProgrammeChoiceDataQuery;
   values;
@@ -16,7 +16,7 @@ interface LookUpSelectionTablesProps {
   onValueChange;
   handleChange;
 }
-export function LookUpSelectionTables({
+export const LookUpSelectionTablesSurveys = ({
   selectedTab,
   choicesData,
   values,
@@ -25,13 +25,13 @@ export function LookUpSelectionTables({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesProps): React.ReactElement {
+}: LookUpSelectionTablesSurveysProps): React.ReactElement => {
   const permissions = usePermissions();
 
   return (
     <>
       {selectedTab === SurveyTabsValues.PROGRAM && (
-        <LookUpProgrammesTable
+        <LookUpProgrammesTableSurveys
           businessArea={businessArea}
           filter={filtersProgramApplied}
           choicesData={choicesData}
@@ -43,7 +43,7 @@ export function LookUpSelectionTables({
         />
       )}
       {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
-        <LookUpTargetPopulationTable
+        <LookUpTargetPopulationTableSurveys
           filter={filtersTargetPopulationApplied}
           canViewDetails={hasPermissions(
             PERMISSIONS.TARGETING_VIEW_DETAILS,
@@ -60,4 +60,4 @@ export function LookUpSelectionTables({
       )}
     </>
   );
-}
+};
