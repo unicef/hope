@@ -232,18 +232,24 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
 
     @property
     def total_entitled_quantity(self) -> Decimal:
-        # TODO: update this one
-        return Decimal(0.0)
+        result = Decimal(0.0)
+        for payment_plan in self.paymentplan_set.all():
+            result += payment_plan.total_entitled_quantity
+        return result
 
     @property
     def total_undelivered_quantity(self) -> Decimal:
-        # TODO: update this one
-        return Decimal(0.0)
+        result = Decimal(0.0)
+        for payment_plan in self.paymentplan_set.all():
+            result += payment_plan.total_undelivered_quantity
+        return result
 
     @property
     def total_delivered_quantity(self) -> Decimal:
-        # TODO: update this one
-        return Decimal(0.0)
+        result = Decimal(0.0)
+        for payment_plan in self.paymentplan_set.all():
+            result += payment_plan.total_delivered_quantity
+        return result
 
     def validate_program_active_status(self) -> None:
         # all changes with Program Cycle are possible within Active Program
