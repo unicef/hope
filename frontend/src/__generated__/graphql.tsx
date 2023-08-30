@@ -666,8 +666,8 @@ export type CashPlanNode = Node & {
   version: Scalars['BigInt'],
   businessArea: UserBusinessAreaNode,
   statusDate: Scalars['DateTime'],
-  startDate: Scalars['DateTime'],
-  endDate: Scalars['DateTime'],
+  startDate: Scalars['Date'],
+  endDate: Scalars['Date'],
   program: ProgramNode,
   exchangeRate?: Maybe<Scalars['Float']>,
   totalEntitledQuantity?: Maybe<Scalars['Float']>,
@@ -1099,8 +1099,6 @@ export type CreatePaymentPlanInput = {
   businessAreaSlug: Scalars['String'],
   targetingId: Scalars['ID'],
   programCycleId: Scalars['ID'],
-  startDate: Scalars['Date'],
-  endDate: Scalars['Date'],
   dispersionStartDate: Scalars['Date'],
   dispersionEndDate: Scalars['Date'],
   currency: Scalars['String'],
@@ -1134,7 +1132,6 @@ export type CreateProgramCycle = {
 };
 
 export type CreateProgramCycleInput = {
-  programId: Scalars['ID'],
   name: Scalars['String'],
   startDate: Scalars['Date'],
   endDate?: Maybe<Scalars['Date']>,
@@ -4950,7 +4947,6 @@ export type ProgramCycleNode = Node & {
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   version: Scalars['BigInt'],
-  iteration: Scalars['Int'],
   name: Scalars['String'],
   status: ProgramCycleStatus,
   startDate: Scalars['Date'],
@@ -5172,7 +5168,8 @@ export type ProgramNodeCyclesArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>
 };
 
 
@@ -6081,12 +6078,12 @@ export type QueryAllCashPlansArgs = {
   assistanceThrough_Startswith?: Maybe<Scalars['String']>,
   serviceProvider_FullName?: Maybe<Scalars['String']>,
   serviceProvider_FullName_Startswith?: Maybe<Scalars['String']>,
-  startDate?: Maybe<Scalars['DateTime']>,
-  startDate_Lte?: Maybe<Scalars['DateTime']>,
-  startDate_Gte?: Maybe<Scalars['DateTime']>,
-  endDate?: Maybe<Scalars['DateTime']>,
-  endDate_Lte?: Maybe<Scalars['DateTime']>,
-  endDate_Gte?: Maybe<Scalars['DateTime']>,
+  startDate?: Maybe<Scalars['Date']>,
+  startDate_Lte?: Maybe<Scalars['Date']>,
+  startDate_Gte?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  endDate_Lte?: Maybe<Scalars['Date']>,
+  endDate_Gte?: Maybe<Scalars['Date']>,
   businessArea?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -8036,8 +8033,6 @@ export type UpdateIndividualDataUpdateIssueTypeExtras = {
 export type UpdatePaymentPlanInput = {
   paymentPlanId: Scalars['ID'],
   targetingId?: Maybe<Scalars['ID']>,
-  startDate?: Maybe<Scalars['Date']>,
-  endDate?: Maybe<Scalars['Date']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
   currency?: Maybe<Scalars['String']>,
@@ -12102,8 +12097,8 @@ export type AllCashPlansQueryVariables = {
   serviceProvider?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
-  startDateGte?: Maybe<Scalars['DateTime']>,
-  endDateLte?: Maybe<Scalars['DateTime']>,
+  startDateGte?: Maybe<Scalars['Date']>,
+  endDateLte?: Maybe<Scalars['Date']>,
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -22421,7 +22416,7 @@ export type PaymentPlanQueryHookResult = ReturnType<typeof usePaymentPlanQuery>;
 export type PaymentPlanLazyQueryHookResult = ReturnType<typeof usePaymentPlanLazyQuery>;
 export type PaymentPlanQueryResult = ApolloReactCommon.QueryResult<PaymentPlanQuery, PaymentPlanQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: Date, $endDateLte: Date, $businessArea: String) {
   allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, serviceProvider_FullName_Startswith: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
@@ -28713,8 +28708,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
   exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
@@ -30593,7 +30588,6 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  iteration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ProgramCycleStatus'], ParentType, ContextType>,
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,

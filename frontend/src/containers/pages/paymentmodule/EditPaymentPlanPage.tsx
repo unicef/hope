@@ -113,8 +113,6 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
           input: {
             paymentPlanId: id,
             targetingId: values.targetingId,
-            startDate: values.startDate,
-            endDate: values.endDate,
             dispersionStartDate: values.dispersionStartDate,
             dispersionEndDate: values.dispersionEndDate,
             currency: values.currency?.value
