@@ -232,6 +232,8 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
             program=program,
             program_cycle_id=program_cycle.pk,
         )
+        # TODO: need to check it
+        # user can't remove 'end_date', 'start_date' and 'name'
 
         if start_date := program_cycle_data.get("start_date"):
             program_cycle.start_date = start_date
