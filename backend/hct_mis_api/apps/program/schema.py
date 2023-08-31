@@ -98,7 +98,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            Permissions.PROGRAMME_CYCLE_VIEW_DETAILS,
         ),
     )
     total_delivered_quantity = graphene.Float()
@@ -179,6 +179,8 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
+    # TODO: add filter by program_id
+    # all_program_cycles = () Permissions.PROGRAMME_CYCLE_VIEW_LIST
     chart_programmes_by_sector = graphene.Field(
         ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
@@ -351,4 +353,9 @@ class Query(graphene.ObjectType):
     def resolve_all_active_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         return Program.objects.exclude(status=Program.DRAFT).filter(
             business_area__slug=info.context.headers.get("Business-Area").lower()
+        )
+
+    def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[ProgramCycle]:
+        return ProgramCycle.objects.filter(
+            program=info.context.headers.get("Program") # need to decode ID
         )

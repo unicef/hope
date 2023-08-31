@@ -79,6 +79,7 @@ class ProgramCycleValidator(CommonValidator):
 
     @classmethod
     def validate_timeframes_overlapping(cls, *args: Any, **kwargs: Any) -> None:
+        # TODO: need to double check
         # A user can leave the Program Cycle end date empty if it was empty upon starting the edit.
         program = kwargs.get("program")
         start_date = kwargs.get("start_date")
