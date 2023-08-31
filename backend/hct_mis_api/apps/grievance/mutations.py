@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
+    clear_cache_for_key,
     decode_id_string,
     to_snake_case,
 )
@@ -642,9 +643,13 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
         grievance_tickets_ids = list(grievance_tickets.values_list("id", flat=True))
 
         if grievance_tickets.exists():
+            business_area_slug = grievance_tickets.first().business_area.slug
             grievance_tickets.filter(status=GrievanceTicket.STATUS_NEW).update(status=GrievanceTicket.STATUS_ASSIGNED)
             grievance_tickets.update(assigned_to=assigned_to_obj)
             bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id)
+            # count cache must be removed for proper filtering in grievance tickets
+            cache_key = f"count_{business_area_slug}_GrievanceTicketNodeConnection_"
+            clear_cache_for_key(cache_key)
 
         return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
 
@@ -944,6 +949,10 @@ class DeleteHouseholdApproveMutation(PermissionMutation):
             reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
             if reason_hh_obj.withdrawn:
                 raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
+            if reason_hh_obj == ticket_details.household:
+                raise ValidationError(
+                    f"The provided household {reason_hh_obj.unicef_id} is the same as the one being withdrawn."
+                )
 
         # update reason_household value
         ticket_details.reason_household = reason_hh_obj  # set HH or None

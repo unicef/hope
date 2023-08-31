@@ -5196,6 +5196,16 @@
                 "defaultValue": null
               },
               {
+                "name": "numberOfHouseholdsWithTpInProgram",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -5821,6 +5831,16 @@
                 "defaultValue": null
               },
               {
+                "name": "numberOfHouseholdsWithTpInProgram",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -6064,6 +6084,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -6398,6 +6428,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -9117,6 +9157,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "PaymentHouseholdSnapshotNode",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "ReportNode",
             "ofType": null
           },
@@ -10527,6 +10572,16 @@
                 "defaultValue": null
               },
               {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -10752,6 +10807,16 @@
                 "defaultValue": null
               },
               {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -10972,6 +11037,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -13077,6 +13152,18 @@
             "deprecationReason": null
           },
           {
+            "name": "registrationId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "disabilityCertificatePicture",
             "description": null,
             "args": [],
@@ -13112,6 +13199,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ageAtRegistration",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -14575,7 +14674,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GRANDDAUGHTER_GRANDSON",
+            "name": "GRANDDAUGHER_GRANDSON",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -14881,13 +14980,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "HouseholdResidenceStatus",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15778,6 +15873,18 @@
           },
           {
             "name": "rowId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "registrationId",
             "description": null,
             "args": [],
             "type": {
@@ -16974,6 +17081,16 @@
                 "defaultValue": null
               },
               {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -17331,53 +17448,6 @@
           }
         ],
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "HouseholdResidenceStatus",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "A_",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "IDP",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "REFUGEE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "OTHERS_OF_CONCERN",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "HOST",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NON_HOST",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
         "possibleTypes": null
       },
       {
@@ -20885,83 +20955,6 @@
             "deprecationReason": null
           },
           {
-            "name": "programSet",
-            "description": null,
-            "args": [
-              {
-                "name": "offset",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "before",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "name",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ProgramNodeConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "targetpopulationSet",
             "description": null,
             "args": [
@@ -21164,6 +21157,16 @@
                 "defaultValue": null
               },
               {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -21180,6 +21183,83 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TargetPopulationNodeConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "programSet",
+            "description": null,
+            "args": [
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProgramNodeConnection",
                 "ofType": null
               }
             },
@@ -23230,6 +23310,22 @@
             "deprecationReason": null
           },
           {
+            "name": "version",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BigInt",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "unicefId",
             "description": null,
             "args": [],
@@ -25157,6 +25253,16 @@
                 "defaultValue": null
               },
               {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -25418,6 +25524,18 @@
           },
           {
             "name": "totalNumberOfHouseholds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalNumberOfHouseholdsWithTpInProgram",
             "description": null,
             "args": [],
             "type": {
@@ -25735,6 +25853,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "version",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BigInt",
                 "ofType": null
               }
             },
@@ -29971,6 +30105,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -35551,6 +35695,18 @@
             "deprecationReason": null
           },
           {
+            "name": "householdSnapshot",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentHouseholdSnapshotNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentPlanHardConflicted",
             "description": null,
             "args": [],
@@ -37339,6 +37495,119 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaymentHouseholdSnapshotNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snapshotData",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONString",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "householdId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "UUID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "payment",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaymentNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -40348,6 +40617,18 @@
           },
           {
             "name": "pending",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "forceFailed",
             "description": null,
             "args": [],
             "type": {
@@ -50327,83 +50608,6 @@
             "deprecationReason": null
           },
           {
-            "name": "programSet",
-            "description": null,
-            "args": [
-              {
-                "name": "offset",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "before",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "name",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ProgramNodeConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "targetpopulationSet",
             "description": null,
             "args": [
@@ -50606,6 +50810,16 @@
                 "defaultValue": null
               },
               {
+                "name": "statusNot",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -50622,6 +50836,83 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TargetPopulationNodeConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "programSet",
+            "description": null,
+            "args": [
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "name",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProgramNodeConnection",
                 "ofType": null
               }
             },
@@ -53345,6 +53636,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ageAtRegistration",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
               "ofType": null
             },
             "isDeprecated": false,
@@ -58120,6 +58423,16 @@
                     "name": "CreatePaymentVerificationInput",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "version",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "BigInt",
+                  "ofType": null
                 },
                 "defaultValue": null
               }
@@ -63016,7 +63329,7 @@
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Boolean",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null

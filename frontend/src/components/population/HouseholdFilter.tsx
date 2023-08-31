@@ -93,9 +93,6 @@ export const HouseholdFilters = ({
             fullWidth
             data-cy='hh-filters-program'
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {programs.map((program) => (
               <MenuItem key={program.id} value={program.id}>
                 {program.name}
@@ -165,9 +162,6 @@ export const HouseholdFilters = ({
             value={filter.orderBy}
             data-cy='hh-filters-order-by'
           >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
             {orderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}

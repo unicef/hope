@@ -1,15 +1,14 @@
-import moment from 'moment';
 import React, { ReactElement } from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
+import styled from 'styled-components';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
@@ -44,16 +43,16 @@ export function RegistrationDataImportTable({
   const businessArea = useBusinessArea();
   const initialVariables = {
     search: filter.search,
-    importDate: filter.importDate
-      ? moment(filter.importDate).format('YYYY-MM-DD')
-      : null,
     importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
-    importDateRange: JSON.stringify(filter.importDateRange),
-    size: JSON.stringify(filter.size),
+    importDateRange: JSON.stringify({
+      min: filter.importDateRangeMin,
+      max: filter.importDateRangeMax,
+    }),
+    size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
   };
 
   const handleRadioChange = (id: string): void => {
