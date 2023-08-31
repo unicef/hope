@@ -96,11 +96,12 @@ export const IndividualsFilter = ({
           <Grid item xs={4}>
             <SelectFilter
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={undefined}
+              label={t('Search Type')}
               value={filter.searchType}
               borderRadius='0px 4px 4px 0px'
               data-cy='filter-search-type'
               fullWidth
+              disableClearable
             >
               {searchTypeOptions.map(({ name, value }) => (
                 <MenuItem key={value} value={value}>
@@ -189,6 +190,7 @@ export const IndividualsFilter = ({
             value={filter.orderBy}
             fullWidth
             data-cy='ind-filters-order-by'
+            disableClearable
           >
             {orderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
