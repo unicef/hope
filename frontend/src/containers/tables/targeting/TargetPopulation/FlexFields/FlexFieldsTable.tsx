@@ -30,7 +30,7 @@ export const FlexFieldsTable = ({
   const filterTable = (): AllFieldsAttributesQuery['allFieldsAttributes'] => {
     const filters = {
       labelEn: searchValue,
-      associatedWith: selectedOption,
+      associatedWith: selectedOption === 'All' ? '' : selectedOption,
     };
     let filteredByFieldType = [];
     if (selectedFieldType === 'All') {
