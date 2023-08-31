@@ -175,16 +175,34 @@ class TestProgramCycle(APITestCase):
             context=context,
             variables={"programCycleData": inputs},
         )
+        # overlapping start_date
         self.snapshot_graphql_request(
             request_string=CREATE_PROGRAM_CYCLE_MUTATION,
             context=context,
             variables={"programCycleData": {"name": "Cycle New 333", "startDate": "2055-11-25"}},
         )
+        # overlapping start_date
         self.snapshot_graphql_request(
             request_string=CREATE_PROGRAM_CYCLE_MUTATION,
             context=context,
             variables={
                 "programCycleData": {"name": "Cycle New 444", "startDate": "2055-11-25", "endDate": "2055-12-12"}
+            },
+        )
+        # overlapping end_date
+        self.snapshot_graphql_request(
+            request_string=CREATE_PROGRAM_CYCLE_MUTATION,
+            context=context,
+            variables={
+                "programCycleData": {"name": "Cycle New 555", "startDate": "2055-11-01", "endDate": "2055-11-11"}
+            },
+        )
+        # overlapping both
+        self.snapshot_graphql_request(
+            request_string=CREATE_PROGRAM_CYCLE_MUTATION,
+            context=context,
+            variables={
+                "programCycleData": {"name": "Cycle New 555", "startDate": "2055-11-12", "endDate": "2055-11-29"}
             },
         )
 
@@ -319,7 +337,7 @@ class TestProgramCycle(APITestCase):
             variables={"programCycleData": inputs},
         )
 
-        cycle = self.program.cycles.filter(name="New Cycle 001").first()
+        cycle = self.program.cycles.get(name="New Cycle 001")
         encoded_cycle_id = self.id_to_base64(cycle.pk, "ProgramCycleNode")
         self.snapshot_graphql_request(
             request_string=DELETE_PROGRAM_CYCLE_MUTATION,

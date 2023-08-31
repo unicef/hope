@@ -79,32 +79,46 @@ class ProgramCycleValidator(CommonValidator):
 
     @classmethod
     def validate_timeframes_overlapping(cls, *args: Any, **kwargs: Any) -> None:
-        # TODO: need to double check
-        # A user can leave the Program Cycle end date empty if it was empty upon starting the edit.
         program = kwargs.get("program")
+        program_cycle = kwargs.get("program_cycle")
         start_date = kwargs.get("start_date")
         end_date = kwargs.get("end_date")
-        program_cycle_id = kwargs.get("program_cycle_id")
+        raise_error = False
 
-        cycles = program.cycles.exclude(id=program_cycle_id) if program_cycle_id else program.cycles.all()
+        existing_cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
 
         if start_date:
-            cycles = cycles.filter(Q(start_date__lte=start_date, end_date__gte=start_date))
-
+            if existing_cycles.filter(start_date__lte=start_date, end_date__gte=start_date).exists():
+                raise_error = True
         if end_date:
-            cycles = cycles.filter(start_date__lte=end_date, end_date__gte=end_date)
+            if existing_cycles.filter(start_date__lte=end_date, end_date__gte=end_date).exists():
+                raise_error = True
 
-        if cycles.exists():
+        if raise_error:
             raise ValidationError("Program Cycles' timeframes mustn't overlap.")
 
     @classmethod
     def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
         # A user can’t leave the Program Cycle name empty.
         program = kwargs.get("program")
-        program_cycle_id = kwargs.get("program_cycle_id")
-        cycles = program.cycles.exclude(id=program_cycle_id) if program_cycle_id else program.cycles.all()
+        program_cycle = kwargs.get("program_cycle")
+        cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
         if cycles.filter(name=kwargs["name"]).exists():
             raise ValidationError("Program Cycles' name should be unique.")
+
+    @classmethod
+    def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
+        if (program_cycle := kwargs.get("program_cycle")) and not kwargs.get("is_create_action"):
+            if program_cycle.start_date and "start_date" in kwargs and kwargs.get("start_date") is None:
+                raise ValidationError("Not possible leave the Program Cycle start date empty.")
+
+            if program_cycle.end_date and "end_date" in kwargs and kwargs.get("end_date") is None:
+                raise ValidationError(
+                    "Not possible leave the Program Cycle end date empty if it was empty upon starting the edit."
+                )
+
+            if program_cycle.name and "name" in kwargs and kwargs.get("name") is None:
+                raise ValidationError("Not possible leave the Program Cycle name empty.")
 
 
 class ProgramCycleDeletionValidator(BaseValidator):

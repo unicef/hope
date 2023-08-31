@@ -448,7 +448,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             context={"user": self.user, "headers": {"Program": program_id}},
             variables={
                 "programCycleData": {
-                    "id": encoded_cycle_id,
+                    "programCycleId": encoded_cycle_id,
                     "name": "NEW NEW NAME",
                     "endDate": timezone.datetime(2022, 8, 29, tzinfo=utc).date(),
                 }
