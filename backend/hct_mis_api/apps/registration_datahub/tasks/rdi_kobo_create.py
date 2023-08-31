@@ -211,8 +211,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
             # check duplication in json AB#166944
             household_uuid = str(household.get("_uuid"))
-            if household_uuid in households_to_create_uuids:
-                continue
+            # commented AB#171697
+            # if household_uuid in households_to_create_uuids:
+            #     continue
             households_to_create_uuids.append(household_uuid)
 
             submission_meta_data.pop("amended", None)

@@ -523,8 +523,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
 
-        self.assertEqual(households.count(), 2)
-        self.assertEqual(individuals.count(), 5)
+        self.assertEqual(households.count(), 3)  # related to AB#171697
+        self.assertEqual(individuals.count(), 8)  # related to AB#171697
 
         documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
