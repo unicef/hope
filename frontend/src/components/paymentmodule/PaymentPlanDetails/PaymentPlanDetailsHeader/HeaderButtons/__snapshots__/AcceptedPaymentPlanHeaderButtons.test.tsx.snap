@@ -37,7 +37,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       </button>
     </div>
     <div
-      class="MuiBox-root MuiBox-root-3"
+      class="MuiBox-root MuiBox-root-4"
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
@@ -59,10 +59,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons should render not disabled buttons 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-4"
+    class="MuiBox-root MuiBox-root-5"
   >
     <div
-      class="MuiBox-root MuiBox-root-5"
+      class="MuiBox-root MuiBox-root-6"
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
@@ -95,7 +95,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       </button>
     </div>
     <div
-      class="MuiBox-root MuiBox-root-6"
+      class="MuiBox-root MuiBox-root-8"
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
