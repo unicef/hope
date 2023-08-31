@@ -40,8 +40,10 @@ const searchTypeOptions = [
   { name: 'Individual ID', value: 'individual_id' },
   { name: 'Household ID', value: 'household_id' },
   { name: 'Full Name', value: 'full_name' },
+  { name: 'Phone Number', value: 'phone_no' },
   { name: 'National ID', value: 'national_id' },
   { name: 'Passport Number', value: 'national_passport' },
+  { name: 'Tax ID', value: 'tax_id' },
 ];
 
 export const IndividualsFilter = ({

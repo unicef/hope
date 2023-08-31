@@ -282,7 +282,9 @@ class IndividualFilter(FilterSet):
             return qs.filter(household__unicef_id__icontains=value)
         if key == "full_name":
             return qs.filter(full_name__icontains=value)
-        if key in ["national_id", "national_passport"]:
+        if key == "phone_no":
+            return qs.filter(Q(phone_no=value) | Q(phone_no_alternative=value))
+        if key in ("national_id", "national_passport", "tax_id"):
             return qs.filter(documents__type__key=key, documents__document_number__icontains=value)
         raise KeyError(f"Invalid search key '{key}'")
 
@@ -360,17 +362,26 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
                     }
                 },
             )
-        else:
-            all_queries.append(
-                {
-                    "match_phrase_prefix": {
-                        "full_name": {
-                            "query": search,
-                        }
+    elif key == "phone_no":
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "phone_no_text": {
+                        "query": search,
                     }
-                },
-            )
-    elif key in ["national_id", "national_passport"]:
+                }
+            }
+        )
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "phone_no_alternative_text": {
+                        "query": search,
+                    }
+                }
+            },
+        )
+    elif key in ("national_id", "national_passport", "tax_id"):
         all_queries.append(
             {
                 "bool": {

@@ -755,6 +755,7 @@ Clear Cache,clear-cache/
     "ADMIN_SYNC_REMOTE_SERVER": ("http://localhost:8000", "Remote server base URL", str),
     "ADMIN_SYNC_LOCAL_ADMIN_URL": ("/admin/", "Local server admin URL", str),
     "ADMIN_SYNC_REMOTE_ADMIN_URL": ("/admin/", "Remote server admin URL", str),
+    "REST_BANNER_MESSAGE": ("", "Banner Message", str),
 }
 
 CONSTANCE_DBS = ("default",)
