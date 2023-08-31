@@ -816,7 +816,7 @@ type DeleteProgram {
 }
 
 type DeleteProgramCycle {
-  ok: Boolean
+  program: ProgramNode
 }
 
 type DeleteRegistrationDataImport {
@@ -4808,7 +4808,7 @@ type UpdateProgramCycle {
 }
 
 input UpdateProgramCycleInput {
-  id: ID!
+  programCycleId: ID!
   name: String
   startDate: Date
   endDate: Date

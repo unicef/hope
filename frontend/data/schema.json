@@ -69575,7 +69575,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "id",
+            "name": "programCycleId",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -69664,12 +69664,12 @@
         "description": null,
         "fields": [
           {
-            "name": "ok",
+            "name": "program",
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
+              "kind": "OBJECT",
+              "name": "ProgramNode",
               "ofType": null
             },
             "isDeprecated": false,
