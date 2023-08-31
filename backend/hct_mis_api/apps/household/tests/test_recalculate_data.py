@@ -376,6 +376,17 @@ class TestRecalculateData(TestCase):
 
         household, _ = recalculate_data(household=household, save=True)
 
-        print("*******")
-        print(household.__dict__)
-        self.assertEqual(1, 2)
+        self.assertEqual(household.size, 6)
+        self.assertEqual(household.female_age_group_0_5_count, 1)
+        self.assertEqual(household.male_age_group_0_5_count, 0)  # NON_BENEFICIARY
+        self.assertEqual(household.female_age_group_12_17_count, 1)
+        self.assertEqual(household.female_age_group_18_59_count, 3)
+        self.assertEqual(household.male_age_group_60_count, 1)
+        self.assertEqual(household.pregnant_count, 2)
+        self.assertEqual(household.female_age_group_0_5_disabled_count, 1)
+        self.assertEqual(household.female_age_group_12_17_disabled_count, 1)
+        self.assertEqual(household.female_age_group_18_59_disabled_count, 1)
+        self.assertEqual(household.children_count, 2)
+        self.assertEqual(household.female_children_count, 2)
+        self.assertEqual(household.children_disabled_count, 2)
+        self.assertEqual(household.female_children_disabled_count, 2)
