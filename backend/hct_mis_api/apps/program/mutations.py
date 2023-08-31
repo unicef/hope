@@ -249,7 +249,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
 
 
 class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
-    ok = graphene.Boolean()
+    program = graphene.Field(ProgramNode)
 
     class Arguments:
         program_cycle_id = graphene.ID(required=True)
@@ -268,7 +268,7 @@ class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
 
         program_cycle.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
-        return cls(ok=True)
+        return cls(program=program)
 
 
 class Mutations(graphene.ObjectType):
