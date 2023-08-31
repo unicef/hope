@@ -12,6 +12,7 @@ import {
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   id:
     'UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==',
+  version: 1000,
   unicefId: 'PP-0060-22-00000001',
   status: PaymentPlanStatus.Locked,
   isFollowUp: false,

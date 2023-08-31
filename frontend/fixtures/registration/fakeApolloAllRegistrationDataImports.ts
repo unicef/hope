@@ -5,10 +5,11 @@ export const fakeApolloAllRegistrationDataImports = [
     request: {
       query: AllRegistrationDataImportsDocument,
       variables: {
-        first: 10,
-        importDate: null,
-        orderBy: '-import_date',
         businessArea: 'afghanistan',
+        importDateRange: '{}',
+        size: '{}',
+        first: 10,
+        orderBy: '-import_date',
       },
     },
     result: {

@@ -1,13 +1,15 @@
 import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
-import moment from 'moment';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
-import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
+import {
+  createHandleApplyFilterChange,
+  dateToIsoString,
+} from '../../../utils/utils';
 
 interface ReportingFiltersProps {
   filter;
@@ -61,9 +63,6 @@ export const ReportingFilters = ({
             onChange={(e) => handleFilterChange('type', e.target.value)}
             value={filter.type}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.reportTypesChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
@@ -80,9 +79,7 @@ export const ReportingFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'createdFrom',
-                moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                dateToIsoString(date, 'startOfDay'),
               )
             }
             value={filter.createdFrom}
@@ -92,12 +89,7 @@ export const ReportingFilters = ({
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
-              handleFilterChange(
-                'createdTo',
-                moment(date)
-                  .endOf('day')
-                  .toISOString(),
-              )
+              handleFilterChange('createdTo', dateToIsoString(date, 'endOfDay'))
             }
             value={filter.createdTo}
           />
@@ -108,9 +100,6 @@ export const ReportingFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
           >
-            <MenuItem value=''>
-              <em>None</em>
-            </MenuItem>
             {choicesData.reportStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>

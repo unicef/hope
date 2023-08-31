@@ -19,9 +19,8 @@ import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaym
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
-const StatusWrapper = styled.div`
+const StatusWrapper = styled(Box)`
   width: 300px;
-  margin-left: 30px;
 `;
 
 interface PaymentPlanDetailsHeaderProps {
@@ -178,7 +177,7 @@ export const PaymentPlanDetailsHeader = ({
           <Box ml={1}>
             <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
           </Box>
-          <StatusWrapper>
+          <StatusWrapper ml={6}>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}

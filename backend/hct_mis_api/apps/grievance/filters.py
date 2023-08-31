@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Sequence, Tuple
 
 from django.db import models
@@ -24,6 +25,8 @@ from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_quer
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+
+logger = logging.getLogger(__name__)
 
 
 class IsNull(Func):
@@ -194,7 +197,12 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        key, value = tuple(value.split(" ", 1))
+        try:
+            key, value = tuple(value.split(" ", 1))
+        except ValueError:
+            logger.info("Search term cannot be empty string or space")
+            return qs.none()
+
         if key == "ticket_id":
             values = list(map(str.strip, value.split(",")))
             return qs.filter(Q(unicef_id__in=values))
