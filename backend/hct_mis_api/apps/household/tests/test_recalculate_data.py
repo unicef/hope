@@ -385,7 +385,7 @@ class TestRecalculateData(TestCase):
         self.assertEqual(household.pregnant_count, 2)
         self.assertEqual(household.female_age_group_0_5_disabled_count, 1)
         self.assertEqual(household.female_age_group_12_17_disabled_count, 1)
-        self.assertEqual(household.female_age_group_18_59_disabled_count, 1)
+        self.assertEqual(household.female_age_group_18_59_disabled_count, 3)
         self.assertEqual(household.children_count, 2)
         self.assertEqual(household.female_children_count, 2)
         self.assertEqual(household.children_disabled_count, 2)
