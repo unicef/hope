@@ -22,8 +22,7 @@ describe("Global Program Filter - Impacts", () => {
   describe("E2E tests GPF impacts", () => {
     it.skip("GPF - Registration data import Verification", () => {});
     it.skip("GPF - Program management", () => {});
-    // ToDo: Add after fix 171171:
-    it.skip("GPF - Targeting", () => {
+    it("GPF - Targeting", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -67,8 +66,7 @@ describe("Global Program Filter - Impacts", () => {
       grievancePage.clickMenuButtonGrievanceTickets();
       grievancePage.getTicketListRow().should("have.length", 0);
     });
-    // ToDo: Add after fix 171163:
-    it.skip("GPF - Feedback", () => {
+    it("GPF - Feedback", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -79,8 +77,7 @@ describe("Global Program Filter - Impacts", () => {
       feedbackPage.getTicketListRow().should("have.length", 2);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage.getProgrammesOptions().contains("Draft Program").click();
-      // ToDo: After fix frontend:
-      // feedbackPage.clickMenuButtonGrievance();
+      feedbackPage.clickMenuButtonGrievance();
       feedbackPage.clickMenuButtonGrievanceTickets();
       feedbackPage.getTicketListRow().should("have.length", 0);
     });
