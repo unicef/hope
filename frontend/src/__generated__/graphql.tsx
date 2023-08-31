@@ -1250,7 +1250,7 @@ export type DeleteProgram = {
 
 export type DeleteProgramCycle = {
    __typename?: 'DeleteProgramCycle',
-  ok?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<ProgramNode>,
 };
 
 export type DeleteRegistrationDataImport = {
@@ -8066,7 +8066,7 @@ export type UpdateProgramCycle = {
 };
 
 export type UpdateProgramCycleInput = {
-  id: Scalars['ID'],
+  programCycleId: Scalars['ID'],
   name?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
@@ -10147,6 +10147,84 @@ export type SetSteficonRuleOnPpListMutation = (
           & Pick<SteficonRuleNode, 'id' | 'name'>
         )> }
       )> }
+    )> }
+  )> }
+);
+
+export type CreateProgramCycleMutationVariables = {
+  programCycleData: CreateProgramCycleInput
+};
+
+
+export type CreateProgramCycleMutation = (
+  { __typename?: 'Mutations' }
+  & { createProgramCycle: Maybe<(
+    { __typename?: 'CreateProgramCycle' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+      & { cycles: (
+        { __typename?: 'ProgramCycleNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'ProgramCycleNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type DeleteProgramCycleMutationVariables = {
+  programCycleId: Scalars['ID']
+};
+
+
+export type DeleteProgramCycleMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteProgramCycle: Maybe<(
+    { __typename?: 'DeleteProgramCycle' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+      & { cycles: (
+        { __typename?: 'ProgramCycleNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'ProgramCycleNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type UpdateProgramCycleMutationVariables = {
+  programCycleData: UpdateProgramCycleInput
+};
+
+
+export type UpdateProgramCycleMutation = (
+  { __typename?: 'Mutations' }
+  & { updateProgramCycle: Maybe<(
+    { __typename?: 'UpdateProgramCycle' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+      & { cycles: (
+        { __typename?: 'ProgramCycleNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'ProgramCycleNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -17261,6 +17339,201 @@ export function useSetSteficonRuleOnPpListMutation(baseOptions?: ApolloReactHook
 export type SetSteficonRuleOnPpListMutationHookResult = ReturnType<typeof useSetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationResult = ApolloReactCommon.MutationResult<SetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>;
+export const CreateProgramCycleDocument = gql`
+    mutation CreateProgramCycle($programCycleData: CreateProgramCycleInput!) {
+  createProgramCycle(programCycleData: $programCycleData) {
+    program {
+      id
+      cycles {
+        edges {
+          node {
+            id
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type CreateProgramCycleMutationFn = ApolloReactCommon.MutationFunction<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>;
+export type CreateProgramCycleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>, 'mutation'>;
+
+    export const CreateProgramCycleComponent = (props: CreateProgramCycleComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateProgramCycleMutation, CreateProgramCycleMutationVariables> mutation={CreateProgramCycleDocument} {...props} />
+    );
+    
+export type CreateProgramCycleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateProgramCycleMutation, CreateProgramCycleMutationVariables> & TChildProps;
+export function withCreateProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateProgramCycleMutation,
+  CreateProgramCycleMutationVariables,
+  CreateProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateProgramCycleMutation, CreateProgramCycleMutationVariables, CreateProgramCycleProps<TChildProps>>(CreateProgramCycleDocument, {
+      alias: 'createProgramCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateProgramCycleMutation__
+ *
+ * To run a mutation, you first call `useCreateProgramCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProgramCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProgramCycleMutation, { data, loading, error }] = useCreateProgramCycleMutation({
+ *   variables: {
+ *      programCycleData: // value for 'programCycleData'
+ *   },
+ * });
+ */
+export function useCreateProgramCycleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>(CreateProgramCycleDocument, baseOptions);
+      }
+export type CreateProgramCycleMutationHookResult = ReturnType<typeof useCreateProgramCycleMutation>;
+export type CreateProgramCycleMutationResult = ApolloReactCommon.MutationResult<CreateProgramCycleMutation>;
+export type CreateProgramCycleMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>;
+export const DeleteProgramCycleDocument = gql`
+    mutation DeleteProgramCycle($programCycleId: ID!) {
+  deleteProgramCycle(programCycleId: $programCycleId) {
+    program {
+      id
+      cycles {
+        edges {
+          node {
+            id
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type DeleteProgramCycleMutationFn = ApolloReactCommon.MutationFunction<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>;
+export type DeleteProgramCycleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>, 'mutation'>;
+
+    export const DeleteProgramCycleComponent = (props: DeleteProgramCycleComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables> mutation={DeleteProgramCycleDocument} {...props} />
+    );
+    
+export type DeleteProgramCycleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables> & TChildProps;
+export function withDeleteProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteProgramCycleMutation,
+  DeleteProgramCycleMutationVariables,
+  DeleteProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables, DeleteProgramCycleProps<TChildProps>>(DeleteProgramCycleDocument, {
+      alias: 'deleteProgramCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteProgramCycleMutation__
+ *
+ * To run a mutation, you first call `useDeleteProgramCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProgramCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProgramCycleMutation, { data, loading, error }] = useDeleteProgramCycleMutation({
+ *   variables: {
+ *      programCycleId: // value for 'programCycleId'
+ *   },
+ * });
+ */
+export function useDeleteProgramCycleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>(DeleteProgramCycleDocument, baseOptions);
+      }
+export type DeleteProgramCycleMutationHookResult = ReturnType<typeof useDeleteProgramCycleMutation>;
+export type DeleteProgramCycleMutationResult = ApolloReactCommon.MutationResult<DeleteProgramCycleMutation>;
+export type DeleteProgramCycleMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>;
+export const UpdateProgramCycleDocument = gql`
+    mutation UpdateProgramCycle($programCycleData: UpdateProgramCycleInput!) {
+  updateProgramCycle(programCycleData: $programCycleData) {
+    program {
+      id
+      cycles {
+        edges {
+          node {
+            id
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateProgramCycleMutationFn = ApolloReactCommon.MutationFunction<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>;
+export type UpdateProgramCycleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>, 'mutation'>;
+
+    export const UpdateProgramCycleComponent = (props: UpdateProgramCycleComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables> mutation={UpdateProgramCycleDocument} {...props} />
+    );
+    
+export type UpdateProgramCycleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables> & TChildProps;
+export function withUpdateProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateProgramCycleMutation,
+  UpdateProgramCycleMutationVariables,
+  UpdateProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables, UpdateProgramCycleProps<TChildProps>>(UpdateProgramCycleDocument, {
+      alias: 'updateProgramCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateProgramCycleMutation__
+ *
+ * To run a mutation, you first call `useUpdateProgramCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProgramCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProgramCycleMutation, { data, loading, error }] = useUpdateProgramCycleMutation({
+ *   variables: {
+ *      programCycleData: // value for 'programCycleData'
+ *   },
+ * });
+ */
+export function useUpdateProgramCycleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>(UpdateProgramCycleDocument, baseOptions);
+      }
+export type UpdateProgramCycleMutationHookResult = ReturnType<typeof useUpdateProgramCycleMutation>;
+export type UpdateProgramCycleMutationResult = ApolloReactCommon.MutationResult<UpdateProgramCycleMutation>;
+export type UpdateProgramCycleMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>;
 export const ActivatePaymentVerificationPlanDocument = gql`
     mutation ActivatePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   activatePaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
@@ -28991,7 +29264,7 @@ export type DeleteProgramResolvers<ContextType = any, ParentType extends Resolve
 };
 
 export type DeleteProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgramCycle'] = ResolversParentTypes['DeleteProgramCycle']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
