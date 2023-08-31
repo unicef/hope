@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
-  getPhoneNoLabel,
+  getPhoneNoLabel, paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
@@ -48,6 +48,7 @@ export function PaymentDetails({
               <StatusBox
                 status={payment.status}
                 statusToColor={paymentStatusToColor}
+                statusNameMapping={paymentStatusDisplayMap}
               />
             </LabelizedField>
           </Grid>

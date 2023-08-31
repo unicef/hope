@@ -98,6 +98,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
 
     class Arguments:
         input = CreatePaymentVerificationInput(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -106,6 +107,8 @@ class CreateVerificationPlanMutation(PermissionMutation):
         payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
             input["cash_or_payment_plan_id"]
         )
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan_object)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
 
@@ -118,6 +121,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
             None,
             verification_plan,
         )
+        payment_plan_object.save()
         payment_plan_object.refresh_from_db()
 
         return cls(payment_plan=payment_plan_object)
