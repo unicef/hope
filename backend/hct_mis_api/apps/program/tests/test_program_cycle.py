@@ -54,7 +54,19 @@ mutation updateProgramCycle($programCycleData: UpdateProgramCycleInput!){
 DELETE_PROGRAM_CYCLE_MUTATION = """
 mutation DeleteProgramCycle($programCycleId: ID!){
   deleteProgramCycle(programCycleId: $programCycleId){
-    ok
+    program{
+      cycles{
+        totalCount
+        edges{
+          node{
+            status
+            name
+            startDate
+            endDate
+          }
+        }
+      }
+    }
   }
 }
 """
@@ -214,12 +226,13 @@ class TestProgramCycle(APITestCase):
         )
         cycle_id = self.program.cycles.get(name="New Cycle for Update").pk
         encoded_cycle_id = self.id_to_base64(cycle_id, "ProgramCycleNode")
+        # without perms
         self.snapshot_graphql_request(
             request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "programCycleData": {
-                    "id": encoded_cycle_id,
+                    "programCycleId": encoded_cycle_id,
                     "name": "NEW NEW NAME 1",
                     "startDate": "2055-11-12",
                 }
@@ -233,7 +246,7 @@ class TestProgramCycle(APITestCase):
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "programCycleData": {
-                    "id": encoded_cycle_id,
+                    "programCycleId": encoded_cycle_id,
                     "name": "NEW NEW NAME 22",
                     "startDate": "2055-11-13",
                 }
@@ -245,10 +258,49 @@ class TestProgramCycle(APITestCase):
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "programCycleData": {
-                    "id": encoded_cycle_id,
+                    "programCycleId": encoded_cycle_id,
                     "name": "NEW NEW NAME 333",
                     "startDate": "2055-11-14",
                     "endDate": "2055-11-22",
+                }
+            },
+        )
+        # name=None
+        self.snapshot_graphql_request(
+            request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "programCycleData": {
+                    "programCycleId": encoded_cycle_id,
+                    "name": None,
+                    "startDate": "2055-11-11",
+                    "endDate": "2055-11-11",
+                }
+            },
+        )
+        # start_date=None
+        self.snapshot_graphql_request(
+            request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "programCycleData": {
+                    "programCycleId": encoded_cycle_id,
+                    "name": "NEW NEW NAME2",
+                    "startDate": None,
+                    "endDate": "2055-11-21",
+                }
+            },
+        )
+        # end_date=None
+        self.snapshot_graphql_request(
+            request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "programCycleData": {
+                    "programCycleId": encoded_cycle_id,
+                    "name": "NEW NEW NAME3",
+                    "startDate": "2055-11-11",
+                    "endDate": None,
                 }
             },
         )
