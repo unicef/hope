@@ -216,7 +216,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
     @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
-        program_cycle_id = decode_id_string(program_cycle_data.pop("id", None))
+        program_cycle_id = decode_id_string(program_cycle_data.pop("program_cycle_id", None))
 
         program_cycle = ProgramCycle.objects.select_for_update().get(id=program_cycle_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program_cycle)
@@ -226,14 +226,12 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         cls.has_permission(info, Permissions.PROGRAMME_CYCLE_UPDATE, business_area)
 
         cls.validate(
-            start_date=program_cycle_data.get("start_date") or program_cycle.start_date,
+            start_date=program_cycle_data.get("start_date"),
             end_date=program_cycle_data.get("end_date"),
             name=program_cycle_data.get("name"),
             program=program,
-            program_cycle_id=program_cycle.pk,
+            program_cycle=program_cycle,
         )
-        # TODO: need to check it
-        # user can't remove 'end_date', 'start_date' and 'name'
 
         if start_date := program_cycle_data.get("start_date"):
             program_cycle.start_date = start_date
@@ -251,7 +249,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
 
 
 class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
-    ok = graphene.Boolean()
+    program = graphene.Field(ProgramNode)
 
     class Arguments:
         program_cycle_id = graphene.ID(required=True)
@@ -270,7 +268,7 @@ class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
 
         program_cycle.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
-        return cls(ok=True)
+        return cls(program=program)
 
 
 class Mutations(graphene.ObjectType):
