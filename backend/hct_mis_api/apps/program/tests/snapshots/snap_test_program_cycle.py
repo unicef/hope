@@ -276,7 +276,29 @@ snapshots['TestProgramCycle::test_delete_program_cycle 3'] = {
 snapshots['TestProgramCycle::test_delete_program_cycle 4'] = {
     'data': {
         'deleteProgramCycle': {
-            'ok': True
+            'program': {
+                'cycles': {
+                    'edges': [
+                        {
+                            'node': {
+                                'endDate': '2020-01-02',
+                                'name': 'Default Cycle 001',
+                                'startDate': '2020-01-01',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
+                                'endDate': '2022-01-01',
+                                'name': 'Cycle 002',
+                                'startDate': '2021-01-01',
+                                'status': 'DRAFT'
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                }
+            }
         }
     }
 }
@@ -375,4 +397,64 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
             }
         }
     }
+}
+
+snapshots['TestProgramCycle::test_update_program_cycle 4'] = {
+    'data': {
+        'updateProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Not possible leave the Program Cycle name empty.',
+            'path': [
+                'updateProgramCycle'
+            ]
+        }
+    ]
+}
+
+snapshots['TestProgramCycle::test_update_program_cycle 5'] = {
+    'data': {
+        'updateProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Not possible leave the Program Cycle start date empty.',
+            'path': [
+                'updateProgramCycle'
+            ]
+        }
+    ]
+}
+
+snapshots['TestProgramCycle::test_update_program_cycle 6'] = {
+    'data': {
+        'updateProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Not possible leave the Program Cycle end date empty if it was empty upon starting the edit.',
+            'path': [
+                'updateProgramCycle'
+            ]
+        }
+    ]
 }
