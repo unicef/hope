@@ -73,12 +73,12 @@ describe("Global Program Filter - Impacts", () => {
         .contains(programmesPage.textTestProgramm)
         .click();
       feedbackPage.clickMenuButtonGrievance();
-      feedbackPage.clickMenuButtonGrievanceTickets();
+      feedbackPage.clickMenuButtonFeedback();
       feedbackPage.getTicketListRow().should("have.length", 2);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage.getProgrammesOptions().contains("Draft Program").click();
       feedbackPage.clickMenuButtonGrievance();
-      feedbackPage.clickMenuButtonGrievanceTickets();
+      feedbackPage.clickMenuButtonFeedback();
       feedbackPage.getTicketListRow().should("have.length", 0);
     });
   });

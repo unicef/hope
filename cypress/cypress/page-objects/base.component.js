@@ -25,6 +25,7 @@ export default class BaseComponent {
   headerTitle = 'h5[data-cy="page-header-title"]';
   globalProgramFilter = 'div[data-cy="global-program-filter"]';
   option = 'li[role="option"]';
+  ticketListRow = 'tr[role="checkbox"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -65,6 +66,7 @@ export default class BaseComponent {
   getGlobalProgramFilter = () => cy.get(this.globalProgramFilter);
   getMenuButtonFeedback = () => cy.get(this.navFeedback);
   getHeaderTitle = () => cy.get(this.headerTitle);
+  getTicketListRow = () => cy.get(this.ticketListRow);
 
   checkGrievanceMenu() {
     this.getMenuButtonGrievanceTickets().should("be.visible");
