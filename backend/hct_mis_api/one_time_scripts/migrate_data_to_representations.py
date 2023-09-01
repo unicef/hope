@@ -181,6 +181,7 @@ def copy_household(household: Household, program: Program) -> Household:
 
     copy_entitlement_card_per_household(household=original_household, household_representation=household)
 
+    del individuals
     return household
 
 
@@ -299,6 +300,7 @@ def copy_roles(households: QuerySet, program: Program, move_to_biggest_program: 
         batch_end = batch_start + BATCH_SIZE
         logger.info(f"Handling {batch_start} - {batch_end}/{roles_count} roles")
         roles_list = []
+        roles_list_to_update = []
         for role in roles[batch_start:batch_end]:
             if move_to_biggest_program:
                 household_representation = role.household
@@ -324,15 +326,25 @@ def copy_roles(households: QuerySet, program: Program, move_to_biggest_program: 
                     individual=individual_representation,
                 ).exists():
                     continue
-                if not move_to_biggest_program:
+                role_for_household_already_exists = IndividualRoleInHousehold.objects.filter(
+                    household=household_representation,
+                    role=role.role,
+                ).exists()
+                if not move_to_biggest_program and not role_for_household_already_exists:
                     role.pk = None
                     role.household = household_representation
                 role.individual = individual_representation
-                roles_list.append(role)
+                if not move_to_biggest_program and role_for_household_already_exists:
+                    roles_list_to_update.append(role)
+                else:
+                    roles_list.append(role)
         if move_to_biggest_program:
             IndividualRoleInHousehold.objects.bulk_update(roles_list, ["individual"])
         else:
             IndividualRoleInHousehold.objects.bulk_create(roles_list)
+            IndividualRoleInHousehold.objects.bulk_update(roles_list_to_update, ["individual"])
+        del roles_list
+        del roles_list_to_update
 
 
 def delete_target_populations_in_wrong_statuses(program: Program) -> None:
@@ -356,6 +368,7 @@ def copy_entitlement_card_per_household(household: Household, household_represen
             entitlement_card.household = household_representation
             entitlement_cards_list.append(entitlement_card)
         EntitlementCard.objects.bulk_create(entitlement_cards_list)
+        del entitlement_cards_list
 
 
 def copy_document_per_individual(individual: Individual, individual_representation: Individual) -> None:
@@ -371,6 +384,7 @@ def copy_document_per_individual(individual: Individual, individual_representati
             document.program = individual_representation.program
             documents_list.append(document)
         Document.objects.bulk_create(documents_list)
+        del documents_list
 
 
 def copy_individual_identity_per_individual(individual: Individual, individual_representation: Individual) -> None:
@@ -385,6 +399,7 @@ def copy_individual_identity_per_individual(individual: Individual, individual_r
             identity.individual = individual_representation
             identities_list.append(identity)
         IndividualIdentity.objects.bulk_create(identities_list)
+        del identities_list
 
 
 def copy_bank_account_info_per_individual(individual: Individual, individual_representation: Individual) -> None:
@@ -399,6 +414,7 @@ def copy_bank_account_info_per_individual(individual: Individual, individual_rep
             bank_account_info.individual = individual_representation
             bank_accounts_info_list.append(bank_account_info)
         BankAccountInfo.objects.bulk_create(bank_accounts_info_list)
+        del bank_accounts_info_list
 
 
 def adjust_household_selections(household_selections: QuerySet, program: Program) -> None:
@@ -426,6 +442,7 @@ def adjust_household_selections(household_selections: QuerySet, program: Program
                     )
                 )
         HouseholdSelection.objects.bulk_update(household_selection_updates, ["household_id"])
+        del household_selection_updates
 
 
 def adjust_payments(business_area: BusinessArea) -> None:
@@ -480,6 +497,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
                 payment_updates.append(payment)
 
         Payment.objects.bulk_update(payment_updates, fields=["collector_id", "head_of_household_id", "household_id"])
+        del payment_updates
 
 
 def adjust_payment_records(business_area: BusinessArea) -> None:
@@ -522,6 +540,7 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
                 payment_record_updates.append(payment_record)
 
         PaymentRecord.objects.bulk_update(payment_record_updates, fields=["head_of_household_id", "household_id"])
+        del payment_record_updates
 
 
 def handle_rdis(households: QuerySet, program: Program) -> None:
