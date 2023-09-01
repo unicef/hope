@@ -36,6 +36,7 @@ export default class BaseComponent {
   buttonGrievanceDashboardText = "Grievance Dashboard";
   buttonFeedbackText = "Feedback";
   textTestProgramm = "Test Programm";
+  textDraftProgram = "Draft Program";
 
   // Elements)
   getMenuButtonRegistrationDataImport = () =>
