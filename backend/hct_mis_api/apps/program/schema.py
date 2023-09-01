@@ -104,12 +104,6 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
     total_delivered_quantity = graphene.Float()
     total_entitled_quantity = graphene.Float()
     total_undelivered_quantity = graphene.Float()
-    unicef_id = graphene.String()
-
-    def resolve_unicef_id(self, info: Any, **kwargs: Any) -> str:
-        # TODO: will update this one
-        # self.pk or self.unicef_id
-        return "P-11223399"
 
     def resolve_total_delivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
         return self.total_delivered_quantity
@@ -355,7 +349,5 @@ class Query(graphene.ObjectType):
             business_area__slug=info.context.headers.get("Business-Area").lower()
         )
 
-    def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[ProgramCycle]:
-        return ProgramCycle.objects.filter(
-            program=info.context.headers.get("Program") # need to decode ID
-        )
+    # def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[ProgramCycle]:
+    #     return ProgramCycle.objects.filter(program=info.context.headers.get("Program"))  # need to decode ID
