@@ -5896,7 +5896,8 @@ export type QueryAllBusinessAreasArgs = {
 
 export type QueryAllFieldsAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>,
-  businessAreaSlug?: Maybe<Scalars['String']>
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
