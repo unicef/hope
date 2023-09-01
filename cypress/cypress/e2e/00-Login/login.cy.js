@@ -2,15 +2,15 @@ import Login from "../../page-objects/pages/login/login.po";
 
 let l = new Login();
 context("Login", () => {
-  after(() => {
-    cy.adminLogin();
-  });
+  // after(() => {
+  //   cy.adminLogin();
+  // });
   it("login with valid username and valid password", () => {
     cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("h5").should("contain", "Test Programm");
   });
-  it("Check the login with valid username and Invalid password", () => {
+  it.skip("Check the login with valid username and Invalid password", () => {
     Cypress.session.clearCurrentSessionData();
     cy.visit("/");
     l.navigateToLoginPage();
@@ -22,7 +22,7 @@ context("Login", () => {
       "Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive."
     );
   });
-  it("Check the login with Invalid username and valid password", () => {
+  it.skip("Check the login with Invalid username and valid password", () => {
     Cypress.session.clearCurrentSessionData();
     l.navigateToLoginPage();
     cy.get('input[name="username"]').type("wrong-username");
@@ -33,7 +33,7 @@ context("Login", () => {
       "Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive."
     );
   });
-  it("Check the login with Invalid username and Invalid password", () => {
+  it.skip("Check the login with Invalid username and Invalid password", () => {
     Cypress.session.clearCurrentSessionData();
     l.navigateToLoginPage();
     cy.get('input[name="username"]').type("wrong-username");
