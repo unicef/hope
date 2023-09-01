@@ -141,7 +141,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         return self.screen_beneficiary
 
     @classmethod
-    def get_choices(cls, business_area_slug: Optional[str] = None, program_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_choices(
+        cls, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         query = ~Q(status__in=[cls.DEDUPLICATION_FAILED, cls.MERGE_ERROR, cls.IMPORT_ERROR, cls.REFUSED_IMPORT])
         if business_area_slug:
             query &= Q(business_area__slug=business_area_slug)
