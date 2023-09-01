@@ -1780,11 +1780,13 @@ class FieldFactory(list):
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
     def apply_business_area(
-        self, business_area_slug: Optional[str] = None, *args: Any, **kwargs: Any
+        self,
+        business_area_slug: Optional[str] = None,
+        program_id: Optional[str] = None,
     ) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
             choices = field.get("_choices")
             if callable(choices):
-                field["choices"] = choices(*args, business_area_slug=business_area_slug, **kwargs)
+                field["choices"] = choices(business_area_slug=business_area_slug, program_id=program_id)
         return factory
