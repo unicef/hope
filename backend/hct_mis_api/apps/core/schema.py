@@ -254,13 +254,13 @@ class LanguageObjectConnection(ObjectConnection):
 
 
 def get_fields_attr_generators(
-    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None
+    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-            business_area_slug
+            business_area_slug=business_area_slug, program_id=program_id
         )
 
 
@@ -301,6 +301,7 @@ class Query(graphene.ObjectType):
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         business_area_slug=graphene.String(required=False, description="The business area slug"),
+        program_id=graphene.String(required=False, description="Program id"),
         description="All field datatype meta.",
     )
     all_groups_with_fields = graphene.List(
@@ -331,7 +332,7 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(
-        parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None
+        parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
@@ -360,7 +361,7 @@ class Query(graphene.ObjectType):
         return sort_by_attr(
             (
                 attr
-                for attr in get_fields_attr_generators(flex_field, business_area_slug)
+                for attr in get_fields_attr_generators(flex_field, business_area_slug, program_id)
                 if not is_a_killer_filter(attr)
             ),
             "label.English(EN)",
