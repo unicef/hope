@@ -36,6 +36,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
 )
+from hct_mis_api.apps.core.utils import decode_id_string
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -301,7 +302,6 @@ class Query(graphene.ObjectType):
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         business_area_slug=graphene.String(required=False, description="The business area slug"),
-        program_id=graphene.String(required=False, description="Program id"),
         description="All field datatype meta.",
     )
     all_groups_with_fields = graphene.List(
@@ -332,7 +332,10 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(
-        parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+        parent,
+        info: Any,
+        flex_field: Optional[bool] = None,
+        business_area_slug: Optional[str] = None,
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
@@ -358,6 +361,7 @@ class Query(graphene.ObjectType):
                 ],
             }.get(associated_with, [])
 
+        program_id = decode_id_string(info.context.headers.get("Program"))
         return sort_by_attr(
             (
                 attr
