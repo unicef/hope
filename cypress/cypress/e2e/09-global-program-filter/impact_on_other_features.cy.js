@@ -6,6 +6,7 @@ import Feedback from "../../page-objects/pages/grievance/feedback.po";
 import PopulationIndividuals from "../../page-objects/pages/population_module/population_individuals.po";
 import PopulationHouseholds from "../../page-objects/pages/population_module/population_households.po";
 import PaymentVerification from "../../page-objects/pages/payment_verification/payment_verification.po";
+import RegistrationDataImport from "../../page-objects/pages/registration_data_import/registration_data_import.po";
 
 let programmesPage = new AllProgrammes();
 let grievancePage = new Grievance();
@@ -15,6 +16,7 @@ let feedbackPage = new Feedback();
 let populationIndividuals = new PopulationIndividuals();
 let populationHouseholds = new PopulationHouseholds();
 let paymentVerification = new PaymentVerification();
+let registrationDataImport = new RegistrationDataImport();
 
 describe("Global Program Filter - Impacts", () => {
   before(() => {
@@ -26,7 +28,19 @@ describe("Global Program Filter - Impacts", () => {
     programmesPage.navigateToProgrammePage();
   });
   describe("E2E tests GPF impacts", () => {
-    it.skip("GPF - Registration data import Verification", () => {});
+    it("GPF - Registration data import Verification", () => {
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage
+        .getProgrammesOptions()
+        .contains(programmesPage.textTestProgramm)
+        .click();
+      registrationDataImport.getMenuButtonRegistrationDataImport().click();
+      registrationDataImport.getTicketListRow().should("have.length", 2);
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage.getProgrammesOptions().contains("Draft Program").click();
+      registrationDataImport.getMenuButtonRegistrationDataImport().click();
+      registrationDataImport.getTicketListRow().should("have.length", 0);
+    });
     it("GPF - Program details", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
@@ -68,7 +82,19 @@ describe("Global Program Filter - Impacts", () => {
       paymentModulePage.clickMenuButtonPaymentModule();
       paymentModulePage.getTicketListRow().should("have.length", 0);
     });
-    it.skip("GPF - Payment Verification", () => {});
+    it("GPF - Payment Verification", () => {
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage
+        .getProgrammesOptions()
+        .contains(programmesPage.textTestProgramm)
+        .click();
+      paymentVerification.clickMenuButtonPaymentVerification();
+      paymentVerification.getTicketListRow().should("have.length", 1);
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage.getProgrammesOptions().contains("Draft Program").click();
+      paymentVerification.clickMenuButtonPaymentVerification();
+      paymentVerification.getTicketListRow().should("have.length", 0);
+    });
     it("GPF - Population module", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
