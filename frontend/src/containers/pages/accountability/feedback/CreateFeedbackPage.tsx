@@ -41,7 +41,6 @@ import { FeedbackSteps } from '../../../../utils/constants';
 import {
   CreateFeedbackInput,
   FeedbackIssueType,
-  useAllProgramsQuery,
   useAllUsersQuery,
   useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
@@ -183,22 +182,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
 
   const [mutate, { loading }] = useCreateFeedbackTicketMutation();
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node?.name,
-    value: edge.node.id,
-  }));
-
-  if (userDataLoading || choicesLoading || loadingPrograms)
-    return <LoadingComponent />;
+  if (userDataLoading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
