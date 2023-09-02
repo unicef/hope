@@ -11,7 +11,7 @@ import {
   useProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { AddNewProgramCycle } from '../../../containers/dialogs/programs/AddNewProgramCycle';
+import { AddNewProgramCycle } from '../../../containers/dialogs/programs/programCycles/AddNewProgramCycle/AddNewProgramCycle';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';

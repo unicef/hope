@@ -216,7 +216,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
     @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
-        program_cycle_id = decode_id_string(program_cycle_data.pop("id", None))
+        program_cycle_id = decode_id_string(program_cycle_data.pop("program_cycle_id", None))
 
         program_cycle = ProgramCycle.objects.select_for_update().get(id=program_cycle_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program_cycle)

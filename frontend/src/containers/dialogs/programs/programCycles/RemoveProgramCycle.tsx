@@ -11,21 +11,21 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  AllProgramsQuery,
   ProgramNode,
-  ProgramStatus,
   useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { GreyText } from '../../../components/core/GreyText';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { programCompare } from '../../../utils/utils';
-import { DialogDescription } from '../DialogDescription';
-import { DialogFooter } from '../DialogFooter';
-import { DialogTitleWrapper } from '../DialogTitleWrapper';
+  AllProgramsQuery,
+  ProgramStatus,
+} from '../../../../__generated__/graphql';
+import { ALL_PROGRAMS_QUERY } from '../../../../apollo/queries/program/AllPrograms';
+import { PROGRAM_QUERY } from '../../../../apollo/queries/program/Program';
+import { GreyText } from '../../../../components/core/GreyText';
+import { LoadingButton } from '../../../../components/core/LoadingButton';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { programCompare } from '../../../../utils/utils';
+import { DialogDescription } from '../../DialogDescription';
+import { DialogFooter } from '../../DialogFooter';
+import { DialogTitleWrapper } from '../../DialogTitleWrapper';
 
 const WhiteDeleteIcon = styled(Delete)`
   color: #fff;
