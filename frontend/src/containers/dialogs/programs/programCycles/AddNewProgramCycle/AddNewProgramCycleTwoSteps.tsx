@@ -10,6 +10,7 @@ import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AutoSubmitFormOnEnter } from '../../../../../components/core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../../../components/core/GreyText';
 import { LabelizedField } from '../../../../../components/core/LabelizedField';
 import { LoadingButton } from '../../../../../components/core/LoadingButton';
@@ -18,7 +19,6 @@ import { FormikTextField } from '../../../../../shared/Formik/FormikTextField';
 import { DialogDescription } from '../../../DialogDescription';
 import { DialogFooter } from '../../../DialogFooter';
 import { DialogTitleWrapper } from '../../../DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '../../../../../components/core/AutoSubmitFormOnEnter';
 
 interface AddNewProgramCycleTwoStepsProps {
   open: boolean;
