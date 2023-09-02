@@ -1,12 +1,12 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { EditProgramCycle } from '../../../containers/dialogs/programs/EditProgramCycle';
-import { RemoveProgramCycle } from '../../../containers/dialogs/programs/RemoveProgramCycle';
 import { programCycleStatusToColor } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { EditProgramCycle } from '../../../containers/dialogs/programs/programCycles/EditProgramCycle';
+import { RemoveProgramCycle } from '../../../containers/dialogs/programs/programCycles/RemoveProgramCycle';
 
 interface ProgramCyclesTableRowProps {
   canViewProgramCycleDetails: boolean;
