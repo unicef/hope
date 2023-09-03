@@ -14,6 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import {
+  CreateFeedbackInput,
+  FeedbackIssueType,
+  useAllUsersQuery,
+  useCreateFeedbackTicketMutation,
+  useFeedbackIssueTypeChoicesQuery,
+} from '../../../../__generated__/graphql';
 import { HouseholdQuestionnaire } from '../../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../../../components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
@@ -27,10 +34,11 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { Consent } from '../../../../components/grievances/Consent';
 import { LookUpHouseholdIndividualSelection } from '../../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import {
+  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
-  PERMISSIONS,
 } from '../../../../config/permissions';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
@@ -38,15 +46,6 @@ import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxFie
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { FeedbackSteps } from '../../../../utils/constants';
-import {
-  CreateFeedbackInput,
-  FeedbackIssueType,
-  useAllProgramsQuery,
-  useAllUsersQuery,
-  useCreateFeedbackTicketMutation,
-  useFeedbackIssueTypeChoicesQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const steps = [
   'Category Selection',
@@ -183,22 +182,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
 
   const [mutate, { loading }] = useCreateFeedbackTicketMutation();
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node?.name,
-    value: edge.node.id,
-  }));
-
-  if (userDataLoading || choicesLoading || loadingPrograms)
-    return <LoadingComponent />;
+  if (userDataLoading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
