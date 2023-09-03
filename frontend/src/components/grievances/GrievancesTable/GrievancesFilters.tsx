@@ -134,6 +134,7 @@ export const GrievancesFilters = ({
               borderRadius='0px 4px 4px 0px'
               data-cy='filters-search-type'
               fullWidth
+              disableClearable
             >
               {choicesData?.grievanceTicketSearchTypesChoices?.map(
                 ({ name, value }) => (
