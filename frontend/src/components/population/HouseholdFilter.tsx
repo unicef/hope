@@ -161,6 +161,7 @@ export const HouseholdFilters = ({
             label={t('Sort by')}
             value={filter.orderBy}
             data-cy='hh-filters-order-by'
+            disableClearable
           >
             {orderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
