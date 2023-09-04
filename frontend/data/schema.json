@@ -25138,7 +25138,7 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "search",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -25151,6 +25151,40 @@
                 "name": "status",
                 "description": null,
                 "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "startDate",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Date",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "endDate",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Date",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": null,
+                "type": {
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
@@ -25159,13 +25193,9 @@
               }
             ],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ProgramCycleNodeConnection",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "ProgramCycleNodeConnection",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
