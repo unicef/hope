@@ -25,15 +25,18 @@ export default class BaseComponent {
   headerTitle = 'h5[data-cy="page-header-title"]';
   globalProgramFilter = 'div[data-cy="global-program-filter"]';
   option = 'li[role="option"]';
+  ticketListRow = 'tr[role="checkbox"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
   buttonTargetingText = "Targeting";
+  buttonPaymentModuleText = "Payment Module";
   buttonGrievanceText = "Grievance";
   buttonGrievanceTicketsText = "Grievance Tickets";
   buttonGrievanceDashboardText = "Grievance Dashboard";
   buttonFeedbackText = "Feedback";
   textTestProgramm = "Test Programm";
+  textDraftProgram = "Draft Program";
 
   // Elements)
   getMenuButtonRegistrationDataImport = () =>
@@ -64,6 +67,7 @@ export default class BaseComponent {
   getGlobalProgramFilter = () => cy.get(this.globalProgramFilter);
   getMenuButtonFeedback = () => cy.get(this.navFeedback);
   getHeaderTitle = () => cy.get(this.headerTitle);
+  getTicketListRow = () => cy.get(this.ticketListRow);
 
   checkGrievanceMenu() {
     this.getMenuButtonGrievanceTickets().should("be.visible");
@@ -98,6 +102,12 @@ export default class BaseComponent {
 
   clickMenuButtonTargeting() {
     this.getMenuButtonTargeting().contains(this.buttonTargetingText).click();
+  }
+
+  clickMenuButtonPaymentModule() {
+    this.getMenuButtonPaymentModule()
+      .contains(this.buttonPaymentModuleText)
+      .click();
   }
 
   pressEscapeFromElement(element) {
