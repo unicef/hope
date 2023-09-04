@@ -204,7 +204,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         individuals_to_create = {}
         bank_accounts_to_create = []
         collectors_to_create = defaultdict(list)
-        households_to_create_uuids = []
         for household in self.reduced_submissions:
             individuals_to_create_list = []
             documents_and_identities_to_create = []
@@ -214,12 +213,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
             if KoboImportedSubmission.objects.filter(**submission_meta_data).exists():
                 continue
-
-            # check duplication in json AB#166944
-            household_uuid = str(household.get("_uuid"))
-            if household_uuid in households_to_create_uuids:
-                continue
-            households_to_create_uuids.append(household_uuid)
 
             submission_meta_data.pop("amended", None)
             household_obj = ImportedHousehold(**submission_meta_data)
