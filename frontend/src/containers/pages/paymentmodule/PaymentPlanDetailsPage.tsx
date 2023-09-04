@@ -77,27 +77,31 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      <AcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayEntitlement && (
-        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-      )}
-      {shouldDisplayFsp && (
-        <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      )}
-      <ExcludeSection paymentPlan={paymentPlan} />
-      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-      <PaymentsTable
-        baseUrl={baseUrl}
-        businessArea={businessArea}
-        paymentPlan={paymentPlan}
-        permissions={permissions}
-        canViewDetails
-      />
-      {shouldDisplayReconciliationSummary && (
-        <ReconciliationSummary paymentPlan={paymentPlan} />
-      )}
-      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={paymentPlan.id} />
+      {status !== PaymentPlanStatus.Preparing && (
+        <>
+          <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayEntitlement && (
+            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+          )}
+          {shouldDisplayFsp && (
+            <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+          )}
+          <ExcludeSection paymentPlan={paymentPlan} />
+          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+          <PaymentsTable
+            baseUrl={baseUrl}
+            businessArea={businessArea}
+            paymentPlan={paymentPlan}
+            permissions={permissions}
+            canViewDetails
+          />
+          {shouldDisplayReconciliationSummary && (
+            <ReconciliationSummary paymentPlan={paymentPlan} />
+          )}
+          {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+            <UniversalActivityLogTable objectId={paymentPlan.id} />
+          )}
+        </>
       )}
     </Box>
   );
