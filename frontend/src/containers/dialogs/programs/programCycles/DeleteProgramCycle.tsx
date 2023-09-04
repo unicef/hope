@@ -15,6 +15,7 @@ import {
   useUpdateProgramMutation,
   AllProgramsQuery,
   ProgramStatus,
+  useDeleteProgramCycleMutation,
 } from '../../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../../apollo/queries/program/Program';
@@ -31,62 +32,38 @@ const WhiteDeleteIcon = styled(Delete)`
   color: #fff;
 `;
 
-interface RemoveProgramCycleProps {
-  program: ProgramNode;
-  canRemoveProgramCycle: boolean;
+interface DeleteProgramCycleProps {
+  programCycle;
+  canDeleteProgramCycle: boolean;
 }
 
-export const RemoveProgramCycle = ({
-  program,
-  canRemoveProgramCycle,
-}: RemoveProgramCycleProps): React.ReactElement => {
+export const DeleteProgramCycle = ({
+  programCycle,
+  canDeleteProgramCycle,
+}: DeleteProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { programId } = useBaseUrl();
 
-  const [mutate, { loading }] = useUpdateProgramMutation({
-    update(cache, { data: { updateProgram } }) {
-      cache.writeQuery({
-        query: PROGRAM_QUERY,
+  const [mutate, { loading }] = useDeleteProgramCycleMutation();
+
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await mutate({
         variables: {
-          id: program.id,
+          programCycleId: programCycle.id,
         },
-        data: { program: updateProgram.program },
+        refetchQueries: () => [
+          {
+            query: PROGRAM_QUERY,
+            variables: { id: programId },
+          },
+        ],
       });
-      const allProgramsData: AllProgramsQuery = cache.readQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-      });
-      allProgramsData.allPrograms.edges.sort(programCompare);
-      cache.writeQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-        data: allProgramsData,
-      });
-    },
-  });
-
-  const save = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.Active,
-        },
-        version: program.version,
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
-      showMessage(t('Programme activated.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-activate-success',
-      });
-      setOpen(false);
-    } else {
-      showMessage(t('Programme activate action failed.'), {
-        dataCy: 'snackbar-program-activate-failure',
-      });
+      showMessage('Programme Cycle deleted.');
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -96,7 +73,7 @@ export const RemoveProgramCycle = ({
         onClick={() => {
           setOpen(true);
         }}
-        disabled={!canRemoveProgramCycle}
+        disabled={!canDeleteProgramCycle}
         color='primary'
       >
         <Delete />
@@ -104,9 +81,7 @@ export const RemoveProgramCycle = ({
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <DialogTitleWrapper>
           <DialogTitle>
-            {t(
-              'Are you sure you want to delete the Program Cycle from the system?',
-            )}
+            {`Are you sure you want to delete the Program Cycle ${programCycle.id} from the system?`}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
@@ -122,7 +97,7 @@ export const RemoveProgramCycle = ({
               error
               type='submit'
               variant='contained'
-              onClick={save}
+              onClick={handleDelete}
               data-cy='button-delete'
               endIcon={<WhiteDeleteIcon />}
             >

@@ -839,5 +839,6 @@
   "This action cannot be undone.": "This action cannot be undone.",
   "Delete Program Cycle": "Delete Program Cycle",
   "Close": "Close",
-  "Programme Cycle name is required": "Programme Cycle name is required"
+  "Programme Cycle name is required": "Programme Cycle name is required",
+  "End Date cannot be after Programme End Date": "End Date cannot be after Programme End Date"
 }

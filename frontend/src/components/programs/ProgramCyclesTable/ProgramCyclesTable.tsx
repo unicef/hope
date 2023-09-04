@@ -79,12 +79,14 @@ export const ProgramCyclesTable = ({
     PERMISSIONS.PROGRAMME_CYCLE_UPDATE,
     permissions,
   );
-  const canRemoveProgramCycle = hasPermissions(
+  const canDeleteProgramCycle = hasPermissions(
     PERMISSIONS.PROGRAMME_CYCLE_REMOVE,
     permissions,
   );
 
   const addNewProgramCycleButton = [<AddNewProgramCycle program={program} />];
+
+  //TODO: connect ProgrammeCycle query
 
   return (
     <TableWrapper>
@@ -103,11 +105,11 @@ export const ProgramCyclesTable = ({
         renderRow={(row) => (
           <ProgramCyclesTableRow
             key={row.id}
-            row={row}
+            programCycle={row}
             statusChoices={statusChoices}
             canViewProgramCycleDetails={canViewProgramCycleDetails}
             canEditProgramCycle={canEditProgramCycle}
-            canRemoveProgramCycle={canRemoveProgramCycle}
+            canDeleteProgramCycle={canDeleteProgramCycle}
           />
         )}
         componentInsteadOfRows={!isProgramActive ? subtitle : null}

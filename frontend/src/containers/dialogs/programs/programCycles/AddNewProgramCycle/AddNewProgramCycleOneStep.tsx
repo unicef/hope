@@ -23,6 +23,7 @@ interface AddNewProgramCycleOneStepProps {
   open: boolean;
   loadingCreate: boolean;
   handleCreate: (values: FormikValues) => void;
+  previousProgramCycle;
   validationSchemaNewProgramCycle;
 }
 
@@ -32,8 +33,10 @@ export const AddNewProgramCycleOneStep = ({
   loadingCreate,
   handleCreate,
   validationSchemaNewProgramCycle,
+  previousProgramCycle,
 }: AddNewProgramCycleOneStepProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { id, name, startDate, endDate } = previousProgramCycle;
 
   const initialValuesCreate: {
     [key: string]: string | boolean | number;
@@ -41,6 +44,10 @@ export const AddNewProgramCycleOneStep = ({
     newProgramCycleName: '',
     newProgramCycleStartDate: '',
     newProgramCycleEndDate: '',
+    previousProgramCycleId: id,
+    previousProgramCycleName: name,
+    previousProgramCycleStartDate: startDate,
+    previousProgramCycleEndDate: endDate,
   };
 
   return (
