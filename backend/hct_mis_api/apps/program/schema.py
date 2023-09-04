@@ -227,6 +227,7 @@ class Query(graphene.ObjectType):
     )
     # Choice
     program_status_choices = graphene.List(ChoiceObject)
+    program_cycle_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
@@ -244,6 +245,9 @@ class Query(graphene.ObjectType):
 
     def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
+
+    def resolve_program_cycle_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
     def resolve_program_frequency_of_payments_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
