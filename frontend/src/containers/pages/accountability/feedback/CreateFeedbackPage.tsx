@@ -46,14 +46,6 @@ import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxFie
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { FeedbackSteps } from '../../../../utils/constants';
-import {
-  CreateFeedbackInput,
-  FeedbackIssueType,
-  useAllUsersQuery,
-  useCreateFeedbackTicketMutation,
-  useFeedbackIssueTypeChoicesQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const steps = [
   'Category Selection',
