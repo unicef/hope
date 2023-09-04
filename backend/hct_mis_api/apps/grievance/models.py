@@ -362,6 +362,18 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     programs = models.ManyToManyField("program.Program", related_name="grievance_tickets", blank=True)
     comments = models.TextField(blank=True, null=True)
 
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, "
+                  "this field will contain the object it was copied from.",
+    )
+
     objects = GrievanceTicketManager()
 
     def flatten(self, t: List[List]) -> List:
