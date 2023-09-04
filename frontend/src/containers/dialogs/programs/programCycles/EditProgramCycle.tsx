@@ -19,6 +19,7 @@ import {
   useUpdateProgramMutation,
   AllProgramsQuery,
   ProgramStatus,
+  useUpdateProgramCycleMutation,
 } from '../../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../../apollo/queries/program/Program';
@@ -35,67 +36,48 @@ import { DialogFooter } from '../../DialogFooter';
 import { DialogTitleWrapper } from '../../DialogTitleWrapper';
 
 interface EditProgramCycleProps {
-  program: ProgramNode;
+  programCycle: ProgramNode;
   canEditProgramCycle: boolean;
 }
 
 export const EditProgramCycle = ({
-  program,
+  programCycle,
   canEditProgramCycle,
 }: EditProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { programId } = useBaseUrl();
 
-  const [mutate, { loading }] = useUpdateProgramMutation({
-    update(cache, { data: { updateProgram } }) {
-      cache.writeQuery({
-        query: PROGRAM_QUERY,
+  const [mutate, { loading }] = useUpdateProgramCycleMutation();
+
+  const handleUpdate = async (values): Promise<void> => {
+    const { name, startDate, endDate } = values;
+    try {
+      await mutate({
         variables: {
-          id: program.id,
+          programCycleData: {
+            programCycleId: programCycle.id,
+            name,
+            startDate,
+            endDate,
+          },
         },
-        data: { program: updateProgram.program },
+        refetchQueries: () => [
+          {
+            query: PROGRAM_QUERY,
+            variables: { id: programId },
+          },
+        ],
       });
-      const allProgramsData: AllProgramsQuery = cache.readQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-      });
-      allProgramsData.allPrograms.edges.sort(programCompare);
-      cache.writeQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-        data: allProgramsData,
-      });
-    },
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const save = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.Active,
-        },
-        version: program.version,
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
-      showMessage(t('Programme activated.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-activate-success',
-      });
-      setOpen(false);
-    } else {
-      showMessage(t('Programme activate action failed.'), {
-        dataCy: 'snackbar-program-activate-failure',
-      });
+      showMessage('Programme Cycle deleted.');
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string()
+    name: Yup.string()
       .required(t('Programme Cycle title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
@@ -120,7 +102,7 @@ export const EditProgramCycle = ({
   const initialValues: {
     [key: string]: string | boolean | number;
   } = {
-    title: '',
+    name: '',
     startDate: '',
     endDate: '',
   };
@@ -139,8 +121,7 @@ export const EditProgramCycle = ({
         <Formik
           initialValues={initialValues}
           onSubmit={(values) => {
-            // eslint-disable-next-line no-console
-            console.log(values);
+            handleUpdate(values);
           }}
           validationSchema={validationSchema}
         >
@@ -159,7 +140,7 @@ export const EditProgramCycle = ({
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Field
-                      name='title'
+                      name='name'
                       fullWidth
                       variant='outlined'
                       label={t('Programme Cycle Title')}

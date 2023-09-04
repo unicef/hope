@@ -41,7 +41,20 @@ export const AddNewProgramCycle = ({
       .required(t('Programme Cycle name is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    newProgramCycleStartDate: Yup.date().required(t('Start Date is required')),
+    newProgramCycleStartDate: Yup.date()
+      .required(t('Start Date is required'))
+      .when(
+        'previousProgramCycleEndDate',
+        (previousProgramCycleEndDate, schema) =>
+          previousProgramCycleEndDate &&
+          schema.min(
+            previousProgramCycleEndDate,
+            `${t('Start date have to be greater than')} ${moment(
+              previousProgramCycleEndDate,
+            ).format('YYYY-MM-DD')}`,
+          ),
+        '',
+      ),
     newProgramCycleEndDate: Yup.date()
       .min(today, t('End Date cannot be in the past'))
       .when(
@@ -55,7 +68,8 @@ export const AddNewProgramCycle = ({
             ).format('YYYY-MM-DD')}`,
           ),
         '',
-      ),
+      )
+      .max(program.endDate, t('End Date cannot be after Programme End Date')),
   });
 
   const validationSchemaPreviousProgramCycle = Yup.object().shape({
@@ -150,6 +164,7 @@ export const AddNewProgramCycle = ({
             setOpen={setOpen}
             loadingCreate={loadingCreate}
             handleCreate={handleCreate}
+            previousProgramCycle={previousProgramCycle}
             validationSchemaNewProgramCycle={validationSchemaNewProgramCycle}
           />
         ) : (
