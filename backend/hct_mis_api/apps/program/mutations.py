@@ -26,7 +26,10 @@ from hct_mis_api.apps.program.inputs import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.program.utils import copy_program_object
+from hct_mis_api.apps.program.utils import (
+    copy_program_object,
+    get_program_id_from_headers,
+)
 from hct_mis_api.apps.program.validators import (
     ProgramCycleDeletionValidator,
     ProgramCycleValidator,
@@ -181,7 +184,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
     @classmethod
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict) -> "CreateProgramCycle":
-        program_id = decode_id_string_required(info.context.headers.get("Program"))
+        program_id = get_program_id_from_headers(info)
         program = Program.objects.get(id=program_id)
 
         cls.has_permission(info, Permissions.PROGRAMME_CYCLE_CREATE, program.business_area)
@@ -216,7 +219,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
     @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
-        program_cycle_id = decode_id_string(program_cycle_data.pop("id", None))
+        program_cycle_id = decode_id_string(program_cycle_data.pop("program_cycle_id", None))
 
         program_cycle = ProgramCycle.objects.select_for_update().get(id=program_cycle_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program_cycle)
@@ -249,7 +252,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
 
 
 class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
-    ok = graphene.Boolean()
+    program = graphene.Field(ProgramNode)
 
     class Arguments:
         program_cycle_id = graphene.ID(required=True)
@@ -268,7 +271,7 @@ class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
 
         program_cycle.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
-        return cls(ok=True)
+        return cls(program=program)
 
 
 class Mutations(graphene.ObjectType):

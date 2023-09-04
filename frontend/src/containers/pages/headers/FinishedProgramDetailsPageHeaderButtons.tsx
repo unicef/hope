@@ -1,16 +1,16 @@
+import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
-import { Box, Button } from '@material-ui/core';
-import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import {
-  ProgramNode,
+  ProgramQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { CopyProgram } from '../../dialogs/programs/CopyProgram';
+import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   canActivate: boolean;
   canDuplicate: boolean;
 }

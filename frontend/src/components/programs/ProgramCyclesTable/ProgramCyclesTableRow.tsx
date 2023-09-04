@@ -1,7 +1,7 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { EditProgramCycle } from '../../../containers/dialogs/programs/EditProgramCycle';
-import { RemoveProgramCycle } from '../../../containers/dialogs/programs/RemoveProgramCycle';
+import { DeleteProgramCycle } from '../../../containers/dialogs/programs/programCycles/DeleteProgramCycle';
+import { EditProgramCycle } from '../../../containers/dialogs/programs/programCycles/EditProgramCycle';
 import { programCycleStatusToColor } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { StatusBox } from '../../core/StatusBox';
@@ -11,56 +11,71 @@ import { UniversalMoment } from '../../core/UniversalMoment';
 interface ProgramCyclesTableRowProps {
   canViewProgramCycleDetails: boolean;
   canEditProgramCycle: boolean;
-  canRemoveProgramCycle: boolean;
-  row;
+  canDeleteProgramCycle: boolean;
+  programCycle;
   statusChoices: { [id: number]: string };
 }
 
 export const ProgramCyclesTableRow = ({
   canViewProgramCycleDetails,
   canEditProgramCycle,
-  canRemoveProgramCycle,
-  row,
+  canDeleteProgramCycle,
+  programCycle,
   statusChoices,
 }: ProgramCyclesTableRowProps): React.ReactElement => {
+  const {
+    id,
+    name,
+    status,
+    totalEntitledQuantity,
+    totalUndeliveredQuantity,
+    totalDeliveredQuantity,
+    startDate,
+    endDate,
+  } = programCycle;
+
+  //TODO: add detailsPath
   const detailsPath = '';
   const handleRowClick = (): void => {
     //eslint-disable-next-line no-console
     console.log('handleRowClick');
   };
+
   return (
-    <ClickableTableRow onClick={handleRowClick} hover role='checkbox' key={0}>
+    <ClickableTableRow onClick={handleRowClick} hover role='checkbox'>
       <TableCell align='left'>
         {canViewProgramCycleDetails ? (
-          <BlackLink to={detailsPath}>P-84273</BlackLink>
+          <BlackLink to={detailsPath}>{id}</BlackLink>
         ) : (
-          'P-84273'
+          id
         )}
       </TableCell>
+      <TableCell align='left'>{name}</TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={statusChoices[row.status]}
+          status={statusChoices[status]}
           statusToColor={programCycleStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>-</TableCell>
-      <TableCell align='right'>-</TableCell>
-      <TableCell align='right'>-</TableCell>
-      <TableCell align='right'>-</TableCell>
-      <TableCell align='left'>-</TableCell>
+      <TableCell align='right'>{totalEntitledQuantity || '-'}</TableCell>
+      <TableCell align='right'>{totalUndeliveredQuantity || '-'}</TableCell>
+      <TableCell align='right'>{totalDeliveredQuantity}</TableCell>
       <TableCell align='left'>
-        <UniversalMoment>date</UniversalMoment>
+        <UniversalMoment>{startDate}</UniversalMoment>
+      </TableCell>
+      <TableCell align='left'>
+        <UniversalMoment>{endDate}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
         <EditProgramCycle
-          program={row}
+          programCycle={programCycle}
           canEditProgramCycle={canEditProgramCycle}
         />
       </TableCell>
       <TableCell align='left'>
-        <RemoveProgramCycle
-          program={row}
-          canRemoveProgramCycle={canRemoveProgramCycle}
+        <DeleteProgramCycle
+          programCycle={programCycle}
+          canDeleteProgramCycle={canDeleteProgramCycle}
         />
       </TableCell>
     </ClickableTableRow>

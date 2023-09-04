@@ -1250,7 +1250,7 @@ export type DeleteProgram = {
 
 export type DeleteProgramCycle = {
    __typename?: 'DeleteProgramCycle',
-  ok?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<ProgramNode>,
 };
 
 export type DeleteRegistrationDataImport = {
@@ -5355,16 +5355,19 @@ export type Query = {
   allLanguages?: Maybe<LanguageObjectConnection>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
+  allActivePrograms?: Maybe<ProgramNodeConnection>,
+  programCycle?: Maybe<ProgramCycleNode>,
+  allProgramCycles?: Maybe<ProgramCycleNodeConnection>,
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
   chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>,
   cashPlan?: Maybe<CashPlanNode>,
   allCashPlans?: Maybe<CashPlanNodeConnection>,
   programStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  programCycleStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programFrequencyOfPaymentsChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  allActivePrograms?: Maybe<ProgramNodeConnection>,
   targetPopulation?: Maybe<TargetPopulationNode>,
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
   targetPopulationHouseholds?: Maybe<HouseholdNodeConnection>,
@@ -6046,6 +6049,44 @@ export type QueryAllProgramsArgs = {
 };
 
 
+export type QueryAllActiveProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryProgramCycleArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllProgramCyclesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
 export type QueryChartProgrammesBySectorArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
@@ -6088,25 +6129,6 @@ export type QueryAllCashPlansArgs = {
   search?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryAllActiveProgramsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  businessArea: Scalars['String'],
-  search?: Maybe<Scalars['String']>,
-  status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
-  numberOfHouseholds?: Maybe<Scalars['String']>,
-  budget?: Maybe<Scalars['String']>,
-  startDate?: Maybe<Scalars['Date']>,
-  endDate?: Maybe<Scalars['Date']>,
-  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8066,7 +8088,7 @@ export type UpdateProgramCycle = {
 };
 
 export type UpdateProgramCycleInput = {
-  id: Scalars['ID'],
+  programCycleId: Scalars['ID'],
   name?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
@@ -10147,6 +10169,84 @@ export type SetSteficonRuleOnPpListMutation = (
           & Pick<SteficonRuleNode, 'id' | 'name'>
         )> }
       )> }
+    )> }
+  )> }
+);
+
+export type CreateProgramCycleMutationVariables = {
+  programCycleData: CreateProgramCycleInput
+};
+
+
+export type CreateProgramCycleMutation = (
+  { __typename?: 'Mutations' }
+  & { createProgramCycle: Maybe<(
+    { __typename?: 'CreateProgramCycle' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+      & { cycles: (
+        { __typename?: 'ProgramCycleNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'ProgramCycleNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type DeleteProgramCycleMutationVariables = {
+  programCycleId: Scalars['ID']
+};
+
+
+export type DeleteProgramCycleMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteProgramCycle: Maybe<(
+    { __typename?: 'DeleteProgramCycle' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+      & { cycles: (
+        { __typename?: 'ProgramCycleNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'ProgramCycleNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type UpdateProgramCycleMutationVariables = {
+  programCycleData: UpdateProgramCycleInput
+};
+
+
+export type UpdateProgramCycleMutation = (
+  { __typename?: 'Mutations' }
+  & { updateProgramCycle: Maybe<(
+    { __typename?: 'UpdateProgramCycle' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id'>
+      & { cycles: (
+        { __typename?: 'ProgramCycleNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'ProgramCycleNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -13129,6 +13229,16 @@ export type ProgramQuery = (
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    & { cycles: (
+      { __typename?: 'ProgramCycleNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramCycleNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramCycleNode' }
+          & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -13149,7 +13259,41 @@ export type ProgrammeChoiceDataQuery = (
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programCycleStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type AllProgramCyclesQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllProgramCyclesQuery = (
+  { __typename?: 'Query' }
+  & { allProgramCycles: Maybe<(
+    { __typename?: 'ProgramCycleNodeConnection' }
+    & Pick<ProgramCycleNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ProgramCycleNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ProgramCycleNode' }
+        & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+      )> }
+    )>> }
+  )> }
 );
 
 export type AllImportedHouseholdsQueryVariables = {
@@ -17261,6 +17405,201 @@ export function useSetSteficonRuleOnPpListMutation(baseOptions?: ApolloReactHook
 export type SetSteficonRuleOnPpListMutationHookResult = ReturnType<typeof useSetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationResult = ApolloReactCommon.MutationResult<SetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>;
+export const CreateProgramCycleDocument = gql`
+    mutation CreateProgramCycle($programCycleData: CreateProgramCycleInput!) {
+  createProgramCycle(programCycleData: $programCycleData) {
+    program {
+      id
+      cycles {
+        edges {
+          node {
+            id
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type CreateProgramCycleMutationFn = ApolloReactCommon.MutationFunction<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>;
+export type CreateProgramCycleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>, 'mutation'>;
+
+    export const CreateProgramCycleComponent = (props: CreateProgramCycleComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateProgramCycleMutation, CreateProgramCycleMutationVariables> mutation={CreateProgramCycleDocument} {...props} />
+    );
+    
+export type CreateProgramCycleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateProgramCycleMutation, CreateProgramCycleMutationVariables> & TChildProps;
+export function withCreateProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateProgramCycleMutation,
+  CreateProgramCycleMutationVariables,
+  CreateProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateProgramCycleMutation, CreateProgramCycleMutationVariables, CreateProgramCycleProps<TChildProps>>(CreateProgramCycleDocument, {
+      alias: 'createProgramCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateProgramCycleMutation__
+ *
+ * To run a mutation, you first call `useCreateProgramCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProgramCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProgramCycleMutation, { data, loading, error }] = useCreateProgramCycleMutation({
+ *   variables: {
+ *      programCycleData: // value for 'programCycleData'
+ *   },
+ * });
+ */
+export function useCreateProgramCycleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>(CreateProgramCycleDocument, baseOptions);
+      }
+export type CreateProgramCycleMutationHookResult = ReturnType<typeof useCreateProgramCycleMutation>;
+export type CreateProgramCycleMutationResult = ApolloReactCommon.MutationResult<CreateProgramCycleMutation>;
+export type CreateProgramCycleMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramCycleMutation, CreateProgramCycleMutationVariables>;
+export const DeleteProgramCycleDocument = gql`
+    mutation DeleteProgramCycle($programCycleId: ID!) {
+  deleteProgramCycle(programCycleId: $programCycleId) {
+    program {
+      id
+      cycles {
+        edges {
+          node {
+            id
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type DeleteProgramCycleMutationFn = ApolloReactCommon.MutationFunction<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>;
+export type DeleteProgramCycleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>, 'mutation'>;
+
+    export const DeleteProgramCycleComponent = (props: DeleteProgramCycleComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables> mutation={DeleteProgramCycleDocument} {...props} />
+    );
+    
+export type DeleteProgramCycleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables> & TChildProps;
+export function withDeleteProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteProgramCycleMutation,
+  DeleteProgramCycleMutationVariables,
+  DeleteProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables, DeleteProgramCycleProps<TChildProps>>(DeleteProgramCycleDocument, {
+      alias: 'deleteProgramCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteProgramCycleMutation__
+ *
+ * To run a mutation, you first call `useDeleteProgramCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProgramCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProgramCycleMutation, { data, loading, error }] = useDeleteProgramCycleMutation({
+ *   variables: {
+ *      programCycleId: // value for 'programCycleId'
+ *   },
+ * });
+ */
+export function useDeleteProgramCycleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>(DeleteProgramCycleDocument, baseOptions);
+      }
+export type DeleteProgramCycleMutationHookResult = ReturnType<typeof useDeleteProgramCycleMutation>;
+export type DeleteProgramCycleMutationResult = ApolloReactCommon.MutationResult<DeleteProgramCycleMutation>;
+export type DeleteProgramCycleMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramCycleMutation, DeleteProgramCycleMutationVariables>;
+export const UpdateProgramCycleDocument = gql`
+    mutation UpdateProgramCycle($programCycleData: UpdateProgramCycleInput!) {
+  updateProgramCycle(programCycleData: $programCycleData) {
+    program {
+      id
+      cycles {
+        edges {
+          node {
+            id
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateProgramCycleMutationFn = ApolloReactCommon.MutationFunction<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>;
+export type UpdateProgramCycleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>, 'mutation'>;
+
+    export const UpdateProgramCycleComponent = (props: UpdateProgramCycleComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables> mutation={UpdateProgramCycleDocument} {...props} />
+    );
+    
+export type UpdateProgramCycleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables> & TChildProps;
+export function withUpdateProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateProgramCycleMutation,
+  UpdateProgramCycleMutationVariables,
+  UpdateProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables, UpdateProgramCycleProps<TChildProps>>(UpdateProgramCycleDocument, {
+      alias: 'updateProgramCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateProgramCycleMutation__
+ *
+ * To run a mutation, you first call `useUpdateProgramCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProgramCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProgramCycleMutation, { data, loading, error }] = useUpdateProgramCycleMutation({
+ *   variables: {
+ *      programCycleData: // value for 'programCycleData'
+ *   },
+ * });
+ */
+export function useUpdateProgramCycleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>(UpdateProgramCycleDocument, baseOptions);
+      }
+export type UpdateProgramCycleMutationHookResult = ReturnType<typeof useUpdateProgramCycleMutation>;
+export type UpdateProgramCycleMutationResult = ApolloReactCommon.MutationResult<UpdateProgramCycleMutation>;
+export type UpdateProgramCycleMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramCycleMutation, UpdateProgramCycleMutationVariables>;
 export const ActivatePaymentVerificationPlanDocument = gql`
     mutation ActivatePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   activatePaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
@@ -24996,6 +25335,20 @@ export const ProgramDocument = gql`
     administrativeAreasOfImplementation
     individualDataNeeded
     version
+    cycles {
+      edges {
+        node {
+          id
+          name
+          status
+          totalEntitledQuantity
+          totalUndeliveredQuantity
+          totalUndeliveredQuantity
+          startDate
+          endDate
+        }
+      }
+    }
   }
 }
     `;
@@ -25060,6 +25413,10 @@ export const ProgrammeChoiceDataDocument = gql`
     name
     value
   }
+  programCycleStatusChoices {
+    name
+    value
+  }
 }
     `;
 export type ProgrammeChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>, 'query'>;
@@ -25104,6 +25461,83 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const AllProgramCyclesDocument = gql`
+    query AllProgramCycles($before: String, $after: String, $first: Int, $last: Int, $search: String, $status: [String], $startDate: Date, $endDate: Date, $orderBy: String) {
+  allProgramCycles(before: $before, after: $after, first: $first, last: $last, search: $search, status: $status, startDate: $startDate, endDate: $endDate, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      node {
+        id
+        name
+        status
+        totalEntitledQuantity
+        totalUndeliveredQuantity
+        totalUndeliveredQuantity
+        startDate
+        endDate
+      }
+    }
+  }
+}
+    `;
+export type AllProgramCyclesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>, 'query'>;
+
+    export const AllProgramCyclesComponent = (props: AllProgramCyclesComponentProps) => (
+      <ApolloReactComponents.Query<AllProgramCyclesQuery, AllProgramCyclesQueryVariables> query={AllProgramCyclesDocument} {...props} />
+    );
+    
+export type AllProgramCyclesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllProgramCyclesQuery, AllProgramCyclesQueryVariables> & TChildProps;
+export function withAllProgramCycles<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllProgramCyclesQuery,
+  AllProgramCyclesQueryVariables,
+  AllProgramCyclesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllProgramCyclesQuery, AllProgramCyclesQueryVariables, AllProgramCyclesProps<TChildProps>>(AllProgramCyclesDocument, {
+      alias: 'allProgramCycles',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllProgramCyclesQuery__
+ *
+ * To run a query within a React component, call `useAllProgramCyclesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllProgramCyclesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllProgramCyclesQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllProgramCyclesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>(AllProgramCyclesDocument, baseOptions);
+      }
+export function useAllProgramCyclesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>(AllProgramCyclesDocument, baseOptions);
+        }
+export type AllProgramCyclesQueryHookResult = ReturnType<typeof useAllProgramCyclesQuery>;
+export type AllProgramCyclesLazyQueryHookResult = ReturnType<typeof useAllProgramCyclesLazyQuery>;
+export type AllProgramCyclesQueryResult = ApolloReactCommon.QueryResult<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
@@ -28991,7 +29425,7 @@ export type DeleteProgramResolvers<ContextType = any, ParentType extends Resolve
 };
 
 export type DeleteProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgramCycle'] = ResolversParentTypes['DeleteProgramCycle']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
@@ -30772,16 +31206,19 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allLanguages?: Resolver<Maybe<ResolversTypes['LanguageObjectConnection']>, ParentType, ContextType, QueryAllLanguagesArgs>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
+  allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>,
+  programCycle?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType, RequireFields<QueryProgramCycleArgs, 'id'>>,
+  allProgramCycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, QueryAllProgramCyclesArgs>,
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
   chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
   programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  programCycleStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programFrequencyOfPaymentsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
   targetPopulationHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryTargetPopulationHouseholdsArgs, 'targetPopulation'>>,

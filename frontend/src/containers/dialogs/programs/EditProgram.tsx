@@ -8,14 +8,14 @@ import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
 import {
-  ProgramNode,
+  ProgramQuery,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface EditProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export function EditProgram({ program }: EditProgramProps): ReactElement {

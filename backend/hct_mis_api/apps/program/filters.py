@@ -7,7 +7,7 @@ from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilt
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -108,3 +108,36 @@ class GlobalProgramFilter(FilterSet):
         program_id = decode_id_string(self.request.headers.get("Program"))
         queryset = queryset.filter(program_id=program_id)
         return super().filter_queryset(queryset)
+
+
+class ProgramCycleFilter(GlobalProgramFilter):
+    search = CharFilter(method="search_filter")
+    status = MultipleChoiceFilter(field_name="status", choices=ProgramCycle.STATUS_CHOICE)
+    start_date = DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = DateFilter(field_name="end_date", lookup_expr="lte")
+    # TODO: need to add filter by Total Entitled Quantity
+
+    class Meta:
+        fields = (
+            "search",
+            "status",
+            "start_date",
+            "end_date",
+        )
+        model = ProgramCycle
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            Lower("name"),
+            "status",
+            "start_date",
+            "end_date",
+        )
+    )
+
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(name__istartswith=value)
+        return qs.filter(q_obj)

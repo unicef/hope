@@ -56,49 +56,15 @@ from hct_mis_api.apps.payment.schema import (
     PaymentVerificationSummaryNode,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
-from hct_mis_api.apps.program.filters import ProgramFilter
+from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
-
-
-class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
-        hopePermissionClass(
-            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        ),
-    )
-
-    budget = graphene.Decimal()
-    total_entitled_quantity = graphene.Decimal()
-    total_delivered_quantity = graphene.Decimal()
-    total_undelivered_quantity = graphene.Decimal()
-    total_number_of_households = graphene.Int()
-    total_number_of_households_with_tp_in_program = graphene.Int()
-    individual_data_needed = graphene.Boolean()
-
-    class Meta:
-        model = Program
-        filter_fields = [
-            "name",
-        ]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_history(self, info: Any) -> QuerySet:
-        return self.history.all()
-
-    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
-        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
-        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
-
-    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
-        return self.households_with_tp_in_program.count()
 
 
 class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            Permissions.PROGRAMME_CYCLE_VIEW_DETAILS,
         ),
     )
     total_delivered_quantity = graphene.Float()
@@ -128,6 +94,46 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
         ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+
+class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+
+    budget = graphene.Decimal()
+    total_entitled_quantity = graphene.Decimal()
+    total_delivered_quantity = graphene.Decimal()
+    total_undelivered_quantity = graphene.Decimal()
+    total_number_of_households = graphene.Int()
+    total_number_of_households_with_tp_in_program = graphene.Int()
+    individual_data_needed = graphene.Boolean()
+    # cycles = DjangoPermissionFilterConnectionField(
+    #     ProgramCycleNode,
+    #     filterset_class=ProgramCycleFilter,
+    #     # TODO: check and update perms
+    #     # permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
+    # )
+
+    class Meta:
+        model = Program
+        filter_fields = [
+            "name",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_history(self, info: Any) -> QuerySet:
+        return self.history.all()
+
+    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
+        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
+        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
+
+    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
+        return self.households_with_tp_in_program.count()
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -171,6 +177,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
+    # Program
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
@@ -179,6 +186,19 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
+    all_active_programs = DjangoPermissionFilterConnectionField(
+        ProgramNode,
+        filterset_class=ProgramFilter,
+        permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
+    )
+    # ProgramCycle
+    program_cycle = relay.Node.Field(ProgramCycleNode)
+    all_program_cycles = DjangoPermissionFilterConnectionField(
+        ProgramCycleNode,
+        filterset_class=ProgramCycleFilter,
+        # permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
+    )
+    # Chart
     chart_programmes_by_sector = graphene.Field(
         ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
@@ -193,7 +213,7 @@ class Query(graphene.ObjectType):
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
     )
-
+    # CashPlan
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
@@ -205,16 +225,13 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
+    # Choice
     program_status_choices = graphene.List(ChoiceObject)
+    program_cycle_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
-    all_active_programs = DjangoPermissionFilterConnectionField(
-        ProgramNode,
-        filterset_class=ProgramFilter,
-        permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
-    )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         return Program.objects.annotate(
@@ -228,6 +245,9 @@ class Query(graphene.ObjectType):
 
     def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
+
+    def resolve_program_cycle_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
     def resolve_program_frequency_of_payments_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
@@ -352,3 +372,13 @@ class Query(graphene.ObjectType):
         return Program.objects.exclude(status=Program.DRAFT).filter(
             business_area__slug=info.context.headers.get("Business-Area").lower()
         )
+
+    def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        # filter by Program added in ProgramCycleFilter > GlobalProgramFilter
+        # TODO: need to add filter by Total Entitled Quantity
+        # ?? .annotate(
+        #     total_entitled_quantity=Coalesce(
+        #         Sum(F('paymentplan__total_entitled_quantity_usd')), Value(Decimal('0.0'))
+        #     )
+        # )
+        return ProgramCycle.objects.all()

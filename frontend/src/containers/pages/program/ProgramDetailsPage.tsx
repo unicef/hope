@@ -2,7 +2,6 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  ProgramNode,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../../__generated__/graphql';
@@ -35,7 +34,7 @@ export const ProgramDetailsPage = (): React.ReactElement => {
 
   if (!data?.program || !choices || permissions === null) return null;
 
-  const program = data.program as ProgramNode;
+  const { program } = data;
   return (
     <div>
       <ProgramDetailsPageHeader

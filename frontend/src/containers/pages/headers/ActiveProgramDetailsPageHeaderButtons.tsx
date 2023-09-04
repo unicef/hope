@@ -2,7 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import {
-  ProgramNode,
+  ProgramQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
@@ -11,7 +11,7 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { CopyProgram } from '../../dialogs/programs/CopyProgram';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   canFinish: boolean;
   canEdit: boolean;
   canDuplicate: boolean;
