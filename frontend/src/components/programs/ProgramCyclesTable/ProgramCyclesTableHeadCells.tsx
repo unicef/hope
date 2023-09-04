@@ -1,8 +1,8 @@
 import { HeadCell } from '../../core/Table/EnhancedTableHead';
-import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import { AllProgramCyclesQuery } from '../../../__generated__/graphql';
 
 export const headCells: HeadCell<
-  AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
+  AllProgramCyclesQuery['allProgramCycles']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -21,7 +21,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Status',
-    id: 'title',
+    id: 'status',
     numeric: false,
     dataCy: 'status',
   },

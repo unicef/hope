@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  ProgramNode,
+  ProgramQuery,
   ProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
@@ -33,7 +33,7 @@ const NumberOfHouseHoldsValue = styled.div`
 `;
 
 interface ProgramDetailsProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -54,7 +54,7 @@ export const ProgramDetails = ({
       </Title>
       <OverviewContainer>
         <Grid container>
-          <Grid container xs={9} spacing={6}>
+          <Grid container item xs={9} spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label={t('status')}>
                 <StatusBox

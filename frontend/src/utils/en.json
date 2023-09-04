@@ -827,8 +827,8 @@
   "Set up Payment Instructions": "Set up Payment Instructions",
   "Organization": "Organization",
   "Program Population Size": "Program Population Size",
-  "Activate the programme to create a cycle": "Activate the programme to create a cycle",
-  "Add New Program Cycle": "Add New Program Cycle",
+  "Activate the Programme to create a cycle": "Activate the programme to create a cycle",
+  "Add New Programme Cycle": "Add New Programme Cycle",
   "Before you create a new cycle, it is necessary to specify the end date of the existing cycle": "Before you create a new cycle, it is necessary to specify the end date of the existing cycle",
   "Enter data for the new Programme cycle": "Enter data for the new Programme cycle",
   "Programme Cycle Title": "Programme Cycle Title",
@@ -838,5 +838,7 @@
   "Are you sure you want to delete the Program Cycle from the system?": "Are you sure you want to delete the Program Cycle from the system?",
   "This action cannot be undone.": "This action cannot be undone.",
   "Delete Program Cycle": "Delete Program Cycle",
-  "Close": "Close"
+  "Close": "Close",
+  "Programme Cycle name is required": "Programme Cycle name is required",
+  "End Date cannot be after Programme End Date": "End Date cannot be after Programme End Date"
 }
