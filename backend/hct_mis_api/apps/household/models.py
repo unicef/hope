@@ -506,6 +506,8 @@ class Household(
                   "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Household"
@@ -658,6 +660,18 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
     program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, "
+                  "this field will contain the object it was copied from.",
+    )
+
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -715,7 +729,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         self.save()
 
 
-class IndividualIdentity(models.Model):
+class IndividualIdentity(TimeStampedUUIDModel):
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
@@ -727,6 +741,17 @@ class IndividualIdentity(models.Model):
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, "
+                  "this field will contain the object it was copied from.",
+    )
 
     class Meta:
         verbose_name_plural = "Individual Identities"
@@ -750,6 +775,17 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         max_length=255,
         blank=True,
         choices=ROLE_CHOICE,
+    )
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, "
+                  "this field will contain the object it was copied from.",
     )
 
     class Meta:
@@ -939,6 +975,8 @@ class Individual(
                   "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
@@ -1156,6 +1194,17 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, "
+                  "this field will contain the object it was copied from.",
+    )
 
     def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
