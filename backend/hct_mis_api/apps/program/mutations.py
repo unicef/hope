@@ -26,7 +26,10 @@ from hct_mis_api.apps.program.inputs import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.program.utils import copy_program_object
+from hct_mis_api.apps.program.utils import (
+    copy_program_object,
+    get_program_id_from_headers,
+)
 from hct_mis_api.apps.program.validators import (
     ProgramCycleDeletionValidator,
     ProgramCycleValidator,
@@ -181,7 +184,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
     @classmethod
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict) -> "CreateProgramCycle":
-        program_id = decode_id_string_required(info.context.headers.get("Program"))
+        program_id = get_program_id_from_headers(info)
         program = Program.objects.get(id=program_id)
 
         cls.has_permission(info, Permissions.PROGRAMME_CYCLE_CREATE, program.business_area)

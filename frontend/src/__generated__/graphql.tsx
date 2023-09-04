@@ -5355,6 +5355,9 @@ export type Query = {
   allLanguages?: Maybe<LanguageObjectConnection>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
+  allActivePrograms?: Maybe<ProgramNodeConnection>,
+  programCycle?: Maybe<ProgramCycleNode>,
+  allProgramCycles?: Maybe<ProgramCycleNodeConnection>,
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
   chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -5364,7 +5367,6 @@ export type Query = {
   programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  allActivePrograms?: Maybe<ProgramNodeConnection>,
   targetPopulation?: Maybe<TargetPopulationNode>,
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
   targetPopulationHouseholds?: Maybe<HouseholdNodeConnection>,
@@ -6046,6 +6048,44 @@ export type QueryAllProgramsArgs = {
 };
 
 
+export type QueryAllActiveProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryProgramCycleArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllProgramCyclesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
 export type QueryChartProgrammesBySectorArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
@@ -6088,25 +6128,6 @@ export type QueryAllCashPlansArgs = {
   search?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryAllActiveProgramsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  businessArea: Scalars['String'],
-  search?: Maybe<Scalars['String']>,
-  status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
-  numberOfHouseholds?: Maybe<Scalars['String']>,
-  budget?: Maybe<Scalars['String']>,
-  startDate?: Maybe<Scalars['Date']>,
-  endDate?: Maybe<Scalars['Date']>,
-  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -31045,6 +31066,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allLanguages?: Resolver<Maybe<ResolversTypes['LanguageObjectConnection']>, ParentType, ContextType, QueryAllLanguagesArgs>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
+  allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>,
+  programCycle?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType, RequireFields<QueryProgramCycleArgs, 'id'>>,
+  allProgramCycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, QueryAllProgramCyclesArgs>,
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
   chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
@@ -31054,7 +31078,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
   targetPopulationHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryTargetPopulationHouseholdsArgs, 'targetPopulation'>>,

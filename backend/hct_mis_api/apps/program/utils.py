@@ -1,3 +1,6 @@
+from typing import Any
+
+from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.household.models import (
     Household,
     Individual,
@@ -134,3 +137,7 @@ def copy_bank_account_info_per_individual(new_individual: Individual) -> None:
         bank_account_info.pk = None
         bank_account_info.individual = new_individual
         bank_account_info.save()
+
+
+def get_program_id_from_headers(info: Any) -> str:
+    return decode_id_string_required(info.context.headers.get("Program"))
