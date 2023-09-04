@@ -48,7 +48,7 @@ export const AddNewProgramCycleTwoSteps = ({
   const { id, name, startDate } = previousProgramCycle;
 
   const initialValuesPreviousProgramCycle: {
-    [key: string]: string | boolean | number;
+    [key: string]: string | boolean | number | null;
   } = {
     previousProgramCycleId: id,
     previousProgramCycleName: name,
@@ -60,15 +60,14 @@ export const AddNewProgramCycleTwoSteps = ({
     [key: string]: string | boolean | number;
   } = {
     newProgramCycleName: '',
-    newProgramCycleStartDate: '',
-    newProgramCycleEndDate: '',
+    newProgramCycleStartDate: undefined,
+    newProgramCycleEndDate: undefined,
   };
 
   return step === 1 ? (
     <Formik
       initialValues={initialValuesPreviousProgramCycle}
       onSubmit={(values) => {
-        console.log('values', values);
         handleUpdate(values);
       }}
       validationSchema={validationSchemaPreviousProgramCycle}
@@ -154,7 +153,6 @@ export const AddNewProgramCycleTwoSteps = ({
     <Formik
       initialValues={initialValuesNewProgramCycle}
       onSubmit={(values) => {
-        console.log('values', values);
         handleCreate(values);
       }}
       validationSchema={validationSchemaNewProgramCycle}

@@ -16,21 +16,16 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   ProgramNode,
-  useUpdateProgramMutation,
-  AllProgramsQuery,
-  ProgramStatus,
   useUpdateProgramCycleMutation,
 } from '../../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../../apollo/queries/program/Program';
+import { ALL_PROGRAM_CYCLES_QUERY } from '../../../../apollo/queries/program/programcycles/AllProgramCycles';
 import { AutoSubmitFormOnEnter } from '../../../../components/core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../../components/core/GreyText';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { programCompare, today } from '../../../../utils/utils';
+import { today } from '../../../../utils/utils';
 import { DialogDescription } from '../../DialogDescription';
 import { DialogFooter } from '../../DialogFooter';
 import { DialogTitleWrapper } from '../../DialogTitleWrapper';
@@ -47,7 +42,6 @@ export const EditProgramCycle = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { programId } = useBaseUrl();
 
   const [mutate, { loading }] = useUpdateProgramCycleMutation();
 
@@ -65,15 +59,24 @@ export const EditProgramCycle = ({
         },
         refetchQueries: () => [
           {
-            query: PROGRAM_QUERY,
-            variables: { id: programId },
+            query: ALL_PROGRAM_CYCLES_QUERY,
           },
         ],
+        awaitRefetchQueries: true,
       });
-      showMessage('Programme Cycle deleted.');
+      showMessage('Programme Cycle edited.');
+      setOpen(false);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
+  };
+
+  const initialValues: {
+    [key: string]: string | boolean | number;
+  } = {
+    name: programCycle.name,
+    startDate: programCycle.startDate,
+    endDate: programCycle.endDate,
   };
 
   const validationSchema = Yup.object().shape({
@@ -98,14 +101,6 @@ export const EditProgramCycle = ({
         '',
       ),
   });
-
-  const initialValues: {
-    [key: string]: string | boolean | number;
-  } = {
-    name: '',
-    startDate: '',
-    endDate: '',
-  };
 
   return (
     <>

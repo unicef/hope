@@ -5,18 +5,19 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
-  ProgramNode,
+  ProgramQuery,
   ProgramStatus,
   useCreateProgramCycleMutation,
   useUpdateProgramCycleMutation,
 } from '../../../../../__generated__/graphql';
+import { ALL_PROGRAM_CYCLES_QUERY } from '../../../../../apollo/queries/program/programcycles/AllProgramCycles';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import { today } from '../../../../../utils/utils';
 import { AddNewProgramCycleOneStep } from './AddNewProgramCycleOneStep';
 import { AddNewProgramCycleTwoSteps } from './AddNewProgramCycleTwoSteps';
 
 interface AddNewProgramCycleProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export const AddNewProgramCycle = ({
@@ -100,6 +101,8 @@ export const AddNewProgramCycle = ({
             endDate: values.newProgramCycleEndDate,
           },
         },
+        refetchQueries: () => [{ query: ALL_PROGRAM_CYCLES_QUERY }],
+        awaitRefetchQueries: true,
       });
       showMessage(t('Programme Cycle created.'), {
         dataCy: 'snackbar-program-cycle-create-success',
@@ -110,13 +113,18 @@ export const AddNewProgramCycle = ({
     }
   };
 
-  //TODO: replace this with actual data
-  const previousProgramCycle = {
-    id: 'PC-123',
-    name: 'Example Previous Program Cycle',
-    startDate: '2023-08-20',
-    endDate: '',
+  const programCycles = program.cycles.edges.map((x) => x.node);
+
+  const getLastProgramCycle = (
+    array,
+  ): ProgramQuery['program']['cycles']['edges'][number]['node'] => {
+    if (array.length > 0) {
+      return array[array.length - 1];
+    }
+    return null;
   };
+
+  const previousProgramCycle = getLastProgramCycle(programCycles);
 
   const handleUpdate = async (values): Promise<void> => {
     try {
@@ -129,11 +137,12 @@ export const AddNewProgramCycle = ({
             endDate: values.previousProgramCycleEndDate,
           },
         },
+        refetchQueries: () => [{ query: ALL_PROGRAM_CYCLES_QUERY }],
+        awaitRefetchQueries: true,
       });
       showMessage(t('Programme Cycle updated.'), {
         dataCy: 'snackbar-program-cycle-update-success',
       });
-      setOpen(false);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -141,7 +150,6 @@ export const AddNewProgramCycle = ({
 
   const showNewProgrammeCycleButton = program.status === ProgramStatus.Active;
 
-  //TODO: replace this with actual data
   const showOneStepModal = Boolean(previousProgramCycle?.endDate);
 
   return (

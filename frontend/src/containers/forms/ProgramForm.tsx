@@ -11,6 +11,10 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import {
+  ProgramQuery,
+  useProgrammeChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
@@ -18,10 +22,6 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
-import {
-  ProgramNode,
-  useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
@@ -45,7 +45,7 @@ const FullWidth = styled.div`
 `;
 
 interface ProgramFormPropTypes {
-  program?: ProgramNode;
+  program?: ProgramQuery['program'] | null;
   onSubmit: (values, setFieldError) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;

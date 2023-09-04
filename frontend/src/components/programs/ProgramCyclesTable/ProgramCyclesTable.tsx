@@ -3,28 +3,22 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  AllGrievanceTicketQuery,
-  AllGrievanceTicketQueryVariables,
-  ProgramNode,
+  AllProgramCyclesQuery,
+  AllProgramCyclesQueryVariables,
+  ProgramQuery,
   ProgramStatus,
-  useAllGrievanceTicketQuery,
+  useAllProgramCyclesQuery,
   useProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { AddNewProgramCycle } from '../../../containers/dialogs/programs/programCycles/AddNewProgramCycle/AddNewProgramCycle';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { choicesToDict } from '../../../utils/utils';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './ProgramCyclesTableHeadCells';
 import { ProgramCyclesTableRow } from './ProgramCyclesTableRow';
-
-interface ProgramCyclesTableProps {
-  filter?;
-  program: ProgramNode;
-}
 
 const Subtitle = styled(Box)`
   color: #7c8990;
@@ -39,17 +33,18 @@ const Subtitle = styled(Box)`
   align-items: center;
 `;
 
+interface ProgramCyclesTableProps {
+  filter?;
+  program: ProgramQuery['program'];
+}
+
 export const ProgramCyclesTable = ({
   program,
 }: ProgramCyclesTableProps): React.ReactElement => {
-  const loading = false;
-  const { data } = useProgrammeChoiceDataQuery();
-  const { businessArea } = useBaseUrl();
+  const { data: programChoiceData, loading } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
-  const initialVariables: AllGrievanceTicketQueryVariables = {
-    businessArea,
-  };
+  const initialVariables: AllProgramCyclesQueryVariables = {};
 
   const permissions = usePermissions();
 
@@ -66,7 +61,7 @@ export const ProgramCyclesTable = ({
 
   const statusChoices: {
     [id: number]: string;
-  } = choicesToDict(data.programStatusChoices);
+  } = choicesToDict(programChoiceData.programCycleStatusChoices);
 
   const isProgramActive = program.status === ProgramStatus.Active;
 
@@ -84,21 +79,22 @@ export const ProgramCyclesTable = ({
     permissions,
   );
 
-  const addNewProgramCycleButton = [<AddNewProgramCycle program={program} />];
-
-  //TODO: connect ProgrammeCycle query
+  const addNewProgramCycleButton = [
+    <AddNewProgramCycle key='add-new' program={program} />,
+  ];
 
   return (
     <TableWrapper>
       <UniversalTable<
-        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-        AllGrievanceTicketQueryVariables
+        AllProgramCyclesQuery['allProgramCycles']['edges'][number]['node'],
+        AllProgramCyclesQueryVariables
       >
+        key={program.cycles?.edges?.length}
         headCells={headCells}
         title={t('Programme Cycles')}
         rowsPerPageOptions={[10, 15, 20, 40]}
-        query={useAllGrievanceTicketQuery}
-        queriedObjectName='allGrievanceTicket'
+        query={useAllProgramCyclesQuery}
+        queriedObjectName='allProgramCycles'
         initialVariables={initialVariables}
         defaultOrderBy='created_at'
         defaultOrderDirection='desc'
