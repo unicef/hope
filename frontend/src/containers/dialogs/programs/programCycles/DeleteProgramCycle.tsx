@@ -10,20 +10,11 @@ import { Delete } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  ProgramNode,
-  useUpdateProgramMutation,
-  AllProgramsQuery,
-  ProgramStatus,
-  useDeleteProgramCycleMutation,
-} from '../../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../../apollo/queries/program/Program';
+import { useDeleteProgramCycleMutation } from '../../../../__generated__/graphql';
+import { ALL_PROGRAM_CYCLES_QUERY } from '../../../../apollo/queries/program/programcycles/AllProgramCycles';
 import { GreyText } from '../../../../components/core/GreyText';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { programCompare } from '../../../../utils/utils';
 import { DialogDescription } from '../../DialogDescription';
 import { DialogFooter } from '../../DialogFooter';
 import { DialogTitleWrapper } from '../../DialogTitleWrapper';
@@ -44,7 +35,6 @@ export const DeleteProgramCycle = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { programId } = useBaseUrl();
 
   const [mutate, { loading }] = useDeleteProgramCycleMutation();
 
@@ -54,12 +44,8 @@ export const DeleteProgramCycle = ({
         variables: {
           programCycleId: programCycle.id,
         },
-        refetchQueries: () => [
-          {
-            query: PROGRAM_QUERY,
-            variables: { id: programId },
-          },
-        ],
+        refetchQueries: () => [{ query: ALL_PROGRAM_CYCLES_QUERY }],
+        awaitRefetchQueries: true,
       });
       showMessage('Programme Cycle deleted.');
     } catch (e) {

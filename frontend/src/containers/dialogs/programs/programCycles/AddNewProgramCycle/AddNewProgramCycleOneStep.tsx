@@ -39,11 +39,11 @@ export const AddNewProgramCycleOneStep = ({
   const { id, name, startDate, endDate } = previousProgramCycle;
 
   const initialValuesCreate: {
-    [key: string]: string | boolean | number;
+    [key: string]: string | boolean | number | null;
   } = {
     newProgramCycleName: '',
-    newProgramCycleStartDate: '',
-    newProgramCycleEndDate: '',
+    newProgramCycleStartDate: undefined,
+    newProgramCycleEndDate: undefined,
     previousProgramCycleId: id,
     previousProgramCycleName: name,
     previousProgramCycleStartDate: startDate,

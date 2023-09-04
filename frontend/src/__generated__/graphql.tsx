@@ -5028,7 +5028,7 @@ export type ProgramNode = Node & {
   paymentSet: PaymentNodeConnection,
   grievanceTickets: GrievanceTicketNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
-  cycles?: Maybe<ProgramCycleNodeConnection>,
+  cycles: ProgramCycleNodeConnection,
   reports: ReportNodeConnection,
   activityLogs: PaymentVerificationLogEntryNodeConnection,
   messages: CommunicationMessageNodeConnection,
@@ -5168,11 +5168,8 @@ export type ProgramNodeCyclesArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  search?: Maybe<Scalars['String']>,
-  status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  startDate?: Maybe<Scalars['Date']>,
-  endDate?: Maybe<Scalars['Date']>,
-  orderBy?: Maybe<Scalars['String']>
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>
 };
 
 
@@ -5366,6 +5363,7 @@ export type Query = {
   cashPlan?: Maybe<CashPlanNode>,
   allCashPlans?: Maybe<CashPlanNodeConnection>,
   programStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  programCycleStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programFrequencyOfPaymentsChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -10187,7 +10185,7 @@ export type CreateProgramCycleMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id'>
-      & { cycles: Maybe<(
+      & { cycles: (
         { __typename?: 'ProgramCycleNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'ProgramCycleNodeEdge' }
@@ -10196,7 +10194,7 @@ export type CreateProgramCycleMutation = (
             & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
-      )> }
+      ) }
     )> }
   )> }
 );
@@ -10213,7 +10211,7 @@ export type DeleteProgramCycleMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id'>
-      & { cycles: Maybe<(
+      & { cycles: (
         { __typename?: 'ProgramCycleNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'ProgramCycleNodeEdge' }
@@ -10222,7 +10220,7 @@ export type DeleteProgramCycleMutation = (
             & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
-      )> }
+      ) }
     )> }
   )> }
 );
@@ -10239,7 +10237,7 @@ export type UpdateProgramCycleMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id'>
-      & { cycles: Maybe<(
+      & { cycles: (
         { __typename?: 'ProgramCycleNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'ProgramCycleNodeEdge' }
@@ -10248,7 +10246,7 @@ export type UpdateProgramCycleMutation = (
             & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
-      )> }
+      ) }
     )> }
   )> }
 );
@@ -13231,6 +13229,16 @@ export type ProgramQuery = (
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    & { cycles: (
+      { __typename?: 'ProgramCycleNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramCycleNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramCycleNode' }
+          & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -13251,7 +13259,41 @@ export type ProgrammeChoiceDataQuery = (
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programCycleStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type AllProgramCyclesQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllProgramCyclesQuery = (
+  { __typename?: 'Query' }
+  & { allProgramCycles: Maybe<(
+    { __typename?: 'ProgramCycleNodeConnection' }
+    & Pick<ProgramCycleNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ProgramCycleNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ProgramCycleNode' }
+        & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+      )> }
+    )>> }
+  )> }
 );
 
 export type AllImportedHouseholdsQueryVariables = {
@@ -25293,6 +25335,20 @@ export const ProgramDocument = gql`
     administrativeAreasOfImplementation
     individualDataNeeded
     version
+    cycles {
+      edges {
+        node {
+          id
+          name
+          status
+          totalEntitledQuantity
+          totalUndeliveredQuantity
+          totalUndeliveredQuantity
+          startDate
+          endDate
+        }
+      }
+    }
   }
 }
     `;
@@ -25357,6 +25413,10 @@ export const ProgrammeChoiceDataDocument = gql`
     name
     value
   }
+  programCycleStatusChoices {
+    name
+    value
+  }
 }
     `;
 export type ProgrammeChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>, 'query'>;
@@ -25401,6 +25461,83 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const AllProgramCyclesDocument = gql`
+    query AllProgramCycles($before: String, $after: String, $first: Int, $last: Int, $search: String, $status: [String], $startDate: Date, $endDate: Date, $orderBy: String) {
+  allProgramCycles(before: $before, after: $after, first: $first, last: $last, search: $search, status: $status, startDate: $startDate, endDate: $endDate, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      node {
+        id
+        name
+        status
+        totalEntitledQuantity
+        totalUndeliveredQuantity
+        totalUndeliveredQuantity
+        startDate
+        endDate
+      }
+    }
+  }
+}
+    `;
+export type AllProgramCyclesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>, 'query'>;
+
+    export const AllProgramCyclesComponent = (props: AllProgramCyclesComponentProps) => (
+      <ApolloReactComponents.Query<AllProgramCyclesQuery, AllProgramCyclesQueryVariables> query={AllProgramCyclesDocument} {...props} />
+    );
+    
+export type AllProgramCyclesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllProgramCyclesQuery, AllProgramCyclesQueryVariables> & TChildProps;
+export function withAllProgramCycles<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllProgramCyclesQuery,
+  AllProgramCyclesQueryVariables,
+  AllProgramCyclesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllProgramCyclesQuery, AllProgramCyclesQueryVariables, AllProgramCyclesProps<TChildProps>>(AllProgramCyclesDocument, {
+      alias: 'allProgramCycles',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllProgramCyclesQuery__
+ *
+ * To run a query within a React component, call `useAllProgramCyclesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllProgramCyclesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllProgramCyclesQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllProgramCyclesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>(AllProgramCyclesDocument, baseOptions);
+      }
+export function useAllProgramCyclesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>(AllProgramCyclesDocument, baseOptions);
+        }
+export type AllProgramCyclesQueryHookResult = ReturnType<typeof useAllProgramCyclesQuery>;
+export type AllProgramCyclesLazyQueryHookResult = ReturnType<typeof useAllProgramCyclesLazyQuery>;
+export type AllProgramCyclesQueryResult = ApolloReactCommon.QueryResult<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
@@ -30943,7 +31080,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
   grievanceTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceTicketsArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
-  cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, ProgramNodeCyclesArgs>,
+  cycles?: Resolver<ResolversTypes['ProgramCycleNodeConnection'], ParentType, ContextType, ProgramNodeCyclesArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeActivityLogsArgs>,
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, ProgramNodeMessagesArgs>,
@@ -31077,6 +31214,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
   programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  programCycleStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programFrequencyOfPaymentsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,

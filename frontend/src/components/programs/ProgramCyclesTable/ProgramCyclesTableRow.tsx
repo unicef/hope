@@ -42,7 +42,7 @@ export const ProgramCyclesTableRow = ({
   };
 
   return (
-    <ClickableTableRow onClick={handleRowClick} hover role='checkbox' key={0}>
+    <ClickableTableRow onClick={handleRowClick} hover role='checkbox'>
       <TableCell align='left'>
         {canViewProgramCycleDetails ? (
           <BlackLink to={detailsPath}>{id}</BlackLink>
