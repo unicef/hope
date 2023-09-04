@@ -2,8 +2,12 @@ import BaseComponent from "../../base.component";
 
 export default class RegistrationDataImport extends BaseComponent {
   // Locators
+  buttonImport = 'button[data-cy="button-import"]';
+
   // Texts
+
   // Elements
+  getButtonImport = () => cy.get(this.buttonImport);
 
   verifyMergedData() {
     let householdId;

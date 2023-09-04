@@ -41,6 +41,19 @@ describe("Global Program Filter - Impacts", () => {
       registrationDataImport.getMenuButtonRegistrationDataImport().click();
       registrationDataImport.getTicketListRow().should("have.length", 0);
     });
+    it("GPF - Registration data import - import button", () => {
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage
+        .getProgrammesOptions()
+        .contains(programmesPage.textTestProgramm)
+        .click();
+      registrationDataImport.getMenuButtonRegistrationDataImport().click();
+      registrationDataImport.getButtonImport().should("not.be.disabled");
+      programmesPage.getGlobalProgramFilter().click();
+      programmesPage.getProgrammesOptions().contains("Draft Program").click();
+      registrationDataImport.getMenuButtonRegistrationDataImport().click();
+      registrationDataImport.getButtonImport().should("be.disabled");
+    });
     it("GPF - Program details", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
