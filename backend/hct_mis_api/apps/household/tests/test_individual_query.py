@@ -49,6 +49,12 @@ class TestIndividualQuery(APITestCase):
         cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
+            status="ACTIVE",
+        )
+        cls.program_draft = ProgramFactory(
+            name="Test program DRAFT",
+            business_area=cls.business_area,
+            status="DRAFT",
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
@@ -154,4 +160,12 @@ class TestIndividualQuery(APITestCase):
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": "full_name Jenna Franklin"},
+        )
+
+    def test_individual_query_draft(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")}},
         )

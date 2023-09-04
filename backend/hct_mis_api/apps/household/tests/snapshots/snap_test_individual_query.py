@@ -86,6 +86,15 @@ snapshots['TestIndividualQuery::test_individual_query_all_1_without_permission 1
     ]
 }
 
+snapshots['TestIndividualQuery::test_individual_query_draft 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
 snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
     'data': {
         'individual': {
