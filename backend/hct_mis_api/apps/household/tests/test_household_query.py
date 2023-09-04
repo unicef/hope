@@ -195,9 +195,14 @@ class TestHouseholdQuery(APITestCase):
         )
 
     def test_household_query_draft(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
+            },
         )

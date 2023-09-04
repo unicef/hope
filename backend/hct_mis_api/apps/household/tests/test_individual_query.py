@@ -163,9 +163,14 @@ class TestIndividualQuery(APITestCase):
         )
 
     def test_individual_query_draft(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
+            },
         )
