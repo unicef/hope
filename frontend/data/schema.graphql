@@ -3354,7 +3354,7 @@ type ProgramNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
-  cycles(offset: Int, before: String, after: String, first: Int, last: Int, name: String, status: String): ProgramCycleNodeConnection!
+  cycles(offset: Int, before: String, after: String, first: Int, last: Int, search: String, status: [String], startDate: Date, endDate: Date, orderBy: String): ProgramCycleNodeConnection
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!

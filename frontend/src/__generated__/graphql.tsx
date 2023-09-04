@@ -5028,7 +5028,7 @@ export type ProgramNode = Node & {
   paymentSet: PaymentNodeConnection,
   grievanceTickets: GrievanceTicketNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
-  cycles: ProgramCycleNodeConnection,
+  cycles?: Maybe<ProgramCycleNodeConnection>,
   reports: ReportNodeConnection,
   activityLogs: PaymentVerificationLogEntryNodeConnection,
   messages: CommunicationMessageNodeConnection,
@@ -5168,8 +5168,11 @@ export type ProgramNodeCyclesArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -10184,7 +10187,7 @@ export type CreateProgramCycleMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id'>
-      & { cycles: (
+      & { cycles: Maybe<(
         { __typename?: 'ProgramCycleNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'ProgramCycleNodeEdge' }
@@ -10193,7 +10196,7 @@ export type CreateProgramCycleMutation = (
             & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
-      ) }
+      )> }
     )> }
   )> }
 );
@@ -10210,7 +10213,7 @@ export type DeleteProgramCycleMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id'>
-      & { cycles: (
+      & { cycles: Maybe<(
         { __typename?: 'ProgramCycleNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'ProgramCycleNodeEdge' }
@@ -10219,7 +10222,7 @@ export type DeleteProgramCycleMutation = (
             & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
-      ) }
+      )> }
     )> }
   )> }
 );
@@ -10236,7 +10239,7 @@ export type UpdateProgramCycleMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id'>
-      & { cycles: (
+      & { cycles: Maybe<(
         { __typename?: 'ProgramCycleNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'ProgramCycleNodeEdge' }
@@ -10245,7 +10248,7 @@ export type UpdateProgramCycleMutation = (
             & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
-      ) }
+      )> }
     )> }
   )> }
 );
@@ -30940,7 +30943,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, ProgramNodePaymentSetArgs>,
   grievanceTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceTicketsArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
-  cycles?: Resolver<ResolversTypes['ProgramCycleNodeConnection'], ParentType, ContextType, ProgramNodeCyclesArgs>,
+  cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, ProgramNodeCyclesArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ProgramNodeActivityLogsArgs>,
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, ProgramNodeMessagesArgs>,

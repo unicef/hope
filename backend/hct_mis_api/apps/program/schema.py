@@ -61,44 +61,10 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
-class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
-        hopePermissionClass(
-            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        ),
-    )
-
-    budget = graphene.Decimal()
-    total_entitled_quantity = graphene.Decimal()
-    total_delivered_quantity = graphene.Decimal()
-    total_undelivered_quantity = graphene.Decimal()
-    total_number_of_households = graphene.Int()
-    total_number_of_households_with_tp_in_program = graphene.Int()
-    individual_data_needed = graphene.Boolean()
-
-    class Meta:
-        model = Program
-        filter_fields = [
-            "name",
-        ]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_history(self, info: Any) -> QuerySet:
-        return self.history.all()
-
-    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
-        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
-        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
-
-    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
-        return self.households_with_tp_in_program.count()
-
-
 class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            Permissions.PROGRAMME_CYCLE_VIEW_DETAILS,
         ),
     )
     total_delivered_quantity = graphene.Float()
@@ -128,6 +94,46 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
         ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+
+class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+
+    budget = graphene.Decimal()
+    total_entitled_quantity = graphene.Decimal()
+    total_delivered_quantity = graphene.Decimal()
+    total_undelivered_quantity = graphene.Decimal()
+    total_number_of_households = graphene.Int()
+    total_number_of_households_with_tp_in_program = graphene.Int()
+    individual_data_needed = graphene.Boolean()
+    # cycles = DjangoPermissionFilterConnectionField(
+    #     ProgramCycleNode,
+    #     filterset_class=ProgramCycleFilter,
+    #     # TODO: check and update perms
+    #     # permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
+    # )
+
+    class Meta:
+        model = Program
+        filter_fields = [
+            "name",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_history(self, info: Any) -> QuerySet:
+        return self.history.all()
+
+    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
+        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
+        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
+
+    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
+        return self.households_with_tp_in_program.count()
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -190,7 +196,7 @@ class Query(graphene.ObjectType):
     all_program_cycles = DjangoPermissionFilterConnectionField(
         ProgramCycleNode,
         filterset_class=ProgramCycleFilter,
-        permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
+        # permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
     )
     # Chart
     chart_programmes_by_sector = graphene.Field(
