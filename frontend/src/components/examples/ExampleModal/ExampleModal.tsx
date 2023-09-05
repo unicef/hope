@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingButton } from '../../core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { programCompare } from '../../../utils/utils';
 import {

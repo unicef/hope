@@ -36,7 +36,6 @@ export const AddNewProgramCycleOneStep = ({
   previousProgramCycle,
 }: AddNewProgramCycleOneStepProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { id, name, startDate, endDate } = previousProgramCycle;
 
   const initialValuesCreate: {
     [key: string]: string | boolean | number | null;
@@ -44,10 +43,10 @@ export const AddNewProgramCycleOneStep = ({
     newProgramCycleName: '',
     newProgramCycleStartDate: undefined,
     newProgramCycleEndDate: undefined,
-    previousProgramCycleId: id,
-    previousProgramCycleName: name,
-    previousProgramCycleStartDate: startDate,
-    previousProgramCycleEndDate: endDate,
+    previousProgramCycleId: previousProgramCycle?.id,
+    previousProgramCycleName: previousProgramCycle?.name,
+    previousProgramCycleStartDate: previousProgramCycle?.startDate,
+    previousProgramCycleEndDate: previousProgramCycle?.endDate,
   };
 
   return (

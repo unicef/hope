@@ -45,14 +45,13 @@ export const AddNewProgramCycleTwoSteps = ({
 }: AddNewProgramCycleTwoStepsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
-  const { id, name, startDate } = previousProgramCycle;
 
   const initialValuesPreviousProgramCycle: {
     [key: string]: string | boolean | number | null;
   } = {
-    previousProgramCycleId: id,
-    previousProgramCycleName: name,
-    previousProgramCycleStartDate: startDate,
+    previousProgramCycleId: previousProgramCycle?.id,
+    previousProgramCycleName: previousProgramCycle?.name,
+    previousProgramCycleStartDate: previousProgramCycle?.startDate,
     previousProgramCycleEndDate: undefined,
   };
 
