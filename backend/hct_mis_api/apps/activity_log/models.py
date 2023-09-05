@@ -55,7 +55,6 @@ class LogEntry(models.Model):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
     programs = models.ManyToManyField("program.Program", related_name="activity_logs", blank=True)
 
-
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
 
     class Meta:

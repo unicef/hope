@@ -455,7 +455,7 @@ class Household(
         "program.Program",
         related_name="households",
         blank=True,
-    ) # TODO: remove after migration
+    )  # TODO: remove after migration
     returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
@@ -503,7 +503,7 @@ class Household(
         on_delete=models.SET_NULL,
         related_name="copied_to",
         help_text="If this household was copied from another household, "
-                  "this field will contain the household it was copied from.",
+        "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
@@ -668,10 +668,8 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, "
-                  "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -684,7 +682,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["type", "country"], # TODO: after GPF merge will add "program"
+                fields=["type", "country"],  # TODO: after GPF merge will add "program"
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -698,7 +696,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
                 name="unique_for_individual_if_not_removed_and_valid",
             ),
             UniqueConstraint(
-                fields=["document_number", "type", "country"], # TODO: after GPF merge will add "program"
+                fields=["document_number", "type", "country"],  # TODO: after GPF merge will add "program"
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -749,8 +747,7 @@ class IndividualIdentity(TimeStampedUUIDModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, "
-                  "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     class Meta:
@@ -784,8 +781,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, "
-                  "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     class Meta:
@@ -972,7 +968,7 @@ class Individual(
         related_name="copied_to",
         on_delete=models.SET_NULL,
         help_text="If this individual was copied from another individual, "
-                  "this field will contain the individual it was copied from.",
+        "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
@@ -1175,6 +1171,7 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+    is_original = models.BooleanField(default=True)
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
@@ -1202,8 +1199,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, "
-                  "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     def __str__(self) -> str:
