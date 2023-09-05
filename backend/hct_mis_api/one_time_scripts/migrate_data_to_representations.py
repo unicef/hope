@@ -74,7 +74,12 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
         households = Household.objects.filter(id__in=household_ids, is_migration_handled=False, is_original=True)
         households_count = households.count()
-
+        logger.info(f"Households to handle: {households_count}")
+        already_copied_households = list(Household.objects.filter(
+            is_original=False, program=program, copied_from__in=households
+        ).values_list("id", flat=True))
+        logger.info(f"Already copied households: {len(already_copied_households)}")
+        households = households.exclude(id__in=already_copied_households)
         logger.info(f"Handling households for program: {program}")
 
         for i, household in enumerate(households):
@@ -88,7 +93,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         logger.info(f"Copying roles for program: {program}")
         copy_roles(households, program=program)
 
-        logger.info(f"Adjusting household selections for program: {program}")
+        logger.info(f"Copy household selections for program: {program}")
         copy_household_selections(household_selections, program)
 
         logger.info(f"Finished creating representations for program: {program}")
@@ -131,14 +136,9 @@ def copy_household_representation(household: Household, program: Program) -> Non
     Copy household into representation for given program if it does not exist yet.
     """
     # copy representations only based on original households
-    if household.is_original:
-        # if there is no representation of this household in this program yet, copy the household
-        if not Household.objects.filter(
-            program=program,
-            copied_from=household,
-            is_original=False,
-        ).exists():
-            copy_household(household, program)
+    if not household.is_original:
+        return
+    copy_household(household, program)
 
 
 def copy_household(household: Household, program: Program) -> Household:
