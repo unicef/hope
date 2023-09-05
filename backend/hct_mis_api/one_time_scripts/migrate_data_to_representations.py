@@ -73,13 +73,14 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         household_ids = household_selections.distinct("household").values_list("household_id", flat=True)
 
         households = Household.objects.filter(id__in=household_ids, is_migration_handled=False, is_original=True)
-        households_count = households.count()
-        logger.info(f"Households to handle: {households_count}")
         already_copied_households = list(Household.objects.filter(
             is_original=False, program=program, copied_from__in=households
         ).values_list("id", flat=True))
         logger.info(f"Already copied households: {len(already_copied_households)}")
         households = households.exclude(id__in=already_copied_households)
+        households_count = households.count()
+        logger.info(f"Households to handle: {households_count}")
+        
         logger.info(f"Handling households for program: {program}")
 
         for i, household in enumerate(households):
