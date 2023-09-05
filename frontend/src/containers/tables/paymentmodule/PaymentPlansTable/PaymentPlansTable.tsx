@@ -1,5 +1,4 @@
 import React, { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   AllPaymentPlansForTableQueryVariables,
   PaymentPlanNode,
@@ -13,13 +12,14 @@ import { headCells } from './PaymentPlansHeadCells';
 interface PaymentPlansTableProps {
   filter;
   canViewDetails: boolean;
+  title?: string;
 }
 
 export const PaymentPlansTable = ({
   filter,
   canViewDetails,
+  title = 'Payment Plans',
 }: PaymentPlansTableProps): ReactElement => {
-  const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
@@ -36,7 +36,7 @@ export const PaymentPlansTable = ({
   return (
     <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
       defaultOrderBy='-createdAt'
-      title={t('Payment Plans')}
+      title={title}
       headCells={headCells}
       query={useAllPaymentPlansForTableQuery}
       queriedObjectName='allPaymentPlans'

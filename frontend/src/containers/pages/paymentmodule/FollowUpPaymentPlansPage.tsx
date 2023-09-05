@@ -19,11 +19,10 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
-  isFollowUp: null,
-  program: null,
+  isFollowUp: true,
 };
 
-export const PaymentModulePage = (): React.ReactElement => {
+export const FollowUpPaymentPlansPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
@@ -65,6 +64,7 @@ export const PaymentModulePage = (): React.ReactElement => {
       <TableWrapper>
         <PaymentPlansTable
           filter={appliedFilter}
+          title={t('Follow-up Payment Plans')}
           canViewDetails={hasPermissions(
             PERMISSIONS.PM_VIEW_DETAILS,
             permissions,
