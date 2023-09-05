@@ -80,6 +80,7 @@ def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List
     from collections import defaultdict
 
     import xlrd
+
     choices_mapping = defaultdict(list)
     first_row = choices_sheet.row(0)
     choices_headers_map = [col.value for col in first_row]
