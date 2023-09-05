@@ -85,22 +85,22 @@ class TestProgramCycle(APITestCase):
     @parameterized.expand(
         [
             ("without_permission_program_in_draft", [], Program.DRAFT, {}),
-            ("with_permission_program_in_draft", [Permissions.PROGRAMME_CYCLE_CREATE], Program.DRAFT, {}),
+            ("with_permission_program_in_draft", [Permissions.PM_PROGRAMME_CYCLE_CREATE], Program.DRAFT, {}),
             (
                 "with_permission_program_in_active_wrong_start_date",
-                [Permissions.PROGRAMME_CYCLE_CREATE],
+                [Permissions.PM_PROGRAMME_CYCLE_CREATE],
                 Program.ACTIVE,
                 {"start_date": "1999-01-01"},
             ),
             (
                 "with_permission_program_in_active_wrong_end_date",
-                [Permissions.PROGRAMME_CYCLE_CREATE],
+                [Permissions.PM_PROGRAMME_CYCLE_CREATE],
                 Program.ACTIVE,
                 {"end_date": "2999-01-01"},
             ),
             (
                 "with_permission_program_in_active_end_date_is_more_then_start_date",
-                [Permissions.PROGRAMME_CYCLE_CREATE],
+                [Permissions.PM_PROGRAMME_CYCLE_CREATE],
                 Program.ACTIVE,
                 {"start_date": "2098-02-22", "end_date": "2098-02-11"},
             ),
@@ -126,7 +126,7 @@ class TestProgramCycle(APITestCase):
         )
 
     def test_create_program_cycle_when_cycles_without_end_date(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_CREATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_CREATE], self.business_area)
         self.program.status = Program.ACTIVE
         self.program.save()
 
@@ -150,7 +150,7 @@ class TestProgramCycle(APITestCase):
         )
 
     def test_create_program_cycle_when_cycles_overlapping(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_CREATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_CREATE], self.business_area)
         self.program.status = Program.ACTIVE
         self.program.save()
 
@@ -177,7 +177,7 @@ class TestProgramCycle(APITestCase):
         )
 
     def test_create_program_cycle_with_the_same_name(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_CREATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_CREATE], self.business_area)
         self.program.status = Program.ACTIVE
         self.program.save()
 
@@ -205,7 +205,7 @@ class TestProgramCycle(APITestCase):
 
         inputs = {"name": "New Cycle for Update", "startDate": "2055-11-11"}
         context = {"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}}
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_CREATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_CREATE], self.business_area)
 
         self.graphql_request(
             request_string=CREATE_PROGRAM_CYCLE_MUTATION,
@@ -226,7 +226,7 @@ class TestProgramCycle(APITestCase):
             },
         )
 
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
@@ -259,7 +259,7 @@ class TestProgramCycle(APITestCase):
 
         inputs = {"name": "New Cycle 001", "startDate": "2055-11-11"}
         context = {"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}}
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_CREATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_CREATE], self.business_area)
 
         self.graphql_request(
             request_string=CREATE_PROGRAM_CYCLE_MUTATION,
@@ -275,7 +275,7 @@ class TestProgramCycle(APITestCase):
             variables={"programCycleId": encoded_cycle_id},
         )
 
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CYCLE_REMOVE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_PROGRAMME_CYCLE_REMOVE], self.business_area)
 
         self.program.status = Program.DRAFT
         self.program.save()
