@@ -18,7 +18,8 @@
     "sentry_id": null,
     "pull_pictures": true,
     "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
-    "screen_beneficiary": false
+    "screen_beneficiary": false,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 }
 ]
