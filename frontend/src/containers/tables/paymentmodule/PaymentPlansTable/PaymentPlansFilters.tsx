@@ -171,27 +171,6 @@ export const PaymentPlansFilters = ({
             minDateMessage={<span />}
           />
         </Grid>
-        <Grid item xs={12}>
-          <Box ml={2}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
-                  color='primary'
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
-                    } else {
-                      handleFilterChange('isFollowUp', false);
-                    }
-                  }}
-                />
-              }
-              label={t('Show only Follow-up plans')}
-            />
-          </Box>
-        </Grid>
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}

@@ -153,7 +153,6 @@ export const DrawerItems = ({
         if (item.flag && !flags[item.flag]) {
           return null;
         }
-
         if (item.collapsable) {
           const hrefForCollapsibleItem = getInitialHrefForCollapsible(
             item.secondaryActions,

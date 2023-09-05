@@ -1,10 +1,16 @@
 import React from 'react';
 import { Switch, useRouteMatch } from 'react-router-dom';
 import { SentryRoute } from '../../components/core/SentryRoute';
+import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
+import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
+import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
 import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
+import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
+import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
+import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
 import { CreateGrievancePage } from '../pages/grievances/CreateGrievancePage';
@@ -18,11 +24,14 @@ import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSet
 import { EditPaymentPlanPage } from '../pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from '../pages/paymentmodule/EditSetUpFspPage';
 import { FollowUpPaymentPlanDetailsPage } from '../pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
+import { FollowUpPaymentPlansPage } from '../pages/paymentmodule/FollowUpPaymentPlansPage';
 import { PaymentDetailsPage } from '../pages/paymentmodule/PaymentDetailsPage';
-import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
-import { SetFollowUpUpFspPage } from '../pages/paymentmodule/SetFollowUpUpFspPage';
+import { PaymentPlansPage } from '../pages/paymentmodule/PaymentPlansPage';
+import { ProgramCyclesPage } from '../pages/paymentmodule/ProgramCyclesPage';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
+import { SetUpFspPageFollowUp } from '../pages/paymentmodule/SetUpFspPageFollowUp';
+import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
 import { CashPlanDetailsPage } from '../pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from '../pages/payments/CashPlanVerificationDetailsPage';
 import { CashPlanVerificationRedirectPage } from '../pages/payments/CashplanVerificationRedirectPage';
@@ -47,13 +56,6 @@ import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopul
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
-import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
-import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
-import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
-import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
-import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
-import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
-import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -101,8 +103,11 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/payment-module/new-plan`}>
         <CreatePaymentPlanPage />
       </SentryRoute>
-      <SentryRoute exact path={`${path}/payment-module`}>
-        <PaymentModulePage />
+      <SentryRoute exact path={`${path}/payment-module/payment-plans`}>
+        <PaymentPlansPage />
+      </SentryRoute>
+      <SentryRoute exact path={`${path}/payment-module/followup-payment-plans`}>
+        <FollowUpPaymentPlansPage />
       </SentryRoute>
       <SentryRoute
         path={`${path}/payment-module/followup-payment-plans/:id/edit`}
@@ -113,7 +118,7 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute
         path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/create`}
       >
-        <SetFollowUpUpFspPage />
+        <SetUpFspPageFollowUp />
       </SentryRoute>
       <SentryRoute
         path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`}
@@ -137,6 +142,9 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/payment-plans/:id/edit`}>
         <EditPaymentPlanPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/payment-module/program-cycles`}>
+        <ProgramCyclesPage />
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/payments/:id`}>
         <PaymentDetailsPage />
