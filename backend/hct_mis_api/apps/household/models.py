@@ -18,7 +18,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
+from model_utils.models import SoftDeletableModel, TimeStampedModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -727,7 +727,8 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         self.save()
 
 
-class IndividualIdentity(TimeStampedUUIDModel):
+class IndividualIdentity(TimeStampedModel):
+    # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
