@@ -330,63 +330,21 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
     elif key == "household_id":
         all_queries.append({"match_phrase_prefix": {"household.unicef_id": {"query": search}}})
     elif key == "full_name":
-        all_queries.append(
-            {
-                "match_phrase_prefix": {
-                    "full_name": {
-                        "query": search,
-                    }
-                }
-            }
-        )
+        all_queries.append({"match_phrase_prefix": {"full_name": {"query": search}}})
     elif key == "phone_no":
+        all_queries.append({"match_phrase_prefix": {"phone_no_text": {"query": search}}})
         all_queries.append(
-            {
-                "match_phrase_prefix": {
-                    "phone_no_text": {
-                        "query": search,
-                    }
-                }
-            }
-        )
-        all_queries.append(
-            {
-                "match_phrase_prefix": {
-                    "phone_no_alternative_text": {
-                        "query": search,
-                    }
-                }
-            },
+            {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
         )
     elif key == "registration_id":
-        all_queries.append(
-            {
-                "math_phrase_prefix": {
-                    "registration_id": {
-                        "query": search,
-                    }
-                }
-            }
-        )
+        all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
     elif DocumentType.objects.filter(key=key).exists():
         all_queries.append(
             {
                 "bool": {
                     "must": [
-                        {
-                            "match": {
-                                "documents.number": {
-                                    "query": search,
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                "documents.key": {
-                                    "query": key,
-                                }
-                            }
-                        },
+                        {"match": {"documents.number": {"query": search}}},
+                        {"match": {"documents.key": {"query": key}}},
                     ],
                 },
             }
@@ -426,7 +384,7 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
         all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}})
         all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}})
     elif key == "registration_id":
-        all_queries.append({"math_phrase_prefix": {"registration_id": {"query": search}}})
+        all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
     elif DocumentType.objects.filter(key=key).exists():
         all_queries.append(
             {
