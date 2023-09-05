@@ -187,7 +187,16 @@ class HouseholdFilter(FilterSet):
         if key == "registration_id":
             return qs.filter(registration_id__icontains=value)
         if key == "kobo_asset_id":
-            return qs.filter(kobo_asset_id__icontains=value)
+            inner_query = Q()
+            split_values_list = value.split(" ")
+            for split_value in split_values_list:
+                striped_value = split_value.strip(",")
+                if striped_value.startswith(("HOPE-", "KOBO-")):
+                    _value = _prepare_kobo_asset_id_value(value)
+                    # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    # will filter by '111222' like 111222 is ID
+                    inner_query |= Q(kobo_asset_id__endswith=_value)
+            return qs.filter(inner_query)
         if DocumentType.objects.filter(key=key).exists():
             return qs.filter(
                 head_of_household__documents__type__key=key,
