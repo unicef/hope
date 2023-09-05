@@ -1171,6 +1171,7 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+    is_original = models.BooleanField(default=True)
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):

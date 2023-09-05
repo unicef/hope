@@ -40,7 +40,6 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    adjust_household_selections,
     adjust_payment_records,
     adjust_payments,
     assign_non_program_objects_to_biggest_program,
@@ -48,6 +47,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     copy_document_per_individual,
     copy_entitlement_card_per_household,
     copy_household_representation,
+    copy_household_selections,
     copy_individual_identity_per_individual,
     copy_individual_representation,
     copy_roles,
@@ -335,44 +335,12 @@ class TestCopyHouseholdRepresentation(TestCase):
         individual_identities_count = IndividualIdentity.objects.count()
         bank_account_info_count = BankAccountInfo.objects.count()
 
-        household = copy_household_representation(program=self.program, household=self.household1)
+        copy_household_representation(program=self.program, household=self.household1)
 
         self.household1 = Household.objects.get(pk=self.household1.pk)
 
-        assert household == self.household1
         assert Household.objects.count() == household_count
         assert EntitlementCard.objects.count() == entitlement_card_count
-        assert Individual.objects.count() == individual_count
-        assert Document.objects.count() == documents_count
-        assert IndividualIdentity.objects.count() == individual_identities_count
-        assert BankAccountInfo.objects.count() == bank_account_info_count
-
-    def test_copy_household_representation_first_representation(self) -> None:
-        original_pk = self.household1.pk
-
-        household_count = Household.objects.count()
-        entitlement_card_count = EntitlementCard.objects.count()
-        individual_count = Individual.objects.count()
-        documents_count = Document.objects.count()
-        individual_identities_count = IndividualIdentity.objects.count()
-        bank_account_info_count = BankAccountInfo.objects.count()
-
-        household = copy_household_representation(program=self.program, household=self.household1)
-        self.household1 = Household.objects.get(pk=original_pk)
-
-        assert household.pk == self.household1.pk
-        assert household.program == self.program
-        assert household.copied_from == self.household1
-        assert household.origin_unicef_id == self.household1.unicef_id
-        assert household.entitlement_cards.count() == 2
-        assert household.individuals.count() == 2
-        assert household.individuals.first().documents.count() == 2
-        assert household.individuals.first().identities.count() == 2
-        assert household.individuals.first().bank_account_info.count() == 2
-
-        assert Household.objects.count() == household_count
-        assert EntitlementCard.objects.count() == entitlement_card_count
-
         assert Individual.objects.count() == individual_count
         assert Document.objects.count() == documents_count
         assert IndividualIdentity.objects.count() == individual_identities_count
@@ -404,9 +372,9 @@ class TestCopyHouseholdRepresentation(TestCase):
         individual_identities_count = IndividualIdentity.objects.count()
         bank_account_info_count = BankAccountInfo.objects.count()
 
-        household = copy_household_representation(program=self.program, household=self.household1)
+        copy_household_representation(program=self.program, household=self.household1)
         self.household1 = Household.objects.get(pk=original_pk)
-
+        household = self.household1.copied_to.filter(program=self.program).first()
         assert household.pk != self.household1.pk
         assert household.program == self.program
         assert household.copied_from == self.household1
@@ -568,21 +536,21 @@ class TestAdjustHouseholdSelections(TestCase):
             household=self.household_other_program,
         )
 
-    def test_adjust_household_selections_other_program(self) -> None:
+    def test_copy_household_selections_other_program(self) -> None:
         household_selections_count = HouseholdSelection.objects.count()
         household_selections = HouseholdSelection.objects.filter(target_population=self.target_population1)
 
-        adjust_household_selections(household_selections=household_selections, program=self.current_program)
+        copy_household_selections(household_selections=household_selections, program=self.current_program)
 
         self.household_selection_other_program.refresh_from_db()
         assert self.household_selection_other_program.household == self.household_current_program
         assert HouseholdSelection.objects.count() == household_selections_count
 
-    def test_adjust_household_selections_program_no_representation(self) -> None:
+    def test_copy_household_selections_program_no_representation(self) -> None:
         no_representation_program = ProgramFactory(status=Program.ACTIVE)
         household_selections = HouseholdSelection.objects.filter(target_population=self.target_population1)
 
-        adjust_household_selections(household_selections=household_selections, program=no_representation_program)
+        copy_household_selections(household_selections=household_selections, program=no_representation_program)
 
         self.household_selection_other_program.refresh_from_db()
         assert self.household_selection_other_program.household == self.household_other_program
@@ -590,7 +558,7 @@ class TestAdjustHouseholdSelections(TestCase):
     def test_adjust_household_selection_same_program(self) -> None:
         household_selections = HouseholdSelection.objects.filter(target_population=self.target_population1)
 
-        adjust_household_selections(household_selections=household_selections, program=self.other_program)
+        copy_household_selections(household_selections=household_selections, program=self.other_program)
 
         self.household_selection_other_program.refresh_from_db()
         assert self.household_selection_other_program.household == self.household_other_program
