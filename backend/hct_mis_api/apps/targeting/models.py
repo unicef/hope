@@ -326,6 +326,8 @@ class HouseholdSelection(TimeStampedUUIDModel):
     vulnerability_score = models.DecimalField(
         blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("household", "target_population")
