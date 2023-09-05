@@ -165,6 +165,15 @@ class HouseholdDocument(Document):
             "given_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "middle_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "family_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "phone_no_text": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "phone_no_alternative_text": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "documents": fields.ObjectField(
+                properties={
+                    "number": fields.KeywordField(attr="document_number", similarity="boolean"),
+                    "key": fields.KeywordField(attr="type.key", similarity="boolean"),
+                    "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
+                }
+            ),
         }
     )
     unicef_id = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
