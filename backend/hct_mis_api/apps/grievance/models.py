@@ -63,6 +63,10 @@ class GrievanceTicketManager(models.Manager):
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
         )
 
+    # remove after data migration
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=True)
+
 
 class GenericPaymentTicket(TimeStampedUUIDModel):
     payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
