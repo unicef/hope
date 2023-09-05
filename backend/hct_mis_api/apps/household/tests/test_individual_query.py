@@ -134,8 +134,6 @@ class TestIndividualQuery(APITestCase):
             document_number="666-777-888", type=DocumentType.objects.get(key="tax_id"), individual=cls.individuals[2]
         )
 
-        cls.rebuild_search_index()
-
         super().setUpTestData()
 
     @parameterized.expand(
