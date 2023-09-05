@@ -3,6 +3,7 @@ import io
 import itertools
 import logging
 import string
+import warnings
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
@@ -22,12 +23,14 @@ from typing import (
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db import models
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
 
 import pytz
 from django_filters import OrderingFilter
+from model_utils.managers import SoftDeletableQuerySet
 from PIL import Image
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
@@ -857,3 +860,77 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
     IDENTIFICATION_TYPE_OTHER: "other_id",
     IDENTIFICATION_TYPE_FOSTER_CHILD: "foster_child",
 }
+
+
+# remove after data migration
+class IsOriginalManager(models.Manager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=True)
+
+
+class SoftDeletableIsOriginalManagerMixin:
+    """
+    Manager that limits the queryset by default to show only not removed
+    instances of model.
+    """
+
+    _queryset_class = SoftDeletableQuerySet
+
+    def __init__(self, *args: Any, _emit_deprecation_warnings: bool = False, **kwargs: Any) -> None:
+        self.emit_deprecation_warnings = _emit_deprecation_warnings
+        super().__init__(*args, **kwargs)
+
+    def get_queryset(self) -> "QuerySet":
+        """
+        Return queryset limited to not removed entries.
+        """
+
+        if self.emit_deprecation_warnings:
+            warning_message = (
+                "{0}.objects model manager will include soft-deleted objects in an "
+                "upcoming release; please use {0}.available_objects to continue "
+                "excluding soft-deleted objects. See "
+                "https://django-model-utils.readthedocs.io/en/stable/models.html"
+                "#softdeletablemodel for more information."
+            ).format(self.model.__class__.__name__)
+            warnings.warn(warning_message, DeprecationWarning)
+
+        kwargs = {"model": self.model, "using": self._db}
+        if hasattr(self, "_hints"):
+            kwargs["hints"] = self._hints
+
+        return self._queryset_class(**kwargs).filter(is_removed=False, is_original=True)
+
+
+class SoftDeletableIsOriginalManager(SoftDeletableIsOriginalManagerMixin, models.Manager):
+    pass
+
+
+class SoftDeletableIsOriginalModel(models.Model):
+    """
+    An abstract base class model with a ``is_removed`` field that
+    marks entries that are not going to be used anymore, but are
+    kept in db for any reason.
+    Default manager returns only not-removed entries.
+    """
+
+    is_removed = models.BooleanField(default=False)
+    is_original = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+
+    objects = SoftDeletableIsOriginalManager(_emit_deprecation_warnings=True)
+    available_objects = SoftDeletableIsOriginalManager()
+    all_objects = models.Manager()
+
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+        """
+        Soft delete object (set its ``is_removed`` field to True).
+        Actually delete object if setting ``soft`` to False.
+        """
+        if soft:
+            self.is_removed = True
+            self.save(using=using)  # type: ignore
+        else:
+            return super().delete(using=using, *args, **kwargs)
