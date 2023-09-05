@@ -1,8 +1,12 @@
 import logging
-from typing import Optional
+from collections import defaultdict
+from typing import Optional, Dict, List
 
+from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, Q, QuerySet
 
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     BankAccountInfo,
@@ -20,7 +24,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 500
+BATCH_SIZE = 100
 
 
 def migrate_data_to_representations() -> None:
@@ -73,20 +77,32 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         household_ids = household_selections.distinct("household").values_list("household_id", flat=True)
 
         households = Household.objects.filter(id__in=household_ids, is_migration_handled=False, is_original=True)
-        already_copied_households = list(Household.objects.filter(
-            is_original=False, program=program, copied_from__in=households
-        ).values_list("id", flat=True))
+        already_copied_households = list(
+            Household.objects.filter(is_original=False, program=program, copied_from__in=households).values_list(
+                "id", flat=True
+            )
+        )
         logger.info(f"Already copied households: {len(already_copied_households)}")
         households = households.exclude(id__in=already_copied_households)
         households_count = households.count()
         logger.info(f"Households to handle: {households_count}")
-        
+        household_ids = list(households.values_list("id", flat=True))
         logger.info(f"Handling households for program: {program}")
-
-        for i, household in enumerate(households):
-            if i % 100 == 0:
-                logger.info(f"Handling {i} - {i+99}/{households_count} households")
-            copy_household_representation(household, program)
+        full_households = (
+            Household.objects.filter(id__in=household_ids)
+            .select_related()
+            .prefetch_related("individuals")
+            .order_by("id")
+        )
+        paginator = Paginator(full_households, BATCH_SIZE)
+        for page_number in paginator.page_range:
+            page = paginator.page(page_number)
+            logger.info(f"Handling households {page.start_index()} - {page.end_index()}/{households_count}")
+            batched_households = page.object_list
+            individuals_per_household =get_all_individuals_per_household_batch(batched_households, program)
+            for household in batched_households:
+                with transaction.atomic():
+                    copy_household_representation(household, program, individuals_per_household[str(household.id)])
 
         logger.info(f"Handling RDIs for program: {program}")
         handle_rdis(households, program)
@@ -108,6 +124,24 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     # logger.info("Adjusting payments and payment records")
     # adjust_payments(business_area)
     # adjust_payment_records(business_area)
+
+
+def get_all_individuals_per_household_batch(batched_households, program) -> Dict[str, List[Individual]]:
+    """
+    returns dict with household_id as key and list of individuals as value
+    excluding individuals that were already copied to current program
+    better to use this function than get individuals per household in loop
+    """
+    all_individuals = Individual.objects.filter(household__in=batched_households)
+    all_individuals_ids = list(all_individuals.values_list("id", flat=True))
+    all_individuals_to_exclude = all_individuals.filter(
+        is_original=False, program=program, copied_from__in=all_individuals_ids
+    )
+    all_individuals_to_copy = all_individuals.exclude(id__in=all_individuals_to_exclude)
+    individuals_per_household = defaultdict(list)
+    for individual in all_individuals_to_copy:
+        individuals_per_household[str(individual.household_id)].append(individual)
+    return individuals_per_household
 
 
 def get_household_representation_per_program_by_old_household_id(
@@ -132,49 +166,37 @@ def get_individual_representation_per_program_by_old_individual_id(
     ).first()
 
 
-def copy_household_representation(household: Household, program: Program) -> None:
+def copy_household_representation(household: Household, program: Program, individuals: List[Individual]) -> None:
     """
     Copy household into representation for given program if it does not exist yet.
     """
     # copy representations only based on original households
     if not household.is_original:
         return
-    copy_household(household, program)
+    copy_household(household, program, individuals)
 
 
-def copy_household(household: Household, program: Program) -> Household:
+def copy_household(household: Household, program: Program, individuals: List[Individual]) -> Household:
     original_household_id = household.id
+    original_head_of_household_id = household.head_of_household_id
+    original_individuals = individuals
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
     household.unicef_id = None
     household.program = program
     household.is_original = False
-
-    original_household = Household.objects.get(pk=original_household_id)
-
-    individuals = []
-    for individual in original_household.individuals.all():
-        individuals.append(copy_individual_representation(program, individual))
-
-    head_of_household = get_individual_representation_per_program_by_old_individual_id(
-        program=program,
-        old_individual_id=original_household.head_of_household.pk,
-    )
-    if head_of_household:
-        household.head_of_household = head_of_household
-    else:
-        household.head_of_household = copy_individual_representation(program, original_household.head_of_household)
-
+    new_individuals = []
+    for individual in original_individuals:
+        copied_individual = copy_individual(individual, program)
+        new_individuals.append(copied_individual)
+        if str(individual.id) == str(original_head_of_household_id):
+            household.head_of_household = copied_individual
     household.save()
-    for individual in individuals:
+    for individual in new_individuals:
         individual.household = household
 
-    Individual.objects.bulk_update(individuals, ["household"])
-
-    copy_entitlement_card_per_household(household=original_household, household_representation=household)
-
-    del individuals
+    Individual.objects.bulk_update(new_individuals, ["household"])
     return household
 
 
