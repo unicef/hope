@@ -10191,7 +10191,7 @@ export type CreateProgramCycleMutation = (
           { __typename?: 'ProgramCycleNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'ProgramCycleNode' }
-            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
       ) }
@@ -10217,7 +10217,7 @@ export type DeleteProgramCycleMutation = (
           { __typename?: 'ProgramCycleNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'ProgramCycleNode' }
-            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
       ) }
@@ -10243,7 +10243,7 @@ export type UpdateProgramCycleMutation = (
           { __typename?: 'ProgramCycleNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'ProgramCycleNode' }
-            & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
           )> }
         )>> }
       ) }
@@ -13235,7 +13235,7 @@ export type ProgramQuery = (
         { __typename?: 'ProgramCycleNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'ProgramCycleNode' }
-          & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
         )> }
       )>> }
     ) }
@@ -13290,9 +13290,26 @@ export type AllProgramCyclesQuery = (
       { __typename?: 'ProgramCycleNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramCycleNode' }
-        & Pick<ProgramCycleNode, 'id' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+        & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
       )> }
     )>> }
+  )> }
+);
+
+export type ProgramCycleQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ProgramCycleQuery = (
+  { __typename?: 'Query' }
+  & { programCycle: Maybe<(
+    { __typename?: 'ProgramCycleNode' }
+    & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'isRemoved' | 'createdAt' | 'updatedAt' | 'lastSyncAt' | 'version' | 'name' | 'status' | 'startDate' | 'endDate' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalEntitledQuantity'>
+    & { program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'startDate' | 'endDate'>
+    ) }
   )> }
 );
 
@@ -17414,6 +17431,7 @@ export const CreateProgramCycleDocument = gql`
         edges {
           node {
             id
+            unicefId
             name
             status
             totalEntitledQuantity
@@ -17479,6 +17497,7 @@ export const DeleteProgramCycleDocument = gql`
         edges {
           node {
             id
+            unicefId
             name
             status
             totalEntitledQuantity
@@ -17544,6 +17563,7 @@ export const UpdateProgramCycleDocument = gql`
         edges {
           node {
             id
+            unicefId
             name
             status
             totalEntitledQuantity
@@ -25339,6 +25359,7 @@ export const ProgramDocument = gql`
       edges {
         node {
           id
+          unicefId
           name
           status
           totalEntitledQuantity
@@ -25475,6 +25496,7 @@ export const AllProgramCyclesDocument = gql`
     edges {
       node {
         id
+        unicefId
         name
         status
         totalEntitledQuantity
@@ -25538,6 +25560,74 @@ export function useAllProgramCyclesLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type AllProgramCyclesQueryHookResult = ReturnType<typeof useAllProgramCyclesQuery>;
 export type AllProgramCyclesLazyQueryHookResult = ReturnType<typeof useAllProgramCyclesLazyQuery>;
 export type AllProgramCyclesQueryResult = ApolloReactCommon.QueryResult<AllProgramCyclesQuery, AllProgramCyclesQueryVariables>;
+export const ProgramCycleDocument = gql`
+    query ProgramCycle($id: ID!) {
+  programCycle(id: $id) {
+    id
+    unicefId
+    isRemoved
+    createdAt
+    updatedAt
+    lastSyncAt
+    version
+    name
+    status
+    startDate
+    endDate
+    totalDeliveredQuantity
+    totalUndeliveredQuantity
+    totalEntitledQuantity
+    program {
+      id
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+export type ProgramCycleComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgramCycleQuery, ProgramCycleQueryVariables>, 'query'> & ({ variables: ProgramCycleQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ProgramCycleComponent = (props: ProgramCycleComponentProps) => (
+      <ApolloReactComponents.Query<ProgramCycleQuery, ProgramCycleQueryVariables> query={ProgramCycleDocument} {...props} />
+    );
+    
+export type ProgramCycleProps<TChildProps = {}> = ApolloReactHoc.DataProps<ProgramCycleQuery, ProgramCycleQueryVariables> & TChildProps;
+export function withProgramCycle<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ProgramCycleQuery,
+  ProgramCycleQueryVariables,
+  ProgramCycleProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ProgramCycleQuery, ProgramCycleQueryVariables, ProgramCycleProps<TChildProps>>(ProgramCycleDocument, {
+      alias: 'programCycle',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useProgramCycleQuery__
+ *
+ * To run a query within a React component, call `useProgramCycleQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProgramCycleQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProgramCycleQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useProgramCycleQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ProgramCycleQuery, ProgramCycleQueryVariables>) {
+        return ApolloReactHooks.useQuery<ProgramCycleQuery, ProgramCycleQueryVariables>(ProgramCycleDocument, baseOptions);
+      }
+export function useProgramCycleLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ProgramCycleQuery, ProgramCycleQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ProgramCycleQuery, ProgramCycleQueryVariables>(ProgramCycleDocument, baseOptions);
+        }
+export type ProgramCycleQueryHookResult = ReturnType<typeof useProgramCycleQuery>;
+export type ProgramCycleLazyQueryHookResult = ReturnType<typeof useProgramCycleLazyQuery>;
+export type ProgramCycleQueryResult = ApolloReactCommon.QueryResult<ProgramCycleQuery, ProgramCycleQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {

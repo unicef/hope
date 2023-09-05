@@ -26,6 +26,7 @@ export const PROGRAM_QUERY = gql`
         edges {
           node {
             id
+            unicefId
             name
             status
             totalEntitledQuantity

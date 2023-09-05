@@ -1,12 +1,13 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { DeleteProgramCycle } from '../../../dialogs/programs/programCycles/DeleteProgramCycle';
-import { EditProgramCycle } from '../../../dialogs/programs/programCycles/EditProgramCycle';
-import { programCycleStatusToColor } from '../../../../utils/utils';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { programCycleStatusToColor } from '../../../../utils/utils';
+import { DeleteProgramCycle } from '../../../dialogs/programs/programCycles/DeleteProgramCycle';
+import { EditProgramCycle } from '../../../dialogs/programs/programCycles/EditProgramCycle';
 
 interface ProgramCyclesActionsTableRowProps {
   canViewProgramCycleDetails: boolean;
@@ -14,6 +15,7 @@ interface ProgramCyclesActionsTableRowProps {
   canDeleteProgramCycle: boolean;
   programCycle;
   statusChoices: { [id: number]: string };
+  itemsCount: number;
 }
 
 export const ProgramCyclesActionsTableRow = ({
@@ -22,9 +24,12 @@ export const ProgramCyclesActionsTableRow = ({
   canDeleteProgramCycle,
   programCycle,
   statusChoices,
+  itemsCount,
 }: ProgramCyclesActionsTableRowProps): React.ReactElement => {
+  const { baseUrl } = useBaseUrl();
   const {
     id,
+    unicefId,
     name,
     status,
     totalEntitledQuantity,
@@ -34,20 +39,15 @@ export const ProgramCyclesActionsTableRow = ({
     endDate,
   } = programCycle;
 
-  //TODO: add detailsPath
-  const detailsPath = '';
-  const handleRowClick = (): void => {
-    //eslint-disable-next-line no-console
-    console.log('handleRowClick');
-  };
+  const detailsPath = `/${baseUrl}/payment-module/program-cycles/${id}`;
 
   return (
-    <ClickableTableRow onClick={handleRowClick} hover role='checkbox'>
+    <ClickableTableRow>
       <TableCell align='left'>
         {canViewProgramCycleDetails ? (
-          <BlackLink to={detailsPath}>{id}</BlackLink>
+          <BlackLink to={detailsPath}>{unicefId}</BlackLink>
         ) : (
-          id
+          unicefId
         )}
       </TableCell>
       <TableCell align='left'>{name}</TableCell>
@@ -76,6 +76,7 @@ export const ProgramCyclesActionsTableRow = ({
         <DeleteProgramCycle
           programCycle={programCycle}
           canDeleteProgramCycle={canDeleteProgramCycle}
+          itemsCount={itemsCount}
         />
       </TableCell>
     </ClickableTableRow>

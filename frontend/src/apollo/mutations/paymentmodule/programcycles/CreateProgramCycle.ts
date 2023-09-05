@@ -9,6 +9,7 @@ export const CREATE_PROGRAM_CYCLE = gql`
           edges {
             node {
               id
+              unicefId
               name
               status
               totalEntitledQuantity

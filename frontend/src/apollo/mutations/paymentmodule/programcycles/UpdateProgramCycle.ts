@@ -9,6 +9,7 @@ export const UPDATE_PROGRAM_CYCLE = gql`
           edges {
             node {
               id
+              unicefId
               name
               status
               totalEntitledQuantity
