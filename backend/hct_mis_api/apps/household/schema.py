@@ -548,11 +548,11 @@ class Query(graphene.ObjectType):
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
         queryset = Individual.objects
         if does_path_exist_in_query("edges.node.household", info):
-            queryset = queryset.select_related("household")
+            queryset = queryset.select_related("household")  # type: ignore
         if does_path_exist_in_query("edges.node.household.admin2", info):
-            queryset = queryset.select_related("household__admin_area")
-            queryset = queryset.select_related("household__admin_area__area_type")
-        return queryset
+            queryset = queryset.select_related("household__admin_area")  # type: ignore
+            queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
+        return queryset  # type: ignore
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(

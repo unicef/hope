@@ -18,7 +18,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel, TimeStampedModel
+from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -27,6 +27,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.utils import IsOriginalManager, SoftDeletableIsOriginalModel
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -636,7 +637,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -660,7 +661,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
     program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
-    is_original = models.BooleanField(default=True)
+
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -751,6 +752,8 @@ class IndividualIdentity(TimeStampedModel):
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
+    objects = IsOriginalManager()
+
     class Meta:
         verbose_name_plural = "Individual Identities"
 
@@ -784,6 +787,8 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
+
+    objects = IsOriginalManager()
 
     class Meta:
         unique_together = [("role", "household"), ("household", "individual")]
@@ -1173,6 +1178,8 @@ class EntitlementCard(TimeStampedUUIDModel):
         null=True,
     )
     is_original = models.BooleanField(default=True)
+
+    objects = IsOriginalManager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):

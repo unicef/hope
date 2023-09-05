@@ -19,7 +19,10 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hct_mis_api.apps.core.utils import (
+    IsOriginalManager,
+    map_unicef_ids_to_households_unicef_ids,
+)
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
@@ -328,6 +331,8 @@ class HouseholdSelection(TimeStampedUUIDModel):
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+
+    objects = IsOriginalManager()
 
     class Meta:
         unique_together = ("household", "target_population")
