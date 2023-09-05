@@ -315,7 +315,7 @@ class GenericPayment(TimeStampedUUIDModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, " "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     class Meta:

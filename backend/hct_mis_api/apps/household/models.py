@@ -668,7 +668,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, " "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     def clean(self) -> None:
@@ -747,7 +747,7 @@ class IndividualIdentity(TimeStampedUUIDModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, " "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     class Meta:
@@ -781,7 +781,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, " "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     class Meta:
@@ -1199,7 +1199,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
         blank=True,
         on_delete=models.SET_NULL,
         related_name="copied_to",
-        help_text="If this object was copied from another, " "this field will contain the object it was copied from.",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     def __str__(self) -> str:
