@@ -3,14 +3,14 @@ import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
-import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
-import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
-import { NumberTextField } from '../../../components/core/NumberTextField';
-import { SearchTextField } from '../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
+import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
+import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
+import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
+import { NumberTextField } from '../../../../components/core/NumberTextField';
+import { SearchTextField } from '../../../../components/core/SearchTextField';
+import { SelectFilter } from '../../../../components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 interface ProgrammesFilterProps {
   filter;

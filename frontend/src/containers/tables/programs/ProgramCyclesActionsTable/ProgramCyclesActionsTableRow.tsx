@@ -1,14 +1,14 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { DeleteProgramCycle } from '../../../containers/dialogs/programs/programCycles/DeleteProgramCycle';
-import { EditProgramCycle } from '../../../containers/dialogs/programs/programCycles/EditProgramCycle';
-import { programCycleStatusToColor } from '../../../utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../core/UniversalMoment';
+import { DeleteProgramCycle } from '../../../dialogs/programs/programCycles/DeleteProgramCycle';
+import { EditProgramCycle } from '../../../dialogs/programs/programCycles/EditProgramCycle';
+import { programCycleStatusToColor } from '../../../../utils/utils';
+import { BlackLink } from '../../../../components/core/BlackLink';
+import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 
-interface ProgramCyclesTableRowProps {
+interface ProgramCyclesActionsTableRowProps {
   canViewProgramCycleDetails: boolean;
   canEditProgramCycle: boolean;
   canDeleteProgramCycle: boolean;
@@ -16,13 +16,13 @@ interface ProgramCyclesTableRowProps {
   statusChoices: { [id: number]: string };
 }
 
-export const ProgramCyclesTableRow = ({
+export const ProgramCyclesActionsTableRow = ({
   canViewProgramCycleDetails,
   canEditProgramCycle,
   canDeleteProgramCycle,
   programCycle,
   statusChoices,
-}: ProgramCyclesTableRowProps): React.ReactElement => {
+}: ProgramCyclesActionsTableRowProps): React.ReactElement => {
   const {
     id,
     name,

@@ -64,7 +64,7 @@ from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PROGRAMME_CYCLE_VIEW_DETAILS,
+            Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
         ),
     )
     total_delivered_quantity = graphene.Float()
@@ -114,7 +114,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     #     ProgramCycleNode,
     #     filterset_class=ProgramCycleFilter,
     #     # TODO: check and update perms
-    #     # permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
+    #     # permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
     # )
 
     class Meta:
@@ -196,7 +196,7 @@ class Query(graphene.ObjectType):
     all_program_cycles = DjangoPermissionFilterConnectionField(
         ProgramCycleNode,
         filterset_class=ProgramCycleFilter,
-        # permission_classes=(hopePermissionClass(Permissions.PROGRAMME_CYCLE_VIEW_LIST),),
+        # permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
     )
     # Chart
     chart_programmes_by_sector = graphene.Field(

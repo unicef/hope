@@ -109,8 +109,32 @@ export const menuItems: MenuItem[] = [
     href: '/payment-module',
     selectedRegexp: /^\/payment-module.*$/,
     icon: <PaymentIcon />,
-    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+    permissionModule: 'PM',
+    collapsable: true,
     flag: 'isPaymentPlanApplicable',
+    secondaryActions: [
+      {
+        name: 'Programme Cycles',
+        href: '/payment-module/program-cycles',
+        selectedRegexp: /^\/payment-module\/program-cycles.*$/,
+        icon: <PaymentIcon />,
+        permissionModule: 'PM',
+      },
+      {
+        name: 'Payment Plans',
+        href: '/payment-module/payment-plans',
+        selectedRegexp: /^\/payment-module\/payment-plans.*$/,
+        icon: <PaymentIcon />,
+        permissionModule: 'PM',
+      },
+      {
+        name: 'Follow-up Payment Plans',
+        href: '/payment-module/followup-payment-plans',
+        selectedRegexp: /^\/payment-module\/followup-payment-plans.*$/,
+        icon: <PaymentIcon />,
+        permissionModule: 'PM',
+      },
+    ],
   },
   {
     name: 'Payment Verification',

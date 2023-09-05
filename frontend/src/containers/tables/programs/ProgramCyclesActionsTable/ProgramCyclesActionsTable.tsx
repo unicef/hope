@@ -9,16 +9,16 @@ import {
   ProgramStatus,
   useAllProgramCyclesQuery,
   useProgrammeChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { AddNewProgramCycle } from '../../../containers/dialogs/programs/programCycles/AddNewProgramCycle/AddNewProgramCycle';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { choicesToDict } from '../../../utils/utils';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { TableWrapper } from '../../core/TableWrapper';
-import { headCells } from './ProgramCyclesTableHeadCells';
-import { ProgramCyclesTableRow } from './ProgramCyclesTableRow';
+} from '../../../../__generated__/graphql';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { AddNewProgramCycle } from '../../../dialogs/programs/programCycles/AddNewProgramCycle/AddNewProgramCycle';
+import { UniversalTable } from '../../UniversalTable';
+import { usePermissions } from '../../../../hooks/usePermissions';
+import { choicesToDict } from '../../../../utils/utils';
+import { LoadingComponent } from '../../../../components/core/LoadingComponent';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { headCells } from './ProgramCyclesActionsTableHeadCells';
+import { ProgramCyclesActionsTableRow } from './ProgramCyclesActionsTableRow';
 
 const Subtitle = styled(Box)`
   color: #7c8990;
@@ -33,14 +33,14 @@ const Subtitle = styled(Box)`
   align-items: center;
 `;
 
-interface ProgramCyclesTableProps {
+interface ProgramCyclesActionsTableProps {
   filter?;
   program: ProgramQuery['program'];
 }
 
-export const ProgramCyclesTable = ({
+export const ProgramCyclesActionsTable = ({
   program,
-}: ProgramCyclesTableProps): React.ReactElement => {
+}: ProgramCyclesActionsTableProps): React.ReactElement => {
   const { data: programChoiceData, loading } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
@@ -66,16 +66,16 @@ export const ProgramCyclesTable = ({
   const isProgramActive = program.status === ProgramStatus.Active;
 
   const canViewProgramCycleDetails = hasPermissions(
-    PERMISSIONS.PROGRAMME_CYCLE_VIEW_DETAILS,
+    PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
     permissions,
   );
 
   const canEditProgramCycle = hasPermissions(
-    PERMISSIONS.PROGRAMME_CYCLE_UPDATE,
+    PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
     permissions,
   );
   const canDeleteProgramCycle = hasPermissions(
-    PERMISSIONS.PROGRAMME_CYCLE_REMOVE,
+    PERMISSIONS.PM_PROGRAMME_CYCLE_REMOVE,
     permissions,
   );
 
@@ -99,7 +99,7 @@ export const ProgramCyclesTable = ({
         defaultOrderBy='created_at'
         defaultOrderDirection='desc'
         renderRow={(row) => (
-          <ProgramCyclesTableRow
+          <ProgramCyclesActionsTableRow
             key={row.id}
             programCycle={row}
             statusChoices={statusChoices}
