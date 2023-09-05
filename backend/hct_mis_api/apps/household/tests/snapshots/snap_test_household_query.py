@@ -167,6 +167,15 @@ snapshots['TestHouseholdQuery::test_household_query_all_5_all_max_with_permissio
     }
 }
 
+snapshots['TestHouseholdQuery::test_household_query_draft 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+            ]
+        }
+    }
+}
+
 snapshots['TestHouseholdQuery::test_household_query_single_0_with_permission 1'] = {
     'data': {
         'household': {
