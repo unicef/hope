@@ -339,3 +339,176 @@ snapshots['TestHouseholdQuery::test_household_query_single_1_without_permission 
         }
     ]
 }
+
+snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_household_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_household_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_individual_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_individual_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
