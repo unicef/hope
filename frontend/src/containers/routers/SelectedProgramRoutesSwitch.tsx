@@ -56,6 +56,7 @@ import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopul
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
+import { ProgramCycleDetailsPage } from '../pages/paymentmodule/ProgramCycleDetailsPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -142,6 +143,9 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/payment-plans/:id/edit`}>
         <EditPaymentPlanPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/payment-module/program-cycles/:id`}>
+        <ProgramCycleDetailsPage />
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/program-cycles`}>
         <ProgramCyclesPage />

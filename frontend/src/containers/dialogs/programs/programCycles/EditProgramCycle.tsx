@@ -105,7 +105,9 @@ export const EditProgramCycle = ({
   return (
     <>
       <IconButton
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+        }}
         color='primary'
         data-cy='button-edit-program-cycle'
         disabled={!canEditProgramCycle}
@@ -171,7 +173,8 @@ export const EditProgramCycle = ({
               <DialogFooter>
                 <DialogActions>
                   <Button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setOpen(false);
                     }}
                     data-cy='button-cancel'
@@ -183,7 +186,10 @@ export const EditProgramCycle = ({
                     type='submit'
                     color='primary'
                     variant='contained'
-                    onClick={submitForm}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      submitForm();
+                    }}
                     data-cy='button-save'
                   >
                     {t('Save')}

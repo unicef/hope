@@ -151,7 +151,6 @@ export const AddNewProgramCycle = ({
   const showNewProgrammeCycleButton = program.status === ProgramStatus.Active;
 
   const showOneStepModal = Boolean(previousProgramCycle?.endDate);
-
   return (
     <>
       {showNewProgrammeCycleButton && (

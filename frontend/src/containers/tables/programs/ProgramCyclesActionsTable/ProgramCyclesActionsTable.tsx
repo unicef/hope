@@ -98,10 +98,11 @@ export const ProgramCyclesActionsTable = ({
         initialVariables={initialVariables}
         defaultOrderBy='created_at'
         defaultOrderDirection='desc'
-        renderRow={(row) => (
+        renderRow={(row, itemsCount) => (
           <ProgramCyclesActionsTableRow
             key={row.id}
             programCycle={row}
+            itemsCount={itemsCount}
             statusChoices={statusChoices}
             canViewProgramCycleDetails={canViewProgramCycleDetails}
             canEditProgramCycle={canEditProgramCycle}
