@@ -24,7 +24,7 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
-import { choicesToDict } from '../../../utils/utils';
+import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
 import { BulkAssignModal } from './BulkAssignModal';
@@ -49,8 +49,8 @@ export const GrievancesTable = ({
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
     category: filter.category,
     issueType: filter.issueType,

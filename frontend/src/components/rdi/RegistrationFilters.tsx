@@ -5,10 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../utils/utils';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -132,10 +129,7 @@ export const RegistrationFilters = ({
               topLabel={t('Import Date')}
               placeholder={t('From')}
               onChange={(date) =>
-                handleFilterChange(
-                  'importDateRangeMin',
-                  dateToIsoString(date, 'startOfDay'),
-                )
+                handleFilterChange('importDateRangeMin', date)
               }
               value={filter.importDateRangeMin}
               data-cy='filter-import-date-range-min'
@@ -145,10 +139,7 @@ export const RegistrationFilters = ({
             <DatePickerFilter
               placeholder={t('To')}
               onChange={(date) =>
-                handleFilterChange(
-                  'importDateRangeMax',
-                  dateToIsoString(date, 'endOfDay'),
-                )
+                handleFilterChange('importDateRangeMax', date)
               }
               value={filter.importDateRangeMax}
               data-cy='filter-import-date-range-max'
