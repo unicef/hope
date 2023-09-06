@@ -8,6 +8,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -48,8 +49,8 @@ export const TargetPopulationTable = ({
     businessArea,
     program: [programId],
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
   };
   const handleRadioChange = (id: string): void => {
