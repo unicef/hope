@@ -36,14 +36,6 @@ const orderOptions = [
   { name: 'Gender: descending', value: '-sex' },
 ];
 
-const searchTypeOptions = [
-  { name: 'Individual ID', value: 'individual_id' },
-  { name: 'Household ID', value: 'household_id' },
-  { name: 'Full Name', value: 'full_name' },
-  { name: 'National ID', value: 'national_id' },
-  { name: 'Passport Number', value: 'national_passport' },
-];
-
 export const IndividualsFilter = ({
   filter,
   choicesData,
@@ -94,17 +86,20 @@ export const IndividualsFilter = ({
           <Grid item xs={4}>
             <SelectFilter
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={undefined}
+              label={t('Search Type')}
               value={filter.searchType}
               borderRadius='0px 4px 4px 0px'
               data-cy='filter-search-type'
               fullWidth
+              disableClearable
             >
-              {searchTypeOptions.map(({ name, value }) => (
-                <MenuItem key={value} value={value}>
-                  {name}
-                </MenuItem>
-              ))}
+              {choicesData?.individualSearchTypesChoices.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
             </SelectFilter>
           </Grid>
         </Grid>
@@ -187,6 +182,7 @@ export const IndividualsFilter = ({
             value={filter.orderBy}
             fullWidth
             data-cy='ind-filters-order-by'
+            disableClearable
           >
             {orderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
