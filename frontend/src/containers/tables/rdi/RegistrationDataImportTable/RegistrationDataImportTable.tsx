@@ -48,7 +48,7 @@ export const RegistrationDataImportTable = ({
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
-    programId,
+    program: programId,
     importDateRange: JSON.stringify({
       min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
