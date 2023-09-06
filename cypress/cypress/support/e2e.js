@@ -39,11 +39,14 @@ Cypress.Commands.add("adminLogin", () => {
     cy.url().then((url) => {
       if (expected_url !== url) {
         cy.reload();
+        cy.wait(1000);
         cy.visit("/api/unicorn/");
-        cy.get('div[id="header"]').then((aweqw) => {
-          cy.log(aweqw.css());
-          cy.log("bdsaljladslkdsasadlnk");
-        });
+        cy.get('div[id="header"]')
+          .invoke("css", "background-color")
+          .then((bgcolor) => {
+            //rgb(255, 102, 0)
+            cy.log(bgcolor.toString());
+          });
         if (n > 0) {
           return checkApiUrl(n - 1);
         } else {
