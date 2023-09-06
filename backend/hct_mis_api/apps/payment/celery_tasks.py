@@ -528,8 +528,7 @@ def payment_plan_exclude_beneficiaries(
                         f"It is not possible to undo exclude Household(s) with ID {hh_unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
                     )
 
-            if exclusion_reason:
-                payment_plan.exclusion_reason = exclusion_reason
+            payment_plan.exclusion_reason = exclusion_reason
 
             if error_msg:
                 payment_plan.background_action_status_exclude_beneficiaries_error()

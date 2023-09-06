@@ -73,6 +73,7 @@ export const LookUpSelection = ({
 
   const initialFilterHH = {
     search: '',
+    searchType: 'household_id',
     program: '',
     residenceStatus: '',
     admin2: '',
