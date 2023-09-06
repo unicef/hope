@@ -269,7 +269,7 @@ class RdiMergeTask:
             individual = Individual(
                 **values,
                 household=household,
-                registration_id=household.registration_id,
+                registration_id=getattr(household, "registration_id", None),
                 business_area=obj_hct.business_area,
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
