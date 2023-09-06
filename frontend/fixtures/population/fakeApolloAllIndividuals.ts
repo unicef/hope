@@ -5,14 +5,14 @@ export const fakeApolloAllIndividuals = [
     request: {
       query: AllIndividualsDocument,
       variables: {
-        age: { min: '', max: '' },
+        age: '{"min":"","max":""}',
         businessArea: 'afghanistan',
         sex: [''],
         search: '',
         admin2: [''],
         flags: [],
         status: '',
-        lastRegistrationDate: {},
+        lastRegistrationDate: '{}',
         first: 10,
         orderBy: 'unicef_id',
       },

@@ -7,10 +7,8 @@ export const fakeApolloAllRegistrationDataImports = [
       query: AllRegistrationDataImportsDocument,
       variables: {
         businessArea: 'afghanistan',
-        programId:
-          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-        importDateRange:
-          '{"min":"1970-01-01T00:00:00.000Z","max":"1970-01-01T23:59:59.999Z"}',
+        program: fakeProgram.id,
+        importDateRange: '{}',
         size: '{}',
         first: 10,
         orderBy: '-import_date',
