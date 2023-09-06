@@ -10,6 +10,7 @@ import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
+import { dateToIsoString } from '../../../../utils/utils';
 
 interface CommunicationTableProps {
   filter;
@@ -23,9 +24,10 @@ export const CommunicationTable = ({
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
-    createdAtRange: filter.createdAtRange
-      ? JSON.stringify(filter.createdAtRange)
-      : '',
+    createdAtRange: JSON.stringify({
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+    }),
     program: programId,
     targetPopulation: filter.targetPopulation,
     createdBy: filter.createdBy || '',
