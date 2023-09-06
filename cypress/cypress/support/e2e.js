@@ -29,20 +29,34 @@ Cypress.Commands.add("createExcel", () => {
     );
   });
 });
-Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
+Cypress.Commands.add("adminLogin", () => {
   Cypress.session.clearCurrentSessionData();
   Cypress.session.clearAllSavedSessions();
   cy.visit("/");
   const expected_url =
     Cypress.config().baseUrl + "/api/unicorn/login/?next=/api/unicorn/";
-  function resolveAThing(n) {
-    cy.visit("/api/unicorn/");
+  function checkApiUrl(n) {
     cy.url().then((url) => {
       if (expected_url !== url) {
         cy.reload();
         cy.visit("/api/unicorn/");
+        cy.get('div[id="header"]').then((aweqw) => {
+          cy.log(aweqw.css());
+          cy.log("bdsaljladslkdsasadlnk");
+        });
+        if (n > 0) {
+          return checkApiUrl(n - 1);
+        } else {
+          return false;
+        }
+      } else {
+        return true;
       }
     });
+  }
+  function resolveAThing(n) {
+    cy.visit("/api/unicorn/");
+    checkApiUrl(5);
     cy.get('input[name="username"]').type(Cypress.env("username"));
     cy.get('input[name="password"]').type(Cypress.env("password"));
     cy.get("input").contains("Log in").click();
@@ -58,9 +72,7 @@ Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
         }
       });
   }
-
   return resolveAThing(10);
-  // }
 });
 
 Cypress.Commands.add("navigateToHomePage", () => {
