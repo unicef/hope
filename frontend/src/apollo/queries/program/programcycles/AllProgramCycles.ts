@@ -34,6 +34,7 @@ export const ALL_PROGRAM_CYCLES_QUERY = gql`
       edges {
         node {
           id
+          unicefId
           name
           status
           totalEntitledQuantity
