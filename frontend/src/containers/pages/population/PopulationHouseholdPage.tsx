@@ -20,6 +20,7 @@ import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 const initialFilter = {
   search: '',
+  searchType: 'household_id',
   program: '',
   residenceStatus: '',
   admin2: '',

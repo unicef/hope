@@ -1153,18 +1153,15 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 item.append(submission["kobo_submission_time"].isoformat())
                 all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
             household: Dict[str, Any]
-            household_uuid_list: List[str] = []
             for household in reduced_submissions:
                 household_uuid = str(household.get("_uuid"))
 
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
                     household_uuid, []
                 )
-                submission_duplicate = household_uuid in household_uuid_list
-                if submission_exists or submission_duplicate:
+                if submission_exists:
                     continue
 
-                household_uuid_list.append(household_uuid)
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0
