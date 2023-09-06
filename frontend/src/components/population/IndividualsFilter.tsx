@@ -36,16 +36,6 @@ const orderOptions = [
   { name: 'Gender: descending', value: '-sex' },
 ];
 
-const searchTypeOptions = [
-  { name: 'Individual ID', value: 'individual_id' },
-  { name: 'Household ID', value: 'household_id' },
-  { name: 'Full Name', value: 'full_name' },
-  { name: 'Phone Number', value: 'phone_no' },
-  { name: 'National ID', value: 'national_id' },
-  { name: 'Passport Number', value: 'national_passport' },
-  { name: 'Tax ID', value: 'tax_id' },
-];
-
 export const IndividualsFilter = ({
   filter,
   choicesData,
@@ -103,11 +93,13 @@ export const IndividualsFilter = ({
               fullWidth
               disableClearable
             >
-              {searchTypeOptions.map(({ name, value }) => (
-                <MenuItem key={value} value={value}>
-                  {name}
-                </MenuItem>
-              ))}
+              {choicesData?.individualSearchTypesChoices.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
             </SelectFilter>
           </Grid>
         </Grid>
