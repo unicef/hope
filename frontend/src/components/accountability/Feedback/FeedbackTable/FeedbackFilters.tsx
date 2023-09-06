@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useFeedbackIssueTypeChoicesQuery } from '../../../../__generated__/graphql';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
@@ -103,12 +100,7 @@ export const FeedbackFilters = ({
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label='From'
-            onChange={(date) =>
-              handleFilterChange(
-                'createdAtRangeMin',
-                dateToIsoString(date, 'startOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
             data-cy='filters-creation-date-from'
           />
@@ -116,12 +108,7 @@ export const FeedbackFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label={t('To')}
-            onChange={(date) =>
-              handleFilterChange(
-                'createdAtRangeMax',
-                dateToIsoString(date, 'endOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
             data-cy='filters-creation-date-to'
           />

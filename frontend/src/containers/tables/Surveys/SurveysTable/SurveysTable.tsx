@@ -8,7 +8,11 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { choicesToDict, decodeIdString } from '../../../../utils/utils';
+import {
+  choicesToDict,
+  dateToIsoString,
+  decodeIdString,
+} from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -32,8 +36,8 @@ export const SurveysTable = ({
     createdBy: decodeIdString(filter.createdBy) || '',
     program: programId,
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
   };
   const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);

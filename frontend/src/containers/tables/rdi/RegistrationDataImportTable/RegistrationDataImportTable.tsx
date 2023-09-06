@@ -8,7 +8,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { decodeIdString } from '../../../../utils/utils';
+import { dateToIsoString, decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
@@ -50,8 +50,8 @@ export const RegistrationDataImportTable = ({
     businessArea,
     programId,
     importDateRange: JSON.stringify({
-      min: filter.importDateRangeMin,
-      max: filter.importDateRangeMax,
+      min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
     }),
     size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
   };
