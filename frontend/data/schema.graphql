@@ -3442,6 +3442,8 @@ type Query {
   flagChoices: [ChoiceObject]
   allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
   allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
+  individualSearchTypesChoices: [ChoiceObject]
+  householdSearchTypesChoices: [ChoiceObject]
   me: UserNode
   allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, orderBy: String): UserNodeConnection
   userRolesChoices: [ChoiceObject]

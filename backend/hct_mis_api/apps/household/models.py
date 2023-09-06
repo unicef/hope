@@ -890,6 +890,14 @@ class Individual(
     vector_column = SearchVectorField(null=True)
 
     @property
+    def phone_no_text(self) -> str:
+        return str(self.phone_no).replace(" ", "")
+
+    @property
+    def phone_no_alternative_text(self) -> str:
+        return str(self.phone_no_alternative).replace(" ", "")
+
+    @property
     def age(self) -> int:
         return relativedelta(date.today(), self.birth_date).years
 

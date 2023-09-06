@@ -2,6 +2,7 @@ import { Box } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   usePaymentPlanQuery,
 } from '../../../__generated__/graphql';
@@ -40,15 +41,21 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   });
 
   const status = data?.paymentPlan?.status;
+  const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
 
   useEffect(() => {
-    if (PaymentPlanStatus.Preparing === status) {
+    if (
+      PaymentPlanStatus.Preparing === status ||
+      (backgroundActionStatus !== null &&
+        backgroundActionStatus !==
+          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+    ) {
       startPolling(3000);
     } else {
       stopPolling();
     }
     return stopPolling;
-  }, [status, startPolling, stopPolling]);
+  }, [status, backgroundActionStatus, startPolling, stopPolling]);
 
   if (loading && !data) return <LoadingComponent />;
   if (permissions === null || !data) return null;
