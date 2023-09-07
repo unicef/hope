@@ -333,6 +333,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
     is_migration_handled = models.BooleanField(default=False)
 
     objects = IsOriginalManager()
+    original_and_repr_objects = models.Manager()
 
     class Meta:
         unique_together = ("household", "target_population")

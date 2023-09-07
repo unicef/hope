@@ -1402,6 +1402,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
 
     # remove after data migration
     objects = IsOriginalManager()
+    original_and_repr_objects = models.Manager()
 
     @property
     def unicef_id(self) -> str:
