@@ -17,7 +17,7 @@ const initialFilter = {
   totalEntitledQuantityTo: null,
 };
 
-export const ProgramCyclesPage = (): React.ReactElement => {
+export const ProgramCyclesPagePaymentModule = (): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const location = useLocation();

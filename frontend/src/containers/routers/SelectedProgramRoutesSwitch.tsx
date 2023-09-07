@@ -28,7 +28,8 @@ import { FollowUpPaymentPlansPage } from '../pages/paymentmodule/FollowUpPayment
 import { PaymentDetailsPage } from '../pages/paymentmodule/PaymentDetailsPage';
 import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
 import { PaymentPlansPage } from '../pages/paymentmodule/PaymentPlansPage';
-import { ProgramCyclesPage } from '../pages/paymentmodule/ProgramCyclesPage';
+import { ProgramCycleDetailsPagePaymentModule } from '../pages/paymentmodule/ProgramCycleDetailsPagePaymentModule';
+import { ProgramCyclesPagePaymentModule } from '../pages/paymentmodule/ProgramCyclesPagePaymentModule';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
 import { SetUpFspPageFollowUp } from '../pages/paymentmodule/SetUpFspPageFollowUp';
 import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
@@ -56,7 +57,7 @@ import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopul
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
-import { ProgramCycleDetailsPage } from '../pages/paymentmodule/ProgramCycleDetailsPage';
+import { ProgramCycleDetailsPageProgramDetails } from '../pages/program/ProgramCycleDetailsPageProgramDetails';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -145,10 +146,10 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
         <EditPaymentPlanPage />
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/program-cycles/:id`}>
-        <ProgramCycleDetailsPage />
+        <ProgramCycleDetailsPagePaymentModule />
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/program-cycles`}>
-        <ProgramCyclesPage />
+        <ProgramCyclesPagePaymentModule />
       </SentryRoute>
       <SentryRoute path={`${path}/payment-module/payments/:id`}>
         <PaymentDetailsPage />
@@ -227,6 +228,9 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/list`}>
         <ProgramsPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/details/:id/program-cycles/:programCycleId`}>
+        <ProgramCycleDetailsPageProgramDetails />
       </SentryRoute>
       <SentryRoute path={`${path}/details/:id`}>
         <ProgramDetailsPage />

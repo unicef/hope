@@ -8,15 +8,15 @@ import { PageHeader } from '../../core/PageHeader';
 import { ProgramCycleQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-interface ProgramCycleDetailsHeaderProps {
+interface ProgramCycleDetailsHeaderPaymentModuleProps {
   permissions: string[];
   programCycle: ProgramCycleQuery['programCycle'];
 }
 
-export const ProgramCycleDetailsHeader = ({
+export const ProgramCycleDetailsHeaderPaymentModule = ({
   permissions,
   programCycle,
-}: ProgramCycleDetailsHeaderProps): React.ReactElement => {
+}: ProgramCycleDetailsHeaderPaymentModuleProps): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { name, unicefId } = programCycle;
@@ -24,7 +24,11 @@ export const ProgramCycleDetailsHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/program-cycles/`,
+    },
+    {
+      title: t('Programme Cycles'),
+      to: `/${baseUrl}/payment-module/program-cycles/`,
     },
   ];
   //TODO: rename PM_CREATE permissions to PM_CREATE_PAYMENT_PLAN and so on
