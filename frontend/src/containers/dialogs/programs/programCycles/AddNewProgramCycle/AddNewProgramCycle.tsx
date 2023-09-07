@@ -42,53 +42,52 @@ export const AddNewProgramCycle = ({
       .required(t('Programme Cycle name is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    newProgramCycleStartDate: Yup.date()
-      .required(t('Start Date is required'))
-      .when(
-        'previousProgramCycleEndDate',
-        (previousProgramCycleEndDate, schema) =>
-          previousProgramCycleEndDate &&
-          schema.min(
-            previousProgramCycleEndDate,
-            `${t('Start date have to be greater than')} ${moment(
-              previousProgramCycleEndDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      ),
+    newProgramCycleStartDate: Yup.date().required(t('Start Date is required')),
+    // .when(
+    //   'previousProgramCycleEndDate',
+    //   (previousProgramCycleEndDate, schema) =>
+    //     previousProgramCycleEndDate &&
+    //     schema.min(
+    //       previousProgramCycleEndDate,
+    //       `${t('Start date have to be greater than')} ${moment(
+    //         previousProgramCycleEndDate,
+    //       ).format('YYYY-MM-DD')}`,
+    //     ),
+    //   '',
+    // ),,
     newProgramCycleEndDate: Yup.date()
       .min(today, t('End Date cannot be in the past'))
-      .when(
-        'newProgramCycleStartDate',
-        (newProgramCycleStartDate, schema) =>
-          newProgramCycleStartDate &&
-          schema.min(
-            newProgramCycleStartDate,
-            `${t('End date have to be greater than')} ${moment(
-              newProgramCycleStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      )
+      // .when(
+      //   'newProgramCycleStartDate',
+      //   (newProgramCycleStartDate, schema) =>
+      //     newProgramCycleStartDate &&
+      //     schema.min(
+      //       newProgramCycleStartDate,
+      //       `${t('End date have to be greater than')} ${moment(
+      //         newProgramCycleStartDate,
+      //       ).format('YYYY-MM-DD')}`,
+      //     ),
+      //   '',
+      // )
       .max(program.endDate, t('End Date cannot be after Programme End Date')),
   });
 
   const validationSchemaPreviousProgramCycle = Yup.object().shape({
     previousProgramCycleEndDate: Yup.date()
       .required(t('End Date is required'))
-      .min(today, t('End Date cannot be in the past'))
-      .when(
-        'previousProgramCycleStartDate',
-        (previousProgramCycleStartDate, schema) =>
-          previousProgramCycleStartDate &&
-          schema.min(
-            previousProgramCycleStartDate,
-            `${t('End date have to be greater than')} ${moment(
-              previousProgramCycleStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      ),
+      .min(today, t('End Date cannot be in the past')),
+    // .when(
+    //   'previousProgramCycleStartDate',
+    //   (previousProgramCycleStartDate, schema) =>
+    //     previousProgramCycleStartDate &&
+    //     schema.min(
+    //       previousProgramCycleStartDate,
+    //       `${t('End date have to be greater than')} ${moment(
+    //         previousProgramCycleStartDate,
+    //       ).format('YYYY-MM-DD')}`,
+    //     ),
+    //   '',
+    // ),
   });
 
   const handleCreate = async (values): Promise<void> => {
