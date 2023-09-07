@@ -11,15 +11,15 @@ import {
   useProgramCycleQuery,
   useProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { ProgramCycleDetails } from '../../../components/paymentmodule/ProgramCycleDetails/ProgramCycleDetails';
-import { ProgramCycleDetailsHeader } from '../../../components/paymentmodule/ProgramCycleDetails/ProgramCycleDetailsHeader';
+import { ProgramCycleDetailsHeaderProgramDetails } from '../../../components/programs/ProgramCycleDetailsProgramDetails/ProgramCycleDetailsHeaderProgramDetails';
+import { ProgramCycleDetailsProgramDetails } from '../../../components/programs/ProgramCycleDetailsProgramDetails/ProgramCycleDetailsProgramDetails';
 
-export const ProgramCycleDetailsPage = (): React.ReactElement => {
-  const { id } = useParams();
+export const ProgramCycleDetailsPageProgramDetails = (): React.ReactElement => {
+  const { programCycleId } = useParams();
   const permissions = usePermissions();
   const { data: programCycleData, loading, error } = useProgramCycleQuery({
     variables: {
-      id,
+      id: programCycleId,
     },
     fetchPolicy: 'cache-and-network',
   });
@@ -46,11 +46,11 @@ export const ProgramCycleDetailsPage = (): React.ReactElement => {
 
   return (
     <Box display='flex' flexDirection='column'>
-      <ProgramCycleDetailsHeader
+      <ProgramCycleDetailsHeaderProgramDetails
         programCycle={programCycle}
         permissions={permissions}
       />
-      <ProgramCycleDetails
+      <ProgramCycleDetailsProgramDetails
         programCycle={programCycle}
         statusChoices={statusChoices}
       />

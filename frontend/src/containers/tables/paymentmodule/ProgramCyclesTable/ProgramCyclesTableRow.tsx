@@ -31,7 +31,7 @@ export const ProgramCyclesTableRow = ({
     endDate,
   } = programCycle;
 
-  const detailsPath = `/${baseUrl}/payment-module/program-cycles/${id}`;
+  const detailsPath = `/${baseUrl}/payment-module/program-cycles/${id}/`;
   const handleRowClick = (): void => {
     if (canViewProgramCycleDetails) {
       history.push(detailsPath);

@@ -11,17 +11,17 @@ import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
-interface ProgramCycleDetailsProps {
+interface ProgramCycleDetailsProgramDetailsProps {
   programCycle: ProgramCycleQuery['programCycle'];
   statusChoices: {
     [id: number]: string;
   };
 }
 
-export const ProgramCycleDetails = ({
+export const ProgramCycleDetailsProgramDetails = ({
   programCycle,
   statusChoices,
-}: ProgramCycleDetailsProps): React.ReactElement => {
+}: ProgramCycleDetailsProgramDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   //TODO: add created by, frequency of payment
   const {
