@@ -46,6 +46,7 @@ class SoftDeletableModelWithDate(models.Model):
 
     objects = SoftDeletableIsOriginalManager()  # SoftDeletableManager update after data migrations last step
     all_objects = models.Manager()
+    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
