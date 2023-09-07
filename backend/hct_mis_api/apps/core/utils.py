@@ -30,7 +30,7 @@ from django.utils import timezone
 
 import pytz
 from django_filters import OrderingFilter
-from model_utils.managers import SoftDeletableQuerySet
+from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from PIL import Image
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
@@ -923,6 +923,7 @@ class SoftDeletableIsOriginalModel(models.Model):
     objects = SoftDeletableIsOriginalManager(_emit_deprecation_warnings=True)
     available_objects = SoftDeletableIsOriginalManager()
     all_objects = models.Manager()
+    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 
     def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
         """

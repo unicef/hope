@@ -728,7 +728,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         self.save()
 
 
-class IndividualIdentity(TimeStampedModel):
+class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
     # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
@@ -752,8 +752,6 @@ class IndividualIdentity(TimeStampedModel):
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
-    objects = IsOriginalManager()
-
     class Meta:
         verbose_name_plural = "Individual Identities"
 
@@ -761,7 +759,7 @@ class IndividualIdentity(TimeStampedModel):
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -787,8 +785,6 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-
-    objects = IsOriginalManager()
 
     class Meta:
         unique_together = [("role", "household"), ("household", "individual")]
@@ -1188,6 +1184,7 @@ class EntitlementCard(TimeStampedUUIDModel):
     is_original = models.BooleanField(default=True)
 
     objects = IsOriginalManager()
+    original_and_repr_objects = models.Manager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
