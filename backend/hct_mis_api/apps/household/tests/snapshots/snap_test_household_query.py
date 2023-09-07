@@ -58,6 +58,27 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         },
                         'size': 11
                     }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'programs': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Test program TWO'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'name': 'Test program ONE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 14
+                    }
                 }
             ]
         }
