@@ -137,7 +137,7 @@ def create_grievance_ticket_with_details(
         area=area,
         registration_data_import=registration_data_import,
     )
-    ticket.programs.set(main_individual.program)
+    ticket.programs.set([main_individual.program])
     golden_records = main_individual.get_deduplication_golden_record()
     extra_data = {
         "golden_records": golden_records,

@@ -22,7 +22,7 @@ from typing import (
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Model, Q, QuerySet
 from django.http import Http404
 from django.utils import timezone
 
@@ -33,8 +33,6 @@ from PIL import Image
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
-    from django.db.models import Model, QuerySet
-
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -285,9 +283,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     )
 
 
-def get_count_and_percentage(input_list: List, all_items_list: List) -> Dict[str, Any]:
-    count = len(input_list)
-    all_items_count = len(all_items_list) or 1
+def get_count_and_percentage(count: int, all_items_count: int = 1) -> Dict[str, Union[int, float]]:
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
 
