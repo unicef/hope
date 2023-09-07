@@ -582,6 +582,8 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2295,6 +2297,8 @@ export type HouseholdNodeTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5152,6 +5156,8 @@ export type ProgramNodeTargetpopulationSetArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6115,6 +6121,8 @@ export type QueryAllTargetPopulationArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6152,6 +6160,8 @@ export type QueryAllActiveTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6387,6 +6397,8 @@ export type QueryAllRegistrationDataImportsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   importDateRange?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6589,6 +6601,7 @@ export type RegistrationDataImportNode = Node & {
   goldenRecordPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
   batchUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
   goldenRecordUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']>,
 };
 
 
@@ -6852,6 +6865,8 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -7439,6 +7454,7 @@ export type TargetPopulationNode = Node & {
   surveys: SurveyNodeConnection,
   totalFamilySize?: Maybe<Scalars['Int']>,
   householdList?: Maybe<HouseholdNodeConnection>,
+  totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']>,
 };
 
 
@@ -8234,6 +8250,8 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8463,6 +8481,8 @@ export type UserNodeTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8488,6 +8508,8 @@ export type UserNodeChangedTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8513,6 +8535,8 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   paymentPlanApplicable?: Maybe<Scalars['Boolean']>,
   statusNot?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -9188,7 +9212,7 @@ export type PaymentRecordDetailsFragment = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'refuseReason'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'erased' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals' | 'refuseReason' | 'totalHouseholdsCountWithValidPhoneNo'>
   & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9300,7 +9324,7 @@ export type ImportedIndividualDetailedFragment = (
 
 export type TargetPopulationMinimalFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'totalHouseholdsCount' | 'totalIndividualsCount'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'totalHouseholdsCount' | 'totalHouseholdsCountWithValidPhoneNo' | 'totalIndividualsCount'>
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
     & Pick<ProgramNode, 'id' | 'name'>
@@ -12668,7 +12692,8 @@ export type AllHouseholdsForPopulationTableQueryVariables = {
   residenceStatus?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   admin2?: Maybe<Scalars['ID']>,
-  withdrawn?: Maybe<Scalars['Boolean']>
+  withdrawn?: Maybe<Scalars['Boolean']>,
+  headOfHouseholdPhoneNoValid?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -13770,8 +13795,10 @@ export type AllActiveTargetPopulationsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
-  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
-  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountMin?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAtRange?: Maybe<Scalars['String']>,
@@ -13789,7 +13816,7 @@ export type AllActiveTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'totalHouseholdsCount' | 'createdAt' | 'updatedAt'>
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'totalHouseholdsCount' | 'totalHouseholdsCountWithValidPhoneNo' | 'createdAt' | 'updatedAt'>
         & { program: Maybe<(
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
@@ -14813,6 +14840,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   numberOfHouseholds
   numberOfIndividuals
   refuseReason
+  totalHouseholdsCountWithValidPhoneNo
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -15002,6 +15030,7 @@ export const TargetPopulationMinimalFragmentDoc = gql`
   createdAt
   updatedAt
   totalHouseholdsCount
+  totalHouseholdsCountWithValidPhoneNo
   totalIndividualsCount
   program {
     id
@@ -23935,8 +23964,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -24016,6 +24045,7 @@ export function withAllHouseholdsForPopulationTable<TProps, TChildProps = {}>(op
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      admin2: // value for 'admin2'
  *      withdrawn: // value for 'withdrawn'
+ *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
  *   },
  * });
  */
@@ -26770,8 +26800,8 @@ export type SurveysChoiceDataQueryHookResult = ReturnType<typeof useSurveysChoic
 export type SurveysChoiceDataLazyQueryHookResult = ReturnType<typeof useSurveysChoiceDataLazyQuery>;
 export type SurveysChoiceDataQueryResult = ApolloReactCommon.QueryResult<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>;
 export const AllActiveTargetPopulationsDocument = gql`
-    query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $statusNot: String) {
-  allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, statusNot: $statusNot) {
+    query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $statusNot: String) {
+  allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin, totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, statusNot: $statusNot) {
     edges {
       node {
         id
@@ -26782,6 +26812,7 @@ export const AllActiveTargetPopulationsDocument = gql`
           name
         }
         totalHouseholdsCount
+        totalHouseholdsCountWithValidPhoneNo
         createdAt
         updatedAt
         createdBy {
@@ -26835,8 +26866,10 @@ export function withAllActiveTargetPopulations<TProps, TChildProps = {}>(operati
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
  *      status: // value for 'status'
- *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
- *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
+ *      totalHouseholdsCountWithValidPhoneNoMin: // value for 'totalHouseholdsCountWithValidPhoneNoMin'
+ *      totalHouseholdsCountWithValidPhoneNoMax: // value for 'totalHouseholdsCountWithValidPhoneNoMax'
+ *      totalHouseholdsCountMin: // value for 'totalHouseholdsCountMin'
+ *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
@@ -30824,6 +30857,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   goldenRecordPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
   batchUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
   goldenRecordUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeConnection'] = ResolversParentTypes['RegistrationDataImportNodeConnection']> = {
@@ -31288,6 +31322,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, TargetPopulationNodeSurveysArgs>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeHouseholdListArgs>,
+  totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
