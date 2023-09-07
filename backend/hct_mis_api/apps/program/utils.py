@@ -59,6 +59,8 @@ def copy_households(copy_from_program_id: str, program: Program) -> None:
         copy_from_household_id = household.pk
         household.pk = None
         household.program = program
+        household.total_cash_received = None
+        household.total_cash_received_usd = None
         household.copied_from_id = copy_from_household_id
         household.head_of_household = Individual.objects.get(
             program=program,
