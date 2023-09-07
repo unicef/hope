@@ -8,6 +8,7 @@ export const targetPopulationMinimal = gql`
     createdAt
     updatedAt
     totalHouseholdsCount
+    totalHouseholdsCountWithValidPhoneNo
     totalIndividualsCount
     program {
       id
