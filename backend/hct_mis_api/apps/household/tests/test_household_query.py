@@ -13,6 +13,10 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    migrate_data_to_representations,
+)
 
 ALL_HOUSEHOLD_QUERY = """
       query AllHouseholds($search: String) {
@@ -122,10 +126,12 @@ class TestHouseholdQuery(APITestCase):
         cls.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
 
         cls.households = []
@@ -139,6 +145,9 @@ class TestHouseholdQuery(APITestCase):
                 household.programs.add(cls.program_one)
             else:
                 household.programs.add(cls.program_two)
+                # added for testing migrate_data_to_representations script
+                if family_size == 14:
+                    household.programs.add(cls.program_one)
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",
@@ -164,6 +173,9 @@ class TestHouseholdQuery(APITestCase):
             type=DocumentType.objects.get(key="national_id"),
             individual=household.head_of_household,
         )
+
+        # remove after data migration
+        migrate_data_to_representations()
 
     @parameterized.expand(
         [
