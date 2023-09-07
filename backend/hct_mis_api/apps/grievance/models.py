@@ -63,9 +63,15 @@ class GrievanceTicketManager(models.Manager):
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
         )
 
-    # remove after data migration
+    # remove 'is_original' after data migration
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_original=True)
+
+
+class GrievanceTicketMigrationManager(models.Manager):
+    # TODO: remove after data migration
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset()
 
 
 class GenericPaymentTicket(TimeStampedUUIDModel):
@@ -378,6 +384,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     )
 
     objects = GrievanceTicketManager()
+    # TODO: remove after data migration
+    # added for migration purposes because 0062 call .objects()
+    default_for_migrations_fix = GrievanceTicketMigrationManager()
 
     def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]
