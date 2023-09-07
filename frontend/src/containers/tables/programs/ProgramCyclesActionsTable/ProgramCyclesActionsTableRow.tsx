@@ -26,7 +26,8 @@ export const ProgramCyclesActionsTableRow = ({
   statusChoices,
   itemsCount,
 }: ProgramCyclesActionsTableRowProps): React.ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
+
   const {
     id,
     unicefId,
@@ -39,7 +40,7 @@ export const ProgramCyclesActionsTableRow = ({
     endDate,
   } = programCycle;
 
-  const detailsPath = `/${baseUrl}/payment-module/program-cycles/${id}`;
+  const detailsPath = `/${baseUrl}/details/${programId}/program-cycles/${id}`;
 
   return (
     <ClickableTableRow>

@@ -70,7 +70,7 @@ export const menuItems: MenuItem[] = [
   {
     name: 'Programme Management',
     href: '/list',
-    selectedRegexp: /^\/programs.*$/,
+    selectedRegexp: /^\/list.*$/,
     icon: <Assignment />,
     permissions: [
       PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
@@ -81,7 +81,7 @@ export const menuItems: MenuItem[] = [
   {
     name: 'Programme Details',
     href: '/programs',
-    selectedRegexp: /^\/programs.*$/,
+    selectedRegexp: /^\/details.*$/,
     icon: <Assignment />,
     permissions: [
       PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
