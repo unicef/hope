@@ -27,7 +27,7 @@ import {
   useSurveyAvailableFlowsLazyQuery,
   useCreateSurveyAccountabilityMutation,
 } from '../../../../__generated__/graphql';
-import { LookUpSelection } from '../../../../components/accountability/Surveys/LookUps/LookUpSelection';
+import { LookUpSelectionSurveys } from '../../../../components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { FormikEffect } from '../../../../components/core/FormikEffect';
@@ -207,7 +207,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
       }))
     : [];
   const mappedFlows = flowsData?.surveyAvailableFlows?.length
-    ? flowsData.surveyAvailableFlows.map((el) => ({ value: el.id, name: el.name }))
+    ? flowsData.surveyAvailableFlows.map((el) => ({
+        value: el.id,
+        name: el.name,
+      }))
     : [];
 
   const getSampleSizePercentage = (): string => {
@@ -236,7 +239,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const matchTitle = (values): string => {
     return category === SurveyCategory.Sms || category === SurveyCategory.Manual
       ? values.title
-      : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id).name;
+      : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id)
+          .name;
   };
 
   const prepareMutationVariables = (
@@ -369,7 +373,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 />
                 {activeStep === SurveySteps.LookUp && (
                   <Box display='flex' flexDirection='column'>
-                    <LookUpSelection
+                    <LookUpSelectionSurveys
                       businessArea={businessArea}
                       values={values}
                       onValueChange={setFieldValue}
