@@ -102,6 +102,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     )
     number_of_individuals = models.PositiveIntegerField(db_index=True)
     number_of_households = models.PositiveIntegerField(db_index=True)
+
+    batch_duplicates = models.PositiveIntegerField(default=0)
+    batch_possible_duplicates = models.PositiveIntegerField(default=0)
+    batch_unique = models.PositiveIntegerField(default=0)
+    golden_record_duplicates = models.PositiveIntegerField(default=0)
+    golden_record_possible_duplicates = models.PositiveIntegerField(default=0)
+    golden_record_unique = models.PositiveIntegerField(default=0)
+
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
