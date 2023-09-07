@@ -88,6 +88,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.history.all()
 
     def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
+        return self.total_number_of_households
         cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
         return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
 
