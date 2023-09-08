@@ -9,10 +9,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
 )
-from hct_mis_api.apps.household.models import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentFactory,
