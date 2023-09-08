@@ -17,12 +17,10 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
-    Document,
     EntitlementCard,
     Household,
     Individual,
     IndividualIdentity,
-    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
@@ -38,21 +36,11 @@ from hct_mis_api.apps.targeting.fixtures import (
     HouseholdSelectionFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    adjust_payment_records,
-    adjust_payments,
-    assign_non_program_objects_to_biggest_program,
     copy_bank_account_info_per_individual,
-    copy_document_per_individual,
     copy_entitlement_card_per_household,
-    copy_household_representation,
-    copy_household_selections,
     copy_individual_identity_per_individual,
-    copy_individual_representation,
-    copy_roles,
     get_biggest_program,
-    handle_rdis,
 )
 
 
@@ -220,24 +208,24 @@ class TestCopyIndividualRepresentation(TestCase):
         self.bank_account_info2 = BankAccountInfoFactory(individual=self.individual1)
 
     # def test_copy_individual_representation_first_representation(self) -> None:
-        # documents_count = Document.objects.count()
-        # individual_identities_count = IndividualIdentity.objects.count()
-        # bank_account_info_count = BankAccountInfo.objects.count()
-        #
-        # individual = copy_individual_representation(program=self.program, individual=self.individual1)
-        #
-        # assert individual.documents.count() == 2
-        # assert individual.identities.count() == 2
-        # assert individual.bank_account_info.count() == 2
-        # assert individual.program == self.program
-        # assert individual == self.individual1
-        # assert individual.copied_from == self.individual1
-        # assert individual.origin_unicef_id == self.individual1.unicef_id
-        # assert individual.documents.first().program == self.program
-        # assert individual.documents.last().program == self.program
-        # assert Document.objects.count() == documents_count
-        # assert IndividualIdentity.objects.count() == individual_identities_count
-        # assert BankAccountInfo.objects.count() == bank_account_info_count
+    # documents_count = Document.objects.count()
+    # individual_identities_count = IndividualIdentity.objects.count()
+    # bank_account_info_count = BankAccountInfo.objects.count()
+    #
+    # individual = copy_individual_representation(program=self.program, individual=self.individual1)
+    #
+    # assert individual.documents.count() == 2
+    # assert individual.identities.count() == 2
+    # assert individual.bank_account_info.count() == 2
+    # assert individual.program == self.program
+    # assert individual == self.individual1
+    # assert individual.copied_from == self.individual1
+    # assert individual.origin_unicef_id == self.individual1.unicef_id
+    # assert individual.documents.first().program == self.program
+    # assert individual.documents.last().program == self.program
+    # assert Document.objects.count() == documents_count
+    # assert IndividualIdentity.objects.count() == individual_identities_count
+    # assert BankAccountInfo.objects.count() == bank_account_info_count
 
     # def test_copy_individual_representation_already_exists(self) -> None:
     #     individual_representation = IndividualFactory(
