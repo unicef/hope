@@ -47164,7 +47164,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GRANDDAUGHTER_GRANDSON'
+                        'value': 'GRANDDAUGHER_GRANDSON'
                     },
                     {
                         'labelEn': 'Grandmother / Grandfather',
