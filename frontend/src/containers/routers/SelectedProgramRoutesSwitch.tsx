@@ -13,6 +13,7 @@ import { PaymentModuleRoutes } from './PaymentModuleRoutes';
 import { PaymentVerificationRoutes } from './PaymentVerificationRoutes';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { PopulationRoutes } from './PopulationRoutes';
+import { AccountabilityRoutes } from './AccountabilityRoutes';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -42,6 +43,7 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <PaymentModuleRoutes />
       <PaymentVerificationRoutes />
       <GrievanceRoutes />
+      <AccountabilityRoutes />
     </>
   );
 };
