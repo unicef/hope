@@ -12,12 +12,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
-    Document,
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
@@ -26,16 +20,12 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     ServiceProviderFactory,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.models import ServiceProvider
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
-from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    get_biggest_program,
-    migrate_data_to_representations_per_business_area,
-)
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestMigrateDataToRepresentations(TestCase):
