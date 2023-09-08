@@ -16,13 +16,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 1
                         },
                         'size': 4
                     }
@@ -32,13 +26,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 1
                         },
                         'size': 1
                     }
@@ -48,13 +36,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 1
                         },
                         'size': 11
                     }
@@ -64,18 +46,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program TWO'
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 2
                         },
                         'size': 14
                     }
