@@ -116,10 +116,17 @@ class TestHouseholdQuery(APITestCase):
         cls.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
+            status="ACTIVE",
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
+            status="ACTIVE",
+        )
+        cls.program_draft = ProgramFactory(
+            name="Test program DRAFT",
+            business_area=cls.business_area,
+            status="DRAFT",
         )
 
         cls.households = []
@@ -185,4 +192,17 @@ class TestHouseholdQuery(APITestCase):
             request_string=HOUSEHOLD_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
+        )
+
+    def test_household_query_draft(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
+            },
         )
