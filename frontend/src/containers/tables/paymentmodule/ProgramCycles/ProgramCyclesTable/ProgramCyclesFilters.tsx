@@ -5,14 +5,14 @@ import { useHistory, useLocation } from 'react-router-dom';
 import {
   AllProgramCyclesQueryVariables,
   useProgrammeChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
-import { Missing } from '../../../../components/core/Missing';
-import { NumberTextField } from '../../../../components/core/NumberTextField';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+} from '../../../../../__generated__/graphql';
+import { ClearApplyButtons } from '../../../../../components/core/ClearApplyButtons';
+import { ContainerWithBorder } from '../../../../../components/core/ContainerWithBorder';
+import { Missing } from '../../../../../components/core/Missing';
+import { NumberTextField } from '../../../../../components/core/NumberTextField';
+import { SearchTextField } from '../../../../../components/core/SearchTextField';
+import { SelectFilter } from '../../../../../components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '../../../../../utils/utils';
 
 //TODO: add missing props
 export type FilterProps = Pick<
