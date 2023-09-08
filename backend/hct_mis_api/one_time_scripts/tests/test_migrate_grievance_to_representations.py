@@ -67,9 +67,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
-    migrate_grievance_to_representations,
-)
 
 
 class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
