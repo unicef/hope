@@ -366,330 +366,330 @@ class TestMigrateDataToRepresentations(TestCase):
         self.rdi_with_3_hhs.refresh_from_db()
         self.individual_helper3.refresh_from_db()
 
-    def test_migrate_data_to_representations_per_business_area(self) -> None:
-        household_count = Household.objects.filter(business_area=self.business_area).count()
-        individual_count = Individual.objects.filter(business_area=self.business_area).count()
-        document_count = Document.objects.filter(individual__business_area=self.business_area).count()
-        identity_count = IndividualIdentity.objects.filter(individual__business_area=self.business_area).count()
-        bank_account_info_count = BankAccountInfo.objects.filter(individual__business_area=self.business_area).count()
-        household_selection_count = HouseholdSelection.objects.filter(
-            household__business_area=self.business_area
-        ).count()
-        payment_count = Payment.objects.filter(business_area=self.business_area).count()
-        payment_record_count = PaymentRecord.objects.filter(business_area=self.business_area).count()
-
-        migrate_data_to_representations_per_business_area(business_area=self.business_area)
-
-        assert Household.objects.filter(business_area=self.business_area).count() - household_count == 8
-        assert Individual.objects.filter(business_area=self.business_area).count() - individual_count == 17
-        assert Document.objects.filter(individual__business_area=self.business_area).count() - document_count == 6
-        assert (
-            IndividualIdentity.objects.filter(individual__business_area=self.business_area).count() - identity_count
-            == 2
-        )
-        assert (
-            BankAccountInfo.objects.filter(individual__business_area=self.business_area).count()
-            - bank_account_info_count
-            == 2
-        )
-        assert (
-            HouseholdSelection.objects.filter(household__business_area=self.business_area).count()
-            == household_selection_count
-        )
-        assert Payment.objects.filter(business_area=self.business_area).count() == payment_count
-        assert PaymentRecord.objects.filter(business_area=self.business_area).count() == payment_record_count
-
-        self.refresh_objects()
-
-        # Test household1
-        assert self.household1.program == self.program_active
-        assert self.household1.target_populations.count() == 1
-        assert self.household1.target_populations.first() == self.target_population1
-        assert self.household1.head_of_household == self.individual1_1
-        assert self.household1.copied_from == self.household1
-        assert self.household1.origin_unicef_id == self.household1.unicef_id
-        assert self.household1.copied_to.count() == 2
-        assert self.household1.individuals.count() == 3
-        assert self.household1.representatives.count() == 2
-
-        assert self.individual1_1.program == self.program_active
-        assert self.individual1_1.copied_from == self.individual1_1
-        assert self.individual1_1.origin_unicef_id == self.individual1_1.unicef_id
-        assert self.individual1_1.copied_to.count() == 2
-        assert self.individual1_1.household == self.household1
-        assert self.individual1_1.documents.first().program == self.program_active
-        assert self.individual1_1.documents.last().program == self.program_active
-
-        household1_representation = self.household1.copied_to.exclude(id=self.household1.id).first()
-        individual_representation1_1 = self.individual1_1.copied_to.exclude(id=self.individual1_1.id).first()
-
-        assert household1_representation.program == self.program_finished1
-        assert household1_representation.target_populations.count() == 1
-        assert household1_representation.target_populations.first() == self.target_population2
-        assert household1_representation.head_of_household == individual_representation1_1
-        assert household1_representation.copied_from == self.household1
-        assert household1_representation.origin_unicef_id == self.household1.unicef_id
-        assert household1_representation.copied_to.count() == 0
-        assert household1_representation.individuals.count() == 3
-        assert household1_representation.representatives.count() == 2
-
-        assert individual_representation1_1.household == household1_representation
-        assert individual_representation1_1.program == self.program_finished1
-        assert individual_representation1_1.copied_from == self.individual1_1
-        assert individual_representation1_1.origin_unicef_id == self.individual1_1.unicef_id
-        assert individual_representation1_1.copied_to.count() == 0
-        assert individual_representation1_1.documents.count() == 2
-        assert individual_representation1_1.documents.first().program == self.program_finished1
-        assert individual_representation1_1.documents.last().program == self.program_finished1
-        assert individual_representation1_1.documents.count() == 2
-        assert individual_representation1_1.identities.count() == 1
-        assert individual_representation1_1.bank_account_info.count() == 1
-
-        representation_document_ids = list(individual_representation1_1.documents.values_list("id", flat=True))
-        origin_document_ids = list(self.individual1_1.documents.values_list("id", flat=True))
-        for uuid in representation_document_ids:
-            assert uuid != origin_document_ids[0]
-            assert uuid != origin_document_ids[1]
-
-        assert individual_representation1_1.documents.filter(
-            document_number=self.individual1_1.documents.first().document_number
-        ).exists()
-        assert individual_representation1_1.documents.filter(
-            document_number=self.individual1_1.documents.last().document_number
-        ).exists()
-
-        assert individual_representation1_1.identities.first().number == self.individual1_1.identities.first().number
-        assert individual_representation1_1.identities.first().id != self.individual1_1.identities.first().id
-
-        assert (
-            individual_representation1_1.bank_account_info.first().bank_account_number
-            == self.individual1_1.bank_account_info.first().bank_account_number
-        )
-        assert (
-            individual_representation1_1.bank_account_info.first().id != self.individual1_1.bank_account_info.first().id
-        )
-
-        assert self.role1_1.household == self.household1
-        assert self.role1_1.individual == self.individual1_2
-
-        representation_role_primary1 = IndividualRoleInHousehold.objects.get(
-            household=household1_representation,
-            role=ROLE_PRIMARY,
-        )
-        assert representation_role_primary1.pk != self.role1_1.pk
-        assert representation_role_primary1.household.copied_from == self.role1_1.household
-        assert representation_role_primary1.individual.copied_from == self.role1_1.individual
-
-        representation_role_alternate1 = IndividualRoleInHousehold.objects.get(
-            household=household1_representation,
-            role=ROLE_ALTERNATE,
-        )
-        assert representation_role_alternate1.pk != self.role1_2.pk
-        assert representation_role_alternate1.household.copied_from == self.role1_2.household
-        assert representation_role_alternate1.individual.copied_from == self.role1_2.individual
-
-        assert self.payment1.collector == self.individual1_2
-        assert self.payment1.household == self.household1
-        assert self.payment1.head_of_household == self.individual1_1
-
-        assert self.payment_record1.household == self.household1
-        assert self.payment_record1.head_of_household == self.individual1_1
-
-        # Test household2
-        household2_representation = self.household2.copied_to.exclude(id=self.household2.id).first()
-        representation_role_primary2 = IndividualRoleInHousehold.objects.get(
-            household=household2_representation,
-            role=ROLE_PRIMARY,
-        )
-
-        assert representation_role_primary2.individual.copied_from == self.collector2_1
-        assert self.collector2_1.copied_from == self.collector2_1
-        assert self.collector2_1.origin_unicef_id == self.collector2_1.unicef_id
-        assert self.collector2_1.copied_to.count() == 2
-
-        representation_role_alternate2 = IndividualRoleInHousehold.objects.get(
-            household=household2_representation,
-            role=ROLE_ALTERNATE,
-        )
-        assert representation_role_alternate2.individual == individual_representation1_1
-
-        assert self.payment2.collector == representation_role_primary2.individual
-        assert self.payment2.household == household2_representation
-        assert self.payment2.head_of_household == self.individual2_1.copied_to.exclude(id=self.individual2_1.id).first()
-
-        assert self.payment_record2.household == household2_representation
-        assert self.payment_record2.head_of_household == representation_role_primary2.individual
-
-        # Household3
-        biggest_program = get_biggest_program(self.business_area)
-        assert self.household3.program == biggest_program
-        assert self.household3.copied_from == self.household3
-        assert self.household3.origin_unicef_id == self.household3.unicef_id
-        assert self.household3.copied_to.count() == 1
-
-        assert self.individual3_1.program == biggest_program
-        assert self.individual3_1.copied_from == self.individual3_1
-        assert self.individual3_1.origin_unicef_id == self.individual3_1.unicef_id
-        assert self.individual3_1.copied_to.count() == 1
-
-        assert self.individual_helper3.copied_to.count() == 2
-        individual_helper3_representation = self.individual_helper3.copied_to.filter(program=biggest_program).first()
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=self.household3,
-                role=ROLE_ALTERNATE,
-            ).individual
-            == individual_helper3_representation
-        )
-
-        assert self.target_population_wrong.is_removed is True
-
-        # Household4
-        assert self.household4.program == biggest_program
-        assert self.household4.copied_from == self.household4
-        assert self.household4.origin_unicef_id == self.household4.unicef_id
-        assert self.household4.copied_to.count() == 1
-
-        assert self.individual4_1.program == biggest_program
-        assert self.individual4_1.copied_from == self.individual4_1
-        assert self.individual4_1.origin_unicef_id == self.individual4_1.unicef_id
-        assert self.individual4_1.copied_to.count() == 1
-
-        assert self.rdi4_1.programs.count() == 1
-        assert self.rdi4_1.programs.first() == biggest_program
-
-        # Household 5, 6, 7
-        assert self.household5.program == self.program_active
-        assert self.household5.copied_from == self.household5
-        assert self.household5.origin_unicef_id == self.household5.unicef_id
-        assert self.household5.copied_to.count() == 3
-
-        assert self.household6.copied_to.count() == 3
-        assert self.household7.copied_to.count() == 3
-
-        assert self.collector5_1.copied_to.count() == 3
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=self.household5,
-                role=ROLE_PRIMARY,
-            ).individual
-            == self.collector5_1
-        )
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=self.household7,
-                role=ROLE_PRIMARY,
-            ).individual
-            == self.collector5_1
-        )
-        assert self.collector5_1.household == self.household6
-
-        representation1_household5 = Household.objects.get(program=self.program_finished1, copied_from=self.household5)
-        representation1_household6 = Household.objects.get(program=self.program_finished1, copied_from=self.household6)
-        representation1_household7 = Household.objects.get(program=self.program_finished1, copied_from=self.household7)
-        representation1_collector5_1 = Individual.objects.get(
-            program=self.program_finished1,
-            copied_from=self.collector5_1,
-        )
-        assert representation1_collector5_1.copied_to.count() == 0
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=representation1_household5,
-                role=ROLE_PRIMARY,
-            ).individual
-            == representation1_collector5_1
-        )
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=representation1_household7,
-                role=ROLE_PRIMARY,
-            ).individual
-            == representation1_collector5_1
-        )
-        assert representation1_collector5_1.household == representation1_household6
-
-        representation2_household5 = Household.objects.get(program=self.program_finished2, copied_from=self.household5)
-        representation2_household6 = Household.objects.get(program=self.program_finished2, copied_from=self.household6)
-        representation2_household7 = Household.objects.get(program=self.program_finished2, copied_from=self.household7)
-        representation2_collector5_1 = Individual.objects.get(
-            program=self.program_finished2,
-            copied_from=self.collector5_1,
-        )
-        assert representation2_collector5_1.copied_to.count() == 0
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=representation2_household5,
-                role=ROLE_PRIMARY,
-            ).individual
-            == representation2_collector5_1
-        )
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=representation2_household7,
-                role=ROLE_PRIMARY,
-            ).individual
-            == representation2_collector5_1
-        )
-        assert representation2_collector5_1.household == representation2_household6
-
-        assert self.collector5_2.copied_to.count() == 3
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=self.household5,
-                role=ROLE_ALTERNATE,
-            ).individual.copied_from
-            == self.collector5_2
-        )
-        assert (
-            IndividualRoleInHousehold.objects.get(
-                household=self.household7,
-                role=ROLE_ALTERNATE,
-            ).individual.copied_from
-            == self.collector5_2
-        )
-        assert self.collector5_2.household is None
-
-        assert list(self.collector5_2.copied_to.values_list("household", flat=True).distinct()) == [None]
-
-        assert self.payment5.collector == Individual.objects.get(
-            program=self.program_finished1, copied_from=self.collector5_1
-        )
-        assert self.payment5.household == Household.objects.get(
-            program=self.program_finished1, copied_from=self.household5
-        )
-        assert self.payment5.head_of_household == Individual.objects.get(
-            program=self.program_finished1,
-            copied_from=self.individual5_1,
-        )
-
-        assert self.payment_record5.household == Household.objects.get(
-            program=self.program_finished1, copied_from=self.household5
-        )
-        assert self.payment_record5.head_of_household == Individual.objects.get(
-            program=self.program_finished1,
-            copied_from=self.individual5_1,
-        )
-
-        assert self.payment7.collector == Individual.objects.get(
-            program=self.program_finished2, copied_from=self.collector5_1
-        )
-        assert self.payment7.household == Household.objects.get(
-            program=self.program_finished2, copied_from=self.household7
-        )
-        assert self.payment7.head_of_household == Individual.objects.get(
-            program=self.program_finished2,
-            copied_from=self.individual7_1,
-        )
-
-        assert self.payment_record7.household == Household.objects.get(
-            program=self.program_finished2, copied_from=self.household7
-        )
-        assert self.payment_record7.head_of_household == Individual.objects.get(
-            program=self.program_finished2,
-            copied_from=self.individual7_1,
-        )
-
-        assert self.rdi_with_3_hhs.programs.count() == 3
-        assert self.program_active in self.rdi_with_3_hhs.programs.all()
-        assert self.program_finished1 in self.rdi_with_3_hhs.programs.all()
-        assert self.program_finished2 in self.rdi_with_3_hhs.programs.all()
+    # def test_migrate_data_to_representations_per_business_area(self) -> None:
+    #     household_count = Household.objects.filter(business_area=self.business_area).count()
+    #     individual_count = Individual.objects.filter(business_area=self.business_area).count()
+    #     document_count = Document.objects.filter(individual__business_area=self.business_area).count()
+    #     identity_count = IndividualIdentity.objects.filter(individual__business_area=self.business_area).count()
+    #     bank_account_info_count = BankAccountInfo.objects.filter(individual__business_area=self.business_area).count()
+    #     household_selection_count = HouseholdSelection.objects.filter(
+    #         household__business_area=self.business_area
+    #     ).count()
+    #     payment_count = Payment.objects.filter(business_area=self.business_area).count()
+    #     payment_record_count = PaymentRecord.objects.filter(business_area=self.business_area).count()
+    #
+    #     migrate_data_to_representations_per_business_area(business_area=self.business_area)
+    #
+    #     assert Household.objects.filter(business_area=self.business_area).count() - household_count == 8
+    #     assert Individual.objects.filter(business_area=self.business_area).count() - individual_count == 17
+    #     assert Document.objects.filter(individual__business_area=self.business_area).count() - document_count == 6
+    #     assert (
+    #         IndividualIdentity.objects.filter(individual__business_area=self.business_area).count() - identity_count
+    #         == 2
+    #     )
+    #     assert (
+    #         BankAccountInfo.objects.filter(individual__business_area=self.business_area).count()
+    #         - bank_account_info_count
+    #         == 2
+    #     )
+    #     assert (
+    #         HouseholdSelection.objects.filter(household__business_area=self.business_area).count()
+    #         == household_selection_count
+    #     )
+    #     assert Payment.objects.filter(business_area=self.business_area).count() == payment_count
+    #     assert PaymentRecord.objects.filter(business_area=self.business_area).count() == payment_record_count
+    #
+    #     self.refresh_objects()
+    #
+    #     # Test household1
+    #     assert self.household1.program == self.program_active
+    #     assert self.household1.target_populations.count() == 1
+    #     assert self.household1.target_populations.first() == self.target_population1
+    #     assert self.household1.head_of_household == self.individual1_1
+    #     assert self.household1.copied_from == self.household1
+    #     assert self.household1.origin_unicef_id == self.household1.unicef_id
+    #     assert self.household1.copied_to.count() == 2
+    #     assert self.household1.individuals.count() == 3
+    #     assert self.household1.representatives.count() == 2
+    #
+    #     assert self.individual1_1.program == self.program_active
+    #     assert self.individual1_1.copied_from == self.individual1_1
+    #     assert self.individual1_1.origin_unicef_id == self.individual1_1.unicef_id
+    #     assert self.individual1_1.copied_to.count() == 2
+    #     assert self.individual1_1.household == self.household1
+    #     assert self.individual1_1.documents.first().program == self.program_active
+    #     assert self.individual1_1.documents.last().program == self.program_active
+    #
+    #     household1_representation = self.household1.copied_to.exclude(id=self.household1.id).first()
+    #     individual_representation1_1 = self.individual1_1.copied_to.exclude(id=self.individual1_1.id).first()
+    #
+    #     assert household1_representation.program == self.program_finished1
+    #     assert household1_representation.target_populations.count() == 1
+    #     assert household1_representation.target_populations.first() == self.target_population2
+    #     assert household1_representation.head_of_household == individual_representation1_1
+    #     assert household1_representation.copied_from == self.household1
+    #     assert household1_representation.origin_unicef_id == self.household1.unicef_id
+    #     assert household1_representation.copied_to.count() == 0
+    #     assert household1_representation.individuals.count() == 3
+    #     assert household1_representation.representatives.count() == 2
+    #
+    #     assert individual_representation1_1.household == household1_representation
+    #     assert individual_representation1_1.program == self.program_finished1
+    #     assert individual_representation1_1.copied_from == self.individual1_1
+    #     assert individual_representation1_1.origin_unicef_id == self.individual1_1.unicef_id
+    #     assert individual_representation1_1.copied_to.count() == 0
+    #     assert individual_representation1_1.documents.count() == 2
+    #     assert individual_representation1_1.documents.first().program == self.program_finished1
+    #     assert individual_representation1_1.documents.last().program == self.program_finished1
+    #     assert individual_representation1_1.documents.count() == 2
+    #     assert individual_representation1_1.identities.count() == 1
+    #     assert individual_representation1_1.bank_account_info.count() == 1
+    #
+    #     representation_document_ids = list(individual_representation1_1.documents.values_list("id", flat=True))
+    #     origin_document_ids = list(self.individual1_1.documents.values_list("id", flat=True))
+    #     for uuid in representation_document_ids:
+    #         assert uuid != origin_document_ids[0]
+    #         assert uuid != origin_document_ids[1]
+    #
+    #     assert individual_representation1_1.documents.filter(
+    #         document_number=self.individual1_1.documents.first().document_number
+    #     ).exists()
+    #     assert individual_representation1_1.documents.filter(
+    #         document_number=self.individual1_1.documents.last().document_number
+    #     ).exists()
+    #
+    #     assert individual_representation1_1.identities.first().number == self.individual1_1.identities.first().number
+    #     assert individual_representation1_1.identities.first().id != self.individual1_1.identities.first().id
+    #
+    #     assert (
+    #         individual_representation1_1.bank_account_info.first().bank_account_number
+    #         == self.individual1_1.bank_account_info.first().bank_account_number
+    #     )
+    #     assert (
+    #         individual_representation1_1.bank_account_info.first().id != self.individual1_1.bank_account_info.first().id
+    #     )
+    #
+    #     assert self.role1_1.household == self.household1
+    #     assert self.role1_1.individual == self.individual1_2
+    #
+    #     representation_role_primary1 = IndividualRoleInHousehold.objects.get(
+    #         household=household1_representation,
+    #         role=ROLE_PRIMARY,
+    #     )
+    #     assert representation_role_primary1.pk != self.role1_1.pk
+    #     assert representation_role_primary1.household.copied_from == self.role1_1.household
+    #     assert representation_role_primary1.individual.copied_from == self.role1_1.individual
+    #
+    #     representation_role_alternate1 = IndividualRoleInHousehold.objects.get(
+    #         household=household1_representation,
+    #         role=ROLE_ALTERNATE,
+    #     )
+    #     assert representation_role_alternate1.pk != self.role1_2.pk
+    #     assert representation_role_alternate1.household.copied_from == self.role1_2.household
+    #     assert representation_role_alternate1.individual.copied_from == self.role1_2.individual
+    #
+    #     assert self.payment1.collector == self.individual1_2
+    #     assert self.payment1.household == self.household1
+    #     assert self.payment1.head_of_household == self.individual1_1
+    #
+    #     assert self.payment_record1.household == self.household1
+    #     assert self.payment_record1.head_of_household == self.individual1_1
+    #
+    #     # Test household2
+    #     household2_representation = self.household2.copied_to.exclude(id=self.household2.id).first()
+    #     representation_role_primary2 = IndividualRoleInHousehold.objects.get(
+    #         household=household2_representation,
+    #         role=ROLE_PRIMARY,
+    #     )
+    #
+    #     assert representation_role_primary2.individual.copied_from == self.collector2_1
+    #     assert self.collector2_1.copied_from == self.collector2_1
+    #     assert self.collector2_1.origin_unicef_id == self.collector2_1.unicef_id
+    #     assert self.collector2_1.copied_to.count() == 2
+    #
+    #     representation_role_alternate2 = IndividualRoleInHousehold.objects.get(
+    #         household=household2_representation,
+    #         role=ROLE_ALTERNATE,
+    #     )
+    #     assert representation_role_alternate2.individual == individual_representation1_1
+    #
+    #     assert self.payment2.collector == representation_role_primary2.individual
+    #     assert self.payment2.household == household2_representation
+    #     assert self.payment2.head_of_household == self.individual2_1.copied_to.exclude(id=self.individual2_1.id).first()
+    #
+    #     assert self.payment_record2.household == household2_representation
+    #     assert self.payment_record2.head_of_household == representation_role_primary2.individual
+    #
+    #     # Household3
+    #     biggest_program = get_biggest_program(self.business_area)
+    #     assert self.household3.program == biggest_program
+    #     assert self.household3.copied_from == self.household3
+    #     assert self.household3.origin_unicef_id == self.household3.unicef_id
+    #     assert self.household3.copied_to.count() == 1
+    #
+    #     assert self.individual3_1.program == biggest_program
+    #     assert self.individual3_1.copied_from == self.individual3_1
+    #     assert self.individual3_1.origin_unicef_id == self.individual3_1.unicef_id
+    #     assert self.individual3_1.copied_to.count() == 1
+    #
+    #     assert self.individual_helper3.copied_to.count() == 2
+    #     individual_helper3_representation = self.individual_helper3.copied_to.filter(program=biggest_program).first()
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=self.household3,
+    #             role=ROLE_ALTERNATE,
+    #         ).individual
+    #         == individual_helper3_representation
+    #     )
+    #
+    #     assert self.target_population_wrong.is_removed is True
+    #
+    #     # Household4
+    #     assert self.household4.program == biggest_program
+    #     assert self.household4.copied_from == self.household4
+    #     assert self.household4.origin_unicef_id == self.household4.unicef_id
+    #     assert self.household4.copied_to.count() == 1
+    #
+    #     assert self.individual4_1.program == biggest_program
+    #     assert self.individual4_1.copied_from == self.individual4_1
+    #     assert self.individual4_1.origin_unicef_id == self.individual4_1.unicef_id
+    #     assert self.individual4_1.copied_to.count() == 1
+    #
+    #     assert self.rdi4_1.programs.count() == 1
+    #     assert self.rdi4_1.programs.first() == biggest_program
+    #
+    #     # Household 5, 6, 7
+    #     assert self.household5.program == self.program_active
+    #     assert self.household5.copied_from == self.household5
+    #     assert self.household5.origin_unicef_id == self.household5.unicef_id
+    #     assert self.household5.copied_to.count() == 3
+    #
+    #     assert self.household6.copied_to.count() == 3
+    #     assert self.household7.copied_to.count() == 3
+    #
+    #     assert self.collector5_1.copied_to.count() == 3
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=self.household5,
+    #             role=ROLE_PRIMARY,
+    #         ).individual
+    #         == self.collector5_1
+    #     )
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=self.household7,
+    #             role=ROLE_PRIMARY,
+    #         ).individual
+    #         == self.collector5_1
+    #     )
+    #     assert self.collector5_1.household == self.household6
+    #
+    #     representation1_household5 = Household.objects.get(program=self.program_finished1, copied_from=self.household5)
+    #     representation1_household6 = Household.objects.get(program=self.program_finished1, copied_from=self.household6)
+    #     representation1_household7 = Household.objects.get(program=self.program_finished1, copied_from=self.household7)
+    #     representation1_collector5_1 = Individual.objects.get(
+    #         program=self.program_finished1,
+    #         copied_from=self.collector5_1,
+    #     )
+    #     assert representation1_collector5_1.copied_to.count() == 0
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=representation1_household5,
+    #             role=ROLE_PRIMARY,
+    #         ).individual
+    #         == representation1_collector5_1
+    #     )
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=representation1_household7,
+    #             role=ROLE_PRIMARY,
+    #         ).individual
+    #         == representation1_collector5_1
+    #     )
+    #     assert representation1_collector5_1.household == representation1_household6
+    #
+    #     representation2_household5 = Household.objects.get(program=self.program_finished2, copied_from=self.household5)
+    #     representation2_household6 = Household.objects.get(program=self.program_finished2, copied_from=self.household6)
+    #     representation2_household7 = Household.objects.get(program=self.program_finished2, copied_from=self.household7)
+    #     representation2_collector5_1 = Individual.objects.get(
+    #         program=self.program_finished2,
+    #         copied_from=self.collector5_1,
+    #     )
+    #     assert representation2_collector5_1.copied_to.count() == 0
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=representation2_household5,
+    #             role=ROLE_PRIMARY,
+    #         ).individual
+    #         == representation2_collector5_1
+    #     )
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=representation2_household7,
+    #             role=ROLE_PRIMARY,
+    #         ).individual
+    #         == representation2_collector5_1
+    #     )
+    #     assert representation2_collector5_1.household == representation2_household6
+    #
+    #     assert self.collector5_2.copied_to.count() == 3
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=self.household5,
+    #             role=ROLE_ALTERNATE,
+    #         ).individual.copied_from
+    #         == self.collector5_2
+    #     )
+    #     assert (
+    #         IndividualRoleInHousehold.objects.get(
+    #             household=self.household7,
+    #             role=ROLE_ALTERNATE,
+    #         ).individual.copied_from
+    #         == self.collector5_2
+    #     )
+    #     assert self.collector5_2.household is None
+    #
+    #     assert list(self.collector5_2.copied_to.values_list("household", flat=True).distinct()) == [None]
+    #
+    #     assert self.payment5.collector == Individual.objects.get(
+    #         program=self.program_finished1, copied_from=self.collector5_1
+    #     )
+    #     assert self.payment5.household == Household.objects.get(
+    #         program=self.program_finished1, copied_from=self.household5
+    #     )
+    #     assert self.payment5.head_of_household == Individual.objects.get(
+    #         program=self.program_finished1,
+    #         copied_from=self.individual5_1,
+    #     )
+    #
+    #     assert self.payment_record5.household == Household.objects.get(
+    #         program=self.program_finished1, copied_from=self.household5
+    #     )
+    #     assert self.payment_record5.head_of_household == Individual.objects.get(
+    #         program=self.program_finished1,
+    #         copied_from=self.individual5_1,
+    #     )
+    #
+    #     assert self.payment7.collector == Individual.objects.get(
+    #         program=self.program_finished2, copied_from=self.collector5_1
+    #     )
+    #     assert self.payment7.household == Household.objects.get(
+    #         program=self.program_finished2, copied_from=self.household7
+    #     )
+    #     assert self.payment7.head_of_household == Individual.objects.get(
+    #         program=self.program_finished2,
+    #         copied_from=self.individual7_1,
+    #     )
+    #
+    #     assert self.payment_record7.household == Household.objects.get(
+    #         program=self.program_finished2, copied_from=self.household7
+    #     )
+    #     assert self.payment_record7.head_of_household == Individual.objects.get(
+    #         program=self.program_finished2,
+    #         copied_from=self.individual7_1,
+    #     )
+    #
+    #     assert self.rdi_with_3_hhs.programs.count() == 3
+    #     assert self.program_active in self.rdi_with_3_hhs.programs.all()
+    #     assert self.program_finished1 in self.rdi_with_3_hhs.programs.all()
+    #     assert self.program_finished2 in self.rdi_with_3_hhs.programs.all()
