@@ -64,13 +64,11 @@ psql-resources-default: &psql-resources-default
 #
 postgresql:
   enabled: true
-  ephemeral: false # to use the dev db
+  ephemeral: true
   <<: *psql-image-default
   auth:
-    database: dump_hope_tmp
-    host: ""
-    username: ""
-    password: ""
+    database: hope-pm
+    <<: *psql-auth-default
   persistence:
     enabled: false
   <<: *psql-resources-default

@@ -21,7 +21,7 @@ export const PaymentVerificationPage = (): React.ReactElement => {
     search: '',
     verificationStatus: [],
     serviceProvider: '',
-    deliveryType: '',
+    deliveryType: [],
     startDate: undefined,
     endDate: undefined,
   };

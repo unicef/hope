@@ -6,10 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../utils/utils';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -222,10 +219,7 @@ export const IndividualsFilter = ({
             topLabel={t('Registration Date')}
             placeholder={t('From')}
             onChange={(date) =>
-              handleFilterChange(
-                'lastRegistrationDateMin',
-                dateToIsoString(date, 'startOfDay'),
-              )
+              handleFilterChange('lastRegistrationDateMin', date)
             }
             value={filter.lastRegistrationDateMin}
             data-cy='ind-filters-reg-date-from'
@@ -235,10 +229,7 @@ export const IndividualsFilter = ({
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
-              handleFilterChange(
-                'lastRegistrationDateMax',
-                dateToIsoString(date, 'endOfDay'),
-              )
+              handleFilterChange('lastRegistrationDateMax', date)
             }
             value={filter.lastRegistrationDateMax}
             data-cy='ind-filters-reg-date-to'
