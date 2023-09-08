@@ -67,9 +67,7 @@ export const CashPlanTableRow = ({
       <TableCell align='right'>
         {cashAndPaymentPlan.totalNumberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>
-        {cashAndPaymentPlan.assistanceMeasurement}
-      </TableCell>
+      <TableCell align='left'>{cashAndPaymentPlan.currency}</TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalEntitledQuantity?.toLocaleString('en-US', {

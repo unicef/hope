@@ -663,6 +663,9 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
 
+    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> int:
+        return self.payment_items.count()
+
     def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None
 
