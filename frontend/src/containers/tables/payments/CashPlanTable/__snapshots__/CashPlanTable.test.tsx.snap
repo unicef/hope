@@ -304,7 +304,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                USD
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -364,7 +366,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                ALL
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -424,7 +428,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                AUD
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -484,7 +490,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                PLN
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -546,7 +554,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                BHD
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
