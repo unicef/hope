@@ -208,7 +208,10 @@ class TestIndividualQuery(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={"search": "phone_no +18663567905"},
         )
 
@@ -223,7 +226,10 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={"search": f"national_id {self.national_id.document_number}"},
         )
 
@@ -238,7 +244,10 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={"search": f"national_passport {self.national_passport.document_number}"},
         )
 
@@ -253,6 +262,9 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={"search": f"tax_id {self.tax_id.document_number}"},
         )
