@@ -7,6 +7,7 @@ import {
   useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
@@ -35,8 +36,8 @@ export const IndividualsListTable = ({
     flags: filter.flags,
     status: filter.status,
     lastRegistrationDate: JSON.stringify({
-      min: filter.lastRegistrationDateMin,
-      max: filter.lastRegistrationDateMax,
+      min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
+      max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
     }),
   };
 

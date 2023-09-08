@@ -1,8 +1,11 @@
-import { Button, IconButton } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
+import { ProgramStatus, useProgramQuery } from '../../../__generated__/graphql';
+import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';
@@ -16,7 +19,7 @@ import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTa
 export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const initialFilter = {
@@ -36,12 +39,19 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   );
   const [isInfoOpen, setToggleInfo] = useState(false);
 
-  if (permissions === null) return null;
+  const { data: programData, loading: programDataLoading } = useProgramQuery({
+    variables: { id: programId },
+  });
+
+  if (permissions === null || !programData) return null;
+  if (programDataLoading) return <LoadingComponent />;
 
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied />;
+
+  const isProgramActive = programData?.program?.status === ProgramStatus.Active;
 
   return (
     <>
@@ -57,15 +67,19 @@ export const TargetPopulationsPage = (): React.ReactElement => {
           </IconButton>
           <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
           {canCreate && (
-            <Button
+            <ButtonTooltip
               variant='contained'
               color='primary'
+              title={t(
+                'Program has to be active to create a new Target Population',
+              )}
               component={Link}
               to={`/${baseUrl}/target-population/create`}
               data-cy='button-target-population-create-new'
+              disabled={!isProgramActive}
             >
               Create new
-            </Button>
+            </ButtonTooltip>
           )}
         </>
       </PageHeader>

@@ -16,10 +16,7 @@ import {
   GrievanceStatuses,
   GrievanceTypes,
 } from '../../../utils/constants';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
@@ -175,12 +172,7 @@ export const GrievancesFilters = ({
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder='From'
-            onChange={(date) =>
-              handleFilterChange(
-                'createdAtRangeMin',
-                dateToIsoString(date, 'startOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
             fullWidth
             data-cy='filters-creation-date-from'
@@ -189,12 +181,7 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder='To'
-            onChange={(date) =>
-              handleFilterChange(
-                'createdAtRangeMax',
-                dateToIsoString(date, 'endOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
             fullWidth
             data-cy='filters-creation-date-to'
