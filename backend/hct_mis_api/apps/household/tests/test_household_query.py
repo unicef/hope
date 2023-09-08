@@ -83,11 +83,7 @@ ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
             countryOrigin
             address
             programs {
-              edges {
-                node {
-                  name
-                }
-              }
+              totalCount
             }
           }
         }
