@@ -8,8 +8,8 @@ import {
   useAllActiveProgramsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './LookUpProgrammesHeadCells';
-import { LookUpProgrammesTableRow } from './LookUpProgrammesTableRow';
+import { headCells } from './LookUpProgrammesHeadCellsSurveys';
+import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
 
 const NoTableStyling = styled.div`
   .MuiPaper-elevation1 {
@@ -18,7 +18,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-interface LookUpProgrammesTableProps {
+interface LookUpProgrammesTableSurveysProps {
   businessArea: string;
   filter;
   choicesData: ProgrammeChoiceDataQuery;
@@ -27,14 +27,14 @@ interface LookUpProgrammesTableProps {
   setFieldValue;
 }
 
-export const LookUpProgrammesTable = ({
+export const LookUpProgrammesTableSurveys = ({
   businessArea,
   filter,
   choicesData,
   selectedProgram,
   handleChange,
   setFieldValue,
-}: LookUpProgrammesTableProps): ReactElement => {
+}: LookUpProgrammesTableSurveysProps): ReactElement => {
   const initialVariables: AllActiveProgramsQueryVariables = {
     businessArea,
     search: filter.search,
@@ -63,7 +63,7 @@ export const LookUpProgrammesTable = ({
           queriedObjectName='allActivePrograms'
           initialVariables={initialVariables}
           renderRow={(row) => (
-            <LookUpProgrammesTableRow
+            <LookUpProgrammesTableRowSurveys
               key={row.id}
               program={row}
               choicesData={choicesData}

@@ -13,12 +13,14 @@ export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
   canActivate: boolean;
   canDuplicate: boolean;
+  isPaymentPlanApplicable: boolean;
 }
 
 export const FinishedProgramDetailsPageHeaderButtons = ({
   program,
   canActivate,
   canDuplicate,
+  isPaymentPlanApplicable,
 }: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -32,18 +34,20 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
           <ReactivateProgram program={program} />
         </Box>
       )}
-      <Box m={2}>
-        <Button
-          variant='contained'
-          color='primary'
-          component='a'
-          disabled={!program.caHashId}
-          href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
-          startIcon={<OpenInNewRoundedIcon />}
-        >
-          Open in CashAssist
-        </Button>
-      </Box>
+      {!isPaymentPlanApplicable && (
+        <Box m={2}>
+          <Button
+            variant='contained'
+            color='primary'
+            component='a'
+            disabled={!program.caHashId}
+            href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
+            startIcon={<OpenInNewRoundedIcon />}
+          >
+            Open in CashAssist
+          </Button>
+        </Box>
+      )}
       {canDuplicate && (
         <Box m={2}>
           <CopyProgram program={program} />

@@ -6,6 +6,7 @@ import {
   useAllCashPlansAndPaymentPlansQuery,
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
@@ -24,7 +25,12 @@ export const PaymentVerificationTable = ({
   const { programId } = useBaseUrl();
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
     businessArea,
-    ...(filter || {}),
+    search: filter.search,
+    verificationStatus: filter.verificationStatus,
+    serviceProvider: filter.serviceProvider,
+    deliveryType: filter.deliveryType,
+    startDateGte: dateToIsoString(filter.startDate, 'startOfDay'),
+    endDateLte: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,
   };
   return (

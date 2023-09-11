@@ -13,6 +13,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import {
   PaymentRecordNode,
   PaymentRecordStatus,
+  useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
 } from '../../../__generated__/graphql';
@@ -23,16 +24,25 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { businessArea } = useBaseUrl();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
+
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  if (loading || caLoading) return <LoadingComponent />;
+  if (loading || caLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
@@ -42,7 +52,7 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
   )
     return <PermissionDenied />;
 
-  if (!data || !caData) return null;
+  if (!data || !caData || !businessAreaData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -78,20 +88,21 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       buttons.push(<ButtonComponent paymentRecordId={paymentRecord.id} />);
     }
 
-    buttons.push(
-      <Button
-        variant='contained'
-        color='primary'
-        component='a'
-        disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
-        target='_blank'
-        href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
-        startIcon={<OpenInNewRoundedIcon />}
-      >
-        {t('Open in CashAssist')}
-      </Button>,
-    );
-
+    if (!businessAreaData.businessArea.isPaymentPlanApplicable) {
+      buttons.push(
+        <Button
+          variant='contained'
+          color='primary'
+          component='a'
+          disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
+          target='_blank'
+          href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
+          startIcon={<OpenInNewRoundedIcon />}
+        >
+          {t('Open in CashAssist')}
+        </Button>,
+      );
+    }
     return buttons;
   };
 

@@ -275,7 +275,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI eFIsGo"
+                  class="sc-iwsKbI kdOUDe"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmQ4NDdkZDFlLTkwYmYtNDQzZC1iNWI1LWNiZTcwMDQ5YzYyMA=="
                 >
                   <div
@@ -304,7 +304,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                USD
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -335,7 +337,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI eFIsGo"
+                  class="sc-iwsKbI kdOUDe"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjQ4YmU4NzVmLWUxYzMtNDM3OS1iMzc1LTgwMzlkYWU4ODQ5MQ=="
                 >
                   <div
@@ -364,7 +366,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                ALL
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -395,7 +399,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI eFIsGo"
+                  class="sc-iwsKbI kdOUDe"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjBkNDVlNjQzLTY1YWMtNDIzOS04ZmI5LWIyNzRhNjlmMmE2ZA=="
                 >
                   <div
@@ -424,7 +428,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                AUD
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -455,7 +461,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI eFIsGo"
+                  class="sc-iwsKbI kdOUDe"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjc3MDQ1YmUwLTUzOTUtNDdlNy1hZWZiLTYwZjNjNDgxNzE5Zg=="
                 >
                   <div
@@ -484,7 +490,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               />
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                PLN
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -515,7 +523,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI eFIsGo"
+                  class="sc-iwsKbI kdOUDe"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/cashplans/Q2FzaFBsYW5Ob2RlOjk1NGY3OWE3LTdiZDYtNDU5ZS05ZGE4LTQzNjg3ZDY0NjYyNg=="
                 >
                   <div
@@ -546,7 +554,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                BHD
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >

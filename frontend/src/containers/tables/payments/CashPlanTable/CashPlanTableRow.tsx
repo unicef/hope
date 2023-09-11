@@ -16,9 +16,9 @@ interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
 }
 
-export function CashPlanTableRow({
+export const CashPlanTableRow = ({
   cashAndPaymentPlan,
-}: CashPlanTableRowProps): React.ReactElement {
+}: CashPlanTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const objectPath =
@@ -67,9 +67,7 @@ export function CashPlanTableRow({
       <TableCell align='right'>
         {cashAndPaymentPlan.totalNumberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>
-        {cashAndPaymentPlan.assistanceMeasurement}
-      </TableCell>
+      <TableCell align='left'>{cashAndPaymentPlan.currency}</TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
@@ -102,4 +100,4 @@ export function CashPlanTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};
