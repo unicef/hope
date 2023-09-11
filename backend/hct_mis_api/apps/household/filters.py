@@ -294,15 +294,12 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
         if key == "full_name":
             return qs.filter(full_name__icontains=value)
         if key == "phone_no":
-<<<<<<< HEAD
             return qs.filter(Q(phone_no=value) | Q(phone_no_alternative=value))
         if key in ("national_id", "national_passport", "tax_id"):
-=======
             return qs.filter(Q(phone_no__icontains=value) | Q(phone_no_alternative__icontains=value))
         if key == "registration_id":
             return qs.filter(registration_id__icontains=value)
         if DocumentType.objects.filter(key=key).exists():
->>>>>>> origin
             return qs.filter(documents__type__key=key, documents__document_number__icontains=value)
         raise KeyError(f"Invalid search key '{key}'")
 
@@ -335,7 +332,6 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
     elif key == "household_id":
         all_queries.append({"match_phrase_prefix": {"household.unicef_id": {"query": search}}})
     elif key == "full_name":
-<<<<<<< HEAD
         values = search.split(" ")
         if len(values) == 2:
             all_queries.append(
@@ -401,7 +397,6 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
             },
         )
     elif key in ("national_id", "national_passport", "tax_id"):
-=======
         all_queries.append({"match_phrase_prefix": {"full_name": {"query": search}}})
     elif key == "phone_no":
         all_queries.append({"match_phrase_prefix": {"phone_no_text": {"query": search}}})
@@ -411,7 +406,6 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
     elif key == "registration_id":
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
     elif DocumentType.objects.filter(key=key).exists():
->>>>>>> origin
         all_queries.append(
             {
                 "bool": {

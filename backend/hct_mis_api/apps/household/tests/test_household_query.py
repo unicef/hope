@@ -204,7 +204,6 @@ class TestHouseholdQuery(APITestCase):
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
-<<<<<<< HEAD
     def test_household_query_draft(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
@@ -216,7 +215,8 @@ class TestHouseholdQuery(APITestCase):
                 "user": self.user,
                 "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
             },
-=======
+        )
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
@@ -230,7 +230,7 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": f"household_id {household.unicef_id}"},
         )
 
@@ -247,7 +247,7 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": f"individual_id {household.head_of_household.unicef_id}"},
         )
 
@@ -264,7 +264,7 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": f"individual_id {household.head_of_household.full_name}"},
         )
 
@@ -279,7 +279,7 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": "phone_no +18663567905"},
         )
 
@@ -294,7 +294,6 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": "national_id 123-456-789"},
->>>>>>> origin
         )
