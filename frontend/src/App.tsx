@@ -13,7 +13,6 @@ import { Providers } from './providers';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 
-
 export const App: React.FC = () => {
   return (
     <Providers>
@@ -53,11 +52,11 @@ export const App: React.FC = () => {
             <BaseHomeRouter>
               <SelectedProgramRoutesSwitch />
             </BaseHomeRouter>
-          <ProtectedRoute
-            path='/sanction-list'
-            component={SanctionList}
-            location={window.location}
-          />
+            <ProtectedRoute
+              path='/sanction-list'
+              component={SanctionList}
+              location={window.location}
+            />
           </Route>
           <Route path='/'>
             <DefaultRoute />

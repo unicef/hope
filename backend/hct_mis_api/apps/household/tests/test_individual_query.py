@@ -77,6 +77,7 @@ class TestIndividualQuery(APITestCase):
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
                 "program": cls.program,
+                "registration_id": 1,
             },
             {
                 "full_name": "Robin Ford",
@@ -204,14 +205,29 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_phone_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_query_individuals_by_search_tax_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={
                 "user": self.user,
                 "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
             },
+            variables={"search": f"tax_id {self.tax_id.document_number}"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_phone_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": "phone_no +18663567905"},
         )
 
@@ -226,10 +242,7 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
-            },
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": f"national_id {self.national_id.document_number}"},
         )
 
@@ -244,10 +257,7 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
-            },
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": f"national_passport {self.national_passport.document_number}"},
         )
 
@@ -257,14 +267,11 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_tax_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_query_individuals_by_search_registration_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
-            },
-            variables={"search": f"tax_id {self.tax_id.document_number}"},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"search": "registration_id 1"},
         )

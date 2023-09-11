@@ -143,7 +143,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             variables={"search": f"ticket_hh_id {self.grievance_ticket_2.household_unicef_id}"},
         )
 
-    def test_grievance_list_filtered_by_household_head_family_name(self) -> None:
+    def test_grievance_list_filtered_by_household_head_full_name(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -153,7 +153,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": f"family_name {self.individual_1.family_name}"},
+            variables={"search": f"full_name {self.individual_1.full_name}"},
         )
 
     def test_grievance_list_filtered_by_household_head_national_id_document_number(self) -> None:
