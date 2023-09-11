@@ -1,6 +1,5 @@
-import { Box, TableCell } from '@material-ui/core';
+import { TableCell } from '@material-ui/core';
 import React from 'react';
-import styled from 'styled-components';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../../__generated__/graphql';
 import { BlackLink } from '../../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../../components/core/StatusBox';
@@ -11,11 +10,7 @@ import {
   paymentPlanStatusToColor,
   formatCurrencyWithSymbol,
 } from '../../../../../utils/utils';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
+import { PaymentPlansTableFollowUpPaymentPlansModal } from './PaymentPlansTableFollowUpPaymentPlansModal';
 
 interface PaymentPlanTableRowProgramCycleProps {
   plan;
@@ -37,24 +32,6 @@ export const PaymentPlanTableRowProgramCycle = ({
 
   if (!statusChoicesData) return null;
 
-  const followUpLinks = (): React.ReactElement => {
-    if (!plan.followUps?.edges?.length) return <>-</>;
-    return (
-      <Box display='flex' flexDirection='column'>
-        {plan.followUps?.edges?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
-          return (
-            <Box mb={1}>
-              <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
-                {followUp?.node?.unicefId}
-              </BlackLink>
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
-
   return (
     <ClickableTableRow key={plan.id}>
       <TableCell align='left'>
@@ -66,12 +43,10 @@ export const PaymentPlanTableRowProgramCycle = ({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={plan.status}
-            statusToColor={paymentPlanStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={plan.status}
+          statusToColor={paymentPlanStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align='right'>
@@ -89,8 +64,13 @@ export const PaymentPlanTableRowProgramCycle = ({
       <TableCell align='left'>
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
-      {/* //TODO: Add Modal with eye icon */}
-      <TableCell align='left'>{followUpLinks()}</TableCell>
+
+      <TableCell align='left'>
+        <PaymentPlansTableFollowUpPaymentPlansModal
+          paymentPlan={plan}
+          canViewDetails={canViewDetails}
+        />
+      </TableCell>
     </ClickableTableRow>
   );
 };
