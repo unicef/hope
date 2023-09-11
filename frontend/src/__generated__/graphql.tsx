@@ -12172,7 +12172,7 @@ export type PaymentPlanQuery = (
         { __typename?: 'PaymentPlanNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'PaymentPlanNode' }
-          & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'createdAt'>
+          & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'createdAt' | 'startDate' | 'endDate' | 'dispersionEndDate' | 'dispersionStartDate'>
           & { paymentItems: (
             { __typename?: 'PaymentNodeConnection' }
             & Pick<PaymentNodeConnection, 'totalCount'>
@@ -22720,6 +22720,10 @@ export const PaymentPlanDocument = gql`
           paymentItems {
             totalCount
           }
+          startDate
+          endDate
+          dispersionEndDate
+          dispersionStartDate
         }
       }
     }
