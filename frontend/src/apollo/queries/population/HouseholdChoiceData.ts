@@ -38,5 +38,9 @@ export const HouseholdChoiceData = gql`
       name
       value
     }
+    householdSearchTypesChoices {
+      name
+      value
+    }
   }
 `;

@@ -120,12 +120,16 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const isFinished =
     paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
+  const { isFollowUp } = paymentPlan;
+
   const toolbar = (
     <PageHeader
       title={
         <BlackLink
           data-cy='plan-link'
-          to={`/${baseUrl}/payment-plans/${paymentPlan.id}`}
+          to={`/${baseUrl}/payment-module/${
+            isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+          }/${paymentPlan.id}`}
           fullWidth
         >
           {t('Payment Plan')}{' '}

@@ -16,6 +16,14 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
         <PaymentVerificationTable
           canViewDetails={false}
           businessArea='afghanistan'
+          filter={{
+            search: '',
+            verificationStatus: [],
+            serviceProvider: '',
+            deliveryType: [],
+            startDate: undefined,
+            endDate: undefined,
+          }}
         />
       </MockedProvider>,
     );
@@ -34,6 +42,14 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
         <PaymentVerificationTable
           canViewDetails={false}
           businessArea='afghanistan'
+          filter={{
+            search: '',
+            verificationStatus: [],
+            serviceProvider: '',
+            deliveryType: [],
+            startDate: undefined,
+            endDate: undefined,
+          }}
         />
       </MockedProvider>,
     );

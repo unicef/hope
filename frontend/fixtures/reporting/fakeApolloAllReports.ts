@@ -6,6 +6,8 @@ export const fakeApolloAllReports = [
       query: AllReportsDocument,
       variables: {
         businessArea: 'afghanistan',
+        createdFrom: null,
+        createdTo: null,
         createdBy: null,
         first: 5,
         orderBy: null,

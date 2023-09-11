@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
+  AllProgramsForChoicesDocument,
   AllProgramsQuery,
   ProgramQuery,
   useDeleteProgramMutation,
@@ -35,13 +36,13 @@ interface DeleteProgramProps {
   program: ProgramQuery['program'];
 }
 
-export function DeleteProgram({
+export const DeleteProgram = ({
   program,
-}: DeleteProgramProps): React.ReactElement {
+}: DeleteProgramProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const [mutate] = useDeleteProgramMutation({
     variables: {
       programId: program.id,
@@ -65,10 +66,16 @@ export function DeleteProgram({
           data: newAllProgramsData,
         });
       },
+      refetchQueries: () => [
+        {
+          query: AllProgramsForChoicesDocument,
+          variables: { businessArea, first: 100 },
+        },
+      ],
     });
     if (!response.errors && response.data.deleteProgram) {
       showMessage(t('Programme removed.'), {
-        pathname: `/${baseUrl}/list`,
+        pathname: `/${businessArea}/programs/all/list`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });
@@ -105,7 +112,9 @@ export function DeleteProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <RemoveModalButton
               type='submit'
               color='primary'
@@ -120,4 +129,4 @@ export function DeleteProgram({
       </MidDialog>
     </span>
   );
-}
+};

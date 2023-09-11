@@ -25,6 +25,7 @@ export const registrationMinimal = gql`
       status
     }
     refuseReason
+    totalHouseholdsCountWithValidPhoneNo
   }
 `;
 

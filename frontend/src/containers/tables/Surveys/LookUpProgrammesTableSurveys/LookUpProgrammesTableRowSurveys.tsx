@@ -16,19 +16,19 @@ import {
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
-interface LookUpProgrammesTableRowProps {
+interface LookUpProgrammesTableRowSurveysProps {
   program: ProgramNode;
   choicesData: ProgrammeChoiceDataQuery;
   radioChangeHandler: (program) => void;
   selectedProgram: string;
 }
 
-export const LookUpProgrammesTableRow = ({
+export const LookUpProgrammesTableRowSurveys = ({
   program,
   choicesData,
   radioChangeHandler,
   selectedProgram,
-}: LookUpProgrammesTableRowProps): React.ReactElement => {
+}: LookUpProgrammesTableRowSurveysProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const programDetailsPath = `/${baseUrl}/details/${program.id}`;
   const handleClick = (): void => {
