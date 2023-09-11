@@ -6,270 +6,264 @@ exports[`components/ProgramDetails should render 1`] = `
     class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-bZQynM ghLfwz"
+      class="sc-gzVnrw AoKEu"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
       >
-        Programme Details
+        Details
       </h6>
     </div>
     <div
-      class="sc-bxivhb ehCvPb"
+      class="sc-ifAKCX iZCSws"
     >
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+        class="MuiGrid-root MuiGrid-container"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 MuiGrid-item MuiGrid-grid-xs-9"
         >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              status
-            </span>
-            <div
-              data-cy="label-status"
-            >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                status
+              </span>
               <div
-                class="sc-ifAKCX iPKgts"
+                data-cy="label-status"
               >
                 <div
-                  class="sc-EHOje eEdtvm"
-                  data-cy="status-container"
+                  class="sc-EHOje gFjtOh"
                 >
-                  FINISHED
+                  <div
+                    class="sc-bZQynM eoRnNj"
+                    data-cy="status-container"
+                  >
+                    FINISHED
+                  </div>
                 </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                START DATE
+              </span>
+              <div
+                data-cy="label-START DATE"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  <time
+                    datetime="1582588800000"
+                  >
+                    25 Feb 2020
+                  </time>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                END DATE
+              </span>
+              <div
+                data-cy="label-END DATE"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  <time
+                    datetime="1602979200000"
+                  >
+                    18 Oct 2020
+                  </time>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Organization
+              </span>
+              <div
+                data-cy="label-Organization"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  <span
+                    class="sc-bxivhb jfOPVe"
+                  >
+                    MISSING
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Sector
+              </span>
+              <div
+                data-cy="label-Sector"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  Child Protection
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Description
+              </span>
+              <div
+                data-cy="label-Description"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  Yeah worry might newspaper drive her many.
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Budget
+              </span>
+              <div
+                data-cy="label-Budget"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  <span
+                    class="sc-bxivhb jfOPVe"
+                  >
+                    MISSING
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Frequency of Payment
+              </span>
+              <div
+                data-cy="label-Frequency of Payment"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  Regular
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                CASH+
+              </span>
+              <div
+                data-cy="label-CASH+"
+              >
+                <span
+                  class="sc-htpNat cwQQYq"
+                  color="textSecondary"
+                >
+                  No
+                </span>
               </div>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
         >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              START DATE
-            </span>
-            <div
-              data-cy="label-START DATE"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                <time
-                  datetime="1582588800000"
-                >
-                  25 Feb 2020
-                </time>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              END DATE
-            </span>
-            <div
-              data-cy="label-END DATE"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                <time
-                  datetime="1602979200000"
-                >
-                  18 Oct 2020
-                </time>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Sector
-            </span>
-            <div
-              data-cy="label-Sector"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                Child Protection
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Scope
-            </span>
-            <div
-              data-cy="label-Scope"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                Unicef
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Frequency of Payment
-            </span>
-            <div
-              data-cy="label-Frequency of Payment"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                Regular
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Administrative Areas of implementation
-            </span>
-            <div
-              data-cy="label-Administrative Areas of implementation"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                Crime book.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Description
-            </span>
-            <div
-              data-cy="label-Description"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                Yeah worry might newspaper drive her many.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              CASH+
-            </span>
-            <div
-              data-cy="label-CASH+"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                No
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Does this programme use individuals’ data for targeting or entitlement calculation?
-            </span>
-            <div
-              data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"
-            >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                No
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        class="sc-gzVnrw bCMxAI"
-      >
-        <div>
-          <span
-            class="sc-bwzfXH eoWrid"
-            color="textSecondary"
-          >
-            Total Number of Households
-          </span>
           <div
-            data-cy="label-Total Number of Households"
+            class="sc-htoDjs iVnQjR"
           >
-            <div
-              class="sc-htoDjs psyrE"
-            >
-              2
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Program Population Size
+              </span>
+              <div
+                data-cy="label-Program Population Size"
+              >
+                <div
+                  class="sc-dnqmqq dXXPUY"
+                >
+                  2
+                </div>
+              </div>
             </div>
           </div>
         </div>

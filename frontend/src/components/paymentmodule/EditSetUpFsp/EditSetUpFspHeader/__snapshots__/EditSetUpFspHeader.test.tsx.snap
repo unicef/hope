@@ -3,14 +3,14 @@
 exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 1`] = `
 <div>
   <div
-    class="sc-EHOje iaZfbD"
+    class="sc-bxivhb ixnywI"
     data-cy="page-header-container"
   >
     <div
-      class="sc-bZQynM ktisbs"
+      class="sc-ifAKCX dWpFEd"
     >
       <div
-        class="sc-gzVnrw coeMyM"
+        class="sc-EHOje PMFav"
       >
         <div>
           <div
@@ -28,12 +28,12 @@ exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 
           </div>
         </div>
         <div
-          class="sc-htoDjs jWUwCq"
+          class="sc-bZQynM jdkaLI"
         />
       </div>
     </div>
     <div
-      class="sc-iwsKbI fVvfjI"
+      class="sc-htoDjs hzwHVL"
     />
   </div>
 </div>

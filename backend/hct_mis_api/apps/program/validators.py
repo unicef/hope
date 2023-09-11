@@ -59,23 +59,23 @@ class ProgramCycleValidator(CommonValidator):
     def validate_program(cls, *args: Any, **kwargs: Any) -> None:
         program = kwargs.get("program")
         if program.status != Program.ACTIVE:
-            raise ValidationError("Create/Update Program Cycle is possible only for Active Program.")
+            raise ValidationError("Create/Update Programme Cycle is possible only for Active Programme.")
 
     @classmethod
     def validate_program_start_end_dates(cls, *args: Any, **kwargs: Any) -> None:
         program = kwargs.get("program")
         if start_date := kwargs.get("start_date"):
             if start_date < program.start_date:
-                raise ValidationError("Program Cycle start date can't be earlier then Program start date")
+                raise ValidationError("Programme Cycle start date cannot be earlier than programme start date")
         if end_date := kwargs.get("end_date"):
             if end_date > program.end_date:
-                raise ValidationError("Program Cycle end date can't be later then Program end date")
+                raise ValidationError("Programme Cycle end date cannot be earlier than programme end date")
 
     @classmethod
     def validate_cycles_has_end_date(cls, *args: Any, **kwargs: Any) -> None:
         program = kwargs.get("program")
         if kwargs.get("is_create_action") and program.cycles.filter(end_date__isnull=True).exists():
-            raise ValidationError("All Program Cycles should have end date for creation new one.")
+            raise ValidationError("All Programme Cycles should have end date for creation new one.")
 
     @classmethod
     def validate_timeframes_overlapping(cls, *args: Any, **kwargs: Any) -> None:
@@ -95,7 +95,7 @@ class ProgramCycleValidator(CommonValidator):
                 raise_error = True
 
         if raise_error:
-            raise ValidationError("Program Cycles' timeframes mustn't overlap.")
+            raise ValidationError("Programme Cycles' timeframes must not overlap.")
 
     @classmethod
     def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
@@ -104,7 +104,7 @@ class ProgramCycleValidator(CommonValidator):
         program_cycle = kwargs.get("program_cycle")
         cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
         if cycles.filter(name=kwargs["name"]).exists():
-            raise ValidationError("Program Cycles' name should be unique.")
+            raise ValidationError("Programme Cycles' name should be unique.")
 
     @classmethod
     def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
@@ -114,11 +114,11 @@ class ProgramCycleValidator(CommonValidator):
 
             if program_cycle.end_date and "end_date" in kwargs and kwargs.get("end_date") is None:
                 raise ValidationError(
-                    "Not possible leave the Program Cycle end date empty if it was empty upon starting the edit."
+                    "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
                 )
 
             if program_cycle.name and "name" in kwargs and kwargs.get("name") is None:
-                raise ValidationError("Not possible leave the Program Cycle name empty.")
+                raise ValidationError("Not possible leave the Programme Cycle name empty.")
 
 
 class ProgramCycleDeletionValidator(BaseValidator):
@@ -126,7 +126,7 @@ class ProgramCycleDeletionValidator(BaseValidator):
     def validate_is_deletable(cls, *args: Any, **kwargs: Any) -> None:
         program_cycle = kwargs.get("program_cycle")
         if program_cycle.program.status != Program.ACTIVE:
-            raise ValidationError("Only Program Cycle for Active Program can be deleted.")
+            raise ValidationError("Only Programme Cycle for Active Programme can be deleted.")
 
         if program_cycle.status != ProgramCycle.DRAFT:
-            raise ValidationError("Only Draft Program Cycle can be deleted.")
+            raise ValidationError("Only Draft Programme Cycle can be deleted.")

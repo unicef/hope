@@ -10,8 +10,8 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { CreateProgram } from '../../dialogs/programs/CreateProgram';
-import { ProgrammesTable } from '../../tables/ProgrammesTable';
-import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
+import { ProgrammesTable } from '../../tables/programs/ProgrammesTable';
+import { ProgrammesFilters } from '../../tables/programs/ProgrammesTable/ProgrammesFilter';
 
 const initialFilter = {
   search: '',

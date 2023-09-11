@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface TableComponentProps<T> {
   data: T[];
-  renderRow: (row: T) => React.ReactElement;
+  renderRow: (row: T, itemsCount: number) => React.ReactElement;
   headCells: HeadCell<T>[];
   rowsPerPageOptions: number[];
   rowsPerPage: number;
@@ -137,7 +137,7 @@ export function TableComponent<T>({
     body = (
       <>
         {data.map((row) => {
-          return renderRow(row);
+          return renderRow(row, itemsCount);
         })}
         {emptyRows > 0 && (
           <TableRow style={{ height: 54 }}>

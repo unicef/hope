@@ -4,42 +4,32 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
 } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../core/LoadingButton';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
   ProgramNode,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { GreyText } from '../../../components/core/GreyText';
-import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { programCompare } from '../../../utils/utils';
-import { DialogDescription } from '../DialogDescription';
-import { DialogFooter } from '../DialogFooter';
-import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 
-const WhiteDeleteIcon = styled(Delete)`
-  color: #fff;
-`;
-
-interface RemoveProgramCycleProps {
+interface ExampleModalProps {
   program: ProgramNode;
-  canRemoveProgramCycle: boolean;
 }
 
-export const RemoveProgramCycle = ({
+export const ExampleModal = ({
   program,
-  canRemoveProgramCycle,
-}: RemoveProgramCycleProps): React.ReactElement => {
+}: ExampleModalProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -92,41 +82,33 @@ export const RemoveProgramCycle = ({
 
   return (
     <>
-      <IconButton
-        onClick={() => {
-          setOpen(true);
-        }}
-        disabled={!canRemoveProgramCycle}
+      <Button
+        variant='contained'
         color='primary'
+        onClick={() => setOpen(true)}
+        data-cy='button-example'
       >
-        <Delete />
-      </IconButton>
+        Example
+      </Button>
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <DialogTitleWrapper>
-          <DialogTitle>
-            {t(
-              'Are you sure you want to delete the Program Cycle from the system?',
-            )}
-          </DialogTitle>
+          <DialogTitle>{t('Example title')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <DialogDescription>
-            <GreyText>{t('This action cannot be undone.')}</GreyText>
-          </DialogDescription>
+          <DialogDescription>{t('Example description')}</DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              error
               type='submit'
+              color='primary'
               variant='contained'
               onClick={save}
-              data-cy='button-delete'
-              endIcon={<WhiteDeleteIcon />}
+              data-cy='button-save-modal'
             >
-              {t('Delete Program Cycle')}
+              {t('Save')}
             </LoadingButton>
           </DialogActions>
         </DialogFooter>

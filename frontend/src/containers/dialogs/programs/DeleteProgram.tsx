@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllProgramsQuery,
-  ProgramNode,
+  ProgramQuery,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
@@ -32,7 +32,7 @@ const MidDialog = styled(Dialog)`
 `;
 
 interface DeleteProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export function DeleteProgram({
