@@ -11,10 +11,10 @@ import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './LookUpTargetPopulationTableHeadCells';
-import { LookUpTargetPopulationTableRow } from './LookUpTargetPopulationTableRow';
+import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
+import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
 
-interface LookUpTargetPopulationTableProps {
+interface LookUpTargetPopulationTableSurveysProps {
   filter;
   canViewDetails: boolean;
   enableRadioButton?: boolean;
@@ -31,7 +31,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const LookUpTargetPopulationTable = ({
+export const LookUpTargetPopulationTableSurveys = ({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -39,17 +39,20 @@ export const LookUpTargetPopulationTable = ({
   handleChange,
   noTableStyling,
   noTitle,
-}: LookUpTargetPopulationTableProps): ReactElement => {
+}: LookUpTargetPopulationTableSurveysProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
-    numberOfHouseholdsMin: filter.numIndividualsMin,
-    numberOfHouseholdsMax: filter.numIndividualsMax,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin,
+    totalHouseholdsCountMax: filter.totalHouseholdsCountMax,
     status: filter.status,
     businessArea,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
     program: [programId],
+    createdAtRange: JSON.stringify({
+      min: filter.createdAtRangeMin,
+      max: filter.createdAtRangeMax,
+    }),
     statusNot: TargetPopulationStatus.Open,
   };
 
@@ -73,7 +76,7 @@ export const LookUpTargetPopulationTable = ({
           defaultOrderDirection='desc'
           initialVariables={initialVariables}
           renderRow={(row) => (
-            <LookUpTargetPopulationTableRow
+            <LookUpTargetPopulationTableRowSurveys
               radioChangeHandler={enableRadioButton && handleRadioChange}
               selectedTargetPopulation={selectedTargetPopulation}
               key={row.id}

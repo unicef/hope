@@ -30,6 +30,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
     golden_record_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     golden_record_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     golden_record_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
+    total_households_count_with_valid_phone_no = graphene.Int()
 
     class Meta:
         model = RegistrationDataImport
@@ -72,6 +73,12 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
         parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> Dict[str, Union[int, float]]:
         return get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals)
+
+    def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
+        return self.households.exclude(
+            head_of_household__phone_no_valid=False,
+            head_of_household__phone_no_alternative_valid=False,
+        ).count()
 
 
 class Query(graphene.ObjectType):

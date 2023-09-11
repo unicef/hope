@@ -322,6 +322,48 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter
     ]
 }
 
+<<<<<<< HEAD
+=======
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+>>>>>>> origin
 snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
