@@ -103,7 +103,7 @@ class Permissions(Enum):
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
 
-      # Programme Cycle
+    # Programme Cycle
     PM_PROGRAMME_CYCLE_VIEW_LIST = auto()
     PM_PROGRAMME_CYCLE_VIEW_DETAILS = auto()
     PM_PROGRAMME_CYCLE_CREATE = auto()

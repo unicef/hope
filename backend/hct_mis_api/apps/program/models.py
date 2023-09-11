@@ -23,6 +23,7 @@ from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
 )
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -182,8 +183,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.name
 
 
-class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
-    # TODO: id?? Unicef ID?? # P-84123
+class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",

@@ -129,48 +129,62 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 1
 
 snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2'] = {
     'data': {
-        'createProgramCycle': {
-            'program': {
-                'cycles': {
-                    'edges': [
-                        {
-                            'node': {
-                                'endDate': '2020-01-02',
-                                'name': 'Default Cycle 001',
-                                'startDate': '2020-01-01',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
-                                'endDate': '2022-01-01',
-                                'name': 'Cycle 002',
-                                'startDate': '2021-01-01',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
-                                'endDate': '2055-11-30',
-                                'name': 'Test Name Program Cycle New 002',
-                                'startDate': '2055-11-11',
-                                'status': 'DRAFT'
-                            }
-                        },
-                        {
-                            'node': {
-                                'endDate': '2055-12-12',
-                                'name': 'Cycle New 444',
-                                'startDate': '2055-11-25',
-                                'status': 'DRAFT'
-                            }
-                        }
-                    ],
-                    'totalCount': 4
+        'createProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
                 }
-            }
+            ],
+            'message': "Program Cycles' timeframes mustn't overlap.",
+            'path': [
+                'createProgramCycle'
+            ]
         }
-    }
+    ]
+}
+
+snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 3'] = {
+    'data': {
+        'createProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': "Program Cycles' timeframes mustn't overlap.",
+            'path': [
+                'createProgramCycle'
+            ]
+        }
+    ]
+}
+
+snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 4'] = {
+    'data': {
+        'createProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': "Program Cycles' timeframes mustn't overlap.",
+            'path': [
+                'createProgramCycle'
+            ]
+        }
+    ]
 }
 
 snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_without_end_date 1'] = {
@@ -276,7 +290,29 @@ snapshots['TestProgramCycle::test_delete_program_cycle 3'] = {
 snapshots['TestProgramCycle::test_delete_program_cycle 4'] = {
     'data': {
         'deleteProgramCycle': {
-            'ok': True
+            'program': {
+                'cycles': {
+                    'edges': [
+                        {
+                            'node': {
+                                'endDate': '2020-01-02',
+                                'name': 'Default Cycle 001',
+                                'startDate': '2020-01-01',
+                                'status': 'DRAFT'
+                            }
+                        },
+                        {
+                            'node': {
+                                'endDate': '2022-01-01',
+                                'name': 'Cycle 002',
+                                'startDate': '2021-01-01',
+                                'status': 'DRAFT'
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                }
+            }
         }
     }
 }
@@ -375,4 +411,64 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
             }
         }
     }
+}
+
+snapshots['TestProgramCycle::test_update_program_cycle 4'] = {
+    'data': {
+        'updateProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Not possible leave the Program Cycle name empty.',
+            'path': [
+                'updateProgramCycle'
+            ]
+        }
+    ]
+}
+
+snapshots['TestProgramCycle::test_update_program_cycle 5'] = {
+    'data': {
+        'updateProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Not possible leave the Program Cycle start date empty.',
+            'path': [
+                'updateProgramCycle'
+            ]
+        }
+    ]
+}
+
+snapshots['TestProgramCycle::test_update_program_cycle 6'] = {
+    'data': {
+        'updateProgramCycle': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Not possible leave the Program Cycle end date empty if it was empty upon starting the edit.',
+            'path': [
+                'updateProgramCycle'
+            ]
+        }
+    ]
 }

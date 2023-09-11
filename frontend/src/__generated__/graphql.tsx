@@ -4947,6 +4947,7 @@ export type ProgramCycleNode = Node & {
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   version: Scalars['BigInt'],
+  unicefId?: Maybe<Scalars['String']>,
   name: Scalars['String'],
   status: ProgramCycleStatus,
   startDate: Scalars['Date'],
@@ -4956,7 +4957,6 @@ export type ProgramCycleNode = Node & {
   totalDeliveredQuantity?: Maybe<Scalars['Float']>,
   totalEntitledQuantity?: Maybe<Scalars['Float']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
-  unicefId?: Maybe<Scalars['String']>,
 };
 
 
@@ -31112,6 +31112,7 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ProgramCycleStatus'], ParentType, ContextType>,
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
@@ -31121,7 +31122,6 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ProgramCycleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNodeConnection'] = ResolversParentTypes['ProgramCycleNodeConnection']> = {
