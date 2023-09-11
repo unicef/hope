@@ -229,11 +229,11 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         cls.has_permission(info, Permissions.PM_PROGRAMME_CYCLE_UPDATE, business_area)
 
         cls.validate(
-            start_date=program_cycle_data.get("start_date") or program_cycle.start_date,
+            start_date=program_cycle_data.get("start_date"),
             end_date=program_cycle_data.get("end_date"),
             name=program_cycle_data.get("name"),
             program=program,
-            program_cycle_id=program_cycle.pk,
+            program_cycle=program_cycle,
         )
 
         if start_date := program_cycle_data.get("start_date"):
