@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                     SELECT INTO businessAreaID p.business_area_id FROM program_program p WHERE p.id = NEW.program_id;
                     SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id = businessAreaID::uuid;
                     
-                    NEW.unicef_id := format('PC-%s-%s-%s', trim(businessAreaCode), to_char(NEW.created_at, 'yy'), trim(replace(to_char(nextval('program_cycle_business_area_seq_' || businessAreaID),'000000'),',','.')));
+                    NEW.unicef_id := format('PC-%s-%s-%s', trim(businessAreaCode), to_char(NEW.created_at, 'yy'), trim(replace(to_char(nextval('program_cycle_business_area_seq_' || translate(businessAreaID::text, '-','_')),'000000'),',','.')));
             
                     RETURN NEW;
                 END;
