@@ -11,11 +11,16 @@ from django.core.validators import (
 )
 from django.db import models
 <<<<<<< HEAD
+<<<<<<< HEAD
 from django.db.models import Q, QuerySet, UniqueConstraint
 =======
 from django.db.models import Q, QuerySet
 from django.db.models.constraints import UniqueConstraint
 >>>>>>> 082307486845f95851a374b96d3b4c6ad227fb07
+=======
+from django.db.models import Q, QuerySet
+from django.db.models.constraints import UniqueConstraint
+>>>>>>> global-program-filter
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -188,6 +193,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
         super(Program, self).validate_unique()
+<<<<<<< HEAD
+=======
+
+>>>>>>> global-program-filter
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel):
