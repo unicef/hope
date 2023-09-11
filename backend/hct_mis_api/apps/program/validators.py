@@ -2,7 +2,6 @@ import logging
 from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 
 from hct_mis_api.apps.core.validators import BaseValidator, CommonValidator
 from hct_mis_api.apps.payment.models import PaymentPlan
