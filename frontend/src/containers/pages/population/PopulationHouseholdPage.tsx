@@ -18,6 +18,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const location = useLocation();
   const initialFilter = {
     search: '',
+    searchType: 'household_id',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',

@@ -3,14 +3,16 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useHouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { CommunicationTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
-import { HouseholdFilters } from '../../../population/HouseholdFilter';
-import { RegistrationFilters } from '../../../rdi/RegistrationFilters';
-import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
-import { LookUpSelectionTables } from './LookUpSelectionTables';
+import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCommunication';
+import { LookUpRegistrationFiltersCommunication } from './LookUpRegistrationFiltersCommunication';
+import { LookUpSelectionTablesCommunication } from './LookUpSelectionTablesCommunication';
+import { LookUpTargetPopulationFiltersCommunication } from './LookUpTargetPopulationFiltersCommunication';
+import {
+  RegistrationDataImportStatus,
+  useHouseholdChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 
 const communicationTabs = ['Household', 'Target Population', 'RDI'];
 
@@ -19,7 +21,7 @@ const BoxWithBorderBottom = styled(Box)`
   padding: 15px 0;
 `;
 
-export const LookUpSelection = ({
+export const LookUpSelectionCommunication = ({
   businessArea,
   onValueChange,
   setValues,
@@ -35,16 +37,15 @@ export const LookUpSelection = ({
   setSelectedTab;
 }): React.ReactElement => {
   const location = useLocation();
-  const { programId } = useBaseUrl();
 
   const initialFilterRDI = {
     search: '',
     importedBy: '',
-    status: '',
+    status: RegistrationDataImportStatus.Merged,
     sizeMin: '',
     sizeMax: '',
-    importDateRangeMin: '',
-    importDateRangeMax: '',
+    importDateRangeMin: undefined,
+    importDateRangeMax: undefined,
   };
 
   const [filterRDI, setFilterRDI] = useState(
@@ -59,6 +60,8 @@ export const LookUpSelection = ({
     status: '',
     numIndividualsMin: null,
     numIndividualsMax: null,
+    totalHouseholdsCountWithValidPhoneNoMin: null,
+    totalHouseholdsCountWithValidPhoneNoMax: null,
   };
 
   const [filterTP, setFilterTP] = useState(
@@ -70,6 +73,7 @@ export const LookUpSelection = ({
 
   const initialFilterHH = {
     search: '',
+    searchType: 'household_id',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -148,7 +152,7 @@ export const LookUpSelection = ({
       </BoxWithBorderBottom>
       <Box p={4} mt={4}>
         {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
-          <HouseholdFilters
+          <LookUpHouseholdFiltersCommunication
             filter={filterHH}
             choicesData={choicesData}
             setFilter={setFilterHH}
@@ -158,7 +162,7 @@ export const LookUpSelection = ({
           />
         )}
         {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
-          <TargetPopulationFilters
+          <LookUpTargetPopulationFiltersCommunication
             filter={filterTP}
             setFilter={setFilterTP}
             initialFilter={initialFilterTP}
@@ -168,7 +172,7 @@ export const LookUpSelection = ({
           />
         )}
         {selectedTab === CommunicationTabsValues.RDI && (
-          <RegistrationFilters
+          <LookUpRegistrationFiltersCommunication
             filter={filterRDI}
             setFilter={setFilterRDI}
             initialFilter={initialFilterRDI}
@@ -178,7 +182,7 @@ export const LookUpSelection = ({
           />
         )}
       </Box>
-      <LookUpSelectionTables
+      <LookUpSelectionTablesCommunication
         selectedTab={selectedTab}
         choicesData={choicesData}
         filtersHouseholdApplied={appliedFilterHH}

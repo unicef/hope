@@ -299,7 +299,7 @@ type BusinessAreaNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
@@ -1495,7 +1495,7 @@ type HouseholdNode implements Node {
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelectionNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
@@ -3298,7 +3298,7 @@ type ProgramNode implements Node {
   cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
@@ -3456,10 +3456,10 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
-  allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection
+  allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
-  allActiveTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection
+  allActiveTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
   allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin2: ID, targetPopulations: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
@@ -3485,6 +3485,8 @@ type Query {
   flagChoices: [ChoiceObject]
   allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
   allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
+  individualSearchTypesChoices: [ChoiceObject]
+  householdSearchTypesChoices: [ChoiceObject]
   me: UserNode
   allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, orderBy: String): UserNodeConnection
   userRolesChoices: [ChoiceObject]
@@ -3502,7 +3504,7 @@ type Query {
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
-  allRegistrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, importDateRange: String, size: String, program: String, orderBy: String): RegistrationDataImportNodeConnection
+  allRegistrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, importDateRange: String, size: String, program: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]
   _debug: DjangoDebug
 }
@@ -3652,6 +3654,12 @@ type RegistrationDataImportNode implements Node {
   dataSource: RegistrationDataImportDataSource!
   numberOfIndividuals: Int!
   numberOfHouseholds: Int!
+  batchDuplicates: Int!
+  batchPossibleDuplicates: Int!
+  batchUnique: Int!
+  goldenRecordDuplicates: Int!
+  goldenRecordPossibleDuplicates: Int!
+  goldenRecordUnique: Int!
   datahubId: UUID
   errorMessage: String!
   sentryId: String
@@ -3668,11 +3676,12 @@ type RegistrationDataImportNode implements Node {
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   batchDuplicatesCountAndPercentage: CountAndPercentageNode
-  goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
   batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
-  goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
   batchUniqueCountAndPercentage: CountAndPercentageNode
+  goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
+  goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
   goldenRecordUniqueCountAndPercentage: CountAndPercentageNode
+  totalHouseholdsCountWithValidPhoneNo: Int
 }
 
 type RegistrationDataImportNodeConnection {
@@ -3815,7 +3824,7 @@ type RuleCommitNode implements Node {
   before: JSONString!
   after: JSONString!
   paymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
 }
 
 type RuleCommitNodeConnection {
@@ -4184,6 +4193,7 @@ type TargetPopulationNode implements Node {
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  totalHouseholdsCountWithValidPhoneNo: Int
 }
 
 type TargetPopulationNodeConnection {
@@ -4832,7 +4842,7 @@ type UserBusinessAreaNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
@@ -4886,9 +4896,9 @@ type UserNode implements Node {
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
-  changedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
-  finalizedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
+  changedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
+  finalizedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!

@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 class TestSampleSizeQuery(APITestCase):
@@ -28,7 +28,7 @@ class TestSampleSizeQuery(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.business_area = create_afghanistan()
 
-        cls.tp = TargetPopulationFactory(business_area=cls.business_area)
+        cls.tp = TargetPopulationFactory(business_area=cls.business_area, status=TargetPopulation.STATUS_PROCESSING)
         cls.households = [create_household()[0] for _ in range(4)]
         HouseholdSelection.objects.bulk_create(
             [HouseholdSelection(household=household, target_population=cls.tp) for household in cls.households]
