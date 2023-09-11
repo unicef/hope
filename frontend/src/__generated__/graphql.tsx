@@ -139,6 +139,7 @@ export type AddIndividualDataObjectType = {
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -3311,6 +3312,7 @@ export type IndividualUpdateDataObjectType = {
   paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   paymentChannelsToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
   paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 

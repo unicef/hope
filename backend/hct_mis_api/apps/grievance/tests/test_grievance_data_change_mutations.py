@@ -304,6 +304,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "sex": "MALE",
                                 "birthDate": date(year=1980, month=2, day=1).isoformat(),
                                 "maritalStatus": SINGLE,
+                                "preferredLanguage": "pl-pl",
                                 "documents": [
                                     {
                                         "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[

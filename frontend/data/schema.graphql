@@ -93,6 +93,7 @@ input AddIndividualDataObjectType {
   identities: [IndividualIdentityObjectType]
   paymentChannels: [BankTransferObjectType]
   businessArea: String
+  preferredLanguage: String
   flexFields: Arg
 }
 
@@ -2319,6 +2320,7 @@ input IndividualUpdateDataObjectType {
   paymentChannels: [BankTransferObjectType]
   paymentChannelsToEdit: [EditBankTransferObjectType]
   paymentChannelsToRemove: [ID]
+  preferredLanguage: String
   flexFields: Arg
 }
 

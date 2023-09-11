@@ -62951,6 +62951,16 @@
             "defaultValue": null
           },
           {
+            "name": "preferredLanguage",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "flexFields",
             "description": null,
             "type": {
@@ -63802,6 +63812,16 @@
           },
           {
             "name": "businessArea",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "preferredLanguage",
             "description": null,
             "type": {
               "kind": "SCALAR",
