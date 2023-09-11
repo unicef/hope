@@ -12,6 +12,7 @@ import {
   PaymentPlanStatus,
   PaymentRecordStatus,
   PaymentStatus,
+  ProgramCycleStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -75,11 +76,10 @@ export function programCycleStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
-  //TODO: program cycle status colors
-  switch (status) {
-    case ProgramStatus.Draft:
+  switch (status.toUpperCase()) {
+    case ProgramCycleStatus.Draft:
       return theme.hctPalette.gray;
-    case ProgramStatus.Active:
+    case ProgramCycleStatus.Active:
       return theme.hctPalette.green;
     default:
       return theme.hctPalette.orange;

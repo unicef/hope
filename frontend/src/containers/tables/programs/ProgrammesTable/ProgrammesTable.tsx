@@ -1,13 +1,13 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
   AllProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
   ProgramNode,
   useAllProgramsQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
+} from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './ProgrammesHeadCells';
 import { ProgrammesTableRow } from './ProgrammesTableRow';
 

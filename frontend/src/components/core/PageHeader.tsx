@@ -2,9 +2,7 @@ import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { registrationDataImportErasedColor } from '../../utils/utils';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
-import { StatusBox } from './StatusBox';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -53,12 +51,7 @@ const TitleWrapper = styled.div`
   }
 `;
 
-const StatusErasedWrapper = styled.div`
-  margin-left: 15px;
-  text-transform: uppercase;
-`;
-
-interface Props {
+interface PageHeaderProps {
   title: string | React.ReactElement;
   children?: React.ReactElement;
   breadCrumbs?: BreadCrumbsItem[];
@@ -68,15 +61,14 @@ interface Props {
   isErased?: boolean;
 }
 
-export function PageHeader({
+export const PageHeader = ({
   title,
   children,
   breadCrumbs = null,
   tabs = null,
   hasInputComponent,
   flags,
-  isErased,
-}: Props): React.ReactElement {
+}: PageHeaderProps): React.ReactElement => {
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
@@ -97,14 +89,6 @@ export function PageHeader({
                   <Typography data-cy='page-header-title' variant='h5'>
                     {title}
                   </Typography>
-                  {isErased ? (
-                    <StatusErasedWrapper>
-                      <StatusBox
-                        status='erased'
-                        statusToColor={registrationDataImportErasedColor}
-                      />
-                    </StatusErasedWrapper>
-                  ) : null}
                   <Box display='flex' ml={2}>
                     {flags}
                   </Box>
@@ -118,4 +102,4 @@ export function PageHeader({
       <TabsWrapper>{tabs}</TabsWrapper>
     </Wrapper>
   );
-}
+};

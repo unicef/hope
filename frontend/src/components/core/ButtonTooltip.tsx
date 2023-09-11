@@ -1,27 +1,37 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import { Tooltip } from '@material-ui/core';
+import { Button, IconButton, Tooltip } from '@material-ui/core';
 
 export const ButtonTooltip = ({
   children,
   onClick = () => null,
   title = 'Permission denied',
+  buttonType = 'button',
   disabled,
   ...otherProps
 }): React.ReactElement => {
-  return disabled ? (
-    <>
-      <Tooltip title={title}>
-        <span>
-          <Button disabled={disabled} onClick={onClick} {...otherProps}>
-            {children}
-          </Button>
-        </span>
-      </Tooltip>
-    </>
-  ) : (
-    <Button disabled={disabled} onClick={onClick} {...otherProps}>
-      {children}
-    </Button>
+  let ButtonComponent;
+  if (buttonType === 'button') {
+    ButtonComponent = Button;
+  } else if (buttonType === 'icon') {
+    ButtonComponent = IconButton;
+  } else {
+    // Handle other cases here, such as a default fallback component
+    ButtonComponent = Button;
+  }
+
+  return (
+    <Tooltip title={disabled ? title : ''}>
+      <span>
+        {React.createElement(
+          ButtonComponent,
+          {
+            disabled,
+            onClick: disabled ? undefined : onClick,
+            ...otherProps,
+          },
+          children,
+        )}
+      </span>
+    </Tooltip>
   );
 };

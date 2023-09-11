@@ -15,87 +15,72 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
-  AllProgramsQuery,
   ProgramNode,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { GreyText } from '../../../components/core/GreyText';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikDateField } from '../../../shared/Formik/FormikDateField';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { programCompare, today } from '../../../utils/utils';
-import { DialogDescription } from '../DialogDescription';
-import { DialogFooter } from '../DialogFooter';
-import { DialogTitleWrapper } from '../DialogTitleWrapper';
+  useUpdateProgramCycleMutation,
+} from '../../../../__generated__/graphql';
+import { ALL_PROGRAM_CYCLES_QUERY } from '../../../../apollo/queries/program/programcycles/AllProgramCycles';
+import { AutoSubmitFormOnEnter } from '../../../../components/core/AutoSubmitFormOnEnter';
+import { GreyText } from '../../../../components/core/GreyText';
+import { LoadingButton } from '../../../../components/core/LoadingButton';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { today } from '../../../../utils/utils';
+import { DialogDescription } from '../../DialogDescription';
+import { DialogFooter } from '../../DialogFooter';
+import { DialogTitleWrapper } from '../../DialogTitleWrapper';
 
 interface EditProgramCycleProps {
-  program: ProgramNode;
+  programCycle: ProgramNode;
   canEditProgramCycle: boolean;
 }
 
 export const EditProgramCycle = ({
-  program,
+  programCycle,
   canEditProgramCycle,
 }: EditProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
 
-  const [mutate, { loading }] = useUpdateProgramMutation({
-    update(cache, { data: { updateProgram } }) {
-      cache.writeQuery({
-        query: PROGRAM_QUERY,
+  const [mutate, { loading }] = useUpdateProgramCycleMutation();
+
+  const handleUpdate = async (values): Promise<void> => {
+    const { name, startDate, endDate } = values;
+    try {
+      await mutate({
         variables: {
-          id: program.id,
+          programCycleData: {
+            programCycleId: programCycle.id,
+            name,
+            startDate,
+            endDate,
+          },
         },
-        data: { program: updateProgram.program },
+        refetchQueries: () => [
+          {
+            query: ALL_PROGRAM_CYCLES_QUERY,
+          },
+        ],
+        awaitRefetchQueries: true,
       });
-      const allProgramsData: AllProgramsQuery = cache.readQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-      });
-      allProgramsData.allPrograms.edges.sort(programCompare);
-      cache.writeQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-        data: allProgramsData,
-      });
-    },
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const save = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.Active,
-        },
-        version: program.version,
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
-      showMessage(t('Programme activated.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-activate-success',
-      });
+      showMessage('Programme Cycle edited.');
       setOpen(false);
-    } else {
-      showMessage(t('Programme activate action failed.'), {
-        dataCy: 'snackbar-program-activate-failure',
-      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
+  const initialValues: {
+    [key: string]: string | boolean | number;
+  } = {
+    name: programCycle.name,
+    startDate: programCycle.startDate,
+    endDate: programCycle.endDate,
+  };
+
   const validationSchema = Yup.object().shape({
-    title: Yup.string()
+    name: Yup.string()
       .required(t('Programme Cycle title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
@@ -117,18 +102,12 @@ export const EditProgramCycle = ({
       ),
   });
 
-  const initialValues: {
-    [key: string]: string | boolean | number;
-  } = {
-    title: '',
-    startDate: '',
-    endDate: '',
-  };
-
   return (
     <>
       <IconButton
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+        }}
         color='primary'
         data-cy='button-edit-program-cycle'
         disabled={!canEditProgramCycle}
@@ -139,8 +118,7 @@ export const EditProgramCycle = ({
         <Formik
           initialValues={initialValues}
           onSubmit={(values) => {
-            // eslint-disable-next-line no-console
-            console.log(values);
+            handleUpdate(values);
           }}
           validationSchema={validationSchema}
         >
@@ -159,7 +137,7 @@ export const EditProgramCycle = ({
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Field
-                      name='title'
+                      name='name'
                       fullWidth
                       variant='outlined'
                       label={t('Programme Cycle Title')}
@@ -195,7 +173,8 @@ export const EditProgramCycle = ({
               <DialogFooter>
                 <DialogActions>
                   <Button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setOpen(false);
                     }}
                     data-cy='button-cancel'
@@ -207,7 +186,10 @@ export const EditProgramCycle = ({
                     type='submit'
                     color='primary'
                     variant='contained'
-                    onClick={submitForm}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      submitForm();
+                    }}
                     data-cy='button-save'
                   >
                     {t('Save')}

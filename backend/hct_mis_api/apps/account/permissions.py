@@ -78,13 +78,6 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_INVALID = auto()
     PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
-    # Programme Cycle
-    PROGRAMME_CYCLE_VIEW_LIST = auto()
-    PROGRAMME_CYCLE_VIEW_DETAILS = auto()
-    PROGRAMME_CYCLE_CREATE = auto()
-    PROGRAMME_CYCLE_UPDATE = auto()
-    PROGRAMME_CYCLE_REMOVE = auto()
-
     # Payment Module
     PM_VIEW_LIST = auto()
     PM_CREATE = auto()
@@ -109,6 +102,13 @@ class Permissions(Enum):
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
+
+      # Programme Cycle
+    PM_PROGRAMME_CYCLE_VIEW_LIST = auto()
+    PM_PROGRAMME_CYCLE_VIEW_DETAILS = auto()
+    PM_PROGRAMME_CYCLE_CREATE = auto()
+    PM_PROGRAMME_CYCLE_UPDATE = auto()
+    PM_PROGRAMME_CYCLE_REMOVE = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()

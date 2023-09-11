@@ -14,7 +14,7 @@ interface UniversalTableProps<T, K> {
   initialVariables: K;
   query;
   queriedObjectName: string;
-  renderRow: (row: T) => ReactElement;
+  renderRow: (row: T, itemsCount: number) => ReactElement;
   headCells: HeadCell<T>[];
   getTitle?: (data) => string;
   title?: string;

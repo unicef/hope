@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
-import { ProgrammesFilters } from '../../../../containers/tables/ProgrammesTable/ProgrammesFilter';
+import { ProgrammesFilters } from '../../../../containers/tables/programs/ProgrammesTable/ProgrammesFilter';
 import { SurveyTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';

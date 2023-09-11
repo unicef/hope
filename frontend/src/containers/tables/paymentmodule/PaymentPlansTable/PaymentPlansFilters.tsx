@@ -1,10 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-  MenuItem,
-} from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,8 +12,8 @@ import { ContainerWithBorder } from '../../../../components/core/ContainerWithBo
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -170,27 +164,6 @@ export const PaymentPlansFilters = ({
             minDate={filter.dispersionStartDate}
             minDateMessage={<span />}
           />
-        </Grid>
-        <Grid item xs={12}>
-          <Box ml={2}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
-                  color='primary'
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
-                    } else {
-                      handleFilterChange('isFollowUp', false);
-                    }
-                  }}
-                />
-              }
-              label={t('Show only Follow-up plans')}
-            />
-          </Box>
         </Grid>
       </Grid>
       <ClearApplyButtons

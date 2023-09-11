@@ -2,14 +2,13 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  ProgramNode,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { ProgramCyclesTable } from '../../../components/programs/ProgramCyclesTable';
+import { ProgramCyclesActionsTable } from '../../tables/programs/ProgramCyclesActionsTable';
 import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -35,7 +34,7 @@ export const ProgramDetailsPage = (): React.ReactElement => {
 
   if (!data?.program || !choices || permissions === null) return null;
 
-  const program = data.program as ProgramNode;
+  const { program } = data;
   return (
     <div>
       <ProgramDetailsPageHeader
@@ -55,7 +54,7 @@ export const ProgramDetailsPage = (): React.ReactElement => {
       <Box display='flex' flexDirection='column'>
         <ProgramDetails program={program} choices={choices} />
         <TableWrapper>
-          <ProgramCyclesTable program={program} />
+          <ProgramCyclesActionsTable program={program} />
         </TableWrapper>
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={program.id} />

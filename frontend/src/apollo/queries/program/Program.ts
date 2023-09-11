@@ -22,6 +22,21 @@ export const PROGRAM_QUERY = gql`
       administrativeAreasOfImplementation
       individualDataNeeded
       version
+      cycles {
+        edges {
+          node {
+            id
+            unicefId
+            name
+            status
+            totalEntitledQuantity
+            totalUndeliveredQuantity
+            totalUndeliveredQuantity
+            startDate
+            endDate
+          }
+        }
+      }
     }
   }
 `;
