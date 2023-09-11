@@ -1,22 +1,22 @@
 from typing import Any, List
 
 from django.conf import settings
-from django.core.management import call_command
 
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
+from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds{
-        allHouseholds(orderBy: "size", businessArea: "afghanistan") {
+      query AllHouseholds($search: String) {
+        allHouseholds(search: $search, orderBy: "size", businessArea: "afghanistan") {
           edges {
             node {
               size
@@ -109,9 +109,8 @@ class TestHouseholdQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        call_command("loadbusinessareas")
         cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         cls.program_one = ProgramFactory(
             name="Test program ONE",
@@ -157,6 +156,17 @@ class TestHouseholdQuery(APITestCase):
 
             cls.households.append(household)
 
+        household = cls.households[0]
+        household.refresh_from_db()
+        household.head_of_household.phone_no = "+18663567905"
+        household.head_of_household.save()
+
+        DocumentFactory(
+            document_number="123-456-789",
+            type=DocumentType.objects.get(key="national_id"),
+            individual=household.head_of_household,
+        )
+
     @parameterized.expand(
         [
             ("all_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY),
@@ -194,6 +204,7 @@ class TestHouseholdQuery(APITestCase):
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
+<<<<<<< HEAD
     def test_household_query_draft(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
@@ -205,4 +216,85 @@ class TestHouseholdQuery(APITestCase):
                 "user": self.user,
                 "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
             },
+=======
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_by_search_household_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        household = self.households[0]
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={"search": f"household_id {household.unicef_id}"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_by_search_individual_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        household = self.households[0]
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={"search": f"individual_id {household.head_of_household.unicef_id}"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_by_search_full_name_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        household = self.households[0]
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={"search": f"individual_id {household.head_of_household.full_name}"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_by_search_phone_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={"search": "phone_no +18663567905"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_by_national_id_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={"search": "national_id 123-456-789"},
+>>>>>>> origin
         )
