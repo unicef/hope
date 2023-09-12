@@ -1,12 +1,12 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { programCycleStatusToColor } from '../../../../utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { BlackLink } from '../../../../../components/core/BlackLink';
+import { StatusBox } from '../../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../../components/core/UniversalMoment';
+import { programCycleStatusToColor } from '../../../../../utils/utils';
+import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
 
 interface ProgramCyclesTableRowProps {
   canViewProgramCycleDetails: boolean;

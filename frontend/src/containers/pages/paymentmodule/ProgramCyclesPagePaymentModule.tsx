@@ -7,8 +7,8 @@ import { TableWrapper } from '../../../components/core/TableWrapper';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { ProgramCyclesFilters } from '../../tables/paymentmodule/ProgramCyclesTable/ProgramCyclesFilters';
-import { ProgramCyclesTable } from '../../tables/paymentmodule/ProgramCyclesTable/ProgramCyclesTable';
+import { ProgramCyclesFilters } from '../../tables/paymentmodule/ProgramCycles/ProgramCyclesTable/ProgramCyclesFilters';
+import { ProgramCyclesTable } from '../../tables/paymentmodule/ProgramCycles/ProgramCyclesTable/ProgramCyclesTable';
 
 const initialFilter = {
   search: '',
