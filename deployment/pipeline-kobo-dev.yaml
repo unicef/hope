@@ -52,5 +52,5 @@ stages:
                 kpi.subdomain=kf-hope,\
                 kobocat.subdomain=kc-hope,\
                 enketo.subdomain=ek-hope,\
-                ingress.annotations.appgw.ingress.kubernetes.io/appgw-ssl-certificate=kv-cert-unitst,\
+                ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-unitst,\
                 ingress.scheme=https"
