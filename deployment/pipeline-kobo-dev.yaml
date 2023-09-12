@@ -39,18 +39,20 @@ stages:
               arguments: "--timeout 600s"
               overrideValues: "
                 global.storageClass=default,\
-                kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
                 mongodb.mongodbPassword=$(MONGO_PASSWORD),\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 rediscache.password=$(REDIS_CACHE_PASSWORD),\
                 redismain.password=$(REDIS_MAIN_PASSWORD),\
-                smtp.host=$(SMTP_HOST),\
-                kpi.ravenDsn=$(KPI_SENTRY_DSN),\
                 kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),\
-                smtp.email=kobo@unitst.org,\
-                ingress.host=$(DOMAIN),\
-                kpi.subdomain=kf-hope,\
                 kobocat.subdomain=kc-hope,\
+                kobocat.resources.requests.cpu=250m,\
+                kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
+                smtp.email=kobo@unitst.org,\
+                smtp.host=$(SMTP_HOST),\
+                ingress.host=$(DOMAIN),\
+                kpi.ravenDsn=$(KPI_SENTRY_DSN),\
+                kpi.subdomain=kf-hope,\
+                kpi.resources.requests.cpu=250m,\
                 enketo.subdomain=ek-hope,\
                 ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-unitst,\
                 ingress.scheme=https"
