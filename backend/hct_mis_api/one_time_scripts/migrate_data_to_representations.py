@@ -1,4 +1,3 @@
-import copy
 import logging
 from typing import Optional
 
@@ -396,7 +395,9 @@ def adjust_payments(business_area: BusinessArea) -> None:
     Payment is already related to program through PaymentPlan (parent), and then TargetPopulation.
     """
 
-    payments = Payment.objects.filter(parent__target_population__program__business_area=business_area, household__is_original=True).order_by("pk")
+    payments = Payment.objects.filter(
+        parent__target_population__program__business_area=business_area, household__is_original=True
+    ).order_by("pk")
     payments_count = payments.count()
 
     for batch_start in range(0, payments_count, BATCH_SIZE):

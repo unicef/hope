@@ -34,8 +34,10 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    adjust_payment_records,
+    adjust_payments,
     get_biggest_program,
-    migrate_data_to_representations_per_business_area, adjust_payments, adjust_payment_records,
+    migrate_data_to_representations_per_business_area,
 )
 
 
@@ -238,7 +240,9 @@ class TestMigrateDataToRepresentations(TestCase):
 
         # Household4 and its data (without target population)
         self.rdi4_1 = RegistrationDataImportFactory()
-        self.individual4_1 = IndividualFactory(business_area=self.business_area, household=None, registration_data_import=self.rdi4_1)
+        self.individual4_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=self.rdi4_1
+        )
         self.household4 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual4_1,
@@ -265,20 +269,26 @@ class TestMigrateDataToRepresentations(TestCase):
         self.individual5_1.save()
         self.household5.target_populations.set([self.target_population1, self.target_population2])
 
-        self.collector5_1 = IndividualFactory(business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs)
+        self.collector5_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+        )
         self.role_primary5 = IndividualRoleInHouseholdFactory(
             individual=self.collector5_1,
             household=self.household5,
             role=ROLE_PRIMARY,
         )
-        self.collector5_2 = IndividualFactory(business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs)
+        self.collector5_2 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+        )
         self.role_alternate5 = IndividualRoleInHouseholdFactory(
             individual=self.collector5_2,
             household=self.household5,
             role=ROLE_ALTERNATE,
         )
 
-        self.individual6_1 = IndividualFactory(business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs)
+        self.individual6_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+        )
         self.household6 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual6_1,
@@ -294,7 +304,9 @@ class TestMigrateDataToRepresentations(TestCase):
             role=ROLE_PRIMARY,
         )
 
-        self.individual7_1 = IndividualFactory(business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs)
+        self.individual7_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+        )
         self.household7 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual7_1,
@@ -314,7 +326,6 @@ class TestMigrateDataToRepresentations(TestCase):
             role=ROLE_ALTERNATE,
         )
         self.identity7_1 = IndividualIdentityFactory(individual=self.individual7_1)
-
 
         # Payments 5
         payment_plan5 = PaymentPlanFactory(
@@ -393,12 +404,18 @@ class TestMigrateDataToRepresentations(TestCase):
         household_count = Household.original_and_repr_objects.filter(business_area=self.business_area).count()
         individual_count = Individual.original_and_repr_objects.filter(business_area=self.business_area).count()
         document_count = Document.original_and_repr_objects.filter(individual__business_area=self.business_area).count()
-        identity_count = IndividualIdentity.original_and_repr_objects.filter(individual__business_area=self.business_area).count()
-        bank_account_info_count = BankAccountInfo.original_and_repr_objects.filter(individual__business_area=self.business_area).count()
+        identity_count = IndividualIdentity.original_and_repr_objects.filter(
+            individual__business_area=self.business_area
+        ).count()
+        bank_account_info_count = BankAccountInfo.original_and_repr_objects.filter(
+            individual__business_area=self.business_area
+        ).count()
         household_selection_count = HouseholdSelection.original_and_repr_objects.filter(
             household__business_area=self.business_area
         ).count()
-        roles_count = IndividualRoleInHousehold.original_and_repr_objects.filter(household__business_area=self.business_area).count()
+        roles_count = IndividualRoleInHousehold.original_and_repr_objects.filter(
+            household__business_area=self.business_area
+        ).count()
         self.refresh_objects()
 
         migrate_data_to_representations_per_business_area(business_area=self.business_area)
@@ -411,15 +428,18 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.household1.representatives.count(), 2)
         self.assertEqual(self.household1.head_of_household, self.individual1_1)
         self.assertEqual(self.household1.target_populations.count(), 2)
-        self.assertSetEqual(set(self.household1.target_populations.all()), {self.target_population1, self.target_population2})
+        self.assertSetEqual(
+            set(self.household1.target_populations.all()), {self.target_population1, self.target_population2}
+        )
         self.assertEqual(self.household1.selections.count(), 2)
         self.assertTrue(all(selection.is_original for selection in self.household1.selections.all()))
-
 
         # check the copied household
         self.assertEqual(self.household1.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        household1_representation1 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household1, program=self.program_active).first()
+        household1_representation1 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household1, program=self.program_active
+        ).first()
         self.assertEqual(household1_representation1.program, self.program_active)
         self.assertEqual(household1_representation1.is_original, False)
         self.assertEqual(household1_representation1.origin_unicef_id, self.household1.unicef_id)
@@ -429,9 +449,13 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household1_representation1.target_populations.count(), 1)
         self.assertEqual(household1_representation1.target_populations.first(), self.target_population1)
         self.assertEqual(household1_representation1.selections(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(household1_representation1.selections(manager="original_and_repr_objects").first().is_original, False)
+        self.assertEqual(
+            household1_representation1.selections(manager="original_and_repr_objects").first().is_original, False
+        )
 
-        household1_representation2 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household1, program=self.program_finished1).first()
+        household1_representation2 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household1, program=self.program_finished1
+        ).first()
         self.assertEqual(household1_representation2.program, self.program_finished1)
         self.assertEqual(household1_representation2.is_original, False)
         self.assertEqual(household1_representation2.origin_unicef_id, self.household1.unicef_id)
@@ -441,11 +465,15 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household1_representation2.target_populations.count(), 1)
         self.assertEqual(household1_representation2.target_populations.first(), self.target_population2)
         self.assertEqual(household1_representation2.selections(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(household1_representation2.selections(manager="original_and_repr_objects").first().is_original, False)
+        self.assertEqual(
+            household1_representation2.selections(manager="original_and_repr_objects").first().is_original, False
+        )
 
         self.assertEqual(self.individual1_1.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        individual1_1_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_1, program=self.program_active).first()
+        individual1_1_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_1, program=self.program_active
+        ).first()
         self.assertEqual(individual1_1_representation1.program, self.program_active)
         self.assertEqual(individual1_1_representation1.is_original, False)
         self.assertEqual(individual1_1_representation1.origin_unicef_id, self.individual1_1.unicef_id)
@@ -453,18 +481,51 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual1_1_representation1.household, household1_representation1)
         self.assertEqual(household1_representation1.head_of_household, individual1_1_representation1)
         self.assertEqual(individual1_1_representation1.documents(manager="original_and_repr_objects").count(), 2)
-        self.assertEqual(individual1_1_representation1.documents(manager="original_and_repr_objects").filter(is_original=False).count(), 2)
-        self.assertEqual(individual1_1_representation1.documents(manager="original_and_repr_objects").filter(program=self.program_active).count(), 2)
-        self.assertSetEqual(set(individual1_1_representation1.documents(manager="original_and_repr_objects").values_list("document_number", flat=True)), set(self.individual1_1.documents.values_list("document_number", flat=True)))
+        self.assertEqual(
+            individual1_1_representation1.documents(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            individual1_1_representation1.documents(manager="original_and_repr_objects")
+            .filter(program=self.program_active)
+            .count(),
+            2,
+        )
+        self.assertSetEqual(
+            set(
+                individual1_1_representation1.documents(manager="original_and_repr_objects").values_list(
+                    "document_number", flat=True
+                )
+            ),
+            set(self.individual1_1.documents.values_list("document_number", flat=True)),
+        )
         self.assertEqual(individual1_1_representation1.identities(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual1_1_representation1.identities(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual1_1_representation1.identities(manager="original_and_repr_objects").first().number, self.individual1_1.identities.first().number)
-        self.assertEqual(individual1_1_representation1.bank_account_info(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual1_1_representation1.bank_account_info(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual1_1_representation1.bank_account_info(manager="original_and_repr_objects").first().bank_account_number, self.individual1_1.bank_account_info.first().bank_account_number)
+        self.assertEqual(
+            individual1_1_representation1.identities(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual1_1_representation1.identities(manager="original_and_repr_objects").first().number,
+            self.individual1_1.identities.first().number,
+        )
+        self.assertEqual(
+            individual1_1_representation1.bank_account_info(manager="original_and_repr_objects").count(), 1
+        )
+        self.assertEqual(
+            individual1_1_representation1.bank_account_info(manager="original_and_repr_objects").first().is_original,
+            False,
+        )
+        self.assertEqual(
+            individual1_1_representation1.bank_account_info(manager="original_and_repr_objects")
+            .first()
+            .bank_account_number,
+            self.individual1_1.bank_account_info.first().bank_account_number,
+        )
 
-
-        individual1_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_1, program=self.program_finished1).first()
+        individual1_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_1, program=self.program_finished1
+        ).first()
         self.assertEqual(individual1_1_representation2.program, self.program_finished1)
         self.assertEqual(individual1_1_representation2.is_original, False)
         self.assertEqual(individual1_1_representation2.origin_unicef_id, self.individual1_1.unicef_id)
@@ -472,42 +533,79 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual1_1_representation2.household, household1_representation2)
         self.assertEqual(household1_representation2.head_of_household, individual1_1_representation2)
         self.assertEqual(individual1_1_representation2.documents(manager="original_and_repr_objects").count(), 2)
-        self.assertEqual(individual1_1_representation2.documents(manager="original_and_repr_objects").filter(is_original=False).count(), 2)
-        self.assertEqual(individual1_1_representation2.documents(manager="original_and_repr_objects").filter(program=self.program_finished1).count(), 2)
+        self.assertEqual(
+            individual1_1_representation2.documents(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            individual1_1_representation2.documents(manager="original_and_repr_objects")
+            .filter(program=self.program_finished1)
+            .count(),
+            2,
+        )
         self.assertEqual(individual1_1_representation2.identities(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual1_1_representation2.identities(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual1_1_representation2.bank_account_info(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual1_1_representation2.bank_account_info(manager="original_and_repr_objects").first().is_original, False)
+        self.assertEqual(
+            individual1_1_representation2.identities(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual1_1_representation2.bank_account_info(manager="original_and_repr_objects").count(), 1
+        )
+        self.assertEqual(
+            individual1_1_representation2.bank_account_info(manager="original_and_repr_objects").first().is_original,
+            False,
+        )
 
         self.assertEqual(self.individual1_2.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        individual1_2_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_2, program=self.program_active).first()
+        individual1_2_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_2, program=self.program_active
+        ).first()
         self.assertEqual(individual1_2_representation1.program, self.program_active)
         self.assertEqual(individual1_2_representation1.is_original, False)
         self.assertEqual(individual1_2_representation1.origin_unicef_id, self.individual1_2.unicef_id)
         self.assertEqual(individual1_2_representation1.copied_from, self.individual1_2)
         self.assertEqual(individual1_2_representation1.household, household1_representation1)
         self.assertEqual(individual1_2_representation1.documents(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual1_2_representation1.documents(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual1_2_representation1.documents(manager="original_and_repr_objects").first().program, self.program_active)
+        self.assertEqual(
+            individual1_2_representation1.documents(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual1_2_representation1.documents(manager="original_and_repr_objects").first().program,
+            self.program_active,
+        )
         self.assertEqual(individual1_2_representation1.identities(manager="original_and_repr_objects").count(), 0)
-        self.assertEqual(individual1_2_representation1.bank_account_info(manager="original_and_repr_objects").count(), 0)
+        self.assertEqual(
+            individual1_2_representation1.bank_account_info(manager="original_and_repr_objects").count(), 0
+        )
 
-        individual1_2_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_2, program=self.program_finished1).first()
+        individual1_2_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_2, program=self.program_finished1
+        ).first()
         self.assertEqual(individual1_2_representation2.program, self.program_finished1)
         self.assertEqual(individual1_2_representation2.is_original, False)
         self.assertEqual(individual1_2_representation2.origin_unicef_id, self.individual1_2.unicef_id)
         self.assertEqual(individual1_2_representation2.copied_from, self.individual1_2)
         self.assertEqual(individual1_2_representation2.household, household1_representation2)
         self.assertEqual(individual1_2_representation2.documents(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual1_2_representation2.documents(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual1_2_representation2.documents(manager="original_and_repr_objects").first().program, self.program_finished1)
+        self.assertEqual(
+            individual1_2_representation2.documents(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual1_2_representation2.documents(manager="original_and_repr_objects").first().program,
+            self.program_finished1,
+        )
         self.assertEqual(individual1_2_representation2.identities(manager="original_and_repr_objects").count(), 0)
-        self.assertEqual(individual1_2_representation2.bank_account_info(manager="original_and_repr_objects").count(), 0)
+        self.assertEqual(
+            individual1_2_representation2.bank_account_info(manager="original_and_repr_objects").count(), 0
+        )
 
         self.assertEqual(self.individual1_3.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        individual1_3_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_3, program=self.program_active).first()
+        individual1_3_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_3, program=self.program_active
+        ).first()
         self.assertEqual(individual1_3_representation1.program, self.program_active)
         self.assertEqual(individual1_3_representation1.is_original, False)
         self.assertEqual(individual1_3_representation1.origin_unicef_id, self.individual1_3.unicef_id)
@@ -515,9 +613,13 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual1_3_representation1.household, household1_representation1)
         self.assertEqual(individual1_3_representation1.documents(manager="original_and_repr_objects").count(), 0)
         self.assertEqual(individual1_3_representation1.identities(manager="original_and_repr_objects").count(), 0)
-        self.assertEqual(individual1_3_representation1.bank_account_info(manager="original_and_repr_objects").count(), 0)
+        self.assertEqual(
+            individual1_3_representation1.bank_account_info(manager="original_and_repr_objects").count(), 0
+        )
 
-        individual1_3_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_3, program=self.program_finished1).first()
+        individual1_3_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_3, program=self.program_finished1
+        ).first()
         self.assertEqual(individual1_3_representation2.program, self.program_finished1)
         self.assertEqual(individual1_3_representation2.is_original, False)
         self.assertEqual(individual1_3_representation2.origin_unicef_id, self.individual1_3.unicef_id)
@@ -525,12 +627,42 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual1_3_representation2.household, household1_representation2)
         self.assertEqual(individual1_3_representation2.documents(manager="original_and_repr_objects").count(), 0)
         self.assertEqual(individual1_3_representation2.identities(manager="original_and_repr_objects").count(), 0)
-        self.assertEqual(individual1_3_representation2.bank_account_info(manager="original_and_repr_objects").count(), 0)
+        self.assertEqual(
+            individual1_3_representation2.bank_account_info(manager="original_and_repr_objects").count(), 0
+        )
 
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household1_representation1, role=ROLE_PRIMARY, individual=individual1_2_representation1).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household1_representation1, role=ROLE_ALTERNATE, individual=individual1_3_representation1).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household1_representation2, role=ROLE_PRIMARY, individual=individual1_2_representation2).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household1_representation2, role=ROLE_ALTERNATE, individual=individual1_3_representation2).first())
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household1_representation1,
+                role=ROLE_PRIMARY,
+                individual=individual1_2_representation1,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household1_representation1,
+                role=ROLE_ALTERNATE,
+                individual=individual1_3_representation1,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household1_representation2,
+                role=ROLE_PRIMARY,
+                individual=individual1_2_representation2,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household1_representation2,
+                role=ROLE_ALTERNATE,
+                individual=individual1_3_representation2,
+            ).first()
+        )
 
         # Test household2
         # check the original household
@@ -540,16 +672,18 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.household2.representatives.count(), 2)
         self.assertEqual(self.household2.head_of_household, self.individual2_1)
         self.assertEqual(self.household2.target_populations.count(), 2)
-        self.assertSetEqual(set(self.household2.target_populations.all()), {self.target_population1, self.target_population2})
+        self.assertSetEqual(
+            set(self.household2.target_populations.all()), {self.target_population1, self.target_population2}
+        )
         self.assertEqual(self.household2.selections.count(), 2)
         self.assertTrue(all(selection.is_original for selection in self.household2.selections.all()))
 
         # check the copied household
         self.assertEqual(self.household2.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        household2_representation1 = Household.original_and_repr_objects.filter(is_original=False,
-                                                                                copied_from=self.household2,
-                                                                                program=self.program_active).first()
+        household2_representation1 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household2, program=self.program_active
+        ).first()
         self.assertEqual(household2_representation1.program, self.program_active)
         self.assertEqual(household2_representation1.is_original, False)
         self.assertEqual(household2_representation1.origin_unicef_id, self.household2.unicef_id)
@@ -559,12 +693,13 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household2_representation1.target_populations.count(), 1)
         self.assertEqual(household2_representation1.target_populations.first(), self.target_population1)
         self.assertEqual(household2_representation1.selections(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(household2_representation1.selections(manager="original_and_repr_objects").first().is_original,
-                         False)
+        self.assertEqual(
+            household2_representation1.selections(manager="original_and_repr_objects").first().is_original, False
+        )
 
-        household2_representation2 = Household.original_and_repr_objects.filter(is_original=False,
-                                                                                copied_from=self.household2,
-                                                                                program=self.program_finished1).first()
+        household2_representation2 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household2, program=self.program_finished1
+        ).first()
         self.assertEqual(household2_representation2.program, self.program_finished1)
         self.assertEqual(household2_representation2.is_original, False)
         self.assertEqual(household2_representation2.origin_unicef_id, self.household2.unicef_id)
@@ -574,12 +709,15 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household2_representation2.target_populations.count(), 1)
         self.assertEqual(household2_representation2.target_populations.first(), self.target_population2)
         self.assertEqual(household2_representation2.selections(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(household2_representation2.selections(manager="original_and_repr_objects").first().is_original,
-                         False)
+        self.assertEqual(
+            household2_representation2.selections(manager="original_and_repr_objects").first().is_original, False
+        )
 
         self.assertEqual(self.individual2_1.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        individual2_1_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual2_1, program=self.program_active).first()
+        individual2_1_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual2_1, program=self.program_active
+        ).first()
         self.assertEqual(individual2_1_representation1.program, self.program_active)
         self.assertEqual(individual2_1_representation1.is_original, False)
         self.assertEqual(individual2_1_representation1.origin_unicef_id, self.individual2_1.unicef_id)
@@ -587,15 +725,42 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual2_1_representation1.household, household2_representation1)
         self.assertEqual(household2_representation1.head_of_household, individual2_1_representation1)
         self.assertEqual(individual2_1_representation1.documents(manager="original_and_repr_objects").count(), 2)
-        self.assertEqual(individual2_1_representation1.documents(manager="original_and_repr_objects").filter(is_original=False).count(), 2)
-        self.assertEqual(individual2_1_representation1.documents(manager="original_and_repr_objects").filter(program=self.program_active).count(), 2)
-        self.assertEqual(individual2_1_representation1.documents(manager="original_and_repr_objects").first().program, self.program_active)
+        self.assertEqual(
+            individual2_1_representation1.documents(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            individual2_1_representation1.documents(manager="original_and_repr_objects")
+            .filter(program=self.program_active)
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            individual2_1_representation1.documents(manager="original_and_repr_objects").first().program,
+            self.program_active,
+        )
         self.assertEqual(individual2_1_representation1.identities(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual2_1_representation1.identities(manager="original_and_repr_objects").filter(is_original=False).count(), 1)
-        self.assertEqual(individual2_1_representation1.bank_account_info(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual2_1_representation1.bank_account_info(manager="original_and_repr_objects").filter(is_original=False).count(), 1)
+        self.assertEqual(
+            individual2_1_representation1.identities(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            1,
+        )
+        self.assertEqual(
+            individual2_1_representation1.bank_account_info(manager="original_and_repr_objects").count(), 1
+        )
+        self.assertEqual(
+            individual2_1_representation1.bank_account_info(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            1,
+        )
 
-        individual2_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual2_1, program=self.program_finished1).first()
+        individual2_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual2_1, program=self.program_finished1
+        ).first()
         self.assertEqual(individual2_1_representation2.program, self.program_finished1)
         self.assertEqual(individual2_1_representation2.is_original, False)
         self.assertEqual(individual2_1_representation2.origin_unicef_id, self.individual2_1.unicef_id)
@@ -603,47 +768,121 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual2_1_representation2.household, household2_representation2)
         self.assertEqual(household2_representation2.head_of_household, individual2_1_representation2)
         self.assertEqual(individual2_1_representation2.documents(manager="original_and_repr_objects").count(), 2)
-        self.assertEqual(individual2_1_representation2.documents(manager="original_and_repr_objects").filter(is_original=False).count(), 2)
-        self.assertEqual(individual2_1_representation2.documents(manager="original_and_repr_objects").filter(program=self.program_finished1).count(), 2)
-        self.assertEqual(individual2_1_representation2.documents(manager="original_and_repr_objects").first().program, self.program_finished1)
+        self.assertEqual(
+            individual2_1_representation2.documents(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            individual2_1_representation2.documents(manager="original_and_repr_objects")
+            .filter(program=self.program_finished1)
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            individual2_1_representation2.documents(manager="original_and_repr_objects").first().program,
+            self.program_finished1,
+        )
         self.assertEqual(individual2_1_representation2.identities(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual2_1_representation2.identities(manager="original_and_repr_objects").filter(is_original=False).count(), 1)
-        self.assertEqual(individual2_1_representation2.bank_account_info(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual2_1_representation2.bank_account_info(manager="original_and_repr_objects").filter(is_original=False).count(), 1)
+        self.assertEqual(
+            individual2_1_representation2.identities(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            1,
+        )
+        self.assertEqual(
+            individual2_1_representation2.bank_account_info(manager="original_and_repr_objects").count(), 1
+        )
+        self.assertEqual(
+            individual2_1_representation2.bank_account_info(manager="original_and_repr_objects")
+            .filter(is_original=False)
+            .count(),
+            1,
+        )
 
         self.assertEqual(self.individual2_2.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        individual2_2_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual2_2, program=self.program_active).first()
+        individual2_2_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual2_2, program=self.program_active
+        ).first()
         self.assertEqual(individual2_2_representation1.program, self.program_active)
         self.assertEqual(individual2_2_representation1.is_original, False)
         self.assertEqual(individual2_2_representation1.origin_unicef_id, self.individual2_2.unicef_id)
         self.assertEqual(individual2_2_representation1.copied_from, self.individual2_2)
-        self.assertEqual(individual2_2_representation1
-                         .household, household2_representation1)
+        self.assertEqual(individual2_2_representation1.household, household2_representation1)
         self.assertEqual(individual2_2_representation1.documents(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual2_1_representation2.documents(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual2_2_representation1.documents(manager="original_and_repr_objects").first().program, self.program_active)
+        self.assertEqual(
+            individual2_1_representation2.documents(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual2_2_representation1.documents(manager="original_and_repr_objects").first().program,
+            self.program_active,
+        )
         self.assertEqual(individual2_2_representation1.identities(manager="original_and_repr_objects").count(), 0)
-        self.assertEqual(individual2_2_representation1.bank_account_info(manager="original_and_repr_objects").count(), 0)
+        self.assertEqual(
+            individual2_2_representation1.bank_account_info(manager="original_and_repr_objects").count(), 0
+        )
 
-        individual2_2_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual2_2, program=self.program_finished1).first()
+        individual2_2_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual2_2, program=self.program_finished1
+        ).first()
         self.assertEqual(individual2_2_representation2.program, self.program_finished1)
         self.assertEqual(individual2_2_representation2.is_original, False)
         self.assertEqual(individual2_2_representation2.origin_unicef_id, self.individual2_2.unicef_id)
         self.assertEqual(individual2_2_representation2.copied_from, self.individual2_2)
         self.assertEqual(individual2_2_representation2.household, household2_representation2)
         self.assertEqual(individual2_2_representation2.documents(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual2_2_representation2.documents(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual2_2_representation2.documents(manager="original_and_repr_objects").first().program, self.program_finished1)
+        self.assertEqual(
+            individual2_2_representation2.documents(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual2_2_representation2.documents(manager="original_and_repr_objects").first().program,
+            self.program_finished1,
+        )
         self.assertEqual(individual2_2_representation2.identities(manager="original_and_repr_objects").count(), 0)
-        self.assertEqual(individual2_2_representation2.bank_account_info(manager="original_and_repr_objects").count(), 0)
+        self.assertEqual(
+            individual2_2_representation2.bank_account_info(manager="original_and_repr_objects").count(), 0
+        )
 
-        collector2_1_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector2_1, program=self.program_active).first()
-        collector2_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector2_1, program=self.program_finished1).first()
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household2_representation1, role=ROLE_PRIMARY, individual=collector2_1_representation1).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household2_representation1, role=ROLE_ALTERNATE, individual=individual1_1_representation1).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household2_representation2, role=ROLE_PRIMARY, individual=collector2_1_representation2).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household2_representation2, role=ROLE_ALTERNATE, individual=individual1_1_representation2).first())
+        collector2_1_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector2_1, program=self.program_active
+        ).first()
+        collector2_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector2_1, program=self.program_finished1
+        ).first()
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household2_representation1,
+                role=ROLE_PRIMARY,
+                individual=collector2_1_representation1,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household2_representation1,
+                role=ROLE_ALTERNATE,
+                individual=individual1_1_representation1,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household2_representation2,
+                role=ROLE_PRIMARY,
+                individual=collector2_1_representation2,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household2_representation2,
+                role=ROLE_ALTERNATE,
+                individual=individual1_1_representation2,
+            ).first()
+        )
 
         # Test household3
         # check the original household
@@ -659,15 +898,14 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.individual_helper3.copied_to(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(self.document_helper.copied_to(manager="original_and_repr_objects").count(), 2)
 
-
         # check the copied household - moved to biggest prorgam
         self.assertEqual(self.household3.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(self.individual3_1.copied_to(manager="original_and_repr_objects").count(), 1)
 
         biggest_program = get_biggest_program(self.business_area)
-        household3_representation = Household.original_and_repr_objects.filter(is_original=False,
-                                                                                copied_from=self.household3,
-                                                                                program=biggest_program).first()
+        household3_representation = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household3, program=biggest_program
+        ).first()
         self.assertEqual(household3_representation.program, biggest_program)
         self.assertEqual(household3_representation.is_original, False)
         self.assertEqual(household3_representation.origin_unicef_id, self.household3.unicef_id)
@@ -677,7 +915,9 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household3_representation.target_populations.count(), 0)
         self.assertEqual(household3_representation.selections(manager="original_and_repr_objects").count(), 0)
 
-        individual3_1_representation = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual3_1, program=biggest_program).first()
+        individual3_1_representation = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual3_1, program=biggest_program
+        ).first()
         self.assertEqual(individual3_1_representation.program, biggest_program)
         self.assertEqual(individual3_1_representation.is_original, False)
         self.assertEqual(individual3_1_representation.origin_unicef_id, self.individual3_1.unicef_id)
@@ -685,18 +925,34 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual3_1_representation.household, household3_representation)
         self.assertEqual(household3_representation.head_of_household, individual3_1_representation)
         self.assertEqual(individual3_1_representation.documents(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual3_1_representation.documents(manager="original_and_repr_objects").first().is_original, False)
-        self.assertEqual(individual3_1_representation.documents(manager="original_and_repr_objects").first().program, biggest_program)
+        self.assertEqual(
+            individual3_1_representation.documents(manager="original_and_repr_objects").first().is_original, False
+        )
+        self.assertEqual(
+            individual3_1_representation.documents(manager="original_and_repr_objects").first().program, biggest_program
+        )
         self.assertEqual(individual3_1_representation.identities(manager="original_and_repr_objects").count(), 0)
         self.assertEqual(individual3_1_representation.bank_account_info(manager="original_and_repr_objects").count(), 0)
 
-        individual_helper3_representation = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual_helper3, program=biggest_program).first()
+        individual_helper3_representation = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual_helper3, program=biggest_program
+        ).first()
         self.assertIsNotNone(
-    IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household3_representation,
-                                                               role=ROLE_ALTERNATE, individual=individual3_1_representation).first())
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household3_representation,
+                role=ROLE_ALTERNATE,
+                individual=individual3_1_representation,
+            ).first()
+        )
         self.assertIsNotNone(
-    IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household3_representation,
-                                                               role=ROLE_PRIMARY, individual=individual_helper3_representation).first())
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household3_representation,
+                role=ROLE_PRIMARY,
+                individual=individual_helper3_representation,
+            ).first()
+        )
 
         # Test household4
         # check the original household
@@ -708,14 +964,13 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.household4.target_populations.count(), 0)
         self.assertEqual(self.household4.selections.count(), 0)
 
-
         # check the copied household - moved to biggest prorgam
         self.assertEqual(self.household4.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(self.individual4_1.copied_to(manager="original_and_repr_objects").count(), 1)
 
-        household4_representation = Household.original_and_repr_objects.filter(is_original=False,
-                                                                                copied_from=self.household4,
-                                                                                program=biggest_program).first()
+        household4_representation = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household4, program=biggest_program
+        ).first()
         self.assertEqual(household4_representation.program, biggest_program)
         self.assertEqual(household4_representation.is_original, False)
         self.assertEqual(household4_representation.origin_unicef_id, self.household4.unicef_id)
@@ -725,7 +980,9 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household4_representation.target_populations.count(), 0)
         self.assertEqual(household4_representation.selections(manager="original_and_repr_objects").count(), 0)
 
-        individual4_1_representation = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual4_1, program=biggest_program).first()
+        individual4_1_representation = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual4_1, program=biggest_program
+        ).first()
         self.assertEqual(individual4_1_representation.program, biggest_program)
         self.assertEqual(individual4_1_representation.is_original, False)
         self.assertEqual(individual4_1_representation.origin_unicef_id, self.individual4_1.unicef_id)
@@ -733,12 +990,18 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual4_1_representation.household, household4_representation)
         self.assertEqual(household4_representation.head_of_household, individual4_1_representation)
         self.assertEqual(individual4_1_representation.documents(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(individual4_1_representation.documents(manager="original_and_repr_objects").first().program, biggest_program)
+        self.assertEqual(
+            individual4_1_representation.documents(manager="original_and_repr_objects").first().program, biggest_program
+        )
         self.assertEqual(individual4_1_representation.identities(manager="original_and_repr_objects").count(), 0)
         self.assertEqual(individual4_1_representation.bank_account_info(manager="original_and_repr_objects").count(), 0)
         self.assertEqual(self.rdi4_1.households(manager="original_and_repr_objects").count(), 2)
-        self.assertEqual(self.rdi4_1.households(manager="original_and_repr_objects").filter(is_original=True).count(), 1)
-        self.assertEqual(self.rdi4_1.households(manager="original_and_repr_objects").filter(is_original=False).count(), 1)
+        self.assertEqual(
+            self.rdi4_1.households(manager="original_and_repr_objects").filter(is_original=True).count(), 1
+        )
+        self.assertEqual(
+            self.rdi4_1.households(manager="original_and_repr_objects").filter(is_original=False).count(), 1
+        )
         self.assertEqual(self.rdi4_1.individuals(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(self.rdi4_1.programs.count(), 1)
 
@@ -777,38 +1040,117 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.collector5_2.copied_to(manager="original_and_repr_objects").count(), 3)
 
         self.assertEqual(self.rdi_with_3_hhs.households(manager="original_and_repr_objects").count(), 12)
-        self.assertEqual(self.rdi_with_3_hhs.households(manager="original_and_repr_objects").filter(is_original=True).count(), 3)
-        self.assertEqual(self.rdi_with_3_hhs.households(manager="original_and_repr_objects").filter(is_original=False).count(), 9)
+        self.assertEqual(
+            self.rdi_with_3_hhs.households(manager="original_and_repr_objects").filter(is_original=True).count(), 3
+        )
+        self.assertEqual(
+            self.rdi_with_3_hhs.households(manager="original_and_repr_objects").filter(is_original=False).count(), 9
+        )
         self.assertEqual(self.rdi_with_3_hhs.individuals(manager="original_and_repr_objects").count(), 16)
         self.assertEqual(self.rdi_with_3_hhs.programs.count(), 3)
 
-        household5_1_representation1 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household5,program=self.program_active).first()
-        household5_1_representation2 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household5,program=self.program_finished1).first()
-        household5_1_representation3 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household5,program=self.program_finished2).first()
-        individual5_1_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual5_1,program=self.program_active).first()
-        individual5_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual5_1,program=self.program_finished1).first()
-        individual5_1_representation3 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual5_1,program=self.program_finished2).first()
-        collector5_1_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_1,program=self.program_active).first()
-        collector5_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_1,program=self.program_finished1).first()
-        collector5_1_representation3 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_1,program=self.program_finished2).first()
-        collector5_2_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_2,program=self.program_active).first()
-        collector5_2_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_2,program=self.program_finished1).first()
-        collector5_2_representation3 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_2,program=self.program_finished2).first()
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household5_1_representation1, role=ROLE_PRIMARY, individual=collector5_1_representation1).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household5_1_representation1, role=ROLE_ALTERNATE, individual=collector5_2_representation1).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household5_1_representation2, role=ROLE_PRIMARY, individual=collector5_1_representation2).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household5_1_representation2, role=ROLE_ALTERNATE, individual=collector5_2_representation2).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household5_1_representation3, role=ROLE_PRIMARY, individual=collector5_1_representation3).first())
-        self.assertIsNotNone(IndividualRoleInHousehold.original_and_repr_objects.filter(is_original=False, household=household5_1_representation3, role=ROLE_ALTERNATE, individual=collector5_2_representation3).first())
+        household5_1_representation1 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household5, program=self.program_active
+        ).first()
+        household5_1_representation2 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household5, program=self.program_finished1
+        ).first()
+        household5_1_representation3 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household5, program=self.program_finished2
+        ).first()
+        individual5_1_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual5_1, program=self.program_active
+        ).first()
+        individual5_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual5_1, program=self.program_finished1
+        ).first()
+        individual5_1_representation3 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual5_1, program=self.program_finished2
+        ).first()
+        collector5_1_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_1, program=self.program_active
+        ).first()
+        collector5_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_1, program=self.program_finished1
+        ).first()
+        collector5_1_representation3 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_1, program=self.program_finished2
+        ).first()
+        collector5_2_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_2, program=self.program_active
+        ).first()
+        collector5_2_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_2, program=self.program_finished1
+        ).first()
+        collector5_2_representation3 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_2, program=self.program_finished2
+        ).first()
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household5_1_representation1,
+                role=ROLE_PRIMARY,
+                individual=collector5_1_representation1,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household5_1_representation1,
+                role=ROLE_ALTERNATE,
+                individual=collector5_2_representation1,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household5_1_representation2,
+                role=ROLE_PRIMARY,
+                individual=collector5_1_representation2,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household5_1_representation2,
+                role=ROLE_ALTERNATE,
+                individual=collector5_2_representation2,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household5_1_representation3,
+                role=ROLE_PRIMARY,
+                individual=collector5_1_representation3,
+            ).first()
+        )
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                is_original=False,
+                household=household5_1_representation3,
+                role=ROLE_ALTERNATE,
+                individual=collector5_2_representation3,
+            ).first()
+        )
         self.assertEqual(household5_1_representation1.head_of_household, individual5_1_representation1)
         self.assertEqual(household5_1_representation2.head_of_household, individual5_1_representation2)
         self.assertEqual(household5_1_representation3.head_of_household, individual5_1_representation3)
-        for representation in [individual5_1_representation1, individual5_1_representation2, individual5_1_representation3]:
+        for representation in [
+            individual5_1_representation1,
+            individual5_1_representation2,
+            individual5_1_representation3,
+        ]:
             self.assertEqual(representation.is_original, False)
             self.assertEqual(representation.copied_from, self.individual5_1)
             self.assertEqual(representation.origin_unicef_id, self.individual5_1.unicef_id)
 
-        self.assertEqual(Individual.original_and_repr_objects.filter(copied_from=self.individual7_1).aggregate(Count("identities"))["identities__count"], 3)
+        self.assertEqual(
+            Individual.original_and_repr_objects.filter(copied_from=self.individual7_1).aggregate(Count("identities"))[
+                "identities__count"
+            ],
+            3,
+        )
 
         # 2x household1, 2x household2, 1x household3, 1x household_helper, 1x household4, 9x from rdi_with_3_hhs + 10x from setup for biggest program
         self.assertEqual(Household.original_and_repr_objects.count() - household_count, 16 + 10)
@@ -824,7 +1166,6 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 4)
         # 4x for household1, 4x for household2, 2x for household3, 1x for household4
         self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 26)
-
 
     def test_adjust_payments_and_payment_records(self) -> None:
         payment_count = Payment.objects.filter(business_area=self.business_area).count()
@@ -864,9 +1205,15 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(PaymentRecord.objects.filter(business_area=self.business_area).count(), payment_record_count)
 
         # payment1
-        individual1_1_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_1, program=self.program_active).first()
-        individual1_2_representation1 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual1_2, program=self.program_active).first()
-        household1_representation1 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household1, program=self.program_active).first()
+        individual1_1_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_1, program=self.program_active
+        ).first()
+        individual1_2_representation1 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual1_2, program=self.program_active
+        ).first()
+        household1_representation1 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household1, program=self.program_active
+        ).first()
         self.assertEqual(self.payment1.collector, individual1_2_representation1)
         self.assertEqual(self.payment1.head_of_household, individual1_1_representation1)
         self.assertEqual(self.payment1.household, household1_representation1)
@@ -874,9 +1221,15 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.payment_record1.household, household1_representation1)
 
         # payment2
-        individual2_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual2_1, program=self.program_finished1).first()
-        collector2_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector2_1, program=self.program_finished1).first()
-        household2_representation2 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household2, program=self.program_finished1).first()
+        individual2_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual2_1, program=self.program_finished1
+        ).first()
+        collector2_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector2_1, program=self.program_finished1
+        ).first()
+        household2_representation2 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household2, program=self.program_finished1
+        ).first()
         self.assertEqual(self.payment2.collector, collector2_1_representation2)
         self.assertEqual(self.payment2.head_of_household, individual2_1_representation2)
         self.assertEqual(self.payment2.household, household2_representation2)
@@ -884,9 +1237,15 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.payment_record2.household, household2_representation2)
 
         # payment5
-        collector5_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_1, program=self.program_finished1).first()
-        household5_representation2 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household5, program=self.program_finished1).first()
-        individual5_1_representation2 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual5_1, program=self.program_finished1).first()
+        collector5_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_1, program=self.program_finished1
+        ).first()
+        household5_representation2 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household5, program=self.program_finished1
+        ).first()
+        individual5_1_representation2 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual5_1, program=self.program_finished1
+        ).first()
         self.assertEqual(self.payment5.collector, collector5_1_representation2)
         self.assertEqual(self.payment5.head_of_household, individual5_1_representation2)
         self.assertEqual(self.payment5.household, household5_representation2)
@@ -894,9 +1253,15 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.payment_record5.household, household5_representation2)
 
         # payment7
-        collector5_1_representation3 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.collector5_1, program=self.program_finished2).first()
-        household7_representation3 = Household.original_and_repr_objects.filter(is_original=False, copied_from=self.household7, program=self.program_finished2).first()
-        individual7_1_representation3 = Individual.original_and_repr_objects.filter(is_original=False, copied_from=self.individual7_1, program=self.program_finished2).first()
+        collector5_1_representation3 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.collector5_1, program=self.program_finished2
+        ).first()
+        household7_representation3 = Household.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.household7, program=self.program_finished2
+        ).first()
+        individual7_1_representation3 = Individual.original_and_repr_objects.filter(
+            is_original=False, copied_from=self.individual7_1, program=self.program_finished2
+        ).first()
         self.assertEqual(self.payment7.collector, collector5_1_representation3)
         self.assertEqual(self.payment7.head_of_household, individual7_1_representation3)
         self.assertEqual(self.payment7.household, household7_representation3)
