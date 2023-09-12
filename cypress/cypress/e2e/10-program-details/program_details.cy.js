@@ -10,8 +10,10 @@ describe("Program Details", () => {
   describe("Smoke tests Program Details", () => {
     it.only("Check Program Details page", () => {
       cy.scenario([
-        "1. Go to Program Details page",
+        "1. Go to Program Details page (Active program chosen)",
         "2. Check if all elements on page exist",
+        "3. Change program to Draft program",
+        "4. Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
       programDetails.getTashPlanTableRow().should("have.length", 1);
