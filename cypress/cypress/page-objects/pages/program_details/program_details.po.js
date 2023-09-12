@@ -4,7 +4,8 @@ export default class ProgramDetails extends BaseComponent {
   // Locators
   buttonActivateProgram = 'button[data-cy="button-activate-program"]';
   buttonRemoveProgram = 'button[data-cy="button-remove-program"]';
-  buttonEditProgram = 'div[data-cy="button-edit-program"]';
+  buttonEditProgram = 'button[data-cy="button-edit-program"]';
+  buttonCopyProgram = 'button[data-cy="button-copy-program"]';
   dialogPopupActivate = 'div[data-cy="dialog-actions-container"]';
   labelTotalNumberOfHouseholds =
     'div[data-cy="label-Total Number of Households"]';
@@ -21,19 +22,19 @@ export default class ProgramDetails extends BaseComponent {
   labelSTARTDATE = 'div[data-cy="label-START DATE"]';
   statusContainer = 'div[data-cy="status-container"]';
   labelStatus = 'div[data-cy="label-status"]';
-  pageHeaderTitle = 'div[data-cy="page-header-title"]';
+  pageHeaderTitle = 'h5[data-cy="page-header-title"]';
 
   tablePagination = 'div[data-cy="table-pagination"]';
-  cashPlanTableRow = 'div[data-cy="cash-plan-table-row"]';
-  tableLabel = 'div[data-cy="table-label"]';
-  tableTitle = 'div[data-cy="table-title"]';
-
+  cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
+  tableLabel = 'span[data-cy="table-label"]';
+  tableTitle = 'h6[data-cy="table-title"]';
   // Texts
 
   // Elements
   getButtonActivateProgram = () => cy.get(this.buttonActivateProgram);
   getButtonRemoveProgram = () => cy.get(this.buttonRemoveProgram);
   getButtonEditProgram = () => cy.get(this.buttonEditProgram);
+  getButtonCopyProgram = () => cy.get(this.buttonCopyProgram);
   getDialogPopupActivate = () => cy.get(this.dialogPopupActivate);
   getLabelTotalNumberOfHouseholds = () =>
     cy.get(this.labelTotalNumberOfHouseholds);
