@@ -15,6 +15,9 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    migrate_data_to_representations,
+)
 
 
 class TestIndividualQuery(APITestCase):
@@ -22,7 +25,7 @@ class TestIndividualQuery(APITestCase):
 
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
-      allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
+      allIndividuals(businessArea: "afghanistan", search: $search) {
         edges {
           node {
             fullName
@@ -61,7 +64,6 @@ class TestIndividualQuery(APITestCase):
         cls.program_draft = ProgramFactory(
             name="Test program DRAFT",
             business_area=cls.business_area,
-            status=Program.ACTIVE,
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
@@ -141,6 +143,9 @@ class TestIndividualQuery(APITestCase):
         cls.tax_id = DocumentFactory(
             document_number="666-777-888", type=DocumentType.objects.get(key="tax_id"), individual=cls.individuals[2]
         )
+
+        # remove after data migration
+        migrate_data_to_representations()
 
         super().setUpTestData()
 

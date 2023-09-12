@@ -39,8 +39,12 @@ stages:
               arguments: "--timeout 600s"
               overrideValues: "
                 global.storageClass=default,\
-                kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
                 mongodb.mongodbPassword=$(MONGO_PASSWORD),\
+                kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
+                kobocat.subdomain=kc-hope,\
+                kobocat.resources.requests.cpu=250m,\
+                kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),\
+                kpi.ravenDsn=$(KPI_SENTRY_DSN),\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 rediscache.password=$(REDIS_CACHE_PASSWORD),\
                 redismain.password=$(REDIS_MAIN_PASSWORD),\
@@ -49,6 +53,4 @@ stages:
                 ingress.host=$(DOMAIN),\
                 ingress.scheme=https,\
                 ingress.tls=true,\
-                kpi.ravenDsn=$(KPI_SENTRY_DSN),\
-                ingress.annotations.appgw.ingress.kubernetes.io/appgw-ssl-certificate=kv-cert-hope,\
-                kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),"
+                ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-hope"
