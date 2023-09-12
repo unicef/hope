@@ -7,7 +7,7 @@ export default class Grievance extends BaseComponent {
   ticketTypeFilter = 'div[data-cy="filters-search-type"]';
   ticketId = 'li[data-value="ticket_id"]';
   householdId = 'li[data-value="ticket_hh_id"]';
-  familyName = 'li[data-value="family_name"]';
+  familyName = 'li[data-value="full_name"]';
   tabSystemGenerated = 'button[data-cy="tab-SYSTEM-GENERATED"]';
   tabUserGenerated = 'button[data-cy="tab-USER-GENERATED"]';
   creationDateFromFilter = 'div[data-cy="filters-creation-date-from"]';

@@ -15,7 +15,6 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-  ISSUE_TYPE_CATEGORIES,
 } from '../../../utils/constants';
 import { createHandleApplyFilterChange } from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
@@ -83,9 +82,9 @@ export const GrievancesFilters = ({
   }, [choicesData, filter.grievanceType]);
 
   const showIssueType =
-    filter.category === ISSUE_TYPE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
-    filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT;
+    filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   const updatedPriorityChoices = useMemo(() => {
     const priorityChoices = choicesData.grievanceTicketPriorityChoices;
@@ -109,6 +108,8 @@ export const GrievancesFilters = ({
       .reverse();
   }, [choicesData.grievanceTicketUrgencyChoices]);
 
+  const subCategories = issueTypeDict[filter.category]?.subCategories || [];
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -130,6 +131,7 @@ export const GrievancesFilters = ({
               borderRadius='0px 4px 4px 0px'
               data-cy='filters-search-type'
               fullWidth
+              disableClearable
             >
               {choicesData?.grievanceTicketSearchTypesChoices?.map(
                 ({ name, value }) => (
@@ -203,24 +205,18 @@ export const GrievancesFilters = ({
           </SelectFilter>
         </Grid>
         {showIssueType && (
-          <Grid item>
+          <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label='Issue Type'
               value={filter.issueType}
               fullWidth
             >
-              {issueTypeDict[
-                GRIEVANCE_CATEGORIES[
-                  filter.category.replace(/\s/g, '_').toUpperCase()
-                ]
-              ].subCategories.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
+              {subCategories.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
             </SelectFilter>
           </Grid>
         )}

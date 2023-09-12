@@ -106,7 +106,7 @@ GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
 MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
 DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
 SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
-GRANDDAUGHTER_GRANDSON = "GRANDDAUGHTER_GRANDSON"
+GRANDDAUGHTER_GRANDSON = "GRANDDAUGHER_GRANDSON"  # key is wrong, but it is used in kobo and aurora
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 FOSTER_CHILD = "FOSTER_CHILD"
@@ -941,6 +941,14 @@ class Individual(
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
+
+    @property
+    def phone_no_text(self) -> str:
+        return str(self.phone_no).replace(" ", "")
+
+    @property
+    def phone_no_alternative_text(self) -> str:
+        return str(self.phone_no_alternative).replace(" ", "")
 
     @property
     def age(self) -> int:

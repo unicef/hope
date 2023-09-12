@@ -49,6 +49,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   const initialFilterHH = {
     search: '',
     program: programId,
+    searchType: 'household_id',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',

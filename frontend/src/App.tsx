@@ -52,6 +52,11 @@ export const App: React.FC = () => {
             <BaseHomeRouter>
               <SelectedProgramRoutesSwitch />
             </BaseHomeRouter>
+            <ProtectedRoute
+              path='/sanction-list'
+              component={SanctionList}
+              location={window.location}
+            />
           </Route>
           <Route path='/'>
             <DefaultRoute />

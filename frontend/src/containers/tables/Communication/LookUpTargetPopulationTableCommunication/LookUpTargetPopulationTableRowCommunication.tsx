@@ -3,6 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { Radio } from '@material-ui/core';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import {
@@ -11,24 +12,23 @@ import {
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
-interface LookUpTargetPopulationTableRowProps {
+interface LookUpTargetPopulationTableRowCommunicationProps {
   targetPopulation: TargetPopulationNode;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
 }
 
-export function LookUpTargetPopulationTableRow({
+export const LookUpTargetPopulationTableRowCommunication = ({
   targetPopulation,
   canViewDetails,
   radioChangeHandler,
   selectedTargetPopulation,
-}: LookUpTargetPopulationTableRowProps): React.ReactElement {
+}: LookUpTargetPopulationTableRowCommunicationProps): React.ReactElement => {
   const history = useHistory();
-  const { baseUrl } = useBaseUrl();
-  const targetPopulationDetailsPath = `/${baseUrl}/target-population/${targetPopulation.id}`;
+  const businessArea = useBusinessArea();
+  const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(targetPopulation.id);
@@ -74,7 +74,10 @@ export function LookUpTargetPopulationTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.totalHouseholdsCount || '-'}
+        {targetPopulation.program?.name || '-'}
+      </TableCell>
+      <TableCell align='left'>
+        {targetPopulation.totalHouseholdsCountWithValidPhoneNo || 0}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
@@ -88,4 +91,4 @@ export function LookUpTargetPopulationTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};
