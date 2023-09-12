@@ -48,19 +48,10 @@
             "name": "RegistrationDataImportNode"
           },
           {
-            "name": "PaymentPlanNode"
-          },
-          {
             "name": "ProgramNode"
           },
           {
-            "name": "CashPlanNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "PaymentRecordNode"
+            "name": "PaymentPlanNode"
           },
           {
             "name": "TargetPopulationNode"
@@ -72,13 +63,22 @@
             "name": "SteficonRuleNode"
           },
           {
-            "name": "SurveyNode"
+            "name": "PaymentRecordNode"
+          },
+          {
+            "name": "CashPlanNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "PaymentVerificationPlanNode"
           },
           {
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "PaymentVerificationPlanNode"
+            "name": "TicketPaymentVerificationDetailsNode"
           },
           {
             "name": "PaymentVerificationSummaryNode"
@@ -93,10 +93,10 @@
             "name": "PaymentVerificationLogEntryNode"
           },
           {
-            "name": "TicketPaymentVerificationDetailsNode"
+            "name": "SurveyNode"
           },
           {
-            "name": "PaymentNode"
+            "name": "DeliveryMechanismNode"
           },
           {
             "name": "FinancialServiceProviderNode"
@@ -108,10 +108,16 @@
             "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
-            "name": "DeliveryMechanismNode"
+            "name": "PaymentNode"
           },
           {
             "name": "PaymentHouseholdSnapshotNode"
+          },
+          {
+            "name": "ApprovalProcessNode"
+          },
+          {
+            "name": "VolumeByDeliveryMechanismNode"
           },
           {
             "name": "ReportNode"
@@ -121,12 +127,6 @@
           },
           {
             "name": "FeedbackMessageNode"
-          },
-          {
-            "name": "ApprovalProcessNode"
-          },
-          {
-            "name": "VolumeByDeliveryMechanismNode"
           },
           {
             "name": "TicketNoteNode"
