@@ -1,6 +1,5 @@
-import { AllProgramCyclesQuery } from "../../../../__generated__/graphql";
-import { HeadCell } from "../../../../components/core/Table/EnhancedTableHead";
-
+import { AllProgramCyclesQuery } from '../../../../../__generated__/graphql';
+import { HeadCell } from '../../../../../components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<
   AllProgramCyclesQuery['allProgramCycles']['edges'][number]['node']
