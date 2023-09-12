@@ -6,7 +6,7 @@ import {
   useAllFeedbacksQuery,
 } from '../../../__generated__/graphql';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { decodeIdString } from '../../../utils/utils';
+import { dateToIsoString, decodeIdString } from '../../../utils/utils';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './FeedbackTableHeadCells';
 import { FeedbackTableRow } from './FeedbackTableRow';
@@ -25,10 +25,13 @@ export const FeedbackTable = ({
     feedbackId: filter.feedbackId,
     issueType: filter.issueType || '',
     createdBy: decodeIdString(filter.createdBy) || '',
-    createdAtRange: filter.createdAtRangeMin || filter.createdAtRangeMax ? JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
-    }) : "",
+    createdAtRange:
+      filter.createdAtRangeMin || filter.createdAtRangeMax
+        ? JSON.stringify({
+            min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+            max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+          })
+        : '',
   };
   return (
     <TableWrapper>

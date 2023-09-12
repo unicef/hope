@@ -11,7 +11,7 @@ export const FlexFieldTab = (): React.ReactElement => {
   const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState('');
+  const [selectedOption, setSelectedOption] = useState('All');
   const [selectedFieldType, setSelectedFieldType] = useState('All');
   useEffect(() => {
     if (data && !selectOptions.length) {
@@ -46,8 +46,9 @@ export const FlexFieldTab = (): React.ReactElement => {
               label={t('Type')}
               value={selectedOption}
               fullWidth
+              disableClearable
             >
-              <MenuItem value=''>
+              <MenuItem value='All'>
                 <em>{t('All')}</em>
               </MenuItem>
               {selectOptions.map((type) => {
@@ -66,8 +67,9 @@ export const FlexFieldTab = (): React.ReactElement => {
             label={t('Field Type')}
             value={selectedFieldType}
             fullWidth
+            disableClearable
           >
-            <MenuItem value={t('All')}>
+            <MenuItem value='All'>
               <em>{t('All')}</em>
             </MenuItem>
             {[

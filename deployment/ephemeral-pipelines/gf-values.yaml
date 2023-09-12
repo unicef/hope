@@ -5,8 +5,8 @@ global:
 backend:
   image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
   replicaCount: 1
-  # initCommand: "python3 /code/manage.py initdemo" # when we want to clear, call initdemo
-  initCommand: "python3 /code/manage.py upgrade" # if we're using an existing db which we want to keep, call upgrade
+  initCommand: "python3 /code/manage.py initdemo" # when we want to clear, call initdemo
+  # initCommand: "python3 /code/manage.py upgrade" # if we're using an existing db which we want to keep, call upgrade
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
@@ -64,13 +64,11 @@ psql-resources-default: &psql-resources-default
 #
 postgresql:
   enabled: true
-  ephemeral: false # to use the dev db
+  ephemeral: true
   <<: *psql-image-default
   auth:
-    database: dump_hope_tmp
-    host: ""
-    username: ""
-    password: ""
+    database: hope-pm
+    <<: *psql-auth-default
   persistence:
     enabled: false
   <<: *psql-resources-default

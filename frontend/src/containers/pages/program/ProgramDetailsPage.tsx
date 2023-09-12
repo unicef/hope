@@ -2,17 +2,19 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
+  useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { ProgramCyclesActionsTable } from '../../tables/programs/ProgramCyclesActionsTable';
 import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
+import { ProgramCyclesActionsTable } from '../../tables/programs/ProgramCyclesActionsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
 
@@ -22,17 +24,26 @@ export const ProgramDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const { businessArea } = useBaseUrl();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
   const permissions = usePermissions();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.program || !choices || permissions === null) return null;
+  if (!data?.program || !choices || !businessAreaData || permissions === null)
+    return null;
 
   const { program } = data;
   return (
@@ -50,6 +61,9 @@ export const ProgramDetailsPage = (): React.ReactElement => {
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
         )}
+        isPaymentPlanApplicable={
+          businessAreaData.businessArea.isPaymentPlanApplicable
+        }
       />
       <Box display='flex' flexDirection='column'>
         <ProgramDetails program={program} choices={choices} />

@@ -7,7 +7,7 @@ export default class Grievance extends BaseComponent {
   ticketTypeFilter = 'div[data-cy="filters-search-type"]';
   ticketId = 'li[data-value="ticket_id"]';
   householdId = 'li[data-value="ticket_hh_id"]';
-  familyName = 'li[data-value="family_name"]';
+  familyName = 'li[data-value="full_name"]';
   tabSystemGenerated = 'button[data-cy="tab-SYSTEM-GENERATED"]';
   tabUserGenerated = 'button[data-cy="tab-USER-GENERATED"]';
   creationDateFromFilter = 'div[data-cy="filters-creation-date-from"]';
@@ -41,7 +41,6 @@ export default class Grievance extends BaseComponent {
   tabCreationData = 'th[data-cy="createdAt"]';
   tabLastModifiedDate = 'th[data-cy="userModified"]';
   tabTotalDays = 'th[data-cy="totalDays"]';
-  ticketListRow = 'tr[role="checkbox"]';
   statusOptions = 'li[role="option"]';
 
   dateTitleFilterPopup =
@@ -93,7 +92,6 @@ export default class Grievance extends BaseComponent {
   getTabTotalDays = () => cy.get(this.tabTotalDays);
   getTabSystemGenerated = () => cy.get(this.tabSystemGenerated);
   getTabUserGenerated = () => cy.get(this.tabUserGenerated);
-  getTicketListRow = () => cy.get(this.ticketListRow);
   getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
   getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
   getOptions = () => cy.get(this.statusOptions);
@@ -111,65 +109,48 @@ export default class Grievance extends BaseComponent {
   chooseTicketListRow(num = 0, contains = "GRV-0000002") {
     // ToDo: Use after fix bug: 164824
     // return this.getTicketListRow().eq(num);
-    return this.getTicketListRow()
-      .eq(num)
-      .find("a")
-      .contains(contains);
+    return this.getTicketListRow().eq(num).find("a").contains(contains);
   }
 
   chooseCategoryFilter(category) {
     this.getCategoryFilter().click();
-    this.getOptions()
-      .contains(category)
-      .click();
+    this.getOptions().contains(category).click();
     this.getButtonApply().click();
   }
 
   chooseStatusFilter(status) {
     this.getStatusFilter().click();
-    this.getOptions()
-      .contains(status)
-      .click();
+    this.getOptions().contains(status).click();
     this.getButtonApply().click();
   }
 
   choosePriorityFilter(prio) {
     this.getPriorityFilter().click();
-    this.getOptions()
-      .contains(prio)
-      .click();
+    this.getOptions().contains(prio).click();
     this.getButtonApply().click();
   }
 
   chooseUrgencyFilter(urgency) {
     this.getUrgencyFilter().click();
-    this.getOptions()
-      .contains(urgency)
-      .click();
+    this.getOptions().contains(urgency).click();
     this.getButtonApply().click();
   }
 
   chooseRDIFilter(rdi) {
     this.getRegistrationDataImportFilter().click();
-    this.getOptions()
-      .contains(rdi)
-      .click();
+    this.getOptions().contains(rdi).click();
     this.getButtonApply().click();
   }
 
   chooseAdminFilter(name) {
     this.getAdminLevelFilter().click();
-    this.getOptions()
-      .contains(name)
-      .click();
+    this.getOptions().contains(name).click();
     this.getButtonApply().click();
   }
 
   chooseAssigneeFilter(mail) {
     this.getAssigneeFilter().click();
-    this.getOptions()
-      .contains(mail)
-      .click();
+    this.getOptions().contains(mail).click();
     this.getButtonApply().click();
   }
   checkElementsOnSystemGeneratedPage() {
@@ -180,9 +161,7 @@ export default class Grievance extends BaseComponent {
     this.getSimilarityScoreFromFilter().should("be.visible");
     this.getSimilarityScoreToFilter().should("be.visible");
     this.checkAllColumnsVisibility();
-    this.getTicketListRow()
-      .eq(0)
-      .should("be.visible");
+    this.getTicketListRow().eq(0).should("be.visible");
   }
 
   checkElementsOfTicketTypeFilter() {
@@ -215,33 +194,15 @@ export default class Grievance extends BaseComponent {
     this.getTabTicketID().should("be.visible");
     this.getTabStatus().should("be.visible");
     this.getTabAssignedTo().should("be.visible");
-    this.getTabCategory()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabIssueType()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabHouseholdID()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabPriority()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabUrgency()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabLinkedTickets()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabCreationData()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabLastModifiedDate()
-      .scrollIntoView()
-      .should("be.visible");
-    this.getTabTotalDays()
-      .scrollIntoView()
-      .should("be.visible");
+    this.getTabCategory().scrollIntoView().should("be.visible");
+    this.getTabIssueType().scrollIntoView().should("be.visible");
+    this.getTabHouseholdID().scrollIntoView().should("be.visible");
+    this.getTabPriority().scrollIntoView().should("be.visible");
+    this.getTabUrgency().scrollIntoView().should("be.visible");
+    this.getTabLinkedTickets().scrollIntoView().should("be.visible");
+    this.getTabCreationData().scrollIntoView().should("be.visible");
+    this.getTabLastModifiedDate().scrollIntoView().should("be.visible");
+    this.getTabTotalDays().scrollIntoView().should("be.visible");
   }
 
   useSearchFilter(text) {
@@ -283,22 +244,16 @@ export default class Grievance extends BaseComponent {
   }
 
   openCreationDateFromFilter() {
-    this.getCreationDateFromFilter()
-      .find("button")
-      .click();
+    this.getCreationDateFromFilter().find("button").click();
   }
 
   chooseDayFilterPopup(day) {
-    this.getDaysFilterPopup()
-      .contains("p", day)
-      .click();
+    this.getDaysFilterPopup().contains("p", day).click();
   }
 
   checkDateFilterFrom(date) {
     // Date format (String): YYYY-MM-DD
-    this.getCreationDateFromFilter()
-      .find("input")
-      .should("have.value", date);
+    this.getCreationDateFromFilter().find("input").should("have.value", date);
   }
 
   changeCreationDateTo(date) {
@@ -307,24 +262,18 @@ export default class Grievance extends BaseComponent {
   }
 
   openCreationDateToFilter() {
-    this.getCreationDateToFilter()
-      .find("button")
-      .click();
+    this.getCreationDateToFilter().find("button").click();
   }
 
   checkDateFilterTo(date) {
     // Date format (String): YYYY-MM-DD
-    this.getCreationDateToFilter()
-      .find("input")
-      .should("have.value", date);
+    this.getCreationDateToFilter().find("input").should("have.value", date);
   }
 
   checkDateTitleFilter(date) {
     // Date format (String): Www, Mmm D
     // Example: Sat, Jan 1
-    this.getDateTitleFilterPopup()
-      .contains(date)
-      .type("{esc}");
+    this.getDateTitleFilterPopup().contains(date).type("{esc}");
   }
   chooseTab(tabName) {
     // Possibilities (String): USER-GENERATED, SYSTEM-GENERATED

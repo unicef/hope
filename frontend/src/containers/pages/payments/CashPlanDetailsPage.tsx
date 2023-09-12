@@ -15,6 +15,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   CashPlanNode,
+  useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   useCashPlanQuery,
 } from '../../../__generated__/graphql';
@@ -29,10 +30,17 @@ const Container = styled.div`
   }
 `;
 
-export function CashPlanDetailsPage(): React.ReactElement {
+export const CashPlanDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const { baseUrl, isAllPrograms, businessArea } = useBaseUrl();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -41,10 +49,11 @@ export function CashPlanDetailsPage(): React.ReactElement {
     data: caData,
     loading: caPrefixLoading,
   } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
-  const { baseUrl, isAllPrograms } = useBaseUrl();
-  if (loading || caPrefixLoading) return <LoadingComponent />;
+  if (loading || caPrefixLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !caData || permissions === null) return null;
+  if (!data || !caData || !businessAreaData || permissions === null)
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -74,17 +83,19 @@ export function CashPlanDetailsPage(): React.ReactElement {
             : null
         }
       >
-        <Button
-          variant='contained'
-          color='primary'
-          component='a'
-          disabled={!data.cashPlan.caHashId}
-          target='_blank'
-          href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
-          startIcon={<OpenInNewRoundedIcon />}
-        >
-          {t('Open in CashAssist')}
-        </Button>
+        {!businessAreaData.businessArea.isPaymentPlanApplicable && (
+          <Button
+            variant='contained'
+            color='primary'
+            component='a'
+            disabled={!data.cashPlan.caHashId}
+            target='_blank'
+            href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
+            startIcon={<OpenInNewRoundedIcon />}
+          >
+            {t('Open in CashAssist')}
+          </Button>
+        )}
       </PageHeader>
       <Container>
         <CashPlanDetails cashPlan={cashPlan} baseUrl={baseUrl} />
@@ -94,4 +105,4 @@ export function CashPlanDetailsPage(): React.ReactElement {
       </Container>
     </div>
   );
-}
+};

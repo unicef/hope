@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
@@ -91,24 +88,14 @@ export const SurveysFilters = ({
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label='From'
-              onChange={(date) =>
-                handleFilterChange(
-                  'createdAtRangeMin',
-                  dateToIsoString(date, 'startOfDay'),
-                )
-              }
+              onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
               value={filter.createdAtRangeMin}
             />
           </Grid>
           <Grid item xs={4}>
             <DatePickerFilter
               label={t('To')}
-              onChange={(date) =>
-                handleFilterChange(
-                  'createdAtRangeMax',
-                  dateToIsoString(date, 'endOfDay'),
-                )
-              }
+              onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
               value={filter.createdAtRangeMax}
             />
           </Grid>
