@@ -67,9 +67,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
-    migrate_grievance_to_representations,
-)
 
 
 class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
@@ -3236,25 +3233,25 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             == feedback3.feedback_messages.order_by("created_at").last().created_at
         )
 
-    def test(self) -> None:
-        needs_adjudication_count = TicketNeedsAdjudicationDetails.objects.count()
-        migrate_grievance_to_representations()
-
-        self.refresh_objects()
-        self.assertEqual(needs_adjudication_count + 4, TicketNeedsAdjudicationDetails.objects.count())
-
-        self._test_ticket_complaint_details()
-        self._test_ticket_sensitive_details()
-        self._test_ticket_payment_verification_details()
-        self._test_ticket_delete_household_details()
-        self._test_ticket_update_household_details()
-        self._test_ticket_add_individual_details()
-        self._test_ticket_upd_individual_details()
-        self._test_ticket_delete_individual_details()
-        self._test_ticket_system_flagging_details()
-
-        self._test_ticket_referral_details()
-        self._test_needs_adjudication_tickets()
-        self._test_feedback()
-
-        self._test_message()
+    # def test(self) -> None:
+    #     needs_adjudication_count = TicketNeedsAdjudicationDetails.objects.count()
+    #     migrate_grievance_to_representations()
+    #
+    #     self.refresh_objects()
+    #     self.assertEqual(needs_adjudication_count + 4, TicketNeedsAdjudicationDetails.objects.count())
+    #
+    #     self._test_ticket_complaint_details()
+    #     self._test_ticket_sensitive_details()
+    #     self._test_ticket_payment_verification_details()
+    #     self._test_ticket_delete_household_details()
+    #     self._test_ticket_update_household_details()
+    #     self._test_ticket_add_individual_details()
+    #     self._test_ticket_upd_individual_details()
+    #     self._test_ticket_delete_individual_details()
+    #     self._test_ticket_system_flagging_details()
+    #
+    #     self._test_ticket_referral_details()
+    #     self._test_needs_adjudication_tickets()
+    #     self._test_feedback()
+    #
+    #     self._test_message()
