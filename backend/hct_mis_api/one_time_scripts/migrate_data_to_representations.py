@@ -86,7 +86,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             batch_end = batch_start + BATCH_SIZE
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
-            batched_households = households[0:BATCH_SIZE]
+            batched_households = households[batch_start:batch_end]
             for individual in Individual.objects.filter(household__in=batched_households):
                 individuals_per_household_dict[individual.household_id].append(individual)
             for household in batched_households:
