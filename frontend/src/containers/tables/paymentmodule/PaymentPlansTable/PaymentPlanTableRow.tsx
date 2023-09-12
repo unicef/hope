@@ -1,22 +1,16 @@
 import { Box, TableCell } from '@material-ui/core';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface PaymentPlanTableRowProps {
   plan;
@@ -75,12 +69,10 @@ export const PaymentPlanTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={plan.status}
-            statusToColor={paymentPlanStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={plan.status}
+          statusToColor={paymentPlanStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align='left'>{plan.currencyName}</TableCell>

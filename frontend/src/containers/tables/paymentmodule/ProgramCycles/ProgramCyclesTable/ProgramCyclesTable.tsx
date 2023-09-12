@@ -5,13 +5,13 @@ import {
   AllProgramCyclesQueryVariables,
   useAllProgramCyclesQuery,
   useProgrammeChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { choicesToDict } from '../../../../utils/utils';
-import { UniversalTable } from '../../UniversalTable';
+} from '../../../../../__generated__/graphql';
+import { LoadingComponent } from '../../../../../components/core/LoadingComponent';
+import { TableWrapper } from '../../../../../components/core/TableWrapper';
+import { PERMISSIONS, hasPermissions } from '../../../../../config/permissions';
+import { usePermissions } from '../../../../../hooks/usePermissions';
+import { choicesToDict } from '../../../../../utils/utils';
+import { UniversalTable } from '../../../UniversalTable';
 import { headCells } from './ProgramCyclesTableHeadCells';
 import { ProgramCyclesTableRow } from './ProgramCyclesTableRow';
 
