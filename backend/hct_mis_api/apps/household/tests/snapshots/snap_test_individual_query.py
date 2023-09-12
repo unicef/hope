@@ -197,20 +197,55 @@ snapshots['TestIndividualQuery::test_individual_query_draft 1'] = {
 }
 
 snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 27,
+                    'line': 3
+                }
+            ],
+            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 27,
+                    'line': 3
+                }
+            ],
+            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_permission 1'] = {
     'data': {
-        'individual': {
-            'birthDate': '1943-07-30',
-            'familyName': 'Butler',
-            'fullName': 'Benjamin Butler',
-            'givenName': 'Benjamin',
-            'phoneNo': '(953)682-4596'
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
+                        'fullName': 'Jenna Franklin',
+                        'givenName': 'Jenna',
+                        'phoneNo': '001-296-358-5428-607',
+                        'phoneNoValid': False
+                    }
+                }
+            ]
         }
     }
 }
 
-snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_1_without_permission 1'] = {
     'data': {
-        'individual': None
+        'allIndividuals': None
     },
     'errors': [
         {
@@ -222,7 +257,7 @@ snapshots['TestIndividualQuery::test_individual_query_single_1_without_permissio
             ],
             'message': 'Permission Denied',
             'path': [
-                'individual'
+                'allIndividuals'
             ]
         }
     ]
