@@ -42,6 +42,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     save_images,
     to_date_string,
     to_phone_number_str,
+    update_es,
     verify_flex_fields,
 )
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
@@ -335,6 +336,9 @@ class IndividualDataUpdateService(DataChangeService):
             new_individual.recalculate_data()
         new_individual.refresh_from_db()
         log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual, new_individual)
+
+        update_es(individual)
+
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
                 lambda: deduplicate_and_check_against_sanctions_list_task.delay(
