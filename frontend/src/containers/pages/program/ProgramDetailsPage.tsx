@@ -2,8 +2,6 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  ProgramNode,
-  ProgramStatus,
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
@@ -19,7 +17,6 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { ProgramCyclesActionsTable } from '../../tables/programs/ProgramCyclesActionsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const ProgramDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
