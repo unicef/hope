@@ -11,6 +11,7 @@ from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 
+from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
@@ -43,8 +44,9 @@ class SoftDeletableModelWithDate(models.Model):
     class Meta:
         abstract = True
 
-    objects = SoftDeletableManager()
+    objects = SoftDeletableIsOriginalManager()  # SoftDeletableManager update after data migrations last step
     all_objects = models.Manager()
+    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any

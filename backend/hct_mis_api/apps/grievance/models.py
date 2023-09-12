@@ -63,6 +63,16 @@ class GrievanceTicketManager(models.Manager):
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
         )
 
+    # remove 'is_original' after data migration
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=True)
+
+
+class GrievanceTicketMigrationManager(models.Manager):
+    # TODO: remove after data migration
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset()
+
 
 class GenericPaymentTicket(TimeStampedUUIDModel):
     payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
@@ -362,7 +372,21 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     programs = models.ManyToManyField("program.Program", related_name="grievance_tickets", blank=True)
     comments = models.TextField(blank=True, null=True)
 
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
+
     objects = GrievanceTicketManager()
+    # TODO: remove after data migration
+    # added for migration purposes because 0062 call .objects()
+    default_for_migrations_fix = GrievanceTicketMigrationManager()
 
     def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]

@@ -13,7 +13,7 @@ variables:
   # ========================================================================
   Kubernetes.serviceConnection: "ICTD-HOPE-PRD-uni-apps-aks-hope-prd-ictd-kobo-prd-1617968835008"
   Kubernetes.namespace: "ictd-kobo-prd"
-  Chart.version: "2.022.44"
+  Chart.version: "0.1.0"
 
 stages:
   - stage: deploy
@@ -31,7 +31,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: "upgrade"
               chartType: "FilePath"
-              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
+              chartPath: 'pkg/kobo-$(Chart.version).tgz'
               releaseName: "kobo"
               install: true
               waitForExecution: false

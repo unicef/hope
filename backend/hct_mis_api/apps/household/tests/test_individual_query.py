@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestIndividualQuery(APITestCase):
@@ -55,12 +56,12 @@ class TestIndividualQuery(APITestCase):
         cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
-            status="ACTIVE",
+            status=Program.ACTIVE,
         )
         cls.program_draft = ProgramFactory(
             name="Test program DRAFT",
             business_area=cls.business_area,
-            status="DRAFT",
+            status=Program.ACTIVE,
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
