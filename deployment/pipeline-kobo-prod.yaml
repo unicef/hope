@@ -52,5 +52,5 @@ stages:
                 smtp.email=kobo@unitst.org,\
                 ingress.host=$(DOMAIN),\
                 ingress.scheme=https,\
-                ingress.tls=false,\
+                ingress.tls=true,\
                 ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-hope"
