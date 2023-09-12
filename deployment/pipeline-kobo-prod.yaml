@@ -31,7 +31,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: "upgrade"
               chartType: "FilePath"
-              chartPath: 'pkg/hope-$(Chart.version).tgz'
+              chartPath: 'pkg/kobo-$(Chart.version).tgz'
               releaseName: "kobo"
               install: true
               waitForExecution: false
