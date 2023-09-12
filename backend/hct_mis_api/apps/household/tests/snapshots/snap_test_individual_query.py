@@ -114,22 +114,12 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
             'edges': [
                 {
                     'node': {
-                        'birthDate': '1969-11-29',
-                        'familyName': 'Franklin',
-                        'fullName': 'Jenna Franklin',
-                        'givenName': 'Jenna',
-                        'phoneNo': '001-296-358-5428-607',
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
                         'phoneNoValid': False
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1973-03-23',
-                        'familyName': 'Torres',
-                        'fullName': 'Eric Torres',
-                        'givenName': 'Eric',
-                        'phoneNo': '+12282315473',
-                        'phoneNoValid': True
                     }
                 },
                 {
@@ -154,11 +144,21 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                 },
                 {
                     'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'fullName': 'Benjamin Butler',
-                        'givenName': 'Benjamin',
-                        'phoneNo': '(953)682-4596',
+                        'birthDate': '1973-03-23',
+                        'familyName': 'Torres',
+                        'fullName': 'Eric Torres',
+                        'givenName': 'Eric',
+                        'phoneNo': '+12282315473',
+                        'phoneNoValid': True
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
+                        'fullName': 'Jenna Franklin',
+                        'givenName': 'Jenna',
+                        'phoneNo': '001-296-358-5428-607',
                         'phoneNoValid': False
                     }
                 }
@@ -197,29 +197,33 @@ snapshots['TestIndividualQuery::test_individual_query_draft 1'] = {
 }
 
 snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 27,
-                    'line': 3
-                }
-            ],
-            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+    'data': {
+        'individual': {
+            'birthDate': '1943-07-30',
+            'familyName': 'Butler',
+            'fullName': 'Benjamin Butler',
+            'givenName': 'Benjamin',
+            'phoneNo': '(953)682-4596'
         }
-    ]
+    }
 }
 
 snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
+    'data': {
+        'individual': None
+    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 27,
+                    'column': 7,
                     'line': 3
                 }
             ],
-            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+            'message': 'Permission Denied',
+            'path': [
+                'individual'
+            ]
         }
     ]
 }
