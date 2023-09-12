@@ -109,7 +109,7 @@ class ProgramCycleValidator(CommonValidator):
     def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
         if (program_cycle := kwargs.get("program_cycle")) and not kwargs.get("is_create_action"):
             if program_cycle.start_date and "start_date" in kwargs and kwargs.get("start_date") is None:
-                raise ValidationError("Not possible leave the Program Cycle start date empty.")
+                raise ValidationError("Not possible leave the Programme Cycle start date empty.")
 
             if program_cycle.end_date and "end_date" in kwargs and kwargs.get("end_date") is None:
                 raise ValidationError(

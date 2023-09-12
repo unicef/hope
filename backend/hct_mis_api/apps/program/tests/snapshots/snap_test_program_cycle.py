@@ -445,7 +445,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 5'] = {
                     'line': 3
                 }
             ],
-            'message': 'Not possible leave the Program Cycle start date empty.',
+            'message': 'Not possible leave the Programme Cycle start date empty.',
             'path': [
                 'updateProgramCycle'
             ]
