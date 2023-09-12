@@ -106,7 +106,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
-    ).update(is_migration_handled=True)
+    ).distinct().update(is_migration_handled=True)
     logger.info("Handling objects without any representations yet - enrolling to biggest program")
     copy_non_program_objects_to_biggest_program(business_area)
 
@@ -161,6 +161,7 @@ def copy_household_representation(
 
 def copy_household(household: Household, program: Program, individuals: list[Individual]) -> Household:
     original_household_id = household.id
+    original_head_of_household_id = household.head_of_household.pk
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
@@ -168,7 +169,7 @@ def copy_household(household: Household, program: Program, individuals: list[Ind
     household.program = program
     household.is_original = False
 
-    original_household = Household.original_and_repr_objects.get(pk=original_household_id)
+    # original_household = Household.original_and_repr_objects.get(pk=original_household_id)
 
     individuals_to_create = []
     for individual in individuals:
@@ -176,7 +177,7 @@ def copy_household(household: Household, program: Program, individuals: list[Ind
 
     household.head_of_household = get_individual_representation_per_program_by_old_individual_id(
         program=program,
-        old_individual_id=original_household.head_of_household.pk,
+        old_individual_id=original_head_of_household_id,
     )
 
     household.save()
