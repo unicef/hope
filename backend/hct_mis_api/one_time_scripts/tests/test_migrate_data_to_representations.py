@@ -215,6 +215,8 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual_helper3,
         )
+        self.individual_helper3.household = self.household_helper
+        self.individual_helper3.save()
         self.document_helper = DocumentFactory(individual=self.individual_helper3)
         self.household_helper.target_populations.set([self.target_population3])
 

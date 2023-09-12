@@ -316,7 +316,9 @@ class TestCopyHouseholdRepresentation(TestCase):
         individual_identities_count = IndividualIdentity.original_and_repr_objects.count()
         bank_account_info_count = BankAccountInfo.original_and_repr_objects.count()
 
-        copy_household_representation(program=self.program, household=self.household1)
+        copy_household_representation(
+            program=self.program, household=self.household1, individuals=[self.individual1, self.individual2]
+        )
 
         self.household1 = Household.original_and_repr_objects.get(id=self.household1_id)
 
@@ -339,7 +341,9 @@ class TestCopyHouseholdRepresentation(TestCase):
         individual_identities_count = IndividualIdentity.original_and_repr_objects.count()
         bank_account_info_count = BankAccountInfo.original_and_repr_objects.count()
 
-        copy_household_representation(program=self.program, household=self.household1)
+        copy_household_representation(
+            program=self.program, household=self.household1, individuals=[self.individual1, self.individual2]
+        )
 
         self.household1 = Household.original_and_repr_objects.get(id=self.household1_id)
 

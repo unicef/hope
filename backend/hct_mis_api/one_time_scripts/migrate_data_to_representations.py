@@ -1,5 +1,6 @@
 import logging
-from typing import Optional
+from collections import defaultdict
+from typing import Any, Optional
 
 from django.db import transaction
 from django.db.models import Count, Q, QuerySet
@@ -21,7 +22,8 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 500
+BATCH_SIZE = 100
+BATCH_SIZE_SMALL = 20
 
 
 def migrate_data_to_representations() -> None:
@@ -80,10 +82,16 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
         logger.info(f"Handling households for program: {program}")
 
-        for i, household in enumerate(households):
-            if i % 100 == 0:
-                logger.info(f"Handling {i} - {i+99}/{households_count} households")
-            copy_household_representation(household, program)
+        for batch_start in range(0, households_count, BATCH_SIZE):
+            batch_end = batch_start + BATCH_SIZE
+            logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
+            individuals_per_household_dict = defaultdict(list)
+            batched_households = households[0:BATCH_SIZE]
+            for individual in Individual.objects.filter(household__in=batched_households):
+                individuals_per_household_dict[individual.household_id].append(individual)
+            for household in batched_households:
+                with transaction.atomic():
+                    copy_household_representation(household, program, individuals_per_household_dict[household.id])
 
         logger.info(f"Handling RDIs for program: {program}")
         handle_rdis(households, program)
@@ -129,22 +137,29 @@ def get_individual_representation_per_program_by_old_individual_id(
     ).first()
 
 
-def copy_household_representation(household: Household, program: Program) -> None:
+def copy_household_representation(
+    household: Household,
+    program: Program,
+    individuals: list[Individual],
+) -> Optional[Household]:
     """
     Copy household into representation for given program if it does not exist yet.
     """
     # copy representations only based on original households
     if household.is_original:
         # if there is no representation of this household in this program yet, copy the household
-        if not Household.original_and_repr_objects.filter(
+        if household_representation := Household.original_and_repr_objects.filter(
             program=program,
             copied_from=household,
             is_original=False,
-        ).exists():
-            copy_household(household, program)
+        ).first():
+            return household_representation
+        else:
+            return copy_household(household, program, individuals)
+    return household
 
 
-def copy_household(household: Household, program: Program) -> Household:
+def copy_household(household: Household, program: Program, individuals: list[Individual]) -> Household:
     original_household_id = household.id
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
@@ -155,9 +170,9 @@ def copy_household(household: Household, program: Program) -> Household:
 
     original_household = Household.original_and_repr_objects.get(pk=original_household_id)
 
-    individuals = []
-    for individual in original_household.individuals.all():
-        individuals.append(copy_individual_representation(program, individual))
+    individuals_to_create = []
+    for individual in individuals:
+        individuals_to_create.append(copy_individual_representation(program, individual))
 
     household.head_of_household = get_individual_representation_per_program_by_old_individual_id(
         program=program,
@@ -165,14 +180,14 @@ def copy_household(household: Household, program: Program) -> Household:
     )
 
     household.save()
-    for individual in individuals:
+    for individual in individuals_to_create:  # type: ignore
         individual.household = household
 
-    Individual.original_and_repr_objects.bulk_update(individuals, ["household"])
+    Individual.original_and_repr_objects.bulk_update(individuals_to_create, ["household"])
 
     # copy_entitlement_card_per_household(household=original_household, household_representation=household)
 
-    del individuals
+    del individuals_to_create
     return household
 
 
@@ -219,24 +234,6 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
     copy_individual_identity_per_individual(original_individual, individual)
     copy_bank_account_info_per_individual(original_individual, individual)
 
-    return individual
-
-
-def adjust_individual_to_representation(
-    individual: Individual,
-    program: Program,
-    household_representation: Optional[Household] = None,
-) -> Individual:
-    """
-    Use this function when individual has no representations yet - original object is used as 1st representation
-    for optimization purposes.
-    """
-    individual.program = program
-    individual.copied_from_id = individual.id
-    individual.origin_unicef_id = individual.unicef_id
-    individual.household = household_representation
-    individual.save()
-    individual.documents.update(program=individual.program)
     return individual
 
 
@@ -292,8 +289,9 @@ def delete_target_populations_in_wrong_statuses(program: Program) -> None:
         )
         & Q(program=program)
     )
-    HouseholdSelection.objects.filter(target_population__in=tp_to_delete).delete()
-    tp_to_delete.delete()
+    with transaction.atomic():
+        HouseholdSelection.objects.filter(target_population__in=tp_to_delete).delete()
+        tp_to_delete.delete()
 
 
 def copy_entitlement_card_per_household(household: Household, household_representation: Household) -> None:
@@ -401,7 +399,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
         logger.info(f"Adjusting payments {batch_start} - {batch_end}/{payments_count}")
         payment_updates = []
 
-        for payment in payments[batch_start:batch_end]:
+        for payment in payments[0:BATCH_SIZE]:
             payment_program = payment.parent.target_population.program
             representation_collector = get_individual_representation_per_program_by_old_individual_id(
                 program=payment_program,
@@ -448,7 +446,7 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
         logger.info(f"Adjusting payment records {batch_start} - {batch_end}/{payment_records_count}")
         payment_record_updates = []
 
-        for payment_record in payment_records[batch_start:batch_end]:
+        for payment_record in payment_records[0:BATCH_SIZE]:
             payment_record_program = payment_record.target_population.program
             if payment_record.head_of_household:
                 representation_head_of_household = get_individual_representation_per_program_by_old_individual_id(
@@ -481,10 +479,27 @@ def handle_rdis(households: QuerySet, program: Program) -> None:
         if i % 100 == 0:
             logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
         rdi_households = rdi.households.filter(is_original=True)
-        for rdi_household in rdi_households:
-            copy_household_representation(rdi_household, program)
 
-        copy_roles(rdi_households, program)
+        household_count = rdi_households.count()
+        for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
+            batch_end = batch_start + BATCH_SIZE_SMALL
+            logger.info(f"Copying {batch_start} - {batch_end}/{household_count} households for RDI")
+            household_dict = {}
+            with transaction.atomic():
+                individuals_per_household_dict = defaultdict(list)
+                batched_households = rdi_households[batch_start:batch_end]
+                for individual in Individual.objects.filter(household__in=batched_households):
+                    individuals_per_household_dict[individual.household_id].append(individual)
+                for household in batched_households:
+                    household_original_id = household.pk
+                    household_representation = copy_household_representation(
+                        household,
+                        program,
+                        individuals_per_household_dict[household_original_id],
+                    )
+                    household_dict[household_original_id] = household_representation
+
+                copy_roles_from_dict(household_dict, program)  # type: ignore
 
         rdi.programs.add(program)
 
@@ -522,20 +537,29 @@ def copy_households_to_biggest_program(program: Program, business_area: Business
         business_area=business_area, copied_to__isnull=True, is_original=True
     ).order_by("pk")
 
-    household_dict = {}
-    for household in households:
-        household_original_id = household.pk
+    household_count = households.count()
+    for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
+        batch_end = batch_start + BATCH_SIZE_SMALL
+        logger.info(f"Copying {batch_start} - {batch_end}/{household_count} households to biggest program")
+        household_dict = {}
+        with transaction.atomic():
+            individuals_per_household_dict = defaultdict(list)
+            batched_households = households[0:BATCH_SIZE_SMALL]
+            for individual in Individual.objects.filter(household__in=batched_households):
+                individuals_per_household_dict[individual.household_id].append(individual)
+            for household in batched_households:
+                household_original_id = household.pk
+                household_representation = copy_household(
+                    household,
+                    program,
+                    individuals_per_household_dict[household_original_id],
+                )
+                household_dict[household_original_id] = household_representation
 
-        household_representation = copy_household(household, program)
-        household_dict[household_original_id] = household_representation
-
-        if len(household_dict) >= BATCH_SIZE:
-            copy_roles_for_biggest_program(household_dict, program)
-            household_dict = {}
-        copy_roles_for_biggest_program(household_dict, program)
+            copy_roles_from_dict(household_dict, program)
 
 
-def copy_roles_for_biggest_program(household_dict: dict[int, Household], program: Program) -> None:
+def copy_roles_from_dict(household_dict: dict[Any, Household], program: Program) -> None:
     roles = (
         IndividualRoleInHousehold.original_and_repr_objects.filter(
             household__id__in=household_dict.keys(),
