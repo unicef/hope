@@ -2,6 +2,7 @@ import { Box } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   usePaymentPlanQuery,
 } from '../../../__generated__/graphql';
@@ -41,15 +42,21 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   });
 
   const status = data?.paymentPlan?.status;
+  const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
 
   useEffect(() => {
-    if (PaymentPlanStatus.Preparing === status) {
+    if (
+      PaymentPlanStatus.Preparing === status ||
+      (backgroundActionStatus !== null &&
+        backgroundActionStatus !==
+          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+    ) {
       startPolling(3000);
     } else {
       stopPolling();
     }
     return stopPolling;
-  }, [status, startPolling, stopPolling]);
+  }, [status, backgroundActionStatus, startPolling, stopPolling]);
 
   if (loading && !data) return <LoadingComponent />;
   if (permissions === null || !data) return null;
@@ -78,25 +85,30 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      <AcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayEntitlement && (
-        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-      )}
-      {shouldDisplayFsp && (
-        <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      )}
-      <PaymentInstructionsSection paymentPlan={paymentPlan} />
-      <ExcludeSection paymentPlan={paymentPlan} />
-      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-      <PaymentsTable
-        baseUrl={baseUrl}
-        businessArea={businessArea}
-        paymentPlan={paymentPlan}
-        permissions={permissions}
-        canViewDetails
-      />
-      {shouldDisplayReconciliationSummary && (
-        <ReconciliationSummary paymentPlan={paymentPlan} />
+      {status !== PaymentPlanStatus.Preparing && (
+        <>
+          <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayEntitlement && (
+            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+          )}
+          {shouldDisplayFsp && (
+            <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+          )}
+          <PaymentInstructionsSection paymentPlan={paymentPlan} />
+          <ExcludeSection paymentPlan={paymentPlan} />
+          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+          <PaymentsTable
+            baseUrl={baseUrl}
+            businessArea={businessArea}
+            paymentPlan={paymentPlan}
+            permissions={permissions}
+            canViewDetails
+          />
+          {shouldDisplayReconciliationSummary && (
+            <ReconciliationSummary paymentPlan={paymentPlan} />
+          )}
+          )
+        </>
       )}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan.id} />

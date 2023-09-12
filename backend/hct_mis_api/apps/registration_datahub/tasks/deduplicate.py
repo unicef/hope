@@ -36,6 +36,7 @@ from hct_mis_api.apps.registration_datahub.documents import (
     get_imported_individual_doc,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    SIMILAR_IN_BATCH,
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
@@ -317,6 +318,30 @@ class DeduplicateTask:
             ).update(deduplication_golden_record_status=UNIQUE)
             old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.batch_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_batch_status=DUPLICATE_IN_BATCH,
+            ).count()
+            registration_data_import.batch_possible_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_batch_status=SIMILAR_IN_BATCH,
+            ).count()
+            registration_data_import.batch_unique = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_batch_status=UNIQUE_IN_BATCH,
+            ).count()
+            registration_data_import.golden_record_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_golden_record_status=DUPLICATE,
+            ).count()
+            registration_data_import.golden_record_possible_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_golden_record_status=NEEDS_ADJUDICATION,
+            ).count()
+            registration_data_import.golden_record_unique = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_golden_record_status=UNIQUE,
+            ).count()
             registration_data_import.error_message = ""
             registration_data_import.save()
             log_create(

@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
-import { ProgrammesFilters } from '../../../../containers/tables/programs/ProgrammesTable/ProgrammesFilter';
 import { SurveyTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
-import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
-import { LookUpSelectionTables } from './LookUpSelectionTables';
+import { LookUpProgrammesFiltersSurveys } from './LookUpProgrammesFiltersSurveys';
+import { LookUpSelectionTablesSurveys } from './LookUpSelectionTablesSurveys';
+import { LookUpTargetPopulationFiltersSurveys } from './LookUpTargetPopulationFiltersSurveys';
 
 const surveysTabs = ['Programme', 'Target Population'];
 
@@ -17,7 +17,7 @@ const BoxWithBorderBottom = styled(Box)`
   padding: 15px 0;
 `;
 
-export const LookUpSelection = ({
+export const LookUpSelectionSurveys = ({
   businessArea,
   onValueChange,
   setValues,
@@ -55,8 +55,10 @@ export const LookUpSelection = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    numIndividualsMin: null,
-    numIndividualsMax: null,
+    totalHouseholdsCountMin: null,
+    totalHouseholdsCountMax: null,
+    createdAtRangeMin: undefined,
+    createdAtRangeMax: undefined,
   };
 
   const [filterTP, setFilterTP] = useState(
@@ -125,7 +127,7 @@ export const LookUpSelection = ({
       <Box p={4} mt={4}>
         <Box>
           {selectedTab === SurveyTabsValues.PROGRAM && (
-            <ProgrammesFilters
+            <LookUpProgrammesFiltersSurveys
               filter={filterP}
               choicesData={choicesData}
               setFilter={setFilterP}
@@ -135,7 +137,7 @@ export const LookUpSelection = ({
             />
           )}
           {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
-            <TargetPopulationFilters
+            <LookUpTargetPopulationFiltersSurveys
               filter={filterTP}
               setFilter={setFilterTP}
               initialFilter={initialFilterTP}
@@ -146,7 +148,7 @@ export const LookUpSelection = ({
           )}
         </Box>
       </Box>
-      <LookUpSelectionTables
+      <LookUpSelectionTablesSurveys
         selectedTab={selectedTab}
         choicesData={choicesData}
         filtersProgramApplied={appliedFilterP}

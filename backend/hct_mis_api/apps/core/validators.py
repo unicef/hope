@@ -84,8 +84,7 @@ def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List
     choices_mapping = defaultdict(list)
     first_row = choices_sheet.row(0)
     choices_headers_map = [col.value for col in first_row]
-
-    if {"list_name", "name", "label:English(EN)"}.issubset(set(choices_headers_map)) is False:
+    if {"list_name", "name", "label::English (en)"}.issubset(set(choices_headers_map)) is False:
         logger.error("Choices sheet does not contain all required columns")
         raise ValueError("Choices sheet does not contain all required columns")
 

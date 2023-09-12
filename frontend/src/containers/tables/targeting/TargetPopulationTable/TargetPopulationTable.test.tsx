@@ -14,7 +14,7 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
     program: [fakeProgram.id],
     totalHouseholdsCountMin: null,
     totalHouseholdsCountMax: null,
-    createdAtRange: {},
+    createdAtRange: undefined,
   };
 
   it('should render with data', async () => {

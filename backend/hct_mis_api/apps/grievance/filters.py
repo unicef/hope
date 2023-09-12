@@ -213,37 +213,45 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             logger.info("Search term cannot be empty string or space")
             return qs.none()
 
+        value = value.strip()
         if key == "ticket_id":
             values = list(map(str.strip, value.split(",")))
-            return qs.filter(Q(unicef_id__in=values))
+            if len(values) > 1:
+                return qs.filter(unicef_id__in=values)
+            return qs.filter(unicef_id__icontains=value)
         elif key == "ticket_hh_id":
-            return qs.filter(Q(household_unicef_id=value))
-        elif key == "family_name":
-            value = value.strip()
-            ids = (
-                Individual.objects.filter(Q(family_name=value) & Q(relationship=HEAD))
+            return qs.filter(household_unicef_id__icontains=value)
+        elif key == "full_name":
+            unicef_ids = (
+                Individual.objects.filter(Q(full_name__icontains=value) & Q(relationship=HEAD))
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
-            return qs.filter(Q(household_unicef_id__in=ids))
+            return qs.filter(household_unicef_id__in=unicef_ids)
         elif key == "registration_id":
-            value = value.strip()
-            ids = (
+            unicef_ids = (
                 Individual.objects.filter(relationship=HEAD, registration_id=value)
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
-            return qs.filter(Q(household_unicef_id__in=ids))
+            return qs.filter(household_unicef_id__in=unicef_ids)
+        elif key == "phone_number":
+            unicef_ids = (
+                Individual.objects.filter(relationship=HEAD)
+                .filter(Q(phone_no__icontains=value) | Q(phone_no_alternative__icontains=value))
+                .select_related("household")
+                .values_list("household__unicef_id", flat=True)
+            )
+            return qs.filter(household_unicef_id__in=unicef_ids)
         elif DocumentType.objects.filter(key=key).exists():
-            value = value.strip()
-            ids = (
+            unicef_ids = (
                 Individual.objects.filter(
                     Q(relationship=HEAD) & Q(documents__type__key=key) & Q(documents__document_number__icontains=value)
                 )
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
-            return qs.filter(Q(household_unicef_id__in=ids))
+            return qs.filter(household_unicef_id__in=unicef_ids)
         raise KeyError(f"Invalid search key '{key}'")
 
     def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:

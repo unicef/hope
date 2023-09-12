@@ -14,6 +14,7 @@ from hct_mis_api.apps.accountability.models import (
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.program.filters import GlobalProgramFilter
 
 
 class MessagesFilter(FilterSet):
@@ -77,7 +78,7 @@ class MessageRecipientsMapFilter(FilterSet):
     )
 
 
-class FeedbackFilter(FilterSet):
+class FeedbackFilter(GlobalProgramFilter, FilterSet):
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")

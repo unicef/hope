@@ -39,7 +39,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_1_with_permission_program
                     'line': 3
                 }
             ],
-            'message': 'Create/Update Program Cycle is possible only for Active Program.',
+            'message': 'Create/Update Programme Cycle is possible only for Active Programme.',
             'path': [
                 'createProgramCycle'
             ]
@@ -59,7 +59,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_2_with_permission_program
                     'line': 3
                 }
             ],
-            'message': "Program Cycle start date can't be earlier then Program start date",
+            'message': 'Programme Cycle start date cannot be earlier than programme start date',
             'path': [
                 'createProgramCycle'
             ]
@@ -79,7 +79,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_3_with_permission_program
                     'line': 3
                 }
             ],
-            'message': "Program Cycle end date can't be later then Program end date",
+            'message': 'Programme Cycle end date cannot be earlier than programme end date',
             'path': [
                 'createProgramCycle'
             ]
@@ -119,7 +119,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 1
                     'line': 3
                 }
             ],
-            'message': "Program Cycles' timeframes mustn't overlap.",
+            'message': "Programme Cycles' timeframes must not overlap.",
             'path': [
                 'createProgramCycle'
             ]
@@ -139,7 +139,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 2
                     'line': 3
                 }
             ],
-            'message': "Program Cycles' timeframes mustn't overlap.",
+            'message': "Programme Cycles' timeframes must not overlap.",
             'path': [
                 'createProgramCycle'
             ]
@@ -159,7 +159,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 3
                     'line': 3
                 }
             ],
-            'message': "Program Cycles' timeframes mustn't overlap.",
+            'message': "Programme Cycles' timeframes must not overlap.",
             'path': [
                 'createProgramCycle'
             ]
@@ -179,7 +179,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_overlapping 4
                     'line': 3
                 }
             ],
-            'message': "Program Cycles' timeframes mustn't overlap.",
+            'message': "Programme Cycles' timeframes must not overlap.",
             'path': [
                 'createProgramCycle'
             ]
@@ -199,7 +199,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_when_cycles_without_end_d
                     'line': 3
                 }
             ],
-            'message': 'All Program Cycles should have end date for creation new one.',
+            'message': 'All Programme Cycles should have end date for creation new one.',
             'path': [
                 'createProgramCycle'
             ]
@@ -219,7 +219,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_with_the_same_name 1'] = 
                     'line': 3
                 }
             ],
-            'message': "Program Cycles' name should be unique.",
+            'message': "Programme Cycles' name should be unique.",
             'path': [
                 'createProgramCycle'
             ]
@@ -259,7 +259,7 @@ snapshots['TestProgramCycle::test_delete_program_cycle 2'] = {
                     'line': 3
                 }
             ],
-            'message': 'Only Program Cycle for Active Program can be deleted.',
+            'message': 'Only Programme Cycle for Active Programme can be deleted.',
             'path': [
                 'deleteProgramCycle'
             ]
@@ -279,7 +279,7 @@ snapshots['TestProgramCycle::test_delete_program_cycle 3'] = {
                     'line': 3
                 }
             ],
-            'message': 'Only Draft Program Cycle can be deleted.',
+            'message': 'Only Draft Programme Cycle can be deleted.',
             'path': [
                 'deleteProgramCycle'
             ]
@@ -425,7 +425,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 4'] = {
                     'line': 3
                 }
             ],
-            'message': 'Not possible leave the Program Cycle name empty.',
+            'message': 'Not possible leave the Programme Cycle name empty.',
             'path': [
                 'updateProgramCycle'
             ]
@@ -445,7 +445,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 5'] = {
                     'line': 3
                 }
             ],
-            'message': 'Not possible leave the Program Cycle start date empty.',
+            'message': 'Not possible leave the Programme Cycle start date empty.',
             'path': [
                 'updateProgramCycle'
             ]
@@ -465,7 +465,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 6'] = {
                     'line': 3
                 }
             ],
-            'message': 'Not possible leave the Program Cycle end date empty if it was empty upon starting the edit.',
+            'message': 'Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit.',
             'path': [
                 'updateProgramCycle'
             ]

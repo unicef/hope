@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from django.contrib.postgres.fields import IntegerRangeField
-from django.db.models import DateTimeField, Q
+from django.db.models import Count, DateTimeField, Q
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -16,6 +16,7 @@ from django_filters import (
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
 
 
-class TargetPopulationFilter(FilterSet):
+class TargetPopulationFilter(GlobalProgramFilter, FilterSet):
     """Query target population records.
 
     Loads associated entries for Households and TargetRules.
@@ -67,6 +68,13 @@ class TargetPopulationFilter(FilterSet):
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
     status_not = CharFilter(field_name="status", exclude=True)
 
+    total_households_count_with_valid_phone_no_max = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_max"
+    )
+    total_households_count_with_valid_phone_no_min = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_min"
+    )
+
     @staticmethod
     def filter_created_by_name(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         """Gets full name of the associated user from query."""
@@ -88,6 +96,32 @@ class TargetPopulationFilter(FilterSet):
         queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__lte=value
         )
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_max(
+        queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "households",
+                filter=Q(households__head_of_household__phone_no_valid=True)
+                | Q(households__head_of_household__phone_no_alternative_valid=True),
+            )
+        ).filter(household_count_with_phone_number__lte=value)
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_min(
+        queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "households",
+                filter=Q(households__head_of_household__phone_no_valid=True)
+                | Q(households__head_of_household__phone_no_alternative_valid=True),
+            )
+        ).filter(household_count_with_phone_number__gte=value)
         return queryset
 
     @staticmethod
