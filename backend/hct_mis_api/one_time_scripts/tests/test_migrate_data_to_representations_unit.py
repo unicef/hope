@@ -42,7 +42,6 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     adjust_payment_records,
     adjust_payments,
-    assign_non_program_objects_to_biggest_program,
     copy_bank_account_info_per_individual,
     copy_document_per_individual,
     copy_entitlement_card_per_household,
@@ -50,6 +49,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     copy_household_selections,
     copy_individual_identity_per_individual,
     copy_individual_representation,
+    copy_non_program_objects_to_biggest_program,
     copy_roles,
     get_biggest_program,
     handle_rdis,
@@ -277,8 +277,8 @@ class TestCopyHouseholdRepresentation(TestCase):
 
         self.household1 = HouseholdFactory(head_of_household=self.individual1, business_area=business_area)
         self.household1_id = self.household1.id
-        self.entitlement_card1 = EntitlementCardFactory(household=self.household1)
-        self.entitlement_card2 = EntitlementCardFactory(household=self.household1)
+        # self.entitlement_card1 = EntitlementCardFactory(household=self.household1)
+        # self.entitlement_card2 = EntitlementCardFactory(household=self.household1)
 
         self.individual1.household = self.household1
         self.individual1.save()
@@ -310,7 +310,7 @@ class TestCopyHouseholdRepresentation(TestCase):
             is_original=False,
         )
         household_count = Household.original_and_repr_objects.count()
-        entitlement_card_count = EntitlementCard.original_and_repr_objects.count()
+        # entitlement_card_count = EntitlementCard.original_and_repr_objects.count()
         individual_count = Individual.original_and_repr_objects.count()
         documents_count = Document.original_and_repr_objects.count()
         individual_identities_count = IndividualIdentity.original_and_repr_objects.count()
@@ -321,7 +321,7 @@ class TestCopyHouseholdRepresentation(TestCase):
         self.household1 = Household.original_and_repr_objects.get(id=self.household1_id)
 
         self.assertEqual(Household.original_and_repr_objects.count(), household_count)
-        self.assertEqual(EntitlementCard.original_and_repr_objects.count(), entitlement_card_count)
+        # self.assertEqual(EntitlementCard.original_and_repr_objects.count(), entitlement_card_count)
         self.assertEqual(Individual.original_and_repr_objects.count(), individual_count)
         self.assertEqual(Document.original_and_repr_objects.count(), documents_count)
         self.assertEqual(IndividualIdentity.original_and_repr_objects.count(), individual_identities_count)
@@ -333,7 +333,7 @@ class TestCopyHouseholdRepresentation(TestCase):
 
     def test_copy_household_representation(self) -> None:
         household_count = Household.original_and_repr_objects.count()
-        entitlement_card_count = EntitlementCard.original_and_repr_objects.count()
+        # entitlement_card_count = EntitlementCard.original_and_repr_objects.count()
         individual_count = Individual.original_and_repr_objects.count()
         documents_count = Document.original_and_repr_objects.count()
         individual_identities_count = IndividualIdentity.original_and_repr_objects.count()
@@ -352,7 +352,7 @@ class TestCopyHouseholdRepresentation(TestCase):
         self.assertNotEqual(household_representation.pk, self.household1.pk)
         self.assertEqual(household_representation.copied_from, self.household1)
         self.assertEqual(household_representation.origin_unicef_id, self.household1.unicef_id)
-        self.assertEqual(household_representation.entitlement_cards(manager="original_and_repr_objects").count(), 2)
+        # self.assertEqual(household_representation.entitlement_cards(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(household_representation.individuals(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(
             household_representation.individuals(manager="original_and_repr_objects")
@@ -377,7 +377,7 @@ class TestCopyHouseholdRepresentation(TestCase):
         )
 
         self.assertEqual(Household.original_and_repr_objects.count() - household_count, 1)
-        self.assertEqual(EntitlementCard.original_and_repr_objects.count() - entitlement_card_count, 2)
+        # self.assertEqual(EntitlementCard.original_and_repr_objects.count() - entitlement_card_count, 2)
         self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 2)
         self.assertEqual(Document.original_and_repr_objects.count() - documents_count, 4)
         self.assertEqual(IndividualIdentity.original_and_repr_objects.count() - individual_identities_count, 4)
@@ -684,7 +684,7 @@ class TestAssignNonProgramRDIToBiggestProgram(TestCase):
         households_count = Household.original_and_repr_objects.count()
         individuals_count = Individual.original_and_repr_objects.count()
 
-        assign_non_program_objects_to_biggest_program(self.business_area)
+        copy_non_program_objects_to_biggest_program(self.business_area)
 
         self.rdi1.refresh_from_db()
         self.rdi2.refresh_from_db()

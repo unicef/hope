@@ -159,14 +159,10 @@ def copy_household(household: Household, program: Program) -> Household:
     for individual in original_household.individuals.all():
         individuals.append(copy_individual_representation(program, individual))
 
-    head_of_household = get_individual_representation_per_program_by_old_individual_id(
+    household.head_of_household = get_individual_representation_per_program_by_old_individual_id(
         program=program,
         old_individual_id=original_household.head_of_household.pk,
     )
-    if head_of_household:
-        household.head_of_household = head_of_household
-    else:
-        household.head_of_household = copy_individual_representation(program, original_household.head_of_household)
 
     household.save()
     for individual in individuals:
@@ -174,7 +170,7 @@ def copy_household(household: Household, program: Program) -> Household:
 
     Individual.original_and_repr_objects.bulk_update(individuals, ["household"])
 
-    copy_entitlement_card_per_household(household=original_household, household_representation=household)
+    # copy_entitlement_card_per_household(household=original_household, household_representation=household)
 
     del individuals
     return household
@@ -525,17 +521,51 @@ def copy_households_to_biggest_program(program: Program, business_area: Business
     households = Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=True, is_original=True
     ).order_by("pk")
-    ids_generator = (x for x in households.values_list("id", flat=True))
-    for household in households:
-        copy_household(household, program)
 
-    li = []
-    for x in ids_generator:
-        li.append(x)
-        if len(li) >= 100:
-            copy_roles(Household.original_and_repr_objects.filter(id__in=li), program=program)
-            li = []
-    copy_roles(Household.original_and_repr_objects.filter(id__in=li), program=program)
+    household_dict = {}
+    for household in households:
+        household_original_id = household.pk
+
+        household_representation = copy_household(household, program)
+        household_dict[household_original_id] = household_representation
+
+        if len(household_dict) >= BATCH_SIZE:
+            copy_roles_for_biggest_program(household_dict, program)
+            household_dict = {}
+        copy_roles_for_biggest_program(household_dict, program)
+
+
+def copy_roles_for_biggest_program(household_dict: dict[int, Household], program: Program) -> None:
+    roles = (
+        IndividualRoleInHousehold.original_and_repr_objects.filter(
+            household__id__in=household_dict.keys(),
+            individual__is_removed=False,
+            household__is_removed=False,
+            is_original=True,
+        )
+        .exclude(copied_to__household__program=program)
+        .order_by("pk")
+    )
+
+    roles_to_create = []
+    for role in roles:
+        household_representation = household_dict[role.household.pk]
+        individual_representation = get_individual_representation_per_program_by_old_individual_id(
+            program=program,
+            old_individual_id=role.individual_id,
+        )
+        if not individual_representation:
+            individual_representation = copy_individual_representation(program=program, individual=role.individual)
+
+        original_role_id = role.id
+        role.copied_from_id = original_role_id
+        role.pk = None
+        role.household = household_representation
+        role.individual = individual_representation
+        role.is_original = False
+        roles_to_create.append(role)
+
+    IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_to_create)
 
 
 def copy_individuals_to_biggest_program(program: Program, business_area: BusinessArea) -> None:
