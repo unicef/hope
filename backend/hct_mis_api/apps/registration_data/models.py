@@ -112,6 +112,19 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
     erased = models.BooleanField(default=False, help_text="Abort RDI")
     refuse_reason = models.CharField(max_length=100, blank=True, null=True)
+    # TODO: in future will use one program per RDI after migration
+    program = models.ForeignKey(
+        "program.Program",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="registration_imports",
+        on_delete=models.SET_NULL,
+    )
+    programs = models.ManyToManyField(
+        "program.Program",
+        related_name="registration_data_imports",
+    )
 
     def __str__(self) -> str:
         return self.name
