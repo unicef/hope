@@ -53,5 +53,4 @@ stages:
                 ingress.host=$(DOMAIN),\
                 ingress.scheme=https,\
                 ingress.tls=true,\
-                ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-hope,\
-                ingress.scheme=https"
+                ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-hope"
