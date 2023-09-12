@@ -228,10 +228,7 @@ class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
 
         cls.has_permission(info, Permissions.PM_PROGRAMME_CYCLE_UPDATE, business_area)
 
-        validation_kwargs_dict = {
-            "program": program,
-            "program_cycle": program_cycle
-        }
+        validation_kwargs_dict = {"program": program, "program_cycle": program_cycle}
         input_fields = ["name", "start_date", "end_date"]
         for input_field in input_fields:
             if input_field in program_cycle_data:
