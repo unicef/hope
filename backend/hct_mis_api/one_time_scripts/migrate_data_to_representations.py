@@ -367,10 +367,12 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     """
     household_selections = household_selections.order_by("id")
 
-    household_selections_to_create = []
+    household_selection_count = household_selections.count()
+    for _ in range(0, household_selection_count, BATCH_SIZE):
+        household_selections_to_create = []
+        batched_household_selections = household_selections[0:BATCH_SIZE]
 
-    with transaction.atomic():
-        for household_selection in household_selections:
+        for household_selection in batched_household_selections:
             household_representation = get_household_representation_per_program_by_old_household_id(
                 program.pk, household_selection.household_id
             )
@@ -379,8 +381,11 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             household_selection.is_original = False
             household_selections_to_create.append(household_selection)
 
-        HouseholdSelection.original_and_repr_objects.bulk_create(household_selections_to_create)
-        household_selections.update(is_migration_handled=True)
+        with transaction.atomic():
+            HouseholdSelection.original_and_repr_objects.bulk_create(household_selections_to_create)
+            HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
+                is_migration_handled=True
+            )
 
 
 def adjust_payments(business_area: BusinessArea) -> None:
