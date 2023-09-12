@@ -106,6 +106,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household1 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual1_1,
+            registration_data_import=None,
         )
         self.household1.target_populations.set([self.target_population1, self.target_population2])
 
@@ -163,6 +164,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household2 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual2_1,
+            registration_data_import=None,
         )
         self.household2.target_populations.set([self.target_population1, self.target_population2])
 
@@ -214,6 +216,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household_helper = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual_helper3,
+            registration_data_import=None,
         )
         self.individual_helper3.household = self.household_helper
         self.individual_helper3.save()
