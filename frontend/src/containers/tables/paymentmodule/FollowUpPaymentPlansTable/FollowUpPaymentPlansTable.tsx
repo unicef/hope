@@ -6,20 +6,20 @@ import {
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
-import { PaymentPlanTableRow } from './PaymentPlanTableRow';
-import { headCells } from './PaymentPlansHeadCells';
+import { FollowUpPaymentPlanTableRow } from './FollowUpPaymentPlanTableRow';
+import { headCells } from './FollowUpPaymentPlansHeadCells';
 
-interface PaymentPlansTableProps {
+interface FollowUpPaymentPlansTableProps {
   filter;
   canViewDetails: boolean;
   title?: string;
 }
 
-export const PaymentPlansTable = ({
+export const FollowUpPaymentPlansTable = ({
   filter,
   canViewDetails,
   title = 'Payment Plans',
-}: PaymentPlansTableProps): ReactElement => {
+}: FollowUpPaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
@@ -29,7 +29,7 @@ export const PaymentPlansTable = ({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
-    isFollowUp: false,
+    isFollowUp: true,
     program: programId,
   };
 
@@ -42,7 +42,7 @@ export const PaymentPlansTable = ({
       queriedObjectName='allPaymentPlans'
       initialVariables={initialVariables}
       renderRow={(row) => (
-        <PaymentPlanTableRow
+        <FollowUpPaymentPlanTableRow
           key={row.id}
           plan={row}
           canViewDetails={canViewDetails}
