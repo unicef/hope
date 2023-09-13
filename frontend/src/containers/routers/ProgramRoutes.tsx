@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, useRouteMatch } from 'react-router-dom';
 import { SentryRoute } from '../../components/core/SentryRoute';
-import { ProgramCycleDetailsPageProgramDetails } from '../pages/program/ProgramCycleDetailsPageProgramDetails';
+import { ProgramCycleDetailsPageProgramDetails } from '../pages/programcycles/ProgramCycleDetailsPageProgramDetails';
 import { ProgramDetailsPage } from '../pages/program/ProgramDetailsPage';
 import { ProgramsPage } from '../pages/program/ProgramsPage';
 
