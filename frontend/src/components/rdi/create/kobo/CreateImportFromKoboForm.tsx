@@ -57,8 +57,6 @@ export function CreateImportFromKoboForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
-            //TODO: uncomment when programId is added to the mutation
-            // programId,
           },
         },
       });
