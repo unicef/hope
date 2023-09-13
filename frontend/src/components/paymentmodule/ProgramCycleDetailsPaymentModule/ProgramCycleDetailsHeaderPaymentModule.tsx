@@ -1,5 +1,5 @@
 import { Box, Button } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -18,6 +18,7 @@ export const ProgramCycleDetailsHeaderPaymentModule = ({
   programCycle,
 }: ProgramCycleDetailsHeaderPaymentModuleProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const { name, unicefId } = programCycle;
 
@@ -48,7 +49,7 @@ export const ProgramCycleDetailsHeaderPaymentModule = ({
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${baseUrl}/payment-module/new-plan`}
+            to={`/${baseUrl}/program-cycles/${id}/create-payment-plan`}
             data-cy='button-create-payment-plan'
           >
             {t('Create Payment Plan')}
