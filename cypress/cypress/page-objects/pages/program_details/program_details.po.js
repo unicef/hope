@@ -28,6 +28,8 @@ export default class ProgramDetails extends BaseComponent {
   cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
   tableLabel = 'span[data-cy="table-label"]';
   tableTitle = 'h6[data-cy="table-title"]';
+  buttonActivateProgramModal =
+    'button[data-cy="button-activate-program-modal"]';
   // Texts
 
   // Elements
@@ -55,4 +57,5 @@ export default class ProgramDetails extends BaseComponent {
   getTashPlanTableRow = () => cy.get(this.cashPlanTableRow);
   getTableLabel = () => cy.get(this.tableLabel);
   getTableTitle = () => cy.get(this.tableTitle);
+  getButtonActivateProgramModal = () => cy.get(this.buttonActivateProgramModal);
 }

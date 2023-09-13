@@ -1,13 +1,19 @@
 import ProgramManagement from "../../page-objects/pages/program_management/program_management.po";
 import PMDetailsPage from "../../page-objects/pages/program_management/details_page.po";
+import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
 
-let pm = new ProgramManagement();
-let pmd = new PMDetailsPage();
+let programManagement = new ProgramManagement();
+let programManagementDetails = new PMDetailsPage();
+let programDetails = new ProgramDetails();
 
 describe("Program Management", () => {
   beforeEach(() => {
     cy.navigateToHomePage();
     cy.get("span").contains("Programme Management").click();
+  });
+
+  after(() => {
+    cy.initScenario("init_clear");
   });
 
   describe("Smoke tests Program Management", () => {
@@ -16,37 +22,44 @@ describe("Program Management", () => {
   });
   describe("Component tests Program Management", () => {
     it("Create a program", () => {
-      cy.get("h5").should("contain", "Programme Management");
-      cy.get('[data-cy="button-new-program"]').click({ force: true });
-      cy.get("h6").should("contain", "Set-up a new Programme");
+      programManagement
+        .getPageHeaderTitle()
+        .should("contain", "Programme Management");
+      programManagement.getButtonNewProgram().click({ force: true });
+      programManagement
+        .getDialogTitle()
+        .should("contain", "Set-up a new Programme");
       cy.uniqueSeed().then((seed) => {
         const programName = `test program ${seed}`;
-        cy.get('[data-cy="input-programme-name"]').type(programName);
-        cy.get('[data-cy="input-cash-assist-scope"]').first().click();
-        cy.get('[data-cy="select-option-Unicef"]').click();
-        cy.get('[data-cy="input-sector"]').first().click();
-        cy.get('[data-cy="select-option-Multi Purpose"]').click();
-        cy.get('[data-cy="input-start-date"]').click().type("2023-01-01");
-        cy.get('[data-cy="input-end-date"]').click().type("2033-12-30");
-        cy.get('[data-cy="input-description"]')
+        programManagement.getInputProgrammeName().type(programName);
+        programManagement.getInputCashAssistScope().first().click();
+        programManagement.getSelectOptionUnicef().click();
+        programManagement.getInputSector().first().click();
+        programManagement.getSelectOptionMultiPurpose().click();
+        programManagement.getInputStartDate().click().type("2023-01-01");
+        programManagement.getInputEndDate().click().type("2033-12-30");
+        programManagement
+          .getInputDescription()
           .first()
           .click()
           .type("test description");
-        cy.get('[data-cy="input-budget"]')
+        programManagement
+          .getInputBudget()
           .first()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}9999");
-        cy.get('[data-cy="input-admin-area"]').click().type("Some Admin Area");
-        cy.get('[data-cy="input-population-goal"]')
+        programManagement.getInputAdminArea().click().type("Some Admin Area");
+        programManagement
+          .getInputPopulationGoal()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}4000");
-        cy.get('[data-cy="button-save"]').click({ force: true });
-        cy.get("h6").should("contain", "Programme Details");
-        cy.get('[data-cy="button-activate-program"]').click({ force: true });
-        cy.get('[data-cy="button-activate-program-modal"]').click({
+        programManagement.getButtonSave().click({ force: true });
+        programDetails.getPageHeaderTitle().should("contain", programName);
+        programDetails.getButtonActivateProgram().click({ force: true });
+        programDetails.getButtonActivateProgramModal().click({
           force: true,
         });
-        cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
+        programDetails.getStatusContainer().should("contain", "ACTIVE");
       });
     });
     it("Edit Program", () => {
