@@ -6636,10 +6636,10 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
-  erased: Scalars['Boolean'],
-  refuseReason?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
   programs: ProgramNodeConnection,
+  erased: Scalars['Boolean'],
+  refuseReason?: Maybe<Scalars['String']>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -6745,7 +6745,6 @@ export type RegistrationKoboImportMutationInput = {
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
-  programId?: Maybe<Scalars['String']>,
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -6759,7 +6758,6 @@ export type RegistrationXlsxImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
-  programId?: Maybe<Scalars['String']>,
 };
 
 export type ReportNode = Node & {
@@ -31007,10 +31005,10 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeProgramsArgs>,
+  erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
