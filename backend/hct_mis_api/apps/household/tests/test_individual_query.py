@@ -25,7 +25,7 @@ class TestIndividualQuery(APITestCase):
 
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
-      allIndividuals(businessArea: "afghanistan", search: $search) {
+      allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
         edges {
           node {
             fullName
