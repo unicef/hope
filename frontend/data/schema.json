@@ -4472,6 +4472,16 @@
                 "defaultValue": null
               },
               {
+                "name": "programCycle",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {

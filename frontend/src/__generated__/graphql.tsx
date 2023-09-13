@@ -6068,6 +6068,7 @@ export type QueryAllPaymentPlansArgs = {
   isFollowUp?: Maybe<Scalars['Boolean']>,
   sourcePaymentPlanId?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
+  programCycle?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
