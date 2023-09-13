@@ -2,6 +2,7 @@ import React, { ReactElement } from 'react';
 import {
   AllPaymentPlansForTableQueryVariables,
   PaymentPlanNode,
+  ProgramCycleQuery,
   useAllPaymentPlansForTableQuery,
 } from '../../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
@@ -13,12 +14,14 @@ interface PaymentPlansTableProgramCycleProps {
   filter;
   canViewDetails: boolean;
   title?: string;
+  programCycle: ProgramCycleQuery['programCycle'];
 }
 
 export const PaymentPlansTableProgramCycle = ({
   filter,
   canViewDetails,
   title = 'Payment Plans',
+  programCycle,
 }: PaymentPlansTableProgramCycleProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
@@ -29,8 +32,9 @@ export const PaymentPlansTableProgramCycle = ({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
-    isFollowUp: filter.isFollowUp ? true : null,
+    isFollowUp: false,
     program: programId,
+    programCycle: programCycle.id,
   };
 
   return (
