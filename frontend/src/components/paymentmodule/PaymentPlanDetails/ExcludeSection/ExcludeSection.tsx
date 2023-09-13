@@ -35,7 +35,12 @@ export const ExcludeSection = ({
   initialOpen = false,
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
-  const { status, exclusionReason, excludeHouseholdError } = paymentPlan;
+  const {
+    status,
+    backgroundActionStatus,
+    exclusionReason,
+    excludeHouseholdError,
+  } = paymentPlan;
 
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
@@ -79,10 +84,8 @@ export const ExcludeSection = ({
     }
     setIdsValue(event.target.value);
   };
-
   const initialValues = {
-    exclusionReason:
-      initialExcludedIds.length > 0 ? paymentPlan.exclusionReason : '',
+    exclusionReason: paymentPlan.exclusionReason || '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -95,7 +98,7 @@ export const ExcludeSection = ({
         variables: {
           paymentPlanId: paymentPlan.id,
           excludedHouseholdsIds: idsToSave,
-          exclusionReason: values.exclusionReason,
+          exclusionReason: values.exclusionReason || null,
         },
         refetchQueries: () => [
           {
@@ -105,9 +108,11 @@ export const ExcludeSection = ({
           },
           'AllPaymentsForTable',
         ],
+        awaitRefetchQueries: true,
       });
       if (!error) {
         showMessage(t('Households exclusion started'));
+        setExclusionsOpen(false);
       }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -187,7 +192,8 @@ export const ExcludeSection = ({
     const saveExclusionsDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      excludedIds.length === 0;
+      excludedIds.length === 0 ||
+      backgroundActionStatus;
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -274,7 +280,8 @@ export const ExcludeSection = ({
   };
 
   const renderInputAndApply = (): React.ReactElement => {
-    const applyDisabled = !hasExcludePermission || !hasOpenOrLockedStatus;
+    const applyDisabled =
+      !hasExcludePermission || !hasOpenOrLockedStatus || backgroundActionStatus;
 
     if (isEdit || numberOfExcluded === 0) {
       return (
@@ -337,6 +344,7 @@ export const ExcludeSection = ({
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values) => handleSave(values)}
+      enableReinitialize
     >
       {({ submitForm, values, resetForm }) => {
         return (

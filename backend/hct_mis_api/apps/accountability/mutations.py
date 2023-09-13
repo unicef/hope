@@ -43,6 +43,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.program.models import Program
 
 
 class CreateCommunicationMessageMutation(PermissionMutation):
@@ -82,10 +83,13 @@ class CreateFeedbackMutation(PermissionMutation):
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMutation":
         user = info.context.user
         business_area_slug = info.context.headers.get("Business-Area")
+        encoded_program_id = info.context.headers.get("Program")
+
         business_area = BusinessArea.objects.get(slug=business_area_slug)
+        program = Program.objects.get(id=decode_id_string(encoded_program_id))
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE, business_area)
-        feedback = FeedbackCrudServices.create(user, business_area, input)
+        feedback = FeedbackCrudServices.create(user, business_area, program, input)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, getattr(feedback.program, "pk", None), None, feedback
         )

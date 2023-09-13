@@ -93,7 +93,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
 
   return (
     <span>
-      <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
+      <Button data-cy='button-edit-program' variant='outlined' color='primary' onClick={() => setOpen(true)}>
         <EditIcon />
       </Button>
       <ProgramForm

@@ -13,6 +13,7 @@ from django.db.models import (
     When,
 )
 from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
@@ -40,6 +41,7 @@ from hct_mis_api.apps.core.schema import (
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
+    decode_id_string,
     encode_ids,
     get_model_choices_fields,
     resolve_flex_fields_choices_to_string,
@@ -82,6 +84,7 @@ from hct_mis_api.apps.household.services.household_programs_with_delivered_quant
     programs_with_delivered_quantity,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
@@ -545,14 +548,20 @@ class Query(graphene.ObjectType):
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
 
+    individual_search_types_choices = graphene.List(ChoiceObject)
+    household_search_types_choices = graphene.List(ChoiceObject)
+
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
+        program = get_object_or_404(Program, id=decode_id_string(info.context.headers.get("Program")))
+        if program.status == Program.DRAFT:
+            return Individual.objects.none()
         queryset = Individual.objects
         if does_path_exist_in_query("edges.node.household", info):
-            queryset = queryset.select_related("household")
+            queryset = queryset.select_related("household")  # type: ignore
         if does_path_exist_in_query("edges.node.household.admin2", info):
-            queryset = queryset.select_related("household__admin_area")
-            queryset = queryset.select_related("household__admin_area__area_type")
-        return queryset
+            queryset = queryset.select_related("household__admin_area")  # type: ignore
+            queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
+        return queryset  # type: ignore
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(
@@ -565,6 +574,9 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
+        program = get_object_or_404(Program, id=decode_id_string(info.context.headers.get("Program")))
+        if program.status == Program.DRAFT:
+            return Household.objects.none()
         queryset = Household.objects.order_by("created_at")
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")
@@ -762,3 +774,26 @@ class Query(graphene.ObjectType):
             {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
+
+    def resolve_individual_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, str]]:
+        search_types_choices = [
+            ("individual_id", "Individual ID"),
+            ("household_id", "Household ID"),
+            ("full_name", "Full Name"),
+            ("phone_no", "Phone Number"),
+            ("registration_id", "Registration ID (Aurora)"),
+        ]
+        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
+        return [{"name": name, "value": value} for value, name in search_types_choices]
+
+    def resolve_household_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, str]]:
+        search_types_choices = [
+            ("household_id", "Household ID"),
+            ("individual_id", "Individual ID"),
+            ("full_name", "Full Name"),
+            ("phone_no", "Phone Number"),
+            ("registration_id", "Registration ID (Aurora)"),
+            ("kobo_asset_id", "KoBo Asset ID"),
+        ]
+        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
+        return [{"name": name, "value": value} for value, name in search_types_choices]

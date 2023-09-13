@@ -105,7 +105,7 @@ export const CopyProgram = ({
 
   return (
     <>
-      <IconButton onClick={() => setOpen(true)}>
+      <IconButton data-cy="button-copy-program" onClick={() => setOpen(true)}>
         <FileCopy />
       </IconButton>
       <ProgramForm

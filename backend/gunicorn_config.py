@@ -18,7 +18,7 @@ umask = 0
 user = None
 group = None
 tmp_upload_dir = None
-max_requests = 100
+max_requests = 500
 
 errorlog = "-"
 loglevel = "info"

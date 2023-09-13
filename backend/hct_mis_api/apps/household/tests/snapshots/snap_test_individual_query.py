@@ -86,6 +86,15 @@ snapshots['TestIndividualQuery::test_individual_query_all_1_without_permission 1
     ]
 }
 
+snapshots['TestIndividualQuery::test_individual_query_draft 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
 snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
     'data': {
         'individual': {
@@ -118,7 +127,7 @@ snapshots['TestIndividualQuery::test_individual_query_single_1_without_permissio
     ]
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_full_name_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
             'edges': [
@@ -137,7 +146,172 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_p
     }
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_full_name_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_national_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_national_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_national_passport_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_national_passport_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1946-02-15',
+                        'familyName': 'Ford',
+                        'fullName': 'Robin Ford',
+                        'givenName': 'Robin',
+                        'phoneNo': '+18663567905',
+                        'phoneNoValid': True
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },

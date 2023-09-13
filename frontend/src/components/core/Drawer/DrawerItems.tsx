@@ -6,7 +6,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -82,6 +82,12 @@ export const DrawerItems = ({
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
+
+  //close nav when changing business area or program
+  useEffect(() => {
+    setExpandedItem(null);
+  }, [baseUrl]);
+
   if (permissions === null || !businessAreaData) return null;
 
   const {

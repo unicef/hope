@@ -14,7 +14,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.schema import HouseholdNode
-from hct_mis_api.apps.targeting.filters import HouseholdFilter
+from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 
 
@@ -30,7 +30,9 @@ def prefetch_selections(qs: QuerySet, target_population: Optional[target_models.
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoPermissionFilterConnectionField(
-        TargetPopulationNode, permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),)
+        TargetPopulationNode,
+        filterset_class=TargetPopulationFilter,
+        permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),),
     )
     target_population_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
