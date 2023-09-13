@@ -26,6 +26,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     save_images,
     to_date_string,
     to_phone_number_str,
+    update_es,
     verify_flex_fields,
 )
 from hct_mis_api.apps.household.models import (
@@ -152,6 +153,9 @@ class AddIndividualService(DataChangeService):
             None,
             individual,
         )
+
+        update_es(individual)
+
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
                 lambda: deduplicate_and_check_against_sanctions_list_task.delay(

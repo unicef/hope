@@ -93,6 +93,7 @@ input AddIndividualDataObjectType {
   identities: [IndividualIdentityObjectType]
   paymentChannels: [BankTransferObjectType]
   businessArea: String
+  preferredLanguage: String
   flexFields: Arg
 }
 
@@ -240,7 +241,23 @@ type BankAccountInfoNode implements Node {
   individual: IndividualNode!
   bankName: String!
   bankAccountNumber: String!
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: BankAccountInfoNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): BankAccountInfoNodeConnection!
   type: String
+}
+
+type BankAccountInfoNodeConnection {
+  pageInfo: PageInfo!
+  edges: [BankAccountInfoNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type BankAccountInfoNodeEdge {
+  node: BankAccountInfoNode
+  cursor: String!
 }
 
 input BankTransferObjectType {
@@ -893,8 +910,9 @@ type DjangoDebugSQL {
 }
 
 type DocumentNode implements Node {
-  isRemoved: Boolean!
   id: ID!
+  isRemoved: Boolean!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
@@ -910,6 +928,9 @@ type DocumentNode implements Node {
   issuanceDate: DateTime
   expiryDate: DateTime
   program: ProgramNode
+  isMigrationHandled: Boolean!
+  copiedFrom: DocumentNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   countryIso3: String
 }
 
@@ -1331,6 +1352,10 @@ type GrievanceTicketNode implements Node {
   partner: PartnerType
   programs: [ProgramNode]
   comments: String
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: GrievanceTicketNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
@@ -1482,6 +1507,8 @@ type HouseholdNode implements Node {
   program: ProgramNode
   copiedFrom: HouseholdNode
   originUnicefId: String
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
@@ -1542,6 +1569,8 @@ type HouseholdSelectionNode {
   household: HouseholdNode!
   targetPopulation: TargetPopulationNode!
   vulnerabilityScore: Float
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
 }
 
 input HouseholdUpdateDataObjectType {
@@ -2059,8 +2088,8 @@ type ImportedIndividualNode implements Node {
   disabilityCertificatePicture: String
   preferredLanguage: String
   misUnicefId: String
-  programId: UUID
   ageAtRegistration: Int
+  programId: UUID
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -2129,10 +2158,17 @@ input IndividualDocumentObjectType {
 
 type IndividualIdentityNode implements Node {
   id: ID!
+  created: DateTime!
+  modified: DateTime!
+  isRemoved: Boolean!
   individual: IndividualNode!
   number: String!
   partner: String
   country: String
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: IndividualIdentityNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   countryIso3: String
 }
 
@@ -2228,10 +2264,12 @@ type IndividualNode implements Node {
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
+  ageAtRegistration: Int
   program: ProgramNode
   copiedFrom: IndividualNode
   originUnicefId: String
-  ageAtRegistration: Int
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2296,12 +2334,17 @@ enum IndividualRelationship {
 
 type IndividualRoleInHouseholdNode {
   id: UUID!
+  isRemoved: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   individual: IndividualNode!
   household: HouseholdNode!
   role: IndividualRoleInHouseholdRole
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: IndividualRoleInHouseholdNode
+  copiedTo: [IndividualRoleInHouseholdNode!]!
 }
 
 enum IndividualRoleInHouseholdRole {
@@ -2353,6 +2396,7 @@ input IndividualUpdateDataObjectType {
   paymentChannels: [BankTransferObjectType]
   paymentChannelsToEdit: [EditBankTransferObjectType]
   paymentChannelsToRemove: [ID]
+  preferredLanguage: String
   flexFields: Arg
 }
 
@@ -2680,6 +2724,9 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: PaymentNode
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -2693,6 +2740,7 @@ type PaymentNode implements Node {
   orderNumber: Int
   tokenNumber: Int
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
@@ -3035,6 +3083,9 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: PaymentRecordNode
   caId: String
   caHashId: UUID
   parent: CashPlanNode
@@ -3049,6 +3100,7 @@ type PaymentRecordNode implements Node {
   visionId: String
   registrationCaId: String
   serviceProvider: ServiceProviderNode!
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verification: PaymentVerificationNode
   unicefId: String
 }
@@ -3667,10 +3719,10 @@ type RegistrationDataImportNode implements Node {
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
   excluded: Boolean!
-  program: ProgramNode
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   erased: Boolean!
   refuseReason: String
+  program: ProgramNode
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
