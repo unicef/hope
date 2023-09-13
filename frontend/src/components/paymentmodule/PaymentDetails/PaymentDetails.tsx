@@ -70,6 +70,18 @@ export function PaymentDetails({
               value={payment.distributionModality}
             />
           </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('DELIVERY DATE')}
+              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
+            />
+          </Grid>
+          {['PARTIALLY_DISTRIBUTED', 'NOT_DISTRIBUTED', 'TRANSACTION_ERRONEOUS'].includes(payment.status) ? <Grid item xs={3}>
+            <LabelizedField
+              label={t('FAILURE REASON')}
+              value={payment.reasonForUnsuccessfulPayment}
+            />
+          </Grid> : null}
         </Grid>
       </ContainerColumnWithBorder>
       {paymentVerification != null ? (
@@ -139,6 +151,12 @@ export function PaymentDetails({
               )}
             />
           </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t("COLLECTOR'S NAME")}
+              value={payment.collector?.fullName}
+            />
+          </Grid>
         </Grid>
       </Overview>
       <Overview>
@@ -169,12 +187,6 @@ export function PaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('DELIVERY DATE')}
-              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
               label={t('TRANSACTION REFERENCE ID')}
               value={payment.transactionReferenceId}
             />
@@ -185,6 +197,7 @@ export function PaymentDetails({
               value={payment.serviceProvider?.fullName}
             />
           </Grid>
+          {}
         </Grid>
       </Overview>
       {canViewActivityLog && (
