@@ -1,7 +1,6 @@
 import React from 'react';
 import { Switch, useRouteMatch } from 'react-router-dom';
 import { SentryRoute } from '../../components/core/SentryRoute';
-import { CreatePaymentPlanPage } from '../pages/paymentmodule/CreatePaymentPlanPage';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
 import { EditPaymentPlanPage } from '../pages/paymentmodule/EditPaymentPlanPage';
@@ -41,7 +40,6 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/followup-payment-plans`,
       component: <FollowUpPaymentPlansPage />,
-      exact: true,
     },
     {
       path: `${path}/payment-module/payment-plans/:id/setup-fsp/edit`,
@@ -66,7 +64,6 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payment-plans`,
       component: <PaymentPlansPage />,
-      exact: true,
     },
     {
       path: `${path}/payment-module/payments/:id`,
@@ -89,7 +86,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
   return (
     <Switch>
       {paymentModuleRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
+        <SentryRoute key={route.path} path={route.path}>
           {route.component}
         </SentryRoute>
       ))}

@@ -33,7 +33,7 @@ export const ProgramCycleDetailsHeaderPaymentModule = ({
     },
   ];
   //TODO: rename PM_CREATE permissions to PM_CREATE_PAYMENT_PLAN and so on
-  //TODO: change routing for payment plans
+
   return (
     <PageHeader
       title={`${name} (ID: ${unicefId})`}
@@ -49,7 +49,7 @@ export const ProgramCycleDetailsHeaderPaymentModule = ({
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${baseUrl}/program-cycles/${id}/create-payment-plan`}
+            to={`/${baseUrl}/payment-module/program-cycles/${id}/create-payment-plan`}
             data-cy='button-create-payment-plan'
           >
             {t('Create Payment Plan')}

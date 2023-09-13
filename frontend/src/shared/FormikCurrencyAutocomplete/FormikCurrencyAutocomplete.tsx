@@ -18,6 +18,7 @@ export const FormikCurrencyAutocomplete = ({
   field,
   form,
   disabled,
+  fullWidth = '100%',
   ...otherProps
 }): React.ReactElement => {
   const { t } = useTranslation();
@@ -46,12 +47,13 @@ export const FormikCurrencyAutocomplete = ({
         getOptionLabel={(option) => option.name}
         onChange={handleChange}
         disabled={disabled}
-        fullWidth
+        fullWidth={fullWidth}
         renderInput={(params) => (
           <TextField
             {...params}
             label={t('Currency')}
             variant='outlined'
+            fullWidth={fullWidth}
             margin='dense'
             error={isInvalid}
             helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}

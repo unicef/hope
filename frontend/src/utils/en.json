@@ -842,5 +842,7 @@
   "Programme Cycle name is required": "Programme Cycle name is required",
   "End Date cannot be after Programme End Date": "End Date cannot be after Programme End Date",
   "Programme Cycles": "Programme Cycles",
-  "Original Payment Plan": "Original Payment Plan"
+  "Original Payment Plan": "Original Payment Plan",
+  "Payment Plan Title is required": "Payment Plan Title is required",
+  "Payment Plan Criteria": "Payment Plan Criteria"
 }

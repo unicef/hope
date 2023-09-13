@@ -1,70 +1,108 @@
-import { Form, Formik } from 'formik';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Box, Grid } from '@material-ui/core';
+import { Field, FieldArray, Form, Formik } from 'formik';
+import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
-import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
-import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  useAllTargetPopulationsQuery,
+  useAllSteficonRulesQuery,
   useCreatePpMutation,
+  useProgramCycleQuery,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { today } from '../../../utils/utils';
+import { BaseSection } from '../../../components/core/BaseSection';
+import { DividerLine } from '../../../components/core/DividerLine';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { UniversalCriteriaPlainComponent } from '../../../components/core/UniversalCriteriaComponent/UniversalCriteriaPlainComponent';
+import { CreatePaymentPlanHeaderProgramCycle } from '../../../components/paymentmodule/CreatePaymentPlanProgramCycle/CreatePaymentPlanHeaderProgramCycle/CreatePaymentPlanHeaderProgramCycle';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { associatedWith, isNot, today, tomorrow } from '../../../utils/utils';
+import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { FormikDateField } from '../../../shared/Formik/FormikDateField';
+import { FormikCurrencyAutocomplete } from '../../../shared/FormikCurrencyAutocomplete';
 
 export const CreatePaymentPlanProgramCyclePage = (): React.ReactElement => {
-  console.log('THIS');
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { id } = useParams();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
+  const [individualData, setIndividualData] = useState(null);
+  const [householdData, setHouseholdData] = useState(null);
 
   const {
-    data: allTargetPopulationsData,
-    loading: loadingTargetPopulations,
-  } = useAllTargetPopulationsQuery({
+    data: importedIndividualFieldsData,
+    loading: importedIndividualFieldsDataLoading,
+  } = useCachedImportedIndividualFieldsQuery(businessArea);
+
+  useEffect(() => {
+    if (importedIndividualFieldsDataLoading) return;
+    const filteredIndividualData = {
+      allFieldsAttributes: importedIndividualFieldsData?.allFieldsAttributes
+        ?.filter(associatedWith('Individual'))
+        .filter(isNot('IMAGE')),
+    };
+    setIndividualData(filteredIndividualData);
+
+    const filteredHouseholdData = {
+      allFieldsAttributes: importedIndividualFieldsData?.allFieldsAttributes?.filter(
+        associatedWith('Household'),
+      ),
+    };
+    setHouseholdData(filteredHouseholdData);
+  }, [importedIndividualFieldsData, importedIndividualFieldsDataLoading]);
+
+  const {
+    data: programCycleData,
+    loading: programCycleLoading,
+  } = useProgramCycleQuery({
     variables: {
-      businessArea,
-      paymentPlanApplicable: true,
-      program: [programId],
+      id,
     },
-    fetchPolicy: 'network-only',
+  });
+  const {
+    data: steficonRulesData,
+    loading: steficonRulesLoading,
+  } = useAllSteficonRulesQuery({
+    variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
   });
 
-  // if (loadingTargetPopulations) return <LoadingComponent />;
-  // if (!allTargetPopulationsData) return null;
-  // if (permissions === null) return null;
-  // if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-  //   return <PermissionDenied />;
+  if (
+    !importedIndividualFieldsData ||
+    !programCycleData ||
+    !steficonRulesData ||
+    permissions === null
+  )
+    return null;
+  if (programCycleLoading || steficonRulesLoading) return <LoadingComponent />;
+
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
+    return <PermissionDenied />;
+
+  const mappedFormulaChoices = steficonRulesData.allSteficonRules.edges.map(
+    (el) => ({
+      name: el.node.name,
+      value: el.node.id,
+    }),
+  );
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
-    startDate: Yup.date().required(t('Start Date is required')),
-    endDate: Yup.date()
-      .required(t('End Date is required'))
-      .when(
-        'startDate',
-        (startDate: string, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date has to be greater than')} ${moment(startDate).format(
-              'YYYY-MM-DD',
-            )}`,
-          ),
-        '',
-      ),
-    currency: Yup.string()
-      .nullable()
-      .required(t('Currency is required')),
+    name: Yup.string()
+      .required(t('Payment Plan Title is required'))
+      .min(2, t('Too short'))
+      .max(150, t('Too long')),
+    description: Yup.string()
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -73,7 +111,7 @@ export const CreatePaymentPlanProgramCyclePage = (): React.ReactElement => {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: string, schema) =>
+        (dispersionStartDate, schema) =>
           dispersionStartDate &&
           schema.min(
             dispersionStartDate,
@@ -83,17 +121,20 @@ export const CreatePaymentPlanProgramCyclePage = (): React.ReactElement => {
           ),
         '',
       ),
+    currency: Yup.string().required(t('Currency is required')),
   });
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    targetingId: '',
-    startDate: '',
-    endDate: '',
-    currency: null,
+    name: '',
+    description: '',
+    criteria: [],
+    formula: '',
     dispersionStartDate: '',
     dispersionEndDate: '',
+    currency: '',
   };
+
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const res = await mutate({
@@ -124,20 +165,93 @@ export const CreatePaymentPlanProgramCyclePage = (): React.ReactElement => {
       {({ submitForm, values }) => (
         <Form>
           <AutoSubmitFormOnEnter />
-          <span role='img' aria-label='lol'>
-            😂😂😂😂😂😂😂😂😂😂😂😂😂😂
-          </span>
-          {/* <CreatePaymentPlanHeader
+          <CreatePaymentPlanHeaderProgramCycle
             handleSubmit={submitForm}
             baseUrl={baseUrl}
             permissions={permissions}
             loadingCreate={loadingCreate}
+            programCycle={programCycleData.programCycle}
           />
-          <PaymentPlanTargeting
-            allTargetPopulations={allTargetPopulationsData}
-            loading={loadingTargetPopulations}
-          />
-          <PaymentPlanParameters values={values} /> */}
+          <BaseSection title={t('Description')}>
+            <Field
+              name='description'
+              multiline
+              fullWidth
+              variant='outlined'
+              label={t('Description')}
+              component={FormikTextField}
+            />
+          </BaseSection>
+          <BaseSection title={t('Payment Plan Criteria')}>
+            <Box display='flex' flexDirection='column'>
+              <Box mb={3} mt={3}>
+                <FieldArray
+                  name='criteria'
+                  render={(arrayHelpers) => (
+                    <UniversalCriteriaPlainComponent
+                      isEdit
+                      arrayHelpers={arrayHelpers}
+                      rules={values.criteria}
+                      householdFieldsChoices={
+                        householdData?.allFieldsAttributes || []
+                      }
+                      individualFieldsChoices={
+                        individualData?.allFieldsAttributes || []
+                      }
+                    />
+                  )}
+                />
+              </Box>
+              <DividerLine />
+              <Field
+                name='formula'
+                variant='outlined'
+                label={t('Apply Additional Formula')}
+                component={FormikSelectField}
+                choices={mappedFormulaChoices}
+              />
+            </Box>
+          </BaseSection>
+          <BaseSection title={t('Parameters')}>
+            <Grid container spacing={3}>
+              <Grid item xs={3}>
+                <Field
+                  name='dispersionStartDate'
+                  label={t('Dispersion Start Date')}
+                  component={FormikDateField}
+                  required
+                  fullWidth
+                  decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+                  tooltip={t(
+                    'The first day from which payments could be delivered.',
+                  )}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <Field
+                  name='dispersionEndDate'
+                  label={t('Dispersion End Date')}
+                  component={FormikDateField}
+                  required
+                  minDate={tomorrow}
+                  disabled={!values.dispersionStartDate}
+                  initialFocusedDate={values.dispersionStartDate}
+                  fullWidth
+                  decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+                  tooltip={t(
+                    'The last day on which payments could be delivered.',
+                  )}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <Field
+                  name='currency'
+                  component={FormikCurrencyAutocomplete}
+                  required
+                />
+              </Grid>
+            </Grid>
+          </BaseSection>
         </Form>
       )}
     </Formik>
