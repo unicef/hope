@@ -8,7 +8,7 @@ describe("Program Details", () => {
   });
 
   describe("Smoke tests Program Details", () => {
-    it.only("Check Program Details page", () => {
+    it("Check Program Details page", () => {
       cy.scenario([
         "1. Go to Program Details page (Active program chosen)",
         "2. Check if all elements on page exist",
