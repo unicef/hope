@@ -290,3 +290,23 @@ export const SurveyTabsValues = {
   A_1: 'Full',
   A_2: 'Partial',
 };
+
+export const householdTableOrderOptions = [
+  { name: 'Household Id: ascending', value: 'unicef_id' },
+  { name: 'Household Id: descending', value: '-unicef_id' },
+  { name: 'Status: ascending', value: 'status_label' },
+  { name: 'Status: descending', value: '-status_label' },
+  { name: 'Household Size: ascending', value: 'size' },
+  { name: 'Household Size: descending', value: '-size' },
+  { name: 'Registration Date: ascending', value: 'last_registration_date' },
+  { name: 'Registration Date: descending', value: '-last_registration_date' },
+];
+
+export const individualTableOrderOptions = [
+  { name: 'Individual Id: ascending', value: 'unicef_id' },
+  { name: 'Individual Id: descending', value: '-unicef_id' },
+  { name: 'Individual: ascending', value: 'full_name' },
+  { name: 'Individual: descending', value: '-full_name' },
+  { name: 'Gender: ascending', value: 'sex' },
+  { name: 'Gender: descending', value: '-sex' },
+];
