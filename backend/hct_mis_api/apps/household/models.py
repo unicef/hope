@@ -18,7 +18,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
+from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -27,6 +27,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.utils import IsOriginalManager, SoftDeletableIsOriginalModel
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -106,7 +107,7 @@ GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
 MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
 DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
 SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
-GRANDDAUGHTER_GRANDSON = "GRANDDAUGHTER_GRANDSON"
+GRANDDAUGHTER_GRANDSON = "GRANDDAUGHER_GRANDSON"  # key is wrong, but it is used in kobo and aurora
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 FOSTER_CHILD = "FOSTER_CHILD"
@@ -386,6 +387,7 @@ class Household(
         HouseholdCollection,
         related_name="households",
         on_delete=models.CASCADE,
+        null=True,
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
     withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -505,6 +507,8 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Household"
@@ -633,7 +637,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -656,8 +660,17 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-
     program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -715,7 +728,8 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         self.save()
 
 
-class IndividualIdentity(models.Model):
+class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
+    # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
@@ -727,6 +741,16 @@ class IndividualIdentity(models.Model):
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
 
     class Meta:
         verbose_name_plural = "Individual Identities"
@@ -735,7 +759,7 @@ class IndividualIdentity(models.Model):
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -750,6 +774,16 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         max_length=255,
         blank=True,
         choices=ROLE_CHOICE,
+    )
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     class Meta:
@@ -827,6 +861,7 @@ class Individual(
         IndividualCollection,
         related_name="individuals",
         on_delete=models.CASCADE,
+        null=True,
     )
     duplicate = models.BooleanField(default=False, db_index=True)
     duplicate_date = models.DateTimeField(null=True, blank=True)
@@ -922,6 +957,8 @@ class Individual(
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
     )  # TODO set null=False after migration
@@ -936,9 +973,18 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
+
+    @property
+    def phone_no_text(self) -> str:
+        return str(self.phone_no).replace(" ", "")
+
+    @property
+    def phone_no_alternative_text(self) -> str:
+        return str(self.phone_no_alternative).replace(" ", "")
 
     @property
     def age(self) -> int:
@@ -1135,6 +1181,10 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+    is_original = models.BooleanField(default=True)
+
+    objects = IsOriginalManager()
+    original_and_repr_objects = models.Manager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
@@ -1154,6 +1204,16 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
 
     def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"

@@ -16,6 +16,7 @@ export const AllHouseholdsForPopulationTable = gql`
     $lastRegistrationDate: String
     $admin2: ID
     $withdrawn: Boolean
+    $headOfHouseholdPhoneNoValid: Boolean
   ) {
     allHouseholds(
       after: $after
@@ -32,6 +33,7 @@ export const AllHouseholdsForPopulationTable = gql`
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
       withdrawn: $withdrawn
+      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
     ) {
       pageInfo {
         hasNextPage

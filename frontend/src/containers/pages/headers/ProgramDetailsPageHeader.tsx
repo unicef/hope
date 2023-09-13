@@ -15,6 +15,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
   canRemove: boolean;
   canFinish: boolean;
   canDuplicate: boolean;
+  isPaymentPlanApplicable: boolean;
 }
 
 export const ProgramDetailsPageHeader = ({
@@ -24,6 +25,7 @@ export const ProgramDetailsPageHeader = ({
   canRemove,
   canFinish,
   canDuplicate,
+  isPaymentPlanApplicable,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   let buttons;
   const { t } = useTranslation();
@@ -36,6 +38,7 @@ export const ProgramDetailsPageHeader = ({
           canFinish={canFinish}
           canEdit={canEdit}
           canDuplicate={canDuplicate}
+          isPaymentPlanApplicable={isPaymentPlanApplicable}
         />
       );
       break;
@@ -55,6 +58,7 @@ export const ProgramDetailsPageHeader = ({
           program={program}
           canActivate={canActivate}
           canDuplicate={canDuplicate}
+          isPaymentPlanApplicable={isPaymentPlanApplicable}
         />
       );
   }

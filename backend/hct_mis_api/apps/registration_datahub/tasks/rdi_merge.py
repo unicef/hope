@@ -269,7 +269,7 @@ class RdiMergeTask:
             individual = Individual(
                 **values,
                 household=household,
-                registration_id=household.registration_id,
+                registration_id=getattr(household, "registration_id", None),
                 business_area=obj_hct.business_area,
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
@@ -332,7 +332,7 @@ class RdiMergeTask:
                 household__in=imported_households, individual__in=imported_individuals
             )
             imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(individual__in=imported_individuals)
-
+            household_ids = []
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
                     old_obj_hct = copy_model_object(obj_hct)

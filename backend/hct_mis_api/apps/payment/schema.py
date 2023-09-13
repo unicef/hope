@@ -553,7 +553,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
 
-    def resolve_excluded_households(self, info: Any) -> graphene.List:
+    def resolve_excluded_households(self, info: Any) -> "QuerySet":
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
@@ -662,6 +662,9 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
+
+    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> int:
+        return self.payment_items.count()
 
     def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None

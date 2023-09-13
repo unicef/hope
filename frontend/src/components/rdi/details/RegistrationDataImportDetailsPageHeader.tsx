@@ -38,7 +38,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   canRefuse,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
@@ -109,7 +109,6 @@ export const RegistrationDataImportDetailsPageHeader = ({
     case RegistrationDataImportStatus.Merged:
       buttons = (
         <MergeButtonContainer>
-          {isAllPrograms ? (
             <Button
               variant='contained'
               color='primary'
@@ -118,7 +117,6 @@ export const RegistrationDataImportDetailsPageHeader = ({
             >
               {t('View Tickets')}
             </Button>
-          ) : null}
         </MergeButtonContainer>
       );
       break;

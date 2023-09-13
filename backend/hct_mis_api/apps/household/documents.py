@@ -67,6 +67,7 @@ class IndividualDocument(Document):
         }
     )
     program_id = fields.KeywordField(attr="program.id")
+    registration_id = fields.TextField()
 
     def prepare_phone_no_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
@@ -165,6 +166,15 @@ class HouseholdDocument(Document):
             "given_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "middle_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "family_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "phone_no_text": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "phone_no_alternative_text": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "documents": fields.ObjectField(
+                properties={
+                    "number": fields.KeywordField(attr="document_number", similarity="boolean"),
+                    "key": fields.KeywordField(attr="type.key", similarity="boolean"),
+                    "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
+                }
+            ),
         }
     )
     unicef_id = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
@@ -173,6 +183,7 @@ class HouseholdDocument(Document):
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
     program_id = fields.KeywordField(attr="program.id")
+    registration_id = fields.TextField()
 
     def prepare_admin1(self, household: Household) -> Optional[str]:
         if household:
