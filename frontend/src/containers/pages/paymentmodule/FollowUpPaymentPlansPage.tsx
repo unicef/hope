@@ -1,16 +1,16 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
-import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { FollowUpPaymentPlansTable } from '../../tables/paymentmodule/FollowUpPaymentPlansTable';
+import { FollowUpPaymentPlansFilters } from '../../tables/paymentmodule/FollowUpPaymentPlansTable/FollowUpPaymentPlansFilters';
 
 const initialFilter = {
   search: '',
@@ -19,7 +19,6 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
-  isFollowUp: true,
 };
 
 export const FollowUpPaymentPlansPage = (): React.ReactElement => {
@@ -54,7 +53,7 @@ export const FollowUpPaymentPlansPage = (): React.ReactElement => {
           </Button>
         )}
       </PageHeader>
-      <PaymentPlansFilters
+      <FollowUpPaymentPlansFilters
         filter={filter}
         setFilter={setFilter}
         initialFilter={initialFilter}
@@ -62,7 +61,7 @@ export const FollowUpPaymentPlansPage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
       />
       <TableWrapper>
-        <PaymentPlansTable
+        <FollowUpPaymentPlansTable
           filter={appliedFilter}
           title={t('Follow-up Payment Plans')}
           canViewDetails={hasPermissions(

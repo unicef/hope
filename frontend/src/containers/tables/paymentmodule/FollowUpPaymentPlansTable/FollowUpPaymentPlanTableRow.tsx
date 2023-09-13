@@ -10,17 +10,16 @@ import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentPlansTableFollowUpPaymentPlansModal } from '../ProgramCycles/PaymentPlansTableProgramCycle/PaymentPlansTableFollowUpPaymentPlansModal';
 
-interface PaymentPlanTableRowProps {
+interface FollowUpPaymentPlanTableRowProps {
   plan;
   canViewDetails: boolean;
 }
 
-export const PaymentPlanTableRow = ({
+export const FollowUpPaymentPlanTableRow = ({
   plan,
   canViewDetails,
-}: PaymentPlanTableRowProps): React.ReactElement => {
+}: FollowUpPaymentPlanTableRowProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
     plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
@@ -73,12 +72,6 @@ export const PaymentPlanTableRow = ({
       <TableCell align='left'>
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
-        <PaymentPlansTableFollowUpPaymentPlansModal
-          paymentPlan={plan}
-          canViewDetails={canViewDetails}
-        />
-      </TableCell>{' '}
     </ClickableTableRow>
   );
 };

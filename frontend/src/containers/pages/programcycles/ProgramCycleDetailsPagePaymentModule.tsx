@@ -89,6 +89,7 @@ export const ProgramCycleDetailsPagePaymentModule = (): React.ReactElement => {
       </TableWrapper>
       <TableWrapper>
         <PaymentPlansTableProgramCycle
+          programCycle={programCycle}
           filter={appliedFilter}
           canViewDetails={hasPermissions(
             PERMISSIONS.PM_VIEW_DETAILS,
