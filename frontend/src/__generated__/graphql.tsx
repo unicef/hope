@@ -12069,7 +12069,8 @@ export type AllPaymentPlansForTableQueryVariables = {
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
   isFollowUp?: Maybe<Scalars['Boolean']>,
-  program?: Maybe<Scalars['String']>
+  program?: Maybe<Scalars['String']>,
+  programCycle?: Maybe<Scalars['String']>
 };
 
 
@@ -22348,8 +22349,8 @@ export type AllDeliveryMechanismsQueryHookResult = ReturnType<typeof useAllDeliv
 export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsLazyQuery>;
 export type AllDeliveryMechanismsQueryResult = ApolloReactCommon.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String) {
-  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, isFollowUp: $isFollowUp, program: $program) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String) {
+  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, isFollowUp: $isFollowUp, program: $program, programCycle: $programCycle) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -22451,6 +22452,7 @@ export function withAllPaymentPlansForTable<TProps, TChildProps = {}>(operationO
  *      dispersionEndDate: // value for 'dispersionEndDate'
  *      isFollowUp: // value for 'isFollowUp'
  *      program: // value for 'program'
+ *      programCycle: // value for 'programCycle'
  *   },
  * });
  */
