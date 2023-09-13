@@ -5,7 +5,7 @@ from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -34,7 +34,8 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
+class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase, APITestCase):
+    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """
@@ -155,6 +156,7 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
                 ],
             },
         )
+        super().setUpTestData()
 
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_add_individual_close_ticket_for_postponed_deduplication(self) -> None:

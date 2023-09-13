@@ -1,7 +1,8 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
@@ -12,7 +13,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
-def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Optional[List]:
+def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
     """
     Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
     """
@@ -183,7 +184,7 @@ class CreateTargetPopulationTextForm(forms.Form):
 
     def clean_criteria(self) -> Optional[List]:
         try:
-            return get_households_from_text(
+            return get_households_from_text(  # type: ignore
                 self.cleaned_data["business_area"],
                 self.cleaned_data["criteria"],
                 self.cleaned_data["target_field"],
