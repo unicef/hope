@@ -14,8 +14,9 @@ from hct_mis_api.apps.household.models import (
 logger = logging.getLogger(__name__)
 
 
-def create_hh_and_ind_collections(business_area_name: Optional[str] = None) -> None:
+def create_hh_and_ind_collections(business_area: Optional[BusinessArea] = None) -> None:
     # Create representation collection for every household and individual already present in db
+    business_area_name = business_area.name if business_area else None
     _create_collections(Household, HouseholdCollection, "household_collection", business_area_name)
     _create_collections(Individual, IndividualCollection, "individual_collection", business_area_name)
 
