@@ -553,7 +553,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
 
-    def resolve_excluded_households(self, info: Any) -> graphene.List:
+    def resolve_excluded_households(self, info: Any) -> "QuerySet":
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:

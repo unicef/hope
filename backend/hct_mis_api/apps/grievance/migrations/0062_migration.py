@@ -5,7 +5,7 @@ from django.db import migrations
 def update_status_for_not_assigned_tickets(apps, schema_editor):
     from hct_mis_api.apps.grievance.models import GrievanceTicket
 
-    GrievanceTicket.objects.filter(status=GrievanceTicket.STATUS_ASSIGNED, assigned_to=None).update(status=GrievanceTicket.STATUS_NEW)
+    GrievanceTicket.default_for_migrations_fix.filter(status=GrievanceTicket.STATUS_ASSIGNED, assigned_to=None).update(status=GrievanceTicket.STATUS_NEW)
 
 
 class Migration(migrations.Migration):
