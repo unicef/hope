@@ -69,6 +69,7 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
 )
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
@@ -1728,16 +1729,16 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "e2b8dd27-f861-4c54-9651-677636918c47",
-        "type": TYPE_STRING,
+        "type": TYPE_SELECT_ONE,
         "name": "preferred_language",
         "lookup": "preferred_language",
         "required": False,
         "label": {"English(EN)": "Preferred language"},
         "hint": "",
-        "choices": [],
+        "choices": Languages.get_choices(),
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "preferred_language",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE],
     },
     {
         "id": "32fcdace-6e72-48ac-9ce8-469e552cfafe",
