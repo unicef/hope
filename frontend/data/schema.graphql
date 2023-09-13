@@ -2139,6 +2139,7 @@ type IndividualIdentityNode implements Node {
   id: ID!
   created: DateTime!
   modified: DateTime!
+  isRemoved: Boolean!
   individual: IndividualNode!
   number: String!
   partner: String
@@ -2312,6 +2313,7 @@ enum IndividualRelationship {
 
 type IndividualRoleInHouseholdNode {
   id: UUID!
+  isRemoved: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime

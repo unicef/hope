@@ -3011,6 +3011,7 @@ export type IndividualIdentityNode = Node & {
   id: Scalars['ID'],
   created: Scalars['DateTime'],
   modified: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   individual: IndividualNode,
   number: Scalars['String'],
   partner?: Maybe<Scalars['String']>,
@@ -3370,6 +3371,7 @@ export enum IndividualRelationship {
 export type IndividualRoleInHouseholdNode = {
    __typename?: 'IndividualRoleInHouseholdNode',
   id: Scalars['UUID'],
+  isRemoved: Scalars['Boolean'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
@@ -11838,7 +11840,7 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'reasonForUnsuccessfulPayment'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -21972,6 +21974,7 @@ export const PaymentDocument = gql`
       id
       fullName
     }
+    reasonForUnsuccessfulPayment
   }
 }
     `;
@@ -29750,6 +29753,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -29887,6 +29891,7 @@ export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends Re
 
 export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,

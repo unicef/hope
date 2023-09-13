@@ -72,6 +72,7 @@ export const Payment = gql`
         id
         fullName
       }
+      reasonForUnsuccessfulPayment
     }
   }
 `;
