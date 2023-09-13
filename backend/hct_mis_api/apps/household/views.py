@@ -59,7 +59,7 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Im
     if households.count() > 1:
         raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
     if households.count() == 1:
-        return households.first()
+        return households.first()  # type: ignore
 
     if business_area_code is None:
         imported_households_by_business_area = ImportedHousehold.objects.all()

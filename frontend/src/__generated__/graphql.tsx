@@ -139,6 +139,7 @@ export type AddIndividualDataObjectType = {
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -373,7 +374,34 @@ export type BankAccountInfoNode = Node & {
   individual: IndividualNode,
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<BankAccountInfoNode>,
+  copiedTo: BankAccountInfoNodeConnection,
   type?: Maybe<Scalars['String']>,
+};
+
+
+export type BankAccountInfoNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type BankAccountInfoNodeConnection = {
+   __typename?: 'BankAccountInfoNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<BankAccountInfoNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type BankAccountInfoNodeEdge = {
+   __typename?: 'BankAccountInfoNodeEdge',
+  node?: Maybe<BankAccountInfoNode>,
+  cursor: Scalars['String'],
 };
 
 export type BankTransferObjectType = {
@@ -1353,8 +1381,9 @@ export type DjangoDebugSql = {
 
 export type DocumentNode = Node & {
    __typename?: 'DocumentNode',
-  isRemoved: Scalars['Boolean'],
   id: Scalars['ID'],
+  isRemoved: Scalars['Boolean'],
+  isOriginal: Scalars['Boolean'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
@@ -1370,7 +1399,19 @@ export type DocumentNode = Node & {
   issuanceDate?: Maybe<Scalars['DateTime']>,
   expiryDate?: Maybe<Scalars['DateTime']>,
   program?: Maybe<ProgramNode>,
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<DocumentNode>,
+  copiedTo: DocumentNodeConnection,
   countryIso3?: Maybe<Scalars['String']>,
+};
+
+
+export type DocumentNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type DocumentNodeConnection = {
@@ -1903,6 +1944,10 @@ export type GrievanceTicketNode = Node & {
   partner?: Maybe<PartnerType>,
   programs?: Maybe<Array<Maybe<ProgramNode>>>,
   comments?: Maybe<Scalars['String']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<GrievanceTicketNode>,
+  copiedTo: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
   sensitiveTicketDetails?: Maybe<TicketSensitiveDetailsNode>,
@@ -1927,6 +1972,15 @@ export type GrievanceTicketNode = Node & {
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   totalDays?: Maybe<Scalars['String']>,
   documentation?: Maybe<Array<Maybe<GrievanceDocumentNode>>>,
+};
+
+
+export type GrievanceTicketNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2082,6 +2136,8 @@ export type HouseholdNode = Node & {
   program?: Maybe<ProgramNode>,
   copiedFrom?: Maybe<HouseholdNode>,
   originUnicefId?: Maybe<Scalars['String']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
   copiedTo: HouseholdNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals?: Maybe<IndividualNodeConnection>,
@@ -2347,6 +2403,8 @@ export type HouseholdSelectionNode = {
   household: HouseholdNode,
   targetPopulation: TargetPopulationNode,
   vulnerabilityScore?: Maybe<Scalars['Float']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
 };
 
 export type HouseholdUpdateDataObjectType = {
@@ -2879,8 +2937,8 @@ export type ImportedIndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
-  programId?: Maybe<Scalars['UUID']>,
   ageAtRegistration?: Maybe<Scalars['Int']>,
+  programId?: Maybe<Scalars['UUID']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -2989,11 +3047,27 @@ export type IndividualDocumentObjectType = {
 export type IndividualIdentityNode = Node & {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
+  created: Scalars['DateTime'],
+  modified: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   individual: IndividualNode,
   number: Scalars['String'],
   partner?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<IndividualIdentityNode>,
+  copiedTo: IndividualIdentityNodeConnection,
   countryIso3?: Maybe<Scalars['String']>,
+};
+
+
+export type IndividualIdentityNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type IndividualIdentityNodeConnection = {
@@ -3091,10 +3165,12 @@ export type IndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   relationshipConfirmed: Scalars['Boolean'],
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   program?: Maybe<ProgramNode>,
   copiedFrom?: Maybe<IndividualNode>,
   originUnicefId?: Maybe<Scalars['String']>,
-  ageAtRegistration?: Maybe<Scalars['Int']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -3333,12 +3409,17 @@ export enum IndividualRelationship {
 export type IndividualRoleInHouseholdNode = {
    __typename?: 'IndividualRoleInHouseholdNode',
   id: Scalars['UUID'],
+  isRemoved: Scalars['Boolean'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   individual: IndividualNode,
   household: HouseholdNode,
   role?: Maybe<IndividualRoleInHouseholdRole>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<IndividualRoleInHouseholdNode>,
+  copiedTo: Array<IndividualRoleInHouseholdNode>,
 };
 
 export enum IndividualRoleInHouseholdRole {
@@ -3390,6 +3471,7 @@ export type IndividualUpdateDataObjectType = {
   paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   paymentChannelsToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
   paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -4257,6 +4339,9 @@ export type PaymentNode = Node & {
   deliveredQuantityUsd?: Maybe<Scalars['Float']>,
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId?: Maybe<Scalars['String']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<PaymentNode>,
   parent: PaymentPlanNode,
   conflicted: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
@@ -4270,6 +4355,7 @@ export type PaymentNode = Node & {
   orderNumber?: Maybe<Scalars['Int']>,
   tokenNumber?: Maybe<Scalars['Int']>,
   followUps: PaymentNodeConnection,
+  copiedTo: PaymentNodeConnection,
   householdSnapshot?: Maybe<PaymentHouseholdSnapshotNode>,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
@@ -4285,6 +4371,15 @@ export type PaymentNode = Node & {
 
 
 export type PaymentNodeFollowUpsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PaymentNodeCopiedToArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -4666,6 +4761,9 @@ export type PaymentRecordNode = Node & {
   deliveredQuantityUsd?: Maybe<Scalars['Float']>,
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId?: Maybe<Scalars['String']>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<PaymentRecordNode>,
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['UUID']>,
   parent?: Maybe<CashPlanNode>,
@@ -4680,8 +4778,18 @@ export type PaymentRecordNode = Node & {
   visionId?: Maybe<Scalars['String']>,
   registrationCaId?: Maybe<Scalars['String']>,
   serviceProvider: ServiceProviderNode,
+  copiedTo: PaymentRecordNodeConnection,
   verification?: Maybe<PaymentVerificationNode>,
   unicefId?: Maybe<Scalars['String']>,
+};
+
+
+export type PaymentRecordNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type PaymentRecordNodeConnection = {
@@ -6647,10 +6755,10 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
-  program?: Maybe<ProgramNode>,
-  programs: ProgramNodeConnection,
   erased: Scalars['Boolean'],
   refuseReason?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  programs: ProgramNodeConnection,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -28261,6 +28369,8 @@ export type ResolversTypes = {
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentStatus: DocumentStatus,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
+  BankAccountInfoNodeConnection: ResolverTypeWrapper<BankAccountInfoNodeConnection>,
+  BankAccountInfoNodeEdge: ResolverTypeWrapper<BankAccountInfoNodeEdge>,
   TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
   TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
   TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
@@ -28770,6 +28880,8 @@ export type ResolversParentTypes = {
   DocumentTypeNode: DocumentTypeNode,
   DocumentStatus: DocumentStatus,
   BankAccountInfoNode: BankAccountInfoNode,
+  BankAccountInfoNodeConnection: BankAccountInfoNodeConnection,
+  BankAccountInfoNodeEdge: BankAccountInfoNodeEdge,
   TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
   TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
   TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
@@ -29183,7 +29295,23 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['BankAccountInfoNodeConnection'], ParentType, ContextType, BankAccountInfoNodeCopiedToArgs>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type BankAccountInfoNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNodeConnection'] = ResolversParentTypes['BankAccountInfoNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['BankAccountInfoNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type BankAccountInfoNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNodeEdge'] = ResolversParentTypes['BankAccountInfoNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
@@ -29646,8 +29774,9 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type DocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNode'] = ResolversParentTypes['DocumentNode']> = {
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
@@ -29663,6 +29792,9 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   issuanceDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   expiryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['DocumentNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentNodeCopiedToArgs>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -29990,6 +30122,10 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
   programs?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramNode']>>>, ParentType, ContextType>,
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeCopiedToArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
   sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
@@ -30124,6 +30260,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, HouseholdNodeCopiedToArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, HouseholdNodeIndividualsArgs>,
@@ -30172,6 +30310,8 @@ export type HouseholdSelectionNodeResolvers<ContextType = any, ParentType extend
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
 };
 
 export type ImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']> = {
@@ -30382,8 +30522,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
@@ -30425,10 +30565,17 @@ export type IndividualDataChangeApproveMutationResolvers<ContextType = any, Pare
 
 export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, IndividualIdentityNodeCopiedToArgs>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -30509,10 +30656,12 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -30556,12 +30705,17 @@ export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends Re
 
 export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
 };
 
 export type InvalidPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['InvalidPaymentVerificationPlan'] = ResolversParentTypes['InvalidPaymentVerificationPlan']> = {
@@ -30855,6 +31009,9 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
   parent?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
   conflicted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -30868,6 +31025,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   orderNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
+  copiedTo?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeCopiedToArgs>,
   householdSnapshot?: Resolver<Maybe<ResolversTypes['PaymentHouseholdSnapshotNode']>, ParentType, ContextType>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
@@ -31003,6 +31161,9 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
@@ -31017,6 +31178,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, PaymentRecordNodeCopiedToArgs>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -31547,10 +31709,10 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeProgramsArgs>,
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   refuseReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeProgramsArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
@@ -32586,6 +32748,8 @@ export type Resolvers<ContextType = any> = {
   Arg?: GraphQLScalarType,
   AssignFspToDeliveryMechanismMutation?: AssignFspToDeliveryMechanismMutationResolvers<ContextType>,
   BankAccountInfoNode?: BankAccountInfoNodeResolvers<ContextType>,
+  BankAccountInfoNodeConnection?: BankAccountInfoNodeConnectionResolvers<ContextType>,
+  BankAccountInfoNodeEdge?: BankAccountInfoNodeEdgeResolvers<ContextType>,
   BigInt?: GraphQLScalarType,
   BulkUpdateGrievanceTicketsAssigneesMutation?: BulkUpdateGrievanceTicketsAssigneesMutationResolvers<ContextType>,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
