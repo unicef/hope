@@ -8,7 +8,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -44,7 +44,9 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestCloseDataChangeTickets(APITestCase):
+class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
+    databases = {"default", "registration_datahub"}
+
     STATUS_CHANGE_MUTATION = """
     mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
       grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -293,6 +295,8 @@ class TestCloseDataChangeTickets(APITestCase):
             approve_status=True,
         )
 
+        super().setUpTestData()
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
@@ -318,7 +322,7 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         if should_close:
             cls.assertTrue(created_individual.exists())
-            created_individual = created_individual.first()
+            created_individual = created_individual.first()  # type: ignore
 
             document = Document.objects.get(document_number="123-123-UX-321")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
