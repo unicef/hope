@@ -209,23 +209,23 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             if len(values) > 1:
                 return qs.filter(unicef_id__in=values)
             return qs.filter(unicef_id__icontains=value)
-        elif key == "ticket_hh_id":
+        if key == "ticket_hh_id":
             return qs.filter(household_unicef_id__icontains=value)
-        elif key == "full_name":
+        if key == "full_name":
             unicef_ids = (
                 Individual.objects.filter(Q(full_name__icontains=value) & Q(relationship=HEAD))
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(household_unicef_id__in=unicef_ids)
-        elif key == "registration_id":
+        if key == "registration_id":
             unicef_ids = (
                 Individual.objects.filter(relationship=HEAD, registration_id=value)
                 .select_related("household")
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(household_unicef_id__in=unicef_ids)
-        elif key == "phone_number":
+        if key == "phone_number":
             unicef_ids = (
                 Individual.objects.filter(relationship=HEAD)
                 .filter(Q(phone_no__icontains=value) | Q(phone_no_alternative__icontains=value))
@@ -233,7 +233,15 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(household_unicef_id__in=unicef_ids)
-        elif DocumentType.objects.filter(key=key).exists():
+        if key == "bank_account_number":
+            unicef_ids = (
+                Individual.objects.filter(relationship=HEAD)
+                .filter(bank_account_info__bank_account_number__icontains=value)
+                .select_related("household")
+                .values_list("household__unicef_id", flat=True)
+            )
+            return qs.filter(household_unicef_id__in=unicef_ids)
+        if DocumentType.objects.filter(key=key).exists():
             unicef_ids = (
                 Individual.objects.filter(
                     Q(relationship=HEAD) & Q(documents__type__key=key) & Q(documents__document_number__icontains=value)
