@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from django.db.models import Count, F, Q, QuerySet
+from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
@@ -42,23 +42,11 @@ class ProgramFilter(FilterSet):
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
-        queryset = queryset.annotate(
-            total_payment_plans_hh_count=Count(
-                "cashplan__payment_items__household",
-                filter=Q(cashplan__payment_items__delivered_quantity__gte=0),
-                distinct=True,
-            ),
-            total_cash_plans_hh_count=Count(
-                "paymentplan__payment_items__household",
-                filter=Q(paymentplan__payment_items__delivered_quantity__gte=0),
-                distinct=True,
-            ),
-        ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
-
+        queryset = queryset.annotate(hh_count=Count("household"))
         if min_value := value.get("min"):
-            queryset = queryset.filter(total_hh_count__gte=min_value)
+            queryset = queryset.filter(hh_count__gte=min_value)
         if max_value := value.get("max"):
-            queryset = queryset.filter(total_hh_count__lte=max_value)
+            queryset = queryset.filter(hh_count__lte=max_value)
 
         return queryset
 
