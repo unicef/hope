@@ -347,6 +347,7 @@ type CashPlanAndPaymentPlanNode {
   id: String
   unicefId: String
   verificationStatus: String
+  status: String
   currency: String
   totalDeliveredQuantity: Float
   startDate: String
