@@ -1,4 +1,3 @@
-import contextlib
 import logging
 from typing import Dict, List, Tuple
 
@@ -461,9 +460,14 @@ class RdiMergeTask:
                 )
                 raise
 
-            with contextlib.suppress(ConnectionError):
-                cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
-                cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
+            for key in cache.keys("*"):
+                if key.startswith(
+                    (
+                        f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection",
+                        f"count_{obj_hub.business_area_slug}_IndividualNodeConnection",
+                    )
+                ):
+                    cache.delete(key)
 
         except Exception as e:
             logger.error(e)
