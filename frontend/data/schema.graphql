@@ -3719,10 +3719,10 @@ type RegistrationDataImportNode implements Node {
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
   excluded: Boolean!
-  erased: Boolean!
-  refuseReason: String
   program: ProgramNode
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  erased: Boolean!
+  refuseReason: String
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3778,7 +3778,6 @@ input RegistrationKoboImportMutationInput {
   pullPictures: Boolean
   businessAreaSlug: String
   screenBeneficiary: Boolean
-  programId: String
 }
 
 type RegistrationXlsxImportMutation {
@@ -3791,7 +3790,6 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
-  programId: String
 }
 
 type ReportNode implements Node {
