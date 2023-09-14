@@ -159,7 +159,7 @@ describe("Grievance", () => {
           grievancePage.chooseTicketTypeTicketID();
           grievancePage.checkTicketTypeFilterText("Ticket ID");
           grievancePage.chooseTicketTypeLastName();
-          grievancePage.checkTicketTypeFilterText("Last Name");
+          grievancePage.checkTicketTypeFilterText("Full Name");
           grievancePage.chooseTicketTypeHouseholdID();
           grievancePage.useSearchFilter("Not Exist");
           grievancePage.expectedNumberOfRows(0);

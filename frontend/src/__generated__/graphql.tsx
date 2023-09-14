@@ -5141,6 +5141,8 @@ export type Query = {
   flagChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allHouseholdsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allIndividualsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  individualSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  householdSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   me?: Maybe<UserNode>,
   allUsers?: Maybe<UserNodeConnection>,
   userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -12626,6 +12628,9 @@ export type HouseholdChoiceDataQuery = (
   )>>>, severityOfDisabilityChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, householdSearchTypesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -12661,6 +12666,9 @@ export type IndividualChoiceDataQueryVariables = {};
 export type IndividualChoiceDataQuery = (
   { __typename?: 'Query' }
   & { flagChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, individualSearchTypesChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -24091,6 +24099,10 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  householdSearchTypesChoices {
+    name
+    value
+  }
 }
     `;
 export type HouseholdChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>, 'query'>;
@@ -24239,6 +24251,10 @@ export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuer
 export const IndividualChoiceDataDocument = gql`
     query individualChoiceData {
   flagChoices {
+    name
+    value
+  }
+  individualSearchTypesChoices {
     name
     value
   }
@@ -30328,6 +30344,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   flagChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  individualSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  householdSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
