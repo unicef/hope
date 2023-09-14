@@ -41,7 +41,6 @@ stages:
                 global.storageClass=default,\
                 mongodb.mongodbPassword=$(MONGO_PASSWORD),\
                 kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
-                kobocat.subdomain=kc-hope,\
                 kobocat.resources.requests.cpu=250m,\
                 kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),\
                 kpi.ravenDsn=$(KPI_SENTRY_DSN),\
