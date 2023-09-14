@@ -12177,7 +12177,8 @@ export type AllCashPlansAndPaymentPlansQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>
+  after?: Maybe<Scalars['String']>,
+  isPaymentVerificationPage?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -12194,7 +12195,7 @@ export type AllCashPlansAndPaymentPlansQuery = (
       & Pick<CashPlanAndPaymentPlanEdges, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanAndPaymentPlanNode' }
-        & Pick<CashPlanAndPaymentPlanNode, 'objType' | 'id' | 'unicefId' | 'verificationStatus' | 'currency' | 'totalDeliveredQuantity' | 'startDate' | 'endDate' | 'programName' | 'updatedAt' | 'totalNumberOfHouseholds' | 'assistanceMeasurement' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'dispersionDate' | 'serviceProviderFullName'>
+        & Pick<CashPlanAndPaymentPlanNode, 'objType' | 'id' | 'unicefId' | 'verificationStatus' | 'status' | 'currency' | 'totalDeliveredQuantity' | 'startDate' | 'endDate' | 'programName' | 'updatedAt' | 'totalNumberOfHouseholds' | 'assistanceMeasurement' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'dispersionDate' | 'serviceProviderFullName'>
         & { verificationPlans: Maybe<Array<Maybe<(
           { __typename?: 'PaymentVerificationPlanNode' }
           & Pick<PaymentVerificationPlanNode, 'id' | 'createdAt' | 'unicefId'>
@@ -22561,8 +22562,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllCashPlansAndPaymentPlansDocument = gql`
-    query allCashPlansAndPaymentPlans($businessArea: String!, $program: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: String, $endDateLte: String, $orderBy: String, $first: Int, $last: Int, $before: String, $after: String) {
-  allCashPlansAndPaymentPlans(businessArea: $businessArea, program: $program, search: $search, serviceProvider: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDateGte: $startDateGte, endDateLte: $endDateLte, orderBy: $orderBy, first: $first, last: $last, before: $before, after: $after) {
+    query allCashPlansAndPaymentPlans($businessArea: String!, $program: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: String, $endDateLte: String, $orderBy: String, $first: Int, $last: Int, $before: String, $after: String, $isPaymentVerificationPage: Boolean) {
+  allCashPlansAndPaymentPlans(businessArea: $businessArea, program: $program, search: $search, serviceProvider: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDateGte: $startDateGte, endDateLte: $endDateLte, orderBy: $orderBy, first: $first, last: $last, before: $before, after: $after, isPaymentVerificationPage: $isPaymentVerificationPage) {
     pageInfo {
       startCursor
       endCursor
@@ -22577,6 +22578,7 @@ export const AllCashPlansAndPaymentPlansDocument = gql`
         id
         unicefId
         verificationStatus
+        status
         currency
         totalDeliveredQuantity
         startDate
@@ -22642,6 +22644,7 @@ export function withAllCashPlansAndPaymentPlans<TProps, TChildProps = {}>(operat
  *      last: // value for 'last'
  *      before: // value for 'before'
  *      after: // value for 'after'
+ *      isPaymentVerificationPage: // value for 'isPaymentVerificationPage'
  *   },
  * });
  */
