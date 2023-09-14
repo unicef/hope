@@ -500,6 +500,11 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             ],
                             'payment_channels_to_remove': [
                             ],
+                            'preferred_language': {
+                                'approve_status': False,
+                                'previous_value': None,
+                                'value': 'pl-pl'
+                            },
                             'previous_documents': {
                             },
                             'previous_identities': {
