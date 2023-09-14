@@ -5990,7 +5990,8 @@ export type QueryAllCashPlansAndPaymentPlansArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>
+  after?: Maybe<Scalars['String']>,
+  isPaymentVerificationPage?: Maybe<Scalars['Boolean']>
 };
 
 
