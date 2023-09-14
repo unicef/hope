@@ -41,7 +41,8 @@ export const HouseholdTable = ({
       min: filter.householdSizeMin,
       max: filter.householdSizeMax,
     }),
-    search: filter.search,
+    search: `${filter.search.trim() &&
+      [filter.searchType, filter.search.trim()].join(' ')}`,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
