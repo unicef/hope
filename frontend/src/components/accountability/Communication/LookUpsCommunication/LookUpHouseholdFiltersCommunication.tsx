@@ -16,6 +16,7 @@ import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+import { householdTableOrderOptions } from '../../../../utils/constants';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
@@ -28,14 +29,6 @@ interface LookUpHouseholdFiltersCommunicationProps {
   isOnPaper?: boolean;
 }
 
-const orderOptions = [
-  { name: 'Household Id: ascending', value: 'unicef_id' },
-  { name: 'Household Id: descending', value: '-unicef_id' },
-  { name: 'Status: ascending', value: 'status_label' },
-  { name: 'Status: descending', value: '-status_label' },
-  { name: 'Household Size: ascending', value: 'size' },
-  { name: 'Household Size: descending', value: '-size' },
-];
 export const LookUpHouseholdFiltersCommunication = ({
   filter,
   programs,
@@ -162,7 +155,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             value={filter.orderBy}
             data-cy='hh-filters-order-by'
           >
-            {orderOptions.map((order) => (
+            {householdTableOrderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>
