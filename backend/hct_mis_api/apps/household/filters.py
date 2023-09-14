@@ -197,6 +197,8 @@ class HouseholdFilter(FilterSet):
                     # will filter by '111222' like 111222 is ID
                     inner_query |= Q(kobo_asset_id__endswith=_value)
             return qs.filter(inner_query)
+        if key == "bank_account_number":
+            return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=value)
         if DocumentType.objects.filter(key=key).exists():
             return qs.filter(
                 head_of_household__documents__type__key=key,
@@ -297,6 +299,8 @@ class IndividualFilter(FilterSet):
             return qs.filter(Q(phone_no__icontains=value) | Q(phone_no_alternative__icontains=value))
         if key == "registration_id":
             return qs.filter(registration_id__icontains=value)
+        if key == "bank_account_number":
+            return qs.filter(bank_account_info__bank_account_number__icontains=value)
         if DocumentType.objects.filter(key=key).exists():
             return qs.filter(documents__type__key=key, documents__document_number__icontains=value)
         raise KeyError(f"Invalid search key '{key}'")
@@ -338,6 +342,8 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
         )
     elif key == "registration_id":
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
+    elif key == "bank_account_number":
+        all_queries.append({"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}})
     elif DocumentType.objects.filter(key=key).exists():
         all_queries.append(
             {
@@ -383,6 +389,10 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
     elif key == "phone_no":
         all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}})
         all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}})
+    elif key == "bank_account_number":
+        all_queries.append(
+            {"match_phrase_prefix": {"head_of_household.bank_account_info.bank_account_number": {"query": search}}}
+        )
     elif key == "registration_id":
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
     elif DocumentType.objects.filter(key=key).exists():
