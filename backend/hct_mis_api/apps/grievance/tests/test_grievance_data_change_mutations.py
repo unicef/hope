@@ -10,7 +10,7 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -38,7 +38,9 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestGrievanceCreateDataChangeMutation(APITestCase):
+class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCase):
+    databases = {"default", "registration_datahub"}
+
     CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){
       createGrievanceTicket(input:$input){
@@ -201,6 +203,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             number="1111",
             country=country_pl,
         )
+        super().setUpTestData()
 
     @parameterized.expand(
         [
@@ -304,6 +307,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "sex": "MALE",
                                 "birthDate": date(year=1980, month=2, day=1).isoformat(),
                                 "maritalStatus": SINGLE,
+                                "preferredLanguage": "pl-pl",
                                 "documents": [
                                     {
                                         "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[

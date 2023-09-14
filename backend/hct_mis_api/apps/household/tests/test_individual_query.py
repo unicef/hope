@@ -14,7 +14,11 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.conftest import disabled_locally_test
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    migrate_data_to_representations,
+)
 
 
 @disabled_locally_test
@@ -78,10 +82,12 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
@@ -92,6 +98,8 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
         household_two.programs.add(cls.program_two)
+        # added for testing migrate_data_to_representations script
+        household_two.programs.add(program_one)
 
         cls.individuals_to_create = [
             {
@@ -163,6 +171,9 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         )
 
         cls.rebuild_search_index()
+
+        # remove after data migration
+        migrate_data_to_representations()
 
         super().setUpTestData()
 

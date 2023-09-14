@@ -179,6 +179,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     payment_channels = graphene.List(BankTransferObjectType)
     payment_channels_to_edit = graphene.List(EditBankTransferObjectType)
     payment_channels_to_remove = graphene.List(graphene.ID)
+    preferred_language = graphene.String()
     flex_fields = Arg()
 
 
@@ -214,6 +215,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     identities = graphene.List(IndividualIdentityObjectType)
     payment_channels = graphene.List(BankTransferObjectType)
     business_area = graphene.String()
+    preferred_language = graphene.String()
     flex_fields = Arg()
 
 
