@@ -21,6 +21,11 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
+                                            'name': 'Test program ONE'
+                                        }
+                                    },
+                                    {
+                                        'node': {
                                             'name': 'Test program TWO'
                                         }
                                     }
@@ -40,6 +45,11 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
+                                            'name': 'Test program ONE'
+                                        }
+                                    },
+                                    {
+                                        'node': {
                                             'name': 'Test program TWO'
                                         }
                                     }
@@ -57,6 +67,11 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                         'household': {
                             'programs': {
                                 'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program ONE'
+                                        }
+                                    },
                                     {
                                         'node': {
                                             'name': 'Test program TWO'
@@ -196,45 +211,6 @@ snapshots['TestIndividualQuery::test_individual_query_single_1_without_permissio
                 }
             ],
             'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
-        }
-    ]
-}
-
-snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_permission 1'] = {
-    'data': {
-        'allIndividuals': {
-            'edges': [
-                {
-                    'node': {
-                        'birthDate': '1969-11-29',
-                        'familyName': 'Franklin',
-                        'fullName': 'Jenna Franklin',
-                        'givenName': 'Jenna',
-                        'phoneNo': '001-296-358-5428-607',
-                        'phoneNoValid': False
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_1_without_permission 1'] = {
-    'data': {
-        'allIndividuals': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied',
-            'path': [
-                'allIndividuals'
-            ]
         }
     ]
 }
