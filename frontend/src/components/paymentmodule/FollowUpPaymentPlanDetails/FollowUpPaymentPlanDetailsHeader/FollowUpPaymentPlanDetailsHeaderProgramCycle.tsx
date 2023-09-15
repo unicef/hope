@@ -39,7 +39,7 @@ export const FollowUpPaymentPlanDetailsHeaderProgramCycle = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/followup-payment-plans`,
     },
     {
       title: `${paymentPlan.programCycle.name} (ID: ${paymentPlan.programCycle.unicefId})`,
