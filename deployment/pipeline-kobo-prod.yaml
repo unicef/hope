@@ -13,7 +13,7 @@ variables:
   # ========================================================================
   Kubernetes.serviceConnection: "ICTD-HOPE-PRD-uni-apps-aks-hope-prd-ictd-kobo-prd-1617968835008"
   Kubernetes.namespace: "ictd-kobo-prd"
-  Chart.version: "0.1.0"
+  Chart.version: "0.1.1"
 
 stages:
   - stage: deploy
@@ -41,7 +41,6 @@ stages:
                 global.storageClass=default,\
                 mongodb.mongodbPassword=$(MONGO_PASSWORD),\
                 kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
-                kobocat.subdomain=kc-hope,\
                 kobocat.resources.requests.cpu=250m,\
                 kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),\
                 kpi.ravenDsn=$(KPI_SENTRY_DSN),\
