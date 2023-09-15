@@ -412,3 +412,12 @@ class FileTemp(TimeStampedModel):
 
 class MigrationStatus(TimeStampedModel):
     is_running = models.BooleanField()
+
+
+class DataCollectingType(TimeStampedModel):
+    code = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    compatible_types = models.ManyToManyField("self", blank=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.description}"
