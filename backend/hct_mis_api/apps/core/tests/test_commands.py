@@ -17,3 +17,10 @@ class TestCommands(BaseElasticSearchTestCase):
                 call_command("initdemo", "--skip-drop")
         except Exception as e:
             self.fail(e)
+
+    def test_initcypress(self) -> None:
+        try:
+            with mock.patch("sys.stdout", new=StringIO()):
+                call_command("initcypress", "--skip-drop")
+        except Exception as e:
+            self.fail(e)

@@ -12,6 +12,7 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { householdTableOrderOptions } from '../../utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
@@ -23,14 +24,6 @@ interface HouseholdFiltersProps {
   isOnPaper?: boolean;
 }
 
-const orderOptions = [
-  { name: 'Household Id: ascending', value: 'unicef_id' },
-  { name: 'Household Id: descending', value: '-unicef_id' },
-  { name: 'Status: ascending', value: 'status_label' },
-  { name: 'Status: descending', value: '-status_label' },
-  { name: 'Household Size: ascending', value: 'size' },
-  { name: 'Household Size: descending', value: '-size' },
-];
 export const HouseholdFilters = ({
   filter,
   choicesData,
@@ -161,7 +154,7 @@ export const HouseholdFilters = ({
             data-cy='hh-filters-order-by'
             disableClearable
           >
-            {orderOptions.map((order) => (
+            {householdTableOrderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

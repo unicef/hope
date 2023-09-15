@@ -13,6 +13,7 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { individualTableOrderOptions } from '../../utils/constants';
 
 interface IndividualsFilterProps {
   filter;
@@ -23,15 +24,6 @@ interface IndividualsFilterProps {
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
 }
-
-const orderOptions = [
-  { name: 'Individual Id: ascending', value: 'unicef_id' },
-  { name: 'Individual Id: descending', value: '-unicef_id' },
-  { name: 'Individual: ascending', value: 'full_name' },
-  { name: 'Individual: descending', value: '-full_name' },
-  { name: 'Gender: ascending', value: 'sex' },
-  { name: 'Gender: descending', value: '-sex' },
-];
 
 export const IndividualsFilter = ({
   filter,
@@ -181,7 +173,7 @@ export const IndividualsFilter = ({
             data-cy='ind-filters-order-by'
             disableClearable
           >
-            {orderOptions.map((order) => (
+            {individualTableOrderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>
