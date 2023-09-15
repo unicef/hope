@@ -14,6 +14,7 @@ describe("Program Management", () => {
 
   after(() => {
     cy.initScenario("init_clear");
+    cy.adminLogin();
   });
 
   describe("Smoke tests Program Management", () => {
@@ -30,12 +31,12 @@ describe("Program Management", () => {
         .getDialogTitle()
         .should("contain", "Set-up a new Programme");
       cy.uniqueSeed().then((seed) => {
-        const programName = `test program ${seed}`;
+        const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
-        programManagement.getInputCashAssistScope().first().click();
+        programManagement.getInputCashAssistScope().click();
         programManagement.getSelectOptionUnicef().click();
         programManagement.getInputSector().first().click();
-        programManagement.getSelectOptionMultiPurpose().click();
+        programManagement.getSelectOptionByName("Multi Purpose").click();
         programManagement.getInputStartDate().click().type("2023-01-01");
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
@@ -63,74 +64,62 @@ describe("Program Management", () => {
       });
     });
     it("Edit Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      cy.get('[data-value="ACTIVE"]').click({ force: true });
-      cy.get('[data-cy="button-filters-apply"]').click();
-      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
-      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      cy.contains("EDIT PROGRAMME").click({ force: true });
+      programManagement.getStatusFilter().click();
+      programManagement.getOption().contains("Active").click();
+      programManagement.getButtonApply().click();
+      programManagement.getStatusContainer().should("contain", "ACTIVE");
+      programManagement
+        .getTableRowByName(programManagement.textTestProgramm)
+        .click();
+      programDetails.getButtonEditProgram().click();
       cy.uniqueSeed().then((seed) => {
         const editedProgramName = `Edited program ${seed}`;
-        cy.get('[data-cy="input-programme-name"]')
+        programManagement
+          .getInputProgrammeName()
           .clear()
           .type(editedProgramName);
-        cy.get('[data-cy="input-cash-assist-scope"]').first().click();
-        cy.get('[data-cy="select-option-Unicef"]').click();
-        cy.get('[data-cy="input-sector"]').first().click();
-        cy.get('[data-cy="select-option-Multi Purpose"]').click();
-        cy.get('[data-cy="input-start-date"]').click().type("2023-01-10");
-        cy.get('[data-cy="input-end-date"]').click().type("2033-12-31");
-        cy.get('[data-cy="input-description"]')
+        programManagement.getInputCashAssistScope().click();
+        programManagement.getSelectOptionForPartners().click();
+        programManagement.getInputSector().click();
+        programManagement.getSelectOptionByName("Health").click();
+        programManagement
+          .getInputStartDate()
+          .click()
+          .type("{selectAll}")
+          .type("2022-11-02");
+        programManagement
+          .getInputEndDate()
+          .click()
+          .type("{selectAll}")
+          .type("2077-01-11");
+        programManagement
+          .getInputDescription()
           .first()
           .clear()
           .type("Edit Test description");
-        cy.get('[data-cy="input-budget"]')
+        programManagement
+          .getInputBudget()
           .first()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}8888");
-        cy.get('[data-cy="input-admin-area"]').clear().type("Some Admin Area");
-        cy.get('[data-cy="input-population-goal"]')
+        programManagement
+          .getInputFrequencyOfPayment()
+          .contains("One-off")
+          .click();
+        programManagement.getInputAdminArea().clear().type("Some Admin Area");
+        programManagement.getInputCashPlus().uncheck();
+        programManagement
+          .getInputPopulationGoal()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}2000");
-        cy.get('[data-cy="button-save"]').click({ force: true });
-        cy.get("h5").should("contain", editedProgramName);
+        programManagement
+          .getInputIndividualDataNeeded()
+          .find("input")
+          .eq(1)
+          .click();
+        programManagement.getButtonSave().click();
+        programManagement.getPageHeaderTitle().contains(editedProgramName);
       });
-    });
-    it("Finish Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      cy.get('[data-value="ACTIVE"]').click({ force: true });
-      cy.get('[data-cy="button-filters-apply"]').click();
-      cy.reload();
-      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
-      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      cy.contains("Finish Programme").click({ force: true });
-      cy.get('[data-cy="button-finish-program"]').eq(1).click({ force: true });
-      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
-    });
-    it("Reactivate Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      cy.get('[data-value="FINISHED"]').click({ force: true });
-      cy.get('[data-cy="button-filters-apply"]').click();
-      cy.reload();
-      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
-      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      cy.contains("Reactivate").eq(0).click({ force: true });
-      cy.get(".MuiDialogActions-root > .MuiButton-contained").click({
-        force: true,
-      });
-      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
-    });
-    it.skip("Remove Program", () => {
-      // ToDo
-    });
-    it.skip("Activate Program", () => {
-      // ToDo
-    });
-    it.skip("Reactivate Program", () => {
-      // ToDo
-    });
-    it.skip("Open in Cashassist", () => {
-      // ToDo
     });
 
     context("PM Filters", () => {

@@ -42,7 +42,7 @@ export const ProgrammesTableRow = ({
       onClick={handleClick}
       role='checkbox'
       key={program.id}
-      data-cy={`table-row-${program.id}`}
+      data-cy={`table-row-${program.name}`}
     >
       <TableCell align='left'>
         <BlackLink to={programDetailsPath}>{program.name}</BlackLink>
