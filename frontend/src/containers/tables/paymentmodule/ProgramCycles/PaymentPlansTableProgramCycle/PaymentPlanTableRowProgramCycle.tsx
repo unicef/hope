@@ -22,9 +22,9 @@ export const PaymentPlanTableRowProgramCycle = ({
   canViewDetails,
 }: PaymentPlanTableRowProgramCycleProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-  }/${plan.id}`;
+  const paymentPlanPath = `/${baseUrl}/payment-module/program-cycles/${
+    plan.programCycle.id
+  }/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`;
 
   const {
     data: statusChoicesData,

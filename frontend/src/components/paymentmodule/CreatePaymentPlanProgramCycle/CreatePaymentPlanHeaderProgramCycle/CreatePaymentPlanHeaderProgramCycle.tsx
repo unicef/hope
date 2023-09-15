@@ -3,19 +3,19 @@ import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ProgramCycleQuery } from '../../../../__generated__/graphql';
+import { ProgramCycleNode } from '../../../../__generated__/graphql';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { PageHeader } from '../../../core/PageHeader';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 interface CreatePaymentPlanHeaderProgramCycleProps {
   handleSubmit: () => Promise<void>;
   baseUrl: string;
   permissions: string[];
   loadingCreate: boolean;
-  programCycle: ProgramCycleQuery['programCycle'];
+  programCycle: Pick<ProgramCycleNode, 'id' | 'name' | 'unicefId'>;
 }
 
 export const CreatePaymentPlanHeaderProgramCycle = ({
