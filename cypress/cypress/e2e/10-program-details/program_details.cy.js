@@ -7,13 +7,18 @@ describe("Program Details", () => {
     cy.navigateToHomePage();
   });
 
+  after(() => {
+    cy.initScenario("init_clear");
+    cy.adminLogin();
+  });
+
   describe("Smoke tests Program Details", () => {
-    it.only("Check Program Details page", () => {
+    it("Check Program Details page", () => {
       cy.scenario([
-        "1. Go to Program Details page (Active program chosen)",
-        "2. Check if all elements on page exist",
-        "3. Change program to Draft program",
-        "4. Check if all elements on page exist",
+        "Go to Program Details page (Active program chosen)",
+        "Check if all elements on page exist",
+        "Change program to Draft program",
+        "Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
       programDetails.getTashPlanTableRow().should("have.length", 2);
@@ -68,7 +73,33 @@ describe("Program Details", () => {
     });
   });
 
-  describe("Component tests Program Details", () => {});
+  describe("Component tests Program Details", () => {
+    it("Finish Program", () => {
+      cy.scenario([
+        "Go to Program Details page (Active program chosen)",
+        "Press Finish Programme button",
+        "Press Finish button on popup",
+        "Check Status",
+      ]);
+      programDetails.getButtonFinishProgram().click();
+      programDetails.getButtonFinishProgram().eq(1).click();
+      programDetails.getStatusContainer().should("contain", "FINISHED");
+    });
+    it("Reactivate Program", () => {
+      cy.scenario([
+        "Go to Program Details page (Finished program chosen)",
+        "Press Reactivate button",
+        "Press Reactivate button on popup",
+        "Check Status",
+      ]);
+      programDetails.getButtonDataCyButtonReactivateProgram().click();
+      programDetails.getButtonDataCyButtonReactivateProgramPopup().click();
+      programDetails.getStatusContainer().should("contain", "ACTIVE");
+    });
+    it.skip("Remove Program", () => {});
+    it.skip("Activate Program", () => {});
+    it.skip("Reactivate Program", () => {});
+  });
 
   describe.skip("E2E tests Program Details", () => {});
 

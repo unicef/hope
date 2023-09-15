@@ -173,7 +173,9 @@ export const ProgramForm = ({
               {open && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
                 <DialogTitle disableTypography>
-                  <Typography variant='h6'>{title}</Typography>
+                  <Typography data-cy='dialog-title' variant='h6'>
+                    {title}
+                  </Typography>
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
