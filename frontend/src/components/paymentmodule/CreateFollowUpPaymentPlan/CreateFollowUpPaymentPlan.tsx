@@ -13,6 +13,7 @@ import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
@@ -26,7 +27,7 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
-import { today, tomorrow } from '../../../utils/utils';
+import { cameThroughProgramCycle, today, tomorrow } from '../../../utils/utils';
 import { DividerLine } from '../../core/DividerLine';
 import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
@@ -40,6 +41,7 @@ export interface CreateFollowUpPaymentPlanProps {
 export const CreateFollowUpPaymentPlan = ({
   paymentPlan,
 }: CreateFollowUpPaymentPlanProps): React.ReactElement => {
+  const location = useLocation();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -76,6 +78,11 @@ export const CreateFollowUpPaymentPlan = ({
       ),
   });
 
+  const getDetailsPath = (plan): string =>
+    cameThroughProgramCycle(location)
+      ? `/${baseUrl}/payment-module/program-cycles/${plan?.programCycle?.id}/payment-plans/${plan.id}`
+      : `/${baseUrl}/payment-module/payment-plans/${plan.id}`;
+
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
     dispersionStartDate: '',
@@ -91,8 +98,9 @@ export const CreateFollowUpPaymentPlan = ({
         },
       });
       setDialogOpen(false);
+      const detailsPath = getDetailsPath(res.data.createFollowUpPaymentPlan);
       showMessage(t('Payment Plan Created'), {
-        pathname: `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+        pathname: detailsPath,
         historyMethod: 'push',
       });
     } catch (e) {

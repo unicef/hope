@@ -979,3 +979,6 @@ export const dateToIsoString = (date: Date, type: DateType): string => {
 
 export const associatedWith = (type) => (item) => item.associatedWith === type;
 export const isNot = (type) => (item) => item.type !== type;
+
+export const cameThroughProgramCycle = (location): boolean =>
+  location.pathname.includes('program-cycles');

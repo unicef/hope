@@ -27,6 +27,11 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   availablePaymentRecordsCount: 0,
   bankReconciliationSuccess: 0,
   bankReconciliationError: 0,
+  programCycle: {
+    id: 'loool',
+    unicefId: 'loool2',
+    name: 'loool3',
+  },
   createdBy: {
     id: 'VXNlck5vZGU6ZjRlMTYwZDEtOTgyNy00NmEwLTg4MzAtZmU1MjljZDVhNDBj',
     firstName: 'Matthew',

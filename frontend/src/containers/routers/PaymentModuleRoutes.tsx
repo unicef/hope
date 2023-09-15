@@ -15,7 +15,11 @@ import { SetUpFspPageFollowUp } from '../pages/paymentmodule/SetUpFspPageFollowU
 import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
 import { ProgramCycleDetailsPagePaymentModule } from '../pages/programcycles/ProgramCycleDetailsPagePaymentModule';
 import { ProgramCyclesPagePaymentModule } from '../pages/programcycles/ProgramCyclesPagePaymentModule';
-import { CreatePaymentPlanProgramCyclePage } from '../pages/programcycles/CreatePaymentPlanProgramCyclePage';
+import { CreatePaymentPlanPageProgramCycle } from '../pages/programcycles/CreatePaymentPlanPageProgramCycle';
+import { EditPaymentPlanPageProgramCycle } from '../pages/programcycles/EditPaymentPlanPageProgramCycle';
+import { PaymentPlanDetailsPageProgramCycle } from '../pages/programcycles/PaymentPlanDetailsPageProgramCycle';
+import { FollowUpPaymentPlanDetailsPageProgramCycle } from '../pages/programcycles/FollowUpPaymentPlanDetailsPageProgramCycle';
+import { EditFollowUpPaymentPlanPageProgramCycle } from '../pages/programcycles/EditFollowUpPaymentPlanPageProgramCycle';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -70,8 +74,25 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
       component: <PaymentDetailsPage />,
     },
     {
+      path: `${path}/payment-module/program-cycles/:id/followup-payment-plans/:paymentPlanId/edit`,
+      component: <EditFollowUpPaymentPlanPageProgramCycle />,
+    },
+    {
+      path: `${path}/payment-module/program-cycles/:id/followup-payment-plans/:paymentPlanId`,
+      component: <FollowUpPaymentPlanDetailsPageProgramCycle />,
+    },
+    {
+      path: `${path}/payment-module/program-cycles/:id/payment-plans/:paymentPlanId/edit`,
+      component: <EditPaymentPlanPageProgramCycle />,
+    },
+    {
+      path: `${path}/payment-module/program-cycles/:id/payment-plans/:paymentPlanId`,
+      component: <PaymentPlanDetailsPageProgramCycle />,
+    },
+
+    {
       path: `${path}/payment-module/program-cycles/:id/create-payment-plan`,
-      component: <CreatePaymentPlanProgramCyclePage />,
+      component: <CreatePaymentPlanPageProgramCycle />,
     },
     {
       path: `${path}/payment-module/program-cycles/:id`,
