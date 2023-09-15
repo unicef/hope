@@ -16,7 +16,7 @@ describe("Program Details", () => {
         "4. Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
-      programDetails.getTashPlanTableRow().should("have.length", 1);
+      programDetails.getTashPlanTableRow().should("have.length", 2);
       programDetails.getLabelAdministrativeAreasOfImplementation();
       programDetails.getButtonEditProgram().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
