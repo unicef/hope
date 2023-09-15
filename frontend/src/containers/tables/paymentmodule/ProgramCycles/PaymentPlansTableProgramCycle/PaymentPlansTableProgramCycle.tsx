@@ -32,7 +32,7 @@ export const PaymentPlansTableProgramCycle = ({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
-    isFollowUp: false,
+    isFollowUp: null,
     program: programId,
     programCycle: programCycle.id,
   };

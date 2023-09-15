@@ -14,6 +14,11 @@ export const CREATE_FOLLOW_UP_PAYMENT_PLAN = gql`
       paymentPlan {
         id
         unicefId
+        programCycle {
+          id
+          unicefId
+          name
+        }
       }
     }
   }

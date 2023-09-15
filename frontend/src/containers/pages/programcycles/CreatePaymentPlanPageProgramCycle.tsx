@@ -1,6 +1,6 @@
 import { Box, Grid } from '@material-ui/core';
-import { Field, FieldArray, Form, Formik } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Field, FieldArray, Form, Formik } from 'formik';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import {
   useAllSteficonRulesQuery,
   useCreatePpMutation,
-  useProgramCycleQuery,
+  useProgramCycleIdNameQuery,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BaseSection } from '../../../components/core/BaseSection';
@@ -23,13 +23,13 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { associatedWith, isNot, today, tomorrow } from '../../../utils/utils';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
+import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { FormikCurrencyAutocomplete } from '../../../shared/FormikCurrencyAutocomplete';
+import { associatedWith, isNot, today, tomorrow } from '../../../utils/utils';
 
-export const CreatePaymentPlanProgramCyclePage = (): React.ReactElement => {
+export const CreatePaymentPlanPageProgramCycle = (): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
@@ -64,7 +64,7 @@ export const CreatePaymentPlanProgramCyclePage = (): React.ReactElement => {
   const {
     data: programCycleData,
     loading: programCycleLoading,
-  } = useProgramCycleQuery({
+  } = useProgramCycleIdNameQuery({
     variables: {
       id,
     },
