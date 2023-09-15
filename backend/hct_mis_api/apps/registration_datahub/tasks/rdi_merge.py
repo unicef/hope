@@ -461,7 +461,7 @@ class RdiMergeTask:
                 )
                 raise
 
-            with contextlib.suppress(ConnectionError):
+            with contextlib.suppress(ConnectionError, AttributeError):
                 for key in cache.keys("*"):
                     if key.startswith(
                         (
