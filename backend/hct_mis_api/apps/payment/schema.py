@@ -641,6 +641,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     id = graphene.String()
     unicef_id = graphene.String(source="get_unicef_id")
     verification_status = graphene.String()
+    status = graphene.String()
     currency = graphene.String()
     total_delivered_quantity = graphene.Float()
     start_date = graphene.String()
@@ -668,6 +669,9 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None
+
+    def resolve_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
+        return self.status
 
     def resolve_program_name(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.program.name
@@ -958,6 +962,7 @@ class Query(graphene.ObjectType):
         last=graphene.Int(),
         before=graphene.String(),
         after=graphene.String(),
+        is_payment_verification_page=graphene.Boolean(),
     )
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
@@ -1310,7 +1315,12 @@ class Query(graphene.ObjectType):
             payment_plan_object_id=OuterRef("id")
         )
 
-        payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.FINISHED).annotate(
+        if "is_payment_verification_page" in kwargs and kwargs.get("is_payment_verification_page"):
+            payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.FINISHED)
+        else:
+            payment_plan_qs = PaymentPlan.objects.all()
+
+        payment_plan_qs = payment_plan_qs.annotate(
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
             delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
         )
