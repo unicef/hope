@@ -419,5 +419,5 @@ class DataCollectingType(TimeStampedModel):
     description = models.TextField(blank=True)
     compatible_types = models.ManyToManyField("self", blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.code} - {self.description}"
