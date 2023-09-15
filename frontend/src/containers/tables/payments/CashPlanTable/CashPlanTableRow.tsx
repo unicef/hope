@@ -2,15 +2,15 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
-  cashPlanStatusToColor,
+  paymentPlanStatusToColor,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
@@ -60,8 +60,8 @@ export const CashPlanTableRow = ({
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={cashAndPaymentPlan.verificationStatus}
-          statusToColor={cashPlanStatusToColor}
+          status={cashAndPaymentPlan.status}
+          statusToColor={paymentPlanStatusToColor}
         />
       </TableCell>
       <TableCell align='right'>

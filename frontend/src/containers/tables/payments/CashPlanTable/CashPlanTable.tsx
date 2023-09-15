@@ -21,6 +21,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   const initialVariables = {
     program: program.id,
     businessArea,
+    isPaymentVerificationPage: false,
   };
 
   return (
