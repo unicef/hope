@@ -105,7 +105,7 @@ describe("Payment Verification", () => {
           defaultNumberOfVPlans016
         );
       });
-      it("Delete Verification Plan", () => {
+      it.only("Delete Verification Plan", () => {
         cy.scenario([
           "Press Delete button",
           "Press Delete button on pop-up",

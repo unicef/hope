@@ -6,7 +6,12 @@ export default class ProgramDetails extends BaseComponent {
   buttonRemoveProgram = 'button[data-cy="button-remove-program"]';
   buttonEditProgram = 'button[data-cy="button-edit-program"]';
   buttonCopyProgram = 'button[data-cy="button-copy-program"]';
+  buttonFinishProgram = 'button[data-cy="button-finish-program"]';
   dialogPopupActivate = 'div[data-cy="dialog-actions-container"]';
+  buttonDataCyButtonReactivateProgram =
+    'button[data-cy="button-reactivate-program"]';
+  buttonDataCyButtonReactivateProgramPopup =
+    'button[data-cy="button-reactivate-program-popup"]';
   labelTotalNumberOfHouseholds =
     'div[data-cy="label-Total Number of Households"]';
   labelIndividualsData =
@@ -37,6 +42,7 @@ export default class ProgramDetails extends BaseComponent {
   getButtonRemoveProgram = () => cy.get(this.buttonRemoveProgram);
   getButtonEditProgram = () => cy.get(this.buttonEditProgram);
   getButtonCopyProgram = () => cy.get(this.buttonCopyProgram);
+  getButtonFinishProgram = () => cy.get(this.buttonFinishProgram);
   getDialogPopupActivate = () => cy.get(this.dialogPopupActivate);
   getLabelTotalNumberOfHouseholds = () =>
     cy.get(this.labelTotalNumberOfHouseholds);
@@ -58,4 +64,8 @@ export default class ProgramDetails extends BaseComponent {
   getTableLabel = () => cy.get(this.tableLabel);
   getTableTitle = () => cy.get(this.tableTitle);
   getButtonActivateProgramModal = () => cy.get(this.buttonActivateProgramModal);
+  getButtonDataCyButtonReactivateProgram = () =>
+    cy.get(this.buttonDataCyButtonReactivateProgram);
+  getButtonDataCyButtonReactivateProgramPopup = () =>
+    cy.get(this.buttonDataCyButtonReactivateProgramPopup);
 }

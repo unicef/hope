@@ -7,13 +7,18 @@ describe("Program Details", () => {
     cy.navigateToHomePage();
   });
 
+  after(() => {
+    cy.initScenario("init_clear");
+    cy.adminLogin();
+  });
+
   describe("Smoke tests Program Details", () => {
     it("Check Program Details page", () => {
       cy.scenario([
-        "1. Go to Program Details page (Active program chosen)",
-        "2. Check if all elements on page exist",
-        "3. Change program to Draft program",
-        "4. Check if all elements on page exist",
+        "Go to Program Details page (Active program chosen)",
+        "Check if all elements on page exist",
+        "Change program to Draft program",
+        "Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
       programDetails.getTashPlanTableRow().should("have.length", 1);
@@ -70,28 +75,26 @@ describe("Program Details", () => {
 
   describe("Component tests Program Details", () => {
     it("Finish Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      // cy.get('[data-value="ACTIVE"]').click({ force: true });
-      // cy.get('[data-cy="button-filters-apply"]').click();
-      // cy.reload();
-      // cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
-      // cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      // cy.contains("Finish Programme").click({ force: true });
-      // cy.get('[data-cy="button-finish-program"]').eq(1).click({ force: true });
-      // cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
+      cy.scenario([
+        "Go to Program Details page (Active program chosen)",
+        "Press Finish Programme button",
+        "Press Finish button on popup",
+        "Check Status",
+      ]);
+      programDetails.getButtonFinishProgram().click();
+      programDetails.getButtonFinishProgram().eq(1).click();
+      programDetails.getStatusContainer().should("contain", "FINISHED");
     });
     it("Reactivate Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      cy.get('[data-value="FINISHED"]').click({ force: true });
-      cy.get('[data-cy="button-filters-apply"]').click();
-      cy.reload();
-      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
-      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      cy.contains("Reactivate").eq(0).click({ force: true });
-      cy.get(".MuiDialogActions-root > .MuiButton-contained").click({
-        force: true,
-      });
-      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
+      cy.scenario([
+        "Go to Program Details page (Finished program chosen)",
+        "Press Reactivate button",
+        "Press Reactivate button on popup",
+        "Check Status",
+      ]);
+      programDetails.getButtonDataCyButtonReactivateProgram().click();
+      programDetails.getButtonDataCyButtonReactivateProgramPopup().click();
+      programDetails.getStatusContainer().should("contain", "ACTIVE");
     });
     it.skip("Remove Program", () => {});
     it.skip("Activate Program", () => {});
