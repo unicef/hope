@@ -10093,6 +10093,10 @@ export type CreateFollowUpPpMutation = (
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+      & { programCycle: Maybe<(
+        { __typename?: 'ProgramCycleNode' }
+        & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name'>
+      )> }
     )> }
   )> }
 );
@@ -12107,7 +12111,10 @@ export type AllPaymentPlansForTableQuery = (
         ), targetPopulation: (
           { __typename?: 'TargetPopulationNode' }
           & Pick<TargetPopulationNode, 'id' | 'name'>
-        ) }
+        ), programCycle: Maybe<(
+          { __typename?: 'ProgramCycleNode' }
+          & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name'>
+        )> }
       )> }
     )>> }
   )> }
@@ -12192,7 +12199,10 @@ export type PaymentPlanQuery = (
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-    ), program: (
+    ), programCycle: Maybe<(
+      { __typename?: 'ProgramCycleNode' }
+      & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name'>
+    )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'caId'>
     ), targetPopulation: (
@@ -12315,7 +12325,10 @@ export type PaymentPlanQuery = (
         & { node: Maybe<(
           { __typename?: 'PaymentPlanNode' }
           & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'createdAt' | 'startDate' | 'endDate' | 'dispersionEndDate' | 'dispersionStartDate'>
-          & { paymentItems: (
+          & { programCycle: Maybe<(
+            { __typename?: 'ProgramCycleNode' }
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name'>
+          )>, paymentItems: (
             { __typename?: 'PaymentNodeConnection' }
             & Pick<PaymentNodeConnection, 'totalCount'>
           ) }
@@ -13459,6 +13472,19 @@ export type ProgramCycleQuery = (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'startDate' | 'endDate'>
     ) }
+  )> }
+);
+
+export type ProgramCycleIdNameQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ProgramCycleIdNameQuery = (
+  { __typename?: 'Query' }
+  & { programCycle: Maybe<(
+    { __typename?: 'ProgramCycleNode' }
+    & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name'>
   )> }
 );
 
@@ -16866,6 +16892,11 @@ export const CreateFollowUpPpDocument = gql`
     paymentPlan {
       id
       unicefId
+      programCycle {
+        id
+        unicefId
+        name
+      }
     }
   }
 }
@@ -22388,6 +22419,11 @@ export const AllPaymentPlansForTableDocument = gql`
           id
           name
         }
+        programCycle {
+          id
+          unicefId
+          name
+        }
         currency
         currencyName
         startDate
@@ -22656,6 +22692,11 @@ export const PaymentPlanDocument = gql`
       lastName
       email
     }
+    programCycle {
+      id
+      unicefId
+      name
+    }
     program {
       id
       name
@@ -22871,6 +22912,11 @@ export const PaymentPlanDocument = gql`
           id
           unicefId
           createdAt
+          programCycle {
+            id
+            unicefId
+            name
+          }
           paymentItems {
             totalCount
           }
@@ -25795,6 +25841,58 @@ export function useProgramCycleLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type ProgramCycleQueryHookResult = ReturnType<typeof useProgramCycleQuery>;
 export type ProgramCycleLazyQueryHookResult = ReturnType<typeof useProgramCycleLazyQuery>;
 export type ProgramCycleQueryResult = ApolloReactCommon.QueryResult<ProgramCycleQuery, ProgramCycleQueryVariables>;
+export const ProgramCycleIdNameDocument = gql`
+    query ProgramCycleIdName($id: ID!) {
+  programCycle(id: $id) {
+    id
+    unicefId
+    name
+  }
+}
+    `;
+export type ProgramCycleIdNameComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables>, 'query'> & ({ variables: ProgramCycleIdNameQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ProgramCycleIdNameComponent = (props: ProgramCycleIdNameComponentProps) => (
+      <ApolloReactComponents.Query<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables> query={ProgramCycleIdNameDocument} {...props} />
+    );
+    
+export type ProgramCycleIdNameProps<TChildProps = {}> = ApolloReactHoc.DataProps<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables> & TChildProps;
+export function withProgramCycleIdName<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ProgramCycleIdNameQuery,
+  ProgramCycleIdNameQueryVariables,
+  ProgramCycleIdNameProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables, ProgramCycleIdNameProps<TChildProps>>(ProgramCycleIdNameDocument, {
+      alias: 'programCycleIdName',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useProgramCycleIdNameQuery__
+ *
+ * To run a query within a React component, call `useProgramCycleIdNameQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProgramCycleIdNameQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProgramCycleIdNameQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useProgramCycleIdNameQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables>) {
+        return ApolloReactHooks.useQuery<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables>(ProgramCycleIdNameDocument, baseOptions);
+      }
+export function useProgramCycleIdNameLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables>(ProgramCycleIdNameDocument, baseOptions);
+        }
+export type ProgramCycleIdNameQueryHookResult = ReturnType<typeof useProgramCycleIdNameQuery>;
+export type ProgramCycleIdNameLazyQueryHookResult = ReturnType<typeof useProgramCycleIdNameLazyQuery>;
+export type ProgramCycleIdNameQueryResult = ApolloReactCommon.QueryResult<ProgramCycleIdNameQuery, ProgramCycleIdNameQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {

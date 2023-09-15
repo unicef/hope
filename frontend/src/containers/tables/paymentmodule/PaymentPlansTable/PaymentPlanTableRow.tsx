@@ -78,7 +78,7 @@ export const PaymentPlanTableRow = ({
           paymentPlan={plan}
           canViewDetails={canViewDetails}
         />
-      </TableCell>{' '}
+      </TableCell>
     </ClickableTableRow>
   );
 };
