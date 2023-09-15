@@ -5,7 +5,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 
-interface EditFspHeaderProps {
+interface EditSetUpFspHeaderProps {
   baseUrl: string;
   permissions: string[];
 }
@@ -13,7 +13,7 @@ interface EditFspHeaderProps {
 export const EditSetUpFspHeader = ({
   baseUrl,
   permissions,
-}: EditFspHeaderProps): React.ReactElement => {
+}: EditSetUpFspHeaderProps): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const { id } = useParams();
