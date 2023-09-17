@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import {Button, Tooltip} from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import {useProgramQuery} from "../../../__generated__/graphql";
 
 const initialFilter = {
   search: '',
@@ -25,7 +26,7 @@ const initialFilter = {
 
 export const PaymentModulePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 
@@ -36,23 +37,50 @@ export const PaymentModulePage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  if (permissions === null) return null;
+  const { data, loading: programLoading } = useProgramQuery({
+    variables: { id: programId },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  if (permissions === null || programLoading) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
+
+  let isImportDisabled = false;
+  if (data.program && data.program.status !== "ACTIVE") {
+    isImportDisabled = true
+  }
 
   return (
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${baseUrl}/payment-module/new-plan`}
-            data-cy='button-new-payment-plan'
-          >
-            {t('NEW PAYMENT PLAN')}
-          </Button>
+          isImportDisabled ?
+            <Tooltip title="Program must be ACTIVE to create Payment Plan">
+              <span>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  component={Link}
+                  to={`/${baseUrl}/payment-module/new-plan`}
+                  data-cy='button-new-payment-plan'
+                  disabled={isImportDisabled}
+                >
+                  {t('NEW PAYMENT PLAN')}
+                </Button>
+              </span>
+            </Tooltip>
+            :
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/payment-module/new-plan`}
+              data-cy='button-new-payment-plan'
+              disabled={isImportDisabled}
+            >
+              {t('NEW PAYMENT PLAN')}
+            </Button>
         )}
       </PageHeader>
       <PaymentPlansFilters
