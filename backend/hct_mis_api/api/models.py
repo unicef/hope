@@ -58,3 +58,6 @@ class APILogEntry(models.Model):
     url = models.URLField()
     method = models.CharField(max_length=10)
     status_code = models.IntegerField()
+
+    class Meta:
+        verbose_name_plural = "Api log entries"
