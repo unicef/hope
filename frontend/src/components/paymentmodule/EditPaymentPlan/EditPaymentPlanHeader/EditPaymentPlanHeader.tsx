@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
+  getPaymentPlanUrlPart,
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
@@ -37,9 +38,9 @@ export const EditPaymentPlanHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}`,
+      to: `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+        isFollowUp,
+      )}/${id}`,
     },
   ];
 

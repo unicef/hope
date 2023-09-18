@@ -8,6 +8,7 @@ import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   formatCurrencyWithSymbol,
+  getPaymentPlanUrlPart,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import { PaymentPlansTableFollowUpPaymentPlansModal } from '../ProgramCycles/PaymentPlansTableProgramCycle/PaymentPlansTableFollowUpPaymentPlansModal';
@@ -22,9 +23,9 @@ export const PaymentPlanTableRow = ({
   canViewDetails,
 }: PaymentPlanTableRowProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-  }/${plan.id}`;
+  const paymentPlanPath = `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+    plan.isFollowUp,
+  )}/${plan.id}`;
 
   const {
     data: statusChoicesData,
