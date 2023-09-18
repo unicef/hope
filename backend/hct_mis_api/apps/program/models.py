@@ -146,6 +146,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         all individuals of a household that's part of the population or only
         the relevant ones (collectors etc.)""",
     )
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
+    )
 
     @staticmethod
     def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
