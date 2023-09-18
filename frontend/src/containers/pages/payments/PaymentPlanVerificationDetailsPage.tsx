@@ -24,6 +24,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import {
   decodeIdString,
   getFilterFromQueryParams,
+  getPaymentPlanUrlPart,
   isPermissionDeniedError,
 } from '../../../utils/utils';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
@@ -127,9 +128,9 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
       title={
         <BlackLink
           data-cy='plan-link'
-          to={`/${baseUrl}/payment-module/${
-            isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-          }/${paymentPlan.id}`}
+          to={`/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+            isFollowUp,
+          )}/${paymentPlan.id}`}
           fullWidth
         >
           {t('Payment Plan')}{' '}

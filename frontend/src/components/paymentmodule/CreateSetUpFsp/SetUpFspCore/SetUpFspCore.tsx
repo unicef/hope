@@ -20,6 +20,7 @@ import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBord
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
+import { getPaymentPlanUrlPart } from '../../../../utils/utils';
 
 export interface FormValues {
   deliveryMechanisms: {
@@ -153,9 +154,9 @@ export const SetUpFspCore = ({
         },
       });
       showMessage(t('FSPs have been assigned to the delivery mechanisms'), {
-        pathname: `/${baseUrl}/payment-module/${
-          isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-        }/${id}`,
+        pathname: `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+          isFollowUp,
+        )}/${id}`,
         historyMethod: 'push',
       });
     } catch (e) {

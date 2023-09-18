@@ -6,6 +6,7 @@ import {
   PaymentPlanQuery,
   PaymentPlanStatus,
 } from '../../../../__generated__/graphql';
+import { getPaymentPlanUrlPart } from '../../../../utils/utils';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
@@ -49,9 +50,9 @@ export const FspSection = ({
               color='primary'
               variant='contained'
               component={Link}
-              to={`/${baseUrl}/payment-module/${
-                isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-              }/${id}/setup-fsp/edit`}
+              to={`/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+                isFollowUp,
+              )}/${id}/setup-fsp/edit`}
             >
               {t('Edit FSP')}
             </Button>
@@ -84,9 +85,9 @@ export const FspSection = ({
             disabled={shouldDisableSetUpFsp()}
             data-cy='button-set-up-fsp'
             component={Link}
-            to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-            }/${id}/setup-fsp/create`}
+            to={`/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+              isFollowUp,
+            )}/${id}/setup-fsp/create`}
           >
             {t('Set up FSP')}
           </Button>

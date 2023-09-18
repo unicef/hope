@@ -7,7 +7,10 @@ import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
 import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
-import { cameThroughProgramCycle } from '../../../../../utils/utils';
+import {
+  cameThroughProgramCycle,
+  getPaymentPlanUrlPart,
+} from '../../../../../utils/utils';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -28,12 +31,12 @@ export const OpenPaymentPlanHeaderButtons = ({
   const { id, isFollowUp, programCycle } = paymentPlan;
 
   const detailsPath = cameThroughProgramCycle(location)
-    ? `/${baseUrl}/payment-module/program-cycles/${programCycle.id}/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}/edit`
-    : `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}/edit`;
+    ? `/${baseUrl}/payment-module/program-cycles/${
+        programCycle.id
+      }/${getPaymentPlanUrlPart(isFollowUp)}/${id}/edit`
+    : `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+        isFollowUp,
+      )}/${id}/edit`;
 
   return (
     <Box display='flex' alignItems='center'>
