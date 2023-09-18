@@ -6,6 +6,7 @@ import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { GreyText } from '../../core/GreyText';
 import { PageHeader } from '../../core/PageHeader';
+import { getPaymentPlanUrlPart } from '../../../utils/utils';
 
 interface SetUpPaymentInstructionsHeaderProps {
   baseUrl: string;
@@ -30,9 +31,9 @@ export const SetUpPaymentInstructionsHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}`,
+      to: `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+        isFollowUp,
+      )}/${id}`,
     },
   ];
 

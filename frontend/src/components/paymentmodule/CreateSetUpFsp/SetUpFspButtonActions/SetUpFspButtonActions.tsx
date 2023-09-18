@@ -2,6 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
+import { getPaymentPlanUrlPart } from '../../../../utils/utils';
 
 interface SetUpFspButtonActionsProps {
   step: number;
@@ -28,9 +29,9 @@ export const SetUpFspButtonActions = ({
         {step === 0 && (
           <Button
             component={Link}
-            to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-            }/${paymentPlanId}`}
+            to={`/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+              isFollowUp,
+            )}/${paymentPlanId}`}
           >
             {t('Cancel')}
           </Button>

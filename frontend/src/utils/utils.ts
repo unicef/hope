@@ -982,3 +982,7 @@ export const isNot = (type) => (item) => item.type !== type;
 
 export const cameThroughProgramCycle = (location): boolean =>
   location.pathname.includes('program-cycles');
+
+export const getPaymentPlanUrlPart = (isFollowUpFlag: boolean): string => {
+  return isFollowUpFlag ? 'followup-payment-plans' : 'payment-plans';
+};

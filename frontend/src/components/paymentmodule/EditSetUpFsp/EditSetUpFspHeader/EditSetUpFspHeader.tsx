@@ -4,6 +4,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
+import { getPaymentPlanUrlPart } from '../../../../utils/utils';
 
 interface EditSetUpFspHeaderProps {
   baseUrl: string;
@@ -22,9 +23,9 @@ export const EditSetUpFspHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}`,
+      to: `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+        isFollowUp,
+      )}/${id}`,
     },
   ];
   return (

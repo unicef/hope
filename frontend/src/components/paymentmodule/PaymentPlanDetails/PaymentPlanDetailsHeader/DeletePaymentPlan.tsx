@@ -7,19 +7,20 @@ import {
   DialogTitle,
   IconButton,
 } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
+import { Delete } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Delete } from '@material-ui/icons';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { useHistory } from 'react-router-dom';
 import {
   PaymentPlanQuery,
   useDeletePpMutation,
 } from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { getPaymentPlanUrlPart } from '../../../../utils/utils';
+import { LoadingButton } from '../../../core/LoadingButton';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -41,7 +42,11 @@ export const DeletePaymentPlan = ({
         paymentPlanId: id,
       },
     });
-    history.push(`/${baseUrl}/payment-module`);
+    history.push(
+      `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+        paymentPlan.isFollowUp,
+      )}/`,
+    );
   };
 
   return (
