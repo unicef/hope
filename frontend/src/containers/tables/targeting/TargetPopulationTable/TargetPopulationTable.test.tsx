@@ -12,8 +12,8 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
     name: '',
     status: '',
     program: [fakeProgram.id],
-    totalHouseholdsCountMin: null,
-    totalHouseholdsCountMax: null,
+    totalHouseholdsCountMin: '',
+    totalHouseholdsCountMax: '',
     createdAtRange: undefined,
   };
 
