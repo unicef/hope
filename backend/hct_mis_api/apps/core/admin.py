@@ -711,8 +711,6 @@ class MigrationStatusAdmin(admin.ModelAdmin):
     pass
 
 
-admin.register(DataCollectingType)
-
-
+@admin.register(DataCollectingType)
 class DataCollectingTypeAdmin(admin.ModelAdmin):
     list_display = ("code", "description", "created", "modified")
