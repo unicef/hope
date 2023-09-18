@@ -70,7 +70,7 @@ export function TargetPopulationTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.totalHouseholdsCount || '-'}
+        {targetPopulation.totalHouseholdsCount || '0'}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>

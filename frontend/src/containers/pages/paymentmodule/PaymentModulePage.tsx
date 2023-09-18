@@ -17,8 +17,8 @@ const initialFilter = {
   dispersionStartDate: undefined,
   dispersionEndDate: undefined,
   status: [],
-  totalEntitledQuantityFrom: null,
-  totalEntitledQuantityTo: null,
+  totalEntitledQuantityFrom: '',
+  totalEntitledQuantityTo: '',
   isFollowUp: null,
   program: null,
 };
