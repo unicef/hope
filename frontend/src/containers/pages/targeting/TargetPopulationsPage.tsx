@@ -25,8 +25,8 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   const initialFilter = {
     name: '',
     status: '',
-    numIndividualsMin: null,
-    numIndividualsMax: null,
+    totalHouseholdsCountMin: '',
+    totalHouseholdsCountMax: '',
     createdAtRangeMin: undefined,
     createdAtRangeMax: undefined,
   };
