@@ -24,10 +24,13 @@ export const SurveysTable = ({
   choicesData,
 }: SurveysTableProps): ReactElement => {
   const { t } = useTranslation();
+
+  console.log(filter.createdBy);
+
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
-    createdBy: decodeIdString(filter.createdBy) || '',
+    createdBy: filter.createdBy || '',
     createdAtRange:
      JSON.stringify({min: filter.createdAtRangeMin, max: filter.createdAtRangeMax}),
     program: filter.program || '',

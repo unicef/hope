@@ -3011,6 +3011,7 @@ export type IndividualIdentityNode = Node & {
   id: Scalars['ID'],
   created: Scalars['DateTime'],
   modified: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   individual: IndividualNode,
   number: Scalars['String'],
   partner?: Maybe<Scalars['String']>,
@@ -3370,6 +3371,7 @@ export enum IndividualRelationship {
 export type IndividualRoleInHouseholdNode = {
    __typename?: 'IndividualRoleInHouseholdNode',
   id: Scalars['UUID'],
+  isRemoved: Scalars['Boolean'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
@@ -5488,9 +5490,9 @@ export type QueryAllSurveysArgs = {
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
   targetPopulation?: Maybe<Scalars['ID']>,
-  createdBy?: Maybe<Scalars['ID']>,
   createdAtRange?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -13673,7 +13675,7 @@ export type AllSurveysQueryVariables = {
   program: Scalars['ID'],
   targetPopulation?: Maybe<Scalars['ID']>,
   createdAtRange?: Maybe<Scalars['String']>,
-  createdBy?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -26462,7 +26464,7 @@ export type RdiAutocompleteQueryHookResult = ReturnType<typeof useRdiAutocomplet
 export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocompleteLazyQuery>;
 export type RdiAutocompleteQueryResult = ApolloReactCommon.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
 export const AllSurveysDocument = gql`
-    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: ID, $search: String, $orderBy: String) {
+    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: String, $search: String, $orderBy: String) {
   allSurveys(offset: $offset, before: $before, after: $after, first: $first, last: $last, program: $program, targetPopulation: $targetPopulation, createdAtRange: $createdAtRange, createdBy: $createdBy, search: $search, orderBy: $orderBy) {
     totalCount
     pageInfo {
@@ -29750,6 +29752,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -29887,6 +29890,7 @@ export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends Re
 
 export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
