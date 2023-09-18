@@ -6,6 +6,9 @@ let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
 
+const systemGenerated = "GRV-0000004";
+const userType7 = "GRV-0000007";
+
 describe("Grievance", () => {
   before(function () {
     cy.initScenario("init_clear");
@@ -38,12 +41,11 @@ describe("Grievance", () => {
       ]);
       grievancePage.getTabSystemGenerated().click();
       cy.url().should("include", "/system-generated");
-      // ToDo: After fix bug: 164824
       grievancePage
         .getTicketListRow()
         .eq(0)
         .find("a")
-        .contains("GRV-0000003")
+        .contains(systemGenerated)
         .click();
       grievanceDetailsPage.checkGrievanceMenu();
       grievanceDetailsPage.getButtonAssignToMe().should("be.visible");
@@ -76,7 +78,12 @@ describe("Grievance", () => {
     context("Grievance Filters", () => {
       [
         ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
-        ["SYSTEM-GENERATED", "GRV-0000003", 1, "Ticket ID: GRV-0000003"],
+        [
+          "SYSTEM-GENERATED",
+          systemGenerated,
+          1,
+          "Ticket ID: " + systemGenerated,
+        ],
       ].forEach((testData) => {
         it("Grievance Search filter " + testData[0], () => {
           cy.scenario([
@@ -109,8 +116,8 @@ describe("Grievance", () => {
           1,
           "Kowalska",
           1,
-          "Ticket ID: GRV-0000005",
-          "GRV-0000005",
+          "Ticket ID: " + userType7,
+          userType7,
         ],
         [
           "SYSTEM-GENERATED",
@@ -118,8 +125,8 @@ describe("Grievance", () => {
           1,
           "Romaniak",
           1,
-          "Ticket ID: GRV-0000003",
-          "GRV-0000003",
+          "Ticket ID: " + systemGenerated,
+          systemGenerated,
         ],
       ].forEach((testData) => {
         it("Grievance Search Type filter " + testData[0], () => {
@@ -182,10 +189,10 @@ describe("Grievance", () => {
         });
       });
       [
-        ["Assigned", 1, "GRV-0000005"],
-        ["For Approval", 1, "GRV-0000001"],
-        ["In Progress", 1, "GRV-0000004"],
-        ["On Hold", 1, "GRV-0000002"],
+        ["Assigned", 1, userType7],
+        ["For Approval", 2, "GRV-0000001"],
+        ["In Progress", 2, "GRV-0000006"],
+        ["On Hold", 1, "GRV-0000003"],
       ].forEach((testData) => {
         it(`Grievance Status filter ${testData[0]}`, () => {
           grievancePage.chooseStatusFilter(testData[0]);
@@ -215,7 +222,7 @@ describe("Grievance", () => {
         });
       });
       [
-        ["USER-GENERATED", 3],
+        ["USER-GENERATED", 5],
         ["SYSTEM-GENERATED", 1],
       ].forEach((testData) => {
         it(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
@@ -233,10 +240,10 @@ describe("Grievance", () => {
       });
 
       [
-        ["Data Change", "GRV-0000005"],
-        // ["Sensitive Grievance", "GRV-0000004"], ToDo: 166077
+        ["Data Change", userType7],
+        ["Sensitive Grievance", "GRV-0000006"],
         ["Referral", "GRV-0000001"],
-        // ["Grievance Complaint", "GRV-0000001"], ToDo: 166077
+        ["Grievance Complaint", "GRV-0000002"],
       ].forEach((testData) => {
         it(`Grievance Category filter - ${testData[0]}`, () => {
           grievancePage.chooseCategoryFilter(testData[0]);
@@ -283,7 +290,7 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", "GRV-0000001"],
-        ["SYSTEM-GENERATED", "GRV-0000003"],
+        ["SYSTEM-GENERATED", systemGenerated],
       ].forEach((testData) => {
         it("Grievance Registration Date Import filter", () => {
           grievancePage.chooseTab(testData[0]);
@@ -296,10 +303,10 @@ describe("Grievance", () => {
         // ToDo: Language filter does not work.
       });
       [
-        ["USER-GENERATED", "High", 1, "GRV-0000005"],
+        ["USER-GENERATED", "High", 1, userType7],
         ["USER-GENERATED", "Low", 1, "GRV-0000002"],
         ["USER-GENERATED", "Medium", 2, "GRV-0000001"],
-        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+        ["SYSTEM-GENERATED", "Not set", 1, systemGenerated],
       ].forEach((testData) => {
         it(`Grievance Priority filter - ${testData[1]}`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -309,10 +316,10 @@ describe("Grievance", () => {
         });
       });
       [
-        ["USER-GENERATED", "Very urgent", 1, "GRV-0000005"],
+        ["USER-GENERATED", "Very urgent", 1, userType7],
         ["USER-GENERATED", "Urgent", 2, "GRV-0000001"],
         ["USER-GENERATED", "Not urgent", 1, "GRV-0000002"],
-        ["SYSTEM-GENERATED", "Not set", 1, "GRV-0000003"],
+        ["SYSTEM-GENERATED", "Not set", 1, systemGenerated],
       ].forEach((testData) => {
         it(`Grievance Urgency filter - ${testData[1]}`, () => {
           grievancePage.chooseTab(testData[0]);
@@ -399,8 +406,7 @@ describe("Grievance", () => {
             .eq(1)
             .contains(newTicket.disability)
             .click();
-          // ToDo: Uncomment after resolve bug: 167376
-          // newTicketPage.getEmail().type(newTicket.email);
+          newTicketPage.getEmail().type(newTicket.email);
           newTicketPage.getPhysicalDisability().click();
           newTicketPage
             .getOptionUndefined()
@@ -487,8 +493,7 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelBirthDate()
             .contains(newTicket.birthDate);
-          // Todo: Fix after resolve bug: 167436
-          // grievanceDetailsPage.getLabelDisability().contains("not disabled");
+          grievanceDetailsPage.getLabelDisability().contains("not disabled");
           grievanceDetailsPage
             .getLabelGivenName()
             .contains(newTicket.givenName);
@@ -510,7 +515,6 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelCommsDisability()
             .contains(newTicket.commsDisability);
-          // Todo: Fix after resolve bug: 167426 - MEMORY DISABILITY
           // grievanceDetailsPage.getLabelMEMORYDISABILITY().contains("");
           grievanceDetailsPage
             .getLabelSeeingDisability()
@@ -521,8 +525,7 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelHearingDisability()
             .contains(newTicket.hearingDisability);
-          // Todo: Fix after resolve bug: 167436 - OBSERVED DISABILITY
-          // grievanceDetailsPage.getLabelObservedDisability().contains("");
+          grievanceDetailsPage.getLabelObservedDisability().contains("");
           grievanceDetailsPage
             .getLabelPhysicalDisability()
             .contains(newTicket.physicalDisability);
@@ -559,8 +562,7 @@ describe("Grievance", () => {
             newTicketPage.getButtonNext().click();
             newTicketPage.getHouseholdTab().should("be.visible");
             newTicketPage.getHouseholdTableRows(0).click();
-            // ToDo: Delete after fixed: 167943
-            // newTicketPage.getIndividualTab().parent().should("not.be.disabled")
+            newTicketPage.getIndividualTab().parent().should("not.be.disabled");
             newTicketPage.getButtonNext().click();
             newTicketPage.getReceivedConsent().click();
             newTicketPage.getButtonNext().click();
@@ -1084,10 +1086,9 @@ describe("Grievance", () => {
   describe.skip("E2E tests Grievance", () => {});
 
   describe("Regression tests Grievance", () => {
-    // ToDo: Enable
-    xit('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
-      grievancePage.chooseTicketListRow(0).click();
-      cy.url().should("include", "/system-generated");
+    it('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
+      grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
+      cy.url().should("include", "/user-generated");
     });
   });
 });

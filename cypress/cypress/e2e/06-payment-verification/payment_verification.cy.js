@@ -41,9 +41,7 @@ describe("Payment Verification", () => {
       });
     });
 
-    it.skip("Check Create Verification Plan pop-up", () => {
-      // ToDo
-    });
+    it.skip("Check Create Verification Plan pop-up", () => {});
   });
 
   describe("Component tests Payment Verification", () => {
@@ -78,9 +76,7 @@ describe("Payment Verification", () => {
     });
 
     context("Verification Plan Settings", () => {
-      it.skip("Test_1", () => {
-        // ToDo
-      });
+      it.skip("Test_1", () => {});
     });
 
     context("Edit Verification Plan", () => {
@@ -166,21 +162,13 @@ describe("Payment Verification", () => {
     });
 
     context("Grievance creation/preview", () => {
-      it.skip("Test_1", () => {
-        // ToDo
-      });
+      it.skip("Test_1", () => {});
     });
 
     context("Verify Payment Record", () => {
-      it.skip("Verify Manually", () => {
-        // ToDo
-      });
-      it.skip("Verify using RapidPro", () => {
-        // ToDo
-      });
-      it.skip("Verify using XLSX", () => {
-        // ToDo
-      });
+      it.skip("Verify Manually", () => {});
+      it.skip("Verify using RapidPro", () => {});
+      it.skip("Verify using XLSX", () => {});
     });
   });
   describe("E2E tests Payment Verification", () => {
@@ -197,8 +185,6 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
-    it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {
-      // ToDo
-    });
+    it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {});
   });
 });
