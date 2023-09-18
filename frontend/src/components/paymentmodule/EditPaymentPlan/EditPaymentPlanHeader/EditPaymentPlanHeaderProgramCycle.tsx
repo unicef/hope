@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
+  getPaymentPlanUrlPart,
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
@@ -37,9 +38,9 @@ export const EditPaymentPlanHeaderProgramCycle = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}`,
+      to: `/${baseUrl}/payment-module/${getPaymentPlanUrlPart(
+        isFollowUp,
+      )}/${id}`,
     },
     {
       title: `${paymentPlan.programCycle.name} (ID: ${paymentPlan.programCycle.unicefId})`,
@@ -81,7 +82,7 @@ export const EditPaymentPlanHeaderProgramCycle = ({
             component={Link}
             to={`/${baseUrl}/payment-module/program-cycles/${
               paymentPlan.programCycle.id
-            }/${isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${id}`}
+            }/${getPaymentPlanUrlPart(isFollowUp)}/${id}`}
           >
             {t('Cancel')}
           </Button>

@@ -9,6 +9,7 @@ import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
 import {
   paymentPlanStatusToColor,
   formatCurrencyWithSymbol,
+  getPaymentPlanUrlPart,
 } from '../../../../../utils/utils';
 import { PaymentPlansTableFollowUpPaymentPlansModal } from './PaymentPlansTableFollowUpPaymentPlansModal';
 
@@ -24,7 +25,7 @@ export const PaymentPlanTableRowProgramCycle = ({
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/program-cycles/${
     plan.programCycle.id
-  }/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`;
+  }/${getPaymentPlanUrlPart(plan.isFollowUp)}/${plan.id}`;
 
   const {
     data: statusChoicesData,
