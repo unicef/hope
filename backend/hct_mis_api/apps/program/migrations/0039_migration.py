@@ -8,13 +8,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0070_migration'),
-        ('household', '0154_migration'),
+        ('program', '0038_migration'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='household',
+            model_name='program',
             name='data_collecting_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='households', to='core.datacollectingtype'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='programs', to='core.datacollectingtype'),
         ),
     ]
