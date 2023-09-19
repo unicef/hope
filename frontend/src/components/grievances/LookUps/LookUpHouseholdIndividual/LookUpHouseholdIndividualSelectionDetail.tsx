@@ -49,6 +49,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   const [selectedTab, setSelectedTab] = useState(0);
   const initialFilterHH = {
     search: '',
+    searchType: 'household_id',
     program: '',
     residenceStatus: '',
     admin2: '',

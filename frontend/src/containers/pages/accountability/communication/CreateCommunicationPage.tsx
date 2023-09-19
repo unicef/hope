@@ -21,7 +21,7 @@ import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { LookUpSelection } from '../../../../components/accountability/Communication/LookUps/LookUpSelection';
+import { LookUpSelectionCommunication } from '../../../../components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
 import { PaperContainer } from '../../../../components/targeting/PaperContainer';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -194,7 +194,12 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     : [];
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+  if (
+    !hasPermissions(
+      PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
+      permissions,
+    )
+  )
     return <PermissionDenied />;
 
   const getSampleSizePercentage = (): string => {
@@ -335,7 +340,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
               />
               {activeStep === CommunicationSteps.LookUp && (
                 <Box display='flex' flexDirection='column'>
-                  <LookUpSelection
+                  <LookUpSelectionCommunication
                     businessArea={businessArea}
                     values={values}
                     onValueChange={setFieldValue}

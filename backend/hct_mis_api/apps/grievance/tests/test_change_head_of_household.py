@@ -2,7 +2,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -21,7 +21,9 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-class TestChangeHeadOfHousehold(APITestCase):
+class TestChangeHeadOfHousehold(BaseElasticSearchTestCase, APITestCase):
+    databases = {"default", "registration_datahub"}
+
     STATUS_CHANGE_MUTATION = """
     mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
       grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -79,6 +81,7 @@ class TestChangeHeadOfHousehold(APITestCase):
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
+        super().setUpTestData()
 
     def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self) -> None:
         self.individual1.relationship = HEAD

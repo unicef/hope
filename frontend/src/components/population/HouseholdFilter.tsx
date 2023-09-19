@@ -16,6 +16,7 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { householdTableOrderOptions } from '../../utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
@@ -28,14 +29,6 @@ interface HouseholdFiltersProps {
   isOnPaper?: boolean;
 }
 
-const orderOptions = [
-  { name: 'Household Id: ascending', value: 'unicef_id' },
-  { name: 'Household Id: descending', value: '-unicef_id' },
-  { name: 'Status: ascending', value: 'status_label' },
-  { name: 'Status: descending', value: '-status_label' },
-  { name: 'Household Size: ascending', value: 'size' },
-  { name: 'Household Size: descending', value: '-size' },
-];
 export const HouseholdFilters = ({
   filter,
   programs,
@@ -75,14 +68,34 @@ export const HouseholdFilters = ({
   const filtersComponent = (
     <>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={3}>
-          <SearchTextField
-            label={t('Search')}
-            value={filter.search}
-            fullWidth
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='hh-filters-search'
-          />
+        <Grid container item xs={6} spacing={0}>
+          <Grid item xs={8}>
+            <SearchTextField
+              label={t('Search')}
+              value={filter.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              data-cy='hh-filters-search'
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('searchType', e.target.value)}
+              label={t('Search Type')}
+              value={filter.searchType}
+              borderRadius='0px 4px 4px 0px'
+              data-cy='filter-search-type'
+              fullWidth
+              disableClearable
+            >
+              {choicesData?.householdSearchTypesChoices.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
+          </Grid>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
@@ -161,8 +174,9 @@ export const HouseholdFilters = ({
             label={t('Sort by')}
             value={filter.orderBy}
             data-cy='hh-filters-order-by'
+            disableClearable
           >
-            {orderOptions.map((order) => (
+            {householdTableOrderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

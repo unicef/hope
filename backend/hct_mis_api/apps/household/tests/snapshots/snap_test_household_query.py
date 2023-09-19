@@ -16,13 +16,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 1
                         },
                         'size': 4
                     }
@@ -32,13 +26,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 1
                         },
                         'size': 1
                     }
@@ -48,15 +36,19 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
+                            'totalCount': 1
                         },
                         'size': 11
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'programs': {
+                            'totalCount': 2
+                        },
+                        'size': 14
                     }
                 }
             ]
@@ -335,6 +327,219 @@ snapshots['TestHouseholdQuery::test_household_query_single_1_without_permission 
             'message': 'Permission Denied',
             'path': [
                 'household'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_household_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_household_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_individual_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_individual_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_search_without_search_type_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': '"Invalid search key \'None\'"',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_search_without_search_type_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
             ]
         }
     ]
