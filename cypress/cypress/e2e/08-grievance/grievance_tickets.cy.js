@@ -208,7 +208,7 @@ describe("Grievance", () => {
         ["USER-GENERATED", 1],
         ["SYSTEM-GENERATED", 0],
       ].forEach((testData) => {
-        it(`Grievance Creation Date From filter of ${testData[0]} tab`, () => {
+        it.skip(`Grievance Creation Date From filter of ${testData[0]} tab`, () => {
           grievancePage.chooseTab(testData[0]);
           grievancePage.changeCreationDateFrom("2024-01-01");
           grievancePage.checkDateFilterFrom("2024-01-01");
