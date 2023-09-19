@@ -5605,6 +5605,16 @@
                 "defaultValue": null
               },
               {
+                "name": "totalDeliveredQuantityUsd",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -27841,7 +27851,7 @@
             "deprecationReason": null
           },
           {
-            "name": "totalDeliveredQuantity",
+            "name": "totalDeliveredQuantityUsd",
             "description": null,
             "args": [],
             "type": {
@@ -27853,7 +27863,7 @@
             "deprecationReason": null
           },
           {
-            "name": "totalEntitledQuantity",
+            "name": "totalEntitledQuantityUsd",
             "description": null,
             "args": [],
             "type": {
@@ -27865,7 +27875,7 @@
             "deprecationReason": null
           },
           {
-            "name": "totalUndeliveredQuantity",
+            "name": "totalUndeliveredQuantityUsd",
             "description": null,
             "args": [],
             "type": {
