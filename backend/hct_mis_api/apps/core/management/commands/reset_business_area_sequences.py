@@ -1,16 +1,16 @@
 from django.db import connections
 
 SQL = """
-    DO $$ 
-    DECLARE 
-        seq_name text; 
-    BEGIN 
-        FOR seq_name IN (SELECT sequence_name 
-                        FROM information_schema.sequences 
-                        WHERE sequence_name LIKE '%_business_area_seq_%') 
-        LOOP 
-            EXECUTE 'SELECT setval($1, 1, false)' USING seq_name; 
-        END LOOP; 
+    DO $$
+    DECLARE
+        seq_name text;
+    BEGIN
+        FOR seq_name IN (SELECT sequence_name
+                        FROM information_schema.sequences
+                        WHERE sequence_name LIKE '%_business_area_seq_%')
+        LOOP
+            EXECUTE 'SELECT setval($1, 1, false)' USING seq_name;
+        END LOOP;
     END $$;
 """
 
