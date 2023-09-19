@@ -481,6 +481,7 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
+    is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
         verbose_name = "Household"

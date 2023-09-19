@@ -1,9 +1,7 @@
 from django.core.paginator import Paginator
 
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
 
 updated_fields = [
     "female_age_group_0_5_count",
@@ -37,6 +35,7 @@ updated_fields = [
     "child_hoh",
     "fchild_hoh",
     "updated_at",
+    "is_recalculated_group_ages"
 ]
 
 
@@ -58,4 +57,4 @@ def recalculate_household_age_groups(size: int = 250) -> None:
         ):
             recalculated_household, _ = recalculate_data(household, save=False, run_from_migration=True)
             households_to_update.append(recalculated_household)
-        Household.objects.update(households_to_update, updated_fields)
+        Household.objects.bulk_update(households_to_update, updated_fields)
