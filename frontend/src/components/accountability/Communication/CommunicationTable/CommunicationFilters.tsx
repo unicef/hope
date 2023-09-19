@@ -17,6 +17,7 @@ import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SelectFilter } from '../../../core/SelectFilter';
+import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 
 interface CommunicationFiltersProps {
   filter;
@@ -97,20 +98,16 @@ export const CommunicationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={4}>
-          <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('targetPopulation', e.target.value)
-            }
-            label={t('Target Population')}
+        <Grid xs={4} item>
+          <TargetPopulationAutocomplete
+            name='targetPopulation'
             value={filter.targetPopulation}
-          >
-            {targetPopulations.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+          />
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
