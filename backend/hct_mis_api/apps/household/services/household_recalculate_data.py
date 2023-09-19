@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Tuple
 
 from django.db import transaction
 from django.db.models import Count, Q
-from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 
@@ -55,7 +54,7 @@ def recalculate_data(
 
         Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
 
-    last_registration_date = getattr(household, "last_registration_date")
+    last_registration_date = household.last_registration_date
     date_6_years_ago = last_registration_date - relativedelta(years=+6)
     date_12_years_ago = last_registration_date - relativedelta(years=+12)
     date_18_years_ago = last_registration_date - relativedelta(years=+18)
