@@ -1274,6 +1274,10 @@ export type DeliveryMechanismNode = Node & {
   status: Scalars['String'],
   deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanism>,
   deliveryMechanismOrder: Scalars['Int'],
+  cardNumber?: Maybe<Scalars['String']>,
+  phoneNo?: Maybe<Scalars['String']>,
+  bankName?: Maybe<Scalars['String']>,
+  bankAccountNumber?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   order?: Maybe<Scalars['Int']>,
   fsp?: Maybe<FinancialServiceProviderNode>,
@@ -4303,6 +4307,7 @@ export type PaymentNode = Node & {
   distributionModality?: Maybe<Scalars['String']>,
   totalPersonsCovered?: Maybe<Scalars['Int']>,
   serviceProvider?: Maybe<FinancialServiceProviderNode>,
+  deliveryMechanism?: Maybe<DeliveryMechanismNode>,
 };
 
 
@@ -11876,6 +11881,9 @@ export type PaymentQuery = (
     ), serviceProvider: Maybe<(
       { __typename?: 'FinancialServiceProviderNode' }
       & Pick<FinancialServiceProviderNode, 'id' | 'fullName'>
+    )>, deliveryMechanism: Maybe<(
+      { __typename?: 'DeliveryMechanismNode' }
+      & Pick<DeliveryMechanismNode, 'cardNumber' | 'phoneNo' | 'bankName' | 'bankAccountNumber'>
     )> }
   )> }
 );
@@ -21975,6 +21983,12 @@ export const PaymentDocument = gql`
       fullName
     }
     reasonForUnsuccessfulPayment
+    deliveryMechanism {
+      cardNumber
+      phoneNo
+      bankName
+      bankAccountNumber
+    }
   }
 }
     `;
@@ -28916,6 +28930,10 @@ export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanism']>, ParentType, ContextType>,
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  cardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  phoneNo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  bankName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  bankAccountNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
@@ -30219,6 +30237,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   distributionModality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   serviceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>,
 };
 
 export type PaymentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentNodeConnection'] = ResolversParentTypes['PaymentNodeConnection']> = {

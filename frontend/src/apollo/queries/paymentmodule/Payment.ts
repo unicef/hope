@@ -73,6 +73,12 @@ export const Payment = gql`
         fullName
       }
       reasonForUnsuccessfulPayment
+      deliveryMechanism {
+        cardNumber
+        phoneNo
+        bankName
+        bankAccountNumber  
+      }
     }
   }
 `;
