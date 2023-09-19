@@ -79,6 +79,12 @@ export const Payment = gql`
         bankName
         bankAccountNumber  
       }
+      documents {
+        documentNumber
+        type {
+          key
+        }
+      }
     }
   }
 `;

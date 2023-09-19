@@ -2735,6 +2735,7 @@ type PaymentNode implements Node {
   totalPersonsCovered: Int
   serviceProvider: FinancialServiceProviderNode
   deliveryMechanism: DeliveryMechanismNode
+  documents: [DocumentNode]
 }
 
 type PaymentNodeConnection {

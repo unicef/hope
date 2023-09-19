@@ -36,6 +36,53 @@ export function PaymentDetails({
   if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
   }
+
+  const documents = []
+  if (payment.documents) {
+    for (const document of payment.documents) {
+      documents.push(`${document.type.key} ${document.documentNumber}`)
+    }
+  }
+
+  const specialFieldGrids = () => {
+    let grids = null;
+    if (payment.deliveryType === "DEPOSIT_TO_CARD") {
+      grids = <>
+        <Grid item xs={3}>
+          <LabelizedField
+            label={t('Card Number')}
+            value={payment.deliveryMechanism.cardNumber}
+          />
+        </Grid>
+      </>
+    } else if (payment.deliveryType === "MOBILE_MONEY") {
+      grids = <>
+        <Grid item xs={3}>
+          <LabelizedField
+            label={t('Mobile phone number')}
+            value={payment.deliveryMechanism.phoneNo}
+          />
+        </Grid>
+      </>
+    } else if (payment.deliveryType === "TRANSFER_TO_ACCOUNT") {
+      grids = <>
+        <Grid item xs={3}>
+          <LabelizedField
+            label={t('Bank Name')}
+            value={payment.deliveryMechanism.bankName}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField
+            label={t('Bank Account Number')}
+            value={payment.deliveryMechanism.bankAccountNumber}
+          />
+        </Grid>
+      </>
+    }
+    return grids;
+  }
+
   return (
     <>
       <ContainerColumnWithBorder>
@@ -123,12 +170,6 @@ export function PaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('Collector')}
-              value={payment.collector.unicefId}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
               label={t('TOTAL PERSON COVERED')}
               value={payment.household.size}
             />
@@ -153,8 +194,20 @@ export function PaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
+              label={t('Collector')}
+              value={payment.collector.unicefId}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
               label={t("COLLECTOR'S NAME")}
               value={payment.collector?.fullName}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <LabelizedField
+              label={t("DOCUMENT NUMBERS")}
+              value={documents.join('\n')}
             />
           </Grid>
         </Grid>
@@ -197,7 +250,7 @@ export function PaymentDetails({
               value={payment.serviceProvider?.fullName}
             />
           </Grid>
-          {}
+          {specialFieldGrids()}
         </Grid>
       </Overview>
       {canViewActivityLog && (
