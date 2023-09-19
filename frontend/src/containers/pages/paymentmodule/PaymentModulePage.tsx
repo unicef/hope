@@ -58,7 +58,6 @@ export const PaymentModulePage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-          isImportDisabled ?
             <ButtonTooltip
               title={t('Program must be ACTIVE to create Payment Plan')}
               variant='contained'
@@ -70,17 +69,6 @@ export const PaymentModulePage = (): React.ReactElement => {
             >
               {t('NEW PAYMENT PLAN')}
             </ButtonTooltip>
-            :
-            <Button
-              variant='contained'
-              color='primary'
-              component={Link}
-              to={`/${baseUrl}/payment-module/new-plan`}
-              data-cy='button-new-payment-plan'
-              disabled={isImportDisabled}
-            >
-              {t('NEW PAYMENT PLAN')}
-            </Button>
         )}
       </PageHeader>
       <PaymentPlansFilters
