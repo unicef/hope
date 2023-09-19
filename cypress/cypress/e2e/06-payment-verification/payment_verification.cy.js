@@ -5,9 +5,10 @@ let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
-const PaymentPlanID = "PP-0060-23-00000012";
+const PaymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
   beforeEach(() => {
+    cy.adminLogin();
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
   });
@@ -87,15 +88,21 @@ describe("Payment Verification", () => {
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type(PaymentPlanID);
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan();
       });
       it("Edit Verification Plan", () => {
-        paymentVerificationDetailsPage.getEditVP().contains("EDIT").click();
-        paymentVerificationDetailsPage.getCVPTitle();
+        paymentVerificationDetailsPage.getEditVP().contains("Edit").click();
+        paymentVerificationDetailsPage.getCvpInputAdminCheckbox().click();
+        paymentVerificationDetailsPage
+          .getLabelVERIFICATIONCHANNEL()
+          .contains("MANUAL");
+        paymentVerificationDetailsPage.getXLSX().click();
+        paymentVerificationDetailsPage.getCVPSave().click();
+        paymentVerificationDetailsPage
+          .getLabelVERIFICATIONCHANNEL()
+          .contains("XLSX");
       });
     });
 
@@ -149,8 +156,6 @@ describe("Payment Verification", () => {
 
     context("Finish Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type(PaymentPlanID);
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(
