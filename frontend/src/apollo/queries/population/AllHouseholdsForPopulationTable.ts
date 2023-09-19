@@ -13,6 +13,7 @@ export const AllHouseholdsForPopulationTable = gql`
     $headOfHouseholdFullNameIcontains: String
     $adminArea: ID
     $search: String
+    $searchType: String
     $residenceStatus: String
     $lastRegistrationDate: String
     $admin2: ID
@@ -31,6 +32,7 @@ export const AllHouseholdsForPopulationTable = gql`
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       adminArea: $adminArea
       search: $search
+      searchType: $searchType
       residenceStatus: $residenceStatus
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
