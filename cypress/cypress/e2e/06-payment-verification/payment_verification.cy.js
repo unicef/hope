@@ -11,6 +11,11 @@ describe("Payment Verification", () => {
     paymentVerificationPage.clickMenuButtonPaymentVerification();
   });
 
+  after(() => {
+    cy.initScenario("init_clear");
+    cy.adminLogin();
+  });
+
   describe("Smoke tests Payment Verification", () => {
     it("Check Payment Verification page", () => {
       cy.scenario([
@@ -87,7 +92,7 @@ describe("Payment Verification", () => {
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan();
       });
-      it.skip("Test_1", () => {
+      it("Edit Verification Plan", () => {
         paymentVerificationDetailsPage.getEditVP().contains("EDIT").click();
         paymentVerificationDetailsPage.getCVPTitle();
       });
@@ -151,7 +156,7 @@ describe("Payment Verification", () => {
           defaultNumberOfVPlans016
         );
       });
-      it.skip("Finish Verification Plan", () => {
+      it("Finish Verification Plan", () => {
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
         paymentVerificationDetailsPage.getStatusVP().contains("ACTIVE");
