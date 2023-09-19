@@ -44,43 +44,46 @@ export function PaymentDetails({
     }
   }
 
-  const specialFieldGrids = () => {
-    let grids = null;
-    if (payment.deliveryType === "DEPOSIT_TO_CARD") {
-      grids = <>
-        <Grid item xs={3}>
-          <LabelizedField
-            label={t('Card Number')}
-            value={payment.deliveryMechanism.cardNumber}
-          />
-        </Grid>
-      </>
-    } else if (payment.deliveryType === "MOBILE_MONEY") {
-      grids = <>
-        <Grid item xs={3}>
-          <LabelizedField
-            label={t('Mobile phone number')}
-            value={payment.deliveryMechanism.phoneNo}
-          />
-        </Grid>
-      </>
-    } else if (payment.deliveryType === "TRANSFER_TO_ACCOUNT") {
-      grids = <>
-        <Grid item xs={3}>
-          <LabelizedField
-            label={t('Bank Name')}
-            value={payment.deliveryMechanism.bankName}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <LabelizedField
-            label={t('Bank Account Number')}
-            value={payment.deliveryMechanism.bankAccountNumber}
-          />
-        </Grid>
-      </>
+  const getSpecialFieldGrids = (): React.ReactElement => {
+    switch (payment.deliveryType) {
+      case 'DEPOSIT_TO_CARD':
+        return (
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t("CARD NUMBER")}
+              value={payment.deliveryMechanism.cardNumber}
+            />
+          </Grid>
+        )
+      case 'MOBILE_MONEY':
+        return (
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t("MOBILE PHONE NUMBER")}
+              value={payment.deliveryMechanism.phoneNo}
+            />
+          </Grid>
+        )
+      case 'TRANSFER_TO_ACCOUNT':
+        return (
+          <>
+            <Grid item xs={3}>
+              <LabelizedField
+                label={t("BANK NUMBER")}
+                value={payment.deliveryMechanism.bankName}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField
+                label={t("BANK ACCOUNT NUMBER")}
+                value={payment.deliveryMechanism.bankAccountNumber}
+              />
+            </Grid>
+          </>
+        )
+      default:
+        return null;
     }
-    return grids;
   }
 
   return (
@@ -250,7 +253,7 @@ export function PaymentDetails({
               value={payment.serviceProvider?.fullName}
             />
           </Grid>
-          {specialFieldGrids()}
+          {getSpecialFieldGrids()}
         </Grid>
       </Overview>
       {canViewActivityLog && (
