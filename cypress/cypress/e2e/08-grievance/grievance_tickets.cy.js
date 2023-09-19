@@ -76,6 +76,9 @@ describe("Grievance", () => {
       it.skip("Export", () => {});
     });
     context("Grievance Filters", () => {
+      beforeEach(() => {
+        grievancePage.getButtonClear().click();
+      });
       [
         ["USER-GENERATED", "GRV-0000001", 1, "Ticket ID: GRV-0000001"],
         [
@@ -252,7 +255,7 @@ describe("Grievance", () => {
       });
       it(`Grievance Admin Level 2 filter - USER-GENERATED`, () => {
         grievancePage.chooseAdminFilter("Andarab");
-        grievancePage.chooseTicketListRow(1, "GRV-0000002");
+        grievancePage.chooseTicketListRow(1, "GRV-0000003");
       });
       it(`Grievance Admin Level 2 filter - SYSTEM-GENERATED`, () => {
         grievancePage.chooseTab("SYSTEM-GENERATED");
@@ -260,7 +263,7 @@ describe("Grievance", () => {
         grievancePage.expectedNumberOfRows(0);
       });
       [
-        ["USER-GENERATED", 2],
+        ["USER-GENERATED", 4],
         ["SYSTEM-GENERATED", 0],
       ].forEach((testData) => {
         it(`Grievance Assignee filter - ${testData[0]}`, () => {
@@ -304,8 +307,8 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", "High", 1, userType7],
-        ["USER-GENERATED", "Low", 1, "GRV-0000002"],
-        ["USER-GENERATED", "Medium", 2, "GRV-0000001"],
+        ["USER-GENERATED", "Low", 1, "GRV-0000003"],
+        ["USER-GENERATED", "Medium", 4, "GRV-0000001"],
         ["SYSTEM-GENERATED", "Not set", 1, systemGenerated],
       ].forEach((testData) => {
         it(`Grievance Priority filter - ${testData[1]}`, () => {
@@ -317,8 +320,8 @@ describe("Grievance", () => {
       });
       [
         ["USER-GENERATED", "Very urgent", 1, userType7],
-        ["USER-GENERATED", "Urgent", 2, "GRV-0000001"],
-        ["USER-GENERATED", "Not urgent", 1, "GRV-0000002"],
+        ["USER-GENERATED", "Urgent", 4, "GRV-0000001"],
+        ["USER-GENERATED", "Not urgent", 1, "GRV-0000003"],
         ["SYSTEM-GENERATED", "Not set", 1, systemGenerated],
       ].forEach((testData) => {
         it(`Grievance Urgency filter - ${testData[1]}`, () => {
@@ -515,7 +518,6 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelCommsDisability()
             .contains(newTicket.commsDisability);
-          // grievanceDetailsPage.getLabelMEMORYDISABILITY().contains("");
           grievanceDetailsPage
             .getLabelSeeingDisability()
             .contains(newTicket.seeingDisability);
@@ -525,7 +527,9 @@ describe("Grievance", () => {
           grievanceDetailsPage
             .getLabelHearingDisability()
             .contains(newTicket.hearingDisability);
-          grievanceDetailsPage.getLabelObservedDisability().contains("");
+          grievanceDetailsPage
+            .getLabelObservedDisability()
+            .contains("Communicating, Hearing, Memory");
           grievanceDetailsPage
             .getLabelPhysicalDisability()
             .contains(newTicket.physicalDisability);
@@ -562,7 +566,7 @@ describe("Grievance", () => {
             newTicketPage.getButtonNext().click();
             newTicketPage.getHouseholdTab().should("be.visible");
             newTicketPage.getHouseholdTableRows(0).click();
-            newTicketPage.getIndividualTab().parent().should("not.be.disabled");
+            newTicketPage.getIndividualTab().parent().should("be.disabled");
             newTicketPage.getButtonNext().click();
             newTicketPage.getReceivedConsent().click();
             newTicketPage.getButtonNext().click();
