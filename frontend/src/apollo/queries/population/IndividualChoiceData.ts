@@ -6,5 +6,9 @@ export const IndividualChoiceData = gql`
       name
       value
     }
+    individualSearchTypesChoices {
+      name
+      value
+    }
   }
 `;

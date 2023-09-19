@@ -23,9 +23,9 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     FILTER_BY_SEARCH = """
-    query AllGrievanceTicket($search: String)
+    query AllGrievanceTicket($search: String, $searchType: String)
     {
-      allGrievanceTicket(businessArea: "afghanistan", search: $search) {
+      allGrievanceTicket(businessArea: "afghanistan", search: $search, searchType: $searchType) {
         totalCount
         edges {
           cursor
@@ -127,7 +127,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": f"ticket_id {self.grievance_ticket_1.unicef_id}"},
+            variables={
+                "search": f"{self.grievance_ticket_1.unicef_id}",
+                "searchType": "ticket_id",
+            },
         )
 
     def test_grievance_list_filtered_by_ticket_household_unicef_id(self) -> None:
@@ -140,10 +143,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": f"ticket_hh_id {self.grievance_ticket_2.household_unicef_id}"},
+            variables={
+                "search": f"{self.grievance_ticket_2.household_unicef_id}",
+                "searchType": "ticket_hh_id",
+            },
         )
 
-    def test_grievance_list_filtered_by_household_head_family_name(self) -> None:
+    def test_grievance_list_filtered_by_household_head_full_name(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -153,7 +159,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": f"family_name {self.individual_1.family_name}"},
+            variables={
+                "search": f"{self.individual_1.full_name}",
+                "searchType": "full_name",
+            },
         )
 
     def test_grievance_list_filtered_by_household_head_national_id_document_number(self) -> None:
@@ -166,7 +175,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": "national_id test123"},
+            variables={
+                "search": "test123",
+                "searchType": "national_id",
+            },
         )
 
     def test_grievance_list_filtered_by_invalid_search_type(self) -> None:
@@ -179,5 +191,8 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
-            variables={"search": "invalid test123"},
+            variables={
+                "search": "test123",
+                "searchType": "invalid",
+            },
         )

@@ -523,24 +523,33 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
 
-        self.assertEqual(households.count(), 2)
-        self.assertEqual(individuals.count(), 5)
+        self.assertEqual(households.count(), 3)  # related to AB#171697
+        self.assertEqual(individuals.count(), 7)  # related to AB#171697
 
         documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
             sorted(list(documents)),
-            ["Tesa Testowski", "Test Testowski", "Zbyszek Zbyszkowski", "abc efg"],
+            [
+                "Tesa Testowski 222",
+                "Tesa XLast",
+                "Test Testowski 222",
+                "XLast XFull XName",
+                "Zbyszek Zbyszkowski",
+                "abc efg",
+            ],
         )
 
-        first_household = households.get(size=3)
-        second_household = households.get(size=2)
+        first_household = households.get(size=3, individuals__full_name="Tesa Testowski 222")
+        second_household = households.get(
+            size=2,
+        )
 
         first_household_collectors = first_household.individuals_and_roles.order_by(
             "individual__full_name"
         ).values_list("individual__full_name", "role")
         self.assertEqual(
             list(first_household_collectors),
-            [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
+            [("Tesa Testowski 222", "ALTERNATE"), ("Test Testowski 222", "PRIMARY")],
         )
         second_household_collectors = second_household.individuals_and_roles.values_list(
             "individual__full_name", "role"

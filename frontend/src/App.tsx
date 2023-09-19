@@ -11,6 +11,7 @@ import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage'
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 
+
 export const App: React.FC = () => {
   return (
     <Providers>
@@ -41,6 +42,11 @@ export const App: React.FC = () => {
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
+          <ProtectedRoute
+            path='/sanction-list'
+            component={SanctionList}
+            location={window.location}
+          />
           <Route path='/:businessArea/'>
             <HomeRouter />
           </Route>

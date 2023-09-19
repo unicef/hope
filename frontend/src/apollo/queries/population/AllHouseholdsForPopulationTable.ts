@@ -13,10 +13,12 @@ export const AllHouseholdsForPopulationTable = gql`
     $headOfHouseholdFullNameIcontains: String
     $adminArea: ID
     $search: String
+    $searchType: String
     $residenceStatus: String
     $lastRegistrationDate: String
     $admin2: ID
     $withdrawn: Boolean
+    $headOfHouseholdPhoneNoValid: Boolean
   ) {
     allHouseholds(
       after: $after
@@ -30,10 +32,12 @@ export const AllHouseholdsForPopulationTable = gql`
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       adminArea: $adminArea
       search: $search
+      searchType: $searchType
       residenceStatus: $residenceStatus
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
       withdrawn: $withdrawn
+      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
     ) {
       pageInfo {
         hasNextPage

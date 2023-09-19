@@ -14,15 +14,19 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.conftest import disabled_locally_test
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    migrate_data_to_representations,
+)
 
 
 @disabled_locally_test
 class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
-    databases = "__all__"
+    databases = {"default", "registration_datahub"}
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals($search: String) {
-      allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
+    query AllIndividuals($search: String, $searchType: String) {
+      allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, orderBy:"id") {
         edges {
           node {
             fullName
@@ -78,10 +82,12 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
@@ -92,6 +98,8 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
         household_two.programs.add(cls.program_two)
+        # added for testing migrate_data_to_representations script
+        household_two.programs.add(program_one)
 
         cls.individuals_to_create = [
             {
@@ -101,6 +109,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
+                "registration_id": 1,
             },
             {
                 "full_name": "Robin Ford",
@@ -163,6 +172,9 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
         cls.rebuild_search_index()
 
+        # remove after data migration
+        migrate_data_to_representations()
+
         super().setUpTestData()
 
     @parameterized.expand(
@@ -220,7 +232,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": "full_name Jenna Franklin"},
+            variables={"search": "Jenna Franklin", "searchType": "full_name"},
         )
 
     @parameterized.expand(
@@ -234,7 +246,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": "phone_no +18663567905"},
+            variables={"search": "+18663567905", "searchType": "phone_no"},
         )
 
     @parameterized.expand(
@@ -249,7 +261,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": f"national_id {self.national_id.document_number}"},
+            variables={"search": f"{self.national_id.document_number}", "searchType": "national_id"},
         )
 
     @parameterized.expand(
@@ -264,7 +276,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": f"national_passport {self.national_passport.document_number}"},
+            variables={"search": f"{self.national_passport.document_number}", "searchType": "national_passport"},
         )
 
     @parameterized.expand(
@@ -279,5 +291,37 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": f"tax_id {self.tax_id.document_number}"},
+            variables={"search": f"{self.tax_id.document_number}", "searchType": "tax_id"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_registration_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={"search": "1", "searchType": "registration_id"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_without_search_type(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={
+                "search": "1",
+            },
         )
