@@ -11,7 +11,9 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import {useProgramQuery} from "../../../__generated__/graphql";
+import {ProgramStatus, useProgramQuery} from "../../../__generated__/graphql";
+import {LoadingComponent} from "../../../components/core/LoadingComponent";
+import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
 
 const initialFilter = {
   search: '',
@@ -42,34 +44,32 @@ export const PaymentModulePage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  if (permissions === null || programLoading) return null;
+  if (permissions === null || !data) return null
+  if (programLoading) {
+    return <LoadingComponent/>
+  }
+
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
-  let isImportDisabled = false;
-  if (data.program && data.program.status !== "ACTIVE") {
-    isImportDisabled = true
-  }
+  const isImportDisabled = data?.program?.status !== ProgramStatus.Active
 
   return (
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
           isImportDisabled ?
-            <Tooltip title="Program must be ACTIVE to create Payment Plan">
-              <span>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  component={Link}
-                  to={`/${baseUrl}/payment-module/new-plan`}
-                  data-cy='button-new-payment-plan'
-                  disabled={isImportDisabled}
-                >
-                  {t('NEW PAYMENT PLAN')}
-                </Button>
-              </span>
-            </Tooltip>
+            <ButtonTooltip
+              title={t('Program must be ACTIVE to create Payment Plan')}
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/payment-module/new-plan`}
+              data-cy='button-new-payment-plan'
+              disabled={isImportDisabled}
+            >
+              {t('NEW PAYMENT PLAN')}
+            </ButtonTooltip>
             :
             <Button
               variant='contained'
