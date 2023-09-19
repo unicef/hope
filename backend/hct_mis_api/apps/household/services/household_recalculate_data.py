@@ -55,7 +55,7 @@ def recalculate_data(
 
         Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
 
-    last_registration_date = getattr(household, "last_registration_date", timezone.now())
+    last_registration_date = getattr(household, "last_registration_date")
     date_6_years_ago = last_registration_date - relativedelta(years=+6)
     date_12_years_ago = last_registration_date - relativedelta(years=+12)
     date_18_years_ago = last_registration_date - relativedelta(years=+18)
@@ -193,6 +193,7 @@ def recalculate_data(
             household.fchild_hoh = True
         household.child_hoh = True
 
+    household.is_recalculated_group_ages = True
     if save:
         household.save(update_fields=updated_fields)
 
