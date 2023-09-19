@@ -22,24 +22,25 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzVkYTkwMTMtY2IyMy00ZTQ0LWFlYzEtNmUyMDllNjg2MjA2',
-                name: 'feeeee',
-                status: 'ASSIGNED',
-                createdAt: '2023-03-09T15:14:00.326946+00:00',
-                updatedAt: '2023-03-09T15:14:39.506326+00:00',
-                totalHouseholdsCount: 4,
-                totalIndividualsCount: 17,
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZTZjZDc0YjgtZjA3Yi00ZTA2LTg2MTAtNWYwMjkwYTA2N2Q0',
+                name: 'Key PM attack.',
+                status: 'READY_FOR_CASH_ASSIST',
+                createdAt: '2023-08-30T08:58:56.158232+00:00',
+                updatedAt: '2023-08-30T08:58:56.185496+00:00',
+                totalHouseholdsCount: 3,
+                totalHouseholdsCountWithValidPhoneNo: 3,
+                totalIndividualsCount: 15,
                 program: {
                   id:
-                    'UHJvZ3JhbU5vZGU6OWE5NjI0NjktNzU3NC00Y2M0LWFjYzUtYjU1Y2QxNWJmNzFm',
-                  name: 'If appear agreement discuss hair international.',
+                    'UHJvZ3JhbU5vZGU6OWNiODk2NTgtMjllMi00ODMzLWFhMzItMTMzNTYwNDcwM2Ri',
+                  name: 'Top choose business son read outside give.',
                   __typename: 'ProgramNode',
                 },
                 createdBy: {
                   id:
-                    'VXNlck5vZGU6ZWVjMjJlZjgtNzRiZC00MmE5LTlkZTEtNzljNzg1MDRkMzll',
-                  firstName: '',
-                  lastName: '',
+                    'VXNlck5vZGU6MGUzNDU5NGItZWExNS00ZjQ4LThkNDktZDk1MWNkMzdjMWU4',
+                  firstName: 'Brittany',
+                  lastName: 'Ramos',
                   __typename: 'UserNode',
                 },
                 __typename: 'TargetPopulationNode',
@@ -50,24 +51,25 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6NmYwMGM3N2ItYmE1ZS00NTQyLWE3YTctOTJkNGY2MTk5NTcz',
-                name: 'Manage whole study crime so receive.',
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MGJlNzFjZjMtYjYyOC00NGUyLTkyMjUtNzM4Y2IxZmJlNWFk',
+                name: 'Argue manage pass part.',
                 status: 'READY_FOR_CASH_ASSIST',
-                createdAt: '2023-03-08T13:02:06.449223+00:00',
-                updatedAt: '2023-03-08T13:02:06.486382+00:00',
+                createdAt: '2023-08-30T08:58:56.022529+00:00',
+                updatedAt: '2023-08-30T08:58:56.051394+00:00',
                 totalHouseholdsCount: 3,
-                totalIndividualsCount: 14,
+                totalHouseholdsCountWithValidPhoneNo: 3,
+                totalIndividualsCount: 15,
                 program: {
                   id:
-                    'UHJvZ3JhbU5vZGU6OWE5NjI0NjktNzU3NC00Y2M0LWFjYzUtYjU1Y2QxNWJmNzFm',
-                  name: 'If appear agreement discuss hair international.',
+                    'UHJvZ3JhbU5vZGU6OWNiODk2NTgtMjllMi00ODMzLWFhMzItMTMzNTYwNDcwM2Ri',
+                  name: 'Top choose business son read outside give.',
                   __typename: 'ProgramNode',
                 },
                 createdBy: {
                   id:
-                    'VXNlck5vZGU6NDEzM2QyMDAtZDczYS00YTBiLTg5NGQtN2E3NDgyY2JiZjAy',
-                  firstName: 'Ashley',
-                  lastName: 'Smith',
+                    'VXNlck5vZGU6MDY1ODdhY2YtN2RjZC00MWMwLWE5OGEtMDYzYzA0Y2FlMDc0',
+                  firstName: 'Richard',
+                  lastName: 'Bailey',
                   __typename: 'UserNode',
                 },
                 __typename: 'TargetPopulationNode',
@@ -78,24 +80,25 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzYzNDk5YTYtMTRlOC00MmZlLWE5MGYtNmVkYTI0MjIwMDk1',
-                name: 'Role eat seem road cup worker modern.',
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6NDMxZGM2YWItNWE4Ni00MzI2LWI0OGQtMTA1ODg5NzIyOTBk',
+                name: 'Television teach sea letter old.',
                 status: 'READY_FOR_CASH_ASSIST',
-                createdAt: '2023-03-08T13:02:06.230343+00:00',
-                updatedAt: '2023-03-08T13:02:06.270910+00:00',
-                totalHouseholdsCount: 3,
-                totalIndividualsCount: 14,
+                createdAt: '2023-08-30T08:58:53.922963+00:00',
+                updatedAt: '2023-08-30T08:58:53.950427+00:00',
+                totalHouseholdsCount: 2,
+                totalHouseholdsCountWithValidPhoneNo: 2,
+                totalIndividualsCount: 8,
                 program: {
                   id:
-                    'UHJvZ3JhbU5vZGU6OWE5NjI0NjktNzU3NC00Y2M0LWFjYzUtYjU1Y2QxNWJmNzFm',
-                  name: 'If appear agreement discuss hair international.',
+                    'UHJvZ3JhbU5vZGU6OWNiODk2NTgtMjllMi00ODMzLWFhMzItMTMzNTYwNDcwM2Ri',
+                  name: 'Top choose business son read outside give.',
                   __typename: 'ProgramNode',
                 },
                 createdBy: {
                   id:
-                    'VXNlck5vZGU6ZDY5NWYyNjAtZTkyOS00MzM1LWE2ZTAtMWJhOTAyMjRkMmRm',
-                  firstName: 'Sophia',
-                  lastName: 'Goodwin',
+                    'VXNlck5vZGU6YTZlZjM5NWYtYTQwZS00MzUyLWE2NWUtODg0ZWIxZmI0YWI2',
+                  firstName: 'Dakota',
+                  lastName: 'Rodriguez',
                   __typename: 'UserNode',
                 },
                 __typename: 'TargetPopulationNode',
@@ -106,40 +109,13 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YmNlOWZhM2QtODBjOC00YmM0LWIzZjItODIzMTM3NWY0ODVh',
-                name: 'Ok with turn difficult policy.',
-                status: 'READY_FOR_CASH_ASSIST',
-                createdAt: '2023-03-08T13:02:04.267826+00:00',
-                updatedAt: '2023-03-08T13:02:04.306629+00:00',
-                totalHouseholdsCount: 2,
-                totalIndividualsCount: 8,
-                program: {
-                  id:
-                    'UHJvZ3JhbU5vZGU6OWE5NjI0NjktNzU3NC00Y2M0LWFjYzUtYjU1Y2QxNWJmNzFm',
-                  name: 'If appear agreement discuss hair international.',
-                  __typename: 'ProgramNode',
-                },
-                createdBy: {
-                  id:
-                    'VXNlck5vZGU6OThkZDQ1ZGItYWZiMC00MWNlLTg1YTktZjkyNGI5MzgwODM1',
-                  firstName: 'James',
-                  lastName: 'Aguilar',
-                  __typename: 'UserNode',
-                },
-                __typename: 'TargetPopulationNode',
-              },
-              cursor: 'YXJyYXljb25uZWN0aW9uOjM=',
-              __typename: 'TargetPopulationNodeEdge',
-            },
-            {
-              node: {
-                id:
                   'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz',
                 name: 'Test Target Population',
                 status: 'ASSIGNED',
-                createdAt: '2023-03-08T13:02:03.689113+00:00',
-                updatedAt: '2023-03-08T13:02:03.735184+00:00',
+                createdAt: '2023-08-30T08:58:53.537158+00:00',
+                updatedAt: '2023-08-30T08:58:53.578860+00:00',
                 totalHouseholdsCount: 2,
+                totalHouseholdsCountWithValidPhoneNo: 0,
                 totalIndividualsCount: 8,
                 program: {
                   id:
@@ -156,12 +132,12 @@ export const fakeApolloAllTargetPopulation = [
                 },
                 __typename: 'TargetPopulationNode',
               },
-              cursor: 'YXJyYXljb25uZWN0aW9uOjQ=',
+              cursor: 'YXJyYXljb25uZWN0aW9uOjM=',
               __typename: 'TargetPopulationNodeEdge',
             },
           ],
-          totalCount: 5,
-          edgeCount: 5,
+          totalCount: 4,
+          edgeCount: 4,
           __typename: 'TargetPopulationNodeConnection',
         },
       },

@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_household_head_family_name 1'] = {
+snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_household_head_full_name 1'] = {
     'data': {
         'allGrievanceTicket': {
             'edges': [
@@ -51,7 +51,7 @@ snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_inval
                     'line': 4
                 }
             ],
-            'message': '"Invalid search key \'invalid\'"',
+            'message': '"Invalid search search_type \'invalid\'"',
             'path': [
                 'allGrievanceTicket'
             ]

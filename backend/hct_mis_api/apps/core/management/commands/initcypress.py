@@ -30,6 +30,7 @@ class Command(BaseCommand):
         call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/apps/core/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
+        call_command("loaddata", "hct_mis_api/apps/program/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/registration_data/fixtures/data-cypress.json")
         call_command(
             "loaddata",
@@ -37,7 +38,6 @@ class Command(BaseCommand):
             database="registration_datahub",
         )
         call_command("loaddata", "hct_mis_api/apps/household/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/program/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/targeting/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/payment/fixtures/data-cypress.json")
