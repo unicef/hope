@@ -5,6 +5,7 @@ let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
+const PaymentPlanID = "PP-0060-23-00000012";
 describe("Payment Verification", () => {
   beforeEach(() => {
     cy.navigateToHomePage();
@@ -86,7 +87,7 @@ describe("Payment Verification", () => {
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
+        paymentVerificationPage.getPaymentPlanID().type(PaymentPlanID);
         paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
@@ -148,7 +149,7 @@ describe("Payment Verification", () => {
 
     context("Finish Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
+        paymentVerificationPage.getPaymentPlanID().type(PaymentPlanID);
         paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
