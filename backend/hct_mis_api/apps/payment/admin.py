@@ -307,6 +307,9 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
 
+    class Media:
+        js = ("payment/js/dynamic_fields.js",)
+
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
