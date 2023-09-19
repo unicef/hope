@@ -1804,6 +1804,16 @@
                 "defaultValue": null
               },
               {
+                "name": "searchType",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "status",
                 "description": null,
                 "type": {
@@ -6755,6 +6765,16 @@
                 "defaultValue": null
               },
               {
+                "name": "searchType",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "headOfHousehold_PhoneNoValid",
                 "description": null,
                 "type": {
@@ -6994,6 +7014,16 @@
               },
               {
                 "name": "search",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "searchType",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -12375,6 +12405,22 @@
             "deprecationReason": null
           },
           {
+            "name": "isRemoved",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "individual",
             "description": null,
             "args": [],
@@ -16696,6 +16742,16 @@
               },
               {
                 "name": "search",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "searchType",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -46242,6 +46298,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "UUID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isRemoved",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
