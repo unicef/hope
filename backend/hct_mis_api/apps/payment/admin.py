@@ -19,7 +19,10 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
+from hct_mis_api.apps.payment.forms import (
+    DeliveryMechanismPerPaymentPlanForm,
+    ImportPaymentRecordsForm,
+)
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanismPerPaymentPlan,
@@ -306,6 +309,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 @admin.register(DeliveryMechanismPerPaymentPlan)
 class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
+    form = DeliveryMechanismPerPaymentPlanForm
 
     class Media:
         js = ("payment/js/dynamic_fields.js",)
