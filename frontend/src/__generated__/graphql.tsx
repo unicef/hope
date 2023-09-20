@@ -5491,9 +5491,9 @@ export type QueryAllSurveysArgs = {
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
   targetPopulation?: Maybe<Scalars['ID']>,
-  createdBy?: Maybe<Scalars['ID']>,
   createdAtRange?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -13684,7 +13684,7 @@ export type AllSurveysQueryVariables = {
   program: Scalars['ID'],
   targetPopulation?: Maybe<Scalars['ID']>,
   createdAtRange?: Maybe<Scalars['String']>,
-  createdBy?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -26478,7 +26478,7 @@ export type RdiAutocompleteQueryHookResult = ReturnType<typeof useRdiAutocomplet
 export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocompleteLazyQuery>;
 export type RdiAutocompleteQueryResult = ApolloReactCommon.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
 export const AllSurveysDocument = gql`
-    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: ID, $search: String, $orderBy: String) {
+    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: String, $search: String, $orderBy: String) {
   allSurveys(offset: $offset, before: $before, after: $after, first: $first, last: $last, program: $program, targetPopulation: $targetPopulation, createdAtRange: $createdAtRange, createdBy: $createdBy, search: $search, orderBy: $orderBy) {
     totalCount
     pageInfo {
