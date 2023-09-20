@@ -621,16 +621,6 @@
                 "defaultValue": null
               },
               {
-                "name": "createdBy",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "createdAtRange",
                 "description": null,
                 "type": {
@@ -642,6 +632,16 @@
               },
               {
                 "name": "search",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "createdBy",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
