@@ -2,9 +2,17 @@ from typing import Any, Dict
 
 from django.db.models import Count, F, Q, QuerySet
 from django.db.models.aggregates import Sum
-from django.db.models.functions import Lower
+from django.db.models.fields import DecimalField
+from django.db.models.functions import Coalesce, Lower
 
-from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, NumberFilter
+from _decimal import Decimal
+from django_filters import (
+    CharFilter,
+    DateFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    NumberFilter,
+)
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
@@ -116,8 +124,8 @@ class ProgramCycleFilter(GlobalProgramFilter):
     status = MultipleChoiceFilter(field_name="status", choices=ProgramCycle.STATUS_CHOICE)
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
-    total_delivered_quantity_usd_from = NumberFilter(field_name="total_delivered_quantity_usd", lookup_expr="gte")
-    total_delivered_quantity_usd_to = NumberFilter(field_name="total_delivered_quantity_usd", lookup_expr="lte")
+    total_delivered_quantity_usd_from = NumberFilter(method="total_delivered_quantity_filter")
+    total_delivered_quantity_usd_to = NumberFilter(method="total_delivered_quantity_filter")
 
     class Meta:
         fields = (
@@ -137,15 +145,6 @@ class ProgramCycleFilter(GlobalProgramFilter):
         )
     )
 
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        program_id = decode_id_string(self.request.headers.get("Program"))
-        queryset = queryset.filter(program_id=program_id)
-        # annotate total_delivered_quantity_usd
-        queryset = queryset.annotate(
-                total_delivered_quantity_usd=Sum('paymentplan__total_delivered_quantity_usd')
-            )
-        return super().filter_queryset(queryset)
-
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
@@ -153,8 +152,18 @@ class ProgramCycleFilter(GlobalProgramFilter):
             q_obj |= Q(name__istartswith=value)
         return qs.filter(q_obj)
 
-    def total_delivered_quantity_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+    def total_delivered_quantity_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
+        filter_dict = {}
         if value:
-            qs.annotate(
-                total_delivered_quantity_usd=Sum('paymentplan_set__total_delivered_quantity_usd')
-            ).filter()
+            # annotate total_delivered_quantity_usd
+            queryset = queryset.annotate(
+                total_delivered_quantity=Coalesce(
+                    Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                )
+            )
+            if name == "total_delivered_quantity_usd_from":
+                filter_dict = {"total_delivered_quantity__gte": Decimal(value)}
+            elif name == "total_delivered_quantity_usd_to":
+                filter_dict = {"total_delivered_quantity__lte": Decimal(value)}
+
+        return queryset.filter(**filter_dict)
