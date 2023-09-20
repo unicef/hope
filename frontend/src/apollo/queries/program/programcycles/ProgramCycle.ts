@@ -14,9 +14,9 @@ export const PROGRAM_CYCLE_QUERY = gql`
       status
       startDate
       endDate
-      totalDeliveredQuantity
-      totalUndeliveredQuantity
-      totalEntitledQuantity
+      totalDeliveredQuantityUsd
+      totalUndeliveredQuantityUsd
+      totalEntitledQuantityUsd
       program {
         id
         startDate

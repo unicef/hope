@@ -12,9 +12,9 @@ export const UPDATE_PROGRAM_CYCLE = gql`
               unicefId
               name
               status
-              totalEntitledQuantity
-              totalUndeliveredQuantity
-              totalUndeliveredQuantity
+              totalEntitledQuantityUsd
+              totalUndeliveredQuantityUsd
+              totalUndeliveredQuantityUsd
               startDate
               endDate
             }

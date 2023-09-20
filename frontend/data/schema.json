@@ -5605,11 +5605,21 @@
                 "defaultValue": null
               },
               {
-                "name": "totalDeliveredQuantityUsd",
+                "name": "totalDeliveredQuantityUsdFrom",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
+                  "name": "Float",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "totalDeliveredQuantityUsdTo",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Float",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -27784,7 +27794,7 @@
             "deprecationReason": null
           },
           {
-            "name": "paymentplanSet",
+            "name": "paymentPlans",
             "description": null,
             "args": [
               {
