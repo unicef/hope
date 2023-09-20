@@ -7,7 +7,7 @@ import {
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { choicesToDict, decodeIdString } from '../../../../utils/utils';
+import { choicesToDict } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -24,8 +24,6 @@ export const SurveysTable = ({
   choicesData,
 }: SurveysTableProps): ReactElement => {
   const { t } = useTranslation();
-
-  console.log(filter.createdBy);
 
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
