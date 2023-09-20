@@ -422,7 +422,9 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
 
-    program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
+    program_cycle = models.ForeignKey(
+        "program.ProgramCycle", related_name="payment_plans", null=True, blank=True, on_delete=models.CASCADE
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
