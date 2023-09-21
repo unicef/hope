@@ -515,6 +515,7 @@ class Household(
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="households", on_delete=models.PROTECT, null=True, blank=True
     )
+    is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
         verbose_name = "Household"
