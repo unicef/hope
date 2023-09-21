@@ -1,6 +1,7 @@
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase, APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocumentAfghanistan
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
@@ -63,12 +64,21 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         cls.household_2.registration_id = "54321"
         cls.household_2.save()
 
-    def test_bulk_upsert_household(self) -> None:
-        bulk_upsert_households([])
+        cls.household_2_id = cls.household_2.id
+        cls.individual_2_id = cls.individual_2.id
 
-        # do something
+    def test_bulk_upsert_household(self) -> None:
+        ids = [self.household_2_id]
+        bulk_upsert_households(ids)
+
+        es_response = (
+            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict({"query": {"terms": {"_id": [str(_id) for _id in ids]}}}).execute()
+        )
 
     def test_bulk_upsert_individuals(self) -> None:
-        bulk_upsert_individuals([])
+        ids = [self.individual_2_id]
+        bulk_upsert_individuals(ids)
 
-        # do something
+        es_response = (
+            IndividualDocumentAfghanistan().params(search_type="dfs_query_then_fetch").update_from_dict({"query": {"terms": {"_id": [str(_id) for _id in ids]}}}).execute()
+        )
