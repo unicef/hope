@@ -14,6 +14,7 @@ export const AllHouseholds = gql`
     $headOfHouseholdPhoneNoValid: Boolean
     $adminArea: ID
     $search: String
+    $searchType: String
     $residenceStatus: String
     $lastRegistrationDate: String
     $admin2: ID
@@ -32,6 +33,7 @@ export const AllHouseholds = gql`
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
       adminArea: $adminArea
       search: $search
+      searchType: $searchType
       residenceStatus: $residenceStatus
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
