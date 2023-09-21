@@ -413,6 +413,9 @@ class FileTemp(TimeStampedModel):
 class MigrationStatus(TimeStampedModel):
     is_running = models.BooleanField()
 
+    class Meta:
+        verbose_name_plural = "Migration Status"
+
 
 class DataCollectingType(TimeStampedModel):
     code = models.CharField(max_length=60, unique=True)
