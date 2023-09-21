@@ -1,18 +1,12 @@
 import enum
 import logging
-from functools import partial
 from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
-from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 
-from django.conf import settings
 from django.db.models import Model
 
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search, connections
-from elasticsearch import Elasticsearch, helpers
-
-from hct_mis_api.apps.household.models import Household, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -102,85 +96,3 @@ def wait_until_es_healthy() -> None:
             f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
             f"number of pending tasks:{health.get('number_of_pending_tasks')}"
         )
-
-
-es_conn = Elasticsearch(settings.ELASTICSEARCH_HOST)
-
-
-class ElasticSearchMixin:
-    def prepare(self, obj):
-        data = self.document.prepare(obj)
-        doc = {
-            "_op_type": 'update',
-            "_index": self.document.Index.name,
-            "_id": str(obj.id),
-            "doc": data,
-            "doc_as_upsert": True
-        }
-        self.documents_to_update.append(doc)
-
-    def process(self) -> None:
-        if self.documents_to_update:
-            try:
-                helpers.bulk(es_conn, self.documents_to_update)
-            except Exception:
-                logger.error(f"Updating {','.join([str(_id) for _id in self.ids])} of {self.document.__name__} failed")
-
-            logger.info(f"{self.document.__name__} with {','.join([str(_id) for _id in self.ids])} have been updated.")
-        else:
-            logger.info(f"Nothing to update for index: {self.document.Index.name}")
-
-
-@dataclass
-class AfghanistanIndividualHelper(ElasticSearchMixin):
-    from hct_mis_api.apps.household.documents import IndividualDocumentAfghanistan
-    document: Document = IndividualDocumentAfghanistan()
-    documents_to_update: List[Dict] = field(default_factory=list)
-
-
-@dataclass
-class UkraineIndividualHelper(ElasticSearchMixin):
-    from hct_mis_api.apps.household.documents import IndividualDocumentUkraine
-    document: Document = IndividualDocumentUkraine()
-    documents_to_update: list = field(default_factory=list)
-
-
-@dataclass
-class OthersIndividualHelper(ElasticSearchMixin):
-    from hct_mis_api.apps.household.documents import IndividualDocumentOthers
-    document: Document = IndividualDocumentOthers
-    documents_to_update: list = field(default_factory=list)
-
-
-@dataclass
-class HouseholdHelper(ElasticSearchMixin):
-    from hct_mis_api.apps.household.documents import HouseholdDocument
-    document: Document = HouseholdDocument()
-    documents_to_update: list = field(default_factory=list)
-
-
-def bulk_upsert(ids: List[str], model: Union[Household, Individual]) -> None:
-    queryset = model.objects.filter(id__in=ids).select_related("business_area__slug")
-
-    if model == Household:
-        household_helper = HouseholdHelper()
-        for obj in queryset:
-            household_helper.prepare(obj)
-        household_helper.process()
-        return
-    else:
-        mapper = {
-            "afghanistan": AfghanistanIndividualHelper(),
-            "ukraine": UkraineIndividualHelper(),
-            "others": OthersIndividualHelper()
-        }
-        for obj in queryset:
-            mapper.get(obj.business_area.slug, "others").prepare(obj)
-        mapper["afghanistan"].process()
-        mapper["ukraine"].process()
-        mapper["others"].process()
-        return
-
-
-bulk_upsert_individuals = partial(bulk_upsert, Individual)
-bulk_upsert_households = partial(bulk_upsert, Household)
