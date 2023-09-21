@@ -60,4 +60,4 @@ class APILogEntry(models.Model):
     status_code = models.IntegerField()
 
     class Meta:
-        verbose_name_plural = "Api log entries"
+        verbose_name_plural = "Api Log Entries"

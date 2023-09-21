@@ -414,7 +414,7 @@ class MigrationStatus(TimeStampedModel):
     is_running = models.BooleanField()
 
     class Meta:
-        verbose_name_plural = "Migration statuses"
+        verbose_name_plural = "Migration Status"
 
 
 class DataCollectingType(TimeStampedModel):
