@@ -28,6 +28,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
@@ -665,3 +666,10 @@ def save_images(flex_fields: Dict, associated_with: str) -> None:
                 file_name = value.replace(default_storage.base_url, "")
                 unquoted_value = urllib.parse.unquote(file_name)
                 flex_fields[name] = unquoted_value
+
+
+def update_es(individual: Individual) -> None:
+    doc = get_individual_doc(individual.business_area.slug)
+    doc().update(individual)
+    if individual.household:
+        HouseholdDocument().update(individual.household)

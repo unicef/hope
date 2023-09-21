@@ -62,6 +62,9 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     full_list_arguments = models.JSONField(blank=True, null=True)
     random_sampling_arguments = models.JSONField(blank=True, null=True)
     sample_size = models.PositiveIntegerField(default=0)
+    program = models.ForeignKey(
+        "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
+    )
 
     class Meta:
         ordering = ("created_at",)
