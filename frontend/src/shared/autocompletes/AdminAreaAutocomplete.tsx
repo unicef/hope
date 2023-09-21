@@ -82,8 +82,6 @@ export const AdminAreaAutocomplete = ({
     setAppliedFilter,
   );
 
-  if (!data) return null;
-
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       value={value}
