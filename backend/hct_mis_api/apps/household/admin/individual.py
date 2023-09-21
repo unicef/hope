@@ -86,7 +86,7 @@ class IndividualAdmin(
         "updated_at",
         "last_sync_at",
     )
-    raw_id_fields = ("household", "registration_data_import", "business_area")
+    raw_id_fields = ("household", "registration_data_import", "business_area", "copied_from", "program")
     fieldsets = [
         (
             None,
@@ -237,10 +237,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
         QueryStringFilter,
         "role",
     )
-    raw_id_fields = (
-        "individual",
-        "household",
-    )
+    raw_id_fields = ("individual", "household", "copied_from")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -257,10 +254,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("partner", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
-    raw_id_fields = (
-        "individual",
-        "partner",
-    )
+    raw_id_fields = ("individual", "partner", "copied_from")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner")
