@@ -1,7 +1,9 @@
 import enum
 import logging
+from functools import partial
 from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from dataclasses import dataclass, field
 
 from django.conf import settings
 from django.db.models import Model
@@ -102,43 +104,83 @@ def wait_until_es_healthy() -> None:
         )
 
 
-def bulk_upsert(ids: List[str], model_name: str, business_area_slug: str) -> None:
-    from hct_mis_api.apps.household.documents import (
-        HouseholdDocument,
-        IndividualDocumentAfghanistan,
-        IndividualDocumentUkraine,
-        IndividualDocumentOthers
-    )
+es_conn = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
-    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
-    document = HouseholdDocument
-    if model_name == "Household":
-        model = Household
-    else:
-        if business_area_slug == "afghanistan":
-            document = IndividualDocumentAfghanistan
-        elif business_area_slug == "ukraine":
-            document = IndividualDocumentUkraine
-        else:
-            document = IndividualDocumentOthers
-        model = Individual
-
-    documents_to_update = []
-    for obj in model.objects.filter(id__in=ids):
-        data = document().prepare(obj)
+class ElasticSearchMixin:
+    def prepare(self, obj):
+        data = self.document.prepare(obj)
         doc = {
             "_op_type": 'update',
-            "_index": document.Index.name,
+            "_index": self.document.Index.name,
             "_id": str(obj.id),
             "doc": data,
             "doc_as_upsert": True
         }
-        documents_to_update.append(doc)
+        self.documents_to_update.append(doc)
 
-    try:
-        helpers.bulk(es, documents_to_update)
-    except Exception:
-        logger.error(f"Updating {','.join([str(_id) for _id in ids])} of {document.__name__} failed")
+    def process(self) -> None:
+        if self.documents_to_update:
+            try:
+                helpers.bulk(es_conn, self.documents_to_update)
+            except Exception:
+                logger.error(f"Updating {','.join([str(_id) for _id in self.ids])} of {self.document.__name__} failed")
 
-    logger.info(f"{document.__name__} with {','.join([str(_id) for _id in ids])} have been updated.")
+            logger.info(f"{self.document.__name__} with {','.join([str(_id) for _id in self.ids])} have been updated.")
+        else:
+            logger.info(f"Nothing to update for index: {self.document.Index.name}")
+
+
+@dataclass
+class AfghanistanIndividualHelper(ElasticSearchMixin):
+    from hct_mis_api.apps.household.documents import IndividualDocumentAfghanistan
+    document: Document = IndividualDocumentAfghanistan()
+    documents_to_update: List[Dict] = field(default_factory=list)
+
+
+@dataclass
+class UkraineIndividualHelper(ElasticSearchMixin):
+    from hct_mis_api.apps.household.documents import IndividualDocumentUkraine
+    document: Document = IndividualDocumentUkraine()
+    documents_to_update: list = field(default_factory=list)
+
+
+@dataclass
+class OthersIndividualHelper(ElasticSearchMixin):
+    from hct_mis_api.apps.household.documents import IndividualDocumentOthers
+    document: Document = IndividualDocumentOthers
+    documents_to_update: list = field(default_factory=list)
+
+
+@dataclass
+class HouseholdHelper(ElasticSearchMixin):
+    from hct_mis_api.apps.household.documents import HouseholdDocument
+    document: Document = HouseholdDocument()
+    documents_to_update: list = field(default_factory=list)
+
+
+def bulk_upsert(ids: List[str], model: Union[Household, Individual]) -> None:
+    queryset = model.objects.filter(id__in=ids).select_related("business_area__slug")
+
+    if model == Household:
+        household_helper = HouseholdHelper()
+        for obj in queryset:
+            household_helper.prepare(obj)
+        household_helper.process()
+        return
+    else:
+        mapper = {
+            "afghanistan": AfghanistanIndividualHelper(),
+            "ukraine": UkraineIndividualHelper(),
+            "others": OthersIndividualHelper()
+        }
+        for obj in queryset:
+            mapper.get(obj.business_area.slug, "others").prepare(obj)
+        mapper["afghanistan"].process()
+        mapper["ukraine"].process()
+        mapper["others"].process()
+        return
+
+
+bulk_upsert_individuals = partial(bulk_upsert, Individual)
+bulk_upsert_households = partial(bulk_upsert, Household)
