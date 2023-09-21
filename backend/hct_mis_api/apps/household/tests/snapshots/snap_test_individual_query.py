@@ -21,12 +21,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
@@ -45,12 +45,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
@@ -69,12 +69,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
@@ -93,12 +93,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
@@ -193,16 +193,6 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'fullName': 'Timothy Perry',
                         'givenName': 'Timothy',
                         'phoneNo': '(548)313-1700-902',
-                        'phoneNoValid': False
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'fullName': 'Benjamin Butler',
-                        'givenName': 'Benjamin',
-                        'phoneNo': '(953)682-4596',
                         'phoneNoValid': False
                     }
                 }
@@ -602,6 +592,45 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
 }
 
 snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_with_search_type_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_with_search_type_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },
