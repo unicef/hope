@@ -1,23 +1,30 @@
 import time
 
 from django.conf import settings
+
 from elasticsearch import Elasticsearch
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase, APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocumentAfghanistan
+from hct_mis_api.apps.household.documents import (
+    HouseholdDocument,
+    IndividualDocumentAfghanistan,
+)
 from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
-    DocumentTypeFactory,
-    DocumentFactory,
 )
 from hct_mis_api.apps.household.models import DocumentType, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.elasticsearch_bulk_upsert import bulk_upsert_households, bulk_upsert_individuals
+from hct_mis_api.apps.utils.elasticsearch_bulk_upsert import (
+    bulk_upsert_households,
+    bulk_upsert_individuals,
+)
 
 
 class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):

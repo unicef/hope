@@ -22,7 +22,7 @@ es_conn = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
 
 class ElasticSearchMixin:
-    def prepare(self, obj):
+    def prepare(self, obj: Union[Household, Individual]) -> None:
         data = self.document.prepare(obj)
         doc = {
             "_op_type": "update",
