@@ -18,6 +18,7 @@ export const registrationMinimal = gql`
     numberOfHouseholds
     numberOfIndividuals
     refuseReason
+    totalHouseholdsCountWithValidPhoneNo
   }
 `;
 

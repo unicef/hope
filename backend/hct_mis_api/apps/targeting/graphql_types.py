@@ -136,6 +136,13 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     targeting_criteria = TargetingCriteriaRuleFilterNode()
     household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
     households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
+    total_households_count_with_valid_phone_no = graphene.Int()
+
+    def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
+        return self.households.exclude(
+            head_of_household__phone_no_valid=False,
+            head_of_household__phone_no_alternative_valid=False,
+        ).count()
 
     class Meta:
         model = target_models.TargetPopulation

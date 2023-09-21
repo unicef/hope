@@ -47,7 +47,7 @@ postgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
   username: devcashubusr
   password: #secret-variables: POSTGRES_PASSWORD
-  database: dev_hope_appdb_datahubdb
+  database: dump_hope_tmp
 registrationdatahubpostgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
   username: devreghubusr
