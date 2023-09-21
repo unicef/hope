@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Iterable, Optional, Tuple
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -9,6 +9,7 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -229,14 +230,27 @@ class IndividualAdmin(
     revalidate_phone_number_async.short_description = "Re-validate phone number (async)"
 
 
+class InputFilter(admin.SimpleListFilter):
+    template: str = "admin/household/individual/business_area_slug_input_filter.html"
+
+    def lookups(self, request: HttpRequest, model_admin: Any) -> Optional[Iterable[Tuple[Any, str]]]:
+        return [(None, "")]
+
+
+class BusinessAreaSlugFilter(InputFilter):
+    parameter_name: str = "individual__business_area_slug"
+    title: str = _("Business Area Slug")
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+        if self.value() is not None:
+            return queryset.filter(individual__business_area__slug=self.value())
+        return queryset
+
+
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("individual", "household", "role")
-    list_filter = (
-        DepotManager,
-        QueryStringFilter,
-        "role",
-    )
+    list_filter = (DepotManager, QueryStringFilter, "role", BusinessAreaSlugFilter)
     raw_id_fields = ("individual", "household", "copied_from")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
