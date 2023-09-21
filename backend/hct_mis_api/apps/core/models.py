@@ -415,3 +415,12 @@ class MigrationStatus(TimeStampedModel):
 
     class Meta:
         verbose_name_plural = "Migration statuses"
+
+
+class DataCollectingType(TimeStampedModel):
+    code = models.CharField(max_length=60, unique=True)
+    description = models.TextField(blank=True)
+    compatible_types = models.ManyToManyField("self", blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.code} - {self.description}"

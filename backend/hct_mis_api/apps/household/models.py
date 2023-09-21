@@ -494,6 +494,9 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType", related_name="households", on_delete=models.PROTECT, null=True, blank=True
+    )
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
     )  # TODO Add later related name, when no clash with programs, set null=False after migration
@@ -509,6 +512,9 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType", related_name="households", on_delete=models.PROTECT, null=True, blank=True
+    )
 
     class Meta:
         verbose_name = "Household"
