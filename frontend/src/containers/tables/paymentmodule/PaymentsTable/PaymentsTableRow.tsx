@@ -1,22 +1,19 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
-import ErrorOutlineRoundedIcon from '@material-ui/icons/ErrorOutlineRounded';
+import {
+  AllPaymentsForTableQuery,
+  PaymentStatus,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { WarningTooltip } from '../../../../components/core/WarningTooltip';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   formatCurrencyWithSymbol,
   opacityToHex,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
-import {
-  AllPaymentsForTableQuery,
-  PaymentStatus,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { PaymentTableWarningTooltip } from './PaymentTableWarningTooltip';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -41,18 +38,6 @@ const RoutedBox = styled.div`
   margin-right: 20px;
 `;
 
-const OrangeError = styled(ErrorOutlineRoundedIcon)`
-  color: ${({ theme }) => theme.hctPalette.orange};
-`;
-
-const RedError = styled(ErrorOutlineRoundedIcon)`
-  color: ${({ theme }) => theme.hctPalette.red};
-`;
-
-const GreenCheck = styled(CheckCircleOutlineRoundedIcon)`
-  color: ${({ theme }) => theme.hctPalette.green};
-`;
-
 interface PaymentsTableRowProps {
   payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
@@ -66,7 +51,6 @@ export const PaymentsTableRow = ({
   canViewDetails,
   onWarningClick,
 }: PaymentsTableRowProps): React.ReactElement => {
-  const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.household.id}`;
@@ -100,34 +84,13 @@ export const PaymentsTableRow = ({
     );
   };
 
-  const renderMark = (): React.ReactElement => {
-    const { deliveredQuantity, entitlementQuantity } = payment;
-
-    if (deliveredQuantity === null) {
-      return <></>;
-    }
-    if (deliveredQuantity === 0) {
-      return <RedError />;
-    }
-    if (deliveredQuantity === entitlementQuantity) {
-      return <GreenCheck />;
-    }
-    return <OrangeError />;
-  };
-
   return (
     <ClickableTableRow hover role='checkbox' key={payment.id}>
       <TableCell align='left'>
-        {(payment.paymentPlanHardConflicted ||
-          payment.paymentPlanSoftConflicted) && (
-          <WarningTooltip
-            handleClick={(e) => handleDialogWarningOpen(e)}
-            message={t(
-              'This household is also included in other Payment Plans. Click this icon to view details.',
-            )}
-            confirmed={payment.paymentPlanHardConflicted}
-          />
-        )}
+        <PaymentTableWarningTooltip
+          payment={payment}
+          handleClick={handleDialogWarningOpen}
+        />
       </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
@@ -177,7 +140,6 @@ export const PaymentsTableRow = ({
       <TableCell data-cy='delivered-quantity-cell' align='left'>
         {renderDeliveredQuantity()}
       </TableCell>
-      <TableCell>{renderMark()}</TableCell>
     </ClickableTableRow>
   );
 };

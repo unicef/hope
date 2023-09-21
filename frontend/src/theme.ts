@@ -47,6 +47,7 @@ export const theme = {
     darkBrown: '#715247',
     navyBlue: '#003C8F',
     lightBlue: '#00ADEF',
+    warningRed: '#C21414',
   },
   hctTypography: {
     fontFamily: FONT,
