@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     search_fields = ("document_number", "country__name")
     list_display = ("document_number", "type", "country", "status", "individual")
-    raw_id_fields = ("individual",)
+    raw_id_fields = ("individual", "copied_from", "program")
     list_filter = (
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
