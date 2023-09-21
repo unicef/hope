@@ -91,43 +91,25 @@ describe("Targeting", () => {
       });
     });
     context("Targeting Filters", () => {
-      it.skip("Targeting Search filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Status filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Programme filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Number of Households filter", () => {
-        // ToDo
-      });
+      it.skip("Targeting Search filter", () => {});
+      it.skip("Targeting Status filter", () => {});
+      it.skip("Targeting Programme filter", () => {});
+      it.skip("Targeting Number of Households filter", () => {});
     });
     context("Edit targeting", () => {
-      it.skip("Edit", () => {
-        // ToDo
-      });
+      it.skip("Edit", () => {});
     });
     context("Rebuild targeting", () => {
-      it.skip("Rebuild", () => {
-        // ToDo
-      });
+      it.skip("Rebuild", () => {});
     });
     context("Lock targeting", () => {
-      it.skip("Lock", () => {
-        // ToDo
-      });
+      it.skip("Lock", () => {});
     });
     context("Unlock targeting", () => {
-      it.skip("Unlock", () => {
-        // ToDo
-      });
+      it.skip("Unlock", () => {});
     });
     context("Mark ready targeting", () => {
-      it.skip("Mark ready", () => {
-        // ToDo
-      });
+      it.skip("Mark ready", () => {});
     });
   });
   describe.skip("E2E tests Targeting", () => {});

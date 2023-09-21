@@ -51,6 +51,7 @@ from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
+    DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
@@ -482,6 +483,7 @@ class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
+    raw_id_fields = ("group",)
 
 
 @admin.register(FlexibleAttributeGroup)
@@ -656,6 +658,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
+    raw_id_fields = ("country",)
 
     def alpha2(self, obj: Any) -> str:
         return obj.country.iso_code2
@@ -708,3 +711,8 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(MigrationStatus)
 class MigrationStatusAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(DataCollectingType)
+class DataCollectingTypeAdmin(admin.ModelAdmin):
+    list_display = ("code", "description", "created", "modified")

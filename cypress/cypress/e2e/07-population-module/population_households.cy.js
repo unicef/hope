@@ -34,27 +34,13 @@ describe("Households Module", () => {
   });
   describe("Component tests Households Population", () => {
     context("Households Population Filters", () => {
-      it.skip("Households Population Search filter", () => {
-        // ToDo
-      });
-      it.skip("Households Population Programme filter", () => {
-        // ToDo
-      });
-      it.skip("Households Population Residence Status filter", () => {
-        // ToDo
-      });
-      it.skip("Households Population Admin Level 2 filter", () => {
-        // ToDo
-      });
-      it.skip("Household Size filter", () => {
-        // ToDo
-      });
-      it.skip("Households Population Sorted by filter", () => {
-        // ToDo
-      });
-      it.skip("Households Population Status filter", () => {
-        // ToDo
-      });
+      it.skip("Households Population Search filter", () => {});
+      it.skip("Households Population Programme filter", () => {});
+      it.skip("Households Population Residence Status filter", () => {});
+      it.skip("Households Population Admin Level 2 filter", () => {});
+      it.skip("Household Size filter", () => {});
+      it.skip("Households Population Sorted by filter", () => {});
+      it.skip("Households Population Status filter", () => {});
     });
   });
   describe.skip("E2E tests Households Population", () => {});

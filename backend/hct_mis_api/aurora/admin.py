@@ -37,7 +37,8 @@ class ProjectAdmin(admin.ModelAdmin):
         self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
     ) -> Type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(business_area=obj.business_area)
+        if hasattr(obj, "business_area"):
+            form.base_fields["programme"].queryset = Program.objects.filter(business_area=obj.business_area)
         return form
 
 
@@ -46,6 +47,7 @@ class RegistrationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("name", "project", "rdi_policy", "project")
     readonly_fields = ("name", "project", "slug", "extra", "metadata")
     list_filter = ("rdi_policy", "project")
+    raw_id_fields = ("steficon_rule",)
 
 
 class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
