@@ -651,7 +651,6 @@ class GenerateReportService:
         Report.INDIVIDUALS_AND_PAYMENT: (
             "household id",
             "country of origin",
-            "administrative area 2",
             "admin1",
             "admin1 P code",
             "admin2",

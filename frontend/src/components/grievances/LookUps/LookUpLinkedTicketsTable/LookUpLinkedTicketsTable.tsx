@@ -26,7 +26,8 @@ export const LookUpLinkedTicketsTable = ({
 }: LookUpLinkedTicketsTableProps): React.ReactElement => {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
-    search: filter.search ? `ticket_id ${filter.search}` : '',
+    search: filter.search.trim(),
+    searchType: 'ticket_id',
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),

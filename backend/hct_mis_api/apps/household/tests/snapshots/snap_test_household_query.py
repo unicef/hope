@@ -504,3 +504,43 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_1
         }
     ]
 }
+
+snapshots['TestHouseholdQuery::test_query_households_search_without_search_type_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': '"Invalid search key \'None\'"',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_query_households_search_without_search_type_1_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
