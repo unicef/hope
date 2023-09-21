@@ -846,8 +846,8 @@
   "Payment Plan Title is required": "Payment Plan Title is required",
   "Payment Plan Criteria": "Payment Plan Criteria",
   "Program has to be active to create a new Target Population": "Program has to be active to create a new Target Population",
-  "Soft conflict (click on the icon to see the details)": "Soft conflict (click on the icon to see the details)",
-  "Hard conflict (click on the icon to see the details)": "Hard conflict (click on the icon to see the details)",
-  "Delivered quantity is 0 (click on the icon to see the details)": "Delivered quantity is 0 (click on the icon to see the details)",
-  "Delivered quantity is equal to entitlement quantity (click on the icon to see the details)": "Delivered quantity is equal to entitlement quantity (click on the icon to see the details)"
+  "Soft conflict": "Soft conflict",
+  "Hard conflict": "Hard conflict",
+  "Delivered quantity is 0": "Delivered quantity is 0",
+  "Delivered quantity is equal to entitlement quantity": "Delivered quantity is equal to entitlement quantity"
 }
