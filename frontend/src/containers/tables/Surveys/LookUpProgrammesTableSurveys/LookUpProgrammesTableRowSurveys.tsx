@@ -16,19 +16,19 @@ import {
   ProgramNode,
 } from '../../../../__generated__/graphql';
 
-interface LookUpProgrammesTableRowProps {
+interface LookUpProgrammesTableRowSurveysProps {
   program: ProgramNode;
   choicesData: ProgrammeChoiceDataQuery;
   radioChangeHandler: (program) => void;
   selectedProgram: string;
 }
 
-export const LookUpProgrammesTableRow = ({
+export const LookUpProgrammesTableRowSurveys = ({
   program,
   choicesData,
   radioChangeHandler,
   selectedProgram,
-}: LookUpProgrammesTableRowProps): React.ReactElement => {
+}: LookUpProgrammesTableRowSurveysProps): React.ReactElement => {
   const businessArea = useBusinessArea();
   const programDetailsPath = `/${businessArea}/programs/${program.id}`;
   const handleClick = (): void => {
