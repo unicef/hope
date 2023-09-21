@@ -27,8 +27,8 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     databases = {"default", "registration_datahub"}
 
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals($search: String) {
-      allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
+    query AllIndividuals($search: String, $searchType: String) {
+      allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, orderBy:"id") {
         edges {
           node {
             fullName
@@ -302,7 +302,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": "full_name Jenna Franklin"},
+            variables={"search": "Jenna Franklin", "searchType": "full_name"},
         )
 
     @parameterized.expand(
@@ -318,7 +318,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": "phone_no +18663567905"},
+            variables={"search": "+18663567905", "searchType": "phone_no"},
         )
 
     @parameterized.expand(
@@ -368,7 +368,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": f"national_id {self.national_id.document_number}"},
+            variables={"search": f"{self.national_id.document_number}", "searchType": "national_id"},
         )
 
     @parameterized.expand(
@@ -384,7 +384,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": f"national_passport {self.national_passport.document_number}"},
+            variables={"search": f"{self.national_passport.document_number}", "searchType": "national_passport"},
         )
 
     @parameterized.expand(
@@ -400,7 +400,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": f"tax_id {self.tax_id.document_number}"},
+            variables={"search": f"{self.tax_id.document_number}", "searchType": "tax_id"},
         )
 
     @parameterized.expand(
@@ -425,6 +425,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
+
     def test_query_individuals_by_search_disability_card_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -449,4 +450,35 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
             variables={"search": f"drivers_license {self.drivers_license.document_number}"},
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_registration_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={"search": "1", "searchType": "registration_id"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_without_search_type(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={
+                "search": "1",
+            },
         )
