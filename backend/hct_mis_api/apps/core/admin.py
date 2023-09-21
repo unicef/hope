@@ -51,6 +51,7 @@ from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
+    DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
@@ -708,3 +709,8 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(MigrationStatus)
 class MigrationStatusAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(DataCollectingType)
+class DataCollectingTypeAdmin(admin.ModelAdmin):
+    list_display = ("code", "description", "created", "modified")
