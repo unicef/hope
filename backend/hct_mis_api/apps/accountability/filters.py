@@ -116,6 +116,7 @@ class FeedbackMessageFilter(FilterSet):
 class SurveyFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
+    created_by = CharFilter(method="filter_created_by")
 
     def filter_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Survey]:
         if re.match(r"([\"\']).+\1", value):
@@ -133,12 +134,16 @@ class SurveyFilter(FilterSet):
             q_obj &= inner_query
         return queryset.filter(q_obj).distinct()
 
+    def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Survey]:
+        if value is not None:
+            return queryset.filter(created_by__id=decode_id_string(value))
+        return queryset
+
     class Meta:
         model = Survey
         fields = {
             "program": ["exact"],
             "target_population": ["exact"],
-            "created_by": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
