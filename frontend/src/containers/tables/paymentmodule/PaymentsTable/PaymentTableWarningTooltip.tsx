@@ -45,9 +45,7 @@ export const PaymentTableWarningTooltip = ({
 
   let icon = null;
   let tooltipText = '';
-  const indicatingAssistanceTooltipText = t(
-    'Indicating Assistance (click on the icon to see the details)',
-  );
+  const indicatingAssistanceTooltipText = t('Indicating Assistance ');
 
   if (deliveredQuantity === null) {
     // No icon and tooltip for null quantity
@@ -58,33 +56,55 @@ export const PaymentTableWarningTooltip = ({
 
   if (deliveredQuantity === 0) {
     icon = <RedErrorIcon onClick={handleClick} />;
-    tooltipText = t(
-      'Delivered quantity is 0 (click on the icon to see the details)',
-    );
+    tooltipText = t('Delivered quantity is 0 ');
   } else if (deliveredQuantity === entitlementQuantity) {
     icon = <GreenCheckIcon onClick={handleClick} />;
-    tooltipText = t(
-      'Delivered quantity is equal to entitlement quantity (click on the icon to see the details)',
-    );
+    tooltipText = t('Delivered quantity is equal to entitlement quantity ');
   } else if (paymentPlanSoftConflicted) {
     icon = <OrangeTriangleExclamationIcon onClick={handleClick} />;
-    tooltipText = t('Soft conflict (click on the icon to see the details)');
+    tooltipText = t('Soft conflict ');
   } else if (paymentPlanHardConflicted) {
     icon = <RedTriangleExclamationIcon onClick={handleClick} />;
-    tooltipText = t('Hard conflict (click on the icon to see the details)');
+    tooltipText = t('Hard conflict ');
   }
 
   return (
     <Box display='flex' alignItems='center'>
       {showIndicatingAssistance && (
-        <Tooltip title={indicatingAssistanceTooltipText} arrow>
+        <Tooltip
+          title={
+            <Box p={2}>
+              <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                {indicatingAssistanceTooltipText}
+              </span>
+              <br />
+              <span style={{ fontSize: '14px' }}>
+                ({t('click on the icon to see the details')})
+              </span>
+            </Box>
+          }
+          arrow
+        >
           <Box mr={1}>
             <OrangeCircleExclamationIcon onClick={handleClick} />
           </Box>
         </Tooltip>
       )}
       {icon && (
-        <Tooltip title={tooltipText} arrow>
+        <Tooltip
+          title={
+            <Box p={2}>
+              <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                {tooltipText}
+              </span>
+              <br />
+              <span style={{ fontSize: '14px' }}>
+                ({t('click on the icon to see the details')})
+              </span>
+            </Box>
+          }
+          arrow
+        >
           <Box>{icon}</Box>
         </Tooltip>
       )}
