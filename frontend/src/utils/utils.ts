@@ -285,6 +285,7 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
     [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
     [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
+    [PaymentPlanStatus.EntitlementSaved]: theme.hctPalette.orange,
     [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
