@@ -28,9 +28,28 @@ export default class ProgramDetails extends BaseComponent {
   cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
   tableLabel = 'span[data-cy="table-label"]';
   tableTitle = 'h6[data-cy="table-title"]';
-  // Texts
+  buttonAddNewProgramCycle = 'button[data-cy="button-add-new-program-cycle"]';
+  buttonDataCyButtonEditProgramCycle =
+    'button[data-cy="button-edit-program-cycle"]';
+  buttonCreate = 'button[data-cy="button-create"]';
+  buttonCancel = 'button[data-cy="button-cancel"]';
+  inputDataCyDateInputNewProgramCycleEndDate =
+    'input[data-cy="date-input-newProgramCycleEndDate"]';
+  inputDataCyDateInputNewProgramCycleStartDate =
+    'input[data-cy="date-input-newProgramCycleStartDate"]';
+  inputDataCyInputNewProgramCycleName =
+    'input[data-cy="input-newProgramCycleName"]';
 
-  // Elements
+  // Texts
+  textTableTitle = "Programme Cycles";
+  textProgrammeCycleID = "Programme Cycle ID";
+  text = "Programme Cycle Title";
+  text = "Status";
+  text = "Total Entitled Quantity";
+  text = "Total Undelivered Quantity";
+  text = "Total Delivered Quantity";
+  text = "Start Date";
+  text = "End Date";
   getButtonActivateProgram = () => cy.get(this.buttonActivateProgram);
   getButtonRemoveProgram = () => cy.get(this.buttonRemoveProgram);
   getButtonEditProgram = () => cy.get(this.buttonEditProgram);
