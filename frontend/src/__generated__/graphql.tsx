@@ -4700,6 +4700,7 @@ export enum PaymentPlanStatus {
   Open = 'OPEN',
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
+  EntitlementSaved = 'ENTITLEMENT_SAVED',
   InApproval = 'IN_APPROVAL',
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
