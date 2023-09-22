@@ -7,7 +7,7 @@ export const ButtonTooltip = ({
   title = 'Permission denied',
   buttonType = 'button',
   disabled,
-  dataCy,
+  dataCy = 'tooltip',
   ...otherProps
 }): React.ReactElement => {
   let ButtonComponent;
