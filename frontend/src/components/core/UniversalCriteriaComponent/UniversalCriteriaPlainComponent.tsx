@@ -34,6 +34,7 @@ export const UniversalCriteriaPlainComponent = (
                 variant='outlined'
                 color='primary'
                 onClick={() => setOpen(true)}
+                data-cy='add-filter-button'
               >
                 {t('Add')} &apos;Or&apos; {t('Filter')}
               </Button>
