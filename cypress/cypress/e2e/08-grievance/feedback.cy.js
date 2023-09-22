@@ -12,7 +12,6 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     feedbackPage.clickMenuButtonGrievance();
     feedbackPage.clickMenuButtonFeedback();
