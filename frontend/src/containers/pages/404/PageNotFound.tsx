@@ -1,9 +1,11 @@
 import { Box, Button } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import React from 'react';
-import styled from 'styled-components';
-import DashboardIcon from '@material-ui/icons/Dashboard';
 import { Refresh } from '@material-ui/icons';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import PageNotFoundGraphic from './404_graphic.png';
+import HopeLogo from './404_hope_logo.png';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -53,16 +55,11 @@ export const PageNotFound: React.FC = () => {
   return (
     <Container>
       <LogoContainer>
-        <img
-          src='./404_hope_logo.png'
-          alt='Hope Logo'
-          width='186'
-          height='101'
-        />
+        <img src={HopeLogo} alt='Hope Logo' width='186' height='101' />
       </LogoContainer>
       <SquareLogo>
         <img
-          src='./404_graphic.png'
+          src={PageNotFoundGraphic}
           alt='Brush with paint 404'
           width='354'
           height='293'
