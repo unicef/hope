@@ -46,7 +46,9 @@ export const ProgramCyclesActionsTableRow = ({
     <ClickableTableRow>
       <TableCell align='left'>
         {canViewProgramCycleDetails ? (
-          <BlackLink to={detailsPath}>{unicefId}</BlackLink>
+          <BlackLink data-cy='link-to-program-cycle-details' to={detailsPath}>
+            {unicefId}
+          </BlackLink>
         ) : (
           unicefId
         )}
