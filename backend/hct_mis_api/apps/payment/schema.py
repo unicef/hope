@@ -53,9 +53,15 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household, Document, \
-    IndividualRoleInHousehold, ROLE_ALTERNATE
-from hct_mis_api.apps.household.schema import HouseholdNode, DocumentNode
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+    Document,
+    Household,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.household.schema import DocumentNode, HouseholdNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxReportFilter,
@@ -392,12 +398,12 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_delivery_mechanism(self, info: Any) -> DeliveryMechanismPerPaymentPlan:
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self.parent).first()
 
-    def resolve_documents(self, info: Any) -> List[Document]:
-        query = Q()
-        query |= Q(individual=self.collector)
+    def resolve_documents(self, info: Any) -> QuerySet:
+        if self.collector:
+            return Document.objects.filter(individual=self.collector)
         if ind_role := IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first():
-            query |= Q(individual=ind_role.individual)
-        return Document.objects.filter(query)
+            return Document.objects.filter(individual=ind_role.individual)
+        return Document.objects.none()
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:
