@@ -1,4 +1,9 @@
+from urllib.parse import urlencode
+
+from django.test import Client
+
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -7,8 +12,9 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    IndividualRoleInHouseholdFactory,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, DocumentType
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, DocumentType, ROLE_ALTERNATE
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -16,7 +22,9 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     RealProgramFactory,
 )
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+
 
 PAYMENT_QUERY = """
 query Payment($id: ID!) {
@@ -39,6 +47,8 @@ query Payment($id: ID!) {
 
 
 class TestDeliveryMechanismSpecialFields(APITestCase):
+    databases = {"default", "registration_datahub"}
+
     @classmethod
     def setUpTestData(cls) -> None:
         cls.user = UserFactory()
@@ -47,18 +57,31 @@ class TestDeliveryMechanismSpecialFields(APITestCase):
         cls.target_population = TargetPopulationFactory()
         cls.program = RealProgramFactory(status="ACTIVE")
 
-        cls.household_1 = HouseholdFactory.build(business_area=cls.business_area)
-        cls.household_2 = HouseholdFactory.build(business_area=cls.business_area)
-        cls.household_3 = HouseholdFactory.build(business_area=cls.business_area)
-        cls.individual_1 = IndividualFactory(household=cls.household_1, role=ROLE_PRIMARY)
-        cls.individual_2 = IndividualFactory(household=cls.household_2, role=ROLE_PRIMARY)
-        cls.individual_3 = IndividualFactory(household=cls.household_3, role=ROLE_PRIMARY)
-        cls.household_1.head_of_household = cls.individual_1
-        cls.household_2.head_of_household = cls.individual_2
-        cls.household_3.head_of_household = cls.individual_3
-        cls.household_1.save()
-        cls.household_2.save()
-        cls.household_3.save()
+        cls.registration_data_import = RegistrationDataImportFactory(imported_by=cls.user)
+
+        cls.individual_1 = IndividualFactory(household=None)
+        cls.individual_2 = IndividualFactory(household=None)
+        cls.individual_3 = IndividualFactory(household=None)
+
+        cls.household_1 = HouseholdFactory(
+            registration_data_import=cls.registration_data_import, head_of_household=cls.individual_1
+        )
+        cls.household_2 = HouseholdFactory(
+            registration_data_import=cls.registration_data_import, head_of_household=cls.individual_2
+        )
+        cls.household_3 = HouseholdFactory(
+            registration_data_import=cls.registration_data_import, head_of_household=cls.individual_3
+        )
+
+        cls.individual_1.household = cls.household_1
+        cls.individual_2.household = cls.household_2
+        cls.individual_3.household = cls.household_3
+        cls.individual_1.save()
+        cls.individual_2.save()
+        cls.individual_3.save()
+
+        IndividualRoleInHouseholdFactory(role=ROLE_PRIMARY, individual=cls.individual_1, household=cls.household_1)
+        IndividualRoleInHouseholdFactory(role=ROLE_ALTERNATE, individual=cls.individual_3, household=cls.household_3)
 
         DocumentTypeFactory(key="national_id")
         DocumentTypeFactory(key="national_passport")
@@ -89,27 +112,20 @@ class TestDeliveryMechanismSpecialFields(APITestCase):
         cls.payment_plan_3 = PaymentPlanFactory(
             created_by=cls.user, target_population=cls.target_population, program=cls.program
         )
-        cls.payment_plan_4 = PaymentPlanFactory(
-            created_by=cls.user, target_population=cls.target_population, program=cls.program
-        )
 
         cls.payment_1 = PaymentFactory(
-            payment_plan=cls.payment_plan_1, household=cls.household_1, head_of_household=cls.individual_1
+            parent=cls.payment_plan_1, household=cls.household_1, collector=cls.individual_1
         )
         cls.payment_2 = PaymentFactory(
-            payment_plan=cls.payment_plan_2, household=cls.household_2, head_of_household=cls.individual_2
+            parent=cls.payment_plan_2, household=cls.household_2, collector=cls.individual_2
         )
         cls.payment_3 = PaymentFactory(
-            payment_plan=cls.payment_plan_3, household=cls.household_3, head_of_household=cls.individual_3
-        )
-        cls.payment_4 = PaymentFactory(
-            payment_plan=cls.payment_plan_4, household=cls.household_4, head_of_household=cls.individual_4
+            parent=cls.payment_plan_3, household=cls.household_3, collector=cls.individual_3
         )
 
         cls.financial_provider_1 = FinancialServiceProviderFactory()
         cls.financial_provider_2 = FinancialServiceProviderFactory()
         cls.financial_provider_3 = FinancialServiceProviderFactory()
-        cls.financial_provider_4 = FinancialServiceProviderFactory()
 
         cls.delivery_mechanism_1 = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan_1,
@@ -127,30 +143,30 @@ class TestDeliveryMechanismSpecialFields(APITestCase):
             bank_name="ing",
             bank_account_number="12345678900987654",
         )
-        cls.delivery_mechanism_4 = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=cls.payment_plan_4, financial_service_provider=cls.financial_provider_4
-        )
-
-    def test_delivery_mechanism_clears_data_between_type_changes(self) -> None:
-        pass
 
     def test_delivery_mechanism_contain_card_number(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_VIEW_DETAILS], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=PAYMENT_QUERY,
             context={"user": self.user},
-            variables={"id": encode_id_base64(self.payment_plan_1.id, "Payment")},
+            variables={"id": encode_id_base64(self.payment_1.id, "Payment")},
         )
 
     def test_delivery_mechanism_contain_mobile_phone_number(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_VIEW_DETAILS], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=PAYMENT_QUERY,
             context={"user": self.user},
-            variables={"id": encode_id_base64(self.payment_plan_2.id, "Payment")},
+            variables={"id": encode_id_base64(self.payment_2.id, "Payment")},
         )
 
     def test_delivery_mechanism_contain_bank_data(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_VIEW_DETAILS], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=PAYMENT_QUERY,
             context={"user": self.user},
-            variables={"id": encode_id_base64(self.payment_plan_3.id, "Payment")},
+            variables={"id": encode_id_base64(self.payment_3.id, "Payment")},
         )
