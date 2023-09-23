@@ -1,7 +1,3 @@
-from urllib.parse import urlencode
-
-from django.test import Client
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -14,7 +10,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, DocumentType, ROLE_ALTERNATE
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY, DocumentType
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -24,7 +20,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-
 
 PAYMENT_QUERY = """
 query Payment($id: ID!) {
@@ -113,15 +108,9 @@ class TestDeliveryMechanismSpecialFields(APITestCase):
             created_by=cls.user, target_population=cls.target_population, program=cls.program
         )
 
-        cls.payment_1 = PaymentFactory(
-            parent=cls.payment_plan_1, household=cls.household_1, collector=cls.individual_1
-        )
-        cls.payment_2 = PaymentFactory(
-            parent=cls.payment_plan_2, household=cls.household_2, collector=cls.individual_2
-        )
-        cls.payment_3 = PaymentFactory(
-            parent=cls.payment_plan_3, household=cls.household_3, collector=cls.individual_3
-        )
+        cls.payment_1 = PaymentFactory(parent=cls.payment_plan_1, household=cls.household_1, collector=cls.individual_1)
+        cls.payment_2 = PaymentFactory(parent=cls.payment_plan_2, household=cls.household_2, collector=cls.individual_2)
+        cls.payment_3 = PaymentFactory(parent=cls.payment_plan_3, household=cls.household_3, collector=cls.individual_3)
 
         cls.financial_provider_1 = FinancialServiceProviderFactory()
         cls.financial_provider_2 = FinancialServiceProviderFactory()
