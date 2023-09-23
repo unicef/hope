@@ -29,6 +29,8 @@ class TestCreateProgram(APITestCase):
           dataCollectingType {
             code
             description
+            active
+            individualFiltersAvailable
           }
         }
         validationErrors
