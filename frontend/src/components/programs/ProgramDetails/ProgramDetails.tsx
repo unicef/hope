@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '../../../utils/utils';
 import {
+  DataCollectionTypeChoiceDataQuery,
   ProgrammeChoiceDataQuery,
   ProgramNode,
 } from '../../../__generated__/graphql';
@@ -88,6 +89,12 @@ export function ProgramDetails({
             <LabelizedField
               label={t('Scope')}
               value={programScopeChoicesDict[program.scope]}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Data Collecting Type')}
+              value={program.dataCollectingType.description}
             />
           </Grid>
           <Grid item xs={4}>
