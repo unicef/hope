@@ -15,8 +15,10 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
+                    'active': True,
                     'code': '1',
-                    'description': 'Partial individuals collected'
+                    'description': 'Partial individuals collected',
+                    'individualFiltersAvailable': True
                 },
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
