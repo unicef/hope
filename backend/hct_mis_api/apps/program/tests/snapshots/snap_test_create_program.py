@@ -14,6 +14,10 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'budget': '20000000',
                 'cashPlus': True,
+                'dataCollectingType': {
+                    'code': '1',
+                    'description': 'Partial individuals collected'
+                },
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
