@@ -13204,7 +13204,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'code' | 'description'>
+      & Pick<DataCollectingTypeNode, 'code' | 'description' | 'active' | 'individualFiltersAvailable'>
     )> }
   )> }
 );
@@ -25086,6 +25086,8 @@ export const ProgramDocument = gql`
     dataCollectingType {
       code
       description
+      active
+      individualFiltersAvailable
     }
   }
 }
