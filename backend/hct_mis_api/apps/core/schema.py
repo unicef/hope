@@ -34,7 +34,7 @@ from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
+    FlexibleAttributeGroup, DataCollectingType,
 )
 
 if TYPE_CHECKING:
@@ -290,6 +290,13 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
     return reduce_assets_list(assets, only_deployed=only_deployed)
 
 
+class DataCollectingTypeNode(DjangoObjectType):
+    class Meta:
+        model = DataCollectingType
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class Query(graphene.ObjectType):
     business_area = graphene.Field(
         BusinessAreaNode,
@@ -323,6 +330,8 @@ class Query(graphene.ObjectType):
     all_languages = ConnectionField(
         LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
+    data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
+    data_collection_type_choices = graphene.List(ChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -380,3 +389,12 @@ class Query(graphene.ObjectType):
 
     def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
         return Languages.filter_by_code(code)
+
+    def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        data_collecting_types = DataCollectingType.objects.extra(select={"cast_code": "CAST(code AS INTEGER)"}).values("code", "description").order_by("cast_code")
+        result = []
+        logger.info(data_collecting_types)
+        for data_collection_type in data_collecting_types:
+            logger.info(data_collection_type)
+            result.append({"name": data_collection_type["description"], "value": data_collection_type["code"]})
+        return result
