@@ -71,6 +71,14 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
 
     # TODO: remove both after data migration
     objects = OnlyOriginalManager()
@@ -148,6 +156,14 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
 
     # TODO: remove both after data migration
     objects = OnlyOriginalManager()

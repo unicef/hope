@@ -937,13 +937,6 @@ class GrievanceDocument(UUIDModel):
     file_size = models.IntegerField(null=True)
     content_type = models.CharField(max_length=100, null=False)
 
-    is_original = models.BooleanField(default=True)
-    is_migration_handled = models.BooleanField(default=False)
-
-    # TODO: remove both after data migration
-    objects = OnlyOriginalManager()
-    original_and_repr_objects = OriginalAndRepresentationsManager()
-
     @property
     def file_name(self) -> str:
         return self.file.name

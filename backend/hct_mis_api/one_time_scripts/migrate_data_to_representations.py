@@ -161,7 +161,7 @@ def copy_household_representation(
 
 def copy_household(household: Household, program: Program, individuals: list[Individual]) -> Household:
     original_household_id = household.id
-    original_head_of_household_id = household.head_of_household.pk
+    original_head_of_household = household.head_of_household
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
@@ -175,10 +175,14 @@ def copy_household(household: Household, program: Program, individuals: list[Ind
     for individual in individuals:
         individuals_to_create.append(copy_individual_representation(program, individual))
 
-    household.head_of_household = get_individual_representation_per_program_by_old_individual_id(
+    head_of_household = get_individual_representation_per_program_by_old_individual_id(
         program=program,
-        old_individual_id=original_head_of_household_id,
+        old_individual_id=original_head_of_household.id,
     )
+    if head_of_household:
+        household.head_of_household = head_of_household
+    else:
+        household.head_of_household = copy_individual_representation(program, original_head_of_household)
 
     household.save()
     for individual in individuals_to_create:  # type: ignore
