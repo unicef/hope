@@ -13187,6 +13187,10 @@ export type AllProgramsForChoicesQuery = (
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
+        & { dataCollectingType: Maybe<(
+          { __typename?: 'DataCollectingTypeNode' }
+          & Pick<DataCollectingTypeNode, 'individualFiltersAvailable'>
+        )> }
       )> }
     )>> }
   )> }
@@ -25001,6 +25005,9 @@ export const AllProgramsForChoicesDocument = gql`
         id
         name
         individualDataNeeded
+        dataCollectingType {
+          individualFiltersAvailable
+        }
       }
     }
   }

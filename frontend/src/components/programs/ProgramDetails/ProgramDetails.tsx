@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '../../../utils/utils';
 import {
-  DataCollectionTypeChoiceDataQuery,
   ProgrammeChoiceDataQuery,
   ProgramNode,
 } from '../../../__generated__/graphql';
