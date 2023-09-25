@@ -40,7 +40,12 @@ export const ProgramCyclesTableRow = ({
   };
 
   return (
-    <ClickableTableRow onClick={handleRowClick} hover role='checkbox'>
+    <ClickableTableRow
+      data-cy='program-cycle-table-row'
+      onClick={handleRowClick}
+      hover
+      role='checkbox'
+    >
       <TableCell align='left'>
         {canViewProgramCycleDetails ? (
           <BlackLink to={detailsPath}>{unicefId}</BlackLink>
