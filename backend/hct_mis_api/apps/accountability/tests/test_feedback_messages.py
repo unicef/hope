@@ -70,7 +70,7 @@ class TestFeedbackMessages(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE],
+                [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE],
             ),
             ("without_permission", []),
         ]
@@ -92,7 +92,7 @@ class TestFeedbackMessages(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS],
+                [Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
             ),
             ("without_permission", []),
         ]
