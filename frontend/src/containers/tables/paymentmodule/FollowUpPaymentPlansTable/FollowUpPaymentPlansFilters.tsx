@@ -79,6 +79,7 @@ export const FollowUpPaymentPlansFilters = ({
           <SearchTextField
             label={t('Search')}
             value={filter.search}
+            data-cy='filter-search'
             fullWidth
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
@@ -90,6 +91,7 @@ export const FollowUpPaymentPlansFilters = ({
             label={t('Status')}
             multiple
             value={filter.status}
+            data-cy='filter-status'
             fullWidth
           >
             {statusChoicesData.paymentPlanStatusChoices.map((item) => {
@@ -106,6 +108,7 @@ export const FollowUpPaymentPlansFilters = ({
             id='totalEntitledQuantityFromFilter'
             topLabel={t('Entitled Quantity')}
             value={filter.totalEntitledQuantityFrom}
+            data-cy='filter-total-entitled-quantity-from'
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityFrom', e.target.value)
@@ -116,6 +119,7 @@ export const FollowUpPaymentPlansFilters = ({
           <NumberTextField
             id='totalEntitledQuantityToFilter'
             value={filter.totalEntitledQuantityTo}
+            data-cy='filter-total-entitled-quantity-to'
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityTo', e.target.value)
@@ -131,6 +135,7 @@ export const FollowUpPaymentPlansFilters = ({
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
+            data-cy='filter-dispersion-date-from'
             onChange={(date) => {
               if (
                 filter.dispersionEndDate &&
@@ -154,6 +159,7 @@ export const FollowUpPaymentPlansFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
+            data-cy='filter-dispersion-date-to'
             onChange={(date) =>
               handleFilterChange(
                 'dispersionEndDate',

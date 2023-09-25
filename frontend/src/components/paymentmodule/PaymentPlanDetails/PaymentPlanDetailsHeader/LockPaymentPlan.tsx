@@ -85,7 +85,12 @@ export const LockPaymentPlan = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setLockDialogOpen(false)}>CANCEL</Button>
+            <Button
+              data-cy='button-cancel'
+              onClick={() => setLockDialogOpen(false)}
+            >
+              CANCEL
+            </Button>
             <LoadingButton
               loading={loadingLock}
               type='submit'

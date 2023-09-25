@@ -123,7 +123,10 @@ export const ApprovePaymentPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setApproveDialogOpen(false)}>
+                  <Button
+                    data-cy='button-cancel'
+                    onClick={() => setApproveDialogOpen(false)}
+                  >
                     CANCEL
                   </Button>
                   <LoadingButton

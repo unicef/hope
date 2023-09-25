@@ -121,7 +121,10 @@ export const AuthorizePaymentPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setAuthorizeDialogOpen(false)}>
+                  <Button
+                    data-cy='button-cancel'
+                    onClick={() => setAuthorizeDialogOpen(false)}
+                  >
                     CANCEL
                   </Button>
                   <LoadingButton

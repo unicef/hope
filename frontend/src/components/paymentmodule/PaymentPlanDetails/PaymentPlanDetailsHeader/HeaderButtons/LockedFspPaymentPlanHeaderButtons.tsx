@@ -42,6 +42,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             variant='outlined'
             color='primary'
             onClick={() => unlock()}
+            data-cy='button-unlock-fsp'
           >
             {t('Unlock FSP')}
           </LoadingButton>
