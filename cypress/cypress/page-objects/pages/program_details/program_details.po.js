@@ -43,13 +43,13 @@ export default class ProgramDetails extends BaseComponent {
   // Texts
   textTableTitle = "Programme Cycles";
   textProgrammeCycleID = "Programme Cycle ID";
-  text = "Programme Cycle Title";
-  text = "Status";
-  text = "Total Entitled Quantity";
-  text = "Total Undelivered Quantity";
-  text = "Total Delivered Quantity";
-  text = "Start Date";
-  text = "End Date";
+  textProgrammeCycleTitle = "Programme Cycle Title";
+  textStatus = "Status";
+  textTotalEntitledQuantity = "Total Entitled Quantity";
+  textTotalUndeliveredQuantity = "Total Undelivered Quantity";
+  textTotalDeliveredQuantity = "Total Delivered Quantity";
+  textStartDate = "Start Date";
+  textEndDate = "End Date";
   getButtonActivateProgram = () => cy.get(this.buttonActivateProgram);
   getButtonRemoveProgram = () => cy.get(this.buttonRemoveProgram);
   getButtonEditProgram = () => cy.get(this.buttonEditProgram);
