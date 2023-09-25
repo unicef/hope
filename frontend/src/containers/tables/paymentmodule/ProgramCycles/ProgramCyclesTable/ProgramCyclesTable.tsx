@@ -30,6 +30,8 @@ export const ProgramCyclesTable = ({
     status: filter.status,
     startDate: filter.startDate,
     endDate: filter.endDate,
+    totalDeliveredQuantityUsdFrom: filter.totalDeliveredQuantityUsdFrom || null,
+    totalDeliveredQuantityUsdTo: filter.totalDeliveredQuantityUsdTo || null,
   };
 
   const permissions = usePermissions();

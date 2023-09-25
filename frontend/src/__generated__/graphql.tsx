@@ -5066,14 +5066,14 @@ export type ProgramCycleNode = Node & {
   startDate: Scalars['Date'],
   endDate?: Maybe<Scalars['Date']>,
   program: ProgramNode,
-  paymentplanSet: PaymentPlanNodeConnection,
-  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
-  totalEntitledQuantity?: Maybe<Scalars['Float']>,
-  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
+  paymentPlans: PaymentPlanNodeConnection,
+  totalDeliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityUsd?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
 };
 
 
-export type ProgramCycleNodePaymentplanSetArgs = {
+export type ProgramCycleNodePaymentPlansArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6201,6 +6201,8 @@ export type QueryAllProgramCyclesArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
+  totalDeliveredQuantityUsdFrom?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantityUsdTo?: Maybe<Scalars['Float']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -10337,7 +10339,7 @@ export type CreateProgramCycleMutation = (
           { __typename?: 'ProgramCycleNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'ProgramCycleNode' }
-            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantityUsd' | 'totalUndeliveredQuantityUsd' | 'startDate' | 'endDate'>
           )> }
         )>> }
       ) }
@@ -10363,7 +10365,7 @@ export type DeleteProgramCycleMutation = (
           { __typename?: 'ProgramCycleNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'ProgramCycleNode' }
-            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantityUsd' | 'totalUndeliveredQuantityUsd' | 'startDate' | 'endDate'>
           )> }
         )>> }
       ) }
@@ -10389,7 +10391,7 @@ export type UpdateProgramCycleMutation = (
           { __typename?: 'ProgramCycleNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'ProgramCycleNode' }
-            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+            & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantityUsd' | 'totalUndeliveredQuantityUsd' | 'startDate' | 'endDate'>
           )> }
         )>> }
       ) }
@@ -13398,7 +13400,7 @@ export type ProgramQuery = (
         { __typename?: 'ProgramCycleNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'ProgramCycleNode' }
-          & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+          & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantityUsd' | 'totalUndeliveredQuantityUsd' | 'startDate' | 'endDate'>
         )> }
       )>> }
     ) }
@@ -13437,7 +13439,9 @@ export type AllProgramCyclesQueryVariables = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  totalDeliveredQuantityUsdFrom?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantityUsdTo?: Maybe<Scalars['Float']>
 };
 
 
@@ -13454,7 +13458,7 @@ export type AllProgramCyclesQuery = (
       & Pick<ProgramCycleNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramCycleNode' }
-        & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
+        & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantityUsd' | 'totalUndeliveredQuantityUsd' | 'startDate' | 'endDate'>
       )> }
     )>> }
   )> }
@@ -13469,7 +13473,7 @@ export type ProgramCycleQuery = (
   { __typename?: 'Query' }
   & { programCycle: Maybe<(
     { __typename?: 'ProgramCycleNode' }
-    & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'isRemoved' | 'createdAt' | 'updatedAt' | 'lastSyncAt' | 'version' | 'name' | 'status' | 'startDate' | 'endDate' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalEntitledQuantity'>
+    & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'isRemoved' | 'createdAt' | 'updatedAt' | 'lastSyncAt' | 'version' | 'name' | 'status' | 'startDate' | 'endDate' | 'totalDeliveredQuantityUsd' | 'totalUndeliveredQuantityUsd' | 'totalEntitledQuantityUsd'>
     & { program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'startDate' | 'endDate'>
@@ -17620,9 +17624,9 @@ export const CreateProgramCycleDocument = gql`
             unicefId
             name
             status
-            totalEntitledQuantity
-            totalUndeliveredQuantity
-            totalUndeliveredQuantity
+            totalEntitledQuantityUsd
+            totalUndeliveredQuantityUsd
+            totalUndeliveredQuantityUsd
             startDate
             endDate
           }
@@ -17686,9 +17690,9 @@ export const DeleteProgramCycleDocument = gql`
             unicefId
             name
             status
-            totalEntitledQuantity
-            totalUndeliveredQuantity
-            totalUndeliveredQuantity
+            totalEntitledQuantityUsd
+            totalUndeliveredQuantityUsd
+            totalUndeliveredQuantityUsd
             startDate
             endDate
           }
@@ -17752,9 +17756,9 @@ export const UpdateProgramCycleDocument = gql`
             unicefId
             name
             status
-            totalEntitledQuantity
-            totalUndeliveredQuantity
-            totalUndeliveredQuantity
+            totalEntitledQuantityUsd
+            totalUndeliveredQuantityUsd
+            totalUndeliveredQuantityUsd
             startDate
             endDate
           }
@@ -25577,9 +25581,9 @@ export const ProgramDocument = gql`
           unicefId
           name
           status
-          totalEntitledQuantity
-          totalUndeliveredQuantity
-          totalUndeliveredQuantity
+          totalEntitledQuantityUsd
+          totalUndeliveredQuantityUsd
+          totalUndeliveredQuantityUsd
           startDate
           endDate
         }
@@ -25698,8 +25702,8 @@ export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeC
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
 export const AllProgramCyclesDocument = gql`
-    query AllProgramCycles($before: String, $after: String, $first: Int, $last: Int, $search: String, $status: [String], $startDate: Date, $endDate: Date, $orderBy: String) {
-  allProgramCycles(before: $before, after: $after, first: $first, last: $last, search: $search, status: $status, startDate: $startDate, endDate: $endDate, orderBy: $orderBy) {
+    query AllProgramCycles($before: String, $after: String, $first: Int, $last: Int, $search: String, $status: [String], $startDate: Date, $endDate: Date, $orderBy: String, $totalDeliveredQuantityUsdFrom: Float, $totalDeliveredQuantityUsdTo: Float) {
+  allProgramCycles(before: $before, after: $after, first: $first, last: $last, search: $search, status: $status, startDate: $startDate, endDate: $endDate, orderBy: $orderBy, totalDeliveredQuantityUsdFrom: $totalDeliveredQuantityUsdFrom, totalDeliveredQuantityUsdTo: $totalDeliveredQuantityUsdTo) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -25715,9 +25719,9 @@ export const AllProgramCyclesDocument = gql`
         unicefId
         name
         status
-        totalEntitledQuantity
-        totalUndeliveredQuantity
-        totalUndeliveredQuantity
+        totalEntitledQuantityUsd
+        totalUndeliveredQuantityUsd
+        totalUndeliveredQuantityUsd
         startDate
         endDate
       }
@@ -25764,6 +25768,8 @@ export function withAllProgramCycles<TProps, TChildProps = {}>(operationOptions?
  *      startDate: // value for 'startDate'
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
+ *      totalDeliveredQuantityUsdFrom: // value for 'totalDeliveredQuantityUsdFrom'
+ *      totalDeliveredQuantityUsdTo: // value for 'totalDeliveredQuantityUsdTo'
  *   },
  * });
  */
@@ -25790,9 +25796,9 @@ export const ProgramCycleDocument = gql`
     status
     startDate
     endDate
-    totalDeliveredQuantity
-    totalUndeliveredQuantity
-    totalEntitledQuantity
+    totalDeliveredQuantityUsd
+    totalUndeliveredQuantityUsd
+    totalEntitledQuantityUsd
     program {
       id
       startDate
@@ -31443,10 +31449,10 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
-  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramCycleNodePaymentplanSetArgs>,
-  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramCycleNodePaymentPlansArgs>,
+  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
 };
 
 export type ProgramCycleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNodeConnection'] = ResolversParentTypes['ProgramCycleNodeConnection']> = {

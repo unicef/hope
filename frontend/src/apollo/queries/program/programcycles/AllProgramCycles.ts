@@ -11,6 +11,8 @@ export const ALL_PROGRAM_CYCLES_QUERY = gql`
     $startDate: Date
     $endDate: Date
     $orderBy: String
+    $totalDeliveredQuantityUsdFrom: Float
+    $totalDeliveredQuantityUsdTo: Float
   ) {
     allProgramCycles(
       before: $before
@@ -22,6 +24,8 @@ export const ALL_PROGRAM_CYCLES_QUERY = gql`
       startDate: $startDate
       endDate: $endDate
       orderBy: $orderBy
+      totalDeliveredQuantityUsdFrom: $totalDeliveredQuantityUsdFrom
+      totalDeliveredQuantityUsdTo: $totalDeliveredQuantityUsdTo
     ) {
       pageInfo {
         hasNextPage
@@ -38,9 +42,9 @@ export const ALL_PROGRAM_CYCLES_QUERY = gql`
           unicefId
           name
           status
-          totalEntitledQuantity
-          totalUndeliveredQuantity
-          totalUndeliveredQuantity
+          totalEntitledQuantityUsd
+          totalUndeliveredQuantityUsd
+          totalUndeliveredQuantityUsd
           startDate
           endDate
         }

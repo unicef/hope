@@ -3344,10 +3344,10 @@ type ProgramCycleNode implements Node {
   startDate: Date!
   endDate: Date
   program: ProgramNode!
-  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  totalDeliveredQuantity: Float
-  totalEntitledQuantity: Float
-  totalUndeliveredQuantity: Float
+  paymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  totalDeliveredQuantityUsd: Float
+  totalEntitledQuantityUsd: Float
+  totalUndeliveredQuantityUsd: Float
 }
 
 type ProgramCycleNodeConnection {
@@ -3556,7 +3556,7 @@ type Query {
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
   allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
   programCycle(id: ID!): ProgramCycleNode
-  allProgramCycles(offset: Int, before: String, after: String, first: Int, last: Int, search: String, status: [String], startDate: Date, endDate: Date, orderBy: String): ProgramCycleNodeConnection
+  allProgramCycles(offset: Int, before: String, after: String, first: Int, last: Int, search: String, status: [String], startDate: Date, endDate: Date, totalDeliveredQuantityUsdFrom: Float, totalDeliveredQuantityUsdTo: Float, orderBy: String): ProgramCycleNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode

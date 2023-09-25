@@ -5605,6 +5605,26 @@
                 "defaultValue": null
               },
               {
+                "name": "totalDeliveredQuantityUsdFrom",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "totalDeliveredQuantityUsdTo",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -27774,7 +27794,7 @@
             "deprecationReason": null
           },
           {
-            "name": "paymentplanSet",
+            "name": "paymentPlans",
             "description": null,
             "args": [
               {
@@ -27841,7 +27861,7 @@
             "deprecationReason": null
           },
           {
-            "name": "totalDeliveredQuantity",
+            "name": "totalDeliveredQuantityUsd",
             "description": null,
             "args": [],
             "type": {
@@ -27853,7 +27873,7 @@
             "deprecationReason": null
           },
           {
-            "name": "totalEntitledQuantity",
+            "name": "totalEntitledQuantityUsd",
             "description": null,
             "args": [],
             "type": {
@@ -27865,7 +27885,7 @@
             "deprecationReason": null
           },
           {
-            "name": "totalUndeliveredQuantity",
+            "name": "totalUndeliveredQuantityUsd",
             "description": null,
             "args": [],
             "type": {

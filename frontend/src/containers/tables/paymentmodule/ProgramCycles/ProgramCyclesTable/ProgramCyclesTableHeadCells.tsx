@@ -27,10 +27,10 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Total Entitled Quantity',
-    id: 'total_entitled_quantity',
+    label: 'Total Delivered Quantity (USD)',
+    id: 'total_delivered_quantity_usd',
     numeric: true,
-    dataCy: 'total_entitled_quantity',
+    dataCy: 'total_delivered_quantity',
   },
   {
     disablePadding: false,
