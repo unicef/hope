@@ -52,7 +52,10 @@ export const DeletePaymentPlan = ({
   return (
     <>
       <Box p={2}>
-        <IconButton onClick={() => setDeleteDialogOpen(true)}>
+        <IconButton
+          data-cy='button-delete-payment-plan'
+          onClick={() => setDeleteDialogOpen(true)}
+        >
           <Delete />
         </IconButton>
       </Box>
@@ -75,7 +78,12 @@ export const DeletePaymentPlan = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)}>CANCEL</Button>
+            <Button
+              data-cy='button-cancel'
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              CANCEL
+            </Button>
             <LoadingButton
               loading={loadingDelete}
               type='submit'

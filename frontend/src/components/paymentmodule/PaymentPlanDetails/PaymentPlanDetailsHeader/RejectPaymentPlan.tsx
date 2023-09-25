@@ -66,7 +66,10 @@ export const RejectPaymentPlan = ({
         <>
           {rejectDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
-            <ErrorButton onClick={() => setRejectDialogOpen(true)}>
+            <ErrorButton
+              data-cy='button-reject-payment-plan'
+              onClick={() => setRejectDialogOpen(true)}
+            >
               {t('Reject')}
             </ErrorButton>
           </Box>
@@ -106,7 +109,10 @@ export const RejectPaymentPlan = ({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setRejectDialogOpen(false)}>
+                <Button
+                  data-cy='button-cancel'
+                  onClick={() => setRejectDialogOpen(false)}
+                >
                   CANCEL
                 </Button>
                 <LoadingButton

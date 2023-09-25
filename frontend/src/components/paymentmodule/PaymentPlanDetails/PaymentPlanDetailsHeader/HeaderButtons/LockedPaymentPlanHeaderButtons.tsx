@@ -37,6 +37,7 @@ export const LockedPaymentPlanHeaderButtons = ({
             variant='outlined'
             color='primary'
             onClick={() => unlock()}
+            data-cy='button-unlock-plan'
           >
             {t('Unlock')}
           </LoadingButton>

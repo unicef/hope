@@ -49,6 +49,7 @@ export const OpenPaymentPlanHeaderButtons = ({
             startIcon={<EditRounded />}
             component={Link}
             to={detailsPath}
+            data-cy='button-edit-payment-plan'
           >
             {t('Edit')}
           </Button>
