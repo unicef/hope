@@ -24,7 +24,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
@@ -288,6 +288,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.household_2, cls.individual_2 = cls.create_household_and_individual()
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
 
+        cls.data_collecting_type = DataCollectingType.objects.create(
+            code="1", description="Full individual collected", active=True
+        )
+
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
         create_programme_response = self.graphql_request(
@@ -308,6 +312,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                     "cashPlus": True,
                     "individualDataNeeded": False,
                     "businessAreaSlug": self.business_area.slug,
+                    "dataCollectingTypeCode": self.data_collecting_type.code,
                 }
             },
         )
