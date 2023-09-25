@@ -30,6 +30,7 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.Open]: 'Open',
   [PaymentPlanStatus.Locked]: 'Locked',
   [PaymentPlanStatus.LockedFsp]: 'FSP Locked',
+  [PaymentPlanStatus.EntitlementSaved]: 'Entitlement Saved',
   [PaymentPlanStatus.InApproval]: 'In Approval',
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
