@@ -8,7 +8,7 @@ export default class BaseComponent {
   navProgrammeDetails = 'a[data-cy="nav-Programme Details"]';
   navTargeting = 'a[data-cy="nav-Targeting"]';
   navCashAssist = 'div[data-cy="nav-Cash Assist"]';
-  navPaymentModule = 'a[data-cy="nav-Payment Module"]';
+  navPaymentModule = 'div[data-cy="nav-Payment Module"]';
   navProgrammeCycles = 'a[data-cy="nav-Programme Cycles"]';
   navPaymentPlans = 'a[data-cy="nav-Payment Plans"]';
   navFollowUpPaymentPlans = 'a[data-cy="nav-Follow-up Payment Plans"]';

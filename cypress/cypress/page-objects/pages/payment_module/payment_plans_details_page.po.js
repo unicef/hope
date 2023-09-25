@@ -1,6 +1,6 @@
 import BaseComponent from "../../base.component";
 
-export default class ProgramCycleDetailsPage extends BaseComponent {
+export default class ProgramPlanDetailsPage extends BaseComponent {
   // Locators
   tableTitle = 'h6[data-cy="table-title"]';
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
@@ -15,7 +15,7 @@ export default class ProgramCycleDetailsPage extends BaseComponent {
   dataCyDeliveredQuantityCell = 'div[data-cy="delivered-quantity-cell"]';
   buttonImport = 'button[data-cy="button-import"]';
   buttonDataCyButtonSetUpPaymentInstructions =
-    'button[data-cy="button-set-up-payment-instructions"]';
+    'a[data-cy="button-set-up-payment-instructions"]';
   labelTargetedIndividuals = 'div[data-cy="label-Targeted Individuals"]';
   labelTotalNumberOfHouseholds =
     'div[data-cy="label-Total Number of Households"]';
@@ -62,7 +62,7 @@ export default class ProgramCycleDetailsPage extends BaseComponent {
     cy.get(this.dataCyDeliveredQuantityCell);
   getButtonImport = () => cy.get(this.buttonImport);
   getButtonDataCyButtonSetUpPaymentInstructions = () =>
-    cy.get(this.buttonDataCyButtonSetUpPaymentInstructions);
+    cy.get(this.buttonDataCyButtonSetUpPaymentInstructions).scrollIntoView();
   getLabelTargetedIndividuals = () => cy.get(this.labelTargetedIndividuals);
   getLabelTotalNumberOfHouseholds = () =>
     cy.get(this.labelTotalNumberOfHouseholds);
