@@ -34,11 +34,11 @@ class StorageFileFactory(DjangoModelFactory):
 
 def generate_data_collecting_types() -> None:
     data_collecting_types = [
-        {"code": "0", "description": "Partial individuals collected"},
-        {"code": "1", "description": "Full individual collected"},
-        {"code": "2", "description": "Size only collected"},
-        {"code": "3", "description": "No individual data"},
-        {"code": "99", "description": "Unknown"},
+        {"label": "Partial", "code": "0", "description": "Partial individuals collected"},
+        {"label": "Full", "code": "1", "description": "Full individual collected"},
+        {"label": "Size only", "code": "2", "description": "Size only collected"},
+        {"label": "No individual data", "code": "3", "description": "No individual data"},
+        {"label": "Unknown", "code": "99", "description": "Unknown"},
     ]
 
     for data_dict in data_collecting_types:
