@@ -96,10 +96,10 @@ export const CommunicationFilters = ({
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            label='User'
+            label={t('Created by')}
             filter={filter}
-            name='userId'
-            value={filter.userId}
+            name='createdBy'
+            value={filter.createdBy}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
