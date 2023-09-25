@@ -947,6 +947,7 @@ export const removeBracketsAndQuotes = (str: string): string => {
 type DateType = 'startOfDay' | 'endOfDay';
 
 export const dateToIsoString = (date: Date, type: DateType): string => {
+  if (!date) return null;
   if (type === 'startOfDay') {
     return moment(date)
       .startOf('day')
