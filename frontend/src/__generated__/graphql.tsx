@@ -13451,6 +13451,7 @@ export type AllProgramCyclesQuery = (
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'ProgramCycleNodeEdge' }
+      & Pick<ProgramCycleNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramCycleNode' }
         & Pick<ProgramCycleNode, 'id' | 'unicefId' | 'name' | 'status' | 'totalEntitledQuantity' | 'totalUndeliveredQuantity' | 'startDate' | 'endDate'>
@@ -25708,6 +25709,7 @@ export const AllProgramCyclesDocument = gql`
     totalCount
     edgeCount
     edges {
+      cursor
       node {
         id
         unicefId
