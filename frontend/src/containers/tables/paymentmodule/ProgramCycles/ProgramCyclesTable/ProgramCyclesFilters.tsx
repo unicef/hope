@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -8,7 +8,6 @@ import {
 } from '../../../../../__generated__/graphql';
 import { ClearApplyButtons } from '../../../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../../../components/core/ContainerWithBorder';
-import { Missing } from '../../../../../components/core/Missing';
 import { NumberTextField } from '../../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../../components/core/SelectFilter';
