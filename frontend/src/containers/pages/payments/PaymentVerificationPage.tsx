@@ -22,7 +22,7 @@ const initialFilter = {
   verificationStatus: [],
   program: '',
   serviceProvider: '',
-  deliveryType: '',
+  deliveryType: [],
   startDate: undefined,
   endDate: undefined,
 };
