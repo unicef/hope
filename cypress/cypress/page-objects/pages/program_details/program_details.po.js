@@ -6,7 +6,12 @@ export default class ProgramDetails extends BaseComponent {
   buttonRemoveProgram = 'button[data-cy="button-remove-program"]';
   buttonEditProgram = 'button[data-cy="button-edit-program"]';
   buttonCopyProgram = 'button[data-cy="button-copy-program"]';
+  buttonFinishProgram = 'button[data-cy="button-finish-program"]';
   dialogPopupActivate = 'div[data-cy="dialog-actions-container"]';
+  buttonDataCyButtonReactivateProgram =
+    'button[data-cy="button-reactivate-program"]';
+  buttonDataCyButtonReactivateProgramPopup =
+    'button[data-cy="button-reactivate-program-popup"]';
   labelTotalNumberOfHouseholds =
     'div[data-cy="label-Total Number of Households"]';
   labelIndividualsData =
@@ -28,6 +33,8 @@ export default class ProgramDetails extends BaseComponent {
   cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
   tableLabel = 'span[data-cy="table-label"]';
   tableTitle = 'h6[data-cy="table-title"]';
+  buttonActivateProgramModal =
+    'button[data-cy="button-activate-program-modal"]';
   buttonAddNewProgramCycle = 'button[data-cy="button-add-new-program-cycle"]';
   buttonDataCyButtonEditProgramCycle =
     'button[data-cy="button-edit-program-cycle"]';
@@ -74,4 +81,20 @@ export default class ProgramDetails extends BaseComponent {
   getTashPlanTableRow = () => cy.get(this.cashPlanTableRow);
   getTableLabel = () => cy.get(this.tableLabel);
   getTableTitle = () => cy.get(this.tableTitle);
+  getButtonActivateProgramModal = () => cy.get(this.buttonActivateProgramModal);
+  getButtonDataCyButtonReactivateProgram = () =>
+    cy.get(this.buttonDataCyButtonReactivateProgram);
+  getButtonDataCyButtonReactivateProgramPopup = () =>
+    cy.get(this.buttonDataCyButtonReactivateProgramPopup);
+  getButtonAddNewProgramCycle = () => cy.get(this.buttonAddNewProgramCycle);
+  getButtonDataCyButtonEditProgramCycle = () =>
+    cy.get(this.buttonDataCyButtonEditProgramCycle);
+  getButtonCreate = () => cy.get(this.buttonCreate);
+  getButtonCancel = () => cy.get(this.buttonCancel);
+  getInputDataCyDateInputNewProgramCycleEndDate = () =>
+    cy.get(this.inputDataCyDateInputNewProgramCycleEndDate);
+  getIinputDataCyDateInputNewProgramCycleStartDate = () =>
+    cy.get(this.inputDataCyDateInputNewProgramCycleStartDate);
+  getIinputDataCyInputNewProgramCycleName = () =>
+    cy.get(this.inputDataCyInputNewProgramCycleName);
 }
