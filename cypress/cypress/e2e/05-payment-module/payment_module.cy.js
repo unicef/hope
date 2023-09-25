@@ -1,9 +1,9 @@
 import PaymentModule from "../../page-objects/pages/payment_module/payment_module.po";
-import PMDetailsPage from "../../page-objects/pages/payment_module/details_page.po";
+import ProgramCycleDetailsPage from "../../page-objects/pages/payment_module/program_cycle_details_page.po";
 import NewPaymentPlan from "../../page-objects/pages/payment_module/new_payment_plan.po";
 
 let t = new PaymentModule();
-let td = new PMDetailsPage();
+let td = new ProgramCycleDetailsPage();
 let tcn = new NewPaymentPlan();
 
 describe("Payment Module", () => {
