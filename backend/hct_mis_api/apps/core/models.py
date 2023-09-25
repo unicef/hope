@@ -421,6 +421,9 @@ class DataCollectingType(TimeStampedModel):
     code = models.CharField(max_length=60, unique=True)
     description = models.TextField(blank=True)
     compatible_types = models.ManyToManyField("self", blank=True)
+    active = models.BooleanField(default=True)
+    individual_filters_available = models.BooleanField(default=False)
+    limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types")
 
     def __str__(self) -> str:
         return f"{self.code} - {self.description}"
