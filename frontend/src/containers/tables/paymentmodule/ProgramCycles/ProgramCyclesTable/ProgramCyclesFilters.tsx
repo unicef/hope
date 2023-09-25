@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -8,7 +8,6 @@ import {
 } from '../../../../../__generated__/graphql';
 import { ClearApplyButtons } from '../../../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../../../components/core/ContainerWithBorder';
-import { Missing } from '../../../../../components/core/Missing';
 import { NumberTextField } from '../../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../../components/core/SelectFilter';
@@ -96,37 +95,34 @@ export const ProgramCyclesFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <Box display='flex' flexDirection='column'>
-            <Missing />
-            <NumberTextField
-              id='totalEntitledQuantityFromFilter'
-              topLabel={t('Total Entitled Quantity')}
-              value={filter.totalEntitledQuantityFrom}
-              placeholder={t('From')}
-              onChange={(e) =>
-                handleFilterChange('totalEntitledQuantityFrom', e.target.value)
-              }
-            />
-          </Box>
+          <NumberTextField
+            id='totalDeliveredQuantityUsdFromFilter'
+            topLabel={t('Total Delivered Quantity (USD)')}
+            value={filter.totalDeliveredQuantityUsdFrom}
+            placeholder={t('From')}
+            onChange={(e) =>
+              handleFilterChange(
+                'totalDeliveredQuantityUsdFrom',
+                e.target.value,
+              )
+            }
+          />
         </Grid>
         <Grid item xs={3}>
-          <Box display='flex' flexDirection='column'>
-            <NumberTextField
-              id='totalEntitledQuantityToFilter'
-              value={filter.totalEntitledQuantityTo}
-              placeholder={t('To')}
-              onChange={(e) =>
-                handleFilterChange('totalEntitledQuantityTo', e.target.value)
-              }
-              error={
-                filter.totalEntitledQuantityFrom &&
-                filter.totalEntitledQuantityTo &&
-                filter.totalEntitledQuantityFrom >
-                  filter.totalEntitledQuantityTo
-              }
-            />
-            <Missing />
-          </Box>
+          <NumberTextField
+            id='totalDeliveredQuantityUsdToFilter'
+            value={filter.totalDeliveredQuantityUsdTo}
+            placeholder={t('To')}
+            onChange={(e) =>
+              handleFilterChange('totalDeliveredQuantityUsdTo', e.target.value)
+            }
+            error={
+              filter.totalDeliveredQuantityUsdFrom &&
+              filter.totalDeliveredQuantityUsdTo &&
+              filter.totalDeliveredQuantityUsdFrom >
+                filter.totalDeliveredQuantityUsdTo
+            }
+          />
         </Grid>
       </Grid>
       <ClearApplyButtons

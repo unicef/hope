@@ -63,18 +63,18 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
         ),
     )
-    total_delivered_quantity = graphene.Float()
-    total_entitled_quantity = graphene.Float()
-    total_undelivered_quantity = graphene.Float()
+    total_delivered_quantity_usd = graphene.Float()
+    total_entitled_quantity_usd = graphene.Float()
+    total_undelivered_quantity_usd = graphene.Float()
 
-    def resolve_total_delivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
-        return self.total_delivered_quantity
+    def resolve_total_delivered_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_delivered_quantity_usd
 
-    def resolve_total_entitled_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
-        return self.total_entitled_quantity
+    def resolve_total_entitled_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_entitled_quantity_usd
 
-    def resolve_total_undelivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
-        return self.total_undelivered_quantity
+    def resolve_total_undelivered_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_undelivered_quantity_usd
 
     class Meta:
         model = ProgramCycle

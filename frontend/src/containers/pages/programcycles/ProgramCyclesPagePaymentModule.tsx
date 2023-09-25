@@ -13,8 +13,8 @@ import { ProgramCyclesTable } from '../../tables/paymentmodule/ProgramCycles/Pro
 const initialFilter = {
   search: '',
   status: [],
-  totalEntitledQuantityFrom: null,
-  totalEntitledQuantityTo: null,
+  totalDeliveredQuantityUsdFrom: '',
+  totalDeliveredQuantityUsdTo: '',
 };
 
 export const ProgramCyclesPagePaymentModule = (): React.ReactElement => {

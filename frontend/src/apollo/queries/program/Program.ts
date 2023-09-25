@@ -29,9 +29,9 @@ export const PROGRAM_QUERY = gql`
             unicefId
             name
             status
-            totalEntitledQuantity
-            totalUndeliveredQuantity
-            totalUndeliveredQuantity
+            totalEntitledQuantityUsd
+            totalUndeliveredQuantityUsd
+            totalUndeliveredQuantityUsd
             startDate
             endDate
           }
