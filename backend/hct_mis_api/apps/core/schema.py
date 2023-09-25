@@ -32,9 +32,10 @@ from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
     BusinessArea,
+    DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,
-    FlexibleAttributeGroup, DataCollectingType,
+    FlexibleAttributeGroup,
 )
 
 if TYPE_CHECKING:
@@ -391,10 +392,12 @@ class Query(graphene.ObjectType):
         return Languages.filter_by_code(code)
 
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        data_collecting_types = DataCollectingType.objects.extra(select={"cast_code": "CAST(code AS INTEGER)"}).values("code", "description").order_by("cast_code")
+        data_collecting_types = (
+            DataCollectingType.objects.extra(select={"cast_code": "CAST(code AS INTEGER)"})
+            .values("code", "description")
+            .order_by("cast_code")
+        )
         result = []
-        logger.info(data_collecting_types)
         for data_collection_type in data_collecting_types:
-            logger.info(data_collection_type)
             result.append({"name": data_collection_type["description"], "value": data_collection_type["code"]})
         return result
