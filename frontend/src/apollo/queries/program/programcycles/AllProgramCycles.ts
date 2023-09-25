@@ -32,6 +32,7 @@ export const ALL_PROGRAM_CYCLES_QUERY = gql`
       totalCount
       edgeCount
       edges {
+        cursor
         node {
           id
           unicefId

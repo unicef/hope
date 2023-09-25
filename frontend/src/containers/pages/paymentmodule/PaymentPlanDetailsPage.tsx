@@ -107,7 +107,6 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
           {shouldDisplayReconciliationSummary && (
             <ReconciliationSummary paymentPlan={paymentPlan} />
           )}
-          )
         </>
       )}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
