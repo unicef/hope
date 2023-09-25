@@ -200,12 +200,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   if (userDataLoading || choicesLoading || loadingPrograms)
     return <LoadingComponent />;
   if (permissions === null) return null;
-  if (
-    !hasPermissions(
-      PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
-      permissions,
-    )
-  )
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
     return <PermissionDenied />;
 
   if (!choicesData || !userData) return null;
@@ -273,7 +268,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
               title='New Feedback'
               breadCrumbs={
                 hasPermissionInModule(
-                  'ACCOUNTABILITY_FEEDBACK_VIEW_LIST',
+                  'GRIEVANCES_FEEDBACK_VIEW_LIST',
                   permissions,
                 )
                   ? breadCrumbsItems
