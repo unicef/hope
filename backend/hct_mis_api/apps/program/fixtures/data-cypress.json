@@ -23,11 +23,11 @@
       "administrative_areas_of_implementation": "",
       "individual_data_needed": false,
       "admin_areas": [],
-      "dataCollectingType": {
+      "data_collecting_type": {
           "active": true,
           "code": "1",
           "description": "Partial individuals collected",
-          "individualFiltersAvailable": true
+          "individual_filters_available": true
       }
     },
     "model": "program.program",
@@ -59,11 +59,11 @@
       "administrative_areas_of_implementation": "other data here ",
       "individual_data_needed": true,
       "admin_areas": [],
-      "dataCollectingType": {
+      "data_collecting_type": {
           "active": true,
           "code": "1",
           "description": "Partial individuals collected",
-          "individualFiltersAvailable": true
+          "individual_filters_available": true
       }
     }
   }
