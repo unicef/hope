@@ -14,6 +14,7 @@ describe('containers/tables/population/IndividualsListTable', () => {
     businessArea: 'afghanistan',
     sex: '',
     search: '',
+    searchType: 'individual_id',
     admin2: '',
     flags: [],
     status: '',

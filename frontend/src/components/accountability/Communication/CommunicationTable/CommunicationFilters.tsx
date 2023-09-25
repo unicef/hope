@@ -5,16 +5,13 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../../utils/utils';
+import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 
 interface CommunicationFiltersProps {
   filter;
@@ -111,24 +108,14 @@ export const CommunicationFilters = ({
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label='From'
-              onChange={(date) =>
-                handleFilterChange(
-                  'createdAtRangeMin',
-                  dateToIsoString(date, 'startOfDay'),
-                )
-              }
+              onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
               value={filter.createdAtRangeMin}
             />
           </Grid>
           <Grid item xs={6}>
             <DatePickerFilter
               label={t('To')}
-              onChange={(date) =>
-                handleFilterChange(
-                  'createdAtRangeMax',
-                  dateToIsoString(date, 'endOfDay'),
-                )
-              }
+              onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
               value={filter.createdAtRangeMax}
             />
           </Grid>

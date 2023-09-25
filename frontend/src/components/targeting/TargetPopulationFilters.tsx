@@ -10,7 +10,6 @@ import {
 } from '../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
-  dateToIsoString,
   targetPopulationStatusMapping,
 } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
@@ -140,24 +139,14 @@ export const TargetPopulationFilters = ({
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
-            onChange={(date) =>
-              handleFilterChange(
-                'createdAtRangeMin',
-                dateToIsoString(date, 'startOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
           />
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) =>
-              handleFilterChange(
-                'createdAtRangeMax',
-                dateToIsoString(date, 'endOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
           />
         </Grid>
