@@ -6633,7 +6633,7 @@
         "code": "0",
         "description": "Partial individuals collected",
         "active": true,
-        "individual_filters_available": false,
+        "individual_filters_available": true,
         "compatible_types": [],
         "limit_to": []
     }
@@ -6647,7 +6647,7 @@
         "code": "1",
         "description": "Full individual collected",
         "active": true,
-        "individual_filters_available": false,
+        "individual_filters_available": true,
         "compatible_types": [],
         "limit_to": []
     }
@@ -6661,7 +6661,7 @@
           "code": "2",
           "description": "Size only collected",
           "active": true,
-          "individual_filters_available": false,
+          "individual_filters_available": true,
           "compatible_types": [],
           "limit_to": []
       }
@@ -6675,7 +6675,7 @@
           "code": "3",
           "description": "No individual data",
           "active": true,
-          "individual_filters_available": false,
+          "individual_filters_available": true,
           "compatible_types": [],
           "limit_to": []
       }
@@ -6689,7 +6689,7 @@
           "code": "99",
           "description": "Unknown",
           "active": true,
-          "individual_filters_available": false,
+          "individual_filters_available": true,
           "compatible_types": [],
           "limit_to": []
       }
