@@ -150,6 +150,28 @@ exports[`components/ProgramDetails should render 1`] = `
               class="sc-bwzfXH eoWrid"
               color="textSecondary"
             >
+              Data Collecting Type
+            </span>
+            <div
+              data-cy="label-Data Collecting Type"
+            >
+              <span
+                class="sc-htpNat cwQQYq"
+                color="textSecondary"
+              >
+                Partial individuals collected
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
               Frequency of Payment
             </span>
             <div
