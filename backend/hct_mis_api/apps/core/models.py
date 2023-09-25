@@ -418,6 +418,7 @@ class MigrationStatus(TimeStampedModel):
 
 
 class DataCollectingType(TimeStampedModel):
+    label = models.CharField(max_length=60, blank=True)
     code = models.CharField(max_length=60, unique=True)
     description = models.TextField(blank=True)
     compatible_types = models.ManyToManyField("self", blank=True)
