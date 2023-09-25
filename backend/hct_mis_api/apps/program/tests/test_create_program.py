@@ -44,10 +44,7 @@ class TestCreateProgram(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="1",
-            description="Partial individuals collected",
-            active=True,
-            individual_filters_available=True
+            code="1", description="Partial individuals collected", active=True, individual_filters_available=True
         )
         cls.program_data = {
             "programData": {
@@ -63,7 +60,7 @@ class TestCreateProgram(APITestCase):
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
                 "businessAreaSlug": cls.business_area.slug,
-                "dataCollectingTypeCode": cls.data_collecting_type.code
+                "dataCollectingTypeCode": cls.data_collecting_type.code,
             }
         }
 

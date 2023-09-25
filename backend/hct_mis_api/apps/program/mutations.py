@@ -46,10 +46,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         )
 
         program = Program(
-            **program_data,
-            status=Program.DRAFT,
-            business_area=business_area,
-            data_collecting_type=data_collecting_type
+            **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type
         )
         program.full_clean()
         program.save()
