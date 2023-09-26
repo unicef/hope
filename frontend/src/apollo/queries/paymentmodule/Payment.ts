@@ -74,14 +74,17 @@ export const Payment = gql`
       }
       reasonForUnsuccessfulPayment
       deliveryMechanism {
+        id
         cardNumber
         phoneNo
         bankName
         bankAccountNumber  
       }
       documents {
+        id
         documentNumber
         type {
+          id
           key
         }
       }
