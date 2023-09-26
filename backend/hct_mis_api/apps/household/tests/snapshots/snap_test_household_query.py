@@ -368,6 +368,51 @@ snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_1_
     ]
 }
 
+snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_1_with_permission 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_2_without_permission 1'] = {
+    'data': {
+        'allHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allHouseholds'
+            ]
+        }
+    ]
+}
+
 snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_0_with_permission 1'] = {
     'data': {
         'allHouseholds': {
@@ -507,22 +552,11 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_1
 
 snapshots['TestHouseholdQuery::test_query_households_search_without_search_type_0_with_permission 1'] = {
     'data': {
-        'allHouseholds': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 9,
-                    'line': 3
-                }
-            ],
-            'message': '"Invalid search key \'None\'"',
-            'path': [
-                'allHouseholds'
+        'allHouseholds': {
+            'edges': [
             ]
         }
-    ]
+    }
 }
 
 snapshots['TestHouseholdQuery::test_query_households_search_without_search_type_1_without_permission 1'] = {

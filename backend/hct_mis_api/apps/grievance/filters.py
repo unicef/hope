@@ -216,6 +216,10 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             )
             return qs.filter(household_unicef_id__in=unicef_ids)
         if search_type == "registration_id":
+            try:
+                int(search)
+            except ValueError:
+                return qs.none()
             unicef_ids = (
                 Individual.objects.filter(relationship=HEAD, registration_id=search)
                 .select_related("household")
@@ -249,7 +253,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(household_unicef_id__in=unicef_ids)
-        raise KeyError(f"Invalid search search_type '{search_type}'")
+        return qs.none()
 
     def search_type_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs
