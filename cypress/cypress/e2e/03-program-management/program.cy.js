@@ -31,6 +31,7 @@ describe("Program Management", () => {
         .getDialogTitle()
         .should("contain", "Set-up a new Programme");
       cy.uniqueSeed().then((seed) => {
+<<<<<<< HEAD
         const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
         programManagement.getInputCashAssistScope().click();
@@ -41,6 +42,19 @@ describe("Program Management", () => {
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
           .getInputDescription()
+=======
+        const programName = `test program ${seed}`;
+        cy.get('[data-cy="input-programme-name"]').type(programName);
+        cy.get('[data-cy="input-cash-assist-scope"]').first().click();
+        cy.get('[data-cy="select-option-Unicef"]').click();
+        cy.get('[data-cy="input-sector"]').first().click();
+        cy.get('[data-cy="select-option-Multi Purpose"]').click();
+        cy.get('[data-cy="input-data-collecting-type"]').first().click();
+        cy.get('[data-cy="select-option-Partial individuals collected"]').click();
+        cy.get('[data-cy="input-start-date"]').click().type("2023-01-01");
+        cy.get('[data-cy="input-end-date"]').click().type("2033-12-30");
+        cy.get('[data-cy="input-description"]')
+>>>>>>> develop
           .first()
           .click()
           .type("test description");
@@ -121,32 +135,47 @@ describe("Program Management", () => {
         programManagement.getPageHeaderTitle().contains(editedProgramName);
       });
     });
+<<<<<<< HEAD
+=======
+    it("Finish Program", () => {
+      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
+      cy.get('[data-value="ACTIVE"]').click({ force: true });
+      cy.get('[data-cy="button-filters-apply"]').click();
+      cy.reload();
+      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
+      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
+      cy.contains("Finish Programme").click({ force: true });
+      cy.get('[data-cy="button-finish-program"]').eq(1).click({ force: true });
+      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
+    });
+    it("Reactivate Program", () => {
+      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
+      cy.get('[data-value="FINISHED"]').click({ force: true });
+      cy.get('[data-cy="button-filters-apply"]').click();
+      cy.reload();
+      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
+      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
+      cy.contains("Reactivate").eq(0).click({ force: true });
+      cy.get(".MuiDialogActions-root > .MuiButton-contained").click({
+        force: true,
+      });
+      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
+    });
+    it.skip("Remove Program", () => {});
+    it.skip("Activate Program", () => {});
+    it.skip("Reactivate Program", () => {});
+    it.skip("Open in Cashassist", () => {});
+>>>>>>> develop
 
     context("PM Filters", () => {
-      it.skip("PM Programme filter", () => {
-        // ToDo
-      });
-      it.skip("PM Status filter", () => {
-        // ToDo
-      });
-      it.skip("PM FSP filter", () => {
-        // ToDo
-      });
-      it.skip("PM Start Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM End Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM Sector filter", () => {
-        // ToDo
-      });
-      it.skip("PM Num. of Households filter", () => {
-        // ToDo
-      });
-      it.skip("PM Budget (USD) filter", () => {
-        // ToDo
-      });
+      it.skip("PM Programme filter", () => {});
+      it.skip("PM Status filter", () => {});
+      it.skip("PM FSP filter", () => {});
+      it.skip("PM Start Date filter", () => {});
+      it.skip("PM End Date filter", () => {});
+      it.skip("PM Sector filter", () => {});
+      it.skip("PM Num. of Households filter", () => {});
+      it.skip("PM Budget (USD) filter", () => {});
     });
   });
   describe.skip("E2E tests Program Management", () => {});

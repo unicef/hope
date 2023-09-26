@@ -97,7 +97,6 @@ class FlexibleAttributeImporter:
 
             if label in model_fields:
                 cleared_value = strip_tags(value).replace("#", "").strip()
-
                 if label == "label" and language == "English(EN)":
                     if isinstance(row[1].value, str):
                         is_index_field = row[1].value.endswith("_index")

@@ -1,0 +1,72 @@
+[
+{
+    "model": "core.datacollectingtype",
+    "pk": 1,
+    "fields": {
+        "created": "2023-09-25T17:57:16.282Z",
+        "modified": "2023-09-25T17:57:16.282Z",
+        "code": "0",
+        "description": "Partial individuals collected",
+        "active": true,
+        "individual_filters_available": false,
+        "compatible_types": [],
+        "limit_to": []
+    }
+},
+{
+    "model": "core.datacollectingtype",
+    "pk": 2,
+    "fields": {
+        "created": "2023-09-25T17:57:16.284Z",
+        "modified": "2023-09-25T17:57:16.284Z",
+        "code": "1",
+        "description": "Full individual collected",
+        "active": true,
+        "individual_filters_available": false,
+        "compatible_types": [],
+        "limit_to": []
+    }
+},
+{
+    "model": "core.datacollectingtype",
+    "pk": 3,
+    "fields": {
+        "created": "2023-09-25T17:57:16.285Z",
+        "modified": "2023-09-25T17:57:16.285Z",
+        "code": "2",
+        "description": "Size only collected",
+        "active": true,
+        "individual_filters_available": false,
+        "compatible_types": [],
+        "limit_to": []
+    }
+},
+{
+    "model": "core.datacollectingtype",
+    "pk": 4,
+    "fields": {
+        "created": "2023-09-25T17:57:16.286Z",
+        "modified": "2023-09-25T17:57:16.286Z",
+        "code": "3",
+        "description": "No individual data",
+        "active": true,
+        "individual_filters_available": false,
+        "compatible_types": [],
+        "limit_to": []
+    }
+},
+{
+    "model": "core.datacollectingtype",
+    "pk": 5,
+    "fields": {
+        "created": "2023-09-25T17:57:16.287Z",
+        "modified": "2023-09-25T17:57:16.287Z",
+        "code": "99",
+        "description": "Unknown",
+        "active": true,
+        "individual_filters_available": false,
+        "compatible_types": [],
+        "limit_to": []
+    }
+}
+]
