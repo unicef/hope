@@ -483,6 +483,7 @@ class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
+    raw_id_fields = ("group",)
 
 
 @admin.register(FlexibleAttributeGroup)
@@ -657,6 +658,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
+    raw_id_fields = ("country",)
 
     def alpha2(self, obj: Any) -> str:
         return obj.country.iso_code2
@@ -712,5 +714,7 @@ class MigrationStatusAdmin(admin.ModelAdmin):
 
 
 @admin.register(DataCollectingType)
-class DataCollectingTypeAdmin(admin.ModelAdmin):
-    list_display = ("code", "description", "created", "modified")
+class DataCollectingTypeAdmin(HOPEModelAdminBase):
+    list_display = ("label", "code", "description", "created", "modified")
+    list_filter = (("limit_to", AutoCompleteFilter),)
+    filter_horizontal = ("compatible_types", "limit_to")
