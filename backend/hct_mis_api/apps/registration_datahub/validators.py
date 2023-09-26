@@ -29,7 +29,7 @@ from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
@@ -42,6 +42,30 @@ from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids
 from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
 
 logger = logging.getLogger(__name__)
+
+
+def data_collecting_type_validator(sheet: Worksheet) -> Dict:
+    if sheet.title == "Households":
+        for column in sheet.iter_cols(1, sheet.max_column):
+            if column[0].value.startswith("collect_individual_data"):
+                header = column[0].value
+                row_number = column[0].row
+                code = column[2].value
+
+                if not DataCollectingType.objects.filter(code=code).exists():
+                    return {
+                        "row_number": row_number,
+                        "header": header,
+                        "message": f"Worksheet: Households - DataCollectingType with code {code} does not exists"
+                    }
+                if code == 0:
+                    return {
+                        "row_number": row_number,
+                        "header": header,
+                        "message": "Worksheet: Households - DataCollectingType cannot be type of UNKNOWN"
+                    }
+
+    return {}
 
 
 class XlsxException(Exception):
@@ -557,6 +581,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if isinstance(cell.value, str):
                     return cell.value.strip() != ""
                 return True
+
+            error = data_collecting_type_validator(sheet)
+            if error:
+                invalid_rows.append(error)
 
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
