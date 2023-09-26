@@ -5,7 +5,8 @@ export const fakeApolloAllCommunicationMessages = [
     request: {
       query: AllAccountabilityCommunicationMessagesDocument,
       variables: {
-        createdAtRange: '',
+        createdAtRange: '{"min":null,"max":null}',
+        program: '',
         targetPopulation: '',
         createdBy: '',
         first: 10,

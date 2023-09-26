@@ -9,17 +9,17 @@ import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtu
 
 describe('containers/tables/population/IndividualsListTable', () => {
   const initialFilter = {
+    search: '',
+    searchType: 'individual_id',
+    admin2: '',
+    sex: '',
     ageMin: '',
     ageMax: '',
-    businessArea: 'afghanistan',
-    sex: '',
-    search: '',
-    admin2: '',
     flags: [],
-    status: '',
-    lastRegistrationDateMin: '',
-    lastRegistrationDateMax: '',
     orderBy: 'unicef_id',
+    status: '',
+    lastRegistrationDateMin: undefined,
+    lastRegistrationDateMax: undefined,
   };
 
   it('should render with data', async () => {
