@@ -83,8 +83,6 @@ export const TargetPopulationAutocomplete = ({
     setAppliedFilter,
   );
 
-  if (!data) return null;
-
   return (
     <StyledAutocomplete
       value={value}

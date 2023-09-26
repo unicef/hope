@@ -1,9 +1,9 @@
-import ApolloClient from 'apollo-client';
-import { createUploadLink } from 'apollo-upload-client';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { onError } from 'apollo-link-error';
-import { ApolloLink } from 'apollo-link';
 import { persistCache } from 'apollo-cache-persist';
+import ApolloClient from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
+import { onError } from 'apollo-link-error';
+import { createUploadLink } from 'apollo-upload-client';
 import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '../utils/utils';
@@ -43,6 +43,20 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         graphQLErrors,
       );
   }
+});
+
+const isDataNull = (data): boolean => {
+  return Object.values(data).some((value) => value === null);
+};
+
+//redirect to 404 page if data is null
+const redirectLink = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
+    if (response.data && isDataNull(response.data)) {
+      window.location.href = '/404';
+    }
+    return response;
+  });
 });
 
 function findValidationErrors(
@@ -125,6 +139,7 @@ const link = ApolloLink.from([
   addBusinessAreaHeaderMiddleware,
   validationErrorMiddleware,
   errorLink,
+  redirectLink,
   createUploadLink({ uri: GRAPHQL_URL }),
 ]);
 let client;

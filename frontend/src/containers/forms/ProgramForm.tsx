@@ -19,7 +19,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
 import {
-  ProgramNode,
+  ProgramNode, useDataCollectionTypeChoiceDataQuery,
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
@@ -65,7 +65,7 @@ export const ProgramForm = ({
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-
+  const { data: {dataCollectionTypeChoices} } = useDataCollectionTypeChoiceDataQuery()
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))
@@ -135,7 +135,7 @@ export const ProgramForm = ({
   if (formInitialValue.budget === 0) {
     formInitialValue.budget = '0.00';
   }
-  if (!data) return null;
+  if (!data || !dataCollectionTypeChoices) return null;
 
   const withoutIndividualDataText = t(
     'This programme will use only household and/or head of household details for targeting or entitlement calculation',
@@ -214,6 +214,16 @@ export const ProgramForm = ({
                     choices={data.programSectorChoices}
                     component={FormikSelectField}
                     data-cy='input-sector'
+                  />
+                  <Field
+                    name='dataCollectingTypeCode'
+                    label={t('Data Collecting Type')}
+                    fullWidth
+                    variant='outlined'
+                    required
+                    choices={dataCollectionTypeChoices}
+                    component={FormikSelectField}
+                    data-cy='input-data-collecting-type'
                   />
                   <DateFields>
                     <DateField>

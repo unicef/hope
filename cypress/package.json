@@ -5,7 +5,11 @@
   "license": "MIT",
   "devDependencies": {
     "copy": "^0.3.2",
+<<<<<<< HEAD
     "cypress": "^13.1.0",
+=======
+    "cypress": "^13.2.0",
+>>>>>>> develop
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-repeat": "^2.3.3",
