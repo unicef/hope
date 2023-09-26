@@ -87,6 +87,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "head_of_household",
         "target_population",
         "service_provider",
+        "copied_from",
     )
 
     def cash_plan_name(self, obj: Any) -> str:
@@ -147,7 +148,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     search_fields = ("payment_plan__name",)
-    raw_id_fields = ("payment_plan",)
+    raw_id_fields = ("payment_plan", "payment_plan_content_type")
 
     @button()
     def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -204,7 +205,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         ("payment__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("payment_verification_plan",)
+    raw_id_fields = ("payment_verification_plan", "payment_content_type")
 
     def payment_plan_name(self, obj: Any) -> str:
         payment_plan = obj.payment_verification_plan.payment_plan_obj
@@ -268,7 +269,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
         ("program__id", ValueFilter),
         ("target_population", AutoCompleteFilter),
     )
-    raw_id_fields = ("business_area", "program", "target_population")
+    raw_id_fields = ("business_area", "program", "target_population", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
 
 
@@ -297,6 +298,10 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "business_area",
         "parent",
         "household",
+        "collector",
+        "program",
+        "source_payment",
+        "copied_from",
         "head_of_household",
         "financial_service_provider",
     )
@@ -309,6 +314,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 @admin.register(DeliveryMechanismPerPaymentPlan)
 class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
+    raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by")
     form = DeliveryMechanismPerPaymentPlanForm
 
     class Media:
@@ -402,6 +408,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     model = FspXlsxTemplatePerDeliveryMechanism
     extra = 0
     readonly_fields = ("created_by",)
+    raw_id_fields = ("financial_service_provider", "delivery_mechanisms")
 
 
 @admin.register(FinancialServiceProvider)
