@@ -43,12 +43,6 @@ snapshots['TestDeliveryMechanismSpecialFields::test_delivery_mechanism_contain_c
                     'type': {
                         'key': 'national_id'
                     }
-                },
-                {
-                    'documentNumber': '444555666',
-                    'type': {
-                        'key': 'national_passport'
-                    }
                 }
             ]
         }
@@ -65,6 +59,12 @@ snapshots['TestDeliveryMechanismSpecialFields::test_delivery_mechanism_contain_m
                 'phoneNo': '+48654789123'
             },
             'documents': [
+                {
+                    'documentNumber': '444555666',
+                    'type': {
+                        'key': 'national_passport'
+                    }
+                }
             ]
         }
     }
