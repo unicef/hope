@@ -37,12 +37,8 @@ export function PaymentDetails({
     paymentVerification = payment.verification;
   }
 
-  const documents = []
-  if (payment.documents) {
-    for (const document of payment.documents) {
-      documents.push(`${document.type.key} ${document.documentNumber}`)
-    }
-  }
+  const mappedDocumentNumbers = payment.documents?.map(doc => `${doc.type.key} ${doc.documentNumber}`);
+  const documentNumbersDisplay = mappedDocumentNumbers.length > 0 ? mappedDocumentNumbers.join('\n') : null;
 
   const getSpecialFieldGrids = (): React.ReactElement => {
     switch (payment.deliveryType) {
@@ -210,7 +206,7 @@ export function PaymentDetails({
           <Grid item xs={6}>
             <LabelizedField
               label={t("DOCUMENT NUMBERS")}
-              value={documents.join('\n')}
+              value={documentNumbersDisplay}
             />
           </Grid>
         </Grid>
