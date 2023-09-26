@@ -205,7 +205,6 @@ class TestIndividualQuery(APITestCase):
             },
         )
 
-
     @parameterized.expand(
         [
             ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
@@ -247,7 +246,10 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={"search": f"national_passport {self.national_passport.document_number}", "searchType": "national_passport"},
+            variables={
+                "search": f"national_passport {self.national_passport.document_number}",
+                "searchType": "national_passport",
+            },
         )
 
     @parameterized.expand(
