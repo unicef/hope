@@ -9,7 +9,7 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { PaymentQuery } from '../../../__generated__/graphql';
+import {PaymentDeliveryType, PaymentQuery} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
@@ -46,7 +46,7 @@ export function PaymentDetails({
 
   const getSpecialFieldGrids = (): React.ReactElement => {
     switch (payment.deliveryType) {
-      case 'DEPOSIT_TO_CARD':
+      case PaymentDeliveryType.DepositToCard:
         return (
           <Grid item xs={3}>
             <LabelizedField
@@ -55,7 +55,7 @@ export function PaymentDetails({
             />
           </Grid>
         )
-      case 'MOBILE_MONEY':
+      case PaymentDeliveryType.MobileMoney:
         return (
           <Grid item xs={3}>
             <LabelizedField
@@ -64,7 +64,7 @@ export function PaymentDetails({
             />
           </Grid>
         )
-      case 'TRANSFER_TO_ACCOUNT':
+      case PaymentDeliveryType.TransferToAccount:
         return (
           <>
             <Grid item xs={3}>
