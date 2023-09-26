@@ -170,6 +170,16 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_national_id_fil
     'data': {
         'allIndividuals': {
             'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
+                    }
+                }
             ]
         }
     }
@@ -199,6 +209,16 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_national_passpo
     'data': {
         'allIndividuals': {
             'edges': [
+                {
+                    'node': {
+                        'birthDate': '1946-02-15',
+                        'familyName': 'Ford',
+                        'fullName': 'Robin Ford',
+                        'givenName': 'Robin',
+                        'phoneNo': '+18663567905',
+                        'phoneNoValid': True
+                    }
+                }
             ]
         }
     }
@@ -230,12 +250,12 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter
             'edges': [
                 {
                     'node': {
-                        'birthDate': '1946-02-15',
-                        'familyName': 'Ford',
-                        'fullName': 'Robin Ford',
-                        'givenName': 'Robin',
-                        'phoneNo': '+18663567905',
-                        'phoneNoValid': True
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
                     }
                 }
             ]
@@ -306,6 +326,16 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_0
     'data': {
         'allIndividuals': {
             'edges': [
+                {
+                    'node': {
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'fullName': 'Timothy Perry',
+                        'givenName': 'Timothy',
+                        'phoneNo': '(548)313-1700-902',
+                        'phoneNoValid': False
+                    }
+                }
             ]
         }
     }

@@ -216,7 +216,7 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={"search": "phone_no +18663567905", "searchType": "phone_no"},
+            variables={"search": "(953)682-4596", "searchType": "phone_no"},
         )
 
     @parameterized.expand(
@@ -231,7 +231,7 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={"search": f"national_id {self.national_id.document_number}", "searchType": "national_id"},
+            variables={"search": f"{self.national_id.document_number}", "searchType": "national_id"},
         )
 
     @parameterized.expand(
@@ -246,10 +246,7 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "search": f"national_passport {self.national_passport.document_number}",
-                "searchType": "national_passport",
-            },
+            variables={"search": f"{self.national_passport.document_number}", "searchType": "national_passport"},
         )
 
     @parameterized.expand(
@@ -264,7 +261,7 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={"search": f"{self.tax_id.document_number}", "searchType": "tax_id"},
+            variables={"search": "666-777-888", "searchType": "tax_id"},
         )
 
     @parameterized.expand(
@@ -279,8 +276,6 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={"search": "registration_id 1"},
-            context={"user": self.user},
             variables={"search": "1", "searchType": "registration_id"},
         )
 
