@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { useLazyInterval } from '../../../hooks/useInterval';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -16,7 +15,13 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 export const EditTargetPopulationPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error, refetch } = useTargetPopulationQuery({
+  const {
+    data,
+    loading,
+    error,
+    startPolling,
+    stopPolling,
+  } = useTargetPopulationQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -25,10 +30,6 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
-  const [
-    startPollingTargetPopulation,
-    stopPollingTargetPopulation,
-  ] = useLazyInterval(() => refetch(), 3000);
   const buildStatus = data?.targetPopulation?.buildStatus;
   useEffect(() => {
     if (
@@ -37,13 +38,12 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
         TargetPopulationBuildStatus.Pending,
       ].includes(buildStatus)
     ) {
-      startPollingTargetPopulation();
+      startPolling(3000);
     } else {
-      stopPollingTargetPopulation();
+      stopPolling();
     }
-    return stopPollingTargetPopulation;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildStatus]);
+    return () => stopPolling();
+  }, [buildStatus, id, startPolling, stopPolling]);
 
   if (loading && !data) return <LoadingComponent />;
 
