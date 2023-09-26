@@ -134,7 +134,9 @@ export const PaymentPlansTableFollowUpPaymentPlansModal = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('Close')}</Button>
+            <Button data-cy='button-close' onClick={() => setOpen(false)}>
+              {t('Close')}
+            </Button>
           </DialogActions>
         </DialogFooter>
       </Dialog>

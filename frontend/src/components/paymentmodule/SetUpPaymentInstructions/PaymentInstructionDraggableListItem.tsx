@@ -182,17 +182,25 @@ export const PaymentInstructionDraggableListItem = ({
 
         const title = (
           <Box display='flex' alignItems='center'>
-            <StyledAvatar>#{index + 1}</StyledAvatar>
+            <StyledAvatar data-cy='payment-instruction-index'>
+              #{index + 1}
+            </StyledAvatar>
             <Box ml={4} display='flex' flexDirection='column'>
               <AvatarTitle>{t('Payment Instruction')}</AvatarTitle>
-              <AvatarId>ID: {item.id}</AvatarId>
+              <AvatarId data-cy='payment-instruction-id'>
+                ID: {item.id}
+              </AvatarId>
             </Box>
           </Box>
         );
 
         return (
           <Form>
-            <Draggable draggableId={item.id} index={index}>
+            <Draggable
+              data-cy='draggable-payment-instruction-tile'
+              draggableId={item.id}
+              index={index}
+            >
               {(provided, snapshot) => {
                 return (
                   <ListItem

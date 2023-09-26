@@ -2,10 +2,18 @@ import BaseComponent from "../../base.component";
 
 export default class PaymentModule extends BaseComponent {
   // Locators
+  programCycleTableRow = 'tr[data-cy="program-cycle-table-row"]';
+  tableLabel = 'span[data-cy="table-label"]';
+  tableTitle = 'h6[data-cy="table-title"]';
+  pageHeaderTitle = 'h5[data-cy="page-header-title"]';
 
   // Texts
 
   // Elements
+  getProgramCycleTableRow = () => cy.get(this.programCycleTableRow);
+  getTableLabel = () => cy.get(this.tableLabel);
+  getTableTitle = () => cy.get(this.tableTitle);
+  getPageHeaderTitle = () => cy.get(this.pageHeaderTitle);
 
   createPaymentPlan(targetPopulationName) {
     cy.get("span").contains("Payment Module").click();
