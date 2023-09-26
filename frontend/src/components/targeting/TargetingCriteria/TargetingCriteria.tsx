@@ -156,6 +156,7 @@ export function TargetingCriteria({
                 shouldShowWarningForIndividualFilter={
                   selectedProgram && !selectedProgram.individualDataNeeded
                 }
+                individualFiltersAvailable={selectedProgram.dataCollectingType.individualFiltersAvailable}
               />
             </>
           )}

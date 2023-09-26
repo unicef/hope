@@ -716,8 +716,5 @@ class MigrationStatusAdmin(admin.ModelAdmin):
 @admin.register(DataCollectingType)
 class DataCollectingTypeAdmin(HOPEModelAdminBase):
     list_display = ("label", "code", "description", "created", "modified")
-    list_filter = (
-        ("compatible_types", AutoCompleteFilter),
-    )
+    list_filter = (("compatible_types", AutoCompleteFilter),)
     filter_horizontal = ("compatible_types",)
-
