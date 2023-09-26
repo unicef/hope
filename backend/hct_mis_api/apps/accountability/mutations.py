@@ -90,7 +90,9 @@ class CreateFeedbackMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE, business_area)
         feedback = FeedbackCrudServices.create(user, business_area, program, input)
-        log_create(Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, getattr(feedback.program, "pk", None), None, feedback)
+        log_create(
+            Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, getattr(feedback.program, "pk", None), None, feedback
+        )
         return cls(feedback=feedback)
 
 
