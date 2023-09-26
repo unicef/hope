@@ -6,7 +6,8 @@ export default class PaymentPlanPage extends BaseComponent {
   statusContainer = 'div[data-cy="status-container"]';
   tableTitle = 'h6[data-cy="table-title"]';
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
-  paymentPlanRow = 'tr[class="MuiTableRow-root sc-fMiknA fHXcHH"]';
+  paymentPlanRow = 'tr[data-cy="payment-plan-table-row"]';
+  linkToPaymentPlanDetails = 'a[data-cy="link-to-payment-plan-details"]';
   buttonFiltersClear = 'button[data-cy="button-filters-clear"]';
   buttonFiltersApply = 'button[data-cy="button-filters-apply"]';
   buttonNewPaymentPlan = 'a[data-cy="button-new-payment-plan"]';

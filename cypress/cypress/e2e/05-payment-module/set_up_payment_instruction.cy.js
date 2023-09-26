@@ -1,8 +1,8 @@
 import PaymentPlanPage from "../../page-objects/pages/payment_module/payment_plan_page.po";
-import PeymentPlanDetailsPage from "../../page-objects/pages/payment_module/payment_plans_details_page.po";
+import PaymentPlanDetailsPage from "../../page-objects/pages/payment_module/payment_plans_details_page.po";
 
 let paymentPlanPage = new PaymentPlanPage();
-let paymentPlanDetailsPage = new PeymentPlanDetailsPage();
+let paymentPlanDetailsPage = new PaymentPlanDetailsPage();
 
 describe("Payment Plan", () => {
   beforeEach(() => {

@@ -78,7 +78,7 @@ export default class ProgramDetails extends BaseComponent {
   getLabelStatus = () => cy.get(this.labelStatus);
   getPageHeaderTitle = () => cy.get(this.pageHeaderTitle);
   getTablePagination = () => cy.get(this.tablePagination);
-  getTashPlanTableRow = () => cy.get(this.cashPlanTableRow);
+  getCashPlanTableRow = () => cy.get(this.cashPlanTableRow);
   getTableLabel = () => cy.get(this.tableLabel);
   getTableTitle = () => cy.get(this.tableTitle);
   getButtonActivateProgramModal = () => cy.get(this.buttonActivateProgramModal);
@@ -93,8 +93,8 @@ export default class ProgramDetails extends BaseComponent {
   getButtonCancel = () => cy.get(this.buttonCancel);
   getInputDataCyDateInputNewProgramCycleEndDate = () =>
     cy.get(this.inputDataCyDateInputNewProgramCycleEndDate);
-  getIinputDataCyDateInputNewProgramCycleStartDate = () =>
+  getInputDataCyDateInputNewProgramCycleStartDate = () =>
     cy.get(this.inputDataCyDateInputNewProgramCycleStartDate);
-  getIinputDataCyInputNewProgramCycleName = () =>
+  getInputDataCyInputNewProgramCycleName = () =>
     cy.get(this.inputDataCyInputNewProgramCycleName);
 }

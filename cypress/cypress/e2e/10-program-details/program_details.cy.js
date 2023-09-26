@@ -21,7 +21,7 @@ describe("Program Details", () => {
         "Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
-      programDetails.getTashPlanTableRow().should("have.length", 2);
+      programDetails.getCashPlanTableRow().should("have.length", 2);
       programDetails.getLabelAdministrativeAreasOfImplementation();
       programDetails.getButtonEditProgram().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
@@ -69,7 +69,7 @@ describe("Program Details", () => {
       programDetails.getTablePagination().should("not.exist");
       programDetails.getTableLabel().should("not.exist");
       programDetails.getTableTitle().should("not.exist");
-      programDetails.getTashPlanTableRow().should("not.exist");
+      programDetails.getCashPlanTableRow().should("not.exist");
     });
   });
 
