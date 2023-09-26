@@ -90,7 +90,7 @@ class TestDeliveryMechanismSpecialFields(APITestCase):
         DocumentFactory(
             document_number="444555666",
             type=DocumentType.objects.get(key="national_passport"),
-            individual=cls.individual_1,
+            individual=cls.individual_2,
         )
         DocumentFactory(
             document_number="777888999",
