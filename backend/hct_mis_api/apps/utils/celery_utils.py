@@ -1,15 +1,21 @@
 from typing import Any, Optional
 
 
+def format_task(task: dict, status: str) -> dict:
+    if "request" in task:
+        task = task["request"]
+    return {
+        "name": task["name"],
+        "args": task["args"],
+        "kwargs": task["kwargs"],
+        "status": status,
+    }
+
+
 def format_tasks(tasks_dict: dict, status: str) -> list:
     for tasks_list in tasks_dict.values():
         for task in tasks_list:
-            yield {
-                "name": task["name"],
-                "args": task["args"],
-                "kwargs": task["kwargs"],
-                "status": status,
-            }
+            yield format_task(task, status)
 
 
 def get_worker_tasks(

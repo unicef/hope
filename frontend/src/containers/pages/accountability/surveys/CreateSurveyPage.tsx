@@ -604,10 +604,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         fontWeight='fontWeightBold'
                       >
                         {t('Number of selected recipients')}:{' '}
-                        {
-                          sampleSizesData?.accountabilitySampleSize
-                            ?.numberOfRecipients
-                        }
+                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}
                       </Box>
                     </Grid>
                   </>

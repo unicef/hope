@@ -51,7 +51,7 @@ snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_inval
                     'line': 4
                 }
             ],
-            'message': '"Invalid search key \'invalid\'"',
+            'message': '"Invalid search search_type \'invalid\'"',
             'path': [
                 'allGrievanceTicket'
             ]
