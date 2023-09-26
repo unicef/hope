@@ -33,10 +33,15 @@ export const FollowUpPaymentPlanTableRow = ({
   if (!statusChoicesData) return null;
 
   return (
-    <ClickableTableRow key={plan.id}>
+    <ClickableTableRow data-cy='payment-plan-table-row' key={plan.id}>
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
+          <BlackLink
+            data-cy='link-to-payment-plan-details'
+            to={paymentPlanPath}
+          >
+            {plan.unicefId}
+          </BlackLink>
         ) : (
           plan.unicefId
         )}

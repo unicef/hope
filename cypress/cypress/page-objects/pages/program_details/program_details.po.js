@@ -6,7 +6,12 @@ export default class ProgramDetails extends BaseComponent {
   buttonRemoveProgram = 'button[data-cy="button-remove-program"]';
   buttonEditProgram = 'button[data-cy="button-edit-program"]';
   buttonCopyProgram = 'button[data-cy="button-copy-program"]';
+  buttonFinishProgram = 'button[data-cy="button-finish-program"]';
   dialogPopupActivate = 'div[data-cy="dialog-actions-container"]';
+  buttonDataCyButtonReactivateProgram =
+    'button[data-cy="button-reactivate-program"]';
+  buttonDataCyButtonReactivateProgramPopup =
+    'button[data-cy="button-reactivate-program-popup"]';
   labelTotalNumberOfHouseholds =
     'div[data-cy="label-Total Number of Households"]';
   labelIndividualsData =
@@ -28,9 +33,30 @@ export default class ProgramDetails extends BaseComponent {
   cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
   tableLabel = 'span[data-cy="table-label"]';
   tableTitle = 'h6[data-cy="table-title"]';
-  // Texts
+  buttonActivateProgramModal =
+    'button[data-cy="button-activate-program-modal"]';
+  buttonAddNewProgramCycle = 'button[data-cy="button-add-new-program-cycle"]';
+  buttonDataCyButtonEditProgramCycle =
+    'button[data-cy="button-edit-program-cycle"]';
+  buttonCreate = 'button[data-cy="button-create"]';
+  buttonCancel = 'button[data-cy="button-cancel"]';
+  inputDataCyDateInputNewProgramCycleEndDate =
+    'input[data-cy="date-input-newProgramCycleEndDate"]';
+  inputDataCyDateInputNewProgramCycleStartDate =
+    'input[data-cy="date-input-newProgramCycleStartDate"]';
+  inputDataCyInputNewProgramCycleName =
+    'input[data-cy="input-newProgramCycleName"]';
 
-  // Elements
+  // Texts
+  textTableTitle = "Programme Cycles";
+  textProgrammeCycleID = "Programme Cycle ID";
+  textProgrammeCycleTitle = "Programme Cycle Title";
+  textStatus = "Status";
+  textTotalEntitledQuantity = "Total Entitled Quantity";
+  textTotalUndeliveredQuantity = "Total Undelivered Quantity";
+  textTotalDeliveredQuantity = "Total Delivered Quantity";
+  textStartDate = "Start Date";
+  textEndDate = "End Date";
   getButtonActivateProgram = () => cy.get(this.buttonActivateProgram);
   getButtonRemoveProgram = () => cy.get(this.buttonRemoveProgram);
   getButtonEditProgram = () => cy.get(this.buttonEditProgram);
@@ -52,7 +78,23 @@ export default class ProgramDetails extends BaseComponent {
   getLabelStatus = () => cy.get(this.labelStatus);
   getPageHeaderTitle = () => cy.get(this.pageHeaderTitle);
   getTablePagination = () => cy.get(this.tablePagination);
-  getTashPlanTableRow = () => cy.get(this.cashPlanTableRow);
+  getCashPlanTableRow = () => cy.get(this.cashPlanTableRow);
   getTableLabel = () => cy.get(this.tableLabel);
   getTableTitle = () => cy.get(this.tableTitle);
+  getButtonActivateProgramModal = () => cy.get(this.buttonActivateProgramModal);
+  getButtonDataCyButtonReactivateProgram = () =>
+    cy.get(this.buttonDataCyButtonReactivateProgram);
+  getButtonDataCyButtonReactivateProgramPopup = () =>
+    cy.get(this.buttonDataCyButtonReactivateProgramPopup);
+  getButtonAddNewProgramCycle = () => cy.get(this.buttonAddNewProgramCycle);
+  getButtonDataCyButtonEditProgramCycle = () =>
+    cy.get(this.buttonDataCyButtonEditProgramCycle);
+  getButtonCreate = () => cy.get(this.buttonCreate);
+  getButtonCancel = () => cy.get(this.buttonCancel);
+  getInputDataCyDateInputNewProgramCycleEndDate = () =>
+    cy.get(this.inputDataCyDateInputNewProgramCycleEndDate);
+  getInputDataCyDateInputNewProgramCycleStartDate = () =>
+    cy.get(this.inputDataCyDateInputNewProgramCycleStartDate);
+  getInputDataCyInputNewProgramCycleName = () =>
+    cy.get(this.inputDataCyInputNewProgramCycleName);
 }

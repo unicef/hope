@@ -50,10 +50,16 @@ export const SetUpPaymentInstructionsHeader = ({
       pr={8}
       pb={2}
     >
-      <GreyText>{t('Drag and drop Payment Instructions to reorder')}</GreyText>
+      <GreyText data-cy='drag-and-drop-text'>
+        {t('Drag and drop Payment Instructions to reorder')}
+      </GreyText>
       <Box>
         <FormControlLabel
-          label={<GreyText>{t("Don't show again")}</GreyText>}
+          label={
+            <GreyText data-cy='dont-show-again-text'>
+              {t("Don't show again")}
+            </GreyText>
+          }
           control={
             <Checkbox
               color='primary'
@@ -67,7 +73,9 @@ export const SetUpPaymentInstructionsHeader = ({
             />
           }
         />
-        <Button onClick={() => setClosed(true)}>{t('Close')}</Button>
+        <Button data-cy='close-button' onClick={() => setClosed(true)}>
+          {t('Close')}
+        </Button>
       </Box>
     </Box>
   ) : null;

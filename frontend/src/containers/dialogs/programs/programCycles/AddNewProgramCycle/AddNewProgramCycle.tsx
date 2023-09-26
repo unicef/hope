@@ -151,7 +151,12 @@ export const AddNewProgramCycle = ({
           {t('Add New Programme Cycle')}
         </Button>
       )}
-      <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
+      <Dialog
+        data-cy='add-new-program-dialog'
+        open={open}
+        onClose={() => setOpen(false)}
+        scroll='paper'
+      >
         {showOneStepModal ? (
           <AddNewProgramCycleOneStep
             open={open}

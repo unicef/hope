@@ -40,8 +40,6 @@ export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
     setItems(items.filter((item) => item.id !== id));
   };
 
-
-
   const buttons = (
     <Box display='flex' justifyContent='center'>
       <Box mr={2}>
@@ -50,6 +48,7 @@ export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
           color='primary'
           endIcon={<AddCircleOutline />}
           onClick={handleAddNewPaymentInstruction}
+          data-cy='add-new-payment-instruction-button'
         >
           {t('Add New Payment Instruction')}
         </Button>
@@ -57,6 +56,7 @@ export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
       <Button
         variant='contained'
         color='primary'
+        data-cy='confirm-reorder-button'
         onClick={() =>
           // eslint-disable-next-line no-console
           console.log(

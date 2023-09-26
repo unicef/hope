@@ -22,6 +22,7 @@ export const PaymentInstructionsSection = ({
       to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.id}/setup-payment-instructions/create`}
       variant='contained'
       color='primary'
+      data-cy='button-set-up-payment-instructions'
     >
       {t('Set up Payment Instructions')}
     </Button>

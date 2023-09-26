@@ -87,6 +87,7 @@ export const DeleteProgramCycle = ({
         color='primary'
         type='icon'
         title={disabledText}
+        dataCy='button-delete-program-cycle'
       >
         <Delete />
       </ButtonTooltip>

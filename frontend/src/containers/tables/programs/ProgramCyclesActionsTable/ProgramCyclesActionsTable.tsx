@@ -56,7 +56,9 @@ export const ProgramCyclesActionsTable = ({
     return <LoadingComponent />;
   }
   const subtitle = (
-    <Subtitle p={18}>{t('Activate the programme to create a cycle')}</Subtitle>
+    <Subtitle data-cy='activate-the-program-info' p={18}>
+      {t('Activate the programme to create a cycle')}
+    </Subtitle>
   );
 
   const statusChoices: {
