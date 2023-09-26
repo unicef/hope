@@ -121,6 +121,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     )
     date_hierarchy = "create_date"
     form = FundsCommitmentAddForm
+    raw_id_fields = ("business_area", "currency_code", "business_office_code")
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
@@ -217,6 +218,7 @@ class DownPaymentAdmin(HOPEModelAdminBase):
     )
     form = DownPaymentAddForm
     date_hierarchy = "create_date"
+    raw_id_fields = ("business_area", "business_office_code")
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")

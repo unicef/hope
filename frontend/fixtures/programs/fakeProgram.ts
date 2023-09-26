@@ -19,5 +19,9 @@ export const fakeProgram = {
   administrativeAreasOfImplementation: 'Crime book.',
   individualDataNeeded: false,
   version: 1644233612796091,
+  dataCollectingType: {
+    code: '0',
+    description: 'Partial individuals collected'
+  },
   __typename: 'ProgramNode',
 } as ProgramNode;

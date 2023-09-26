@@ -2,10 +2,7 @@ import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  useAllProgramsForChoicesQuery,
-  useAllTargetPopulationForChoicesQuery,
-} from '../../../../__generated__/graphql';
+import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import {
@@ -65,22 +62,10 @@ export const CommunicationFilters = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  const {
-    data: allTargetPopulationForChoices,
-    loading: targetPopulationsLoading,
-  } = useAllTargetPopulationForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
   const allPrograms = data?.allPrograms?.edges || [];
   const programs = allPrograms.map((edge) => edge.node);
 
-  const allTargetPopulations =
-    allTargetPopulationForChoices?.allTargetPopulation?.edges || [];
-  const targetPopulations = allTargetPopulations.map((edge) => edge.node);
-
-  if (programsLoading || targetPopulationsLoading) return <LoadingComponent />;
+  if (programsLoading) return <LoadingComponent />;
 
   return (
     <ContainerWithBorder>
