@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
-from django.db.models import JSONField
+from django.db.models import JSONField, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
@@ -418,12 +418,23 @@ class MigrationStatus(TimeStampedModel):
 
 
 class DataCollectingType(TimeStampedModel):
-    code = models.CharField(max_length=60, unique=True)
+    label = models.CharField(max_length=32, blank=True)
+    code = models.CharField(max_length=32)
     description = models.TextField(blank=True)
     compatible_types = models.ManyToManyField("self", blank=True)
+    limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
     active = models.BooleanField(default=True)
     individual_filters_available = models.BooleanField(default=False)
-    limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types")
+    household_filters_available = models.BooleanField(default=True)
+    recalculate_composition = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f"{self.code} - {self.description}"
+        return self.label
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["label", "code"],
+                name="unique_label_code_data_collecting_type",
+            )
+        ]

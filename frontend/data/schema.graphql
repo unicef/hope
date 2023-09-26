@@ -775,12 +775,15 @@ type DataCollectingTypeNode implements Node {
   id: ID!
   created: DateTime!
   modified: DateTime!
+  label: String!
   code: String!
   description: String!
   compatibleTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
+  limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   active: Boolean!
   individualFiltersAvailable: Boolean!
-  limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
+  householdFiltersAvailable: Boolean!
+  recalculateComposition: Boolean!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
