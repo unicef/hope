@@ -16,8 +16,11 @@ from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
@@ -82,6 +85,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = create_afghanistan()
+        generate_data_collecting_types()
 
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
@@ -124,6 +128,12 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         self.assertEqual(3, households_count)
         self.assertEqual(6, individuals_count)
+
+        dct_partial_id = DataCollectingType.objects.get(code="partial").id
+        dct_full_id = DataCollectingType.objects.get(code="full").id
+
+        self.assertEqual(ImportedHousehold.objects.filter(data_collecting_type_id=dct_partial_id).count(), 2)
+        self.assertEqual(ImportedHousehold.objects.filter(data_collecting_type_id=dct_full_id).count(), 1)
 
         individual_data = {
             "full_name": "Some Full Name",

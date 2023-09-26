@@ -103,6 +103,7 @@ class RdiMergeTask:
         "child_hoh",
         "kobo_asset_id",
         "row_id",
+        "data_collecting_type_id",
     )
 
     INDIVIDUAL_FIELDS = (

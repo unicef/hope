@@ -29,7 +29,7 @@ from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
@@ -585,6 +585,24 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
+
+                    if header.value == "collect_individual_data_h_c":
+                        if not DataCollectingType.objects.filter(code=value).exists():
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": header,
+                                    "message": f"Worksheet: Households - DataCollectingType with code {value} does not exists",
+                                }
+                            )
+                        if value == 0:
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": header,
+                                    "message": "Worksheet: Households - DataCollectingType cannot be UNKNOWN type",
+                                }
+                            )
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]

@@ -166,6 +166,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     program_id = models.UUIDField(
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
+    data_collecting_type_id = models.CharField(max_length=5, blank=True, null=True)
 
     @property
     def business_area(self) -> str:
