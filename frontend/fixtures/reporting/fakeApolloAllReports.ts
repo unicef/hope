@@ -7,6 +7,8 @@ export const fakeApolloAllReports = [
       variables: {
         businessArea: 'afghanistan',
         createdBy: null,
+        createdFrom: null,
+        createdTo: null,
         first: 5,
         orderBy: null,
       },
