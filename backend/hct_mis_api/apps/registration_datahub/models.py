@@ -170,7 +170,6 @@ class ImportedHousehold(TimeStampedUUIDModel):
         "core.DataCollectingType", related_name="imported_households", on_delete=models.PROTECT, null=True, blank=True
     )
 
-
     @property
     def business_area(self) -> str:
         return self.registration_data_import.business_area

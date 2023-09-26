@@ -56,13 +56,13 @@ def data_collecting_type_validator(sheet: Worksheet) -> Dict:
                     return {
                         "row_number": row_number,
                         "header": header,
-                        "message": f"Worksheet: Households - DataCollectingType with code {code} does not exists"
+                        "message": f"Worksheet: Households - DataCollectingType with code {code} does not exists",
                     }
                 if code == 0:
                     return {
                         "row_number": row_number,
                         "header": header,
-                        "message": "Worksheet: Households - DataCollectingType cannot be type of UNKNOWN"
+                        "message": "Worksheet: Households - DataCollectingType cannot be type of UNKNOWN",
                     }
 
     return {}
