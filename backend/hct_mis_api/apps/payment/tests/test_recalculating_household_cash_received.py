@@ -12,7 +12,7 @@ from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 
@@ -96,6 +96,10 @@ class TestRecalculatingCash(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
+        cls.data_collecting_type = DataCollectingType.objects.create(
+            code="1", description="Full individual collected", active=True
+        )
+
         cls.create_program_mutation_variables = {
             "programData": {
                 "administrativeAreasOfImplementation": "",
@@ -111,6 +115,7 @@ class TestRecalculatingCash(APITestCase):
                 "scope": "UNICEF",
                 "sector": "MULTI_PURPOSE",
                 "startDate": "2022-07-25",
+                "dataCollectingTypeCode": cls.data_collecting_type.code,
             }
         }
 

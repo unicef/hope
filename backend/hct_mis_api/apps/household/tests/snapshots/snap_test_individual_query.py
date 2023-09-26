@@ -330,3 +330,43 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_1
         }
     ]
 }
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_type_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': '"Invalid search key \'None\'"',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_type_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}

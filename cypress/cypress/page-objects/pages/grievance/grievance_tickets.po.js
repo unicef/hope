@@ -107,9 +107,7 @@ export default class Grievance extends BaseComponent {
   }
 
   chooseTicketListRow(num = 0, contains = "GRV-0000002") {
-    // ToDo: Use after fix bug: 164824
-    // return this.getTicketListRow().eq(num);
-    return this.getTicketListRow().eq(num).find("a").contains(contains);
+    return this.getTicketListRow().eq(num).contains(contains);
   }
 
   chooseCategoryFilter(category) {
@@ -244,16 +242,22 @@ export default class Grievance extends BaseComponent {
   }
 
   openCreationDateFromFilter() {
-    this.getCreationDateFromFilter().find("button").click();
+    this.getCreationDateFromFilter()
+      .find("button")
+      .click();
   }
 
   chooseDayFilterPopup(day) {
-    this.getDaysFilterPopup().contains("p", day).click();
+    this.getDaysFilterPopup()
+      .contains("p", day)
+      .click();
   }
 
   checkDateFilterFrom(date) {
     // Date format (String): YYYY-MM-DD
-    this.getCreationDateFromFilter().find("input").should("have.value", date);
+    this.getCreationDateFromFilter()
+      .find("input")
+      .should("have.value", date);
   }
 
   changeCreationDateTo(date) {
@@ -262,18 +266,24 @@ export default class Grievance extends BaseComponent {
   }
 
   openCreationDateToFilter() {
-    this.getCreationDateToFilter().find("button").click();
+    this.getCreationDateToFilter()
+      .find("button")
+      .click();
   }
 
   checkDateFilterTo(date) {
     // Date format (String): YYYY-MM-DD
-    this.getCreationDateToFilter().find("input").should("have.value", date);
+    this.getCreationDateToFilter()
+      .find("input")
+      .should("have.value", date);
   }
 
   checkDateTitleFilter(date) {
     // Date format (String): Www, Mmm D
     // Example: Sat, Jan 1
-    this.getDateTitleFilterPopup().contains(date).type("{esc}");
+    this.getDateTitleFilterPopup()
+      .contains(date)
+      .type("{esc}");
   }
   chooseTab(tabName) {
     // Possibilities (String): USER-GENERATED, SYSTEM-GENERATED
