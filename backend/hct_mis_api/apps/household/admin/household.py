@@ -75,6 +75,12 @@ class HouseholdAdmin(
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = (
         "admin_area",
+        "admin1",
+        "admin2",
+        "admin3",
+        "admin4",
+        "program",
+        "copied_from",
         "business_area",
         "country",
         "country_origin",
@@ -124,7 +130,7 @@ class HouseholdAdmin(
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
-            "head_of_household", "country", "country_origin", "admin_area"
+            "head_of_household", "country", "country_origin", "admin_area", "admin1", "admin2", "admin3", "admin4"
         )
         ordering = self.get_ordering(request)
         if ordering:

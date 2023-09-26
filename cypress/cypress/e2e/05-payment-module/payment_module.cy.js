@@ -190,55 +190,23 @@ describe("Payment Module", () => {
             });
         });
     });
-    context("Select Entitlement Formula", () => {
-      // ToDo
-    });
-    context("Set up FSP", () => {
-      // ToDo
-    });
-    context("Create Exclude", () => {
-      // ToDo
-    });
-    context("Choose field from Payee List", () => {
-      // ToDo
-    });
-    context("Lock FSP", () => {
-      // ToDo
-    });
-    context("Unlock FSP", () => {
-      // ToDo
-    });
-    context("Send for approval", () => {
-      // ToDo
-    });
-    context("Approve", () => {
-      // ToDo
-    });
-    context("Reject from all points of process", () => {
-      // ToDo
-    });
-    context("Authorize", () => {
-      // ToDo
-    });
-    context("Export XLSX", () => {
-      // ToDo
-    });
-    context("Check Acceptance Process", () => {
-      //ToDo
-    });
+    it("Select Entitlement Formula", () => {});
+    it("Set up FSP", () => {});
+    it("Create Exclude", () => {});
+    it("Choose field from Payee List", () => {});
+    it("Lock FSP", () => {});
+    it("Unlock FSP", () => {});
+    it("Send for approval", () => {});
+    it("Approve", () => {});
+    it("Reject from all points of process", () => {});
+    it("Authorize", () => {});
+    it("Export XLSX", () => {});
+    it("Check Acceptance Process", () => {});
     context("Payment Filters", () => {
-      it.skip("Payment Search filter", () => {
-        // ToDo
-      });
-      it.skip("Payment Status filter", () => {
-        // ToDo
-      });
-      it.skip("Payment Entitled Quantity filter", () => {
-        // ToDo
-      });
-      it.skip("Payment Dispersion Date filter", () => {
-        // ToDo
-      });
+      it.skip("Payment Search filter", () => {});
+      it.skip("Payment Status filter", () => {});
+      it.skip("Payment Entitled Quantity filter", () => {});
+      it.skip("Payment Dispersion Date filter", () => {});
     });
   });
   describe.skip("E2E tests Payment", () => {});

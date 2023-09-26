@@ -773,6 +773,7 @@ class Query(graphene.ObjectType):
             ("full_name", "Full Name"),
             ("phone_no", "Phone Number"),
             ("registration_id", "Registration ID (Aurora)"),
+            ("bank_account_number", "Bank Account Number"),
         ]
         search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
         return [{"name": name, "value": value} for value, name in search_types_choices]
@@ -785,6 +786,7 @@ class Query(graphene.ObjectType):
             ("phone_no", "Phone Number"),
             ("registration_id", "Registration ID (Aurora)"),
             ("kobo_asset_id", "KoBo Asset ID"),
+            ("bank_account_number", "Bank Account Number"),
         ]
         search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
         return [{"name": name, "value": value} for value, name in search_types_choices]

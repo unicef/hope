@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import HopeLogo from './maintenance_hope_logo.png';
+import MaintenanceGraphic from './maintenance_graphic_painter.png';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -69,17 +71,12 @@ export const MaintenancePage: React.FC = () => {
   return (
     <Container>
       <LogoContainer>
-        <img
-          src='./maintenance_hope_logo.png'
-          alt='Hope Logo'
-          width='186'
-          height='101'
-        />
+        <img src={HopeLogo} alt='Hope Logo' width='186' height='101' />
       </LogoContainer>
 
       <SquareLogo>
         <img
-          src='./maintenance_graphic_painter.png'
+          src={MaintenanceGraphic}
           alt='Brush with paint'
           width='354'
           height='293'

@@ -461,9 +461,15 @@ class RdiMergeTask:
                 )
                 raise
 
-            with contextlib.suppress(ConnectionError):
-                cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
-                cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
+            with contextlib.suppress(ConnectionError, AttributeError):
+                for key in cache.keys("*"):
+                    if key.startswith(
+                        (
+                            f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection",
+                            f"count_{obj_hub.business_area_slug}_IndividualNodeConnection",
+                        )
+                    ):
+                        cache.delete(key)
 
         except Exception as e:
             logger.error(e)
