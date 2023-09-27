@@ -117,6 +117,9 @@
             "name": "PaymentHouseholdSnapshotNode"
           },
           {
+            "name": "DocumentNode"
+          },
+          {
             "name": "ApprovalProcessNode"
           },
           {
@@ -184,9 +187,6 @@
           },
           {
             "name": "GrievanceDocumentNode"
-          },
-          {
-            "name": "DocumentNode"
           },
           {
             "name": "BankAccountInfoNode"

@@ -9,7 +9,7 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { PaymentQuery } from '../../../__generated__/graphql';
+import {PaymentDeliveryType, PaymentQuery, PaymentStatus} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
@@ -36,6 +36,52 @@ export function PaymentDetails({
   if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
   }
+
+  const mappedDocumentNumbers = payment.documents?.map(doc => `${doc.type.key} ${doc.documentNumber}`);
+  const documentNumbersDisplay = mappedDocumentNumbers.length > 0 ? mappedDocumentNumbers.join('\n') : null;
+
+  const getSpecialFieldGrids = (): React.ReactElement => {
+    switch (payment.deliveryType) {
+      case PaymentDeliveryType.DepositToCard:
+        return (
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('CARD NUMBER')}
+              value={payment.deliveryMechanism.cardNumber}
+            />
+          </Grid>
+        )
+      case PaymentDeliveryType.MobileMoney:
+        return (
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('MOBILE PHONE NUMBER')}
+              value={payment.deliveryMechanism.phoneNo}
+            />
+          </Grid>
+        )
+      case PaymentDeliveryType.TransferToAccount:
+        return (
+          <>
+            <Grid item xs={3}>
+              <LabelizedField
+                label={t('BANK NUMBER')}
+                value={payment.deliveryMechanism.bankName}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField
+                label={t('BANK ACCOUNT NUMBER')}
+                value={payment.deliveryMechanism.bankAccountNumber}
+              />
+            </Grid>
+          </>
+        )
+      default:
+        return null;
+    }
+  }
+
   return (
     <>
       <ContainerColumnWithBorder>
@@ -70,6 +116,22 @@ export function PaymentDetails({
               value={payment.distributionModality}
             />
           </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('DELIVERY DATE')}
+              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
+            />
+          </Grid>
+          {[
+              PaymentStatus.PartiallyDistributed,
+              PaymentStatus.NotDistributed,
+              PaymentStatus.TransactionErroneous
+          ].includes(payment.status) ? <Grid item xs={3}>
+            <LabelizedField
+              label={t('FAILURE REASON')}
+              value={payment.reasonForUnsuccessfulPayment}
+            />
+          </Grid> : null}
         </Grid>
       </ContainerColumnWithBorder>
       {paymentVerification != null ? (
@@ -111,12 +173,6 @@ export function PaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('Collector')}
-              value={payment.collector.unicefId}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
               label={t('TOTAL PERSON COVERED')}
               value={payment.household.size}
             />
@@ -137,6 +193,24 @@ export function PaymentDetails({
                 payment.collector.phoneNoAlternative,
                 payment.collector.phoneNoAlternativeValid,
               )}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Collector')}
+              value={payment.collector.unicefId}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t("COLLECTOR'S NAME")}
+              value={payment.collector?.fullName}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <LabelizedField
+              label={t("DOCUMENT NUMBERS")}
+              value={documentNumbersDisplay}
             />
           </Grid>
         </Grid>
@@ -169,12 +243,6 @@ export function PaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('DELIVERY DATE')}
-              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
               label={t('TRANSACTION REFERENCE ID')}
               value={payment.transactionReferenceId}
             />
@@ -185,6 +253,7 @@ export function PaymentDetails({
               value={payment.serviceProvider?.fullName}
             />
           </Grid>
+          {getSpecialFieldGrids()}
         </Grid>
       </Overview>
       {canViewActivityLog && (

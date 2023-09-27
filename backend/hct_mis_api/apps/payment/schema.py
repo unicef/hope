@@ -53,8 +53,15 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
-from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+    Document,
+    Household,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.household.schema import DocumentNode, HouseholdNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxReportFilter,
@@ -181,6 +188,26 @@ class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
 class ServiceProviderNode(DjangoObjectType):
     class Meta:
         model = ServiceProvider
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class DeliveryMechanismNode(DjangoObjectType):
+    name = graphene.String()
+    order = graphene.Int()
+    fsp = graphene.Field(FinancialServiceProviderNode)
+
+    def resolve_name(self, info: Any) -> graphene.String:
+        return self.delivery_mechanism
+
+    def resolve_order(self, info: Any) -> graphene.Int:
+        return self.delivery_mechanism_order
+
+    def resolve_fsp(self, info: Any) -> graphene.Field:
+        return self.financial_service_provider
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -325,6 +352,8 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     total_persons_covered = graphene.Int()
     service_provider = graphene.Field(FinancialServiceProviderNode)
     household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
+    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    documents = graphene.List(DocumentNode)
 
     class Meta:
         model = Payment
@@ -366,30 +395,20 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
 
+    def resolve_delivery_mechanism(self, info: Any) -> DeliveryMechanismPerPaymentPlan:
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self.parent).first()
+
+    def resolve_documents(self, info: Any) -> QuerySet:
+        if self.collector:
+            return Document.objects.filter(individual=self.collector)
+        if ind_role := IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first():
+            return Document.objects.filter(individual=ind_role.individual)
+        return Document.objects.none()
+
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:
         """parse list of conflicted payment plans data from Payment model json annotations"""
         return [json.loads(conflict) for conflict in conflicts_data]
-
-
-class DeliveryMechanismNode(DjangoObjectType):
-    name = graphene.String()
-    order = graphene.Int()
-    fsp = graphene.Field(FinancialServiceProviderNode)
-
-    def resolve_name(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism
-
-    def resolve_order(self, info: Any) -> graphene.Int:
-        return self.delivery_mechanism_order
-
-    def resolve_fsp(self, info: Any) -> graphene.Field:
-        return self.financial_service_provider
-
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 def _calculate_volume(
