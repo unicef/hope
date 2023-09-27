@@ -398,11 +398,11 @@ class Query(graphene.ObjectType):
 
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         data_collecting_types = (
-            DataCollectingType.objects.extra(select={"cast_code": "CAST(code AS INTEGER)"})
-            .values("code", "description")
-            .order_by("cast_code")
+            DataCollectingType.objects.filter(active=True).only("code", "label")
+            .values("code", "label")
+            .order_by("label")
         )
         result = []
         for data_collection_type in data_collecting_types:
-            result.append({"name": data_collection_type["description"], "value": data_collection_type["code"]})
+            result.append({"name": data_collection_type["label"], "value": data_collection_type["code"]})
         return result
