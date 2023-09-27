@@ -7,16 +7,8 @@ import {
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-<<<<<<< HEAD
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import {
-  choicesToDict,
-  dateToIsoString,
-  decodeIdString,
-} from '../../../../utils/utils';
-=======
-import { choicesToDict } from '../../../../utils/utils';
->>>>>>> develop
+import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -38,19 +30,12 @@ export const SurveysTable = ({
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
-<<<<<<< HEAD
-    createdBy: decodeIdString(filter.createdBy) || '',
+    createdBy: filter.createdBy || '',
     program: programId,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
-=======
-    createdBy: filter.createdBy || '',
-    createdAtRange:
-     JSON.stringify({min: filter.createdAtRangeMin, max: filter.createdAtRangeMax}),
-    program: filter.program || '',
->>>>>>> develop
   };
   const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
 

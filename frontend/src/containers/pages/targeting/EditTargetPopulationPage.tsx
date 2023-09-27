@@ -1,13 +1,5 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-<<<<<<< HEAD
-=======
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
->>>>>>> develop
 import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
@@ -17,7 +9,6 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useLazyInterval } from '../../../hooks/useInterval';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 

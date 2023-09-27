@@ -1,9 +1,7 @@
 import ProgramManagement from "../../page-objects/pages/program_management/program_management.po";
-import PMDetailsPage from "../../page-objects/pages/program_management/details_page.po";
 import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
 
 let programManagement = new ProgramManagement();
-let programManagementDetails = new PMDetailsPage();
 let programDetails = new ProgramDetails();
 
 describe("Program Management", () => {
@@ -31,7 +29,6 @@ describe("Program Management", () => {
         .getDialogTitle()
         .should("contain", "Set-up a new Programme");
       cy.uniqueSeed().then((seed) => {
-<<<<<<< HEAD
         const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
         programManagement.getInputCashAssistScope().click();
@@ -42,19 +39,6 @@ describe("Program Management", () => {
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
           .getInputDescription()
-=======
-        const programName = `test program ${seed}`;
-        cy.get('[data-cy="input-programme-name"]').type(programName);
-        cy.get('[data-cy="input-cash-assist-scope"]').first().click();
-        cy.get('[data-cy="select-option-Unicef"]').click();
-        cy.get('[data-cy="input-sector"]').first().click();
-        cy.get('[data-cy="select-option-Multi Purpose"]').click();
-        cy.get('[data-cy="input-data-collecting-type"]').first().click();
-        cy.get('[data-cy="select-option-Partial individuals collected"]').click();
-        cy.get('[data-cy="input-start-date"]').click().type("2023-01-01");
-        cy.get('[data-cy="input-end-date"]').click().type("2033-12-30");
-        cy.get('[data-cy="input-description"]')
->>>>>>> develop
           .first()
           .click()
           .type("test description");
@@ -135,8 +119,6 @@ describe("Program Management", () => {
         programManagement.getPageHeaderTitle().contains(editedProgramName);
       });
     });
-<<<<<<< HEAD
-=======
     it("Finish Program", () => {
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="ACTIVE"]').click({ force: true });
@@ -165,7 +147,6 @@ describe("Program Management", () => {
     it.skip("Activate Program", () => {});
     it.skip("Reactivate Program", () => {});
     it.skip("Open in Cashassist", () => {});
->>>>>>> develop
 
     context("PM Filters", () => {
       it.skip("PM Programme filter", () => {});
