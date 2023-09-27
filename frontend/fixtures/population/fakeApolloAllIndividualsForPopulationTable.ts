@@ -6,14 +6,17 @@ export const fakeApolloAllIndividualsForPopulationTable = [
     request: {
       query: AllIndividualsForPopulationTableDocument,
       variables: {
+        age: '{"min":"","max":""}',
         businessArea: 'afghanistan',
+        sex: [''],
         search: '',
+        searchType: 'individual_id',
+        admin2: [''],
+        flags: [],
         status: '',
-        sector: [],
-        numberOfHouseholds: '{"min":"","max":""}',
-        budget: '{"min":"","max":""}',
-        first: 5,
-        orderBy: null,
+        lastRegistrationDate: '{"min":null,"max":null}',
+        first: 10,
+        orderBy: 'unicef_id',
       },
     },
     result: {
