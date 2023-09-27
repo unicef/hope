@@ -13241,7 +13241,7 @@ export type AllProgramsQuery = (
       & Pick<ProgramNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
+        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded' | 'totalNumberOfHouseholdsWithTpInProgram'>
       )> }
     )>> }
   )> }
@@ -25081,6 +25081,7 @@ export const AllProgramsDocument = gql`
         sector
         totalNumberOfHouseholds
         individualDataNeeded
+        totalNumberOfHouseholdsWithTpInProgram
       }
     }
   }
