@@ -9,7 +9,7 @@ from django.utils import timezone
 from faker import Faker
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.models import (
     MALE,
     ROLE_PRIMARY,
@@ -83,7 +83,11 @@ def create_household_with_individual_for_payment_plan(address: str) -> None:
 
 def init_targeting(seed: str) -> None:
     create_household_with_individual(address=f"TargetingVille-{seed}")
-    ProgramFactory(name=f"TargetingProgram-{seed}", status=Program.ACTIVE)
+    ProgramFactory(
+        name=f"TargetingProgram-{seed}",
+        status=Program.ACTIVE,
+        data_collecting_type=DataCollectingType.objects.get(id=2),
+    )
 
 
 def init_clear(seed: str) -> None:

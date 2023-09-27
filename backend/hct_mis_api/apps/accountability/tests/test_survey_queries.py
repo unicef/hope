@@ -17,7 +17,7 @@ class TestSurveyQueries(APITestCase):
         $search: String
         $targetPopulation: ID
         $program: ID
-        $createdBy: ID
+        $createdBy: String
     ) {
       allSurveys(search: $search, targetPopulation: $targetPopulation, program: $program, createdBy: $createdBy) {
         totalCount

@@ -6,10 +6,7 @@ import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../utils/utils';
 
 interface ReportingFiltersProps {
   filter;
@@ -76,21 +73,14 @@ export const ReportingFilters = ({
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder={t('From')}
-            onChange={(date) =>
-              handleFilterChange(
-                'createdFrom',
-                dateToIsoString(date, 'startOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('createdFrom', date)}
             value={filter.createdFrom}
           />
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) =>
-              handleFilterChange('createdTo', dateToIsoString(date, 'endOfDay'))
-            }
+            onChange={(date) => handleFilterChange('createdTo', date)}
             value={filter.createdTo}
           />
         </Grid>

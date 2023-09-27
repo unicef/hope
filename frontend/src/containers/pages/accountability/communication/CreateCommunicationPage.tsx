@@ -194,7 +194,12 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     : [];
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+  if (
+    !hasPermissions(
+      PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
+      permissions,
+    )
+  )
     return <PermissionDenied />;
 
   const getSampleSizePercentage = (): string => {

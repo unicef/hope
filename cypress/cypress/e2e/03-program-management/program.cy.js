@@ -26,6 +26,8 @@ describe("Program Management", () => {
         cy.get('[data-cy="select-option-Unicef"]').click();
         cy.get('[data-cy="input-sector"]').first().click();
         cy.get('[data-cy="select-option-Multi Purpose"]').click();
+        cy.get('[data-cy="input-data-collecting-type"]').first().click();
+        cy.get('[data-cy="select-option-Partial individuals collected"]').click();
         cy.get('[data-cy="input-start-date"]').click().type("2023-01-01");
         cy.get('[data-cy="input-end-date"]').click().type("2033-12-30");
         cy.get('[data-cy="input-description"]')
@@ -107,44 +109,20 @@ describe("Program Management", () => {
       });
       cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
     });
-    it.skip("Remove Program", () => {
-      // ToDo
-    });
-    it.skip("Activate Program", () => {
-      // ToDo
-    });
-    it.skip("Reactivate Program", () => {
-      // ToDo
-    });
-    it.skip("Open in Cashassist", () => {
-      // ToDo
-    });
+    it.skip("Remove Program", () => {});
+    it.skip("Activate Program", () => {});
+    it.skip("Reactivate Program", () => {});
+    it.skip("Open in Cashassist", () => {});
 
     context("PM Filters", () => {
-      it.skip("PM Programme filter", () => {
-        // ToDo
-      });
-      it.skip("PM Status filter", () => {
-        // ToDo
-      });
-      it.skip("PM FSP filter", () => {
-        // ToDo
-      });
-      it.skip("PM Start Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM End Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM Sector filter", () => {
-        // ToDo
-      });
-      it.skip("PM Num. of Households filter", () => {
-        // ToDo
-      });
-      it.skip("PM Budget (USD) filter", () => {
-        // ToDo
-      });
+      it.skip("PM Programme filter", () => {});
+      it.skip("PM Status filter", () => {});
+      it.skip("PM FSP filter", () => {});
+      it.skip("PM Start Date filter", () => {});
+      it.skip("PM End Date filter", () => {});
+      it.skip("PM Sector filter", () => {});
+      it.skip("PM Num. of Households filter", () => {});
+      it.skip("PM Budget (USD) filter", () => {});
     });
   });
   describe.skip("E2E tests Program Management", () => {});
