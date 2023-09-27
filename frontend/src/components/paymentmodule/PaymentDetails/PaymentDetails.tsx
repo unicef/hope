@@ -9,7 +9,7 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import {PaymentDeliveryType, PaymentQuery} from '../../../__generated__/graphql';
+import {PaymentDeliveryType, PaymentQuery, PaymentStatus} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
@@ -46,7 +46,7 @@ export function PaymentDetails({
         return (
           <Grid item xs={3}>
             <LabelizedField
-              label={t("CARD NUMBER")}
+              label={t('CARD NUMBER')}
               value={payment.deliveryMechanism.cardNumber}
             />
           </Grid>
@@ -55,7 +55,7 @@ export function PaymentDetails({
         return (
           <Grid item xs={3}>
             <LabelizedField
-              label={t("MOBILE PHONE NUMBER")}
+              label={t('MOBILE PHONE NUMBER')}
               value={payment.deliveryMechanism.phoneNo}
             />
           </Grid>
@@ -65,13 +65,13 @@ export function PaymentDetails({
           <>
             <Grid item xs={3}>
               <LabelizedField
-                label={t("BANK NUMBER")}
+                label={t('BANK NUMBER')}
                 value={payment.deliveryMechanism.bankName}
               />
             </Grid>
             <Grid item xs={3}>
               <LabelizedField
-                label={t("BANK ACCOUNT NUMBER")}
+                label={t('BANK ACCOUNT NUMBER')}
                 value={payment.deliveryMechanism.bankAccountNumber}
               />
             </Grid>
@@ -122,7 +122,11 @@ export function PaymentDetails({
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
           </Grid>
-          {['PARTIALLY_DISTRIBUTED', 'NOT_DISTRIBUTED', 'TRANSACTION_ERRONEOUS'].includes(payment.status) ? <Grid item xs={3}>
+          {[
+              PaymentStatus.PartiallyDistributed,
+              PaymentStatus.NotDistributed,
+              PaymentStatus.TransactionErroneous
+          ].includes(payment.status) ? <Grid item xs={3}>
             <LabelizedField
               label={t('FAILURE REASON')}
               value={payment.reasonForUnsuccessfulPayment}
