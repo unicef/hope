@@ -5,10 +5,16 @@ let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
+const PaymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
   beforeEach(() => {
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
+  });
+
+  after(() => {
+    cy.initScenario("init_clear");
+    cy.adminLogin();
   });
 
   describe("Smoke tests Payment Verification", () => {
@@ -41,9 +47,7 @@ describe("Payment Verification", () => {
       });
     });
 
-    it.skip("Check Create Verification Plan pop-up", () => {
-      // ToDo
-    });
+    it.skip("Check Create Verification Plan pop-up", () => {});
   });
 
   describe("Component tests Payment Verification", () => {
@@ -78,22 +82,26 @@ describe("Payment Verification", () => {
     });
 
     context("Verification Plan Settings", () => {
-      it.skip("Test_1", () => {
-        // ToDo
-      });
+      it.skip("Test_1", () => {});
     });
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan();
       });
-      it.skip("Test_1", () => {
-        paymentVerificationDetailsPage.getEditVP().contains("EDIT").click();
-        paymentVerificationDetailsPage.getCVPTitle();
+      it("Edit Verification Plan", () => {
+        paymentVerificationDetailsPage.getEditVP().contains("Edit").click();
+        paymentVerificationDetailsPage.getCvpInputAdminCheckbox().click();
+        paymentVerificationDetailsPage
+          .getLabelVERIFICATIONCHANNEL()
+          .contains("MANUAL");
+        paymentVerificationDetailsPage.getXLSX().click();
+        paymentVerificationDetailsPage.getCVPSave().click();
+        paymentVerificationDetailsPage
+          .getLabelVERIFICATIONCHANNEL()
+          .contains("XLSX");
       });
     });
 
@@ -105,7 +113,7 @@ describe("Payment Verification", () => {
           defaultNumberOfVPlans016
         );
       });
-      it.only("Delete Verification Plan", () => {
+      it("Delete Verification Plan", () => {
         cy.scenario([
           "Press Delete button",
           "Press Delete button on pop-up",
@@ -147,15 +155,13 @@ describe("Payment Verification", () => {
 
     context("Finish Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(
           defaultNumberOfVPlans016
         );
       });
-      it.skip("Finish Verification Plan", () => {
+      it("Finish Verification Plan", () => {
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
         paymentVerificationDetailsPage.getStatusVP().contains("ACTIVE");
@@ -166,21 +172,13 @@ describe("Payment Verification", () => {
     });
 
     context("Grievance creation/preview", () => {
-      it.skip("Test_1", () => {
-        // ToDo
-      });
+      it.skip("Test_1", () => {});
     });
 
     context("Verify Payment Record", () => {
-      it.skip("Verify Manually", () => {
-        // ToDo
-      });
-      it.skip("Verify using RapidPro", () => {
-        // ToDo
-      });
-      it.skip("Verify using XLSX", () => {
-        // ToDo
-      });
+      it.skip("Verify Manually", () => {});
+      it.skip("Verify using RapidPro", () => {});
+      it.skip("Verify using XLSX", () => {});
     });
   });
   describe("E2E tests Payment Verification", () => {
@@ -197,8 +195,6 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
-    it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {
-      // ToDo
-    });
+    it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {});
   });
 });

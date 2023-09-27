@@ -41,6 +41,7 @@ export default class Grievance extends BaseComponent {
   tabCreationData = 'th[data-cy="createdAt"]';
   tabLastModifiedDate = 'th[data-cy="userModified"]';
   tabTotalDays = 'th[data-cy="totalDays"]';
+  ticketListRow = 'tr[role="checkbox"]';
   statusOptions = 'li[role="option"]';
 
   dateTitleFilterPopup =
@@ -92,6 +93,7 @@ export default class Grievance extends BaseComponent {
   getTabTotalDays = () => cy.get(this.tabTotalDays);
   getTabSystemGenerated = () => cy.get(this.tabSystemGenerated);
   getTabUserGenerated = () => cy.get(this.tabUserGenerated);
+  getTicketListRow = () => cy.get(this.ticketListRow);
   getDateTitleFilterPopup = () => cy.get(this.dateTitleFilterPopup);
   getDaysFilterPopup = () => cy.get(this.daysFilterPopup);
   getOptions = () => cy.get(this.statusOptions);

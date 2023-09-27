@@ -5,6 +5,7 @@ export default class Targeting extends BaseComponent {
   titlePage = 'h5[data-cy="page-header-title"]';
   searchFilter = 'div[data-cy="filters-search"]';
   statusFilter = 'div[data-cy="filters-status"]';
+  programFilter = 'div[data-cy="filters-program"]';
   minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]';
   maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]';
   buttonCreateNew = 'a[data-cy="button-target-population-create-new"]';
@@ -32,6 +33,7 @@ export default class Targeting extends BaseComponent {
   getTitlePage = () => cy.get(this.titlePage);
   getSearchFilter = () => cy.get(this.searchFilter);
   getStatusFilter = () => cy.get(this.statusFilter);
+  getProgramFilter = () => cy.get(this.programFilter);
   getMinNumberOfHouseholdsFilter = () => cy.get(this.minNumberOfHouseholds);
   getMaxNumberOfHouseholdsFilter = () => cy.get(this.maxNumberOfHouseholds);
   getButtonCreateNew = () => cy.get(this.buttonCreateNew);

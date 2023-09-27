@@ -123,30 +123,14 @@ describe("Program Management", () => {
     });
 
     context("PM Filters", () => {
-      it.skip("PM Programme filter", () => {
-        // ToDo
-      });
-      it.skip("PM Status filter", () => {
-        // ToDo
-      });
-      it.skip("PM FSP filter", () => {
-        // ToDo
-      });
-      it.skip("PM Start Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM End Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM Sector filter", () => {
-        // ToDo
-      });
-      it.skip("PM Num. of Households filter", () => {
-        // ToDo
-      });
-      it.skip("PM Budget (USD) filter", () => {
-        // ToDo
-      });
+      it.skip("PM Programme filter", () => {});
+      it.skip("PM Status filter", () => {});
+      it.skip("PM FSP filter", () => {});
+      it.skip("PM Start Date filter", () => {});
+      it.skip("PM End Date filter", () => {});
+      it.skip("PM Sector filter", () => {});
+      it.skip("PM Num. of Households filter", () => {});
+      it.skip("PM Budget (USD) filter", () => {});
     });
   });
   describe.skip("E2E tests Program Management", () => {});
