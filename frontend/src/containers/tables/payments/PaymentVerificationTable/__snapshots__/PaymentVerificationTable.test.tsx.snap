@@ -29,10 +29,4 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
 </div>
 `;
 
-exports[`containers/tables/payments/PaymentVerificationTable should render with data 1`] = `
-<div>
-  <div>
-    Unexpected error
-  </div>
-</div>
-`;
+exports[`containers/tables/payments/PaymentVerificationTable should render with data 1`] = `<div />`;
