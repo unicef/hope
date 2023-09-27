@@ -862,10 +862,6 @@ type DeliveryMechanismNode implements Node {
   status: String!
   deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
   deliveryMechanismOrder: Int!
-  cardNumber: String
-  phoneNo: String
-  bankName: String
-  bankAccountNumber: String
   name: String
   order: Int
   fsp: FinancialServiceProviderNode
@@ -2767,8 +2763,6 @@ type PaymentNode implements Node {
   distributionModality: String
   totalPersonsCovered: Int
   serviceProvider: FinancialServiceProviderNode
-  deliveryMechanism: DeliveryMechanismNode
-  documents: [DocumentNode]
 }
 
 type PaymentNodeConnection {
