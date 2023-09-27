@@ -12,10 +12,7 @@ import { SelectedProgramRoutesSwitch } from './containers/routers/SelectedProgra
 import { Providers } from './providers';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
-<<<<<<< HEAD
-=======
 import { PageNotFound } from './containers/pages/404/PageNotFound';
->>>>>>> develop
 
 export const App: React.FC = () => {
   return (
