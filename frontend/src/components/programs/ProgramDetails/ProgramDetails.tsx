@@ -93,7 +93,7 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label={t('Data Collecting Type')}
-              value={program.dataCollectingType.description}
+              value={program?.dataCollectingType?.description}
             />
           </Grid>
           <Grid item xs={4}>
