@@ -6,8 +6,15 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
       query: AllCashPlansAndPaymentPlansDocument,
       variables: {
         businessArea: 'afghanistan',
+        search: '',
+        verificationStatus: [],
+        serviceProvider: '',
+        deliveryType: [],
+        startDateGte: null,
+        endDateLte: null,
         program:
-          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtM"UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm"WEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        isPaymentVerificationPage: true,
         first: 5,
         orderBy: null,
       },
