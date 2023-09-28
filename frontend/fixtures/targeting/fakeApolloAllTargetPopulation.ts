@@ -7,12 +7,14 @@ export const fakeApolloAllTargetPopulation = [
       query: AllTargetPopulationsDocument,
       variables: {
         name: '',
-        totalHouseholdsCountMin: null,
+        totalHouseholdsCountMin: 0,
         totalHouseholdsCountMax: null,
-        createdAtRange: '{}',
         status: '',
-        program: [fakeProgram.id],
         businessArea: 'afghanistan',
+        program: [
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        ],
+        createdAtRange: '{"min":null,"max":null}',
         first: 10,
         orderBy: '-created_at',
       },
@@ -31,6 +33,7 @@ export const fakeApolloAllTargetPopulation = [
                 updatedAt: '2023-06-21T09:17:05.273250+00:00',
                 totalHouseholdsCount: 3,
                 totalIndividualsCount: 13,
+                totalHouseholdsCountWithValidPhoneNo: 3,
                 program: {
                   id:
                     'UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm',
@@ -52,7 +55,7 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MGI1NDljMjMtYTMxNC00ZDY0LWIxZDktOGVmMDliYWE1OWFj',
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MGI5MDA0YmYtY2RiNC00Yzc5LWIxMTEtN2YyODgxZGUxNzIz',
                 name: 'Stop per point address bit lose set.',
                 status: 'READY_FOR_CASH_ASSIST',
                 createdAt: '2023-06-21T09:17:04.608777+00:00',
@@ -87,6 +90,7 @@ export const fakeApolloAllTargetPopulation = [
                 updatedAt: '2023-06-21T09:17:01.587942+00:00',
                 totalHouseholdsCount: 2,
                 totalIndividualsCount: 8,
+                totalHouseholdsCountWithValidPhoneNo: 3,
                 program: {
                   id:
                     'UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm',

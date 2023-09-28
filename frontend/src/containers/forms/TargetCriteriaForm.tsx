@@ -105,6 +105,7 @@ interface TargetCriteriaFormPropTypes {
   open: boolean;
   onClose: () => void;
   shouldShowWarningForIndividualFilter?: boolean;
+  individualFiltersAvailable: boolean
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -116,6 +117,7 @@ export function TargetCriteriaForm({
   open,
   onClose,
   shouldShowWarningForIndividualFilter,
+  individualFiltersAvailable
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
@@ -307,56 +309,60 @@ export function TargetCriteriaForm({
                   </Button>
                 </ButtonBox>
               </Box>
-              <AndDivider>
-                <AndDividerLabel>And</AndDividerLabel>
-              </AndDivider>
-              {values.individualsFiltersBlocks.length &&
-              shouldShowWarningForIndividualFilter ? (
-                <DialogDescription>
-                  In your programme, individual rules can only be applied to
-                  head of households.
-                </DialogDescription>
+              {individualFiltersAvailable ? (
+                  <>
+                    <AndDivider>
+                      <AndDividerLabel>And</AndDividerLabel>
+                    </AndDivider>
+                    {values.individualsFiltersBlocks.length &&
+                    shouldShowWarningForIndividualFilter ? (
+                      <DialogDescription>
+                        In your programme, individual rules can only be applied to
+                        head of households.
+                      </DialogDescription>
+                    ) : null}
+                    <FieldArray
+                      name='individualsFiltersBlocks'
+                      render={(arrayHelpers) => (
+                        <ArrayFieldWrapper
+                          arrayHelpers={arrayHelpers}
+                          ref={individualsFiltersBlocksWrapperRef}
+                        >
+                          {values.individualsFiltersBlocks.map((each, index) => {
+                            return (
+                              <TargetCriteriaFilterBlocks
+                                //eslint-disable-next-line
+                                key={index}
+                                blockIndex={index}
+                                data={individualData}
+                                values={values}
+                                onDelete={() => arrayHelpers.remove(index)}
+                              />
+                            );
+                          })}
+                        </ArrayFieldWrapper>
+                      )}
+                    />
+                    <Box display='flex' flexDirection='column'>
+                      <ButtonBox>
+                        <Button
+                          data-cy='button-individual-rule'
+                          onClick={() =>
+                            individualsFiltersBlocksWrapperRef.current
+                              .getArrayHelpers()
+                              .push({
+                                individualBlockFilters: [{ fieldName: '' }],
+                              })
+                          }
+                          color='primary'
+                          startIcon={<AddCircleOutline />}
+                        >
+                          ADD INDIVIDUAL RULE GROUP
+                        </Button>
+                      </ButtonBox>
+                    </Box>
+                  </>
               ) : null}
-              <FieldArray
-                name='individualsFiltersBlocks'
-                render={(arrayHelpers) => (
-                  <ArrayFieldWrapper
-                    arrayHelpers={arrayHelpers}
-                    ref={individualsFiltersBlocksWrapperRef}
-                  >
-                    {values.individualsFiltersBlocks.map((each, index) => {
-                      return (
-                        <TargetCriteriaFilterBlocks
-                          //eslint-disable-next-line
-                          key={index}
-                          blockIndex={index}
-                          data={individualData}
-                          values={values}
-                          onDelete={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
-                  </ArrayFieldWrapper>
-                )}
-              />
-              <Box display='flex' flexDirection='column'>
-                <ButtonBox>
-                  <Button
-                    data-cy='button-individual-rule'
-                    onClick={() =>
-                      individualsFiltersBlocksWrapperRef.current
-                        .getArrayHelpers()
-                        .push({
-                          individualBlockFilters: [{ fieldName: '' }],
-                        })
-                    }
-                    color='primary'
-                    startIcon={<AddCircleOutline />}
-                  >
-                    ADD INDIVIDUAL RULE GROUP
-                  </Button>
-                </ButtonBox>
-              </Box>
             </DialogContent>
             <DialogFooter>
               <DialogActions>

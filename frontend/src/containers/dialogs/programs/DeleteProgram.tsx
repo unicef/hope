@@ -3,19 +3,19 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   AllProgramsForChoicesDocument,
   AllProgramsQuery,
-  ProgramNode,
+  ProgramQuery,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const RemoveButton = styled(Button)`
   && {
@@ -38,7 +38,7 @@ const MidDialog = styled(Dialog)`
 `;
 
 interface DeleteProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export const DeleteProgram = ({
