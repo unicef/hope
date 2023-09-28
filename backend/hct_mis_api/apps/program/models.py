@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Collection, Optional
+from typing import Collection, Optional, Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
