@@ -3,7 +3,7 @@ import { Group, Person } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TargetPopulationStatus, ProgramNode } from '../../../../__generated__/graphql';
+import { TargetPopulationStatus } from '../../../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
@@ -17,7 +17,6 @@ import { SelectFilter } from '../../../core/SelectFilter';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;
-  programs: ProgramNode[];
   addBorder?: boolean;
   setFilter: (filter) => void;
   initialFilter;
