@@ -6,10 +6,12 @@ export const fakeApolloAllRegistrationDataImports = [
     request: {
       query: AllRegistrationDataImportsDocument,
       variables: {
+        search: '',
         businessArea: 'afghanistan',
-        program: fakeProgram.id,
-        importDateRange: '{}',
-        size: '{}',
+        program:
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        importDateRange: '{"min":null,"max":null}',
+        size: '{"min":"","max":""}',
         first: 10,
         orderBy: '-import_date',
       },

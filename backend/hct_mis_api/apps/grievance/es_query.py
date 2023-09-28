@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List
 
+from hct_mis_api.apps.core.exceptions import SearchException
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 from hct_mis_api.apps.household.models import DocumentType
@@ -78,7 +79,7 @@ def create_es_query(options: Dict) -> Dict:
                 {"term": {"ticket_details.household.head_of_household.documents.number": {"value": value}}}
             )
         else:
-            raise KeyError(f"Invalid search key '{key}'")
+            raise SearchException(f"Invalid search key '{key}'")
 
     order_by = options.pop("order_by", ["-created_at"])
     order_by = order_by[0]

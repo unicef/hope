@@ -37,10 +37,6 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
 <div>
   <div
     class="sc-bdVaJa ksQzqc"
-  >
-    <div>
-      Unexpected error
-    </div>
-  </div>
+  />
 </div>
 `;

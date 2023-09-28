@@ -1,23 +1,23 @@
 import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import {
+  AllProgramsQuery,
+  ProgrammeChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   choicesToDict,
   formatCurrency,
   programStatusToColor,
 } from '../../../../utils/utils';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpProgrammesTableRowSurveysProps {
-  program: ProgramNode;
+  program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
   choicesData: ProgrammeChoiceDataQuery;
   radioChangeHandler: (program) => void;
   selectedProgram: string;

@@ -102,7 +102,7 @@ export const PaymentFilters = ({
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
-            label='Modality'
+            label='Delivery Mechanism'
             data-cy='filter-Modality'
             multiple
             value={filter.deliveryType}

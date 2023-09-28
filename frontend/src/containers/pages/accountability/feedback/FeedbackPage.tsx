@@ -38,13 +38,13 @@ export const FeedbackPage = (): React.ReactElement => {
   if (permissions === null) return null;
   if (
     !hasPermissionInModule(
-      PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
+      PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
       permissions,
     )
   )
     return <PermissionDenied />;
   const canViewDetails = hasPermissionInModule(
-    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS,
+    PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
     permissions,
   );
 
