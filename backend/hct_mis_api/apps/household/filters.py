@@ -14,6 +14,7 @@ from django_filters import (
     OrderingFilter,
 )
 
+from hct_mis_api.apps.core.exceptions import SearchException
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     BusinessAreaSlugFilter,
@@ -146,27 +147,33 @@ class HouseholdFilter(FilterSet):
         business_area = self.data["business_area"]
         search = value.strip()
         search_type = self.data.get("search_type")
+
+        if search_type == "kobo_asset_id":
+            split_values_list = search.split(" ")
+            inner_query = Q()
+            for split_value in split_values_list:
+                striped_value = split_value.strip(",")
+                if striped_value.startswith(("HOPE-", "KOBO-")):
+                    _value = _prepare_kobo_asset_id_value(search)
+                    # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    # will filter by '111222' like 111222 is ID
+                    inner_query |= Q(kobo_asset_id__endswith=_value)
+            return qs.filter(inner_query).distinct()
+
         query_dict = get_elasticsearch_query_for_households(search, search_type, business_area)
         es_response = (
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-
-        split_values_list = search.split(" ")
-        inner_query = Q()
-        for split_value in split_values_list:
-            striped_value = split_value.strip(",")
-            if striped_value.startswith(("HOPE-", "KOBO-")):
-                _value = _prepare_kobo_asset_id_value(search)
-                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                # will filter by '111222' like 111222 is ID
-                inner_query |= Q(kobo_asset_id__endswith=_value)
-        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
+        return qs.filter(id__in=es_ids)
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
-        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
-            return self._search_es(qs, value)
-        return self._search_db(qs, value)
+        try:
+            if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
+                return self._search_es(qs, value)
+            return self._search_db(qs, value)
+        except SearchException:
+            return qs.none()
 
     def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
         search = value.strip()
@@ -184,6 +191,10 @@ class HouseholdFilter(FilterSet):
                 | Q(head_of_household__phone_no_alternative__icontains=search)
             )
         if search_type == "registration_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchException("The search value for a given search type should be a number")
             return qs.filter(registration_id__icontains=search)
         if search_type == "kobo_asset_id":
             inner_query = Q()
@@ -203,7 +214,7 @@ class HouseholdFilter(FilterSet):
                 head_of_household__documents__type__key=search_type,
                 head_of_household__documents__document_number__icontains=search,
             )
-        raise KeyError(f"Invalid search key '{search_type}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
 
     def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
@@ -282,9 +293,12 @@ class IndividualFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids)).distinct()
 
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
-            return self._search_es(qs, value)
-        return self._search_db(qs, value)
+        try:
+            if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
+                return self._search_es(qs, value)
+            return self._search_db(qs, value)
+        except SearchException:
+            return qs.none()
 
     def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
         search_type = self.data.get("search_type")
@@ -298,12 +312,16 @@ class IndividualFilter(FilterSet):
         if search_type == "phone_no":
             return qs.filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
         if search_type == "registration_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchException("The search value for a given search type should be a number")
             return qs.filter(registration_id__icontains=search)
         if search_type == "bank_account_number":
             return qs.filter(bank_account_info__bank_account_number__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
             return qs.filter(documents__type__key=search_type, documents__document_number__icontains=search)
-        raise KeyError(f"Invalid search key '{search_type}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
 
     def search_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
         return qs
@@ -338,6 +356,10 @@ def get_elasticsearch_query_for_individuals(search: str, search_type: str, busin
             {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
         )
     elif search_type == "registration_id":
+        try:
+            int(search)
+        except ValueError:
+            raise SearchException("The search value for a given search type should be a number")
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
     elif search_type == "bank_account_number":
         all_queries.append({"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}})
@@ -353,7 +375,7 @@ def get_elasticsearch_query_for_individuals(search: str, search_type: str, busin
             }
         )
     else:
-        raise KeyError(f"Invalid search key '{search_type}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
 
     return {
         "size": "100",
@@ -385,7 +407,14 @@ def get_elasticsearch_query_for_households(search: str, search_type: str, busine
             {"match_phrase_prefix": {"head_of_household.bank_account_info.bank_account_number": {"query": search}}}
         )
     elif search_type == "registration_id":
+        try:
+            int(search)
+        except ValueError:
+            raise SearchException("The search value for a given search type should be a number")
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
+    elif search_type == "kobo_asset_id":
+        # Handled on postgres side
+        pass
     elif DocumentType.objects.filter(key=search_type).exists():
         all_queries.append(
             {
@@ -398,7 +427,7 @@ def get_elasticsearch_query_for_households(search: str, search_type: str, busine
             }
         )
     else:
-        raise KeyError(f"Invalid search key '{search_type}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
 
     query: Dict[str, Any] = {
         "size": "100",
