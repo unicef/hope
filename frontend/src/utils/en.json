@@ -823,9 +823,5 @@
   "Messages List": "Messages List",
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
-  "Preview Exclusion": "Preview Exclusion",
-  "CARD NUMBER": "CARD NUMBER",
-  "MOBILE PHONE NUMBER": "MOBILE PHONE NUMBER",
-  "BANK NUMBER": "BANK NUMBER",
-  "BANK ACCOUNT NUMBER": "BANK ACCOUNT NUMBER"
+  "Preview Exclusion": "Preview Exclusion"
 }
