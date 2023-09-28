@@ -5,12 +5,13 @@ export const fakeApolloAllCommunicationMessages = [
     request: {
       query: AllAccountabilityCommunicationMessagesDocument,
       variables: {
-        createdAtRange: '',
+        createdAtRange: '{"min":null,"max":null}',
+        program:
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
         targetPopulation: '',
         createdBy: '',
         first: 10,
         orderBy: '-created_at',
-        program: '',
       },
     },
     result: {

@@ -14,7 +14,6 @@ export const fakeApolloAllPaymentVerifications = [
           'Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA==',
         first: 5,
         orderBy: null,
-        program: fakeProgram.id,
       },
     },
     result: {

@@ -67,7 +67,7 @@ def pre_filter_query_with_headers(info: Any) -> QuerySet:
     business_area_slug = info.context.headers.get("Business-Area")
     encoded_program_id = info.context.headers.get("Program")
 
-    query = GrievanceTicket.objects.all()
+    query = GrievanceTicket.objects.filter(ignored=False)
 
     if business_area_slug:
         query = query.filter(business_area__slug=business_area_slug)

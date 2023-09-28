@@ -6,15 +6,17 @@ export const fakeApolloAllPaymentPlansForTable = [
       query: AllPaymentPlansForTableDocument,
       variables: {
         businessArea: 'afghanistan',
-        search: '',
-        status: [],
         totalEntitledQuantityFrom: null,
         totalEntitledQuantityTo: null,
         isFollowUp: null,
         program:
-          'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
         first: 5,
         orderBy: '-created_at',
+        search: '',
+        dispersionStartDate: undefined,
+        dispersionEndDate: undefined,
+        status: [],
       },
     },
     result: {

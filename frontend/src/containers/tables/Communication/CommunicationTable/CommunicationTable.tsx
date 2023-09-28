@@ -7,10 +7,10 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
-import { dateToIsoString } from '../../../../utils/utils';
 
 interface CommunicationTableProps {
   filter;

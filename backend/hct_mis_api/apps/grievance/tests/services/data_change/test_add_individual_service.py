@@ -3,6 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import TicketAddIndividualDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.add_individual_service import (
@@ -12,8 +13,8 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import SINGLE, Individual
 
 
-class TestAddIndividualService(TestCase):
-    databases = {"default"}
+class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
+    databases = {"default", "registration_datahub"}
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -37,6 +38,8 @@ class TestAddIndividualService(TestCase):
 
         cls.household = household
         cls.ticket = ticket
+
+        super().setUpTestData()
 
     def test_increase_household_size_on_close_ticket(self) -> None:
         self.household.size = 3

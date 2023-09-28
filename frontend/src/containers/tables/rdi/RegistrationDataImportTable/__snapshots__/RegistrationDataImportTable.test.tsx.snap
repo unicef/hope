@@ -37,10 +37,6 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
 <div>
   <div
     class="sc-bdVaJa ksQzqc"
-  >
-    <div>
-      Unexpected error
-    </div>
-  </div>
+  />
 </div>
 `;

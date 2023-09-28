@@ -2,20 +2,20 @@ import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  ProgramQuery,
+  useUpdateProgramMutation,
+} from '../../../__generated__/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '../../../components/core/LoadingButton';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
-import {
-  ProgramNode,
-  useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface EditProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export function EditProgram({ program }: EditProgramProps): ReactElement {
@@ -94,7 +94,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
   return (
     <span>
       <Button
-          data-cy='button-edit-program'
+        data-cy='button-edit-program'
         variant='outlined'
         color='primary'
         startIcon={<EditIcon />}

@@ -22,7 +22,7 @@ export default class PaymentVerification extends BaseComponent {
   textPaymentPlanID = "Payment Plan ID";
   textStatus = "Status";
   textFSP = "FSP";
-  textModality = "Modality";
+  textModality = "Delivery Mechanism";
   textStartDate = "Start Date";
   textEndDate = "End Date";
   textPaymentPlanID = "Payment Plan ID";
