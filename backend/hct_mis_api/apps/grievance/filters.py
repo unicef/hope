@@ -265,7 +265,6 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(household_unicef_id__in=unicef_ids)
         raise KeyError(f"Invalid search search_type '{search_type}'")
 
-
     def search_type_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs
 
