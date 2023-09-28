@@ -412,7 +412,6 @@ def get_elasticsearch_query_for_households(search: str, search_type: str, busine
         except ValueError:
             raise SearchException("The search value for a given search type should be a number")
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
-    elif DocumentType.objects.filter(key=search_type).exists():
     elif search_type == "kobo_asset_id":
         # Handled on postgres side
         pass
