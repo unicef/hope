@@ -296,17 +296,20 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
-            ("without_permission", []),
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], "1"),
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], "1/11"),
+            ("without_permission", [], "1"),
         ]
     )
-    def test_query_individuals_by_search_registration_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_query_individuals_by_search_registration_id_filter(
+        self, _: Any, permissions: List[Permissions], search: str
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": "1", "searchType": "registration_id"},
+            variables={"search": search, "searchType": "registration_id"},
         )
 
     @parameterized.expand(

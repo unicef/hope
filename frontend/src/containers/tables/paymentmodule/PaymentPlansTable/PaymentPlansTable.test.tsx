@@ -15,7 +15,15 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
       >
         <PaymentPlansTable
           canViewDetails={false}
-          filter={{}}
+          filter={{
+            search: '',
+            dispersionStartDate: undefined,
+            dispersionEndDate: undefined,
+            status: [],
+            totalEntitledQuantityFrom: null,
+            totalEntitledQuantityTo: null,
+            isFollowUp: null,
+          }}
           businessArea='afghanistan'
         />
       </MockedProvider>,
@@ -34,7 +42,15 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
       >
         <PaymentPlansTable
           canViewDetails={false}
-          filter={{}}
+          filter={{
+            search: '',
+            dispersionStartDate: undefined,
+            dispersionEndDate: undefined,
+            status: [],
+            totalEntitledQuantityFrom: null,
+            totalEntitledQuantityTo: null,
+            isFollowUp: null,
+          }}
           businessArea='afghanistan'
         />
       </MockedProvider>,
