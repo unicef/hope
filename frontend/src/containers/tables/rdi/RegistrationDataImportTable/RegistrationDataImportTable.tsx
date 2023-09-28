@@ -7,7 +7,11 @@ import {
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
+<<<<<<< HEAD
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+=======
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+>>>>>>> develop
 import { dateToIsoString, decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';

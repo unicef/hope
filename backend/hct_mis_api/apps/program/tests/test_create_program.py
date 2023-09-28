@@ -29,6 +29,7 @@ class TestCreateProgram(APITestCase):
           administrativeAreasOfImplementation
           dataCollectingType {
             code
+            label
             description
             active
             individualFiltersAvailable
@@ -45,7 +46,7 @@ class TestCreateProgram(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="1", description="Partial individuals collected", active=True, individual_filters_available=True
+            code="1", label="Partial", description="Partial individuals collected", active=True, individual_filters_available=True
         )
         cls.program_data = {
             "programData": {

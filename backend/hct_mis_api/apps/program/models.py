@@ -151,6 +151,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
     )
 
+    @staticmethod
+    def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
+        return (
+            qs.filter(**{"payment_items__delivered_quantity__gt": 0})
+            .distinct("payment_items__household__unicef_id")
+            .values_list("payment_items__household__unicef_id", flat=True)
+            .order_by("payment_items__household__unicef_id")
+            .count()
+        )
+
     @property
     def total_number_of_households(self) -> int:
         return self.household_set.count()
