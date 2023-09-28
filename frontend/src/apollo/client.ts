@@ -59,6 +59,20 @@ const redirectLink = new ApolloLink((operation, forward) => {
   });
 });
 
+const isDataNull = (data): boolean => {
+  return Object.values(data).some((value) => value === null);
+};
+
+//redirect to 404 page if data is null
+const redirectLink = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
+    if (response.data && isDataNull(response.data)) {
+      window.location.href = '/404';
+    }
+    return response;
+  });
+});
+
 function findValidationErrors(
   data,
   name = 'ROOT',

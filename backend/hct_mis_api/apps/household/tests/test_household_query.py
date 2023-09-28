@@ -165,6 +165,8 @@ class TestHouseholdQuery(APITestCase):
             cls.households.append(household)
 
         household = cls.households[0]
+        household.registration_id = 123
+        household.save()
         household.refresh_from_db()
         household.head_of_household.phone_no = "+18663567905"
         household.head_of_household.save()
@@ -309,6 +311,24 @@ class TestHouseholdQuery(APITestCase):
             request_string=ALL_HOUSEHOLD_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": "123-456-789", "searchType": "national_id"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123"),
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
+            ("without_permission", [], "123"),
+        ]
+    )
+    def test_query_households_by_registration_id_filter(
+        self, _: Any, permissions: List[Permissions], search: str
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            variables={"search": search, "searchType": "registration_id"},
         )
 
     @parameterized.expand(

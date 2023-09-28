@@ -7,13 +7,13 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
+import { individualTableOrderOptions } from '../../utils/constants';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { individualTableOrderOptions } from '../../utils/constants';
 
 interface IndividualsFilterProps {
   filter;

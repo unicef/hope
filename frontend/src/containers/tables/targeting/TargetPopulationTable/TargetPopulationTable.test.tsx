@@ -11,10 +11,18 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
   const initialFilter = {
     name: '',
     status: '',
+<<<<<<< HEAD
     program: [fakeProgram.id],
     totalHouseholdsCountMin: '',
     totalHouseholdsCountMax: '',
     createdAtRange: undefined,
+=======
+    program: '',
+    numIndividualsMin: null,
+    numIndividualsMax: null,
+    createdAtRangeMin: undefined,
+    createdAtRangeMax: undefined,
+>>>>>>> develop
   };
 
   it('should render with data', async () => {

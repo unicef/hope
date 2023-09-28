@@ -88,15 +88,10 @@ describe("Targeting", () => {
       });
     });
     context("Targeting Filters", () => {
-      it.skip("Targeting Search filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Status filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Number of Households filter", () => {
-        // ToDo
-      });
+      it.skip("Targeting Search filter", () => {});
+      it.skip("Targeting Status filter", () => {});
+      it.skip("Targeting Programme filter", () => {});
+      it.skip("Targeting Number of Households filter", () => {});
     });
     context("Edit targeting", () => {
       it.skip("Edit", () => {});

@@ -66,9 +66,7 @@ export const ProgramForm = ({
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-  const {
-    data: { dataCollectionTypeChoices },
-  } = useDataCollectionTypeChoiceDataQuery();
+const { data: {dataCollectionTypeChoices} } = useDataCollectionTypeChoiceDataQuery()
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))
