@@ -66,7 +66,9 @@ export const ProgramForm = ({
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-const { data: {dataCollectionTypeChoices} } = useDataCollectionTypeChoiceDataQuery()
+  const {
+    data: dataCollectionTypeData,
+  } = useDataCollectionTypeChoiceDataQuery();
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))
@@ -136,7 +138,7 @@ const { data: {dataCollectionTypeChoices} } = useDataCollectionTypeChoiceDataQue
   if (formInitialValue.budget === 0) {
     formInitialValue.budget = '0.00';
   }
-  if (!data || !dataCollectionTypeChoices) return null;
+  if (!data || !dataCollectionTypeData) return null;
 
   const withoutIndividualDataText = t(
     'This programme will use only household and/or head of household details for targeting or entitlement calculation',
@@ -222,7 +224,7 @@ const { data: {dataCollectionTypeChoices} } = useDataCollectionTypeChoiceDataQue
                     fullWidth
                     variant='outlined'
                     required
-                    choices={dataCollectionTypeChoices}
+                    choices={dataCollectionTypeData?.dataCollectionTypeChoices}
                     component={FormikSelectField}
                     data-cy='input-data-collecting-type'
                   />
