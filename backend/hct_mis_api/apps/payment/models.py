@@ -35,7 +35,6 @@ from graphql import GraphQLError
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
-from phonenumber_field.modelfields import PhoneNumberField
 from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
@@ -1219,13 +1218,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
-    # Deposit to card
-    card_number = models.CharField(max_length=64, blank=True, null=True)
-    # Mobile Money
-    phone_no = PhoneNumberField(blank=True, null=True)
-    # Transfer to account
-    bank_name = models.CharField(max_length=255, blank=True, null=True)
-    bank_account_number = models.CharField(max_length=64, blank=True, null=True)
 
     class Meta:
         constraints = [
