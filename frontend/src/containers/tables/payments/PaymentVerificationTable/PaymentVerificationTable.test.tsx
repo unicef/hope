@@ -21,13 +21,8 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
             verificationStatus: [],
             serviceProvider: '',
             deliveryType: [],
-<<<<<<< HEAD
-            startDate: undefined,
-            endDate: undefined,
-=======
             startDateGte: undefined,
             endDateLte: undefined,
->>>>>>> develop
           }}
         />
       </MockedProvider>,
@@ -52,13 +47,8 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
             verificationStatus: [],
             serviceProvider: '',
             deliveryType: [],
-<<<<<<< HEAD
-            startDate: undefined,
-            endDate: undefined,
-=======
             startDateGte: undefined,
             endDateLte: undefined,
->>>>>>> develop
           }}
         />
       </MockedProvider>,
