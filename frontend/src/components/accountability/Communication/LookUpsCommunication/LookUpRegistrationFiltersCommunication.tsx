@@ -86,7 +86,7 @@ export const LookUpRegistrationFiltersCommunication = ({
           </Grid>
           <Grid item xs={3}>
             <NumberTextField
-              topLabel={t('Num. of Households')}
+              topLabel={t('Num. of Recipients')}
               value={filter.totalHouseholdsCountWithValidPhoneNoMin}
               placeholder='From'
               icon={<GroupIcon />}

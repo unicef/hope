@@ -114,7 +114,7 @@ export const LookUpTargetPopulationFiltersCommunication = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Number of Households')}
+            topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
             placeholder={t('From')}
             onChange={(e) =>
