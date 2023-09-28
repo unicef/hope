@@ -9,6 +9,8 @@ export const fakeApolloAllReports = [
         createdFrom: null,
         createdTo: null,
         createdBy: null,
+        createdFrom: null,
+        createdTo: null,
         first: 5,
         orderBy: null,
       },

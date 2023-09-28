@@ -7,8 +7,8 @@ import {
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
