@@ -111,5 +111,16 @@ describe("Targeting", () => {
   });
   describe.skip("E2E tests Targeting", () => {});
 
-  describe.skip("Regression tests Targeting", () => {});
+  describe.skip("Regression tests Targeting", () => {
+    it.only("173542: GPF: Error occurs after apply empty Number of Households field", () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Delete value from Number of Households",
+        "Press button Apply",
+      ]);
+      targetingPage.filter;
+    });
+  });
 });
