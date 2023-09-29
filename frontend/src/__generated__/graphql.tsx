@@ -9503,13 +9503,13 @@ export type ImportedIndividualDetailedFragment = (
 );
 
 export type TargetPopulationMinimalFragment = (
-  { __typename?: 'TargetPopulationNode' }
+  { __typename: 'TargetPopulationNode' }
   & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'totalHouseholdsCount' | 'totalHouseholdsCountWithValidPhoneNo' | 'totalIndividualsCount'>
   & { program: Maybe<(
-    { __typename?: 'ProgramNode' }
+    { __typename: 'ProgramNode' }
     & Pick<ProgramNode, 'id' | 'name'>
   )>, createdBy: Maybe<(
-    { __typename?: 'UserNode' }
+    { __typename: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )> }
 );
@@ -9518,35 +9518,35 @@ export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
   & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'buildStatus' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'childMaleCount' | 'childFemaleCount' | 'adultMaleCount' | 'adultFemaleCount' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'changeDate' | 'finalizedAt'>
   & { steficonRule: Maybe<(
-    { __typename?: 'RuleCommitNode' }
+    { __typename: 'RuleCommitNode' }
     & Pick<RuleCommitNode, 'id'>
     & { rule: Maybe<(
-      { __typename?: 'SteficonRuleNode' }
+      { __typename: 'SteficonRuleNode' }
       & Pick<SteficonRuleNode, 'id' | 'name'>
     )> }
   )>, finalizedBy: Maybe<(
-    { __typename?: 'UserNode' }
+    { __typename: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
-    { __typename?: 'ProgramNode' }
+    { __typename: 'ProgramNode' }
     & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate'>
   )>, createdBy: Maybe<(
-    { __typename?: 'UserNode' }
+    { __typename: 'UserNode' }
     & Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>
   )>, targetingCriteria: Maybe<(
-    { __typename?: 'TargetingCriteriaNode' }
-    & Pick<TargetingCriteriaNode, 'flagExcludeIfActiveAdjudicationTicket' | 'flagExcludeIfOnSanctionList'>
+    { __typename: 'TargetingCriteriaNode' }
+    & Pick<TargetingCriteriaNode, 'id' | 'flagExcludeIfActiveAdjudicationTicket' | 'flagExcludeIfOnSanctionList'>
     & { rules: Maybe<Array<Maybe<(
-      { __typename?: 'TargetingCriteriaRuleNode' }
+      { __typename: 'TargetingCriteriaRuleNode' }
       & Pick<TargetingCriteriaRuleNode, 'id'>
       & { individualsFiltersBlocks: Maybe<Array<Maybe<(
-        { __typename?: 'TargetingIndividualRuleFilterBlockNode' }
+        { __typename: 'TargetingIndividualRuleFilterBlockNode' }
         & { individualBlockFilters: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingIndividualBlockRuleFilterNode' }
-          & Pick<TargetingIndividualBlockRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisonMethod'>
+          { __typename: 'TargetingIndividualBlockRuleFilterNode' }
+          & Pick<TargetingIndividualBlockRuleFilterNode, 'id' | 'fieldName' | 'isFlexField' | 'arguments' | 'comparisonMethod'>
           & { fieldAttribute: Maybe<(
-            { __typename?: 'FieldAttributeNode' }
-            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            { __typename: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'id' | 'name' | 'labelEn' | 'type'>
             & { choices: Maybe<Array<Maybe<(
               { __typename?: 'CoreFieldChoiceObject' }
               & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
@@ -9554,11 +9554,11 @@ export type TargetPopulationDetailedFragment = (
           )> }
         )>>> }
       )>>>, filters: Maybe<Array<Maybe<(
-        { __typename?: 'TargetingCriteriaRuleFilterNode' }
-        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisonMethod'>
+        { __typename: 'TargetingCriteriaRuleFilterNode' }
+        & Pick<TargetingCriteriaRuleFilterNode, 'id' | 'fieldName' | 'isFlexField' | 'arguments' | 'comparisonMethod'>
         & { fieldAttribute: Maybe<(
-          { __typename?: 'FieldAttributeNode' }
-          & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          { __typename: 'FieldAttributeNode' }
+          & Pick<FieldAttributeNode, 'id' | 'name' | 'labelEn' | 'type'>
           & { choices: Maybe<Array<Maybe<(
             { __typename?: 'CoreFieldChoiceObject' }
             & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
@@ -15262,14 +15262,17 @@ export const TargetPopulationMinimalFragmentDoc = gql`
   totalHouseholdsCount
   totalHouseholdsCountWithValidPhoneNo
   totalIndividualsCount
+  __typename
   program {
     id
     name
+    __typename
   }
   createdBy {
     id
     firstName
     lastName
+    __typename
   }
 }
     `;
@@ -15289,8 +15292,10 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   excludedIds
   exclusionReason
   steficonRule {
+    __typename
     id
     rule {
+      __typename
       id
       name
     }
@@ -15300,11 +15305,13 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   changeDate
   finalizedAt
   finalizedBy {
+    __typename
     id
     firstName
     lastName
   }
   program {
+    __typename
     id
     name
     status
@@ -15312,23 +15319,32 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     endDate
   }
   createdBy {
+    __typename
     id
     email
     firstName
     lastName
   }
   targetingCriteria {
+    __typename
+    id
     flagExcludeIfActiveAdjudicationTicket
     flagExcludeIfOnSanctionList
     rules {
+      __typename
       id
       individualsFiltersBlocks {
+        __typename
         individualBlockFilters {
+          __typename
+          id
           fieldName
           isFlexField
           arguments
           comparisonMethod
           fieldAttribute {
+            __typename
+            id
             name
             labelEn
             type
@@ -15340,11 +15356,15 @@ export const TargetPopulationDetailedFragmentDoc = gql`
         }
       }
       filters {
+        __typename
+        id
         fieldName
         isFlexField
         arguments
         comparisonMethod
         fieldAttribute {
+          __typename
+          id
           name
           labelEn
           type
