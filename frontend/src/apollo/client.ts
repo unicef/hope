@@ -48,12 +48,25 @@ const isDataNull = (data): boolean => {
   return Object.values(data).some((value) => value === null);
 };
 
+const hasDataError = (data): boolean => {
+  return data && (data.error || data?.errors?.length > 0);
+};
+
 //redirect to 404 page if data is null
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
-    if (response.data && isDataNull(response.data)) {
+    if (hasDataError(response.data)) {
+      // eslint-disable-next-line no-console
+      console.error(response.data?.error || response.data?.errors);
+    }
+    if (
+      response.data &&
+      isDataNull(response.data) &&
+      !hasDataError(response.data)
+    ) {
       const pathSegments = window.location.pathname.split('/');
       const businessArea = pathSegments[1];
+
       window.location.href = `/404/${businessArea}`;
     }
     return response;
