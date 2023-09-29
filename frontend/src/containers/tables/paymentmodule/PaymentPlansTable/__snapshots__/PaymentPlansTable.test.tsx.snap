@@ -375,7 +375,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-4 of 4
+            1-2 of 2
           </p>
           <div
             class="MuiTablePagination-actions"
