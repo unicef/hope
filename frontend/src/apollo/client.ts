@@ -52,7 +52,9 @@ const isDataNull = (data): boolean => {
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
     if (response.data && isDataNull(response.data)) {
-      window.location.href = '/404';
+      const pathSegments = window.location.pathname.split('/');
+      const businessArea = pathSegments[1];
+      window.location.href = `/404/${businessArea}`;
     }
     return response;
   });
