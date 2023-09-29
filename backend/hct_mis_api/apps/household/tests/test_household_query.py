@@ -140,12 +140,16 @@ class TestHouseholdQuery(APITestCase):
 
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household(
-                {"size": family_size, "address": "Lorem Ipsum", "country_origin": country_origin},
+                {"size": family_size, "address": f"Lorem Ipsum {family_size}", "country_origin": country_origin},
             )
             if index % 2:
                 household.programs.add(cls.program_one)
+                household.program_id = cls.program_one.pk
+                household.save()
             else:
                 household.programs.add(cls.program_two)
+                household.program_id = cls.program_two.pk
+                household.save()
                 # added for testing migrate_data_to_representations script
                 if family_size == 14:
                     household.programs.add(cls.program_one)
@@ -316,7 +320,7 @@ class TestHouseholdQuery(APITestCase):
     @parameterized.expand(
         [
             ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123"),
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
+            ("with_permission_wrong_type_in_search", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
             ("without_permission", [], "123"),
         ]
     )
