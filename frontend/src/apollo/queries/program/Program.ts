@@ -23,10 +23,12 @@ export const PROGRAM_QUERY = gql`
       individualDataNeeded
       version
       dataCollectingType {
+        id
         code
         label
         active
         individualFiltersAvailable
+        householdFiltersAvailable
       }
     }
   }
