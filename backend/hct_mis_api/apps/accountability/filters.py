@@ -116,6 +116,7 @@ class FeedbackMessageFilter(FilterSet):
 
 
 class SurveyFilter(FilterSet):
+    business_area = BusinessAreaSlugFilter()
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
     created_by = CharFilter(method="filter_created_by")
