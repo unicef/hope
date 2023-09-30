@@ -5578,6 +5578,7 @@ export type QueryAllSurveysArgs = {
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
   targetPopulation?: Maybe<Scalars['ID']>,
+  businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
@@ -13192,7 +13193,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'individualFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
         )> }
       )> }
     )>> }
@@ -13211,7 +13212,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
     )> }
   )> }
 );
@@ -25009,7 +25010,9 @@ export const AllProgramsForChoicesDocument = gql`
         name
         individualDataNeeded
         dataCollectingType {
+          id
           individualFiltersAvailable
+          householdFiltersAvailable
         }
       }
     }
@@ -25094,10 +25097,12 @@ export const ProgramDocument = gql`
     individualDataNeeded
     version
     dataCollectingType {
+      id
       code
       label
       active
       individualFiltersAvailable
+      householdFiltersAvailable
     }
   }
 }
