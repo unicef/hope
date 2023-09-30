@@ -268,6 +268,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
+        logger.info(self.combined_fields["household"])
 
     def get_combined_fields(self) -> Dict:
         core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
