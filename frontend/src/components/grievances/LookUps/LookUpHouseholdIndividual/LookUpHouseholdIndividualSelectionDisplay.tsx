@@ -83,7 +83,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 </BlueText>
               </Box>
             </Grid>
-            {!disabled && values?.selectedIndividual?.unicefId && (
+            {values?.selectedIndividual?.unicefId && (
               <Grid item>
                 <DarkGrey>
                   <Flex>
