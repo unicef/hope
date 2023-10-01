@@ -2,7 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
@@ -52,6 +52,10 @@ export const PageNotFound: React.FC = () => {
     window.history.back();
   };
 
+  const history = useHistory();
+  const pathSegments = history.location.pathname.split('/');
+  const businessArea = pathSegments[2];
+
   return (
     <Container>
       <LogoContainer>
@@ -89,7 +93,7 @@ export const PageNotFound: React.FC = () => {
           color='primary'
           variant='contained'
           component={Link}
-          to='/'
+          to={`/${businessArea}/`}
         >
           GO TO COUNTRY DASHBOARD
         </Button>
