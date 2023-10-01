@@ -580,9 +580,9 @@ def clean_old_record_files_task(default_timedelta: int = 60) -> None:
 
     try:
         time_threshold = timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA or default_timedelta)
-        print(Record.objects.filter(
-            Q(timestamp__lt=time_threshold) & ~Q(files=None) & Q(status=Record.STATUS_IMPORTED)
-        ))
+        print(
+            Record.objects.filter(Q(timestamp__lt=time_threshold) & ~Q(files=None) & Q(status=Record.STATUS_IMPORTED))
+        )
         records = Record.objects.filter(
             Q(timestamp__lt=time_threshold) & ~Q(files=None) & Q(status=Record.STATUS_IMPORTED)
         )
