@@ -6,6 +6,7 @@ from django.utils import timezone
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
@@ -71,6 +72,7 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "has_data_sharing_agreement": True,
             },
         )
+        generate_data_collecting_types()
 
         cls.organization = OrganizationFactory.create(slug=slug)
         project = ProjectFactory.create(organization=cls.organization)

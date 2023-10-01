@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 
 from django_countries.fields import Country
 
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
@@ -10,12 +11,12 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BANK_STATEMENT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
-    YES,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -72,7 +73,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "country_origin": Country(code="LK"),
             "country": Country(code="LK"),
             "consent": True,
-            "collect_individual_data": YES,
+            "collect_individual_data": COLLECT_TYPE_FULL,
+            "data_collecting_type_id": DataCollectingType.objects.get(code=COLLECT_TYPE_FULL).id,
             "size": 0,
             "flex_fields": {"moh_center_of_reference": localization_dict.get("moh_center_of_reference")},
         }

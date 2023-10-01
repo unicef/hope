@@ -8,6 +8,8 @@ from django.forms import model_to_dict
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
@@ -92,6 +94,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
         cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
         cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+
+        generate_data_collecting_types()
 
         super().setUpTestData()
 
@@ -209,6 +213,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin4_title=self.area4.name,
             zip_code="00-123",
             enumerator_rec_id=1234567890,
+            data_collecting_type_id=DataCollectingType.objects.get(code=COLLECT_TYPE_FULL).id,
         )
         self.set_imported_individuals(imported_household)
         with capture_on_commit_callbacks(execute=True):
@@ -226,6 +231,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(8, individuals.count())
         self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
         self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
+        self.assertEqual(households.first().data_collecting_type.code, COLLECT_TYPE_FULL)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
@@ -291,6 +297,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_PARTIAL,
             registration_data_import=self.rdi_hub,
+            data_collecting_type_id=DataCollectingType.objects.get(code=COLLECT_TYPE_PARTIAL).id,
         )
         self.set_imported_individuals(imported_household)
 
@@ -302,6 +309,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
         self.assertEqual(1, households.count())
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_PARTIAL)
+        self.assertEqual(households[0].data_collecting_type.code, COLLECT_TYPE_PARTIAL)
         self.assertEqual(8, individuals.count())
 
         household_data = model_to_dict(

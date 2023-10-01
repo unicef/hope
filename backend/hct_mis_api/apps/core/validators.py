@@ -189,6 +189,12 @@ class KoboTemplateValidator:
             if field_type.startswith("select_"):
                 field_type, choices_list_name, *_ = field_type.split(" ")
 
+                print("********")
+                print(field_name)
+                print(field_type)
+                print(choices_list_name)
+                print(choices_mapping[choices_list_name])
+
             if field_type not in cls.CHOICE_MAP.keys():
                 continue
 

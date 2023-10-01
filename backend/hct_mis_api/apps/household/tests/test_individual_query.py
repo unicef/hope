@@ -24,6 +24,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 @disabled_locally_test
 class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     databases = {"default", "registration_datahub"}
+
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String, $searchType: String) {
       allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, orderBy:"id") {
@@ -40,6 +41,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
       }
     }
     """
+
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals($programs: [ID]) {
       allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
@@ -63,6 +65,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
       }
     }
     """
+
     INDIVIDUAL_QUERY = """
     query Individual($id: ID!) {
       individual(id: $id, orderBy:"id") {

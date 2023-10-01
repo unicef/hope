@@ -5,8 +5,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
     COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_UNKNOWN,
     HEAD,
     MALE,
     Household,
@@ -75,8 +75,8 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         self.assertEqual(household.female_age_group_0_5_count, None)
 
     def test_recalculating_data_when_flag_is_none(self) -> None:
-        household = self.create_hh(COLLECT_TYPE_NONE)
-        self.assertEqual(household.collect_individual_data, COLLECT_TYPE_NONE)
+        household = self.create_hh(COLLECT_TYPE_UNKNOWN)
+        self.assertEqual(household.collect_individual_data, COLLECT_TYPE_UNKNOWN)
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)

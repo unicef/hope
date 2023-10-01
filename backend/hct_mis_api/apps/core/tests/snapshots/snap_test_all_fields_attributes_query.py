@@ -53679,14 +53679,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Full individual collected',
+                        'labelEn': 'Full',
                         'labels': [
                             {
-                                'label': 'Full individual collected',
+                                'label': 'Full',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': '1'
+                        'value': 'full'
                     },
                     {
                         'labelEn': 'No individual data',
@@ -53696,17 +53696,27 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': '0'
+                        'value': 'no_ind_data'
                     },
                     {
-                        'labelEn': 'Partial individuals collected',
+                        'labelEn': 'Partial',
                         'labels': [
                             {
-                                'label': 'Partial individuals collected',
+                                'label': 'Partial',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': '2'
+                        'value': 'partial'
+                    },
+                    {
+                        'labelEn': 'Size only',
+                        'labels': [
+                            {
+                                'label': 'Size only',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'size_only'
                     },
                     {
                         'labelEn': 'Unknown',
@@ -53716,7 +53726,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': ''
+                        'value': 'unknown'
                     }
                 ],
                 'hint': '',

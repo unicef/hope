@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
@@ -52,6 +53,7 @@ class TestSriLankaRegistrationService(TestCase):
                 "has_data_sharing_agreement": True,
             },
         )
+        generate_data_collecting_types()
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
@@ -179,6 +181,7 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(imported_household.admin4_title, "SriLanka admin4")
         self.assertEqual(imported_household.admin_area, "LK1163020")
         self.assertEqual(imported_household.admin_area_title, "SriLanka admin4")
+        self.assertEqual(imported_household.data_collecting_type_id, DataCollectingType.objects.get(code="full").id)
 
         self.assertEqual(
             ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}

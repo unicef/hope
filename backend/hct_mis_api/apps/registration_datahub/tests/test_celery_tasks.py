@@ -13,6 +13,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
+from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
@@ -319,6 +320,8 @@ class TestAutomatingRDICreationTask(TestCase):
         cls.registration = RegistrationFactory.create(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
+
+        generate_data_collecting_types()
 
     def test_successful_run_without_records_to_import(self) -> None:
         result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)

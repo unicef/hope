@@ -6,6 +6,7 @@ from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
@@ -22,7 +23,6 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    YES,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -183,7 +183,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             country_origin=Country(code="UA"),
             country=Country(code="UA"),
             consent=True,
-            collect_individual_data=YES,
+            collect_individual_data="full",
+            data_collecting_type_id=DataCollectingType.objects.get(code="full").id,
         )
 
         if residence_status := household_data.get("residence_status"):

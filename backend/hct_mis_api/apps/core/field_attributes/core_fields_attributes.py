@@ -87,7 +87,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
+from hct_mis_api.apps.registration_datahub.models import DATA_COLLECTING_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -536,7 +536,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Will you be collecting all member Individuals' data?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in COLLECT_TYPES],
+        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in DATA_COLLECTING_TYPES],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "collect_individual_data_h_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE, Scope.XLSX],

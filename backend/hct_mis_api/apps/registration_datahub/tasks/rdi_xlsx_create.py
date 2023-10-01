@@ -17,11 +17,10 @@ from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
-from hct_mis_api.apps.household.models import (
+from hct_mis_api.apps.household.models import (  # COLLECT_TYPE_NONE,
     COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
     COLLECT_TYPE_PARTIAL,
     COLLECT_TYPE_UNKNOWN,
     HEAD,
@@ -82,7 +81,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return {
                 "FULL": COLLECT_TYPE_FULL,
                 "PARTIAL": COLLECT_TYPE_PARTIAL,
-                "NONE": COLLECT_TYPE_NONE,
+                # "NONE": COLLECT_TYPE_NONE,
                 "UNKNOWN": COLLECT_TYPE_UNKNOWN,
             }[value]
         except KeyError:
@@ -512,6 +511,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             household_id = str(temp_value)
                             if sheet_title == "individuals":
                                 obj_to_create.household = self.households.get(household_id)
+
+                        if header == "collect_individual_data_h_c":
+                            obj_to_create.collect_individual_data = cell_value
+                            obj_to_create.data_collecting_type_id = DataCollectingType.objects.get(
+                                code=obj_to_create.collect_individual_data
+                            ).id
 
                         if header in complex_fields[sheet_title]:
                             fn_complex: Callable = complex_fields[sheet_title][header]

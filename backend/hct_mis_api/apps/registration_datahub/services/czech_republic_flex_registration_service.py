@@ -7,6 +7,7 @@ from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
@@ -121,6 +122,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "country": Country(code="CZ"),
             "consent_sharing": [],
             "collect_individual_data": COLLECT_TYPE_PARTIAL,
+            "data_collecting_type_id": DataCollectingType.objects.get(code=COLLECT_TYPE_PARTIAL).id,
         }
         if needs_assessment:
             household_data["flex_fields"] = needs_assessment

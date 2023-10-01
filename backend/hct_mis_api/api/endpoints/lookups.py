@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING, Any, Optional
 
+from django.utils.translation import gettext_lazy as _
+
 from django_countries import Countries
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPES,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
@@ -18,6 +19,19 @@ from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
+
+
+COLLECT_TYPE_UNKNOWN = ""
+COLLECT_TYPE_NONE = "0"
+COLLECT_TYPE_FULL = "1"
+COLLECT_TYPE_PARTIAL = "2"
+
+COLLECT_TYPES = (
+    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
+    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
+    (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_NONE, _("No individual data")),
+)
 
 
 class DocumentType(HOPEAPIView):

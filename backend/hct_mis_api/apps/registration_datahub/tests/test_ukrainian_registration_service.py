@@ -6,7 +6,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.registration_datahub.models import (
@@ -49,6 +50,8 @@ class TestUkrainianRegistrationService(TestCase):
                 "has_data_sharing_agreement": True,
             },
         )
+        generate_data_collecting_types()
+
         household = [
             {
                 "residence_status_h_c": "non_host",
@@ -187,6 +190,13 @@ class TestUkrainianRegistrationService(TestCase):
             ).count(),
             1,
         )
+
+        data_collecting_type_id = DataCollectingType.objects.get(code="full").id
+
+        self.assertEqual(ImportedHousehold.objects.all()[0].data_collecting_type_id, data_collecting_type_id)
+        self.assertEqual(ImportedHousehold.objects.all()[1].data_collecting_type_id, data_collecting_type_id)
+        self.assertEqual(ImportedHousehold.objects.all()[2].data_collecting_type_id, data_collecting_type_id)
+        self.assertEqual(ImportedHousehold.objects.all()[3].data_collecting_type_id, data_collecting_type_id)
 
     def test_import_data_to_datahub_retry(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)

@@ -146,18 +146,18 @@ YES_NO_CHOICE = (
     (NO, _("No")),
 )
 
-COLLECT_TYPE_UNKNOWN = ""
-COLLECT_TYPE_NONE = "0"
-COLLECT_TYPE_FULL = "1"
-COLLECT_TYPE_PARTIAL = "2"
-COLLECT_TYPE_SIZE_ONLY = "3"
+COLLECT_TYPE_PARTIAL = "partial"
+COLLECT_TYPE_FULL = "full"
+COLLECT_TYPE_SIZE_ONLY = "size_only"
+COLLECT_TYPE_NO_IND_DATA = "no_ind_data"
+COLLECT_TYPE_UNKNOWN = "unknown"
 
-COLLECT_TYPES = (
+DATA_COLLECTING_TYPES = (
+    (COLLECT_TYPE_PARTIAL, _("Partial")),
+    (COLLECT_TYPE_FULL, _("Full")),
+    (COLLECT_TYPE_SIZE_ONLY, _("Size only")),
+    (COLLECT_TYPE_NO_IND_DATA, _("No individual data")),
     (COLLECT_TYPE_UNKNOWN, _("Unknown")),
-    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
-    (COLLECT_TYPE_FULL, _("Full individual collected")),
-    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
-    (COLLECT_TYPE_NONE, _("No individual data")),
 )
 
 NOT_PROVIDED = "NOT_PROVIDED"
@@ -472,7 +472,9 @@ class Household(
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN)
+    collect_individual_data = models.CharField(
+        max_length=250, choices=DATA_COLLECTING_TYPES, default=COLLECT_TYPE_UNKNOWN
+    )
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
