@@ -10525,7 +10525,7 @@ export type CreateProgramMutation = (
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
       & { dataCollectingType: Maybe<(
         { __typename?: 'DataCollectingTypeNode' }
-        & Pick<DataCollectingTypeNode, 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
       )> }
     )> }
   )> }
@@ -10560,7 +10560,7 @@ export type UpdateProgramMutation = (
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
       & { dataCollectingType: Maybe<(
         { __typename?: 'DataCollectingTypeNode' }
-        & Pick<DataCollectingTypeNode, 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
       )> }
     )> }
   )> }
@@ -18138,6 +18138,7 @@ export const CreateProgramDocument = gql`
       populationGoal
       individualDataNeeded
       dataCollectingType {
+        id
         code
         label
         active
@@ -18261,6 +18262,7 @@ export const UpdateProgramDocument = gql`
       individualDataNeeded
       version
       dataCollectingType {
+        id
         code
         label
         active

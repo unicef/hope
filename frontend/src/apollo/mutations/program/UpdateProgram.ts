@@ -22,11 +22,12 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         individualDataNeeded
         version
         dataCollectingType {
-        code
-        label
-        active
-        individualFiltersAvailable
-      }
+          id
+          code
+          label
+          active
+          individualFiltersAvailable
+        }
       }
       validationErrors
     }

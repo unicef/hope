@@ -19,11 +19,12 @@ export const CREATE_PROGRAM_MUTATION = gql`
         populationGoal
         individualDataNeeded
         dataCollectingType {
-        code
-        label
-        active
-        individualFiltersAvailable
-      }
+          id
+          code
+          label
+          active
+          individualFiltersAvailable
+        }
       }
       validationErrors
     }
