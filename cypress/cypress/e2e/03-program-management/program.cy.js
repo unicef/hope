@@ -37,6 +37,8 @@ describe("Program Management", () => {
         programManagement.getSelectOptionUnicef().click();
         programManagement.getInputSector().first().click();
         programManagement.getSelectOptionByName("Multi Purpose").click();
+        programManagement.getInputDataCollectingType().click();
+        programManagement.getSelectOptionByName("Partial").click();
         programManagement.getInputStartDate().click().type("2023-01-01");
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
@@ -135,5 +137,48 @@ describe("Program Management", () => {
   });
   describe.skip("E2E tests Program Management", () => {});
 
-  describe.skip("Regression tests Program Management", () => {});
+  describe("Regression tests Program Management", () => {
+    // ToDo: 174707
+    it.skip("174707: Create a program without Data Collecting Type", () => {
+      programManagement
+        .getPageHeaderTitle()
+        .should("contain", "Programme Management");
+      programManagement.getButtonNewProgram().click({ force: true });
+      programManagement
+        .getDialogTitle()
+        .should("contain", "Set-up a new Programme");
+      cy.uniqueSeed().then((seed) => {
+        const programName = `Test Program ${seed}`;
+        programManagement.getInputProgrammeName().type(programName);
+        programManagement.getInputCashAssistScope().click();
+        programManagement.getSelectOptionUnicef().click();
+        programManagement.getInputSector().first().click();
+        programManagement.getSelectOptionByName("Multi Purpose").click();
+        programManagement.getInputStartDate().click().type("2023-01-01");
+        programManagement.getInputEndDate().click().type("2033-12-30");
+        programManagement
+          .getInputDescription()
+          .first()
+          .click()
+          .type("test description");
+        programManagement
+          .getInputBudget()
+          .first()
+          .click()
+          .type("{backspace}{backspace}{backspace}{backspace}9999");
+        programManagement.getInputAdminArea().click().type("Some Admin Area");
+        programManagement
+          .getInputPopulationGoal()
+          .click()
+          .type("{backspace}{backspace}{backspace}{backspace}4000");
+        programManagement.getButtonSave().click({ force: true });
+        programDetails.getPageHeaderTitle().should("contain", programName);
+        programDetails.getButtonActivateProgram().click({ force: true });
+        programDetails.getButtonActivateProgramModal().click({
+          force: true,
+        });
+        programDetails.getStatusContainer().should("contain", "ACTIVE");
+      });
+    });
+  });
 });
