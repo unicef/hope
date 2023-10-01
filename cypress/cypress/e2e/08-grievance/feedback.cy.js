@@ -19,6 +19,7 @@ describe("Grievance - Feedback", () => {
 
   after(() => {
     cy.initScenario("init_clear");
+    cy.adminLogin();
   });
 
   describe("Smoke tests Feedback", () => {
