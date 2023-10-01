@@ -18,6 +18,12 @@ export const CREATE_PROGRAM_MUTATION = gql`
         cashPlus
         populationGoal
         individualDataNeeded
+        dataCollectingType {
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
       }
       validationErrors
     }
