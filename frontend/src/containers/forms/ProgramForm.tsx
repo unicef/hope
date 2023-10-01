@@ -138,7 +138,7 @@ export const ProgramForm = ({
   if (initialValue.budget === 0) {
     initialValue.budget = '0.00';
   }
-  initialValue.dataCollectingTypeCode = program?.dataCollectingType.code;
+  initialValue.dataCollectingTypeCode = program?.dataCollectingType?.code;
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
