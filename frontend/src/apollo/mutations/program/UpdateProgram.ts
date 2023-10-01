@@ -21,6 +21,12 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         administrativeAreasOfImplementation
         individualDataNeeded
         version
+        dataCollectingType {
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
       }
       validationErrors
     }
