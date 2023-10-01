@@ -163,7 +163,7 @@ export async function getClient(): Promise<
       );
     }, 1000);
   }
-  const cache = new InMemoryCache();
+  const cache = new InMemoryCache({ addTypename: true });
   await persistCache({
     cache,
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
