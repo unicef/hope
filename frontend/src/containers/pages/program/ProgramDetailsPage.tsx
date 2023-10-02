@@ -1,7 +1,16 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
+<<<<<<< HEAD
+=======
+import { useTranslation } from 'react-i18next';
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import {
+<<<<<<< HEAD
+=======
+  ProgramStatus,
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
@@ -17,6 +26,41 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { ProgramCyclesActionsTable } from '../../tables/programs/ProgramCyclesActionsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+<<<<<<< HEAD
+=======
+
+const Container = styled.div`
+  && {
+    display: flex;
+    flex-direction: column;
+    min-width: 100%;
+  }
+`;
+
+const TableWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 20px;
+  padding-bottom: 0;
+`;
+
+const NoCashPlansContainer = styled.div`
+  margin-top: ${({ theme }) => theme.spacing(30)}px;
+`;
+const NoCashPlansTitle = styled.div`
+  color: rgba(0, 0, 0, 0.38);
+  font-size: 24px;
+  line-height: 28px;
+  text-align: center;
+`;
+const NoCashPlansSubTitle = styled.div`
+  color: rgba(0, 0, 0, 0.38);
+  font-size: 16px;
+  line-height: 19px;
+  text-align: center;
+`;
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 
 export const ProgramDetailsPage = (): React.ReactElement => {
   const { id } = useParams();

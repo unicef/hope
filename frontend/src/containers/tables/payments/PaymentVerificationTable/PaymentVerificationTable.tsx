@@ -32,6 +32,7 @@ export const PaymentVerificationTable = ({
     startDateGte: dateToIsoString(filter.startDate, 'startOfDay'),
     endDateLte: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,
+    isPaymentVerificationPage: true,
   };
   return (
     <UniversalTable<

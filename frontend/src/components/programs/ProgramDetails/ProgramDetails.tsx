@@ -110,6 +110,7 @@ export const ProgramDetails = ({
               />
             </Grid>
           </Grid>
+<<<<<<< HEAD
           <Grid item xs={3}>
             <NumberOfHouseHolds>
               <LabelizedField label={t('Program Population Size')}>
@@ -120,6 +121,75 @@ export const ProgramDetails = ({
                 </NumberOfHouseHoldsValue>
               </LabelizedField>
             </NumberOfHouseHolds>
+=======
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('START DATE')}
+              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('END DATE')}
+              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
+            />
+          </Grid>
+
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Sector')}
+              value={programSectorChoicesDict[program.sector]}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Scope')}
+              value={programScopeChoicesDict[program.scope]}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Data Collecting Type')}
+              value={program?.dataCollectingType?.label}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Frequency of Payment')}
+              value={
+                programFrequencyOfPaymentsChoicesDict[
+                  program.frequencyOfPayments
+                ]
+              }
+            />
+          </Grid>
+
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Administrative Areas of implementation')}
+              value={program.administrativeAreasOfImplementation}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Description')}
+              value={program.description}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('CASH+')}
+              value={program.cashPlus ? t('Yes') : t('No')}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t(
+                'Does this programme use individuals’ data for targeting or entitlement calculation?',
+              )}
+              value={program.individualDataNeeded ? t('Yes') : t('No')}
+            />
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
           </Grid>
         </Grid>
       </OverviewContainer>

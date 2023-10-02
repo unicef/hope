@@ -7,12 +7,8 @@ import {
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import {
-  choicesToDict,
-  dateToIsoString,
-  decodeIdString,
-} from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -30,10 +26,11 @@ export const SurveysTable = ({
 }: SurveysTableProps): ReactElement => {
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
+
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
-    createdBy: decodeIdString(filter.createdBy) || '',
+    createdBy: filter.createdBy || '',
     program: programId,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),

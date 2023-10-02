@@ -29,27 +29,13 @@ describe("Individuals Module", () => {
   });
   describe("Component tests Individuals Population", () => {
     context("Individuals Population Filters", () => {
-      it.skip("Individuals Population Search filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Programme filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Residence Status filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Admin Level 2 filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Size filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Sorted by filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Status filter", () => {
-        // ToDo
-      });
+      it.skip("Individuals Population Search filter", () => {});
+      it.skip("Individuals Population Programme filter", () => {});
+      it.skip("Individuals Population Residence Status filter", () => {});
+      it.skip("Individuals Population Admin Level 2 filter", () => {});
+      it.skip("Individuals Size filter", () => {});
+      it.skip("Individuals Population Sorted by filter", () => {});
+      it.skip("Individuals Population Status filter", () => {});
     });
   });
   describe.skip("E2E tests Individuals Population", () => {});

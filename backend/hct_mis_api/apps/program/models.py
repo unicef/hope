@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Collection, Optional
+from typing import Collection, Optional, Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
@@ -148,6 +149,19 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         all individuals of a household that's part of the population or only
         the relevant ones (collectors etc.)""",
     )
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
+    )
+
+    @staticmethod
+    def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
+        return (
+            qs.filter(**{"payment_items__delivered_quantity__gt": 0})
+            .distinct("payment_items__household__unicef_id")
+            .values_list("payment_items__household__unicef_id", flat=True)
+            .order_by("payment_items__household__unicef_id")
+            .count()
+        )
 
     @property
     def total_number_of_households(self) -> int:

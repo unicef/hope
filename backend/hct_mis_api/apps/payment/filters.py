@@ -346,7 +346,7 @@ class PaymentPlanFilter(FilterSet):
         return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
 
     def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(program_cycle__program_id=decode_id_string_required(value))
+        return qs.filter(program_id=decode_id_string_required(value))
 
     def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_cycle_id=decode_id_string_required(value))

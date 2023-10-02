@@ -6,11 +6,24 @@ import { RegistrationDataImportTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeApolloAllRegistrationDataImports } from '../../../../../fixtures/registration/fakeApolloAllRegistrationDataImports';
 
+const initialFilter = {
+  search: '',
+  importedBy: '',
+  status: '',
+  sizeMin: '',
+  sizeMax: '',
+  importDateRangeMin: undefined,
+  importDateRangeMax: undefined,
+};
+
 describe('containers/tables/rdi/RegistrationDataImportTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider mocks={fakeApolloAllRegistrationDataImports}>
-        <RegistrationDataImportTable filter={{}} canViewDetails={true} />
+        <RegistrationDataImportTable
+          filter={initialFilter}
+          canViewDetails={true}
+        />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
@@ -24,7 +37,10 @@ describe('containers/tables/rdi/RegistrationDataImportTable', () => {
         link={new ApolloLoadingLink()}
         mocks={fakeApolloAllRegistrationDataImports}
       >
-        <RegistrationDataImportTable filter={{}} canViewDetails={true} />
+        <RegistrationDataImportTable
+          filter={initialFilter}
+          canViewDetails={true}
+        />
       </MockedProvider>,
     );
 

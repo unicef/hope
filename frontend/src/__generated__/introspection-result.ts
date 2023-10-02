@@ -45,10 +45,13 @@
             "name": "UserBusinessAreaNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "DataCollectingTypeNode"
           },
           {
             "name": "ProgramNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "PaymentPlanNode"

@@ -507,20 +507,16 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        return (
-            queryset.select_related("assigned_to", "created_by")
-            .annotate(
-                total=Case(
-                    When(
-                        status=GrievanceTicket.STATUS_CLOSED,
-                        then=F("updated_at") - F("created_at"),
-                    ),
-                    default=timezone.now() - F("created_at"),  # type: ignore
-                    output_field=DateField(),
-                )
+        return queryset.annotate(
+            total=Case(
+                When(
+                    status=GrievanceTicket.STATUS_CLOSED,
+                    then=F("updated_at") - F("created_at"),
+                ),
+                default=timezone.now() - F("created_at"),  # type: ignore
+                output_field=DateField(),
             )
-            .annotate(total_days=F("total__day"))
-        )
+        ).annotate(total_days=F("total__day"))
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
@@ -554,6 +550,7 @@ class Query(graphene.ObjectType):
             ("full_name", "Full Name"),
             ("phone_number", "Phone Number"),
             ("registration_id", "Registration ID (Aurora)"),
+            ("bank_account_number", "Bank Account Number"),
         ]
         search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
         return [{"name": name, "value": value} for value, name in search_types_choices]

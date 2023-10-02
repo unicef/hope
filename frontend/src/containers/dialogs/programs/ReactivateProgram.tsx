@@ -76,7 +76,12 @@ export function ReactivateProgram({
   };
   return (
     <span>
-      <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
+      <Button
+        data-cy='button-reactivate-program'
+        variant='outlined'
+        color='primary'
+        onClick={() => setOpen(true)}
+      >
         {t('Reactivate')}
       </Button>
       <Dialog
@@ -95,13 +100,16 @@ export function ReactivateProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <LoadingButton
               loading={loading}
               type='submit'
               color='primary'
               variant='contained'
               onClick={reactivateProgram}
+              data-cy='button-reactivate-program-popup'
             >
               {t('REACTIVATE')}
             </LoadingButton>
