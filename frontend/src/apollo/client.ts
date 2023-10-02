@@ -48,21 +48,20 @@ const isDataNull = (data): boolean => {
   return Object.values(data).some((value) => value === null);
 };
 
-const hasDataError = (data): boolean => {
-  return data && (data.error || data?.errors?.length > 0);
+const hasResponseErrors = (response): boolean => {
+  return response && (response?.error || response?.errors?.length > 0);
 };
 
 //redirect to 404 page if data is null
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
-    if (hasDataError(response.data)) {
+    if (hasResponseErrors(response.data)) {
       // eslint-disable-next-line no-console
       console.error(response.data?.error || response.data?.errors);
-    }
-    if (
+    } else if (
       response.data &&
       isDataNull(response.data) &&
-      !hasDataError(response.data)
+      !hasResponseErrors(response)
     ) {
       const pathSegments = window.location.pathname.split('/');
       const businessArea = pathSegments[1];

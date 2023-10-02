@@ -125,7 +125,7 @@ module.exports = function(proxy, allowedHost) {
               'https://fonts.googleapis.com',
             ],
             'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
-            'connect-src': ["excubo.unicef.io", "sentry.io"],
+            'connect-src': ['excubo.unicef.io', 'sentry.io', "'self'"],
             'report-uri': `${cspReportUri}`,
             'report-to': `${cspReportUri}`,
           },
