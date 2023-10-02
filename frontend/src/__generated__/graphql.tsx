@@ -8157,6 +8157,7 @@ export type UpdateProgramInput = {
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  dataCollectingTypeCode?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationInput = {
@@ -10522,6 +10523,10 @@ export type CreateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
+      & { dataCollectingType: Maybe<(
+        { __typename?: 'DataCollectingTypeNode' }
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      )> }
     )> }
   )> }
 );
@@ -10553,6 +10558,10 @@ export type UpdateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+      & { dataCollectingType: Maybe<(
+        { __typename?: 'DataCollectingTypeNode' }
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      )> }
     )> }
   )> }
 );
@@ -18128,6 +18137,13 @@ export const CreateProgramDocument = gql`
       cashPlus
       populationGoal
       individualDataNeeded
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
     validationErrors
   }
@@ -18245,6 +18261,13 @@ export const UpdateProgramDocument = gql`
       administrativeAreasOfImplementation
       individualDataNeeded
       version
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
     validationErrors
   }
