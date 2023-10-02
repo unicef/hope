@@ -12,20 +12,13 @@ import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
-<<<<<<< HEAD
-import {
-  ProgramQuery,
-  useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
-=======
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 import { ProgramForm } from '../../forms/ProgramForm';
 
 interface EditProgramProps {
   program: ProgramQuery['program'];
 }
 
-export function EditProgram({ program }: EditProgramProps): ReactElement {
+export const EditProgram = ({ program }: EditProgramProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -100,19 +93,13 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
 
   return (
     <span>
-<<<<<<< HEAD
-      <Button data-cy='button-edit-program' variant='outlined' color='primary' onClick={() => setOpen(true)}>
-        <EditIcon />
-=======
       <Button
         data-cy='button-edit-program'
         variant='outlined'
         color='primary'
-        startIcon={<EditIcon />}
         onClick={() => setOpen(true)}
       >
-        {t('EDIT PROGRAMME')}
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
+        <EditIcon />
       </Button>
       <ProgramForm
         onSubmit={submitFormHandler}
@@ -124,4 +111,4 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       />
     </span>
   );
-}
+};

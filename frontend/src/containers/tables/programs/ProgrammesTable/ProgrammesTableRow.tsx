@@ -1,36 +1,20 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-<<<<<<< HEAD:frontend/src/containers/tables/programs/ProgrammesTable/ProgrammesTableRow.tsx
+import {
+  AllProgramsQuery,
+  ProgrammeChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-=======
-import {
-  AllProgramsQuery,
-  ProgrammeChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937:frontend/src/containers/tables/ProgrammesTable/ProgrammesTableRow.tsx
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   choicesToDict,
-  formatCurrency,
   programStatusToColor,
-<<<<<<< HEAD:frontend/src/containers/tables/programs/ProgrammesTable/ProgrammesTableRow.tsx
+  formatCurrency,
 } from '../../../../utils/utils';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-=======
-} from '../../../utils/utils';
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937:frontend/src/containers/tables/ProgrammesTable/ProgrammesTableRow.tsx
 
 interface ProgrammesTableRowProps {
   program: AllProgramsQuery['allPrograms']['edges'][number]['node'];

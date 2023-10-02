@@ -10,8 +10,8 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import {ProgramStatus, useProgramQuery} from "../../../__generated__/graphql";
-import {LoadingComponent} from "../../../components/core/LoadingComponent";
+import { ProgramStatus, useProgramQuery } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
 
 const initialFilter = {
@@ -19,15 +19,8 @@ const initialFilter = {
   dispersionStartDate: undefined,
   dispersionEndDate: undefined,
   status: [],
-<<<<<<< HEAD:frontend/src/containers/pages/paymentmodule/PaymentPlansPage.tsx
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
-=======
-  totalEntitledQuantityFrom: '',
-  totalEntitledQuantityTo: '',
-  isFollowUp: null,
-  program: null,
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937:frontend/src/containers/pages/paymentmodule/PaymentModulePage.tsx
 };
 
 export const PaymentPlansPage = (): React.ReactElement => {
@@ -48,31 +41,31 @@ export const PaymentPlansPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  if (permissions === null || !data) return null
+  if (permissions === null || !data) return null;
   if (programLoading) {
-    return <LoadingComponent/>
+    return <LoadingComponent />;
   }
 
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
-  const isImportDisabled = data?.program?.status !== ProgramStatus.Active
+  const isImportDisabled = data?.program?.status !== ProgramStatus.Active;
 
   return (
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-            <ButtonTooltip
-              title={t('Program must be ACTIVE to create Payment Plan')}
-              variant='contained'
-              color='primary'
-              component={Link}
-              to={`/${baseUrl}/payment-module/new-plan`}
-              data-cy='button-new-payment-plan'
-              disabled={isImportDisabled}
-            >
-              {t('NEW PAYMENT PLAN')}
-            </ButtonTooltip>
+          <ButtonTooltip
+            title={t('Program must be ACTIVE to create Payment Plan')}
+            variant='contained'
+            color='primary'
+            component={Link}
+            to={`/${baseUrl}/payment-module/new-plan`}
+            data-cy='button-new-payment-plan'
+            disabled={isImportDisabled}
+          >
+            {t('NEW PAYMENT PLAN')}
+          </ButtonTooltip>
         )}
       </PageHeader>
       <PaymentPlansFilters

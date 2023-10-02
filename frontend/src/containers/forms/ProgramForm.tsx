@@ -13,10 +13,7 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ProgramQuery,
-<<<<<<< HEAD
-=======
   useDataCollectionTypeChoiceDataQuery,
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
@@ -49,11 +46,7 @@ const FullWidth = styled.div`
 `;
 
 interface ProgramFormPropTypes {
-<<<<<<< HEAD
   program?: ProgramQuery['program'] | null;
-=======
-  program?: ProgramQuery['program'];
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
   onSubmit: (values, setFieldError) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;

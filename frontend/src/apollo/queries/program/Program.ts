@@ -22,7 +22,6 @@ export const PROGRAM_QUERY = gql`
       administrativeAreasOfImplementation
       individualDataNeeded
       version
-<<<<<<< HEAD
       cycles {
         edges {
           node {
@@ -37,13 +36,11 @@ export const PROGRAM_QUERY = gql`
             endDate
           }
         }
-=======
       dataCollectingType {
         code
         label
         active
         individualFiltersAvailable
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
       }
     }
   }

@@ -1,22 +1,13 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-<<<<<<< HEAD:frontend/src/containers/tables/programs/ProgrammesTable/ProgrammesTable.tsx
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-=======
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937:frontend/src/containers/tables/ProgrammesTable/ProgrammesTable.tsx
 import {
-  AllProgramsQuery,
-  AllProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
+  AllProgramsQueryVariables,
+  AllProgramsQuery,
   useAllProgramsQuery,
-<<<<<<< HEAD:frontend/src/containers/tables/programs/ProgrammesTable/ProgrammesTable.tsx
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
-=======
-} from '../../../__generated__/graphql';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { UniversalTable } from '../UniversalTable';
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937:frontend/src/containers/tables/ProgrammesTable/ProgrammesTable.tsx
 import { headCells } from './ProgrammesHeadCells';
 import { ProgrammesTableRow } from './ProgrammesTableRow';
 
