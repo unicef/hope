@@ -50,3 +50,4 @@ class CopyProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
+    data_collecting_type_code = graphene.String()

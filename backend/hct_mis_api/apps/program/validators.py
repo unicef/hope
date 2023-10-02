@@ -1,10 +1,13 @@
 import logging
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.program.models import Program
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import DataCollectingType
 
 logger = logging.getLogger(__name__)
 
@@ -41,3 +44,13 @@ class ProgramDeletionValidator(BaseValidator):
 
 class CashPlanValidator(BaseValidator):
     pass
+
+
+def validate_data_collecting_type(
+    program_data_collecting_type: "DataCollectingType", data_collecting_type: "DataCollectingType"
+) -> None:
+    if (
+        data_collecting_type != program_data_collecting_type
+        and data_collecting_type not in program_data_collecting_type.compatible_types.all()
+    ):
+        raise ValidationError("The Data Collection Type must match or be compatible with the original Programme.")
