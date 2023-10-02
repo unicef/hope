@@ -13202,7 +13202,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'individualFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable'>
         )> }
       )> }
     )>> }
@@ -13221,7 +13221,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
     )> }
   )> }
 );
@@ -25033,6 +25033,7 @@ export const AllProgramsForChoicesDocument = gql`
         name
         individualDataNeeded
         dataCollectingType {
+          id
           individualFiltersAvailable
         }
       }
@@ -25118,6 +25119,7 @@ export const ProgramDocument = gql`
     individualDataNeeded
     version
     dataCollectingType {
+      id
       code
       label
       active
