@@ -1009,6 +1009,7 @@ export type CopyProgramInput = {
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  dataCollectingTypeCode?: Maybe<Scalars['String']>,
 };
 
 export type CopyTargetPopulationInput = {
@@ -5603,6 +5604,7 @@ export type QueryAllSurveysArgs = {
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
   targetPopulation?: Maybe<Scalars['ID']>,
+  businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
