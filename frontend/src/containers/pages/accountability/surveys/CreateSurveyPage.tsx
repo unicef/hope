@@ -335,7 +335,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
       }}
     >
       {({ submitForm, setValues, values, setFieldValue, errors }) => {
-        console.log(values);
         return (
           <>
             <PageHeader
