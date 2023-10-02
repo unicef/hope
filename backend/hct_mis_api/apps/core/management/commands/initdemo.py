@@ -8,7 +8,6 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
@@ -52,8 +51,6 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_ca")
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
         call_command("flush", "--noinput", database="registration_datahub")
-
-        generate_data_collecting_types()
 
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
