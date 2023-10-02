@@ -1,14 +1,9 @@
 from typing import Any, Dict
 
-<<<<<<< HEAD
-from django.db.models import Count, F, Q, QuerySet
+from django.db.models import Count, Q, QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce, Lower
-=======
-from django.db.models import Count, Q, QuerySet
-from django.db.models.functions import Lower
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 
 from _decimal import Decimal
 from django_filters import (

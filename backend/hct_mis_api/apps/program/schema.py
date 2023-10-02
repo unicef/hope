@@ -100,16 +100,13 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
     individual_data_needed = graphene.Boolean()
-<<<<<<< HEAD
     # cycles = DjangoPermissionFilterConnectionField(
     #     ProgramCycleNode,
     #     filterset_class=ProgramCycleFilter,
     #     # TODO: check and update perms
     #     # permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
     # )
-=======
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 
     class Meta:
         model = Program
