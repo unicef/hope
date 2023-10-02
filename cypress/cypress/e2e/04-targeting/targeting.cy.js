@@ -120,7 +120,12 @@ describe("Targeting", () => {
         "Delete value from Number of Households",
         "Press button Apply",
       ]);
-      targetingPage.filter;
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getApply().click();
+      targetingPage.getMaxNumberOfHouseholdsFilter().contains("123");
+      targetingPage.getMaxNumberOfHouseholdsFilter().clear();
+      targetingPage.getApply().click();
+      targetingPage.getMaxNumberOfHouseholdsFilter().should("be.empty");
     });
   });
 });
