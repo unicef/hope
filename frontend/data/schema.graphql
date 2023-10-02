@@ -4861,6 +4861,7 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   individualDataNeeded: Boolean
+  dataCollectingTypeCode: String
 }
 
 input UpdateTargetPopulationInput {
