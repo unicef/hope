@@ -24,7 +24,7 @@ export const PROGRAM_QUERY = gql`
       version
       dataCollectingType {
         code
-        description
+        label
         active
         individualFiltersAvailable
       }

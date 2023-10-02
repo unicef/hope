@@ -155,12 +155,7 @@ exports[`components/ProgramDetails should render 1`] = `
             <div
               data-cy="label-Data Collecting Type"
             >
-              <span
-                class="sc-htpNat cwQQYq"
-                color="textSecondary"
-              >
-                Partial individuals collected
-              </span>
+              -
             </div>
           </div>
         </div>
