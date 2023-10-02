@@ -111,8 +111,8 @@ describe("Targeting", () => {
   });
   describe.skip("E2E tests Targeting", () => {});
 
-  describe.skip("Regression tests Targeting", () => {
-    it("173542: GPF: Error occurs after apply empty Number of Households field", () => {
+  describe("Regression tests Targeting", () => {
+    it.only("173542: GPF: Error occurs after apply empty Number of Households field", () => {
       cy.scenario([
         "Go to Targeting",
         "Fill Number of Households field",
@@ -121,11 +121,28 @@ describe("Targeting", () => {
         "Press button Apply",
       ]);
       targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
       targetingPage.getApply().click();
-      targetingPage.getMaxNumberOfHouseholdsFilter().contains("123");
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "123");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "456");
       targetingPage.getMaxNumberOfHouseholdsFilter().clear();
+      targetingPage.getMinNumberOfHouseholdsFilter().clear();
       targetingPage.getApply().click();
-      targetingPage.getMaxNumberOfHouseholdsFilter().should("be.empty");
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage.getTargetPopulationsRows().should("have.length", 2);
     });
   });
 });
