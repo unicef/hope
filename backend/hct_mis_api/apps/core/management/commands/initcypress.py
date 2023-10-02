@@ -4,7 +4,6 @@ from typing import Any
 from django.core.management import BaseCommand, call_command
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
@@ -63,5 +62,3 @@ class Command(BaseCommand):
         )
 
         call_command("search_index", "--rebuild", "-f")
-
-        generate_data_collecting_types()
