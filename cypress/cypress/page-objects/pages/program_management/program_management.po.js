@@ -17,6 +17,7 @@ export default class ProgramManagement extends BaseComponent {
   inputBudget = 'input[data-cy="input-budget"]';
   inputAdminArea = 'div[data-cy="input-admin-area"]';
   inputPopulationGoal = 'div[data-cy="input-population-goal"]';
+  inputDataCollectingType = 'div[data-cy="input-data-collecting-type"]';
   buttonSave = 'button[data-cy="button-save"]';
   statusFilter = 'div[data-cy="filters-status"]';
   option = ' li[role = "option"]';
@@ -55,4 +56,6 @@ export default class ProgramManagement extends BaseComponent {
   getInputCashPlus = () => cy.get(this.inputCashPlus).find("input");
   getInputIndividualDataNeeded = () => cy.get(this.inputIndividualDataNeeded);
   getTableRowByName = (name) => cy.get(this.tableRowX + name + '"]');
+  getInputDataCollectingType = () =>
+    cy.get(this.inputDataCollectingType).first();
 }

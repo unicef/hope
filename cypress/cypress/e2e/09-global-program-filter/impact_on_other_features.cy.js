@@ -136,7 +136,7 @@ describe("Global Program Filter - Impacts", () => {
         .click();
       grievancePage.clickMenuButtonGrievance();
       grievancePage.clickMenuButtonGrievanceTickets();
-      grievancePage.getTicketListRow().should("have.length", 4);
+      grievancePage.getTicketListRow().should("have.length", 6);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage.getProgrammesOptions().contains("Draft Program").click();
       grievancePage.clickMenuButtonGrievance();
