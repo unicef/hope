@@ -148,7 +148,6 @@ export function TargetingCriteria({
     }
   }
 
-
   if (householdFiltersAvailable || individualFiltersAvailable) {
     return (
       <PaperContainer>
