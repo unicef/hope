@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
 
 from constance import config
@@ -579,17 +579,13 @@ def clean_old_record_files_task(default_timedelta: int = 60) -> None:
     from datetime import timedelta
 
     try:
-        time_threshold = timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA or default_timedelta)
-        print(
-            Record.objects.filter(Q(timestamp__lt=time_threshold) & ~Q(files=None) & Q(status=Record.STATUS_IMPORTED))
+        time_threshold = max(
+            timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA),
+            timezone.now() - timedelta(default_timedelta),
         )
-        records = Record.objects.filter(
-            Q(timestamp__lt=time_threshold) & ~Q(files=None) & Q(status=Record.STATUS_IMPORTED)
+        Record.objects.filter(timestamp__lt=time_threshold, status=Record.STATUS_IMPORTED).exclude(files=None).update(
+            files=None
         )
-        for record in records.iterator():
-            record.files = None
-            record.save()
-
         logger.info("Record's files have benn successfully cleared")
     except Exception:
         logger.error("Clearance of record's files failed")
