@@ -8,7 +8,6 @@ let defaultNumberOfVPlans016 = 0;
 const PaymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
   });
@@ -114,7 +113,7 @@ describe("Payment Verification", () => {
           defaultNumberOfVPlans016
         );
       });
-      it.only("Delete Verification Plan", () => {
+      it("Delete Verification Plan", () => {
         cy.scenario([
           "Press Delete button",
           "Press Delete button on pop-up",
