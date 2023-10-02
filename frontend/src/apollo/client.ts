@@ -55,7 +55,7 @@ const hasResponseErrors = (response): boolean => {
 //redirect to 404 page if data is null
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
-    if (hasResponseErrors(response.data)) {
+    if (hasResponseErrors(response)) {
       // eslint-disable-next-line no-console
       console.error(response.data?.error || response.data?.errors);
     } else if (
