@@ -10,25 +10,13 @@ import {
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-<<<<<<< HEAD
 import { ErrorButton } from '../../../components/core/ErrorButton';
-=======
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-<<<<<<< HEAD
-=======
-
-const RemoveButton = styled(Button)`
-  && {
-    color: ${({ theme }) => theme.palette.error.main};
-  }
-`;
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 
 const RemoveModalButton = styled(Button)`
   && {

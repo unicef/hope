@@ -31,10 +31,6 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
 
 exports[`containers/tables/payments/PaymentPlansTable should render with data 1`] = `
 <div>
-<<<<<<< HEAD
-  <div>
-    Unexpected error
-=======
   <div
     class="makeStyles-root-1"
   >
@@ -434,7 +430,6 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
         </div>
       </div>
     </div>
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
   </div>
 </div>
 `;
