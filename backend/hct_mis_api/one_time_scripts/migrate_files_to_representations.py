@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceDocument
-from hct_mis_api.apps.household.models import Document, Individual, Household
+from hct_mis_api.apps.household.models import Document, Household, Individual
 
 
 def migrate_files_to_representations(business_area: BusinessArea):
@@ -25,8 +25,8 @@ def copy_file(instance: Any, file_field: str) -> None:
 
 def migrate_grievance_document_files(business_area: BusinessArea):
     for grievance_document in GrievanceDocument.objects.filter(
-            grievance_ticket__is_original=False,
-            grievance_ticket__business_area=business_area,
+        grievance_ticket__is_original=False,
+        grievance_ticket__business_area=business_area,
     ):
         if grievance_document.file:
             copy_file(grievance_document, "file")
@@ -43,8 +43,8 @@ def migrate_document_files(business_area: BusinessArea):
 
 def migrate_individual_files(business_area: BusinessArea):
     for individual in Individual.original_and_repr_objects.filter(
-            is_original=False,
-            business_area=business_area,
+        is_original=False,
+        business_area=business_area,
     ):
         if individual.photo:
             copy_file(individual, "photo")
