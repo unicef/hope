@@ -723,7 +723,7 @@ class DataCollectingTypeAdmin(HOPEModelAdminBase):
         "modified",
         "individual_filters_available",
         "household_filters_available",
-        "recalculate_composition"
+        "recalculate_composition",
     )
     list_filter = (("limit_to", AutoCompleteFilter),)
     filter_horizontal = ("compatible_types", "limit_to")
