@@ -476,7 +476,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         ]
     )
     def test_query_individuals_by_search_registration_id_filter_with_search_type(
-            self, _: Any, permissions: List[Permissions]
+        self, _: Any, permissions: List[Permissions]
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
