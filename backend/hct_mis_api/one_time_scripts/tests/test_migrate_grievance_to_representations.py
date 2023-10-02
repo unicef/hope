@@ -9,7 +9,7 @@ from hct_mis_api.apps.accountability.fixtures import (
     FeedbackFactory,
     FeedbackMessageFactory,
 )
-from hct_mis_api.apps.accountability.models import Feedback, Message
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -159,7 +159,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                     )
                 )
 
-    def check_closed_ticket(self, original_ticket: Any, program: Program, ticket_representation: Any) -> None:
+    def check_closed_ticket(self, original_ticket: Any, program: Optional[Any], ticket_representation: Any) -> None:
         self.check_original_ticket(original_ticket)
         self.check_ticket_representation(ticket_representation)
         self.assertEqual(
@@ -195,7 +195,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             True,
         )
 
-    def check_ticket_representation(self, ticket_copy: Any):
+    def check_ticket_representation(self, ticket_copy: Any) -> None:
         self.assertEqual(
             ticket_copy.ticket.is_original,
             False,
@@ -847,7 +847,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 for b in bank_accounts
             ]
 
-    def create_messages(self) -> tuple[list[Message], list[Household]]:
+    def create_messages(self) -> None:
         # Message with target population
         self.message_tp_hh1_1 = self.create_household_with_representations([self.program2, self.program1])
         self.message_tp_hh2_1 = self.create_household_with_representations([self.program1])

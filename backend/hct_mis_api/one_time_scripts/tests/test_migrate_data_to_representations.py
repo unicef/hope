@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from django.db.models import Count
 from django.test import TestCase
 
@@ -43,7 +45,13 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 
 
 class TestMigrateDataToRepresentations(TestCase):
-    def create_hh_with_ind(self, ind_data, hh_data, is_rdi=False, target_populations=None):
+    def create_hh_with_ind(
+        self,
+        ind_data: dict,
+        hh_data: dict,
+        is_rdi: bool = False,
+        target_populations: Optional[List[TargetPopulation]] = None,
+    ) -> tuple:
         if is_rdi:
             rdi = RegistrationDataImportFactory(business_area=self.business_area)
         else:

@@ -8,7 +8,7 @@ from hct_mis_api.apps.grievance.models import GrievanceDocument
 from hct_mis_api.apps.household.models import Document, Household, Individual
 
 
-def migrate_files_to_representations(business_area: BusinessArea):
+def migrate_files_to_representations(business_area: BusinessArea) -> None:
     migrate_grievance_document_files(business_area)
     migrate_document_files(business_area)
     migrate_individual_files(business_area)
@@ -23,7 +23,7 @@ def copy_file(instance: Any, file_field: str) -> None:
     instance.save()
 
 
-def migrate_grievance_document_files(business_area: BusinessArea):
+def migrate_grievance_document_files(business_area: BusinessArea) -> None:
     for grievance_document in GrievanceDocument.objects.filter(
         grievance_ticket__is_original=False,
         grievance_ticket__business_area=business_area,
@@ -32,7 +32,7 @@ def migrate_grievance_document_files(business_area: BusinessArea):
             copy_file(grievance_document, "file")
 
 
-def migrate_document_files(business_area: BusinessArea):
+def migrate_document_files(business_area: BusinessArea) -> None:
     for document in Document.original_and_repr_objects.filter(
         individual__business_area=business_area,
         copied_from__isnull=False,
@@ -41,7 +41,7 @@ def migrate_document_files(business_area: BusinessArea):
             copy_file(document, "photo")
 
 
-def migrate_individual_files(business_area: BusinessArea):
+def migrate_individual_files(business_area: BusinessArea) -> None:
     for individual in Individual.original_and_repr_objects.filter(
         is_original=False,
         business_area=business_area,
@@ -52,7 +52,7 @@ def migrate_individual_files(business_area: BusinessArea):
             copy_file(individual, "disability_certificate_picture")
 
 
-def migrate_household_files(business_area: BusinessArea):
+def migrate_household_files(business_area: BusinessArea) -> None:
     for household in Household.original_and_repr_objects.filter(
         is_original=False,
         business_area=business_area,
