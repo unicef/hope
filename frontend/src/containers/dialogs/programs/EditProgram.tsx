@@ -18,7 +18,7 @@ interface EditProgramProps {
   program: ProgramNode;
 }
 
-export function EditProgram({ program }: EditProgramProps): ReactElement {
+export const EditProgram = ({ program }: EditProgramProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -111,4 +111,4 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       />
     </span>
   );
-}
+};

@@ -1,9 +1,9 @@
-import ApolloClient from 'apollo-client';
-import { createUploadLink } from 'apollo-upload-client';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { onError } from 'apollo-link-error';
-import { ApolloLink } from 'apollo-link';
 import { persistCache } from 'apollo-cache-persist';
+import ApolloClient from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
+import { onError } from 'apollo-link-error';
+import { createUploadLink } from 'apollo-upload-client';
 import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '../utils/utils';
@@ -42,6 +42,35 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       networkError,
       graphQLErrors,
     );
+});
+
+const isDataNull = (data): boolean => {
+  return Object.values(data).some((value) => value === null);
+};
+
+const hasDataError = (data): boolean => {
+  return data && (data.error || data?.errors?.length > 0);
+};
+
+//redirect to 404 page if data is null
+const redirectLink = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
+    if (hasDataError(response.data)) {
+      // eslint-disable-next-line no-console
+      console.error(response.data?.error || response.data?.errors);
+    }
+    if (
+      response.data &&
+      isDataNull(response.data) &&
+      !hasDataError(response.data)
+    ) {
+      const pathSegments = window.location.pathname.split('/');
+      const businessArea = pathSegments[1];
+
+      window.location.href = `/404/${businessArea}`;
+    }
+    return response;
+  });
 });
 
 function findValidationErrors(
@@ -116,6 +145,7 @@ const link = ApolloLink.from([
   addBusinessAreaHeaderMiddleware,
   validationErrorMiddleware,
   errorLink,
+  redirectLink,
   createUploadLink({ uri: GRAPHQL_URL }),
 ]);
 let client;

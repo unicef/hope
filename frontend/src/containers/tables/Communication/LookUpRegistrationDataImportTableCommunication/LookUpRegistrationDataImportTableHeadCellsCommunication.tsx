@@ -29,7 +29,7 @@ export const headCells: HeadCell<RegistrationDataImportNode>[] = [
   },
   {
     disablePadding: true,
-    label: 'Num. of Households',
+    label: 'Num. of Recipients',
     id: 'total_households_count_with_valid_phone_no',
     numeric: true,
   },

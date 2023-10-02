@@ -53,6 +53,7 @@ stages:
               install: true
               waitForExecution: false
               failOnStderr: false
+              force: $[not(empty(variables['REDEPLOY']))]
               valueFile: 'hct-mis/deployment/pipeline-cd-dev.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
