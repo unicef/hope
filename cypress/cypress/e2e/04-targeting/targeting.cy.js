@@ -19,7 +19,7 @@ describe("Targeting", () => {
     it("Check Targeting page", () => {
       cy.scenario([
         "Go to Targeting page",
-        "Check if all elements on page exist"
+        "Check if all elements on page exist",
       ]);
       targetingPage.checkElementsOnPage();
     });
@@ -42,7 +42,7 @@ describe("Targeting", () => {
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
         cy.get('[data-cy="button-target-population-create-new"]').click({
-          force: true
+          force: true,
         });
         cy.uniqueSeed().then((seed) => {
           const targetPopulationName = `test TP ${seed}`;
@@ -52,7 +52,7 @@ describe("Targeting", () => {
           cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
           cy.get('[data-cy="button-household-rule"]', {
-            timeout: 10000
+            timeout: 10000,
           }).click();
           cy.get('[data-cy="autocomplete-target-criteria"]')
             .click()
@@ -111,5 +111,16 @@ describe("Targeting", () => {
   });
   describe.skip("E2E tests Targeting", () => {});
 
-  describe.skip("Regression tests Targeting", () => {});
+  describe.skip("Regression tests Targeting", () => {
+    it.only("173542: GPF: Error occurs after apply empty Number of Households field", () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Delete value from Number of Households",
+        "Press button Apply",
+      ]);
+      targetingPage.filter;
+    });
+  });
 });
