@@ -5578,6 +5578,7 @@ export type QueryAllSurveysArgs = {
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
   targetPopulation?: Maybe<Scalars['ID']>,
+  businessArea?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
@@ -8156,6 +8157,7 @@ export type UpdateProgramInput = {
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  dataCollectingTypeCode?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationInput = {
@@ -10521,6 +10523,10 @@ export type CreateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
+      & { dataCollectingType: Maybe<(
+        { __typename?: 'DataCollectingTypeNode' }
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      )> }
     )> }
   )> }
 );
@@ -10552,6 +10558,10 @@ export type UpdateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+      & { dataCollectingType: Maybe<(
+        { __typename?: 'DataCollectingTypeNode' }
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      )> }
     )> }
   )> }
 );
@@ -13192,7 +13202,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'individualFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable'>
         )> }
       )> }
     )>> }
@@ -13211,7 +13221,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
     )> }
   )> }
 );
@@ -18127,6 +18137,13 @@ export const CreateProgramDocument = gql`
       cashPlus
       populationGoal
       individualDataNeeded
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
     validationErrors
   }
@@ -18244,6 +18261,13 @@ export const UpdateProgramDocument = gql`
       administrativeAreasOfImplementation
       individualDataNeeded
       version
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
     validationErrors
   }
@@ -25009,6 +25033,7 @@ export const AllProgramsForChoicesDocument = gql`
         name
         individualDataNeeded
         dataCollectingType {
+          id
           individualFiltersAvailable
         }
       }
@@ -25094,6 +25119,7 @@ export const ProgramDocument = gql`
     individualDataNeeded
     version
     dataCollectingType {
+      id
       code
       label
       active
