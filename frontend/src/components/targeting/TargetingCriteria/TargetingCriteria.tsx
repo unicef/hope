@@ -131,17 +131,23 @@ export function TargetingCriteria({
     return closeModal();
   };
 
-  const { dataCollectingType } = selectedProgram;
-  let individualFiltersAvailable = dataCollectingType?.individualFiltersAvailable
-  let householdFiltersAvailable = dataCollectingType?.householdFiltersAvailable;
+  let individualFiltersAvailable = true;
+  let householdFiltersAvailable = true;
 
-  // Allow use filters on non-migrated programs
-  if (individualFiltersAvailable === undefined) {
-    individualFiltersAvailable = true
+  if (selectedProgram) {
+    const { dataCollectingType } = selectedProgram;
+    individualFiltersAvailable = dataCollectingType?.individualFiltersAvailable
+    householdFiltersAvailable = dataCollectingType?.householdFiltersAvailable;
+
+    // Allow use filters on non-migrated programs
+    if (individualFiltersAvailable === undefined) {
+      individualFiltersAvailable = true
+    }
+    if (householdFiltersAvailable === undefined) {
+      householdFiltersAvailable = true
+    }
   }
-  if (householdFiltersAvailable === undefined) {
-    householdFiltersAvailable = true
-  }
+
 
   if (householdFiltersAvailable || individualFiltersAvailable) {
     return (
