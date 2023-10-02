@@ -298,6 +298,22 @@ export function paymentPlanStatusToColor(
   return theme.palette.error.main;
 }
 
+export function paymentInstructionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    PENDING: theme.hctPalette.gray,
+    REJECT: theme.palette.error.main,
+    AUTHORIZED: theme.hctPalette.darkerBlue,
+    RELEASED: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
 export function paymentPlanBackgroundActionStatusToColor(
   theme: typeof themeObj,
   status: string,
