@@ -10,7 +10,7 @@ export const AllSurveys = gql`
     $program: ID!
     $targetPopulation: ID
     $createdAtRange: String
-    $createdBy: ID
+    $createdBy: String
     $search: String
     $orderBy: String
   ) {

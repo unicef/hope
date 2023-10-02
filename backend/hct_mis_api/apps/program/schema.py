@@ -30,7 +30,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
@@ -71,6 +71,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
     individual_data_needed = graphene.Boolean()
+    data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
 
     class Meta:
         model = Program

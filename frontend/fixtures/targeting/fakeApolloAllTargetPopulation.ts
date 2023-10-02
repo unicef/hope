@@ -1,5 +1,4 @@
 import { AllTargetPopulationsDocument } from '../../src/__generated__/graphql';
-import { fakeProgram } from '../programs/fakeProgram';
 
 export const fakeApolloAllTargetPopulation = [
   {
@@ -7,12 +6,14 @@ export const fakeApolloAllTargetPopulation = [
       query: AllTargetPopulationsDocument,
       variables: {
         name: '',
-        totalHouseholdsCountMin: null,
+        totalHouseholdsCountMin: 0,
         totalHouseholdsCountMax: null,
-        createdAtRange: '{}',
         status: '',
-        program: [fakeProgram.id],
         businessArea: 'afghanistan',
+        program: [
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        ],
+        createdAtRange: '{"min":null,"max":null}',
         first: 10,
         orderBy: '-created_at',
       },
@@ -24,27 +25,28 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YTY3MGJmNTQtOGJiOS00MzU5LTkwMjEtYjZhNmJmYTM2ZGU2',
-                name: 'Growth get try financial country south.',
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MjQyZmQ4NDQtOTYzOC00MTdhLTkzZWMtYjQzMjY0Y2Y4YmRj',
+                name: 'Our ball many investment look like.',
                 status: 'READY_FOR_CASH_ASSIST',
-                createdAt: '2023-06-21T09:17:05.197737+00:00',
-                updatedAt: '2023-06-21T09:17:05.273250+00:00',
-                totalHouseholdsCount: 3,
-                totalIndividualsCount: 13,
+                createdAt: '2023-09-29T10:52:33.042363+00:00',
+                updatedAt: '2023-09-29T10:52:33.068191+00:00',
+                totalHouseholdsCount: 0,
+                totalHouseholdsCountWithValidPhoneNo: 0,
+                totalIndividualsCount: null,
+                __typename: 'TargetPopulationNode',
                 program: {
                   id:
-                    'UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm',
-                  name: 'Inside girl analysis report.66688849444',
+                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  name: 'Test Program',
                   __typename: 'ProgramNode',
                 },
                 createdBy: {
                   id:
-                    'VXNlck5vZGU6YWM0ZGNiZDktNzRiNy00MzMyLWI0NGEtNmM1MWZmYzlhZDZm',
-                  firstName: 'Sabrina',
-                  lastName: 'Parker',
+                    'VXNlck5vZGU6M2ZlNWE2OGMtYTI3Mi00Y2UzLWE3YzgtODhkNWIyOTY1YjMy',
+                  firstName: 'Mary',
+                  lastName: 'Reyes',
                   __typename: 'UserNode',
                 },
-                __typename: 'TargetPopulationNode',
               },
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               __typename: 'TargetPopulationNodeEdge',
@@ -52,27 +54,28 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MGI1NDljMjMtYTMxNC00ZDY0LWIxZDktOGVmMDliYWE1OWFj',
-                name: 'Stop per point address bit lose set.',
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YjI0ZDA5ZTUtN2E1Yy00MjgyLWI4ZmItYWY4MDkwMGY5YzRm',
+                name: 'Less road structure audience those modern.',
                 status: 'READY_FOR_CASH_ASSIST',
-                createdAt: '2023-06-21T09:17:04.608777+00:00',
-                updatedAt: '2023-06-21T09:17:04.715117+00:00',
-                totalHouseholdsCount: 3,
-                totalIndividualsCount: 13,
+                createdAt: '2023-09-29T10:52:30.379605+00:00',
+                updatedAt: '2023-09-29T10:52:30.412142+00:00',
+                totalHouseholdsCount: 0,
+                totalHouseholdsCountWithValidPhoneNo: 0,
+                totalIndividualsCount: null,
+                __typename: 'TargetPopulationNode',
                 program: {
                   id:
-                    'UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm',
-                  name: 'Inside girl analysis report.66688849444',
+                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  name: 'Test Program',
                   __typename: 'ProgramNode',
                 },
                 createdBy: {
                   id:
-                    'VXNlck5vZGU6MmY2NzY1NzQtNjJjNS00ZWFlLTk5MjYtOGQ2ODk0NTE2ODMy',
-                  firstName: 'Mario',
-                  lastName: 'Hayes',
+                    'VXNlck5vZGU6ZDA0MjdlNjktN2U1Mi00NmYzLTljNjItMGU1YzJlZWRjNGYz',
+                  firstName: 'Elizabeth',
+                  lastName: 'Coleman',
                   __typename: 'UserNode',
                 },
-                __typename: 'TargetPopulationNode',
               },
               cursor: 'YXJyYXljb25uZWN0aW9uOjE=',
               __typename: 'TargetPopulationNodeEdge',
@@ -80,34 +83,64 @@ export const fakeApolloAllTargetPopulation = [
             {
               node: {
                 id:
-                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZjVjODkxZDQtYWMyNC00M2MwLWE3N2EtMjIyYWNkODc3OGRl',
-                name: 'Read stuff force start model.',
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YzBiMzE0NjItNmIzMC00OGNiLTljMmMtZDgzM2JkZTJmNGYx',
+                name: 'Score visit write ask whole myself.',
                 status: 'READY_FOR_CASH_ASSIST',
-                createdAt: '2023-06-21T09:17:01.518063+00:00',
-                updatedAt: '2023-06-21T09:17:01.587942+00:00',
-                totalHouseholdsCount: 2,
-                totalIndividualsCount: 8,
+                createdAt: '2023-09-29T10:52:30.190168+00:00',
+                updatedAt: '2023-09-29T10:52:30.220259+00:00',
+                totalHouseholdsCount: 0,
+                totalHouseholdsCountWithValidPhoneNo: 0,
+                totalIndividualsCount: null,
+                __typename: 'TargetPopulationNode',
                 program: {
                   id:
-                    'UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm',
-                  name: 'Inside girl analysis report.66688849444',
+                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  name: 'Test Program',
                   __typename: 'ProgramNode',
                 },
                 createdBy: {
                   id:
-                    'VXNlck5vZGU6NmRjYmZiZmEtYjJiOS00Yzc2LWFmYTctMDNjZTlkNGNiMjY4',
-                  firstName: 'Fernando',
-                  lastName: 'Wells',
+                    'VXNlck5vZGU6ODE3OWIyMDAtZjBhZC00OWYyLWJjZDItNTYwZjUxZDZlOGNj',
+                  firstName: 'Jennifer',
+                  lastName: 'Bailey',
                   __typename: 'UserNode',
                 },
-                __typename: 'TargetPopulationNode',
               },
               cursor: 'YXJyYXljb25uZWN0aW9uOjI=',
               __typename: 'TargetPopulationNodeEdge',
             },
+            {
+              node: {
+                id:
+                  'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz',
+                name: 'Test Target Population',
+                status: 'ASSIGNED',
+                createdAt: '2023-09-29T10:52:29.726956+00:00',
+                updatedAt: '2023-09-29T10:52:29.779197+00:00',
+                totalHouseholdsCount: 2,
+                totalHouseholdsCountWithValidPhoneNo: 0,
+                totalIndividualsCount: 8,
+                __typename: 'TargetPopulationNode',
+                program: {
+                  id:
+                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  name: 'Test Program',
+                  __typename: 'ProgramNode',
+                },
+                createdBy: {
+                  id:
+                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  firstName: 'Root',
+                  lastName: 'Rootkowski',
+                  __typename: 'UserNode',
+                },
+              },
+              cursor: 'YXJyYXljb25uZWN0aW9uOjM=',
+              __typename: 'TargetPopulationNodeEdge',
+            },
           ],
-          totalCount: 3,
-          edgeCount: 3,
+          totalCount: 4,
+          edgeCount: 4,
           __typename: 'TargetPopulationNodeConnection',
         },
       },

@@ -6,7 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import Program
 
 
@@ -27,6 +27,13 @@ class TestCreateProgram(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
+          dataCollectingType {
+            code
+            label
+            description
+            active
+            individualFiltersAvailable
+          }
         }
         validationErrors
       }
@@ -38,6 +45,13 @@ class TestCreateProgram(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.data_collecting_type = DataCollectingType.objects.create(
+            code="partial",
+            label="Partial",
+            description="Partial individuals collected",
+            active=True,
+            individual_filters_available=True,
+        )
         cls.program_data = {
             "programData": {
                 "name": "Test",
@@ -52,6 +66,7 @@ class TestCreateProgram(APITestCase):
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
                 "businessAreaSlug": cls.business_area.slug,
+                "dataCollectingTypeCode": cls.data_collecting_type.code,
             }
         }
 

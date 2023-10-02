@@ -1,25 +1,25 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
-  ProgramNode,
+  ProgramQuery,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface FinishProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export function FinishProgram({

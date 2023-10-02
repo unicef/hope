@@ -597,6 +597,9 @@ class TicketComplaintDetails(GenericPaymentTicket):
         null=True,
     )
 
+    class Meta:
+        verbose_name_plural = "Ticket Complaint Details"
+
 
 class TicketSensitiveDetails(GenericPaymentTicket):
     STATUS_FLOW = GENERAL_STATUS_FLOW
@@ -619,6 +622,9 @@ class TicketSensitiveDetails(GenericPaymentTicket):
         null=True,
     )
 
+    class Meta:
+        verbose_name_plural = "Ticket Sensitive Details"
+
 
 class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
@@ -635,6 +641,9 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         null=True,
     )
     household_data = JSONField(null=True)
+
+    class Meta:
+        verbose_name_plural = "Ticket Household Data Update Details"
 
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
@@ -658,6 +667,9 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     def household(self) -> "Household":
         return self.individual.household
 
+    class Meta:
+        verbose_name_plural = "Ticket Individual Data Update Details"
+
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
@@ -675,6 +687,9 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
     )
     individual_data = JSONField(null=True)
     approve_status = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = "Ticket Add Individual Details"
 
 
 class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
@@ -697,6 +712,9 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     @property
     def household(self) -> "Household":
         return self.individual.household
+
+    class Meta:
+        verbose_name_plural = "Ticket Delete Individual Details"
 
 
 class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
@@ -721,6 +739,9 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         blank=True,
         default=None,
     )
+
+    class Meta:
+        verbose_name_plural = "Ticket Delete Household Details"
 
 
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
@@ -747,6 +768,9 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     @property
     def individual(self) -> "Individual":
         return self.golden_records_individual
+
+    class Meta:
+        verbose_name_plural = "Ticket System Flagging Details"
 
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
@@ -803,6 +827,9 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     def individual(self) -> "Individual":
         return self.golden_records_individual
 
+    class Meta:
+        verbose_name_plural = "Ticket Needs Adjudication Details"
+
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
@@ -852,6 +879,9 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     def payment_record(self) -> Optional["PaymentRecord"]:
         return getattr(self.payment_verification, "payment_obj", None)
 
+    class Meta:
+        verbose_name_plural = "Ticket Payment Verification Details"
+
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
     STATUS_FLOW = FEEDBACK_STATUS_FLOW
@@ -873,6 +903,9 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+
+    class Meta:
+        verbose_name_plural = "Ticket Positive Feedback Details"
 
 
 class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
@@ -896,6 +929,9 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
         null=True,
     )
 
+    class Meta:
+        verbose_name_plural = "Ticket Negative Feedback Details"
+
 
 class TicketReferralDetails(TimeStampedUUIDModel):
     STATUS_FLOW = FEEDBACK_STATUS_FLOW
@@ -917,6 +953,9 @@ class TicketReferralDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+
+    class Meta:
+        verbose_name_plural = "Ticket Referral Details"
 
 
 class GrievanceDocument(UUIDModel):

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
+import { ProgramQuery, ProgramStatus } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
@@ -9,7 +9,7 @@ import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageH
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   canActivate: boolean;
   canEdit: boolean;
   canRemove: boolean;

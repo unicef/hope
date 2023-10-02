@@ -6,10 +6,12 @@ export const fakeApolloAllRegistrationDataImports = [
     request: {
       query: AllRegistrationDataImportsDocument,
       variables: {
+        search: '',
         businessArea: 'afghanistan',
-        program: fakeProgram.id,
-        importDateRange: '{}',
-        size: '{}',
+        program:
+          'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        importDateRange: '{"min":null,"max":null}',
+        size: '{"min":"","max":""}',
         first: 10,
         orderBy: '-import_date',
       },
@@ -18,34 +20,46 @@ export const fakeApolloAllRegistrationDataImports = [
       data: {
         allRegistrationDataImports: {
           pageInfo: {
-            hasNextPage: true,
+            hasNextPage: false,
             hasPreviousPage: false,
             startCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
-            endCursor: 'YXJyYXljb25uZWN0aW9uOjk=',
+            endCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
             __typename: 'PageInfo',
           },
-          totalCount: 27,
+          totalCount: 1,
           edges: [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
                 id:
-                  'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ZjRmMGY4NjktNTllNS00YWI2LWJkYjEtYWJiMGVkMTU5YTRl',
-                createdAt: '2023-06-12T11:14:35.582648+00:00',
-                name: 'Lol123',
-                status: 'IMPORT_ERROR',
-                importDate: '2023-06-12T11:14:35.582685+00:00',
+                  'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NGQxMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAw',
+                createdAt: '2023-09-29T10:52:29.562586+00:00',
+                name: 'Test Import',
+                status: 'IN_REVIEW',
+                erased: false,
+                importDate: '2023-09-29T10:52:29.562609+00:00',
                 importedBy: {
                   id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
-                  firstName: 'Root',
-                  lastName: 'Rootkowski',
-                  email: 'root@root.com',
+                    'VXNlck5vZGU6NTE1MTQ4MzMtM2U1Yy00NGRiLTljN2UtNWYxNzdmNDkxYmZk',
+                  firstName: 'Tiffany',
+                  lastName: 'Glenn',
+                  email: 'tiffany.glenn_1695984749500934169@unicef.com',
                   __typename: 'UserNode',
                 },
-                dataSource: 'XLS',
-                numberOfHouseholds: 2,
-                numberOfIndividuals: 6,
+                dataSource: 'API',
+                numberOfHouseholds: 1,
+                numberOfIndividuals: 3,
+                program: {
+                  id:
+                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  name: 'Test Program',
+                  startDate: '2023-09-29',
+                  endDate: '2024-09-28',
+                  status: 'ACTIVE',
+                  __typename: 'ProgramNode',
+                },
+                refuseReason: null,
+                totalHouseholdsCountWithValidPhoneNo: 0,
                 __typename: 'RegistrationDataImportNode',
               },
               __typename: 'RegistrationDataImportNodeEdge',

@@ -11,6 +11,11 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import {
+  ProgramQuery,
+  useDataCollectionTypeChoiceDataQuery,
+  useProgrammeChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
@@ -18,10 +23,6 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
-import {
-  ProgramNode,
-  useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
@@ -45,7 +46,7 @@ const FullWidth = styled.div`
 `;
 
 interface ProgramFormPropTypes {
-  program?: ProgramNode;
+  program?: ProgramQuery['program'];
   onSubmit: (values, setFieldError) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;
@@ -65,7 +66,9 @@ export const ProgramForm = ({
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-
+  const {
+    data: dataCollectionTypeData,
+  } = useDataCollectionTypeChoiceDataQuery();
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))
@@ -135,7 +138,7 @@ export const ProgramForm = ({
   if (formInitialValue.budget === 0) {
     formInitialValue.budget = '0.00';
   }
-  if (!data) return null;
+  if (!data || !dataCollectionTypeData) return null;
 
   const withoutIndividualDataText = t(
     'This programme will use only household and/or head of household details for targeting or entitlement calculation',
@@ -214,6 +217,16 @@ export const ProgramForm = ({
                     choices={data.programSectorChoices}
                     component={FormikSelectField}
                     data-cy='input-sector'
+                  />
+                  <Field
+                    name='dataCollectingTypeCode'
+                    label={t('Data Collecting Type')}
+                    fullWidth
+                    variant='outlined'
+                    required
+                    choices={dataCollectionTypeData?.dataCollectionTypeChoices}
+                    component={FormikSelectField}
+                    data-cy='input-data-collecting-type'
                   />
                   <DateFields>
                     <DateField>

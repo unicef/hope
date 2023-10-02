@@ -95,9 +95,9 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         cls.create_user_role_with_permissions(
             cls.user,
             [
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
+                Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE,
+                Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
                 Permissions.GRIEVANCES_CREATE,
             ],
             cls.business_area,
