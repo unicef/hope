@@ -417,7 +417,7 @@ class MigrationStatus(TimeStampedModel):
 class DataCollectingType(TimeStampedModel):
     code = models.CharField(max_length=60, unique=True)
     description = models.TextField(blank=True)
-    compatible_types = models.ManyToManyField("self", blank=True)
+    compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
 
     def __str__(self) -> str:
         return f"{self.code} - {self.description}"
