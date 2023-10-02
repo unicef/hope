@@ -15,10 +15,11 @@ describe('containers/tables//Communication/CommunicationTable', () => {
       >
         <CommunicationTable
           filter={{
-            targetPopulation: '',
             createdBy: '',
-            first: 10,
-            orderBy: '-created_at',
+            createdAtRangeMin: null,
+            createdAtRangeMax: null,
+            program: '',
+            targetPopulation: '',
           }}
           canViewDetails={false}
         />

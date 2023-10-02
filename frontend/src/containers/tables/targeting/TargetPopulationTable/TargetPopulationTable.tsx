@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
+import { dateToIsoString, decodeIdString } from '../../../../utils/utils';
 import {
   AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
@@ -48,8 +48,8 @@ export const TargetPopulationTable = ({
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
   };
 

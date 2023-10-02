@@ -45,6 +45,10 @@ export const AllProgramsForChoices = gql`
           id
           name
           individualDataNeeded
+          dataCollectingType {
+            id
+            individualFiltersAvailable
+          }
         }
       }
     }

@@ -11,7 +11,7 @@ from hct_mis_api.apps.accountability.models import (
     Message,
     Survey,
 )
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter
+from hct_mis_api.apps.core.filters import BusinessAreaSlugFilter, DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
@@ -78,6 +78,7 @@ class MessageRecipientsMapFilter(FilterSet):
 
 
 class FeedbackFilter(FilterSet):
+    business_area = BusinessAreaSlugFilter()
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
@@ -114,6 +115,7 @@ class FeedbackMessageFilter(FilterSet):
 
 
 class SurveyFilter(FilterSet):
+    business_area = BusinessAreaSlugFilter()
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
     created_by = CharFilter(method="filter_created_by")

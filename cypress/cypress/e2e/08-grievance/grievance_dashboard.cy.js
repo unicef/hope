@@ -4,6 +4,7 @@ let grievanceDashboard = new GrievanceDashboard();
 
 describe("Grievance Dashboard", () => {
   beforeEach(() => {
+    cy.adminLogin();
     cy.navigateToHomePage();
     grievanceDashboard.clickMenuButtonGrievance();
     grievanceDashboard.clickMenuButtonGrievanceDashboard();
