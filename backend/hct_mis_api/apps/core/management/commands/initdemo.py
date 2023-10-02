@@ -53,6 +53,8 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
         call_command("flush", "--noinput", database="registration_datahub")
 
+        generate_data_collecting_types()
+
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
@@ -79,7 +81,6 @@ class Command(BaseCommand):
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
-        generate_data_collecting_types()
 
         email_list = [
             "jan.romaniak@kellton.com",

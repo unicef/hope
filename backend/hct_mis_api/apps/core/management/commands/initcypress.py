@@ -26,6 +26,7 @@ class Command(BaseCommand):
             call_command("migratealldb")
 
         reset_business_area_sequences()
+        generate_data_collecting_types()
         call_command("flush", "--noinput")
         call_command("flush", "--noinput", database="cash_assist_datahub_mis")
         call_command("flush", "--noinput", database="cash_assist_datahub_ca")
@@ -63,5 +64,3 @@ class Command(BaseCommand):
         )
 
         call_command("search_index", "--rebuild", "-f")
-
-        generate_data_collecting_types()
