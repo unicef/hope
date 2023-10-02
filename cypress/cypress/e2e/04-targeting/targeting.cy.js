@@ -144,5 +144,38 @@ describe("Targeting", () => {
         .should("have.value", "");
       targetingPage.getTargetPopulationsRows().should("have.length", 2);
     });
+    it('173541: GPF: Clear button does not work for field "Number of Households" in page Targeting', () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Clear",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Press button Clear",
+      ]);
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getClear().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getApply().click();
+      targetingPage.getClear().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+    });
   });
 });
