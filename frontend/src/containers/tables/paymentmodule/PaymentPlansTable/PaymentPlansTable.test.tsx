@@ -13,7 +13,18 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
         addTypename={false}
         mocks={fakeApolloAllPaymentPlansForTable}
       >
-        <PaymentPlansTable canViewDetails={false} filter={{}} />
+        <PaymentPlansTable
+          canViewDetails={false}
+          filter={{
+            search: '',
+            dispersionStartDate: undefined,
+            dispersionEndDate: undefined,
+            status: [],
+            totalEntitledQuantityFrom: null,
+            totalEntitledQuantityTo: null,
+            isFollowUp: null,
+          }}
+        />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
@@ -28,7 +39,18 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
         addTypename={false}
         mocks={fakeApolloAllPaymentPlansForTable}
       >
-        <PaymentPlansTable canViewDetails={false} filter={{}} />
+        <PaymentPlansTable
+          canViewDetails={false}
+          filter={{
+            search: '',
+            dispersionStartDate: undefined,
+            dispersionEndDate: undefined,
+            status: [],
+            totalEntitledQuantityFrom: null,
+            totalEntitledQuantityTo: null,
+            isFollowUp: null,
+          }}
+        />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response

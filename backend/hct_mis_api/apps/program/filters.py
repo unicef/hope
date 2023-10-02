@@ -1,9 +1,14 @@
 from typing import Any, Dict
 
+<<<<<<< HEAD
 from django.db.models import Count, F, Q, QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce, Lower
+=======
+from django.db.models import Count, Q, QuerySet
+from django.db.models.functions import Lower
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 
 from _decimal import Decimal
 from django_filters import (
@@ -51,23 +56,11 @@ class ProgramFilter(FilterSet):
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
-        queryset = queryset.annotate(
-            total_payment_plans_hh_count=Count(
-                "cashplan__payment_items__household",
-                filter=Q(cashplan__payment_items__delivered_quantity__gte=0),
-                distinct=True,
-            ),
-            total_cash_plans_hh_count=Count(
-                "paymentplan__payment_items__household",
-                filter=Q(paymentplan__payment_items__delivered_quantity__gte=0),
-                distinct=True,
-            ),
-        ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
-
+        queryset = queryset.annotate(hh_count=Count("household"))
         if min_value := value.get("min"):
-            queryset = queryset.filter(total_hh_count__gte=min_value)
+            queryset = queryset.filter(hh_count__gte=min_value)
         if max_value := value.get("max"):
-            queryset = queryset.filter(total_hh_count__lte=max_value)
+            queryset = queryset.filter(hh_count__lte=max_value)
 
         return queryset
 

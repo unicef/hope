@@ -71,12 +71,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
   if (userDataLoading || choicesLoading || feedbackDataLoading)
     return <LoadingComponent />;
   if (permissions === null) return null;
-  if (
-    !hasPermissions(
-      PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
-      permissions,
-    )
-  )
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
     return <PermissionDenied />;
 
   if (!choicesData || !userData || !feedbackData) return null;
@@ -152,7 +147,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
               title={`Edit Feedback #${feedback.unicefId}`}
               breadCrumbs={
                 hasPermissionInModule(
-                  'ACCOUNTABILITY_FEEDBACK_VIEW_LIST',
+                  'GRIEVANCES_FEEDBACK_VIEW_LIST',
                   permissions,
                 )
                   ? breadCrumbsItems

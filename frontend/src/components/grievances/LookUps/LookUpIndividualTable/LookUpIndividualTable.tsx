@@ -75,8 +75,8 @@ export const LookUpIndividualTable = ({
     businessArea,
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     sex: [filter.sex],
-    search: `${filter.search.trim() &&
-      [filter.searchType, filter.search.trim()].join(' ')}`,
+    search: filter.search.trim(),
+    searchType: filter.searchType,
     admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,

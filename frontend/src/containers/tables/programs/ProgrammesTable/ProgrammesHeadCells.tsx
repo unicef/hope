@@ -1,7 +1,14 @@
+<<<<<<< HEAD:frontend/src/containers/tables/programs/ProgrammesTable/ProgrammesHeadCells.tsx
 import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
 import { ProgramNode } from '../../../../__generated__/graphql';
+=======
+import { AllProgramsQuery } from '../../../__generated__/graphql';
+import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937:frontend/src/containers/tables/ProgrammesTable/ProgrammesHeadCells.tsx
 
-export const headCells: HeadCell<ProgramNode>[] = [
+export const headCells: HeadCell<
+  AllProgramsQuery['allPrograms']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: 'Name',

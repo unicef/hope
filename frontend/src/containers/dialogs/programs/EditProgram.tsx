@@ -2,17 +2,24 @@ import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
 import {
   ProgramQuery,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { ProgramForm } from '../../forms/ProgramForm';
+import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
+import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
+<<<<<<< HEAD
+import {
+  ProgramQuery,
+  useUpdateProgramMutation,
+} from '../../../__generated__/graphql';
+=======
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
+import { ProgramForm } from '../../forms/ProgramForm';
 
 interface EditProgramProps {
   program: ProgramQuery['program'];
@@ -93,8 +100,19 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
 
   return (
     <span>
+<<<<<<< HEAD
       <Button data-cy='button-edit-program' variant='outlined' color='primary' onClick={() => setOpen(true)}>
         <EditIcon />
+=======
+      <Button
+        data-cy='button-edit-program'
+        variant='outlined'
+        color='primary'
+        startIcon={<EditIcon />}
+        onClick={() => setOpen(true)}
+      >
+        {t('EDIT PROGRAMME')}
+>>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
       </Button>
       <ProgramForm
         onSubmit={submitFormHandler}

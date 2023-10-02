@@ -103,12 +103,13 @@ class APITokenAdmin(SmartModelAdmin):
         ("valid_for", AutoCompleteFilter),
     )
     filter_horizontal = ("valid_for",)
-    autocomplete_fields = ("user",)
+    # autocomplete_fields = ("user",)
     formfield_overrides = {
         ChoiceArrayField: {"widget": forms.CheckboxSelectMultiple},
     }
     form = APITokenForm
     search_fields = ("id",)
+    raw_id_fields = ("user",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("user")
