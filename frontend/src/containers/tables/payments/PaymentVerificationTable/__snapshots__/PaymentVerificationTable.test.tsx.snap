@@ -223,17 +223,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
           </thead>
           <tbody
             class="MuiTableBody-root"
-          >
-            <tr
-              class="MuiTableRow-root"
-              style="height: 54px;"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body"
-                colspan="6"
-              />
-            </tr>
-          </tbody>
+          />
         </table>
       </div>
       <div
@@ -285,7 +275,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-4 of 4
+            1-5 of 32
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -315,9 +305,8 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
             </button>
             <button
               aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
-              disabled=""
-              tabindex="-1"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
+              tabindex="0"
               title="Next page"
               type="button"
             >
@@ -335,6 +324,9 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   />
                 </svg>
               </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
             </button>
           </div>
         </div>

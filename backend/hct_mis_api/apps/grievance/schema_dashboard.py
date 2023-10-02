@@ -105,7 +105,7 @@ class Query(graphene.ObjectType):
         user_generated, system_generated = create_type_generated_queries()
 
         qs = (
-            GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
+            GrievanceTicket.objects.filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
                 days_diff=Extract(F("updated_at") - F("created_at"), "days"),
@@ -128,7 +128,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_category(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
-            GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
+            GrievanceTicket.objects.filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
             .values("category_name")
             .annotate(count=Count("category"))
@@ -140,7 +140,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_status(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
-            GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
+            GrievanceTicket.objects.filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
             .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
             .values("status_name")
             .annotate(count=Count("status"))
@@ -153,7 +153,7 @@ class Query(graphene.ObjectType):
     def resolve_tickets_by_location_and_category(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
             GrievanceTicket.objects.select_related("admin2")
-            .filter(business_area__slug=kwargs.get("business_area_slug"))
+            .filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
             .values_list("admin2__name", "category")
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
