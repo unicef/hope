@@ -420,8 +420,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         assigned_to_id = decode_id_string(input_data.pop("assigned_to", None))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
 
-        if admin := input_data.pop("admin", None):
-            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
+        if (admin_p_code := input_data.pop("admin_p_code", None)) and (admin_name := input_data.pop("admin_name", None)):
+            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin_p_code, name=admin_name)
 
         linked_tickets_encoded_ids = input_data.pop("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]

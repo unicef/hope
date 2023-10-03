@@ -648,7 +648,8 @@ input CreateGrievanceTicketInput {
   assignedTo: ID
   category: Int!
   issueType: Int
-  admin: String
+  adminPCode: String
+  adminName: String
   area: String
   language: String!
   consent: Boolean!
@@ -4760,7 +4761,8 @@ input UpdateGrievanceTicketInput {
   ticketId: ID!
   description: String
   assignedTo: ID
-  admin: String
+  adminPCode: String
+  adminName: String
   area: String
   language: String
   linkedTickets: [ID]

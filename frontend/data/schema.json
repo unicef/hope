@@ -64405,7 +64405,17 @@
             "defaultValue": null
           },
           {
-            "name": "admin",
+            "name": "adminPCode",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "adminName",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -66866,7 +66876,17 @@
             "defaultValue": null
           },
           {
-            "name": "admin",
+            "name": "adminPCode",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "adminName",
             "description": null,
             "type": {
               "kind": "SCALAR",
