@@ -114,5 +114,10 @@ describe("Targeting", () => {
   });
   describe.skip("E2E tests Targeting", () => {});
 
-  describe.skip("Regression tests Targeting", () => {});
+  describe("Regression tests Targeting", () => {
+    it("174517: Check clear cash", () => {
+      targetingPage.clearCache();
+      targetingPage.checkElementsOnPage();
+    });
+  });
 });

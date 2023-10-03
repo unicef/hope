@@ -1,8 +1,8 @@
 import PopulationIndividuals from "../../page-objects/pages/population_module/population_individuals.po";
 import IPDetailsPage from "../../page-objects/pages/population_module/individuals_details_page.po";
 
-let pi = new PopulationIndividuals();
-let pidp = new IPDetailsPage();
+let populationIndividuals = new PopulationIndividuals();
+let ipDetailsPage = new IPDetailsPage();
 
 describe("Individuals Module", () => {
   beforeEach(() => {
@@ -40,5 +40,12 @@ describe("Individuals Module", () => {
   });
   describe.skip("E2E tests Individuals Population", () => {});
 
-  describe.skip("Regression tests Individuals Population", () => {});
+  describe("Regression tests Individuals Population", () => {
+    it("174517: Check clear cash", () => {
+      populationIndividuals.clearCache();
+      populationIndividuals
+        .getTitle()
+        .contains(populationIndividuals.textTitle);
+    });
+  });
 });
