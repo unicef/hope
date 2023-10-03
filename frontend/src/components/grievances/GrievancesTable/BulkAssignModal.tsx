@@ -84,7 +84,7 @@ export const BulkAssignModal = ({
           variables: {
             assignedTo: assignee.node.id,
             businessAreaSlug: businessArea,
-            grievanceTicketUnicefIds: selected,
+            grievanceTicketIds: selected,
           },
           refetchQueries: () => [
             {

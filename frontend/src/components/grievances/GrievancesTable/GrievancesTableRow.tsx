@@ -84,7 +84,7 @@ export const GrievancesTableRow = ({
           variables: {
             assignedTo: assignee.node.id,
             businessAreaSlug: businessArea,
-            grievanceTicketUnicefIds: ids,
+            grievanceTicketIds: ids,
           },
           refetchQueries: () => [
             {
