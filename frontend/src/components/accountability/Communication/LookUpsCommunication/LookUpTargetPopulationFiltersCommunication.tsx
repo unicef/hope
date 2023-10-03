@@ -3,7 +3,6 @@ import { Group, Person } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TargetPopulationStatus } from '../../../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
@@ -14,6 +13,7 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+import { TargetPopulationStatus } from '../../../../__generated__/graphql';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;

@@ -2,7 +2,6 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { ProgramQuery } from '../../../__generated__/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
-import { CopyProgram } from '../../dialogs/programs/CopyProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
 
