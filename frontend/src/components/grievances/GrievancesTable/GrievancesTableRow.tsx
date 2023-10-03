@@ -77,6 +77,7 @@ export const GrievancesTableRow = ({
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
 
   const onFilterChange = async (assignee, ids): Promise<void> => {
+
     if (assignee) {
       try {
         await mutate({
