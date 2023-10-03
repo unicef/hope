@@ -756,6 +756,11 @@ Clear Cache,clear-cache/
     "ADMIN_SYNC_LOCAL_ADMIN_URL": ("/admin/", "Local server admin URL", str),
     "ADMIN_SYNC_REMOTE_ADMIN_URL": ("/admin/", "Remote server admin URL", str),
     "REST_BANNER_MESSAGE": ("", "Banner Message", str),
+    "CLEARING_RECORD_FILES_TIMEDELTA": (
+        60,
+        "The schedule (in days) which is applied to task clean_old_record_files_task",
+        "positive_integers",
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
