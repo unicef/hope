@@ -5,11 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    create_afghanistan,
-    generate_data_collecting_types,
-)
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -33,7 +30,17 @@ class TestUpdateProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        generate_data_collecting_types()
+
+        data_collecting_types = [
+            {"label": "Partial", "code": "partial", "description": "Partial individuals collected"},
+            {"label": "Full", "code": "full", "description": "Full individual collected"},
+            {"label": "Size only", "code": "size_only", "description": "Size only collected"},
+            {"label": "No individual data", "code": "no_ind", "description": "No individual data"},
+            {"label": "Unknown", "code": "unknown", "description": "Unknown"},
+        ]
+
+        for data_dict in data_collecting_types:
+            DataCollectingType.objects.update_or_create(**data_dict)
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(name="initial name", status=Program.DRAFT, business_area=cls.business_area)
