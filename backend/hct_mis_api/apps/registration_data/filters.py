@@ -10,8 +10,11 @@ from hct_mis_api.apps.core.filters import (
     IntegerFilter,
     IntegerRangeFilter,
 )
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required, decode_id_string
-from hct_mis_api.apps.program.filters import GlobalProgramFilter
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    decode_id_string_required,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
@@ -57,7 +60,9 @@ class RegistrationDataImportFilter(FilterSet):
         return qs.exclude(excluded=True)
 
     def filter_by_program(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        return queryset.filter(Q(program_id=decode_id_string_required(value) | Q(programs__in=[decode_id_string_required(value)])))
+        return queryset.filter(
+            Q(program_id=decode_id_string_required(value)) | Q(programs__in=[decode_id_string_required(value)])
+        )
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(
