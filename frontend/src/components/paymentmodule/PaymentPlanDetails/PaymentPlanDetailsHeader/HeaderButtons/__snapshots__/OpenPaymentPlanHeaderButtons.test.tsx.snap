@@ -10,6 +10,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     >
       <button
         class="MuiButtonBase-root MuiIconButton-root"
+        data-cy="button-delete-payment-plan"
         tabindex="0"
         type="button"
       >
@@ -38,6 +39,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       <a
         aria-disabled="false"
         class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
+        data-cy="button-edit-payment-plan"
         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==/edit"
         role="button"
         tabindex="0"

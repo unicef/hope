@@ -4,7 +4,6 @@ import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
@@ -13,6 +12,7 @@ import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { householdTableOrderOptions } from '../../../../utils/constants';
+import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
