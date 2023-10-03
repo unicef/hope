@@ -129,6 +129,9 @@ export function UniversalTable<T, K>({
         if (orderBy) {
           variables.orderBy = columnToOrderBy(orderBy, orderDirection);
         }
+        if (filterOrderBy) {
+          variables.orderBy = columnToOrderBy(filterOrderBy, orderDirection);
+        }
         setPage(newPage);
         refetch(variables);
       }}

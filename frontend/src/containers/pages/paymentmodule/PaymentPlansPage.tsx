@@ -1,4 +1,3 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +10,9 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ProgramStatus, useProgramQuery } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
 
 const initialFilter = {
   search: '',
@@ -23,7 +25,7 @@ const initialFilter = {
 
 export const PaymentPlansPage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 
@@ -34,23 +36,36 @@ export const PaymentPlansPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  if (permissions === null) return null;
+  const { data, loading: programLoading } = useProgramQuery({
+    variables: { id: programId },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  if (permissions === null || !data) return null;
+  if (programLoading) {
+    return <LoadingComponent />;
+  }
+
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
+
+  const isImportDisabled = data?.program?.status !== ProgramStatus.Active;
 
   return (
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-          <Button
+          <ButtonTooltip
+            title={t('Program must be ACTIVE to create Payment Plan')}
             variant='contained'
             color='primary'
             component={Link}
             to={`/${baseUrl}/payment-module/new-plan`}
             data-cy='button-new-payment-plan'
+            disabled={isImportDisabled}
           >
             {t('NEW PAYMENT PLAN')}
-          </Button>
+          </ButtonTooltip>
         )}
       </PageHeader>
       <PaymentPlansFilters

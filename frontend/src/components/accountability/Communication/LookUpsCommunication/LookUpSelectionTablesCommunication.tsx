@@ -1,11 +1,11 @@
 import React from 'react';
-import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { LookUpHouseholdTableCommunication } from '../../../../containers/tables/Communication/LookUpHouseholdTableCommunication/LookUpHouseholdTableCommunication';
 import { LookUpRegistrationDataImportTableCommunication } from '../../../../containers/tables/Communication/LookUpRegistrationDataImportTableCommunication';
 import { LookUpTargetPopulationTableCommunication } from '../../../../containers/tables/Communication/LookUpTargetPopulationTableCommunication';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { CommunicationTabsValues } from '../../../../utils/constants';
+import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 
 interface LookUpSelectionTablesCommunicationProps {
   selectedTab: number;

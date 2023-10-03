@@ -40,18 +40,10 @@ describe("Registration Data Import", () => {
       });
       it.skip("Refuse import", () => {});
       context("Registration Data Import Filters", () => {
-        it.skip("Registration Data Import Search filter", () => {
-          // ToDo
-        });
-        it.skip("Registration Data Import Import Date filter", () => {
-          // ToDo
-        });
-        it.skip("Registration Data Import Imported By filter", () => {
-          // ToDo
-        });
-        it.skip("Registration Data Import Status filter", () => {
-          // ToDo
-        });
+        it.skip("Registration Data Import Search filter", () => {});
+        it.skip("Registration Data Import Import Date filter", () => {});
+        it.skip("Registration Data Import Imported By filter", () => {});
+        it.skip("Registration Data Import Status filter", () => {});
       });
     });
   });

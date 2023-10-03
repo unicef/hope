@@ -7,6 +7,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
+import { individualTableOrderOptions } from '../../utils/constants';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -23,15 +24,6 @@ interface IndividualsFilterProps {
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
 }
-
-const orderOptions = [
-  { name: 'Individual Id: ascending', value: 'unicef_id' },
-  { name: 'Individual Id: descending', value: '-unicef_id' },
-  { name: 'Individual: ascending', value: 'full_name' },
-  { name: 'Individual: descending', value: '-full_name' },
-  { name: 'Gender: ascending', value: 'sex' },
-  { name: 'Gender: descending', value: '-sex' },
-];
 
 export const IndividualsFilter = ({
   filter,
@@ -181,7 +173,7 @@ export const IndividualsFilter = ({
             data-cy='ind-filters-order-by'
             disableClearable
           >
-            {orderOptions.map((order) => (
+            {individualTableOrderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

@@ -68,6 +68,7 @@ class IndividualDocument(Document):
     )
     program_id = fields.KeywordField(attr="program.id")
     registration_id = fields.TextField()
+    bank_account_info = fields.ObjectField(properties={"bank_account_number": fields.TextField()})
 
     def prepare_phone_no_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
@@ -162,6 +163,7 @@ def get_individual_doc(
 class HouseholdDocument(Document):
     head_of_household = fields.ObjectField(
         properties={
+            "unicef_id": fields.TextField(),
             "full_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "given_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "middle_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
@@ -175,6 +177,7 @@ class HouseholdDocument(Document):
                     "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
                 }
             ),
+            "bank_account_info": fields.ObjectField(properties={"bank_account_number": fields.TextField()}),
         }
     )
     unicef_id = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})

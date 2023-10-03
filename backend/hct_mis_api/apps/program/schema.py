@@ -30,7 +30,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
@@ -106,6 +106,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     #     # TODO: check and update perms
     #     # permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
     # )
+    data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
 
     class Meta:
         model = Program

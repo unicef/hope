@@ -459,7 +459,7 @@ class PaymentPlanService:
             self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
             self.payment_plan.target_population.save()
 
-        if self.payment_plan.program_cycle.paymentplan_set.count() == 1:
+        if self.payment_plan.program_cycle.payment_plans.count() == 1:
             # if it's the last Payment Plan in this Cycle need to update Cycle status
             # move from Active to Draft Cycle need to delete all Payment Plans
             self.payment_plan.program_cycle.set_draft()

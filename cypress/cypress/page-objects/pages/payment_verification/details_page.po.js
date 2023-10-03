@@ -31,7 +31,9 @@ export default class PVDetailsPage extends BaseComponent {
   cvpTab = 'button[role="tab"]';
   cvpTitle = 'div[data-cy="dialog-title"]';
   cvpSliderConfidenceInterval = 'span[data-cy="slider-confidence-interval"]';
+  cvpInputAdminCheckbox = 'span[data-cy="input-adminCheckbox"]';
   cvpSubmit = 'button[data-cy="button-submit"]';
+  labelVERIFICATIONCHANNEL = 'div[data-cy="label-VERIFICATION CHANNEL"]';
 
   // Texts
   textTitle = "Payment Verification";
@@ -98,14 +100,17 @@ export default class PVDetailsPage extends BaseComponent {
   getFinishPlan = () => cy.get(this.finishPlan);
   getFinish = () => cy.get(this.cvpSubmit);
   getEditVP = () => cy.get(this.editVP);
-
+  getMANUAL = () => cy.get("span").filter("MANUAL").eq(1);
+  getXLSX = () => cy.get('input[value="XLSX"]').eq(1);
+  getLabelVERIFICATIONCHANNEL = () => cy.get(this.labelVERIFICATIONCHANNEL);
   // Create Verification Plan
   getCVPTitle = () => cy.get(this.cvp).get(this.cvpTitle);
   getFullList = () => cy.get(this.cvp).get(this.cvpTab).eq(0);
   getRandomSampling = () => cy.get(this.cvp).get(this.cvpTab).eq(1);
   getCVPConfidenceInterval = () =>
     cy.get(this.cvp).get(this.cvpSliderConfidenceInterval);
-  getCVPSave = () => cy.get(this.cvp).get(this.cvpSubmit);
+  getCVPSave = () => cy.get(this.cvpSubmit);
+  getCvpInputAdminCheckbox = () => cy.get(this.cvpInputAdminCheckbox);
 
   checkPaymentVerificationTitle() {
     this.getPaymentVerificationTitle().should("be.visible");
