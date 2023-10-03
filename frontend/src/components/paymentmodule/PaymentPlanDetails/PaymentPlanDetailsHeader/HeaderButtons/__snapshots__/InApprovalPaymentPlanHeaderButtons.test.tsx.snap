@@ -10,6 +10,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-text makeStyles-error-3"
+        data-cy="button-reject-payment-plan"
         tabindex="0"
         type="button"
       >
