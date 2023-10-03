@@ -1,7 +1,6 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { renderUserName } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
@@ -10,6 +9,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
 
 interface CommunicationDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];

@@ -36,7 +36,9 @@ export const PROGRAM_QUERY = gql`
             endDate
           }
         }
+      }
       dataCollectingType {
+        id
         code
         label
         active
