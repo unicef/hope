@@ -19,7 +19,7 @@ describe("Targeting", () => {
     it("Check Targeting page", () => {
       cy.scenario([
         "Go to Targeting page",
-        "Check if all elements on page exist",
+        "Check if all elements on page exist"
       ]);
       targetingPage.checkElementsOnPage();
     });
@@ -42,7 +42,7 @@ describe("Targeting", () => {
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
         cy.get('[data-cy="button-target-population-create-new"]').click({
-          force: true,
+          force: true
         });
         cy.uniqueSeed().then((seed) => {
           const targetPopulationName = `test TP ${seed}`;
@@ -52,7 +52,7 @@ describe("Targeting", () => {
           cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
           cy.get('[data-cy="button-household-rule"]', {
-            timeout: 10000,
+            timeout: 10000
           }).click();
           cy.get('[data-cy="autocomplete-target-criteria"]')
             .click()
@@ -88,40 +88,25 @@ describe("Targeting", () => {
       });
     });
     context("Targeting Filters", () => {
-      it.skip("Targeting Search filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Status filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Number of Households filter", () => {
-        // ToDo
-      });
+      it.skip("Targeting Search filter", () => {});
+      it.skip("Targeting Status filter", () => {});
+      it.skip("Targeting Programme filter", () => {});
+      it.skip("Targeting Number of Households filter", () => {});
     });
     context("Edit targeting", () => {
-      it.skip("Edit", () => {
-        // ToDo
-      });
+      it.skip("Edit", () => {});
     });
     context("Rebuild targeting", () => {
-      it.skip("Rebuild", () => {
-        // ToDo
-      });
+      it.skip("Rebuild", () => {});
     });
     context("Lock targeting", () => {
-      it.skip("Lock", () => {
-        // ToDo
-      });
+      it.skip("Lock", () => {});
     });
     context("Unlock targeting", () => {
-      it.skip("Unlock", () => {
-        // ToDo
-      });
+      it.skip("Unlock", () => {});
     });
     context("Mark ready targeting", () => {
-      it.skip("Mark ready", () => {
-        // ToDo
-      });
+      it.skip("Mark ready", () => {});
     });
   });
   describe.skip("E2E tests Targeting", () => {});

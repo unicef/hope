@@ -35,8 +35,9 @@ class ProgramValidator(BaseValidator):
         if status_to_set == Program.FINISHED:
             # TODO: update after PaymentPlan status update
             # status=PaymentPlan.Status.RECONCILED
-            if program.paymentplan_set.exclude(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            if PaymentPlan.objects.filter(
+                program_cycle__in=program.cycles.all(),
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
             ).exists():
                 raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
 

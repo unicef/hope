@@ -37,6 +37,13 @@ export const PROGRAM_QUERY = gql`
           }
         }
       }
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
   }
 `;

@@ -1,23 +1,23 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import {
+  AllProgramsQuery,
+  ProgrammeChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   choicesToDict,
-  formatCurrency,
   programStatusToColor,
+  formatCurrency,
 } from '../../../../utils/utils';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface ProgrammesTableRowProps {
-  program: ProgramNode;
+  program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
   choicesData: ProgrammeChoiceDataQuery;
 }
 
@@ -42,6 +42,7 @@ export const ProgrammesTableRow = ({
       onClick={handleClick}
       role='checkbox'
       key={program.id}
+      data-cy={`table-row-${program.name}`}
     >
       <TableCell align='left'>
         <BlackLink to={programDetailsPath}>{program.name}</BlackLink>

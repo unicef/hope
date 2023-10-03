@@ -266,6 +266,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'value': 'ACCEPTED'
             },
             {
+                'name': 'Entitlement Saved',
+                'value': 'ENTITLEMENT_SAVED'
+            },
+            {
                 'name': 'Finished',
                 'value': 'FINISHED'
             },

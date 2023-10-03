@@ -10,6 +10,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
         businessArea: 'afghanistan',
         first: 5,
         orderBy: null,
+        isPaymentVerificationPage: false,
       },
     },
     result: {

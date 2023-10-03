@@ -37,7 +37,15 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "category",
         "registration_data_import",
     )
-    raw_id_fields = ("created_by", "assigned_to", "admin2", "business_area", "registration_data_import")
+    raw_id_fields = (
+        "created_by",
+        "assigned_to",
+        "admin2",
+        "business_area",
+        "registration_data_import",
+        "programme",
+        "copied_from",
+    )
     search_fields = ("unicef_id",)
     date_hierarchy = "created_at"
     list_filter = (
@@ -117,8 +125,15 @@ class TicketDeleteHouseholdDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @admin.register(TicketNeedsAdjudicationDetails)
 class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "golden_records_individual", "possible_duplicate", "selected_individual")
-    filter_horizontal = ("possible_duplicates", "selected_individuals")
+    raw_id_fields = (
+        "ticket",
+        "golden_records_individual",
+        "possible_duplicate",
+        "selected_individual",
+        "possible_duplicates",
+        "selected_individuals",
+    )
+    # filter_horizontal = ("possible_duplicates", "selected_individuals")
 
 
 @admin.register(TicketPaymentVerificationDetails)
@@ -144,3 +159,4 @@ class TicketReferralDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 @admin.register(GrievanceDocument)
 class GrievanceDocumentAdmin(HOPEModelAdminBase):
     list_display = ("file_name",)
+    raw_id_fields = ("created_by", "grievance_ticket", "content_type")

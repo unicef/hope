@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ProgramQuery,
+  useDataCollectionTypeChoiceDataQuery,
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
@@ -65,7 +66,9 @@ export const ProgramForm = ({
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-
+  const {
+    data: dataCollectionTypeData,
+  } = useDataCollectionTypeChoiceDataQuery();
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))
@@ -135,7 +138,7 @@ export const ProgramForm = ({
   if (formInitialValue.budget === 0) {
     formInitialValue.budget = '0.00';
   }
-  if (!data) return null;
+  if (!data || !dataCollectionTypeData) return null;
 
   const withoutIndividualDataText = t(
     'This programme will use only household and/or head of household details for targeting or entitlement calculation',
@@ -173,7 +176,9 @@ export const ProgramForm = ({
               {open && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
                 <DialogTitle disableTypography>
-                  <Typography variant='h6'>{title}</Typography>
+                  <Typography data-cy='dialog-title' variant='h6'>
+                    {title}
+                  </Typography>
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
@@ -212,6 +217,16 @@ export const ProgramForm = ({
                     choices={data.programSectorChoices}
                     component={FormikSelectField}
                     data-cy='input-sector'
+                  />
+                  <Field
+                    name='dataCollectingTypeCode'
+                    label={t('Data Collecting Type')}
+                    fullWidth
+                    variant='outlined'
+                    required
+                    choices={dataCollectionTypeData?.dataCollectionTypeChoices}
+                    component={FormikSelectField}
+                    data-cy='input-data-collecting-type'
                   />
                   <DateFields>
                     <DateField>

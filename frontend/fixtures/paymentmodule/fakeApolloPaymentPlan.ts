@@ -1,12 +1,13 @@
 import {
+  FinancialServiceProviderCommunicationChannel,
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanCurrency,
   PaymentPlanQuery,
   PaymentPlanStatus,
-  PaymentVerificationPlanStatus,
-  PaymentPlanCurrency,
-  PaymentVerificationPlanVerificationChannel,
-  PaymentVerificationPlanSampling,
-  FinancialServiceProviderCommunicationChannel,
   PaymentStatus,
+  PaymentVerificationPlanSampling,
+  PaymentVerificationPlanStatus,
+  PaymentVerificationPlanVerificationChannel,
 } from '../../src/__generated__/graphql';
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
@@ -301,4 +302,9 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     __typename: 'ReconciliationSummaryNode',
   },
   __typename: 'PaymentPlanNode',
+};
+
+export const fakeApolloPaymentPlanWithWrongBackgroundActionStatus: PaymentPlanQuery['paymentPlan'] = {
+  ...fakeApolloPaymentPlan,
+  backgroundActionStatus: PaymentPlanBackgroundActionStatus.XlsxExporting,
 };
