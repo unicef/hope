@@ -1094,5 +1094,9 @@ describe("Grievance", () => {
       grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
       cy.url().should("include", "/user-generated");
     });
+    it("174517: Check clear cash", () => {
+      grievancePage.clearCache();
+      grievancePage.checkElementsOnPage();
+    });
   });
 });

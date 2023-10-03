@@ -196,6 +196,10 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
+    it("174517: Check clear cash", () => {
+      paymentVerificationPage.clearCache();
+      paymentVerificationPage.checkPaymentVerificationTitle();
+    });
     it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {});
   });
 });

@@ -9,6 +9,8 @@ export default class BaseComponent {
   buttonGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   buttonFeedback = 'a[data-cy="nav-Feedback"]';
   headerTitle = 'h5[data-cy="page-header-title"]';
+  menuUserProfile = 'button[data-cy="menu-user-profile"]';
+  menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -19,6 +21,8 @@ export default class BaseComponent {
   buttonFeedbackText = "Feedback";
 
   // Elements
+  getMenuUserProfile = () => cy.get(this.menuUserProfile);
+  getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
   getMenuButtonPaymentVerification = () =>
     cy.get(this.buttonPaymentVerification);
   getMenuButtonTargeting = () => cy.get(this.buttonTargeting);
@@ -61,6 +65,11 @@ export default class BaseComponent {
 
   clickMenuButtonTargeting() {
     this.getMenuButtonTargeting().contains(this.buttonTargetingText).click();
+  }
+
+  clearCache() {
+    this.getMenuUserProfile().click();
+    this.getMenuItemClearCache().click();
   }
 
   pressEscapeFromElement(element) {
