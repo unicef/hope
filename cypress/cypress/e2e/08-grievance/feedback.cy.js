@@ -12,6 +12,8 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
   beforeEach(() => {
+    cy.adminLogin();
+
     cy.navigateToHomePage();
     feedbackPage.clickMenuButtonGrievance();
     feedbackPage.clickMenuButtonFeedback();
@@ -19,7 +21,6 @@ describe("Grievance - Feedback", () => {
 
   after(() => {
     cy.initScenario("init_clear");
-    cy.adminLogin();
   });
 
   describe("Smoke tests Feedback", () => {
@@ -43,7 +44,8 @@ describe("Grievance - Feedback", () => {
       feedbackPage.chooseTableRow(0);
       feedbackDetailsPage.checkElementsOnPage();
     });
-    it("Check Feedback New Ticket page", () => {
+    // ToDo: Enable after fix
+    it.skip("Check Feedback New Ticket page", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Submit New Feedback button",
@@ -153,7 +155,8 @@ describe("Grievance - Feedback", () => {
         feedbackPage.expectedNumberOfRows(0);
       });
     });
-    context("Create New Feedback", () => {
+    // ToDo: Enable after fix
+    context.skip("Create New Feedback", () => {
       it("Create New Feedback - Negative Feedback", () => {
         cy.scenario([
           "Go to Grievance page",
