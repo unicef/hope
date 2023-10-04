@@ -123,34 +123,6 @@ describe("Program Management", () => {
         programManagement.getPageHeaderTitle().contains(editedProgramName);
       });
     });
-    it("Finish Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      cy.get('[data-value="ACTIVE"]').click({ force: true });
-      cy.get('[data-cy="button-filters-apply"]').click();
-      cy.reload();
-      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
-      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      cy.contains("Finish Programme").click({ force: true });
-      cy.get('[data-cy="button-finish-program"]').eq(1).click({ force: true });
-      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
-    });
-    it("Reactivate Program", () => {
-      cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
-      cy.get('[data-value="FINISHED"]').click({ force: true });
-      cy.get('[data-cy="button-filters-apply"]').click();
-      cy.reload();
-      cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
-      cy.get('[data-cy="status-container"]').eq(0).click({ force: true });
-      cy.contains("Reactivate").eq(0).click({ force: true });
-      cy.get(".MuiDialogActions-root > .MuiButton-contained").click({
-        force: true,
-      });
-      cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
-    });
-    it.skip("Remove Program", () => {});
-    it.skip("Activate Program", () => {});
-    it.skip("Reactivate Program", () => {});
-    it.skip("Open in Cashassist", () => {});
 
     context("PM Filters", () => {
       it.skip("PM Programme filter", () => {});

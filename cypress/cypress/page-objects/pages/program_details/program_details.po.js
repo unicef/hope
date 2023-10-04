@@ -35,7 +35,6 @@ export default class ProgramDetails extends BaseComponent {
   tableTitle = 'h6[data-cy="table-title"]';
   buttonActivateProgramModal =
     'button[data-cy="button-activate-program-modal"]';
-<<<<<<< HEAD
   buttonAddNewProgramCycle = 'button[data-cy="button-add-new-program-cycle"]';
   buttonDataCyButtonEditProgramCycle =
     'button[data-cy="button-edit-program-cycle"]';
@@ -47,9 +46,6 @@ export default class ProgramDetails extends BaseComponent {
     'input[data-cy="date-input-newProgramCycleStartDate"]';
   inputDataCyInputNewProgramCycleName =
     'input[data-cy="input-newProgramCycleName"]';
-=======
-  // Texts
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 
   // Texts
   textTableTitle = "Programme Cycles";
@@ -91,7 +87,6 @@ export default class ProgramDetails extends BaseComponent {
     cy.get(this.buttonDataCyButtonReactivateProgram);
   getButtonDataCyButtonReactivateProgramPopup = () =>
     cy.get(this.buttonDataCyButtonReactivateProgramPopup);
-<<<<<<< HEAD
   getButtonAddNewProgramCycle = () => cy.get(this.buttonAddNewProgramCycle);
   getButtonDataCyButtonEditProgramCycle = () =>
     cy.get(this.buttonDataCyButtonEditProgramCycle);
@@ -103,6 +98,4 @@ export default class ProgramDetails extends BaseComponent {
     cy.get(this.inputDataCyDateInputNewProgramCycleStartDate);
   getInputDataCyInputNewProgramCycleName = () =>
     cy.get(this.inputDataCyInputNewProgramCycleName);
-=======
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
 }
