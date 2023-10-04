@@ -26,6 +26,8 @@ export const DatePickerFilter = ({
             const momentDate = moment(date);
 
             onChange(momentDate?.toISOString());
+          } else {
+            onChange(null);
           }
         }}
         value={utcValue}
