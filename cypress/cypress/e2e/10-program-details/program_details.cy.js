@@ -21,11 +21,7 @@ describe("Program Details", () => {
         "Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
-<<<<<<< HEAD
       programDetails.getCashPlanTableRow().should("have.length", 2);
-=======
-      programDetails.getTashPlanTableRow().should("have.length", 2);
->>>>>>> cb4319bb4d0d695656d0ec4956559438fdd72937
       programDetails.getLabelAdministrativeAreasOfImplementation();
       programDetails.getButtonEditProgram().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
