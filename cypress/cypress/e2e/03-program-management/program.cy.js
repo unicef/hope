@@ -1,8 +1,8 @@
 import ProgramManagement from "../../page-objects/pages/program_management/program_management.po";
 import PMDetailsPage from "../../page-objects/pages/program_management/details_page.po";
 
-let pm = new ProgramManagement();
-let pmd = new PMDetailsPage();
+let programManagement = new ProgramManagement();
+let pmDetailsPage = new PMDetailsPage();
 
 describe("Program Management", () => {
   beforeEach(() => {
@@ -127,5 +127,10 @@ describe("Program Management", () => {
   });
   describe.skip("E2E tests Program Management", () => {});
 
-  describe.skip("Regression tests Program Management", () => {});
+  describe("Regression tests Program Management", () => {
+    it("174517: Check clear cash", () => {
+      programManagement.clearCache();
+      cy.get("h5").should("contain", "Programme Management");
+    });
+  });
 });

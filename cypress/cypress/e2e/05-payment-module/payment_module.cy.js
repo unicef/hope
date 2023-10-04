@@ -2,9 +2,9 @@ import PaymentModule from "../../page-objects/pages/payment_module/payment_modul
 import PMDetailsPage from "../../page-objects/pages/payment_module/details_page.po";
 import NewPaymentPlan from "../../page-objects/pages/payment_module/new_payment_plan.po";
 
-let t = new PaymentModule();
-let td = new PMDetailsPage();
-let tcn = new NewPaymentPlan();
+let paymentModule = new PaymentModule();
+let paymentModuleDetailsPage = new PMDetailsPage();
+let newPaymentPlan = new NewPaymentPlan();
 
 describe("Payment Module", () => {
   before(() => {
@@ -32,7 +32,7 @@ describe("Payment Module", () => {
       let fspXlsxFilenames;
 
       //New Payment Plan page
-      t.createPaymentPlan(targetPopulationName);
+      paymentModule.createPaymentPlan(targetPopulationName);
 
       cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 
@@ -175,9 +175,9 @@ describe("Payment Module", () => {
                   encoding: "base64",
                 });
               });
-              cy.get('[data-cy="file-input"').click({ force: true });
+              cy.get('[data-cy="file-input"]').click({ force: true });
               // cy.get('[data-cy="imported-file-name"]').should('exist'); // TODO
-              cy.get('[data-cy="button-import-submit"').click({ force: true });
+              cy.get('[data-cy="button-import-submit"]').click({ force: true });
               cy.wait(1000);
               cy.get("p").should("not.contain", "Errors");
               cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -211,5 +211,12 @@ describe("Payment Module", () => {
   });
   describe.skip("E2E tests Payment", () => {});
 
-  describe.skip("Regression tests Payment", () => {});
+  describe("Regression tests Payment", () => {
+    it("174517: Check clear cash", () => {
+      cy.navigateToHomePage();
+      paymentModule.getButtonPaymentModule().click();
+      paymentModule.clearCache();
+      paymentModule.getTitle().contains(paymentModule.textTitle);
+    });
+  });
 });

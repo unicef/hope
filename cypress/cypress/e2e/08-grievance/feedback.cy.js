@@ -400,5 +400,10 @@ describe("Grievance - Feedback", () => {
     });
   });
   describe.skip("E2E tests Feedback", () => {});
-  describe.skip("Regression tests Feedback", () => {});
+  describe("Regression tests Feedback", () => {
+    it("174517: Check clear cash", () => {
+      feedbackPage.clearCache();
+      feedbackPage.checkElementsOnPage();
+    });
+  });
 });
