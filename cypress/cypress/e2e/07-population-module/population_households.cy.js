@@ -1,8 +1,8 @@
 import PopulationHouseholds from "../../page-objects/pages/population_module/population_households.po";
 import HPDetailsPage from "../../page-objects/pages/population_module/households_details_page.po";
 
-let ph = new PopulationHouseholds();
-let phdp = new HPDetailsPage();
+let populationHouseholds = new PopulationHouseholds();
+let householdsDetailsPage = new HPDetailsPage();
 
 describe("Households Module", () => {
   beforeEach(() => {
@@ -45,5 +45,10 @@ describe("Households Module", () => {
   });
   describe.skip("E2E tests Households Population", () => {});
 
-  describe.skip("Regression tests Households Population", () => {});
+  describe("Regression tests Households Population", () => {
+    it("174517: Check clear cash", () => {
+      populationHouseholds.clearCache();
+      populationHouseholds.getTitle().contains(populationHouseholds.textTitle);
+    });
+  });
 });

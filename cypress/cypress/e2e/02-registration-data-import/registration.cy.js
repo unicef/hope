@@ -1,6 +1,6 @@
 import RegistrationDataImport from "../../page-objects/pages/registration_data_import/registration_data_import.po";
 
-let rdi = new RegistrationDataImport();
+let registrationDataImport = new RegistrationDataImport();
 
 describe("Registration Data Import", () => {
   beforeEach(() => {
@@ -32,11 +32,11 @@ describe("Registration Data Import", () => {
         });
       });
       it("Merge Data", () => {
-        rdi.uploadRDIFile();
+        registrationDataImport.uploadRDIFile();
 
         return; // TODO: make this work
-        rdi.mergeRDIFile();
-        rdi.verifyMergedData();
+        registrationDataImport.mergeRDIFile();
+        registrationDataImport.verifyMergedData();
       });
       it.skip("Refuse import", () => {});
       context("Registration Data Import Filters", () => {
@@ -49,5 +49,10 @@ describe("Registration Data Import", () => {
   });
   describe.skip("E2E tests Registration Data Import", () => {});
 
-  describe.skip("Regression tests Registration Data Import", () => {});
+  describe("Regression tests Registration Data Import", () => {
+    it("174517: Check clear cash", () => {
+      registrationDataImport.clearCache();
+      cy.get("h5").contains("Registration Data Import");
+    });
+  });
 });
