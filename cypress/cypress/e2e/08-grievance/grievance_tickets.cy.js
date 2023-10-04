@@ -1096,7 +1096,7 @@ describe("Grievance", () => {
     });
     it("174517: Check clear cash", () => {
       grievancePage.clearCache();
-      grievancePage.checkElementsOnPage();
+      grievancePage.checkElementsOnUserGeneratedPage();
     });
   });
 });
