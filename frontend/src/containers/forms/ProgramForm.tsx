@@ -142,7 +142,7 @@ export const ProgramForm = ({
   if (formInitialValue.budget === 0) {
     formInitialValue.budget = '0.00';
   }
-  initialValue.dataCollectingTypeCode = program?.dataCollectingType?.code;
+  formInitialValue.dataCollectingTypeCode = program?.dataCollectingType?.code;
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
