@@ -19,6 +19,7 @@ describe("Grievance - Feedback", () => {
 
   after(() => {
     cy.initScenario("init_clear");
+    cy.adminLogin();
   });
 
   describe("Smoke tests Feedback", () => {
@@ -394,9 +395,7 @@ describe("Grievance - Feedback", () => {
     });
 
     context("Edit Feedback", () => {
-      it.skip("Edit Feedback", () => {
-        // ToDo
-      });
+      it.skip("Edit Feedback", () => {});
     });
   });
   describe.skip("E2E tests Feedback", () => {});

@@ -573,6 +573,7 @@ input CopyProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   individualDataNeeded: Boolean
+  dataCollectingTypeCode: String
 }
 
 input CopyTargetPopulationInput {
@@ -4930,6 +4931,7 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   individualDataNeeded: Boolean
+  dataCollectingTypeCode: String
 }
 
 input UpdateTargetPopulationInput {
