@@ -11,6 +11,10 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
     'data': {
         'updateProgram': {
             'program': {
+                'dataCollectingType': {
+                    'code': 'full',
+                    'label': 'Full'
+                },
                 'name': 'updated name',
                 'status': 'ACTIVE'
             }
