@@ -37,7 +37,7 @@ describe("Grievance Dashboard", () => {
   describe("Regression tests Grievance Dashboard", () => {
     it("174517: Check clear cash", () => {
       grievanceDashboard.clearCache();
-      grievanceDashboard.checkElementsOnUserGeneratedPage();
+      grievanceDashboard.checkElementsOnPage();
     });
   });
 });

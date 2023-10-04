@@ -213,6 +213,8 @@ describe("Payment Module", () => {
 
   describe("Regression tests Payment", () => {
     it("174517: Check clear cash", () => {
+      cy.navigateToHomePage();
+      paymentModule.getButtonPaymentModule().click();
       paymentModule.clearCache();
       paymentModule.getTitle().contains(paymentModule.textTitle);
     });
