@@ -144,12 +144,11 @@ class TicketCreatorService:
     def _create_ticket(self, business_area: BusinessArea, input_data: Dict, user: AbstractUser) -> GrievanceTicket:
         partner = decode_and_get_object(input_data.pop("partner", None), Partner, False)
         assigned_to = decode_and_get_object(input_data.pop("assigned_to", None), get_user_model(), False)
-        admin_p_code = input_data.pop("admin_p_code", None)
-        admin_name = input_data.pop("admin_name", None)
+        admin = input_data.pop("admin", None)
         programme = input_data.pop("programme", None)
 
-        if admin_p_code and admin_name:
-            admin = get_object_or_404(Area, p_code=admin_p_code, name=admin_name)
+        if admin:
+            admin = get_object_or_404(Area, id=decode_id_string(admin))
         else:
             admin = None
 
