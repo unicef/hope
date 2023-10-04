@@ -17,6 +17,7 @@ export default class PaymentModule extends BaseComponent {
 
   createPaymentPlan(targetPopulationName) {
     cy.get("span").contains("Payment Module").click();
+    this.getMenuButtonPaymentPlans().click();
     cy.get('[data-cy="page-header-container"]').contains("Payment Module");
     cy.get('[data-cy="button-new-payment-plan"]').click({
       force: true,
