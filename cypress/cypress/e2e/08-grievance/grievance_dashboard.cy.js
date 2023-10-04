@@ -34,5 +34,10 @@ describe("Grievance Dashboard", () => {
   });
   describe.skip("E2E tests Grievance Dashboard", () => {});
 
-  describe.skip("Regression tests Grievance Dashboard", () => {});
+  describe("Regression tests Grievance Dashboard", () => {
+    it("174517: Check clear cash", () => {
+      grievanceDashboard.clearCache();
+      grievanceDashboard.checkElementsOnPage();
+    });
+  });
 });
