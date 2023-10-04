@@ -24,7 +24,8 @@
         "population_goal": 0,
         "administrative_areas_of_implementation": "",
         "individual_data_needed": false,
-        "admin_areas": []
+        "admin_areas": [],
+         "data_collecting_type": 2
     }
 },
 {

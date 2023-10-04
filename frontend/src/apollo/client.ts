@@ -49,11 +49,25 @@ const isDataNull = (data): boolean => {
   return Object.values(data).some((value) => value === null);
 };
 
+const hasResponseErrors = (response): boolean => {
+  return response && (response?.error || response?.errors?.length > 0);
+};
+
 //redirect to 404 page if data is null
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
-    if (response.data && isDataNull(response.data)) {
-      window.location.href = '/404';
+    if (hasResponseErrors(response)) {
+      // eslint-disable-next-line no-console
+      console.error(response.data?.error || response.data?.errors);
+    } else if (
+      response.data &&
+      isDataNull(response.data) &&
+      !hasResponseErrors(response)
+    ) {
+      const pathSegments = window.location.pathname.split('/');
+      const businessArea = pathSegments[1];
+
+      window.location.href = `/404/${businessArea}`;
     }
     return response;
   });

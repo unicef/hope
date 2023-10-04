@@ -115,9 +115,14 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
             end_date=program_data.get("end_date"),
         )
 
+        data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
+        if data_collecting_type_code and data_collecting_type_code != old_program.data_collecting_type.code:
+            program.data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
+
         program.full_clean()
         program.save()
 

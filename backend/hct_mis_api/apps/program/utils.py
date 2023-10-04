@@ -1,5 +1,6 @@
 from typing import Any
 
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.household.models import (
     Household,
@@ -7,6 +8,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.validators import validate_data_collecting_type
 
 
 def copy_program_object(copy_from_program_id: str, program_data: dict) -> Program:
@@ -14,6 +16,16 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     admin_areas = program.admin_areas.all()
     program.pk = None
     program.status = Program.DRAFT
+
+    data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
+    if data_collecting_type_code:
+        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+    else:
+        data_collecting_type = program.data_collecting_type
+
+    validate_data_collecting_type(program.data_collecting_type, data_collecting_type)
+
+    program_data["data_collecting_type_id"] = data_collecting_type.id
 
     for field_name, value in program_data.items():
         setattr(program, field_name, value)

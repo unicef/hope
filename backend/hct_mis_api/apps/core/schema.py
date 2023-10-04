@@ -397,6 +397,7 @@ class Query(graphene.ObjectType):
         return Languages.filter_by_code(code)
 
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        # TODO: maybe add filter by BA 'DataCollectingType.limit_to'
         data_collecting_types = (
             DataCollectingType.objects.filter(active=True)
             .only("code", "label")
