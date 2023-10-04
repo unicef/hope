@@ -2,7 +2,7 @@ import PopulationIndividuals from "../../page-objects/pages/population_module/po
 import IPDetailsPage from "../../page-objects/pages/population_module/individuals_details_page.po";
 
 let populationIndividuals = new PopulationIndividuals();
-let ipDetailsPage = new IPDetailsPage();
+let individualsDetailsPage = new IPDetailsPage();
 
 describe("Individuals Module", () => {
   beforeEach(() => {

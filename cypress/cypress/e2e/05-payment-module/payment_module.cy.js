@@ -3,7 +3,7 @@ import PMDetailsPage from "../../page-objects/pages/payment_module/details_page.
 import NewPaymentPlan from "../../page-objects/pages/payment_module/new_payment_plan.po";
 
 let paymentModule = new PaymentModule();
-let pmDetailsPage = new PMDetailsPage();
+let paymentModuleDetailsPage = new PMDetailsPage();
 let newPaymentPlan = new NewPaymentPlan();
 
 describe("Payment Module", () => {

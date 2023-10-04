@@ -2,7 +2,7 @@ import PopulationHouseholds from "../../page-objects/pages/population_module/pop
 import HPDetailsPage from "../../page-objects/pages/population_module/households_details_page.po";
 
 let populationHouseholds = new PopulationHouseholds();
-let hpDetailsPage = new HPDetailsPage();
+let householdsDetailsPage = new HPDetailsPage();
 
 describe("Households Module", () => {
   beforeEach(() => {

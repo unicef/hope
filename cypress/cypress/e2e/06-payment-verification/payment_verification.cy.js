@@ -5,7 +5,7 @@ let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
-const PaymentPlanID = "PP-0060-23-00000002";
+const paymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
   beforeEach(() => {
     cy.adminLogin();
