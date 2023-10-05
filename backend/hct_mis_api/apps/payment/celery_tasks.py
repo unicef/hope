@@ -548,7 +548,7 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.update_money_fields()
 
             payment_plan.background_action_status_none()
-            payment_plan.exclude_household_error = str(info_msg) if info_msg else ""
+            payment_plan.exclude_household_error = str(info_msg or "")
             payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
