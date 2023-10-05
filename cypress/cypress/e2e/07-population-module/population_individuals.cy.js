@@ -16,6 +16,11 @@ describe("Individuals Module", () => {
   describe("Smoke tests Individuals Population module", () => {
     it.skip("Check Individuals Population page", () => {});
     it("Check Individuals Population Details page", () => {
+      cy.scenario([
+        "Go to Population page",
+        "Go to Individuals page",
+        "Check if all elements on page exist",
+      ]);
       cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
       cy.get("div").contains("Individuals");
       cy.get('[data-cy="table-title"]').contains("Individuals");
@@ -42,6 +47,12 @@ describe("Individuals Module", () => {
 
   describe("Regression tests Individuals Population", () => {
     it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Individuals page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
       populationIndividuals.clearCache();
       populationIndividuals
         .getTitle()
