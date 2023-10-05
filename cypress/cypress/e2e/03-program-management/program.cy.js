@@ -22,7 +22,13 @@ describe("Program Management", () => {
     it.skip("Check Program Management Details page", () => {});
   });
   describe("Component tests Program Management", () => {
+    // ToDo: Refactor in second milestone
     it("Create a program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Create new programme",
+        "Check if programme was created properly",
+      ]);
       programManagement
         .getPageHeaderTitle()
         .should("contain", "Programme Management");
@@ -66,6 +72,12 @@ describe("Program Management", () => {
       });
     });
     it("Edit Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose Programme",
+        "Edit Programme",
+        "Check if programme was edited properly",
+      ]);
       programManagement.getStatusFilter().click();
       programManagement.getOption().contains("Active").click();
       programManagement.getButtonApply().click();
@@ -138,6 +150,16 @@ describe("Program Management", () => {
   describe.skip("E2E tests Program Management", () => {});
 
   describe("Regression tests Program Management", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Program Management page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      programManagement.clearCache();
+      cy.get("h5").should("contain", "Programme Management");
+    });
     // ToDo: 174707
     it.skip("174707: Create a program without Data Collecting Type", () => {
       programManagement

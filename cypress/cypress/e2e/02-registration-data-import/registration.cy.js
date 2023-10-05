@@ -1,6 +1,6 @@
 import RegistrationDataImport from "../../page-objects/pages/registration_data_import/registration_data_import.po";
 
-let rdi = new RegistrationDataImport();
+let registrationDataImport = new RegistrationDataImport();
 
 describe("Registration Data Import", () => {
   beforeEach(() => {
@@ -15,6 +15,7 @@ describe("Registration Data Import", () => {
 
   describe("Component tests Registration Data Import", () => {
     context("Registration Data Import - Download Template", () => {
+      // ToDo: Refactor this in second milestone
       it("Import Template", () => {
         cy.get("span").contains("IMPORT").click({ force: true });
         cy.window()
@@ -31,12 +32,13 @@ describe("Registration Data Import", () => {
           timeout: 20000,
         });
       });
+      // ToDo: Refactor this in second milestone
       it("Merge Data", () => {
-        rdi.uploadRDIFile();
+        registrationDataImport.uploadRDIFile();
 
         return; // TODO: make this work
-        rdi.mergeRDIFile();
-        rdi.verifyMergedData();
+        registrationDataImport.mergeRDIFile();
+        registrationDataImport.verifyMergedData();
       });
       it.skip("Refuse import", () => {});
       context("Registration Data Import Filters", () => {
@@ -49,5 +51,16 @@ describe("Registration Data Import", () => {
   });
   describe.skip("E2E tests Registration Data Import", () => {});
 
-  describe.skip("Regression tests Registration Data Import", () => {});
+  describe("Regression tests Registration Data Import", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Registration Data Import page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      registrationDataImport.clearCache();
+      cy.get("h5").contains("Registration Data Import");
+    });
+  });
 });
