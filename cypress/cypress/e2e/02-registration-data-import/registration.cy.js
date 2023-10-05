@@ -15,6 +15,7 @@ describe("Registration Data Import", () => {
 
   describe("Component tests Registration Data Import", () => {
     context("Registration Data Import - Download Template", () => {
+      // ToDo: Refactor this in second milestone
       it("Import Template", () => {
         cy.get("span").contains("IMPORT").click({ force: true });
         cy.window()
@@ -31,6 +32,7 @@ describe("Registration Data Import", () => {
           timeout: 20000,
         });
       });
+      // ToDo: Refactor this in second milestone
       it("Merge Data", () => {
         registrationDataImport.uploadRDIFile();
 
@@ -51,6 +53,12 @@ describe("Registration Data Import", () => {
 
   describe("Regression tests Registration Data Import", () => {
     it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Registration Data Import page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
       registrationDataImport.clearCache();
       cy.get("h5").contains("Registration Data Import");
     });

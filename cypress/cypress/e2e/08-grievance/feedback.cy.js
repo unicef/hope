@@ -402,6 +402,12 @@ describe("Grievance - Feedback", () => {
   describe.skip("E2E tests Feedback", () => {});
   describe("Regression tests Feedback", () => {
     it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Feedback page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
       feedbackPage.clearCache();
       feedbackPage.checkElementsOnPage();
     });

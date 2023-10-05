@@ -23,6 +23,12 @@ describe("Payment Module", () => {
   });
   describe("Component tests Payment", () => {
     it("Can create a payment plan", () => {
+      cy.scenario([
+        "Go to payment plan page",
+        "Press New Payment Plan button",
+        "Create New Payment Plan",
+        "Check if Payment Plan was created properly",
+      ]);
       const downloadsFolder = Cypress.config("downloadsFolder");
       const fileName = (id) => `payment_plan_payment_list_${id}`;
       const zipFileName = (id) => `${fileName(id)}.zip`;
@@ -213,6 +219,12 @@ describe("Payment Module", () => {
 
   describe("Regression tests Payment", () => {
     it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Payment module page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
       cy.navigateToHomePage();
       paymentModule.getButtonPaymentModule().click();
       paymentModule.clearCache();
