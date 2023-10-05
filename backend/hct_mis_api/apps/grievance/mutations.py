@@ -635,7 +635,8 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
         assigned_to_id = decode_id_string(assigned_to)
-        tickets = BulkActionService().bulk_assign(grievance_ticket_ids, assigned_to_id, business_area_slug)
+        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        tickets = BulkActionService().bulk_assign(decoded_grievance_ticket_ids, assigned_to_id, business_area_slug)
         return cls(grievance_tickets=tickets)
 
 
@@ -660,7 +661,8 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
         **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        tickets = BulkActionService().bulk_set_priority(grievance_ticket_ids, priority, business_area_slug)
+        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        tickets = BulkActionService().bulk_set_priority(decoded_grievance_ticket_ids, priority, business_area_slug)
         return cls(grievance_tickets=tickets)
 
 class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
@@ -684,7 +686,8 @@ class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
         **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        tickets = BulkActionService().bulk_set_urgency(grievance_ticket_ids, urgency, business_area_slug)
+        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        tickets = BulkActionService().bulk_set_urgency(decoded_grievance_ticket_ids, urgency, business_area_slug)
         return cls(grievance_tickets=tickets)
 
 
@@ -709,7 +712,8 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
             **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        tickets = BulkActionService().bulk_set_priority(grievance_ticket_ids, priority, business_area_slug)
+        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        tickets = BulkActionService().bulk_set_priority(decoded_grievance_ticket_ids, priority, business_area_slug)
         return cls(grievance_tickets=tickets)
 
 
@@ -734,7 +738,8 @@ class BulkGrievanceAddNoteMutation(PermissionMutation):
             **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        tickets = BulkActionService().bulk_add_note(grievance_ticket_ids, note, business_area_slug)
+        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        tickets = BulkActionService().bulk_add_note(decoded_grievance_ticket_ids, note, business_area_slug)
         return cls(grievance_tickets=tickets)
 
 

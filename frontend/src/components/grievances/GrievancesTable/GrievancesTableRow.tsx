@@ -32,12 +32,9 @@ interface GrievancesTableRowProps {
   priorityChoicesData;
   urgencyChoicesData;
   checkboxClickHandler: (
-    event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    number,
+    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
   ) => void;
-  selected: Array<string>;
+  isSelected: boolean;
   optionsData;
   setInputValue;
   initialVariables;
@@ -52,7 +49,7 @@ export const GrievancesTableRow = ({
   priorityChoicesData,
   urgencyChoicesData,
   checkboxClickHandler,
-  selected,
+  isSelected,
   optionsData,
   setInputValue,
   initialVariables,
@@ -65,8 +62,6 @@ export const GrievancesTableRow = ({
     ticket.category,
     businessArea,
   );
-  const isSelected = (name: string): boolean => selected.includes(name);
-  const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType
     ? issueTypeChoicesData
         .find((el) => el.category === ticket.category.toString())
@@ -77,7 +72,6 @@ export const GrievancesTableRow = ({
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
 
   const onFilterChange = async (assignee, ids): Promise<void> => {
-
     if (assignee) {
       try {
         await mutate({
@@ -116,8 +110,11 @@ export const GrievancesTableRow = ({
       <TableCell align='left' padding='checkbox'>
         <Checkbox
           color='primary'
-          onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
-          checked={isItemSelected}
+          onClick={(event) => {
+            event.stopPropagation();
+            checkboxClickHandler(ticket);
+          }}
+          checked={isSelected}
           disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
           inputProps={{ 'aria-labelledby': ticket.unicefId }}
         />
@@ -143,7 +140,7 @@ export const GrievancesTableRow = ({
             optionsData={optionsData}
             onFilterChange={onFilterChange}
             value={ticket.assignedTo}
-            ids={[ticket.unicefId]}
+            ids={[ticket.id]}
             setInputValue={setInputValue}
             disableClearable
           />

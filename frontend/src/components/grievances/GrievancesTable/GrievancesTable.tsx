@@ -29,6 +29,7 @@ import { TableWrapper } from '../../core/TableWrapper';
 import { BulkAssignModal } from './BulkAssignModal';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
+import TableContainer from "@material-ui/core/TableContainer";
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -85,7 +86,9 @@ export const GrievancesTable = ({
 
   const optionsData = get(data, 'allUsers.edges', []);
 
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selectedTickets, setSelectedTickets] = useState<
+    AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][]
+  >([]);
 
   const {
     data: choicesData,
@@ -141,35 +144,29 @@ export const GrievancesTable = ({
   };
 
   const handleCheckboxClick = (
-    _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    name: string,
+    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
   ): void => {
-    _event.stopPropagation();
-    const selectedIndex = selected.indexOf(name);
-    const newSelected = [...selected];
-
-    if (selectedIndex === -1) {
-      newSelected.push(name);
+    const index = selectedTickets.findIndex(
+      (ticketItem) => ticketItem.id === ticket.id,
+    );
+    const newSelectedTickets = [...selectedTickets];
+    if (index === -1) {
+      newSelectedTickets.push(ticket);
     } else {
-      newSelected.splice(selectedIndex, 1);
+      newSelectedTickets.splice(index, 1);
     }
-
-    setSelected(newSelected);
+    setSelectedTickets(newSelectedTickets);
   };
 
   const handleSelectAllCheckboxesClick = (event, rows): void => {
-    event.preventDefault();
-    if (!selected.length) {
-      const newSelecteds = rows
+    if (!selectedTickets.length) {
+      const newSelected = rows
         .filter((row) => row.status !== GRIEVANCE_TICKET_STATES.CLOSED)
-        .map((row) => row.unicefId);
-      setSelected(newSelecteds);
-
+        .map((row) => row);
+      setSelectedTickets(newSelected);
       return;
     }
-    setSelected([]);
+    setSelectedTickets([]);
   };
 
   return (
@@ -178,11 +175,11 @@ export const GrievancesTable = ({
         <Box display='flex' justifyContent='space-between' px={5}>
           <BulkAssignModal
             optionsData={optionsData}
-            selected={selected}
+            selectedTickets={selectedTickets}
             businessArea={businessArea}
             initialVariables={initialVariables}
             setInputValue={setInputValue}
-            setSelected={setSelected}
+            setSelected={setSelectedTickets}
           />
           <Box display='flex' ml='auto'>
             <Box>
@@ -227,16 +224,18 @@ export const GrievancesTable = ({
           </Box>
         </Box>
         <TableWrapper>
+          <TableContainer>
+
           <UniversalTable<
             AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
             AllGrievanceTicketQueryVariables
           >
+            isOnPaper={false}
             headCells={headCells}
-            title={t('Grievance Tickets List')}
             rowsPerPageOptions={[10, 15, 20, 40]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}
-            numSelected={selected.length}
+            numSelected={selectedTickets.length}
             queriedObjectName='allGrievanceTicket'
             initialVariables={initialVariables}
             defaultOrderBy='created_at'
@@ -252,13 +251,16 @@ export const GrievancesTable = ({
                 urgencyChoicesData={urgencyChoicesData}
                 canViewDetails={getCanViewDetailsOfTicket(row)}
                 checkboxClickHandler={handleCheckboxClick}
-                selected={selected}
+                isSelected={Boolean(
+                  selectedTickets.find((ticket) => ticket.id === row.id),
+                )}
                 optionsData={optionsData}
                 setInputValue={setInputValue}
                 initialVariables={initialVariables}
               />
             )}
           />
+          </TableContainer>
         </TableWrapper>
       </Box>
     </>
