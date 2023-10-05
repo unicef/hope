@@ -17,6 +17,8 @@ import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapp
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketDocument,
+  AllGrievanceTicketQuery,
+  GrievanceTicketNode,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../__generated__/graphql';
 import { AssignedToDropdown } from './AssignedToDropdown';
@@ -41,7 +43,7 @@ const Bold = styled.span`
 `;
 
 interface BulkAssignModalProps {
-  selected: string[];
+  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   businessArea: string;
   optionsData;
   initialVariables;
@@ -50,7 +52,7 @@ interface BulkAssignModalProps {
 }
 
 export const BulkAssignModal = ({
-  selected,
+  selectedTickets,
   businessArea,
   optionsData,
   initialVariables,
@@ -69,7 +71,7 @@ export const BulkAssignModal = ({
       <Button
         variant='text'
         color='primary'
-        disabled={!selected.length}
+        disabled={!selectedTickets.length}
         onClick={() => setDialogOpen(true)}
       >
         {t('ASSIGN TICKETS')}
@@ -84,7 +86,7 @@ export const BulkAssignModal = ({
           variables: {
             assignedTo: assignee.node.id,
             businessAreaSlug: businessArea,
-            grievanceTicketIds: selected,
+            grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
           },
           refetchQueries: () => [
             {
@@ -126,7 +128,10 @@ export const BulkAssignModal = ({
           <Box mt={2} mb={6}>
             <StyledTable>
               <Typography>
-                {t('Tickets ID')}: <Bold>{selected.join(', ')}</Bold>
+                {t('Tickets ID')}:{' '}
+                <Bold>
+                  {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
+                </Bold>
               </Typography>
             </StyledTable>
           </Box>
