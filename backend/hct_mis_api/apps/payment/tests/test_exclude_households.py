@@ -70,7 +70,6 @@ class TestExcludeHouseholds(APITestCase):
         cls.household_3 = HouseholdFactory(id="e1bdabf2-a54a-40c4-b92d-166b79d10542", head_of_household=hoh3)
         cls.payment_3 = PaymentFactory(parent=cls.payment_plan, household=cls.household_3, excluded=False)
 
-
     def test_payment_plan_within_not_status_open_or_lock(self) -> None:
         payment_plan_id = encode_id_base64(self.source_payment_plan.id, "PaymentPlan")
 
