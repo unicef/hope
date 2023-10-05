@@ -490,12 +490,13 @@ def payment_plan_exclude_beneficiaries(
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         pp_payment_items = payment_plan.payment_items
         payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
-        error_msg = []
+        error_msg, info_msg = [], []
 
         try:
             for hh_unicef_id in excluding_hh_ids:
                 if not pp_payment_items.filter(household__unicef_id=hh_unicef_id).exists():
-                    error_msg.append(f"Household {hh_unicef_id} is not included in this {payment_plan_title}.")
+                    # add only notice for user and ignore this id
+                    info_msg.append(f"Household {hh_unicef_id} is not included in this {payment_plan_title}.")
                     # remove wrong HH_id from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_ids.remove(hh_unicef_id)
 
@@ -532,7 +533,7 @@ def payment_plan_exclude_beneficiaries(
 
             if error_msg:
                 payment_plan.background_action_status_exclude_beneficiaries_error()
-                payment_plan.exclude_household_error = str(error_msg)
+                payment_plan.exclude_household_error = str(error_msg) + str(info_msg)
                 payment_plan.save(
                     update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
                 )
@@ -547,14 +548,14 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.update_money_fields()
 
             payment_plan.background_action_status_none()
-            payment_plan.exclude_household_error = ""
+            payment_plan.exclude_household_error = str(info_msg)
             payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
             payment_plan.background_action_status_exclude_beneficiaries_error()
 
             if error_msg:
-                payment_plan.exclude_household_error = str(error_msg)
+                payment_plan.exclude_household_error = str(error_msg) + str(info_msg)
             payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
 
     except Exception as e:
