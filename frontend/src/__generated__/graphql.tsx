@@ -9881,7 +9881,7 @@ export type BulkUpdateGrievanceAssigneeMutation = (
       & Pick<GrievanceTicketNode, 'id'>
       & { assignedTo: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName' | 'email'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
       )> }
     )>>> }
   )> }
@@ -16279,6 +16279,7 @@ export const BulkUpdateGrievanceAssigneeDocument = gql`
     grievanceTickets {
       id
       assignedTo {
+        id
         firstName
         lastName
         email

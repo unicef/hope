@@ -13,6 +13,7 @@ export const BulkUpdateGrievanceAssignee = gql`
       grievanceTickets {
         id
         assignedTo {
+          id
           firstName
           lastName
           email
