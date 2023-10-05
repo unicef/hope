@@ -164,6 +164,6 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         }
 
         if extras:
-            input_data["input"]["extras"] = {"category": {"referralTicketExtras": extras}}
+            input_data["input"]["extras"] = {"category": {"referralTicketExtras": extras}}  # type: ignore
 
         return input_data
