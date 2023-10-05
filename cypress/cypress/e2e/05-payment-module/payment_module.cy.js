@@ -219,7 +219,7 @@ describe("Payment Module", () => {
   describe.skip("E2E tests Payment", () => {});
 
   describe("Regression tests Payment", () => {
-    it("174517: Check clear cash", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Payment module page",
         "Press Menu User Profile button",

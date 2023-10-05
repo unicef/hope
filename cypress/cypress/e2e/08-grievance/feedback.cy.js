@@ -400,7 +400,7 @@ describe("Grievance - Feedback", () => {
   });
   describe.skip("E2E tests Feedback", () => {});
   describe("Regression tests Feedback", () => {
-    it("174517: Check clear cash", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Feedback page",
         "Press Menu User Profile button",

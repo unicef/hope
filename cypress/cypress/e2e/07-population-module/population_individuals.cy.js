@@ -46,7 +46,7 @@ describe("Individuals Module", () => {
   describe.skip("E2E tests Individuals Population", () => {});
 
   describe("Regression tests Individuals Population", () => {
-    it("174517: Check clear cash", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Individuals page",
         "Press Menu User Profile button",

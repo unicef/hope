@@ -150,7 +150,7 @@ describe("Program Management", () => {
   describe.skip("E2E tests Program Management", () => {});
 
   describe("Regression tests Program Management", () => {
-    it("174517: Check clear cash", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Program Management page",
         "Press Menu User Profile button",

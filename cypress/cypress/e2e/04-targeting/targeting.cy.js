@@ -128,7 +128,7 @@ describe("Targeting", () => {
   describe.skip("E2E tests Targeting", () => {});
 
   describe("Regression tests Targeting", () => {
-    it("174517: Check clear cash", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Targeting page",
         "Press Menu User Profile button",

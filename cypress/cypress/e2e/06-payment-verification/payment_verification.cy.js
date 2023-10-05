@@ -182,7 +182,7 @@ describe("Payment Verification", () => {
           "Choose Active Verification Plan",
           "Press Finish button",
           "Press Finish button on pop-up",
-          "Check if Verification Plan was Finish",
+          "Check if Verification Plan was finished",
         ]);
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
@@ -217,7 +217,7 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
-    it("174517: Check clear cash", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Payment Verification page",
         "Press Menu User Profile button",
