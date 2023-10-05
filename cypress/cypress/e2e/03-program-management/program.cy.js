@@ -119,7 +119,7 @@ describe("Program Management", () => {
         "Go to Programme Management page",
         "Choose finished Programme",
         "Reactivate Programme",
-        "Check if programme was eeactivate properly",
+        "Check if programme was reactivated properly",
       ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="FINISHED"]').click({ force: true });

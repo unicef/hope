@@ -27,7 +27,7 @@ describe(
       cy.scenario([
         "Log in via admin panel using invalid password",
         "Go to Home page",
-        "Check if did not logged",
+        "Check if did not log in",
       ]);
       Cypress.session.clearCurrentSessionData();
       cy.navigateToHomePage();
@@ -44,7 +44,7 @@ describe(
       cy.scenario([
         "Log in via admin panel using invalid login",
         "Go to Home page",
-        "Check if did not logged",
+        "Check if did not log in",
       ]);
       Cypress.session.clearCurrentSessionData();
       l.navigateToLoginPage();
@@ -60,7 +60,7 @@ describe(
       cy.scenario([
         "Log in via admin panel using invalid login and password",
         "Go to Home page",
-        "Check if did not logged",
+        "Check if did not log in",
       ]);
       Cypress.session.clearCurrentSessionData();
       l.navigateToLoginPage();
