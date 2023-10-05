@@ -405,6 +405,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
         BackgroundActionStatus.RULE_ENGINE_ERROR,
+        BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
     ]
 
     class Action(models.TextChoices):
