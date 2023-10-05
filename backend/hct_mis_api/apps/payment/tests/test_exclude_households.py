@@ -145,15 +145,15 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
         payment_plan_exclude_beneficiaries(
-            self.payment_plan.pk, [hh_unicef_id_1, wrong_hh_unicef_id_4], "reason exclusion Error 123"
+            payment_plan_id=self.payment_plan.pk,
+            excluding_hh_ids=[hh_unicef_id_1, wrong_hh_unicef_id_4],
+            exclusion_reason="reason exclusion Error 123",
         )
         self.payment_plan.refresh_from_db()
-        error_msg = f"['Household {wrong_hh_unicef_id_4} is not included in this Follow-up Payment Plan.']"
+        error_msg = f"['Household {wrong_hh_unicef_id_4} is not part of this Follow-up Payment Plan.']"
 
         self.assertEqual(self.payment_plan.exclusion_reason, "reason exclusion Error 123")
-        self.assertEqual(
-            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
-        )
+        self.assertEqual(self.payment_plan.background_action_status, None)
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
     def test_exclude_all_households(self) -> None:
@@ -171,10 +171,12 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
         payment_plan_exclude_beneficiaries(
-            self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3], "reason exclude_all_households"
+            payment_plan_id=self.payment_plan.pk,
+            excluding_hh_ids=[hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3],
+            exclusion_reason="reason exclude_all_households",
         )
         self.payment_plan.refresh_from_db()
-        error_msg = '["You can\'t exclude all households from the Follow-up Payment Plan."]'
+        error_msg = "['Households cannot be entirely excluded from the Follow-up Payment Plan.']"
 
         self.assertEqual(self.payment_plan.exclusion_reason, "reason exclude_all_households")
         self.assertEqual(
@@ -200,7 +202,9 @@ class TestExcludeHouseholds(APITestCase):
 
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
-        payment_plan_exclude_beneficiaries(self.payment_plan.pk, [], "Undo HH_1")
+        payment_plan_exclude_beneficiaries(
+            payment_plan_id=self.payment_plan.pk, excluding_hh_ids=[], exclusion_reason="Undo HH_1"
+        )
 
         self.assertEqual(set(self.payment_plan.excluded_households_ids), {self.payment_1.household.unicef_id})
         self.payment_plan.refresh_from_db()
@@ -223,7 +227,11 @@ class TestExcludeHouseholds(APITestCase):
 
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
-        payment_plan_exclude_beneficiaries(self.payment_plan.pk, [hh_unicef_id_1, hh_unicef_id_2], "Nice Job!")
+        payment_plan_exclude_beneficiaries(
+            payment_plan_id=self.payment_plan.pk,
+            excluding_hh_ids=[hh_unicef_id_1, hh_unicef_id_2],
+            exclusion_reason="Nice Job!",
+        )
 
         self.payment_plan.refresh_from_db()
 
