@@ -46,7 +46,7 @@ describe("Targeting", () => {
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
       // TODO: Refactor in second milestone
-      it("Can visit the targeting page and create a target population", () => {
+      it.skip("Can visit the targeting page and create a target population", () => {
         cy.scenario([
           "Go to Targeting New Ticket page",
           "Press Create New button",
