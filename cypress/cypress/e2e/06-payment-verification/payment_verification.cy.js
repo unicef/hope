@@ -93,6 +93,15 @@ describe("Payment Verification", () => {
         paymentVerificationDetailsPage.createNewVerificationPlan();
       });
       it("Edit Verification Plan", () => {
+        cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Verification Plan",
+          "Create New Verification Plan",
+          "After create Verification Plan Press Edit button",
+          "Change verification channel from MANUAL to XLSX",
+          "Press button Save",
+          "Check if Verification Plan was changed",
+        ]);
         paymentVerificationDetailsPage.getEditVP().contains("Edit").click();
         paymentVerificationDetailsPage.getCvpInputAdminCheckbox().click();
         paymentVerificationDetailsPage
@@ -116,6 +125,9 @@ describe("Payment Verification", () => {
       });
       it("Delete Verification Plan", () => {
         cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Verification Plan",
+          "Create New Verification Plan",
           "Press Delete button",
           "Press Delete button on pop-up",
           "Check if Verification Plan was deleted",
@@ -140,6 +152,9 @@ describe("Payment Verification", () => {
       });
       it("Activate Verification Plan", () => {
         cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Verification Plan",
+          "Create New Verification Plan",
           "Press Activation button",
           "Press Activate button on pop-up",
           "Check if Summary status = ACTIVE",
@@ -163,6 +178,13 @@ describe("Payment Verification", () => {
         );
       });
       it("Finish Verification Plan", () => {
+        cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Active Verification Plan",
+          "Press Finish button",
+          "Press Finish button on pop-up",
+          "Check if Verification Plan was Finish",
+        ]);
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
         paymentVerificationDetailsPage.getStatusVP().contains("ACTIVE");
@@ -183,7 +205,7 @@ describe("Payment Verification", () => {
     });
   });
   describe("E2E tests Payment Verification", () => {
-    // eslint-disable-next-line mocha/no-setup-in-describe
+    // ToDo: Refactor this in second milestone
     paymentVerificationPage.countPaymentPlanArray().forEach((row_no) => {
       it(`Compare data in Payment Plan Details Page - Row: ${row_no}`, () => {
         paymentVerificationPage.choosePaymentPlan(row_no).click();
@@ -197,6 +219,12 @@ describe("Payment Verification", () => {
   });
   describe("Regression tests Payment Verification", () => {
     it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Payment Verification page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
       paymentVerificationPage.clearCache();
       paymentVerificationPage.checkPaymentVerificationTitle();
     });

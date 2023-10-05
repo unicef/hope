@@ -15,7 +15,13 @@ describe("Program Management", () => {
     it.skip("Check Program Management Details page", () => {});
   });
   describe("Component tests Program Management", () => {
+    // ToDo: Refactor in second milestone
     it("Create a program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Create new programme",
+        "Check if programme was created properly",
+      ]);
       cy.get("h5").should("contain", "Programme Management");
       cy.get('[data-cy="button-new-program"]').click({ force: true });
       cy.get("h6").should("contain", "Set-up a new Programme");
@@ -52,6 +58,12 @@ describe("Program Management", () => {
       });
     });
     it("Edit Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose Programme",
+        "Edit Programme",
+        "Check if programme was edited properly",
+      ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="ACTIVE"]').click({ force: true });
       cy.get('[data-cy="button-filters-apply"]').click();
@@ -86,6 +98,12 @@ describe("Program Management", () => {
       });
     });
     it("Finish Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose active Programme",
+        "Finish Programme",
+        "Check if programme was finished properly",
+      ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="ACTIVE"]').click({ force: true });
       cy.get('[data-cy="button-filters-apply"]').click();
@@ -97,6 +115,12 @@ describe("Program Management", () => {
       cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
     });
     it("Reactivate Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose finished Programme",
+        "Reactivate Programme",
+        "Check if programme was reactivated properly",
+      ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="FINISHED"]').click({ force: true });
       cy.get('[data-cy="button-filters-apply"]').click();
@@ -129,6 +153,12 @@ describe("Program Management", () => {
 
   describe("Regression tests Program Management", () => {
     it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Program Management page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
       programManagement.clearCache();
       cy.get("h5").should("contain", "Programme Management");
     });
