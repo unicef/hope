@@ -2239,6 +2239,7 @@ type IndividualNode implements Node {
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String!
+  paymentDeliveryPhoneNo: String
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
@@ -2750,6 +2751,9 @@ type PaymentNode implements Node {
   program: ProgramNode
   orderNumber: Int
   tokenNumber: Int
+  additionalCollectorName: String
+  additionalDocumentType: String
+  additionalDocumentNumber: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
@@ -2761,8 +2765,13 @@ type PaymentNode implements Node {
   targetPopulation: TargetPopulationNode
   verification: PaymentVerificationNode
   distributionModality: String
-  totalPersonsCovered: Int
   serviceProvider: FinancialServiceProviderNode
+  totalPersonsCovered: Int
+  snapshotCollectorFullName: String
+  snapshotCollectorDeliveryPhoneNo: String
+  snapshotCollectorBankName: String
+  snapshotCollectorBankAccountNumber: String
+  snapshotCollectorDebitCardNumber: String
 }
 
 type PaymentNodeConnection {
