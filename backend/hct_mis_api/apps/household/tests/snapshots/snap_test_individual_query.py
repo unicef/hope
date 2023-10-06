@@ -21,12 +21,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
@@ -45,12 +45,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
@@ -69,12 +69,12 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                                 'edges': [
                                     {
                                         'node': {
-                                            'name': 'Test program TWO'
+                                            'name': 'Test program ONE'
                                         }
                                     },
                                     {
                                         'node': {
-                                            'name': 'Test program ONE'
+                                            'name': 'Test program TWO'
                                         }
                                     }
                                 ]
