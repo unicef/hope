@@ -1,8 +1,8 @@
 import PopulationHouseholds from "../../page-objects/pages/population_module/population_households.po";
 import HPDetailsPage from "../../page-objects/pages/population_module/households_details_page.po";
 
-let ph = new PopulationHouseholds();
-let phdp = new HPDetailsPage();
+let populationHouseholds = new PopulationHouseholds();
+let householdsDetailsPage = new HPDetailsPage();
 
 describe("Households Module", () => {
   beforeEach(() => {
@@ -16,6 +16,12 @@ describe("Households Module", () => {
   describe("Smoke tests Households Population module", () => {
     it.skip("Check Households Population page", () => {});
     it("Check Households Population Details page", () => {
+      cy.scenario([
+        "Go to Population page",
+        "Check if page is in Households",
+        "Choose first Household from list",
+        "Check if all elements on page exist",
+      ]);
       cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
       cy.get("div").contains("Households");
       cy.get('[data-cy="table-title"]').contains("Households");
@@ -45,5 +51,16 @@ describe("Households Module", () => {
   });
   describe.skip("E2E tests Households Population", () => {});
 
-  describe.skip("Regression tests Households Population", () => {});
+  describe("Regression tests Households Population", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Households page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      populationHouseholds.clearCache();
+      populationHouseholds.getTitle().contains(populationHouseholds.textTitle);
+    });
+  });
 });
