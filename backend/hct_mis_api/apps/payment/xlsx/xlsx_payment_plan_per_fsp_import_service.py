@@ -202,6 +202,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "delivery_date",
                 "reason_for_unsuccessful_payment",
                 "additional_collector_name",
+                "additional_document_type",
+                "additional_document_number",
             ),
         )
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
