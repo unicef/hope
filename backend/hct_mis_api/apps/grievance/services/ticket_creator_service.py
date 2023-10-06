@@ -154,6 +154,8 @@ class TicketCreatorService:
 
         if programme:
             programme = get_object_or_404(Program, pk=decode_id_string(programme))
+        else:
+            programme = None
 
         return GrievanceTicket.objects.create(
             **input_data,

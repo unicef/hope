@@ -198,6 +198,13 @@ describe("Grievance", () => {
         ["On Hold", 1, "GRV-0000003"],
       ].forEach((testData) => {
         it(`Grievance Status filter ${testData[0]}`, () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Status filter: " + testData[0],
+            "Press button Apply",
+            `Check if Tickets List has ${testData[1]} rows`,
+            "Press button Clear",
+          ]);
           grievancePage.chooseStatusFilter(testData[0]);
           grievancePage.expectedNumberOfRows(testData[1]);
           grievancePage.chooseTicketListRow(0, testData[2]);
@@ -229,6 +236,15 @@ describe("Grievance", () => {
         ["SYSTEM-GENERATED", 1],
       ].forEach((testData) => {
         it(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            "Type in Search filter " + testData[1],
+            "Press button Apply",
+            `Check if Tickets List has ${testData[2]} rows`,
+            "Press first row from Ticket List and check data",
+            "Come back to Grievance Page",
+          ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.changeCreationDateTo("2024-01-01");
           grievancePage.checkDateFilterTo("2024-01-01");
@@ -249,15 +265,36 @@ describe("Grievance", () => {
         ["Grievance Complaint", "GRV-0000002"],
       ].forEach((testData) => {
         it(`Grievance Category filter - ${testData[0]}`, () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose Category filter: " + testData[0],
+            "Press button Apply",
+            "Check if Tickets List has " + testData[1],
+            "Press button Clear",
+          ]);
           grievancePage.chooseCategoryFilter(testData[0]);
           grievancePage.chooseTicketListRow(0, testData[1]);
         });
       });
-      it(`Grievance Admin Level 2 filter - USER-GENERATED`, () => {
+      it("Grievance Admin Level 2 filter - USER-GENERATED", () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Choose tab: USER-GENERATED",
+          "Type in Admin Level 2 filter: Andarab",
+          "Press button Apply",
+          `Check if Tickets List has GRV-0000003`,
+        ]);
         grievancePage.chooseAdminFilter("Andarab");
         grievancePage.chooseTicketListRow(1, "GRV-0000003");
       });
       it(`Grievance Admin Level 2 filter - SYSTEM-GENERATED`, () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Choose tab: SYSTEM-GENERATED",
+          "Type in Admin Level 2 filter: Andarab",
+          "Press button Apply",
+          `Check if Tickets List has 0 rows`,
+        ]);
         grievancePage.chooseTab("SYSTEM-GENERATED");
         grievancePage.chooseAdminFilter("Andarab");
         grievancePage.expectedNumberOfRows(0);
@@ -267,12 +304,38 @@ describe("Grievance", () => {
         ["SYSTEM-GENERATED", 0],
       ].forEach((testData) => {
         it(`Grievance Assignee filter - ${testData[0]}`, () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            "Type in Assignee filter: root@root.com",
+            "Press button Apply",
+            `Check if Tickets List has ${testData[1]} rows`,
+          ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.chooseAssigneeFilter("root@root.com");
           grievancePage.expectedNumberOfRows(testData[1]);
         });
       });
       it("Grievance Similarity Score filter", () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Choose tab: SYSTEM-GENERATED",
+          "Type in Similarity Score From filter: 5",
+          "Press button Apply",
+          `Check if Tickets List has 1 rows`,
+          "Type in Similarity Score From filter: 10",
+          "Press button Apply",
+          `Check if Tickets List has 0 rows`,
+          "Press button Clear",
+          `Check if Tickets List has 1 rows`,
+          "Type in Similarity Score From filter: 5",
+          "Type in Similarity Score To filter: 10",
+          `Check if Tickets List has 1 rows`,
+          "Type in Similarity Score From filter: 4",
+          "Type in Similarity Score To filter: 5",
+          "Press button Apply",
+          `Check if Tickets List has 0 rows`,
+        ]);
         grievancePage.chooseTab("SYSTEM-GENERATED");
         grievancePage.getSimilarityScoreFromFilter().type(5);
         grievancePage.getButtonApply().click();
@@ -296,6 +359,13 @@ describe("Grievance", () => {
         ["SYSTEM-GENERATED", systemGenerated],
       ].forEach((testData) => {
         it("Grievance Registration Date Import filter", () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            "Type in Registration Date Import filter: Test",
+            "Press button Apply",
+            `Check if Tickets List has ${testData[1]}`,
+          ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.chooseRDIFilter("Test");
           grievancePage.expectedNumberOfRows(1);
@@ -312,6 +382,14 @@ describe("Grievance", () => {
         ["SYSTEM-GENERATED", "Not set", 1, systemGenerated],
       ].forEach((testData) => {
         it(`Grievance Priority filter - ${testData[1]}`, () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            `Choose in Priority filter: ${testData[1]}`,
+            "Press button Apply",
+            `Check if Tickets List has ${testData[2]} rows`,
+            `Check if Tickets List has ${testData[3]}`,
+          ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.choosePriorityFilter(testData[1]);
           grievancePage.expectedNumberOfRows(testData[2]);
@@ -325,13 +403,21 @@ describe("Grievance", () => {
         ["SYSTEM-GENERATED", "Not set", 1, systemGenerated],
       ].forEach((testData) => {
         it(`Grievance Urgency filter - ${testData[1]}`, () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Choose tab: " + testData[0],
+            `Choose in Urgency filter: ${testData[1]}`,
+            "Press button Apply",
+            `Check if Tickets List has ${testData[2]} rows`,
+            `Check if Tickets List has ${testData[3]}`,
+          ]);
           grievancePage.chooseTab(testData[0]);
           grievancePage.chooseUrgencyFilter(testData[1]);
           grievancePage.expectedNumberOfRows(testData[2]);
           grievancePage.chooseTicketListRow(0, testData[3]);
         });
       });
-      it("Grievance Active Tickets filter", () => {});
+      it.skip("Grievance Active Tickets filter", () => {});
     });
     context("Create New Ticket", () => {
       beforeEach(() => {
@@ -341,6 +427,20 @@ describe("Grievance", () => {
       ["DataChangeAddIndividual"].forEach((testData) => {
         it("Create New Ticket - Data Change - Add Individual", function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
           newTicketPage
@@ -551,6 +651,20 @@ describe("Grievance", () => {
         (testData) => {
           it(`Create New Ticket - Data Change - ${testData}`, function () {
             let newTicket = this.newTicket[testData];
+            cy.scenario([
+              "Go to Grievance page",
+              "Press button New Ticket",
+              `Choose category: ${newTicket.category}`,
+              `Choose issue type: ${newTicket.issueType}`,
+              "Press button Next",
+              "Choose Household",
+              "Press button Next",
+              "Check Received Consent",
+              "Press button Next",
+              "Fill all fields",
+              "Press button Save",
+              "Check if ticket was created properly",
+            ]);
             newTicketPage.chooseCategory(newTicket.category);
             newTicketPage.chooseIssueType(newTicket.issueType);
             newTicketPage
@@ -624,6 +738,21 @@ describe("Grievance", () => {
       ["Individual Data Update"].forEach((testData) => {
         it(`Create New Ticket - Data Change - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Choose Individual",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
           newTicketPage
@@ -699,6 +828,21 @@ describe("Grievance", () => {
       ["Withdraw Individual"].forEach((testData) => {
         it(`Create New Ticket - Data Change - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Choose Individual",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
           newTicketPage
@@ -768,6 +912,20 @@ describe("Grievance", () => {
       ["Withdraw Household"].forEach((testData) => {
         it(`Create New Ticket - Data Change - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
           newTicketPage
@@ -839,6 +997,21 @@ describe("Grievance", () => {
       ].forEach((testData) => {
         it(`Create New Ticket - Grievance Complaint - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Choose Individual",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
           newTicketPage
@@ -949,6 +1122,21 @@ describe("Grievance", () => {
       ["Referral"].forEach((testData) => {
         it(`Create New Ticket - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Choose Individual",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage
             .getLabelCategoryDescription()
@@ -1024,6 +1212,21 @@ describe("Grievance", () => {
       ].forEach((testData) => {
         it(`Create New Ticket - Sensitive Grievance - ${testData}`, function () {
           let newTicket = this.newTicket[testData];
+          cy.scenario([
+            "Go to Grievance page",
+            "Press button New Ticket",
+            `Choose category: ${newTicket.category}`,
+            `Choose issue type: ${newTicket.issueType}`,
+            "Press button Next",
+            "Choose Household",
+            "Choose Individual",
+            "Press button Next",
+            "Check Received Consent",
+            "Press button Next",
+            "Fill all fields",
+            "Press button Save",
+            "Check if ticket was created properly",
+          ]);
           newTicketPage.chooseCategory(newTicket.category);
           newTicketPage.chooseIssueType(newTicket.issueType);
           newTicketPage
@@ -1091,8 +1294,23 @@ describe("Grievance", () => {
 
   describe("Regression tests Grievance", () => {
     it('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Choose ticket: GRV-0000001",
+        "Check URL",
+      ]);
       grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
       cy.url().should("include", "/user-generated");
+    });
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      grievancePage.clearCache();
+      grievancePage.checkElementsOnUserGeneratedPage();
     });
   });
 });
