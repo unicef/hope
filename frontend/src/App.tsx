@@ -11,6 +11,7 @@ import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage'
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 import { PageNotFound } from './containers/pages/404/PageNotFound';
+import { SomethingWentWrong } from './containers/pages/SomethingWentWrong/SomethingWentWrong';
 
 export const App: React.FC = () => {
   return (
@@ -26,6 +27,9 @@ export const App: React.FC = () => {
           </SentryRoute>
           <SentryRoute path='/404'>
             <PageNotFound />
+          </SentryRoute>
+          <SentryRoute path='/error'>
+            <SomethingWentWrong />
           </SentryRoute>
           <SentryRoute path='/sentry-check'>
             <button
