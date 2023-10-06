@@ -6,6 +6,7 @@ trigger:
     - staging
     - master
     - global-program-filter
+    - second-milestone
     - testing-ephemeral
     - ops/*
   paths:
