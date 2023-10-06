@@ -11,17 +11,17 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { Dialog } from '../../../../containers/dialogs/Dialog';
+import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
-  GrievanceTicketNode,
   useBulkUpdateGrievanceAssigneeMutation,
-} from '../../../__generated__/graphql';
-import { AssignedToDropdown } from './AssignedToDropdown';
+} from '../../../../__generated__/graphql';
+import { AssignedToDropdown } from '../AssignedToDropdown';
+import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -42,7 +42,7 @@ const Bold = styled.span`
   font-weight: bold;
 `;
 
-interface BulkAssignModalProps {
+interface BulkSetPriorityModalProps {
   selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   businessArea: string;
   optionsData;
@@ -51,14 +51,14 @@ interface BulkAssignModalProps {
   setSelected;
 }
 
-export const BulkAssignModal = ({
+export const BulkSetPriorityModal = ({
   selectedTickets,
   businessArea,
   optionsData,
   initialVariables,
   setInputValue,
   setSelected,
-}: BulkAssignModalProps): React.ReactElement => {
+}: BulkSetPriorityModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [assignee, setAssignee] = useState(null);
   const { t } = useTranslation();
@@ -69,12 +69,13 @@ export const BulkAssignModal = ({
   const renderButton = (): React.ReactElement => {
     return (
       <Button
-        variant='text'
+        variant='outlined'
         color='primary'
+        startIcon={<AssignmentIndIcon />}
         disabled={!selectedTickets.length}
         onClick={() => setDialogOpen(true)}
       >
-        {t('ASSIGN TICKETS')}
+        {t('ASSIGN')}
       </Button>
     );
   };
