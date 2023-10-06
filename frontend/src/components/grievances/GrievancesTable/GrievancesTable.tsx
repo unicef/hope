@@ -26,10 +26,11 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
-import { BulkAssignModal } from './BulkAssignModal';
+import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
-import TableContainer from "@material-ui/core/TableContainer";
+import Paper from '@material-ui/core/Paper';
+import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -173,14 +174,6 @@ export const GrievancesTable = ({
     <>
       <Box display='flex' flexDirection='column' px={5} pt={5}>
         <Box display='flex' justifyContent='space-between' px={5}>
-          <BulkAssignModal
-            optionsData={optionsData}
-            selectedTickets={selectedTickets}
-            businessArea={businessArea}
-            initialVariables={initialVariables}
-            setInputValue={setInputValue}
-            setSelected={setSelectedTickets}
-          />
           <Box display='flex' ml='auto'>
             <Box>
               {/* TODO: Enable Export Report button */}
@@ -208,59 +201,70 @@ export const GrievancesTable = ({
               {t('Upload Tickets')}
             </Button> */}
             </Box>
-            {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
-              hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-                <Button
-                  alignItems='center'
-                  variant='contained'
-                  color='primary'
-                  component={Link}
-                  to={`/${businessArea}/grievance/new-ticket`}
-                  data-cy='button-new-ticket'
-                >
-                  {t('NEW TICKET')}
-                </Button>
-              )}
+
           </Box>
         </Box>
         <TableWrapper>
-          <TableContainer>
-
-          <UniversalTable<
-            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-            AllGrievanceTicketQueryVariables
-          >
-            isOnPaper={false}
-            headCells={headCells}
-            rowsPerPageOptions={[10, 15, 20, 40]}
-            query={useAllGrievanceTicketQuery}
-            onSelectAllClick={handleSelectAllCheckboxesClick}
-            numSelected={selectedTickets.length}
-            queriedObjectName='allGrievanceTicket'
-            initialVariables={initialVariables}
-            defaultOrderBy='created_at'
-            defaultOrderDirection='desc'
-            renderRow={(row) => (
-              <GrievancesTableRow
-                key={row.id}
-                ticket={row}
-                statusChoices={statusChoices}
-                categoryChoices={categoryChoices}
-                issueTypeChoicesData={issueTypeChoicesData}
-                priorityChoicesData={priorityChoicesData}
-                urgencyChoicesData={urgencyChoicesData}
-                canViewDetails={getCanViewDetailsOfTicket(row)}
-                checkboxClickHandler={handleCheckboxClick}
-                isSelected={Boolean(
-                  selectedTickets.find((ticket) => ticket.id === row.id),
-                )}
+          <Paper>
+            <EnhancedTableToolbar title={t('Grievance Tickets List')} />
+            <Box display="flex" flexDirection="row" marginX={6} gridGap={16} >
+              <BulkAssignModal
                 optionsData={optionsData}
-                setInputValue={setInputValue}
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
                 initialVariables={initialVariables}
+                setInputValue={setInputValue}
+                setSelected={setSelectedTickets}
               />
-            )}
-          />
-          </TableContainer>
+              {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
+                hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+                  <Button
+                    alignItems='center'
+                    variant='contained'
+                    color='primary'
+                    component={Link}
+                    to={`/${businessArea}/grievance/new-ticket`}
+                    data-cy='button-new-ticket'
+                  >
+                    {t('NEW TICKET')}
+                  </Button>
+                )}
+            </Box>
+            <UniversalTable<
+              AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+              AllGrievanceTicketQueryVariables
+            >
+              isOnPaper={false}
+              headCells={headCells}
+              rowsPerPageOptions={[10, 15, 20, 40]}
+              query={useAllGrievanceTicketQuery}
+              onSelectAllClick={handleSelectAllCheckboxesClick}
+              numSelected={selectedTickets.length}
+              queriedObjectName='allGrievanceTicket'
+              initialVariables={initialVariables}
+              defaultOrderBy='created_at'
+              defaultOrderDirection='desc'
+              renderRow={(row) => (
+                <GrievancesTableRow
+                  key={row.id}
+                  ticket={row}
+                  statusChoices={statusChoices}
+                  categoryChoices={categoryChoices}
+                  issueTypeChoicesData={issueTypeChoicesData}
+                  priorityChoicesData={priorityChoicesData}
+                  urgencyChoicesData={urgencyChoicesData}
+                  canViewDetails={getCanViewDetailsOfTicket(row)}
+                  checkboxClickHandler={handleCheckboxClick}
+                  isSelected={Boolean(
+                    selectedTickets.find((ticket) => ticket.id === row.id),
+                  )}
+                  optionsData={optionsData}
+                  setInputValue={setInputValue}
+                  initialVariables={initialVariables}
+                />
+              )}
+            />
+          </Paper>
         </TableWrapper>
       </Box>
     </>
