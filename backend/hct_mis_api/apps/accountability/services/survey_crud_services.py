@@ -37,8 +37,10 @@ class SurveyCrudServices:
         sampling = Sampling(input_data, households)
         result = sampling.process_sampling()
         survey.sample_size = result.sample_size
-        survey.full_list_arguments = result.full_list_arguments
-        survey.random_sampling_arguments = result.random_sampling_arguments
+        survey.full_list_arguments = result.full_list_arguments if result.full_list_arguments else dict()
+        survey.random_sampling_arguments = (
+            result.random_sampling_arguments if result.random_sampling_arguments else dict()
+        )
         survey.number_of_recipients = result.number_of_recipients
         survey.recipients.set(result.households)
 
