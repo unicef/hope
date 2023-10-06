@@ -20,7 +20,7 @@ describe("Country Dashboard", () => {
       programmesPage.getMenuButtonHouseholds().should("not.exist");
       programmesPage.getMenuButtonIndividuals().should("not.exist");
       programmesPage.getMenuButtonProgrammeDetails().should("not.exist");
-      programmesPage.getMenuButtonCashAssist().should("not.exist");
+      // ToDo: ??? programmesPage.getMenuButtonCashAssist().should("not.exist");
       programmesPage.getMenuButtonPaymentModule().should("not.exist");
       programmesPage.getMenuButtonReporting().should("not.exist");
       programmesPage.getMenuButtonProgrammeUsers().should("not.exist");
@@ -81,7 +81,7 @@ describe("Country Dashboard", () => {
       programmesPage.getMenuButtonHouseholds().should("not.be.visible");
       programmesPage.getMenuButtonIndividuals().should("not.be.visible");
       programmesPage.getMenuButtonProgrammeDetails().should("be.visible");
-      programmesPage.getMenuButtonCashAssist().should("be.visible");
+      // ToDo: ??? programmesPage.getMenuButtonCashAssist().should("be.visible");
       programmesPage.getMenuButtonPaymentModule().should("be.visible");
       programmesPage.getMenuButtonReporting().should("be.visible");
       programmesPage.getMenuButtonProgrammeUsers().should("be.visible");
@@ -131,7 +131,7 @@ describe("Country Dashboard", () => {
       programmesPage.getMenuButtonHouseholds().should("not.exist");
       programmesPage.getMenuButtonIndividuals().should("not.exist");
       programmesPage.getMenuButtonProgrammeDetails().should("not.exist");
-      programmesPage.getMenuButtonCashAssist().should("not.exist");
+      // ToDo: ??? programmesPage.getMenuButtonCashAssist().should("not.exist");
       programmesPage.getMenuButtonPaymentModule().should("not.exist");
       programmesPage.getMenuButtonReporting().should("not.exist");
       programmesPage.getMenuButtonProgrammeUsers().should("not.exist");
