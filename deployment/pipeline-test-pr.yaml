@@ -3,6 +3,7 @@ pr:
   - master
   - develop
   - global-program-filter
+  - second-milestone
   - feature/*
 resources:
   - repo: self
