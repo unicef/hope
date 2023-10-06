@@ -24,12 +24,20 @@ describe("Targeting", () => {
       targetingPage.checkElementsOnPage();
     });
     it("Check Targeting Details page", () => {
+      cy.scenario([
+        "Go to Targeting Details page",
+        "Check if all elements on page exist",
+      ]);
       targetingPage.selectStatus("Open");
       targetingPage.getTargetPopulationsRows().should("have.length", 1);
       targetingPage.chooseTargetPopulationRow(0).click();
       targetingDetailsPage.checkElementsOnPage("OPEN");
     });
     it("Check Targeting New Ticket page", () => {
+      cy.scenario([
+        "Go to Targeting New Ticket page",
+        "Check if all elements on page exist",
+      ]);
       targetingPage.getButtonCreateNew().click();
       targetingCreateNewPage.checkElementsOnPage();
     });
@@ -37,7 +45,15 @@ describe("Targeting", () => {
 
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
-      it("Can visit the targeting page and create a target population", () => {
+      // TODO: Refactor in second milestone
+      it.skip("Can visit the targeting page and create a target population", () => {
+        cy.scenario([
+          "Go to Targeting New Ticket page",
+          "Press Create New button",
+          "Fill name field",
+          "Press button household rule",
+          "Check if all elements on page exist",
+        ]);
         cy.navigateToHomePage();
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
@@ -58,7 +74,7 @@ describe("Targeting", () => {
             .click()
             .type("address");
 
-          // TODO
+          // TODO: Refactor in second milestone
           // cy.contains("Address").click();
           // cy.get('[data-cy="input-filters[0].value"]')
           //   .click()
@@ -111,16 +127,16 @@ describe("Targeting", () => {
   });
   describe.skip("E2E tests Targeting", () => {});
 
-  describe.skip("Regression tests Targeting", () => {
-    it.only("173542: GPF: Error occurs after apply empty Number of Households field", () => {
+  describe("Regression tests Targeting", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
-        "Go to Targeting",
-        "Fill Number of Households field",
-        "Press button Apply",
-        "Delete value from Number of Households",
-        "Press button Apply",
+        "Go to Targeting page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
       ]);
-      targetingPage.filter;
+      targetingPage.clearCache();
+      targetingPage.checkElementsOnPage();
     });
   });
 });
