@@ -30,7 +30,7 @@ export default class ProgramDetails extends BaseComponent {
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
 
   tablePagination = 'div[data-cy="table-pagination"]';
-  cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
+  // ToDo: ?? cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]';
   tableLabel = 'span[data-cy="table-label"]';
   tableTitle = 'h6[data-cy="table-title"]';
   buttonActivateProgramModal =
@@ -79,7 +79,7 @@ export default class ProgramDetails extends BaseComponent {
   getLabelStatus = () => cy.get(this.labelStatus);
   getPageHeaderTitle = () => cy.get(this.pageHeaderTitle);
   getTablePagination = () => cy.get(this.tablePagination);
-  getCashPlanTableRow = () => cy.get(this.cashPlanTableRow);
+  // ToDo: ?? getCashPlanTableRow = () => cy.get(this.cashPlanTableRow);
   getTableLabel = () => cy.get(this.tableLabel);
   getTableTitle = () => cy.get(this.tableTitle);
   getButtonActivateProgramModal = () => cy.get(this.buttonActivateProgramModal);

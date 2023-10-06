@@ -7,7 +7,7 @@ export default class BaseComponent {
   navProgrammeManagement = 'a[data-cy="nav-Programme Management"]';
   navProgrammeDetails = 'a[data-cy="nav-Programme Details"]';
   navTargeting = 'a[data-cy="nav-Targeting"]';
-  navCashAssist = 'div[data-cy="nav-Cash Assist"]';
+  // navCashAssist = 'div[data-cy="nav-Cash Assist"]';
   navPaymentModule = 'div[data-cy="nav-Payment Module"]';
   navProgrammeCycles = 'a[data-cy="nav-Programme Cycles"]';
   navPaymentPlans = 'a[data-cy="nav-Payment Plans"]';
@@ -49,7 +49,7 @@ export default class BaseComponent {
   getMenuButtonIndividuals = () => cy.get(this.navIndividuals);
   getMenuButtonProgrammeManagement = () => cy.get(this.navProgrammeManagement);
   getMenuButtonProgrammeDetails = () => cy.get(this.navProgrammeDetails);
-  getMenuButtonCashAssist = () => cy.get(this.navCashAssist);
+  // getMenuButtonCashAssist = () => cy.get(this.navCashAssist);
   getMenuButtonPaymentModule = () => cy.get(this.navPaymentModule);
   getMenuButtonProgrammeCycles = () => cy.get(this.navProgrammeCycles);
   getMenuButtonPaymentPlans = () => cy.get(this.navPaymentPlans);
