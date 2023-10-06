@@ -10,8 +10,8 @@ describe("Country Dashboard", () => {
   describe("Smoke tests Global Program Filter", () => {
     it("Check All Programmes - Programme Management page", () => {
       cy.scenario([
-        "1. Go to main page (All programmes set)",
-        "2. Check if all elements on page exist",
+        "Go to main page (All programmes set)",
+        "Check if all elements on page exist",
       ]);
       programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
       programmesPage.getMenuButtonFeedback().should("not.exist");
@@ -60,9 +60,9 @@ describe("Country Dashboard", () => {
     });
     it("Choose program", () => {
       cy.scenario([
-        "1. Go to main page (All programmes set)",
-        "2. Choose program (Test Programm)",
-        "3. Check if all elements on page exist",
+        "Go to main page (All programmes set)",
+        "Choose program (Test Programm)",
+        "Check if all elements on page exist",
       ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
@@ -103,10 +103,10 @@ describe("Country Dashboard", () => {
     });
     it("Come back to All Programmes", () => {
       cy.scenario([
-        "1. Go to main page (All programmes set)",
-        "2. Choose program (Test Programm)",
-        "3. Come back to All Programmes",
-        "4. Check if all elements on page exist",
+        "Go to main page (All programmes set)",
+        "Choose program (Test Programme)",
+        "Come back to All Programmes",
+        "Check if all elements on page exist",
       ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage

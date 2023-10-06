@@ -49,6 +49,7 @@ export const ProgramDetailsPageHeader = ({
           canRemove={canRemove}
           canEdit={canEdit}
           canActivate={canActivate}
+          canDuplicate={canDuplicate}
         />
       );
       break;
@@ -59,7 +60,7 @@ export const ProgramDetailsPageHeader = ({
           canActivate={canActivate}
           canDuplicate={canDuplicate}
           isPaymentPlanApplicable={isPaymentPlanApplicable}
-        />
+          />
       );
   }
   const breadCrumbsItems: BreadCrumbsItem[] = [
