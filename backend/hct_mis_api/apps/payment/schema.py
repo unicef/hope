@@ -370,7 +370,11 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def get_primary_collector_or_alternate_collector(household_snapshot_data: Dict) -> Dict:
         """get primary or alternate collector dict"""
-        return household_snapshot_data.get("primary_collector") or household_snapshot_data.get("alternate_collector") or dict()
+        return (
+            household_snapshot_data.get("primary_collector")
+            or household_snapshot_data.get("alternate_collector")
+            or dict()
+        )
 
     def get_collector_field(self, field_name: str) -> Union[None, str, Dict]:
         """return primary_collector or alternate_collector field value or None"""
@@ -382,10 +386,10 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         return self.household_snapshot.snapshot_data.get("size") if self.household_snapshot else None
 
-    def resolve_snapshot_collector_full_name(self, info: Any) -> Optional[str]:
+    def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
         return self.get_collector_field("full_name")
 
-    def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Optional[str]:
+    def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
         return self.get_collector_field("payment_delivery_phone_no")
 
     def resolve_snapshot_collector_bank_name(self, info: Any) -> Optional[str]:

@@ -1029,7 +1029,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "order_number": (payment, "order_number"),
             "token_number": (payment, "token_number"),
             "additional_collector_name": (payment, "additional_collector_name"),
-            "additional_document_type":(payment, "additional_document_type"),
+            "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
         }
         if column_name not in map_obj_name_column:
@@ -1479,9 +1479,18 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         object_id_field="payment_object_id",
         related_query_name="payment",
     )
-    additional_collector_name = models.CharField(max_length=64, blank=True, null=True, help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector")
-    additional_document_type = models.CharField(max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data")
-    additional_document_number = models.CharField(max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data")
+    additional_collector_name = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector",
+    )
+    additional_document_type = models.CharField(
+        max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
+    )
+    additional_document_number = models.CharField(
+        max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
+    )
 
     @property
     def full_name(self) -> str:
