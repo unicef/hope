@@ -115,7 +115,6 @@ def get_individual_snapshot(individual: Individual) -> dict:
     individual_data["bank_account_info"] = {}
 
     for document in individual.documents.all():
-
         document_data = {
             "type": document.type.key,
             "document_number": document.document_number,
