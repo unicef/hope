@@ -1,5 +1,6 @@
 export default class BaseComponent {
   // Menu Locators
+  buttonPaymentModule = 'a[data-cy="nav-Payment Module"]';
   navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]';
   navProgrammePopulation = 'div[data-cy="nav-Programme Population"]';
   navHouseholds = 'a[data-cy="nav-Households"]';
@@ -42,6 +43,7 @@ export default class BaseComponent {
   textDraftProgram = "Draft Program";
 
   // Elements)
+  getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
   getMenuButtonRegistrationDataImport = () =>
     cy.get(this.navRegistrationDataImport);
   getMenuButtonProgrammePopulation = () => cy.get(this.navProgrammePopulation);

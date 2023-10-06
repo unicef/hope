@@ -8,6 +8,7 @@ export default class PaymentModule extends BaseComponent {
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
 
   // Texts
+  textTitle = "Payment Module";
 
   // Elements
   getProgramCycleTableRow = () => cy.get(this.programCycleTableRow);
