@@ -402,5 +402,16 @@ describe("Grievance - Feedback", () => {
     });
   });
   describe.skip("E2E tests Feedback", () => {});
-  describe.skip("Regression tests Feedback", () => {});
+  describe("Regression tests Feedback", () => {
+    it.skip("174517: Check clear cache", () => {
+      cy.scenario([
+        "Go to Feedback page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      feedbackPage.clearCache();
+      feedbackPage.checkElementsOnPage();
+    });
+  });
 });
