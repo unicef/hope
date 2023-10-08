@@ -16,7 +16,7 @@ from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -209,7 +209,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 continue
 
             submission_meta_data.pop("amended", None)
-            household_obj = ImportedHousehold(**submission_meta_data)
+            data_collecting_type = DataCollectingType.objects.get(code=household["collect_individual_data_h_c"])
+            household_obj = ImportedHousehold(**submission_meta_data, data_collecting_type_id=data_collecting_type.id)
             self.attachments = household.get("_attachments", [])
             registration_date = None
             current_individuals = []

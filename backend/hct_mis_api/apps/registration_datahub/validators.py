@@ -29,7 +29,7 @@ from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
@@ -465,7 +465,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet) -> List:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: Optional[str] = None) -> List:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -585,6 +585,26 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
+
+                    if header.value == "collect_individual_data_h_c":
+                        # First, validate if dataCollectionType for given value exists
+                        if not DataCollectingType.objects.filter(code=value).exists():
+                            invalid_rows.append({
+                                "row_number": row_number,
+                                "header": header.value,
+                                "message": f"Worksheet: Households - DataCollectingType with code {value} does not exists",
+                            })
+
+                        business_area = BusinessArea.objects.get(slug=business_area_slug)
+                        data_collecting_type = DataCollectingType.objects.get(code=value)
+
+                        # Second, check if business area is allowed for given dataCollectingType
+                        if business_area not in data_collecting_type.limit_to.all():
+                            invalid_rows.append({
+                                "row_number": row_number,
+                                "header": header.value,
+                                "message": f"Worksheet: Households - BusinessArea: {business_area_slug} is not in scope of DataCollectingType: {value}",
+                            })
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]
@@ -719,7 +739,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
             self.image_loader = SheetImageLoader(household_sheet)
-            errors.extend(self.rows_validator(household_sheet))
+            errors.extend(self.rows_validator(household_sheet, business_area_slug))
             self.image_loader = SheetImageLoader(individuals_sheet)
             errors.extend(self.rows_validator(individuals_sheet))
             return errors
@@ -1154,6 +1174,28 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
             household: Dict[str, Any]
             for household in reduced_submissions:
+                # Checking DataCollectingType / collect_individual_data
+                collect_individual_data = household.get("collect_individual_data_h_c")
+
+                if not collect_individual_data:
+                    errors.append({
+                        "header": "collect_individual_data_h_c",
+                        "message": "No collect_individual_data delivered"
+                    })
+
+                data_collecting_type = DataCollectingType.objects.get(code=collect_individual_data)
+
+                if not data_collecting_type:
+                    errors.append({
+                        "header": "collect_individual_data_h_c",
+                        "message": f"DataCollectingType of {collect_individual_data} type does not exist"
+                    })
+                if business_area not in data_collecting_type.limit_to.all():
+                    errors.append({
+                        "header": "collect_individual_data_h_c",
+                        "message": f"Business Area: {business_area.slug} is not in scope of given collect_individual_data"
+                    })
+
                 household_uuid = str(household.get("_uuid"))
 
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
