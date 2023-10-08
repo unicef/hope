@@ -1,3 +1,5 @@
+from typing import Any, List
+
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -50,7 +52,7 @@ class DataCollectingTypeFactory(DjangoModelFactory):
         model = DataCollectingType
 
     @factory.post_generation
-    def business_areas(self, create, extracted, **kwargs):
+    def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:
         if not create:
             return
 

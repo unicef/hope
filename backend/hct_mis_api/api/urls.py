@@ -50,5 +50,5 @@ urlpatterns = [
     path("lookups/datacollectingpolicy/", endpoints.DataCollectingPolicy().as_view(), name="datacollectingpolicy-list"),
     path("lookups/role/", endpoints.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.Sex().as_view(), name="sex-list"),
-    *router.urls
+    *router.urls,
 ]

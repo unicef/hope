@@ -55,24 +55,12 @@ class TestSriLankaRegistrationService(TestCase):
             },
         )
         cls.data_collecting_type = DataCollectingTypeFactory.create(
-            label="Size Only",
-            code="size_only",
-            business_areas=[cls.business_area]
+            label="Size Only", code="size_only", business_areas=[cls.business_area]
         )
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
-        cls.organization = OrganizationFactory(
-            business_area=cls.business_area,
-            slug=cls.business_area.slug
-        )
-        cls.project = ProjectFactory(
-            name="fake__other_project",
-            organization=cls.organization,
-            programme=cls.program
-        )
-        cls.registration = RegistrationFactory(
-            name="fake_other_registration",
-            project=cls.project
-        )
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake__other_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_other_registration", project=cls.project)
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 

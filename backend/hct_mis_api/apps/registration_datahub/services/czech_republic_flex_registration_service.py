@@ -7,14 +7,12 @@ from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_PARTIAL,
     GOVERNMENT_PARTNER,
     HEAD,
     HUMANITARIAN_PARTNER,

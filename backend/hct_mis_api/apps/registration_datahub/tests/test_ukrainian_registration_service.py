@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -53,25 +53,15 @@ class TestUkrainianRegistrationService(TestCase):
             },
         )
         cls.data_collecting_type = DataCollectingTypeFactory.create(
-            label="Size Only",
-            code="size_only",
-            business_areas=[cls.business_area]
+            label="Size Only", code="size_only", business_areas=[cls.business_area]
         )
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
 
-        cls.organization = OrganizationFactory(
-            business_area=cls.business_area,
-            slug=cls.business_area.slug
-        )
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(
-            name="fake__other_project_ukraine",
-            organization=cls.organization,
-            programme=cls.program
+            name="fake__other_project_ukraine", organization=cls.organization, programme=cls.program
         )
-        cls.registration = RegistrationFactory(
-            name="fake_other_registration_ukraine",
-            project=cls.project
-        )
+        cls.registration = RegistrationFactory(name="fake_other_registration_ukraine", project=cls.project)
 
         household = [
             {

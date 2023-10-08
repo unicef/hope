@@ -74,25 +74,13 @@ class TestCzechRepublicRegistrationService(TestCase):
             },
         )
         cls.data_collecting_type = DataCollectingTypeFactory.create(
-            label="Partial",
-            code="partial",
-            business_areas=[cls.business_area]
+            label="Partial", code="partial", business_areas=[cls.business_area]
         )
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
 
-        cls.organization = OrganizationFactory(
-            business_area=cls.business_area,
-            slug=cls.business_area.slug
-        )
-        cls.project = ProjectFactory(
-            name="fake_project",
-            organization=cls.organization,
-            programme=cls.program
-        )
-        cls.registration = RegistrationFactory(
-            name="fake_registration",
-            project=cls.project
-        )
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
         geo_models.Country.objects.create(name="Czechia")
 
         consent = [

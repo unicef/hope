@@ -96,14 +96,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
 
         cls.data_collecting_type_partial = DataCollectingTypeFactory(
-            label="Partial",
-            code="partial",
-            business_areas=[cls.rdi.business_area]
+            label="Partial", code="partial", business_areas=[cls.rdi.business_area]
         )
         cls.data_collecting_type_full = DataCollectingTypeFactory(
-            label="Full",
-            code="full",
-            business_areas=[cls.rdi.business_area]
+            label="Full", code="full", business_areas=[cls.rdi.business_area]
         )
 
         super().setUpTestData()

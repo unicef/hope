@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory, ProgramWithDataCollectingTypeFactory
+from hct_mis_api.apps.program.fixtures import ProgramWithDataCollectingTypeFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -320,13 +320,10 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         organization = OrganizationFactory.create(slug="ukraine")
         cls.data_collecting_type = DataCollectingTypeFactory(
-            label="Partial",
-            code="partial",
-            business_areas=[BusinessArea.objects.get(slug="ukraine")]
+            label="Partial", code="partial", business_areas=[BusinessArea.objects.get(slug="ukraine")]
         )
         cls.program = ProgramWithDataCollectingTypeFactory(
-            status="ACTIVE",
-            data_collecting_type=cls.data_collecting_type
+            status="ACTIVE", data_collecting_type=cls.data_collecting_type
         )
         cls.project = ProjectFactory.create(organization=organization, programme=cls.program)
         cls.registration = RegistrationFactory.create(project=cls.project)
@@ -460,10 +457,7 @@ class TestAutomatingRDICreationTask(TestCase):
         data_collecting_type = DataCollectingTypeFactory(
             label="Full",
             code="full",
-            business_areas=[
-                BusinessArea.objects.get(slug="sri-lanka"),
-                BusinessArea.objects.get(slug="ukraine")
-            ]
+            business_areas=[BusinessArea.objects.get(slug="sri-lanka"), BusinessArea.objects.get(slug="ukraine")],
         )
 
         registration_ids = [2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999]

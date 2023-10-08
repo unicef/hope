@@ -360,7 +360,6 @@ def automate_rdi_creation_task(
             except Registration.DoesNotExist:
                 raise NotImplementedError
             project = registration.project
-            programme = project.programme
             organization = project.organization
             service: Optional[Any] = registration.rdi_parser
             if service is None:

@@ -16,7 +16,7 @@ from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan, DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
@@ -88,14 +88,10 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         )
 
         cls.data_collecting_type_partial = DataCollectingTypeFactory(
-            label="Partial",
-            code="partial",
-            business_areas=[business_area]
+            label="Partial", code="partial", business_areas=[business_area]
         )
         cls.data_collecting_type_full = DataCollectingTypeFactory(
-            label="Full",
-            code="full",
-            business_areas=[business_area]
+            label="Full", code="full", business_areas=[business_area]
         )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
