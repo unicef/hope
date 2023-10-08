@@ -2590,8 +2590,8 @@ type Mutations {
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   bulkUpdateGrievanceAssignee(assignedTo: String, businessAreaSlug: String!, grievanceTicketIds: [ID]): BulkUpdateGrievanceTicketsAssigneesMutation
-  bulkUpdateGrievancePriority(businessAreaSlug: String!, grievanceTicketIds: [ID], priority: String): BulkUpdateGrievanceTicketsPriorityMutation
-  bulkUpdateGrievanceUrgency(businessAreaSlug: String!, grievanceTicketIds: [ID], urgency: String): BulkUpdateGrievanceTicketsUrgencyMutation
+  bulkUpdateGrievancePriority(businessAreaSlug: String!, grievanceTicketIds: [ID], priority: Int!): BulkUpdateGrievanceTicketsPriorityMutation
+  bulkUpdateGrievanceUrgency(businessAreaSlug: String!, grievanceTicketIds: [ID], urgency: Int!): BulkUpdateGrievanceTicketsUrgencyMutation
   bulkGrievanceAddNote(businessAreaSlug: String!, grievanceTicketIds: [ID], note: String): BulkGrievanceAddNoteMutation
   createPaymentVerificationPlan(input: CreatePaymentVerificationInput!, version: BigInt): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
