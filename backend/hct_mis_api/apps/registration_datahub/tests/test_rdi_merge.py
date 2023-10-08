@@ -8,7 +8,7 @@ from django.forms import model_to_dict
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.models import (
@@ -95,7 +95,16 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
         cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
 
-        generate_data_collecting_types()
+        cls.data_collecting_type_partial = DataCollectingTypeFactory(
+            label="Partial",
+            code="partial",
+            business_areas=[cls.rdi.business_area]
+        )
+        cls.data_collecting_type_full = DataCollectingTypeFactory(
+            label="Full",
+            code="full",
+            business_areas=[cls.rdi.business_area]
+        )
 
         super().setUpTestData()
 
@@ -213,7 +222,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin4_title=self.area4.name,
             zip_code="00-123",
             enumerator_rec_id=1234567890,
-            data_collecting_type_id=DataCollectingType.objects.get(code=COLLECT_TYPE_FULL).id,
+            data_collecting_type_id=self.data_collecting_type_full.id,
         )
         self.set_imported_individuals(imported_household)
         with capture_on_commit_callbacks(execute=True):

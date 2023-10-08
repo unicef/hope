@@ -16,11 +16,8 @@ from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import (
-    create_afghanistan,
-    generate_data_collecting_types,
-)
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.fixtures import create_afghanistan, DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
@@ -80,17 +77,26 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
-            RdiXlsxCreateTask,
-        )
-
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
-
         business_area = create_afghanistan()
-        generate_data_collecting_types()
+
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
+
+        cls.data_collecting_type_partial = DataCollectingTypeFactory(
+            label="Partial",
+            code="partial",
+            business_areas=[business_area]
+        )
+        cls.data_collecting_type_full = DataCollectingTypeFactory(
+            label="Full",
+            code="full",
+            business_areas=[business_area]
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
 
@@ -110,7 +116,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
-
         ImportedDocumentType.objects.create(
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
@@ -130,19 +135,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         self.assertEqual(3, households_count)
         self.assertEqual(6, individuals_count)
-
-        self.assertEqual(
-            ImportedHousehold.objects.filter(
-                data_collecting_type_id=DataCollectingType.objects.get(code="partial").id
-            ).count(),
-            2,
-        )
-        self.assertEqual(
-            ImportedHousehold.objects.filter(
-                data_collecting_type_id=DataCollectingType.objects.get(code="full").id
-            ).count(),
-            1,
-        )
 
         individual_data = {
             "full_name": "Some Full Name",
@@ -176,6 +168,14 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(role.individual.full_name, "Some Full Name")
 
         self.assertEqual(household_obj_data, household_data)
+
+        # data collecting type
+        self.assertEqual(
+            ImportedHousehold.objects.filter(data_collecting_type_id=self.data_collecting_type_partial.id).count(), 2
+        )
+        self.assertEqual(
+            ImportedHousehold.objects.filter(data_collecting_type_id=self.data_collecting_type_full.id).count(), 1
+        )
 
     def test_handle_document_fields(self) -> None:
         task = self.RdiXlsxCreateTask()

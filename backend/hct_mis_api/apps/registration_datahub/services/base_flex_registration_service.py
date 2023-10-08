@@ -44,9 +44,19 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         self, imported_by: Optional[Any], rdi_name: str = "rdi_name", is_open: bool = False
     ) -> RegistrationDataImport:
         project = self.registration.project
-        # programme = project.programme TODO programme refactoring
         organization = project.organization
+        program = project.programme
         business_area = BusinessArea.objects.get(slug=organization.slug)
+
+        data_collecting_type = getattr(program, "data_collecting_type", None)
+
+        if not data_collecting_type:
+            raise ValidationError("Program of given project does not have any Data Collecting Type")
+
+        if business_area not in data_collecting_type.limit_to.all():
+            raise ValidationError(
+                f"{business_area.slug.capitalize()} is not limited for DataCollectingType: {data_collecting_type.code}"
+            )
 
         number_of_individuals = 0
         number_of_households = 0
@@ -60,6 +70,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             number_of_households=number_of_households,
             business_area=business_area,
             status=status,
+            program=program
         )
 
         import_data = ImportData.objects.create(

@@ -109,9 +109,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         needs_assessment: Dict,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
         address = household_address.get("address_h_c", "")
         village = household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
+
+        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        data_collecting_type = rdi.program.data_collecting_type
 
         household_data = {
             "flex_registrations_record": record,
@@ -121,8 +126,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "country_origin": Country(code="CZ"),
             "country": Country(code="CZ"),
             "consent_sharing": [],
-            "collect_individual_data": COLLECT_TYPE_PARTIAL,
-            "data_collecting_type_id": DataCollectingType.objects.get(code=COLLECT_TYPE_PARTIAL).id,
+            "collect_individual_data": data_collecting_type.code,
+            "data_collecting_type_id": data_collecting_type.id,
         }
         if needs_assessment:
             household_data["flex_fields"] = needs_assessment

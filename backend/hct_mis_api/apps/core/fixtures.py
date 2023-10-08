@@ -43,3 +43,17 @@ def generate_data_collecting_types() -> None:
 
     for data_dict in data_collecting_types:
         DataCollectingType.objects.update_or_create(**data_dict)
+
+
+class DataCollectingTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = DataCollectingType
+
+    @factory.post_generation
+    def business_areas(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for business_area in extracted:
+                self.limit_to.add(business_area)

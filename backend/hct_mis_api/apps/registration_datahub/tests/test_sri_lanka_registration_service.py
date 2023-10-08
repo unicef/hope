@@ -4,11 +4,12 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -42,7 +43,7 @@ class TestSriLankaRegistrationService(TestCase):
             label=IDENTIFICATION_TYPE_NATIONAL_ID,
         )
 
-        BusinessArea.objects.create(
+        cls.business_area = BusinessArea.objects.create(
             **{
                 "code": "0780",
                 "name": "Sri Lanka",
@@ -53,7 +54,25 @@ class TestSriLankaRegistrationService(TestCase):
                 "has_data_sharing_agreement": True,
             },
         )
-        generate_data_collecting_types()
+        cls.data_collecting_type = DataCollectingTypeFactory.create(
+            label="Size Only",
+            code="size_only",
+            business_areas=[cls.business_area]
+        )
+        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
+        cls.organization = OrganizationFactory(
+            business_area=cls.business_area,
+            slug=cls.business_area.slug
+        )
+        cls.project = ProjectFactory(
+            name="fake__other_project",
+            organization=cls.organization,
+            programme=cls.program
+        )
+        cls.registration = RegistrationFactory(
+            name="fake_other_registration",
+            project=cls.project
+        )
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
@@ -150,9 +169,6 @@ class TestSriLankaRegistrationService(TestCase):
 
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
-        cls.organization = OrganizationFactory.create(slug="sri-lanka")
-        project = ProjectFactory.create(organization=cls.organization)
-        cls.registration = RegistrationFactory.create(project=project, created_at="2022-05-06")
 
     def test_import_data_to_datahub(self) -> None:
         service = SriLankaRegistrationService(self.registration)
@@ -181,7 +197,10 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(imported_household.admin4_title, "SriLanka admin4")
         self.assertEqual(imported_household.admin_area, "LK1163020")
         self.assertEqual(imported_household.admin_area_title, "SriLanka admin4")
-        self.assertEqual(imported_household.data_collecting_type_id, DataCollectingType.objects.get(code="full").id)
+
+        # data collecting type
+        self.assertEqual(imported_household.collect_individual_data, self.data_collecting_type.code)
+        self.assertEqual(imported_household.data_collecting_type_id, self.data_collecting_type.id)
 
         self.assertEqual(
             ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}

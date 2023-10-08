@@ -6,10 +6,11 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
@@ -34,12 +35,13 @@ class TestUkrainianRegistrationService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUp(self) -> None:
+    def setUp(cls) -> None:
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
         )
-        BusinessArea.objects.create(
+
+        cls.business_area = BusinessArea.objects.create(
             **{
                 "code": "0060",
                 "name": "Ukraine",
@@ -50,7 +52,26 @@ class TestUkrainianRegistrationService(TestCase):
                 "has_data_sharing_agreement": True,
             },
         )
-        generate_data_collecting_types()
+        cls.data_collecting_type = DataCollectingTypeFactory.create(
+            label="Size Only",
+            code="size_only",
+            business_areas=[cls.business_area]
+        )
+        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
+
+        cls.organization = OrganizationFactory(
+            business_area=cls.business_area,
+            slug=cls.business_area.slug
+        )
+        cls.project = ProjectFactory(
+            name="fake__other_project_ukraine",
+            organization=cls.organization,
+            programme=cls.program
+        )
+        cls.registration = RegistrationFactory(
+            name="fake_other_registration_ukraine",
+            project=cls.project
+        )
 
         household = [
             {
@@ -169,12 +190,9 @@ class TestUkrainianRegistrationService(TestCase):
                 files=json.dumps(files).encode(),
             ),
         ]
-        self.records = Record.objects.bulk_create(records)
-        self.bad_records = Record.objects.bulk_create(bad_records)
-        self.user = UserFactory.create()
-        self.organization = OrganizationFactory.create(slug="ukraine")
-        project = ProjectFactory.create(organization=self.organization)
-        self.registration = RegistrationFactory.create(project=project)
+        cls.records = Record.objects.bulk_create(records)
+        cls.bad_records = Record.objects.bulk_create(bad_records)
+        cls.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -191,12 +209,16 @@ class TestUkrainianRegistrationService(TestCase):
             1,
         )
 
-        data_collecting_type_id = DataCollectingType.objects.get(code="full").id
+        # data collecting type
+        self.assertEqual(ImportedHousehold.objects.all()[0].data_collecting_type_id, self.data_collecting_type.id)
+        self.assertEqual(ImportedHousehold.objects.all()[1].data_collecting_type_id, self.data_collecting_type.id)
+        self.assertEqual(ImportedHousehold.objects.all()[2].data_collecting_type_id, self.data_collecting_type.id)
+        self.assertEqual(ImportedHousehold.objects.all()[3].data_collecting_type_id, self.data_collecting_type.id)
 
-        self.assertEqual(ImportedHousehold.objects.all()[0].data_collecting_type_id, data_collecting_type_id)
-        self.assertEqual(ImportedHousehold.objects.all()[1].data_collecting_type_id, data_collecting_type_id)
-        self.assertEqual(ImportedHousehold.objects.all()[2].data_collecting_type_id, data_collecting_type_id)
-        self.assertEqual(ImportedHousehold.objects.all()[3].data_collecting_type_id, data_collecting_type_id)
+        self.assertEqual(ImportedHousehold.objects.all()[0].collect_individual_data, self.data_collecting_type.code)
+        self.assertEqual(ImportedHousehold.objects.all()[1].collect_individual_data, self.data_collecting_type.code)
+        self.assertEqual(ImportedHousehold.objects.all()[2].collect_individual_data, self.data_collecting_type.code)
+        self.assertEqual(ImportedHousehold.objects.all()[3].collect_individual_data, self.data_collecting_type.code)
 
     def test_import_data_to_datahub_retry(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
