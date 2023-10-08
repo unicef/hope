@@ -19,3 +19,4 @@ from hct_mis_api.api.endpoints.rdi import (  # noqa: F401
     PushToRDIView,
 )
 from hct_mis_api.api.endpoints.upload import UploadRDIView  # noqa: F401
+from hct_mis_api.api.endpoints.data_collecting_type import DataCollectingTypeViewSet

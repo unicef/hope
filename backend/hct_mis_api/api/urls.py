@@ -23,6 +23,7 @@ schema_view = get_schema_view(
 )
 
 router = APIRouter()
+router.register("data-collecting-types", endpoints.DataCollectingTypeViewSet, basename="data-collecting-types")
 
 urlpatterns = [
     path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
@@ -49,4 +50,5 @@ urlpatterns = [
     path("lookups/datacollectingpolicy/", endpoints.DataCollectingPolicy().as_view(), name="datacollectingpolicy-list"),
     path("lookups/role/", endpoints.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.Sex().as_view(), name="sex-list"),
+    *router.urls
 ]
