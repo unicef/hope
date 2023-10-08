@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import { MenuItem, Select } from '@material-ui/core';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
-  AllUsersForFiltersQuery,
-  useAllUsersForFiltersQuery,
-  useBulkUpdateGrievanceAssigneeMutation,
+  useBulkUpdateGrievanceUrgencyMutation,
+  useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { AssignedToDropdown } from '../AssignedToDropdown';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
+import PriorityHighIcon from '@material-ui/icons/PriorityHigh';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -20,43 +19,30 @@ export const StyledLink = styled.div`
   align-content: center;
 `;
 
-interface BulkAssignModalProps {
+interface BulkSetUrgencyModalProps {
   selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   businessArea: string;
   setSelected;
 }
 
-export const BulkAssignModal = ({
+export const BulkSetUrgencyModal = ({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAssignModalProps): React.ReactElement => {
+}: BulkSetUrgencyModalProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
-  const [inputValue, setInputValue] = useState('');
-  const { data: usersData } = useAllUsersForFiltersQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: inputValue,
-    },
-  });
-  const optionsData = usersData?.allUsers?.edges || [];
-  const onFilterChange = (data): void => {
-    if (data) {
-      setValue(data);
-    }
-  };
+  const [value, setValue] = React.useState<number>(0);
+  const [mutate] = useBulkUpdateGrievanceUrgencyMutation();
+  const { data: choices } = useGrievancesChoiceDataQuery();
+  const urgencyChoices = choices.grievanceTicketUrgencyChoices;
   const onSave = async (
     tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
   ): Promise<void> => {
     try {
       await mutate({
         variables: {
-          assignedTo: value.node.id,
+          urgency: value,
           businessAreaSlug: businessArea,
           grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
         },
@@ -74,18 +60,22 @@ export const BulkAssignModal = ({
     <>
       <BulkBaseModal
         selectedTickets={selectedTickets}
-        title={t('Assign')}
-        buttonTitle={t('Assign')}
+        title={t('Set Urgency')}
+        buttonTitle={t('Set Urgency')}
         onSave={onSave}
-        icon={<AssignmentIndIcon />}
+        icon={<PriorityHighIcon />}
       >
-        <AssignedToDropdown
-          optionsData={optionsData}
-          onFilterChange={onFilterChange}
-          setInputValue={setInputValue}
-          label={t('Assignee')}
-          fullWidth
-        />
+        <Select
+          value={value}
+          onChange={(e) => setValue(e.target.value as number)}
+          style={{ width: '100%' }}
+          variant='outlined'
+          margin='dense'
+        >
+          {urgencyChoices.map((choice) => (
+            <MenuItem value={choice.value}>{choice.name}</MenuItem>
+          ))}
+        </Select>
       </BulkBaseModal>
     </>
   );

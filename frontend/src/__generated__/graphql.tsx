@@ -3947,14 +3947,14 @@ export type MutationsBulkUpdateGrievanceAssigneeArgs = {
 export type MutationsBulkUpdateGrievancePriorityArgs = {
   businessAreaSlug: Scalars['String'],
   grievanceTicketIds?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  priority?: Maybe<Scalars['String']>
+  priority: Scalars['Int']
 };
 
 
 export type MutationsBulkUpdateGrievanceUrgencyArgs = {
   businessAreaSlug: Scalars['String'],
   grievanceTicketIds?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  urgency?: Maybe<Scalars['String']>
+  urgency: Scalars['Int']
 };
 
 
@@ -9889,7 +9889,7 @@ export type BulkUpdateGrievanceAssigneeMutation = (
 
 export type BulkUpdateGrievancePriorityMutationVariables = {
   grievanceTicketIds?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  priority?: Maybe<Scalars['String']>,
+  priority: Scalars['Int'],
   businessAreaSlug: Scalars['String']
 };
 
@@ -9907,7 +9907,7 @@ export type BulkUpdateGrievancePriorityMutation = (
 
 export type BulkUpdateGrievanceUrgencyMutationVariables = {
   grievanceTicketIds?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  urgency?: Maybe<Scalars['String']>,
+  urgency: Scalars['Int'],
   businessAreaSlug: Scalars['String']
 };
 
@@ -16333,7 +16333,7 @@ export type BulkUpdateGrievanceAssigneeMutationHookResult = ReturnType<typeof us
 export type BulkUpdateGrievanceAssigneeMutationResult = ApolloReactCommon.MutationResult<BulkUpdateGrievanceAssigneeMutation>;
 export type BulkUpdateGrievanceAssigneeMutationOptions = ApolloReactCommon.BaseMutationOptions<BulkUpdateGrievanceAssigneeMutation, BulkUpdateGrievanceAssigneeMutationVariables>;
 export const BulkUpdateGrievancePriorityDocument = gql`
-    mutation BulkUpdateGrievancePriority($grievanceTicketIds: [ID], $priority: String, $businessAreaSlug: String!) {
+    mutation BulkUpdateGrievancePriority($grievanceTicketIds: [ID], $priority: Int!, $businessAreaSlug: String!) {
   bulkUpdateGrievancePriority(grievanceTicketIds: $grievanceTicketIds, priority: $priority, businessAreaSlug: $businessAreaSlug) {
     grievanceTickets {
       id
@@ -16387,7 +16387,7 @@ export type BulkUpdateGrievancePriorityMutationHookResult = ReturnType<typeof us
 export type BulkUpdateGrievancePriorityMutationResult = ApolloReactCommon.MutationResult<BulkUpdateGrievancePriorityMutation>;
 export type BulkUpdateGrievancePriorityMutationOptions = ApolloReactCommon.BaseMutationOptions<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>;
 export const BulkUpdateGrievanceUrgencyDocument = gql`
-    mutation BulkUpdateGrievanceUrgency($grievanceTicketIds: [ID], $urgency: String, $businessAreaSlug: String!) {
+    mutation BulkUpdateGrievanceUrgency($grievanceTicketIds: [ID], $urgency: Int!, $businessAreaSlug: String!) {
   bulkUpdateGrievanceUrgency(grievanceTicketIds: $grievanceTicketIds, urgency: $urgency, businessAreaSlug: $businessAreaSlug) {
     grievanceTickets {
       id
@@ -30559,8 +30559,8 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   bulkUpdateGrievanceAssignee?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsAssigneesMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceAssigneeArgs, 'businessAreaSlug'>>,
-  bulkUpdateGrievancePriority?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsPriorityMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievancePriorityArgs, 'businessAreaSlug'>>,
-  bulkUpdateGrievanceUrgency?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsUrgencyMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceUrgencyArgs, 'businessAreaSlug'>>,
+  bulkUpdateGrievancePriority?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsPriorityMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievancePriorityArgs, 'businessAreaSlug' | 'priority'>>,
+  bulkUpdateGrievanceUrgency?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsUrgencyMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceUrgencyArgs, 'businessAreaSlug' | 'urgency'>>,
   bulkGrievanceAddNote?: Resolver<Maybe<ResolversTypes['BulkGrievanceAddNoteMutation']>, ParentType, ContextType, RequireFields<MutationsBulkGrievanceAddNoteArgs, 'businessAreaSlug'>>,
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>,
   editPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditPaymentVerificationPlanArgs, 'input'>>,

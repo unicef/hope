@@ -670,7 +670,7 @@ class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_ids = graphene.List(graphene.ID)
-        urgency = graphene.String()
+        urgency = graphene.Int(required=True)
         business_area_slug = graphene.String(required=True)
 
     @classmethod
@@ -696,7 +696,7 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_ids = graphene.List(graphene.ID)
-        priority = graphene.String()
+        priority = graphene.Int(required=True)
         business_area_slug = graphene.String(required=True)
 
     @classmethod
