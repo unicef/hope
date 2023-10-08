@@ -12,17 +12,17 @@ import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
+  GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
 import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import {
+  AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
+  useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
   useMeQuery,
-  AllGrievanceTicketQuery,
-  useAllGrievanceTicketQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
@@ -31,6 +31,9 @@ import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import Paper from '@material-ui/core/Paper';
 import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
+import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
+import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import {BulkAddNoteModal} from "./bulk/BulkAddNoteModal";
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -201,19 +204,30 @@ export const GrievancesTable = ({
               {t('Upload Tickets')}
             </Button> */}
             </Box>
-
           </Box>
         </Box>
         <TableWrapper>
           <Paper>
             <EnhancedTableToolbar title={t('Grievance Tickets List')} />
-            <Box display="flex" flexDirection="row" marginX={6} gridGap={16} >
+            <Box display='flex' flexDirection='row' marginX={6} gridGap={16}>
               <BulkAssignModal
-                optionsData={optionsData}
                 selectedTickets={selectedTickets}
                 businessArea={businessArea}
-                initialVariables={initialVariables}
-                setInputValue={setInputValue}
+                setSelected={setSelectedTickets}
+              />
+              <BulkSetPriorityModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
+                setSelected={setSelectedTickets}
+              />
+              <BulkSetUrgencyModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
+                setSelected={setSelectedTickets}
+              />
+              <BulkAddNoteModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
                 setSelected={setSelectedTickets}
               />
               {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&

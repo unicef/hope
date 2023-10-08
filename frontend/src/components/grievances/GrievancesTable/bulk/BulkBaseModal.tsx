@@ -37,13 +37,14 @@ const Bold = styled.span`
 
 interface BulkBaseModalProps {
   selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
-  icon?: React.ReactElement;
-  buttonTitle?: string;
+  icon: React.ReactElement;
+  buttonTitle: string;
   title: string;
   children?: React.ReactNode;
   onSave: (
     tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ) => void;
+  ) => Promise<void>;
+  disabledSave?: boolean;
 }
 
 export const BulkBaseModal = ({
@@ -53,6 +54,7 @@ export const BulkBaseModal = ({
   title,
   children,
   onSave,
+  disabledSave,
 }: BulkBaseModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
@@ -69,6 +71,14 @@ export const BulkBaseModal = ({
         {buttonTitle}
       </Button>
     );
+  };
+  const onAccept = async (): Promise<void> => {
+    try {
+      await onSave(selectedTickets);
+      setDialogOpen(false);
+    } catch (e) {
+      //handled by inner function
+    }
   };
 
   return (
@@ -110,10 +120,8 @@ export const BulkBaseModal = ({
             <Button
               variant='contained'
               color='primary'
-              onClick={(e) => {
-                onSave(selectedTickets);
-                setDialogOpen(false);
-              }}
+              onClick={onAccept}
+              disabled={disabledSave}
             >
               {t('SAVE')}
             </Button>

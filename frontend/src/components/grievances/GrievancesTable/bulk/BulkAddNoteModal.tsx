@@ -1,15 +1,34 @@
+import {
+  Box,
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TextareaAutosize,
+  TextField,
+  Typography,
+} from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { Dialog } from '../../../../containers/dialogs/Dialog';
+import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
-  AllUsersForFiltersQuery,
-  useAllUsersForFiltersQuery,
+  useBulkUpdateGrievanceAddNoteMutation,
   useBulkUpdateGrievanceAssigneeMutation,
+  useBulkUpdateGrievancePriorityMutation,
+  useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
+import CommentIcon from '@material-ui/icons/Comment';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -20,43 +39,28 @@ export const StyledLink = styled.div`
   align-content: center;
 `;
 
-interface BulkAssignModalProps {
+interface BulkAddNoteModalProps {
   selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   businessArea: string;
   setSelected;
 }
 
-export const BulkAssignModal = ({
+export const BulkAddNoteModal = ({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAssignModalProps): React.ReactElement => {
+}: BulkAddNoteModalProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
-  const [inputValue, setInputValue] = useState('');
-  const { data: usersData } = useAllUsersForFiltersQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: inputValue,
-    },
-  });
-  const optionsData = usersData?.allUsers?.edges || [];
-  const onFilterChange = (data): void => {
-    if (data) {
-      setValue(data);
-    }
-  };
+  const [value, setValue] = React.useState<string>('');
+  const [mutate] = useBulkUpdateGrievanceAddNoteMutation();
   const onSave = async (
     tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
   ): Promise<void> => {
     try {
       await mutate({
         variables: {
-          assignedTo: value.node.id,
+          note: value,
           businessAreaSlug: businessArea,
           grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
         },
@@ -74,17 +78,18 @@ export const BulkAssignModal = ({
     <>
       <BulkBaseModal
         selectedTickets={selectedTickets}
-        title={t('Assign')}
-        buttonTitle={t('Assign')}
+        title={t('Add Note')}
+        buttonTitle={t('add note')}
         onSave={onSave}
-        icon={<AssignmentIndIcon />}
+        icon={<CommentIcon />}
+        disabledSave={!value}
       >
-        <AssignedToDropdown
-          optionsData={optionsData}
-          onFilterChange={onFilterChange}
-          setInputValue={setInputValue}
-          label={t('Assignee')}
+        <TextField
+          variant='outlined'
           fullWidth
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          margin='dense'
         />
       </BulkBaseModal>
     </>

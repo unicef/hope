@@ -4,6 +4,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   Typography,
@@ -19,9 +21,12 @@ import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
+  useBulkUpdateGrievancePriorityMutation,
+  useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
+import AlarmAddIcon from '@material-ui/icons/AlarmAdd';
+import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -30,148 +35,65 @@ export const StyledLink = styled.div`
   display: flex;
   align-content: center;
 `;
-const StyledTable = styled(Table)`
-  min-width: 400px;
-  max-width: 800px;
-`;
-const StyledDialog = styled(Dialog)`
-  max-height: 800px;
-`;
-
-const Bold = styled.span`
-  font-weight: bold;
-`;
 
 interface BulkSetPriorityModalProps {
   selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   businessArea: string;
-  optionsData;
-  initialVariables;
-  setInputValue;
   setSelected;
 }
 
 export const BulkSetPriorityModal = ({
   selectedTickets,
   businessArea,
-  optionsData,
-  initialVariables,
-  setInputValue,
   setSelected,
 }: BulkSetPriorityModalProps): React.ReactElement => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [assignee, setAssignee] = useState(null);
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
-
-  const renderButton = (): React.ReactElement => {
-    return (
-      <Button
-        variant='outlined'
-        color='primary'
-        startIcon={<AssignmentIndIcon />}
-        disabled={!selectedTickets.length}
-        onClick={() => setDialogOpen(true)}
-      >
-        {t('ASSIGN')}
-      </Button>
-    );
-  };
-
-  const onSave = async (): Promise<void> => {
-    if (assignee) {
+  const [value, setValue] = React.useState<number>(0);
+  const [mutate] = useBulkUpdateGrievancePriorityMutation();
+  const { data: choices } = useGrievancesChoiceDataQuery();
+  const priorityChoices = choices.grievanceTicketPriorityChoices;
+  const onSave = async (
+    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
+  ): Promise<void> => {
       try {
         await mutate({
           variables: {
-            assignedTo: assignee.node.id,
+            priority: value,
             businessAreaSlug: businessArea,
             grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
           },
-          refetchQueries: () => [
-            {
-              query: AllGrievanceTicketDocument,
-              variables: { ...initialVariables },
-            },
-          ],
+          refetchQueries: ['AllGrievanceTicket'],
           awaitRefetchQueries: true,
         });
+        setSelected([]);
       } catch (e) {
         e.graphQLErrors.map((x) => showMessage(x.message));
-      } finally {
-        setSelected([]);
+        throw e;
       }
-    }
-  };
-
-  const onFilterChange = (data): void => {
-    if (data) {
-      setAssignee(data);
-    }
   };
 
   return (
     <>
-      {renderButton()}
-      <StyledDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+      <BulkBaseModal
+        selectedTickets={selectedTickets}
+        title={t('Set priority')}
+        buttonTitle={t('Set priority')}
+        onSave={onSave}
+        icon={<AlarmAddIcon />}
       >
-        <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Assign Ticket')}
-          </DialogTitle>
-        </DialogTitleWrapper>
-        <DialogContent>
-          <Box mt={2} mb={6}>
-            <StyledTable>
-              <Typography>
-                {t('Tickets ID')}:{' '}
-                <Bold>
-                  {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
-                </Bold>
-              </Typography>
-            </StyledTable>
-          </Box>
-          <StyledTable>
-            <TableBody>
-              <AssignedToDropdown
-                optionsData={optionsData}
-                onFilterChange={onFilterChange}
-                setInputValue={setInputValue}
-                label={t('Assignee')}
-                fullWidth
-              />
-            </TableBody>
-          </StyledTable>
-        </DialogContent>
-        <DialogFooter>
-          <DialogActions>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                setDialogOpen(false);
-              }}
-            >
-              {t('CANCEL')}
-            </Button>
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={(e) => {
-                e.stopPropagation();
-                onSave();
-                setDialogOpen(false);
-              }}
-            >
-              {t('SAVE')}
-            </Button>
-          </DialogActions>
-        </DialogFooter>
-      </StyledDialog>
+        <Select
+          value={value}
+          onChange={(e) => setValue(e.target.value as number)}
+          style={{ width: '100%' }}
+          variant='outlined'
+          margin='dense'
+        >
+          {priorityChoices.map((choice) => (
+            <MenuItem value={choice.value}>{choice.name}</MenuItem>
+          ))}
+        </Select>
+      </BulkBaseModal>
     </>
   );
 };
