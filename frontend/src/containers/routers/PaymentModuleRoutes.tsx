@@ -12,7 +12,7 @@ import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetail
 import { PaymentPlansPage } from '../pages/paymentmodule/PaymentPlansPage';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
 import { SetUpFspPageFollowUp } from '../pages/paymentmodule/SetUpFspPageFollowUp';
-import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
+import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/PaymentInstractions/SetUpPaymentInstructionsPage';
 import { ProgramCycleDetailsPagePaymentModule } from '../pages/programcycles/ProgramCycleDetailsPagePaymentModule';
 import { ProgramCyclesPagePaymentModule } from '../pages/programcycles/ProgramCyclesPagePaymentModule';
 import { CreatePaymentPlanPageProgramCycle } from '../pages/programcycles/CreatePaymentPlanPageProgramCycle';
@@ -20,6 +20,7 @@ import { EditPaymentPlanPageProgramCycle } from '../pages/programcycles/EditPaym
 import { PaymentPlanDetailsPageProgramCycle } from '../pages/programcycles/PaymentPlanDetailsPageProgramCycle';
 import { FollowUpPaymentPlanDetailsPageProgramCycle } from '../pages/programcycles/FollowUpPaymentPlanDetailsPageProgramCycle';
 import { EditFollowUpPaymentPlanPageProgramCycle } from '../pages/programcycles/EditFollowUpPaymentPlanPageProgramCycle';
+import { ManagePaymentInstructionsPage } from '../pages/paymentmodule/PaymentInstractions/ManagePaymentInstructionsPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -56,6 +57,10 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payment-plans/:id/setup-payment-instructions/create`,
       component: <SetUpPaymentInstructionsPage />,
+    },
+    {
+      path: `${path}/payment-module/payment-plans/:id/setup-payment-instructions/manage`,
+      component: <ManagePaymentInstructionsPage />,
     },
     {
       path: `${path}/payment-module/payment-plans/:id/edit`,

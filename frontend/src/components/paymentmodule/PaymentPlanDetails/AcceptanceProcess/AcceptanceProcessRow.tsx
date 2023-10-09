@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { renderUserName } from '../../../../utils/utils';
 import { DividerLine } from '../../../core/DividerLine';
+import { GreyInfoCard } from '../../../../shared/GreyInfoCard';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
-import { GreyInfoCard } from './GreyInfoCard';
 
 const StyledBox = styled(Box)`
   width: 100%;
