@@ -6,7 +6,7 @@ import ErrorPage from "../../page-objects/404.po";
 let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
-let error404Page = ErrorPage();
+let error404Page = new ErrorPage();
 
 const systemGenerated = "GRV-0000004";
 const userType7 = "GRV-0000007";
