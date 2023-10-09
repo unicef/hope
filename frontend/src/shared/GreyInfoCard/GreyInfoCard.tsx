@@ -1,9 +1,9 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { MessageDialog } from './MessageDialog';
+import { PaymentPlanQuery } from '../../__generated__/graphql';
+import { UniversalMoment } from '../../components/core/UniversalMoment';
+import { MessageDialog } from '../MessageDialog';
 
 const GreyText = styled.div`
   color: #9e9e9e;
@@ -27,7 +27,7 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanQuery["paymentPlan"]["approvalProcess"]["edges"][number]["node"]["actions"]["approval"];
+  approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
 }
 
 export const GreyInfoCard = ({

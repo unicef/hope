@@ -1,6 +1,6 @@
 import React from 'react';
-import { fakeApolloMe } from '../../../../../fixtures/core/fakeApolloMe';
-import { render } from '../../../../testUtils/testUtils';
+import { render } from '../../testUtils/testUtils';
+import { fakeApolloMe } from '../../../fixtures/core/fakeApolloMe';
 import { MessageDialog } from './MessageDialog';
 
 describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/MessageDialog', () => {

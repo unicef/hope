@@ -4,13 +4,13 @@ import React from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { PaymentInstructionDraggableList } from '../../../components/paymentmodule/SetUpPaymentInstructions/PaymentInstructionDraggableList';
-import { SetUpPaymentInstructionsHeader } from '../../../components/paymentmodule/SetUpPaymentInstructions/SetUpPaymentInstructionsHeader';
-import { reorder } from '../../../components/paymentmodule/SetUpPaymentInstructions/helpers';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { PaymentInstructionDraggableList } from '../../../../components/paymentmodule/SetUpPaymentInstructions/PaymentInstructionDraggableList';
+import { SetUpPaymentInstructionsHeader } from '../../../../components/paymentmodule/SetUpPaymentInstructions/SetUpPaymentInstructionsHeader';
+import { reorder } from '../../../../components/paymentmodule/SetUpPaymentInstructions/helpers';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../../hooks/usePermissions';
 
 export const SetUpPaymentInstructionsPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();

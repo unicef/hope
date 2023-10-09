@@ -1,6 +1,6 @@
 import React from 'react';
-import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
-import { render } from '../../../../testUtils/testUtils';
+import { render } from '../../testUtils/testUtils';
+import { fakeApolloPaymentPlan } from '../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { GreyInfoCard } from './GreyInfoCard';
 
 describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoCard', () => {
