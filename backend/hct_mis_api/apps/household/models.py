@@ -862,6 +862,7 @@ class Individual(
             "kobo_asset_id",
             "row_id",
             "registration_id",
+            "payment_delivery_phone_no",
         ]
     )
     individual_collection = models.ForeignKey(
@@ -891,7 +892,6 @@ class Individual(
     phone_no_alternative_valid = models.BooleanField(null=True, db_index=True)
     email = models.CharField(max_length=255, blank=True)
     payment_delivery_phone_no = PhoneNumberField(blank=True, null=True)
-    # TODO: update the RDI template ^
 
     relationship = models.CharField(
         max_length=255,
