@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
@@ -9,7 +10,6 @@ import {
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../../__generated__/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -51,7 +51,6 @@ export const BulkAssignModal = ({
     }
   };
   const onSave = async (
-    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
   ): Promise<void> => {
     try {
       await mutate({

@@ -2,13 +2,13 @@ import { MenuItem, Select } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import PriorityHighIcon from '@material-ui/icons/PriorityHigh';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceUrgencyMutation,
   useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import PriorityHighIcon from '@material-ui/icons/PriorityHigh';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -36,9 +36,7 @@ export const BulkSetUrgencyModal = ({
   const [mutate] = useBulkUpdateGrievanceUrgencyMutation();
   const { data: choices } = useGrievancesChoiceDataQuery();
   const urgencyChoices = choices.grievanceTicketUrgencyChoices;
-  const onSave = async (
-    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     try {
       await mutate({
         variables: {
@@ -71,6 +69,7 @@ export const BulkSetUrgencyModal = ({
           style={{ width: '100%' }}
           variant='outlined'
           margin='dense'
+          label={t('Urgency')}
         >
           {urgencyChoices.map((choice) => (
             <MenuItem value={choice.value}>{choice.name}</MenuItem>
