@@ -11,7 +11,18 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataCollectingType
-        fields = "__all__"
+        fields = (
+            "id",
+            "label",
+            "code",
+            "description",
+            "active",
+            "individual_filters_available",
+            "household_filters_available",
+            "recalculate_composition",
+            "compatible_types",
+            "limit_to"
+        )
 
     def get_limit_to(self, obj: DataCollectingType) -> List[str]:
         return list(obj.limit_to.all().values_list("slug", flat=True))

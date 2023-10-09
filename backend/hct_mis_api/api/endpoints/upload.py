@@ -14,6 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
+from hct_mis_api.api.endpoints.lookups import COLLECT_TYPE_NONE
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
@@ -39,7 +40,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 if TYPE_CHECKING:
     from rest_framework.request import Request
 
-    from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 
 
 logger = logging.getLogger(__name__)
@@ -109,8 +110,8 @@ class CollectDataMixin(serializers.Serializer):
             return COLLECT_TYPE_FULL
         if v in [COLLECT_TYPE_PARTIAL, "PARTIAL", "P"]:
             return COLLECT_TYPE_PARTIAL
-        # if v in [COLLECT_TYPE_NONE, "NO", "N", "NONE"]:
-        #     return COLLECT_TYPE_NONE
+        if v in [COLLECT_TYPE_NONE, "NO", "N", "NONE"]:
+            return COLLECT_TYPE_NONE
         raise ValidationError(
             "Invalid value %s. " "Check values at %s" % (value, reverse("api:datacollectingpolicy-list"))
         )
@@ -185,16 +186,18 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
         def get_related() -> int:
             return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 
-        ctype = attrs.get("collect_individual_data", "")
-        # if ctype == COLLECT_TYPE_NONE:
-        #     if not attrs.get("size", 0) > 0:
-        #         raise ValidationError({"size": ["This field is required 2"]})
-        if ctype == COLLECT_TYPE_PARTIAL:
-            if not attrs.get("size", 0) > get_related():
-                raise ValidationError({"size": ["Households size must be greater than provided details"]})
-        else:
-            attrs["size"] = get_related()
-        return attrs
+        collect_individual_data = attrs.get("collect_individual_data")
+        if not collect_individual_data:
+            raise ValidationError("Attribute collect_individual_data must be delivered in xlsx file.")
+        try:
+            data_collecting_type = DataCollectingType.objects.get(code=collect_individual_data)
+            attrs["data_collecting_type_id"] = data_collecting_type.id
+            attrs["collect_individual_data"] = data_collecting_type.code
+        except DataCollectingType.DoesNotExist:
+            raise ValidationError(f"Type of {collect_individual_data} for collect_individual_data does not exist.")
+
+        attrs["size"] = get_related()
+        return super().validate(attrs)
 
 
 class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
