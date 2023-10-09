@@ -1,10 +1,12 @@
 import Grievance from "../../page-objects/pages/grievance/grievance_tickets.po";
 import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
+import ErrorPage from "../../page-objects/404.po";
 
 let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
+let error404Page = ErrorPage();
 
 const systemGenerated = "GRV-0000004";
 const userType7 = "GRV-0000007";
@@ -1290,7 +1292,23 @@ describe("Grievance", () => {
       it.skip("Mark duplicate from details page", () => {});
     });
   });
-  describe.skip("E2E tests Grievance", () => {});
+  describe("E2E tests Grievance", () => {
+    it("404 Error page", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Choose ticket: GRV-0000001",
+        "Delete part of URL",
+        "Check if 404 occurred",
+      ]);
+      grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
+      grievancePage.getGrievanceTitle().contains(grievancePage.textTitle);
+      cy.url().then((url) => {
+        let newUrl = url.slice(0, -10);
+        cy.visit(newUrl);
+        error404Page.getPageNoFound();
+      });
+    });
+  });
 
   describe("Regression tests Grievance", () => {
     it('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
