@@ -4,8 +4,8 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
-import { ManagePaymentInstructionsHeader } from '../../../../components/paymentmodule/ManagePaymentInstractions/ManagePaymentInstructionsHeader';
-import { PaymentInstructionItem } from '../../../../components/paymentmodule/ManagePaymentInstractions/PaymentInstructionItem';
+import { ManagePaymentInstructionsHeader } from '../../../../components/paymentmodule/ManagePaymentInstructions/ManagePaymentInstructionsHeader';
+import { PaymentInstructionItem } from '../../../../components/paymentmodule/ManagePaymentInstructions/PaymentInstructionItem';
 
 const initialItems = [
   {

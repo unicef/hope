@@ -1,9 +1,9 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { ApprovalNode } from '../../../../__generated__/graphql';
-import { MessageDialog } from './MessageDialog';
+import { PaymentPlanQuery } from '../../__generated__/graphql';
+import { UniversalMoment } from '../../components/core/UniversalMoment';
+import { MessageDialog } from '../MessageDialog';
 
 const GreyText = styled.div`
   color: #9e9e9e;
@@ -27,7 +27,7 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: ApprovalNode[];
+  approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
 }
 
 export const GreyInfoCard = ({
@@ -35,11 +35,10 @@ export const GreyInfoCard = ({
   topDate,
   approvals,
 }: GreyInfoCardProps): React.ReactElement => {
-  const mappedApprovals = approvals
-    .filter((action) => action.info)
-    .map((action) => {
-      const { info, createdAt, comment, createdBy } = action;
-      return (
+  const mappedApprovals = approvals.map((action) => {
+    const { info, createdAt, comment, createdBy } = action;
+    return (
+      info && (
         <Box alignItems='center' display='flex' key={createdAt}>
           {info}
           <Box ml={1}>
@@ -59,8 +58,9 @@ export const GreyInfoCard = ({
             )}
           </Box>
         </Box>
-      );
-    });
+      )
+    );
+  });
 
   return (
     <Box display='flex' flexDirection='column'>

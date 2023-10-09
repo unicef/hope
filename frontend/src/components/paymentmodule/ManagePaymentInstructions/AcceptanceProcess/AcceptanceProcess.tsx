@@ -47,6 +47,7 @@ export const AcceptanceProcess = ({
             color='primary'
             onClick={() => setShowAll(!showAll)}
             endIcon={<ExpandLessIcon />}
+            data-cy='btn-hide'
           >
             {t('HIDE')}
           </Button>
@@ -61,6 +62,7 @@ export const AcceptanceProcess = ({
           color='primary'
           onClick={() => setShowAll(!showAll)}
           endIcon={<ExpandMoreIcon />}
+          data-cy='btn-show-previous'
         >
           {t('SHOW PREVIOUS')}
         </Button>
@@ -76,7 +78,9 @@ export const AcceptanceProcess = ({
     <Box m={5}>
       <Box display='flex' justifyContent='space-between' mt={4}>
         <Title>
-          <Typography variant='h6'>{t('Acceptance Process')}</Typography>
+          <Typography variant='h6' data-cy='title-acceptance-process'>
+            {t('Acceptance Process')}
+          </Typography>
         </Title>
       </Box>
       {renderRows()}

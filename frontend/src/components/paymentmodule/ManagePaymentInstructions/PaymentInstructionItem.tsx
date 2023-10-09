@@ -83,7 +83,9 @@ export const PaymentInstructionItem = ({
 
   const rejectButton = (
     <Grid item>
-      <ErrorButton onClick={actions.handleReject}>{t('Reject')}</ErrorButton>
+      <ErrorButton onClick={actions.handleReject} data-cy='btn-reject'>
+        {t('Reject')}
+      </ErrorButton>
     </Grid>
   );
 
@@ -93,6 +95,7 @@ export const PaymentInstructionItem = ({
         onClick={actions.handleAuthorize}
         variant='contained'
         color='primary'
+        data-cy='btn-authorize'
       >
         {t('Authorize')}
       </Button>
@@ -105,6 +108,7 @@ export const PaymentInstructionItem = ({
         onClick={actions.handleRelease}
         variant='contained'
         color='primary'
+        data-cy='btn-release'
       >
         {t('Release')}
       </Button>

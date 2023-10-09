@@ -3,8 +3,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '../../../../utils/utils';
 import { DividerLine } from '../../../core/DividerLine';
+import { GreyInfoCard } from '../../../../shared/GreyInfoCard';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper';
-import { GreyInfoCard } from './GreyInfoCard';
 
 interface AcceptanceProcessRowProps {
   acceptanceProcess;

@@ -9,13 +9,13 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import MessageIcon from '@material-ui/icons/Message';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DividerLine } from '../../../core/DividerLine';
-import { renderUserName } from '../../../../utils/utils';
-import { UserNode } from '../../../../__generated__/graphql';
+import { UserNode } from '../../__generated__/graphql';
+import { Dialog } from '../../containers/dialogs/Dialog';
+import { DialogContainer } from '../../containers/dialogs/DialogContainer';
+import { renderUserName } from '../../utils/utils';
+import { UniversalMoment } from '../../components/core/UniversalMoment';
+import { DividerLine } from '../../components/core/DividerLine';
+import { DialogActions } from '../../containers/dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
