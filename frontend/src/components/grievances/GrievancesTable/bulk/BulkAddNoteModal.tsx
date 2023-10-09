@@ -1,34 +1,13 @@
-import {
-  Box,
-  Button,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Select,
-  Table,
-  TableBody,
-  TextareaAutosize,
-  TextField,
-  Typography,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+import { TextField } from '@material-ui/core';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import CommentIcon from '@material-ui/icons/Comment';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
-  AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAddNoteMutation,
-  useBulkUpdateGrievanceAssigneeMutation,
-  useBulkUpdateGrievancePriorityMutation,
-  useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { AssignedToDropdown } from '../AssignedToDropdown';
-import CommentIcon from '@material-ui/icons/Comment';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -54,9 +33,7 @@ export const BulkAddNoteModal = ({
   const { showMessage } = useSnackbar();
   const [value, setValue] = React.useState<string>('');
   const [mutate] = useBulkUpdateGrievanceAddNoteMutation();
-  const onSave = async (
-    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     try {
       await mutate({
         variables: {
@@ -86,6 +63,7 @@ export const BulkAddNoteModal = ({
       >
         <TextField
           variant='outlined'
+          label={t('Note')}
           fullWidth
           value={value}
           onChange={(e) => setValue(e.target.value)}

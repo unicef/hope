@@ -26,6 +26,7 @@ interface UniversalTableProps<T, K> {
   numSelected?: number;
   allowSort?: boolean;
   filterOrderBy?: string;
+  onPageChanged?: (page: number) => void;
 }
 
 export function UniversalTable<T, K>({
@@ -45,13 +46,21 @@ export function UniversalTable<T, K>({
   numSelected = 0,
   allowSort = true,
   filterOrderBy,
+  onPageChanged,
 }: UniversalTableProps<T, K>): ReactElement {
-  const [page, setPage] = useState(0);
+  const [page, _setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(defaultOrderBy);
   const [orderDirection, setOrderDirection] = useState<Order>(
     defaultOrderDirection,
   );
+
+  const setPage = (newPage: number): void => {
+    _setPage(newPage);
+    if (onPageChanged) {
+      onPageChanged(newPage);
+    }
+  };
 
   const initVariables = {
     ...initialVariables,
