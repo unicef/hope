@@ -1185,23 +1185,23 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     errors.append(
                         {"header": "collect_individual_data_h_c", "message": "No collect_individual_data delivered"}
                     )
+                else:
+                    data_collecting_type = DataCollectingType.objects.filter(code=collect_individual_data).first()
 
-                data_collecting_type = DataCollectingType.objects.get(code=collect_individual_data)
-
-                if not data_collecting_type:
-                    errors.append(
-                        {
-                            "header": "collect_individual_data_h_c",
-                            "message": f"DataCollectingType of {collect_individual_data} type does not exist",
-                        }
-                    )
-                if business_area not in data_collecting_type.limit_to.all():
-                    errors.append(
-                        {
-                            "header": "collect_individual_data_h_c",
-                            "message": f"Business Area: {business_area.slug} is not in scope of given collect_individual_data",
-                        }
-                    )
+                    if not data_collecting_type:
+                        errors.append(
+                            {
+                                "header": "collect_individual_data_h_c",
+                                "message": f"No DataCollectingType exists",
+                            }
+                        )
+                    elif business_area not in data_collecting_type.limit_to.all():
+                        errors.append(
+                            {
+                                "header": "collect_individual_data_h_c",
+                                "message": f"Business Area: {business_area.slug} is not in scope of given collect_individual_data",
+                            }
+                        )
 
                 household_uuid = str(household.get("_uuid"))
 

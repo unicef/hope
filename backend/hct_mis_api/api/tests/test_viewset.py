@@ -32,21 +32,6 @@ class TestDataCollectingTypeViewSet(TestCase):
         self.assertEqual(
             dict(response.data[0]),
             {
-                "id": self.data_collecting_type_1.id,
-                "label": "Partial",
-                "code": "partial",
-                "description": self.data_collecting_type_1.description,
-                "active": True,
-                "individual_filters_available": False,
-                "household_filters_available": True,
-                "recalculate_composition": False,
-                "compatible_types": [],
-                "limit_to": ["afghanistan"],
-            },
-        )
-        self.assertEqual(
-            dict(response.data[1]),
-            {
                 "id": self.data_collecting_type_2.id,
                 "label": "Full",
                 "code": "full",
@@ -57,6 +42,21 @@ class TestDataCollectingTypeViewSet(TestCase):
                 "recalculate_composition": False,
                 "compatible_types": [],
                 "limit_to": [],
+            },
+        )
+        self.assertEqual(
+            dict(response.data[1]),
+            {
+                "id": self.data_collecting_type_1.id,
+                "label": "Partial",
+                "code": "partial",
+                "description": self.data_collecting_type_1.description,
+                "active": True,
+                "individual_filters_available": False,
+                "household_filters_available": True,
+                "recalculate_composition": False,
+                "compatible_types": [],
+                "limit_to": ["afghanistan"],
             },
         )
         self.assertEqual(

@@ -29,5 +29,5 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
 
 
 class DataCollectingTypeViewSet(mixins.ListModelMixin, GenericViewSet):
-    queryset = DataCollectingType.objects.all()
+    queryset = DataCollectingType.objects.all().order_by("code")
     serializer_class = DataCollectingTypeSerializer

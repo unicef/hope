@@ -4,7 +4,7 @@ from typing import Dict, Tuple
 from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan, DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
@@ -18,6 +18,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     VALID_JSON = [
         {
             "_notes": [],
+            "collect_individual_data_h_c": "full",
             "wash_questions/score_num_items": "8",
             "wash_questions/bed_hhsize": "NaN",
             "monthly_income_questions/total_inc_h_f": "0",
@@ -368,7 +369,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        business_area = create_afghanistan()
+        DataCollectingTypeFactory(label="Full", code="full", business_areas=[business_area])
 
     def test_image_validator(self) -> None:
         # test for valid value
@@ -619,6 +621,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
             # TODO: fix this? (rebase issue?)
             # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
+            {"header": "collect_individual_data_h_c", "message": "No collect_individual_data delivered"},
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]

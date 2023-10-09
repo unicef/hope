@@ -3,8 +3,6 @@ from typing import Dict, List, Union
 
 def humanize_errors(errors: Dict) -> Dict:
     try:
-        print("*****")
-        print(errors)
         households = errors.pop("households", [])
         errs = {}
         if len(households) == 1 and isinstance(households[0], str):
