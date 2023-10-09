@@ -2074,6 +2074,7 @@ type ImportedIndividualNode implements Node {
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String
+  paymentDeliveryPhoneNo: String!
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
