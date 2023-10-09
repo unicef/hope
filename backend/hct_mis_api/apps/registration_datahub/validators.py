@@ -592,19 +592,19 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             invalid_rows.append({
                                 "row_number": row_number,
                                 "header": header.value,
-                                "message": f"Worksheet: Households - DataCollectingType with code {value} does not exists",
+                                "message": f"Sheet: 'Households', DataCollectingType with code {value} does not exists",
                             })
+                        else:
+                            business_area = BusinessArea.objects.get(slug=business_area_slug)
+                            data_collecting_type = DataCollectingType.objects.get(code=value)
 
-                        business_area = BusinessArea.objects.get(slug=business_area_slug)
-                        data_collecting_type = DataCollectingType.objects.get(code=value)
-
-                        # Second, check if business area is allowed for given dataCollectingType
-                        if business_area not in data_collecting_type.limit_to.all():
-                            invalid_rows.append({
-                                "row_number": row_number,
-                                "header": header.value,
-                                "message": f"Worksheet: Households - BusinessArea: {business_area_slug} is not in scope of DataCollectingType: {value}",
-                            })
+                            # Second, check if business area is allowed for given dataCollectingType
+                            if business_area not in data_collecting_type.limit_to.all():
+                                invalid_rows.append({
+                                    "row_number": row_number,
+                                    "header": header.value,
+                                    "message": f"Sheet: 'Households', BusinessArea: {business_area_slug} is not in scope of DataCollectingType: {value}",
+                                })
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]

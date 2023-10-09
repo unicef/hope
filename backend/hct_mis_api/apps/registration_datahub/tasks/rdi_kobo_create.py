@@ -192,7 +192,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         submissions_json = import_data.file.read()
         submissions = json.loads(submissions_json)
         self.reduced_submissions = rename_dict_keys(submissions, get_field_name)
-
         head_of_households_mapping = {}
         households_to_create = []
         individuals_to_create = {}

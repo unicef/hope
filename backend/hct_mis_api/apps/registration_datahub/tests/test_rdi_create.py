@@ -429,6 +429,12 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             RdiKoboCreateTask,
         )
 
+        cls.data_collecting_type = DataCollectingTypeFactory(
+            label="Partial",
+            code="partial",
+            business_areas=[BusinessArea.objects.first()]
+        )
+
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
@@ -523,6 +529,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "flex_fields": {},
         }
         self.assertEqual(household_obj_data, expected_hh)
+        self.assertEqual(households[0].data_collecting_type_id, self.data_collecting_type.id)
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
@@ -540,6 +547,10 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         self.assertEqual(households.count(), 3)  # related to AB#171697
         self.assertEqual(individuals.count(), 7)  # related to AB#171697
+
+        self.assertEqual(households[0].data_collecting_type_id, self.data_collecting_type.id)
+        self.assertEqual(households[1].data_collecting_type_id, self.data_collecting_type.id)
+        self.assertEqual(households[2].data_collecting_type_id, self.data_collecting_type.id)
 
         documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(

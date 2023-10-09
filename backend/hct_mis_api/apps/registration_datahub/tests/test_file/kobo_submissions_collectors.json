@@ -1,6 +1,7 @@
 [
   {
     "_notes": [],
+    "collect_individual_data_h_c": "partial",
     "wash_questions/score_num_items": "8",
     "household_questions/household_location/address_h_c": "Some Street 312",
     "wash_questions/bed_hhsize": "NaN",
@@ -129,6 +130,7 @@
   },
   {
     "_notes": [],
+    "collect_individual_data_h_c": "partial",
     "wash_questions/score_num_items": "8",
     "household_questions/household_location/address_h_c": "Some Street 123",
     "wash_questions/bed_hhsize": "NaN",
@@ -280,6 +282,7 @@
   },
   {
     "_notes": [],
+    "collect_individual_data_h_c": "partial",
     "wash_questions/score_num_items": "8",
     "household_questions/household_location/address_h_c": "Some Street 123",
     "wash_questions/bed_hhsize": "NaN",
