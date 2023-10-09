@@ -3,6 +3,7 @@ import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import Paper from '@material-ui/core/Paper';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
@@ -26,14 +27,13 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
+import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
-import Paper from '@material-ui/core/Paper';
-import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import {BulkAddNoteModal} from "./bulk/BulkAddNoteModal";
+import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -74,7 +74,7 @@ export const GrievancesTable = ({
   };
 
   const [inputValue, setInputValue] = useState('');
-
+  const [page, setPage] = useState<number>(0);
   const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
     variables: {
       businessArea,
@@ -90,9 +90,23 @@ export const GrievancesTable = ({
 
   const optionsData = get(data, 'allUsers.edges', []);
 
-  const [selectedTickets, setSelectedTickets] = useState<
-    AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][]
-  >([]);
+  const [selectedTicketsPerPage, setSelectedTicketsPerPag] = useState<{
+    [key: number]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  }>({ 0: [] });
+
+  const selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][] = [];
+  const currentSelectedTickets = selectedTicketsPerPage[page];
+  for (const pageKey of Object.keys(selectedTicketsPerPage)) {
+    selectedTickets.push(...selectedTicketsPerPage[pageKey]);
+  }
+
+  const setSelectedTickets = (
+    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
+  ):void => {
+    const newSelectedTicketsPerPage = { ...selectedTicketsPerPage };
+    newSelectedTicketsPerPage[page] = tickets;
+    setSelectedTicketsPerPag(newSelectedTicketsPerPage);
+  };
 
   const {
     data: choicesData,
@@ -150,10 +164,11 @@ export const GrievancesTable = ({
   const handleCheckboxClick = (
     ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
   ): void => {
-    const index = selectedTickets.findIndex(
-      (ticketItem) => ticketItem.id === ticket.id,
-    );
-    const newSelectedTickets = [...selectedTickets];
+    const index =
+      currentSelectedTickets?.findIndex(
+        (ticketItem) => ticketItem.id === ticket.id,
+      ) || -1;
+    const newSelectedTickets = [...(currentSelectedTickets || [])];
     if (index === -1) {
       newSelectedTickets.push(ticket);
     } else {
@@ -163,7 +178,7 @@ export const GrievancesTable = ({
   };
 
   const handleSelectAllCheckboxesClick = (event, rows): void => {
-    if (!selectedTickets.length) {
+    if (!currentSelectedTickets?.length) {
       const newSelected = rows
         .filter((row) => row.status !== GRIEVANCE_TICKET_STATES.CLOSED)
         .map((row) => row);
@@ -253,11 +268,12 @@ export const GrievancesTable = ({
               rowsPerPageOptions={[10, 15, 20, 40]}
               query={useAllGrievanceTicketQuery}
               onSelectAllClick={handleSelectAllCheckboxesClick}
-              numSelected={selectedTickets.length}
+              numSelected={currentSelectedTickets?.length || 0}
               queriedObjectName='allGrievanceTicket'
               initialVariables={initialVariables}
               defaultOrderBy='created_at'
               defaultOrderDirection='desc'
+              onPageChanged={setPage}
               renderRow={(row) => (
                 <GrievancesTableRow
                   key={row.id}

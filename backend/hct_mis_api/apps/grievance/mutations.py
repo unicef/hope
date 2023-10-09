@@ -1,15 +1,12 @@
 import logging
 from typing import Any, Dict, List, Optional, Union
 
+import graphene
 from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner, User
@@ -20,12 +17,10 @@ from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
-    clear_cache_for_key,
     decode_id_string,
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
 from hct_mis_api.apps.grievance.inputs import (
     CreateGrievanceTicketInput,
     CreateTicketNoteInput,
@@ -665,6 +660,7 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
         tickets = BulkActionService().bulk_set_priority(decoded_grievance_ticket_ids, priority, business_area_slug)
         return cls(grievance_tickets=tickets)
 
+
 class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
     grievance_tickets = graphene.List(GrievanceTicketNode)
 
@@ -703,13 +699,13 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-            cls,
-            root: Any,
-            info: Any,
-            grievance_ticket_ids: List[str],
-            priority: str,
-            business_area_slug: str,
-            **kwargs: Any,
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_ids: List[str],
+        priority: str,
+        business_area_slug: str,
+        **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
         decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
@@ -729,17 +725,19 @@ class BulkGrievanceAddNoteMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-            cls,
-            root: Any,
-            info: Any,
-            grievance_ticket_ids: List[str],
-            note: str,
-            business_area_slug: str,
-            **kwargs: Any,
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_ids: List[str],
+        note: str,
+        business_area_slug: str,
+        **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
         decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
-        tickets = BulkActionService().bulk_add_note(decoded_grievance_ticket_ids, note, business_area_slug)
+        tickets = BulkActionService().bulk_add_note(
+            info.context.user, decoded_grievance_ticket_ids, note, business_area_slug
+        )
         return cls(grievance_tickets=tickets)
 
 
