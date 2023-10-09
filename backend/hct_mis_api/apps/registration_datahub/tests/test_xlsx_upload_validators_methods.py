@@ -8,7 +8,7 @@ from django.core.management import call_command
 import openpyxl
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan, DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
@@ -24,12 +24,8 @@ class TestXLSXValidatorsMethods(APITestCase):
         call_command("loadflexfieldsattributes")
 
         cls.business_area = create_afghanistan()
-        DataCollectingTypeFactory(
-            label="Partial", code="partial", business_areas=[cls.business_area]
-        )
-        DataCollectingTypeFactory(
-            label="Full", code="full", business_areas=[cls.business_area]
-        )
+        DataCollectingTypeFactory(label="Partial", code="partial", business_areas=[cls.business_area])
+        DataCollectingTypeFactory(label="Full", code="full", business_areas=[cls.business_area])
 
     def test_geolocation_validator(self) -> None:
         # test correct values:

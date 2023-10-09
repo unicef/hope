@@ -18,6 +18,7 @@ from hct_mis_api.api.endpoints.lookups import COLLECT_TYPE_NONE
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
@@ -40,7 +41,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 if TYPE_CHECKING:
     from rest_framework.request import Request
 
-    from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+    from hct_mis_api.apps.core.models import BusinessArea
 
 
 logger = logging.getLogger(__name__)

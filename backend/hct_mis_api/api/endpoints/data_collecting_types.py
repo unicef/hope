@@ -21,7 +21,7 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
             "household_filters_available",
             "recalculate_composition",
             "compatible_types",
-            "limit_to"
+            "limit_to",
         )
 
     def get_limit_to(self, obj: DataCollectingType) -> List[str]:

@@ -1,12 +1,12 @@
 import json
 from typing import Dict
 from unittest import TestCase
-from unittest.mock import Mock
 
 from django.http import JsonResponse
 
 from hct_mis_api.api.endpoints.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_ukraine
 
 MEMBER = {
     "birth_date": "2000-01-01",
@@ -20,7 +20,7 @@ HOUSEHOLD = {
     "country": "AF",
     "residence_status": "IDP",
     "size": 1,
-    "collect_individual_data": "FULL",
+    "collect_individual_data": "no_ind_data",
     "members": [MEMBER],
 }
 
@@ -31,9 +31,11 @@ class ValidatorTest(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.validator = RDINestedSerializer
+        cls.business_area = create_ukraine()
+        DataCollectingTypeFactory(label="No individual data", code="no_ind_data", business_areas=[cls.business_area])
 
     def _run(self, data: Dict) -> Dict:
-        serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))
+        serializer = self.validator(data=data, business_area=self.business_area)
         serializer.is_valid()
         return humanize_errors(json.loads(JsonResponse(serializer.errors).content))
 

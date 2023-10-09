@@ -430,9 +430,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
 
         cls.data_collecting_type = DataCollectingTypeFactory(
-            label="Partial",
-            code="partial",
-            business_areas=[BusinessArea.objects.first()]
+            label="Partial", code="partial", business_areas=[BusinessArea.objects.first()]
         )
 
         cls.RdiKoboCreateTask = RdiKoboCreateTask

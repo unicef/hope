@@ -140,13 +140,13 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_with_documents(self) -> None:
         data = {
             "name": "aaaa",
-            "collect_individual_data": "FULL",
+            "collect_individual_data": COLLECT_TYPE_FULL,
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": "FULL",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,

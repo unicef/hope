@@ -589,22 +589,26 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value == "collect_individual_data_h_c":
                         # First, validate if dataCollectionType for given value exists
                         if not DataCollectingType.objects.filter(code=value).exists():
-                            invalid_rows.append({
-                                "row_number": row_number,
-                                "header": header.value,
-                                "message": f"Sheet: 'Households', DataCollectingType with code {value} does not exists",
-                            })
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": header.value,
+                                    "message": f"Sheet: 'Households', DataCollectingType with code {value} does not exists",
+                                }
+                            )
                         else:
                             business_area = BusinessArea.objects.get(slug=business_area_slug)
                             data_collecting_type = DataCollectingType.objects.get(code=value)
 
                             # Second, check if business area is allowed for given dataCollectingType
                             if business_area not in data_collecting_type.limit_to.all():
-                                invalid_rows.append({
-                                    "row_number": row_number,
-                                    "header": header.value,
-                                    "message": f"Sheet: 'Households', BusinessArea: {business_area_slug} is not in scope of DataCollectingType: {value}",
-                                })
+                                invalid_rows.append(
+                                    {
+                                        "row_number": row_number,
+                                        "header": header.value,
+                                        "message": f"Sheet: 'Households', BusinessArea: {business_area_slug} is not in scope of DataCollectingType: {value}",
+                                    }
+                                )
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]
@@ -1178,23 +1182,26 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 collect_individual_data = household.get("collect_individual_data_h_c")
 
                 if not collect_individual_data:
-                    errors.append({
-                        "header": "collect_individual_data_h_c",
-                        "message": "No collect_individual_data delivered"
-                    })
+                    errors.append(
+                        {"header": "collect_individual_data_h_c", "message": "No collect_individual_data delivered"}
+                    )
 
                 data_collecting_type = DataCollectingType.objects.get(code=collect_individual_data)
 
                 if not data_collecting_type:
-                    errors.append({
-                        "header": "collect_individual_data_h_c",
-                        "message": f"DataCollectingType of {collect_individual_data} type does not exist"
-                    })
+                    errors.append(
+                        {
+                            "header": "collect_individual_data_h_c",
+                            "message": f"DataCollectingType of {collect_individual_data} type does not exist",
+                        }
+                    )
                 if business_area not in data_collecting_type.limit_to.all():
-                    errors.append({
-                        "header": "collect_individual_data_h_c",
-                        "message": f"Business Area: {business_area.slug} is not in scope of given collect_individual_data"
-                    })
+                    errors.append(
+                        {
+                            "header": "collect_individual_data_h_c",
+                            "message": f"Business Area: {business_area.slug} is not in scope of given collect_individual_data",
+                        }
+                    )
 
                 household_uuid = str(household.get("_uuid"))
 

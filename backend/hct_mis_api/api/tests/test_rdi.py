@@ -7,6 +7,8 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -16,7 +18,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
-    COLLECT_TYPE_FULL,
     ImportedDocumentType,
     ImportedHousehold,
     RegistrationDataImportDatahub,
@@ -35,7 +36,7 @@ class CreateRDITests(HOPEApiTestCase):
     def test_create_rdi(self) -> None:
         data = {
             "name": "aaaa",
-            "collect_data_policy": "FULL",
+            "collect_data_policy": "full",
         }
         response = self.client.post(self.url, data, format="json")
         hrdi = RegistrationDataImportDatahub.objects.filter(name="aaaa").first()
@@ -60,6 +61,7 @@ class PushToRDITests(HOPEApiTestCase):
         )
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
+        DataCollectingTypeFactory(label="Partial", code="partial", business_areas=[cls.business_area])
 
     def test_push(self) -> None:
         image = Path(__file__).parent / "logo.png"
@@ -94,7 +96,7 @@ class PushToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "collect_individual_data": COLLECT_TYPE_FULL,
+                "collect_individual_data": "partial",
                 "size": 1,
             }
         ]
@@ -110,7 +112,8 @@ class PushToRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
-        self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
+        self.assertEqual(hh.collect_individual_data, "partial")
+        self.assertEqual(hh.data_collecting_type_id, DataCollectingType.objects.get(code="partial").id)
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
