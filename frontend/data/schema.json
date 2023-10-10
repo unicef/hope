@@ -65997,6 +65997,16 @@
               "ofType": null
             },
             "defaultValue": null
+          },
+          {
+            "name": "paymentDeliveryPhoneNo",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -66864,6 +66874,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "Arg",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "paymentDeliveryPhoneNo",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null
