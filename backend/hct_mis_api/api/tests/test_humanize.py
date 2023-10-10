@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from hct_mis_api.api.endpoints.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_sri_lanka, create_ukraine
+from hct_mis_api.apps.core.fixtures import create_ukraine
 from hct_mis_api.apps.core.models import DataCollectingType
 
 MEMBER = {
@@ -38,9 +38,8 @@ class ValidatorTest(TestCase):
         cls.data_collecting_type, created = DataCollectingType.objects.get_or_create(
             label="label1",
             code="code1",
-        )
+        )   # will generate failure
         cls.data_collecting_type.limit_to.add(cls.business_area)
-
 
     def _run(self, data: Dict) -> Dict:
         serializer = self.validator(data=data, business_area=self.business_area)
@@ -108,8 +107,7 @@ class ValidatorTest(TestCase):
                     {
                         "Household #1": [
                             {
-                                "head_of_household": ["Only one HoH allowed"],
-                                "primary_collector": ["Only one Primary Collector allowed"],
+                                "collect_individual_data": ["Invalid value size_only. Check values at /api/rest/data-collecting-types/"]
                             },
                         ]
                     }
@@ -124,15 +122,28 @@ class ValidatorTest(TestCase):
         self.assertErrors(
             data,
             {
-                "households": [
+                'households': [
                     {
-                        "Household #3": [
+                        'Household #1': [
                             {
-                                "head_of_household": ["Only one HoH allowed"],
-                                "primary_collector": ["Only one Primary Collector allowed"],
-                            },
+                                'collect_individual_data': ['Invalid value size_only. Check values at /api/rest/data-collecting-types/']
+                            }
+                        ]
+                    },
+                    {
+                        'Household #2': [
+                            {
+                                'collect_individual_data': ['Invalid value size_only. Check values at /api/rest/data-collecting-types/']
+                            }
+                        ]
+                    },
+                    {
+                        'Household #3': [
+                            {
+                                'collect_individual_data': ['Invalid value size_only. Check values at /api/rest/data-collecting-types/']
+                            }
                         ]
                     }
                 ]
-            },
+            }
         )

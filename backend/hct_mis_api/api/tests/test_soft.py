@@ -8,6 +8,7 @@ from rest_framework import status
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
@@ -37,6 +38,10 @@ class PushLaxToRDITests(HOPEApiTestCase):
         )
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
         cls.url = reverse("api:rdi-push-lax", args=[cls.business_area.slug, str(cls.rdi.id)])
+        cls.data_collecting_type, created = DataCollectingType.objects.get_or_create(
+            label="Full",
+            code="full",
+        )
 
     def test_push(self) -> None:
         image = Path(__file__).parent / "logo.png"
@@ -46,7 +51,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
+                "collect_individual_data": "full",
                 "members": [
                     {
                         "relationship": HEAD,
