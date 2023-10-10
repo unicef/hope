@@ -106,16 +106,12 @@ class CollectDataMixin(serializers.Serializer):
     collect_individual_data = serializers.CharField(required=True)
 
     def validate_collect_individual_data(self, value: str) -> str:
-        v = value.upper()
-        if v in [COLLECT_TYPE_FULL, "FULL", "F"]:
-            return COLLECT_TYPE_FULL
-        if v in [COLLECT_TYPE_PARTIAL, "PARTIAL", "P"]:
-            return COLLECT_TYPE_PARTIAL
-        if v in [COLLECT_TYPE_NONE, "NO", "N", "NONE"]:
-            return COLLECT_TYPE_NONE
-        raise ValidationError(
-            "Invalid value %s. " "Check values at %s" % (value, reverse("api:datacollectingpolicy-list"))
-        )
+        try:
+            return DataCollectingType.objects.get(code=value).code
+        except (DataCollectingType.DoesNotExist, Exception):
+            raise ValidationError(
+                "Invalid value %s. " "Check values at %s" % (value, reverse("api:data-collecting-types-list"))
+            )
 
 
 class IndividualSerializer(serializers.ModelSerializer):

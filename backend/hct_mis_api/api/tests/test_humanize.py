@@ -6,7 +6,8 @@ from django.test import TestCase
 
 from hct_mis_api.api.endpoints.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_sri_lanka
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_sri_lanka, create_ukraine
+from hct_mis_api.apps.core.models import DataCollectingType
 
 MEMBER = {
     "birth_date": "2000-01-01",
@@ -30,9 +31,16 @@ class ValidatorTest(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        super(ValidatorTest, cls).setUpClass()
         cls.validator = RDINestedSerializer
-        cls.business_area = create_sri_lanka()
-        DataCollectingTypeFactory(label="Size only", code="size_only", business_areas=[cls.business_area])
+        # Avoid unique constraints
+        cls.business_area = create_ukraine()
+        cls.data_collecting_type, created = DataCollectingType.objects.get_or_create(
+            label="label1",
+            code="code1",
+        )
+        cls.data_collecting_type.limit_to.add(cls.business_area)
+
 
     def _run(self, data: Dict) -> Dict:
         serializer = self.validator(data=data, business_area=self.business_area)
@@ -83,7 +91,10 @@ class ValidatorTest(TestCase):
             ],
             "name": "Test1",
         }
-        self.assertErrors(data, {"households": [{"Household #1": [{"members": ["This field is required"]}]}]})
+        self.assertErrors(data, {
+            "households": [{"Household #1": [{"members": ["This field is required"]}]}],
+            "households": [{"Household #1": [{"collect_individual_data": ["Invalid value N. Check values at /api/rest/data-collecting-types/"]}]}],
+        })
 
     def test_double_entries(self) -> None:
         h1 = dict(**HOUSEHOLD)

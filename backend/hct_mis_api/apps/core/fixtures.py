@@ -30,7 +30,7 @@ def create_afghanistan(
 def create_ukraine(
     is_payment_plan_applicable: bool = False,
 ) -> BusinessArea:
-    return BusinessArea.objects.create(
+    obj, created = BusinessArea.objects.get_or_create(
         **{
             "code": "0002",
             "name": "Ukraine",
@@ -43,6 +43,7 @@ def create_ukraine(
             "kobo_token": "XXX",
         },
     )
+    return obj
 
 
 def create_sri_lanka(
