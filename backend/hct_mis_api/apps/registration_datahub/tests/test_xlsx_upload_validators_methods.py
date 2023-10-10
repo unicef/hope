@@ -513,3 +513,43 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         result = upload_xlsx_instance_validator.validate_collectors_size(wb)
         self.assertEqual(result, expected_result)
+
+    def test_no_collect_data_column_in_file(self) -> None:
+        no_collect_data_column = f"{self.FILES_DIR_PATH}/no_collect_data_column.xlsx"
+
+        with open(no_collect_data_column, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            wb = openpyxl.load_workbook(file, data_only=True)
+            household_sheet = wb["Households"]
+            errors = upload_xlsx_instance_validator.rows_validator(household_sheet, self.business_area.slug)
+            errors.sort(key=operator.itemgetter("row_number", "header"))
+            self.assertEqual(
+                errors,
+                [
+                    {
+                        "row_number": 1,
+                        "header": "collect_individual_data_h_c",
+                        "message": "Sheet: 'Households', collect_individual_data_h_c COLUMN does not exists",
+                    }
+                ],
+            )
+
+    def test_wrong_data_collecting_code_in_file(self) -> None:
+        wrong_data_collecting_type = f"{self.FILES_DIR_PATH}/wrong_data_collecting_type.xlsx"
+
+        with open(wrong_data_collecting_type, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            wb = openpyxl.load_workbook(file, data_only=True)
+            household_sheet = wb["Households"]
+            errors = upload_xlsx_instance_validator.rows_validator(household_sheet, self.business_area.slug)
+            errors.sort(key=operator.itemgetter("row_number", "header"))
+            self.assertEqual(
+                errors,
+                [
+                    {
+                        "row_number": 3,
+                        "header": "collect_individual_data_h_c",
+                        "message": "Sheet: 'Households', DataCollectingType with code xD does not exists",
+                    }
+                ],
+            )

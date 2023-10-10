@@ -490,6 +490,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             invalid_rows = []
             current_household_id = None
 
+            if sheet.title == "Households":
+                collect_individual_data_column_exits = False
+                for row in first_row:
+                    column_name = row.value
+                    if column_name == "collect_individual_data_h_c":
+                        collect_individual_data_column_exits = True
+                if not collect_individual_data_column_exits:
+                    invalid_rows.append(
+                        {
+                            "row_number": 1,
+                            "header": "collect_individual_data_h_c",
+                            "message": "Sheet: 'Households', collect_individual_data_h_c COLUMN does not exists",
+                        }
+                    )
+
             identities_numbers = {
                 "unhcr_id_no_i_c": {
                     "partner": "UNHCR",
@@ -609,6 +624,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                                         "message": f"Sheet: 'Households', BusinessArea: {business_area_slug} is not in scope of DataCollectingType: {value}",
                                     }
                                 )
+                        continue
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]
