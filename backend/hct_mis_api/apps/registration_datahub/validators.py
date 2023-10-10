@@ -1192,7 +1192,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         errors.append(
                             {
                                 "header": "collect_individual_data_h_c",
-                                "message": f"No DataCollectingType exists",
+                                "message": "No DataCollectingType exists",
                             }
                         )
                     elif business_area not in data_collecting_type.limit_to.all():

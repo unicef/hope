@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest import skip
 
 from parameterized import parameterized
 
@@ -215,6 +216,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip(reason="After merging, we remove 2nd program")
     def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 

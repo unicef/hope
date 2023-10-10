@@ -18,6 +18,7 @@ import requests
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.admin import XLSXKoboTemplateAdmin
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
@@ -60,6 +61,8 @@ class TestKoboTemplateUpload(APITestCase):
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
         cls.maxDiff = None
 
+        generate_data_collecting_types()
+
     def prepare_request(self, name: str) -> WSGIRequest:
         with open(
             f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}",
@@ -88,7 +91,9 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: relationship_i_c - Choice: FREE_UNION is not present in the file",
                 "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
                 "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
-                "Field: collect_individual_data_h_c - Choice: 2 is not present in the file",
+                "Field: collect_individual_data_h_c - Choice: size_only is not present in the file",
+                "Field: collect_individual_data_h_c - Choice: no_ind_data is not present in the file",
+                "Field: collect_individual_data_h_c - Choice: unknown is not present in the file",
                 "Field: currency_h_c - Choice: BOV is not present in the file",
                 "Field: currency_h_c - Choice: MRU is not present in the file",
                 "Field: currency_h_c - Choice: STN is not present in the file",

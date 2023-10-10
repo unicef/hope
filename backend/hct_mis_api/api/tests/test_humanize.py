@@ -1,8 +1,8 @@
 import json
 from typing import Dict
-from django.test import TestCase
 
 from django.http import JsonResponse
+from django.test import TestCase
 
 from hct_mis_api.api.endpoints.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors

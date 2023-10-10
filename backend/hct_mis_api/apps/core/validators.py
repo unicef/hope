@@ -281,6 +281,12 @@ class KoboTemplateValidator:
         core_fields_in_file = cls._get_core_fields_from_file(
             survey_sheet, choices_mapping, columns_names_and_numbers_mapping
         )
+
+        # TODO very ugly workaround for collect_individual_data_h_c, fix after launching gpf
+        core_fields_in_file["collect_individual_data_h_c"]["choices"] = [
+            item.lower() for item in core_fields_in_file["collect_individual_data_h_c"]["choices"]
+        ]
+
         core_fields_in_db = cls._get_core_fields_from_db()
 
         validation_errors = []
