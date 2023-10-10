@@ -1293,6 +1293,12 @@ describe("Grievance", () => {
     });
   });
   describe("E2E tests Grievance", () => {
+    afterEach(function () {
+      Cypress.session.clearCurrentSessionData();
+      cy.adminLogin();
+      cy.navigateToHomePage();
+      grievancePage.clickMenuButtonGrievance();
+    });
     it("404 Error page", () => {
       cy.scenario([
         "Go to Grievance page",
