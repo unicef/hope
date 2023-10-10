@@ -33,7 +33,6 @@ class ValidatorTest(TestCase):
     def setUpClass(cls) -> None:
         super(ValidatorTest, cls).setUpClass()
         cls.validator = RDINestedSerializer
-        # Avoid unique constraints
         cls.business_area = create_ukraine()
         cls.data_collecting_type, created = DataCollectingType.objects.get_or_create(
             label="label1",

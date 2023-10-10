@@ -3219,6 +3219,35 @@
   },
   {
     "model": "core.businessarea",
+    "pk": "3745963c-908b-4792-a4e9-8ea54ccb70ee",
+    "fields": {
+      "created_at": "2022-03-30 09:05:21.522-00:00",
+      "updated_at": "2022-03-30 09:05:21.522-00:00",
+      "code": "BOCZ",
+      "name": "Czech Republic",
+      "long_name": "The Czech Republic",
+      "region_code": "66",
+      "region_name": "ECAR",
+      "kobo_username": null,
+      "rapid_pro_host": null,
+      "slug": "czech-republic",
+      "custom_fields": {},
+      "has_data_sharing_agreement": true,
+      "parent": null,
+      "is_split": false,
+      "deduplication_duplicate_score": 6.0,
+      "deduplication_possible_duplicate_score": 6.0,
+      "deduplication_batch_duplicates_percentage": 50,
+      "deduplication_batch_duplicates_allowed": 5,
+      "deduplication_golden_record_duplicates_percentage": 50,
+      "deduplication_golden_record_duplicates_allowed": 5,
+      "screen_beneficiary": false,
+      "countries": [],
+      "is_payment_plan_applicable": false
+    }
+  },
+  {
+    "model": "core.businessarea",
     "pk": "a63414eb-3c08-4d65-b069-a560ab6eec45",
     "fields": {
       "created_at": "2022-03-30 09:05:21.340-00:00",
