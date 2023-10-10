@@ -759,7 +759,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
             self.image_loader = SheetImageLoader(household_sheet)
-            errors.extend(self.rows_validator(household_sheet, business_area_slug))
+            errors.extend(
+                self.rows_validator(household_sheet, business_area_slug)
+            )  # TODO we catch twice the same error?
             self.image_loader = SheetImageLoader(individuals_sheet)
             errors.extend(self.rows_validator(individuals_sheet))
             return errors

@@ -14,7 +14,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
@@ -454,10 +454,9 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        data_collecting_type = DataCollectingTypeFactory(
-            label="Full",
-            code="full",
-            business_areas=[BusinessArea.objects.get(slug="sri-lanka"), BusinessArea.objects.get(slug="ukraine")],
+        data_collecting_type, created = DataCollectingType.objects.get_or_create(label="Partial", code="partial")
+        data_collecting_type.limit_to.set(
+            [BusinessArea.objects.get(slug="sri-lanka"), BusinessArea.objects.get(slug="ukraine")]
         )
 
         registration_ids = [2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999]

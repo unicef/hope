@@ -5,7 +5,6 @@ from hct_mis_api.api.endpoints.data_collecting_types import (  # noqa: F401
 )
 from hct_mis_api.api.endpoints.lookups import (  # noqa: F401
     Country,
-    DataCollectingPolicy,
     DocumentType,
     MaritalStatus,
     ObservedDisability,

@@ -97,7 +97,7 @@ class ValidatorTest(TestCase):
                         "Household #1": [
                             {
                                 "collect_individual_data": [
-                                    "Invalid value N. Check values at /api/rest/data-collecting-types/"
+                                    "Invalid value N. Check values at /api/rest/lookups/data-collecting-types/"
                                 ]
                             }
                         ]
@@ -119,7 +119,7 @@ class ValidatorTest(TestCase):
                         "Household #1": [
                             {
                                 "collect_individual_data": [
-                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                    "Invalid value size_only. Check values at /api/rest/lookups/data-collecting-types/"
                                 ]
                             },
                         ]
@@ -140,7 +140,7 @@ class ValidatorTest(TestCase):
                         "Household #1": [
                             {
                                 "collect_individual_data": [
-                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                    "Invalid value size_only. Check values at /api/rest/lookups/data-collecting-types/"
                                 ]
                             }
                         ]
@@ -149,7 +149,7 @@ class ValidatorTest(TestCase):
                         "Household #2": [
                             {
                                 "collect_individual_data": [
-                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                    "Invalid value size_only. Check values at /api/rest/lookups/data-collecting-types/"
                                 ]
                             }
                         ]
@@ -158,7 +158,7 @@ class ValidatorTest(TestCase):
                         "Household #3": [
                             {
                                 "collect_individual_data": [
-                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                    "Invalid value size_only. Check values at /api/rest/lookups/data-collecting-types/"
                                 ]
                             }
                         ]

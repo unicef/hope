@@ -104,7 +104,7 @@ class CollectDataMixin(serializers.Serializer):
 
     def validate_collect_individual_data(self, value: str) -> str:
         try:
-            return DataCollectingType.objects.get(code=value).code
+            return DataCollectingType.objects.only("code").get(code=value).code
         except (DataCollectingType.DoesNotExist, Exception):
             raise ValidationError(
                 "Invalid value %s. " "Check values at %s" % (value, reverse("api:data-collecting-types-list"))

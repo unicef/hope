@@ -64,11 +64,6 @@ class Relationship(HOPEAPIView):
         return Response(dict(RELATIONSHIP_CHOICE))
 
 
-class DataCollectingPolicy(HOPEAPIView):
-    def get(self, request: "Request", format: Optional[Any] = None) -> Response:
-        return Response(dict(COLLECT_TYPES[1:]))
-
-
 class Roles(HOPEAPIView):
     def get(self, request: "Request", format: Optional[Any] = None) -> Response:
         return Response(dict(ROLE_CHOICE))

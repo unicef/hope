@@ -5,7 +5,6 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 from hct_mis_api.api import endpoints
-from hct_mis_api.api.router import APIRouter
 
 app_name = "api"
 
@@ -22,9 +21,6 @@ schema_view = get_schema_view(
     permission_classes=[permissions.IsAuthenticated],
 )
 
-router = APIRouter()
-router.register("data-collecting-types", endpoints.DataCollectingTypeViewSet, basename="data-collecting-types")
-
 urlpatterns = [
     path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path(r"", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
@@ -38,6 +34,11 @@ urlpatterns = [
         endpoints.ProgramViewSet.as_view({"post": "create"}),
         name="program-create",
     ),
+    path(
+        "programs/",
+        endpoints.ProgramViewSet.as_view({"get": "list"}),
+        name="programs-list",
+    ),
     path("areas/", endpoints.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.AreaTypeList().as_view(), name="areatype-list"),
     path("constance/", endpoints.ConstanceSettingsAPIView().as_view(), name="constance-list"),
@@ -47,8 +48,11 @@ urlpatterns = [
     path("lookups/maritalstatus/", endpoints.MaritalStatus().as_view(), name="maritalstatus-list"),
     path("lookups/observeddisability/", endpoints.ObservedDisability().as_view(), name="observeddisability-list"),
     path("lookups/relationship/", endpoints.Relationship().as_view(), name="relationship-list"),
-    path("lookups/datacollectingpolicy/", endpoints.DataCollectingPolicy().as_view(), name="datacollectingpolicy-list"),
     path("lookups/role/", endpoints.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.Sex().as_view(), name="sex-list"),
-    *router.urls,
+    path(
+        "lookups/data-collecting-types/",
+        endpoints.DataCollectingTypeViewSet.as_view({"get": "list"}),
+        name="data-collecting-types-list",
+    ),
 ]
