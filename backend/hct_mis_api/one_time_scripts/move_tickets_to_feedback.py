@@ -3,8 +3,9 @@ from typing import Type
 
 from django.core.paginator import Paginator
 
-from hct_mis_api.apps.accountability.models import Feedback
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
 from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
     TicketNegativeFeedbackDetails,
     TicketPositiveFeedbackDetails,
 )
@@ -15,7 +16,8 @@ logger = logging.getLogger(__name__)
 def move_tickets_to_feedback() -> None:
     for ticket_type in (TicketPositiveFeedbackDetails, TicketNegativeFeedbackDetails):
         move_ticket_model_to_feedback(ticket_type)
-        delete_moved_to_feedback_tickets(ticket_type)
+    move_ticket_notes()
+    delete_moved_to_feedback_tickets()
 
 
 def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 1000) -> None:
@@ -63,20 +65,40 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
     logger.info(f"Migration of {model_type.__name__} succeeded")
 
 
-def delete_moved_to_feedback_tickets(model_type: Type[object], batch_size: int = 1000) -> None:
-    if model_type == TicketPositiveFeedbackDetails:
-        ticket_ids = Feedback.objects.filter(issue_type=Feedback.POSITIVE_FEEDBACK).values_list(
-            "linked_grievance_id", flat=True
+def move_ticket_notes() -> None:
+    logger.info("Feedback messages - started")
+    feedbacks_data = Feedback.objects.filter(
+        linked_grievance__ticket_notes__isnull=False,
+        issue_type__in=[Feedback.POSITIVE_FEEDBACK, Feedback.NEGATIVE_FEEDBACK],
+    ).values(
+        "id",
+        "linked_grievance__ticket_notes__description",
+        "linked_grievance__ticket_notes__created_by_id",
+        "linked_grievance__ticket_notes__updated_at",
+        "linked_grievance__ticket_notes__created_at",
+    )
+
+    FeedbackMessage._meta.get_field("created_at").auto_now_add = False
+
+    feedback_messages = []
+    for feedback_data in feedbacks_data:
+        feedback_messages.append(
+            FeedbackMessage(
+                feedback_id=feedback_data["id"],
+                description=feedback_data["linked_grievance__ticket_notes__description"],
+                created_by_id=feedback_data["linked_grievance__ticket_notes__created_by_id"],
+                created_at=feedback_data["linked_grievance__ticket_notes__created_at"],
+                updated_at=feedback_data["linked_grievance__ticket_notes__updated_at"],
+            )
         )
-    else:
-        ticket_ids = Feedback.objects.filter(issue_type=Feedback.NEGATIVE_FEEDBACK).values_list(
-            "linked_grievance_id", flat=True
-        )
-    i, pages = 0, len(ticket_ids) // batch_size + 1
-    try:
-        while i <= pages:
-            model_type.objects.filter(ticket_id__in=list(ticket_ids[i * batch_size : (i + 1) * batch_size])).delete()
-            i += 1
-    except Exception:
-        logger.error("Deleting migrated tickets failed")
-        raise
+    logger.info(f"Creating {len(feedback_messages)} feedback messages")
+    FeedbackMessage.objects.bulk_create(feedback_messages)
+    FeedbackMessage._meta.get_field("created_at").auto_now_add = True
+    logger.info("Feedback messages - finished")
+
+
+def delete_moved_to_feedback_tickets() -> None:
+    ticket_ids = Feedback.objects.values("linked_grievance_id")
+    result = GrievanceTicket.objects.filter(id__in=ticket_ids).delete()
+    logger.info("Removed records")
+    logger.info(result)
