@@ -141,6 +141,7 @@ export type AddIndividualDataObjectType = {
   businessArea?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
 };
 
 export type AddIndividualIssueTypeExtras = {
@@ -3521,6 +3522,7 @@ export type IndividualUpdateDataObjectType = {
   paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
 };
 
 export type InvalidPaymentVerificationPlan = {
@@ -9234,7 +9236,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage' | 'paymentDeliveryPhoneNo'>
   & { paymentChannels: Maybe<Array<Maybe<(
     { __typename?: 'BankAccountInfoNode' }
     & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
@@ -14287,6 +14289,7 @@ export const IndividualDetailedFragmentDoc = gql`
     bankAccountNumber
   }
   preferredLanguage
+  paymentDeliveryPhoneNo
 }
     ${IndividualMinimalFragmentDoc}`;
 export const HouseholdMinimalFragmentDoc = gql`
