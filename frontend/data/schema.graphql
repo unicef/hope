@@ -95,6 +95,7 @@ input AddIndividualDataObjectType {
   businessArea: String
   preferredLanguage: String
   flexFields: Arg
+  paymentDeliveryPhoneNo: String
 }
 
 input AddIndividualIssueTypeExtras {
@@ -2412,6 +2413,7 @@ input IndividualUpdateDataObjectType {
   paymentChannelsToRemove: [ID]
   preferredLanguage: String
   flexFields: Arg
+  paymentDeliveryPhoneNo: String
 }
 
 type InvalidPaymentVerificationPlan {
