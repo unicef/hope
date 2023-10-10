@@ -1293,10 +1293,6 @@ describe("Grievance", () => {
     });
   });
   describe("E2E tests Grievance", () => {
-    afterEach(() => {
-      cy.visit("/");
-      grievancePage.clickMenuButtonGrievance();
-    });
     it("404 Error page", () => {
       cy.scenario([
         "Go to Grievance page",
