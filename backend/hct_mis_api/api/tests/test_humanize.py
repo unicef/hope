@@ -38,7 +38,7 @@ class ValidatorTest(TestCase):
         cls.data_collecting_type, created = DataCollectingType.objects.get_or_create(
             label="label1",
             code="code1",
-        )   # will generate failure
+        )  # will generate failure
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
     def _run(self, data: Dict) -> Dict:
@@ -90,10 +90,22 @@ class ValidatorTest(TestCase):
             ],
             "name": "Test1",
         }
-        self.assertErrors(data, {
-            "households": [{"Household #1": [{"members": ["This field is required"]}]}],
-            "households": [{"Household #1": [{"collect_individual_data": ["Invalid value N. Check values at /api/rest/data-collecting-types/"]}]}],
-        })
+        self.assertErrors(
+            data,
+            {
+                "households": [
+                    {
+                        "Household #1": [
+                            {
+                                "collect_individual_data": [
+                                    "Invalid value N. Check values at /api/rest/data-collecting-types/"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+            },
+        )
 
     def test_double_entries(self) -> None:
         h1 = dict(**HOUSEHOLD)
@@ -107,7 +119,9 @@ class ValidatorTest(TestCase):
                     {
                         "Household #1": [
                             {
-                                "collect_individual_data": ["Invalid value size_only. Check values at /api/rest/data-collecting-types/"]
+                                "collect_individual_data": [
+                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                ]
                             },
                         ]
                     }
@@ -122,28 +136,34 @@ class ValidatorTest(TestCase):
         self.assertErrors(
             data,
             {
-                'households': [
+                "households": [
                     {
-                        'Household #1': [
+                        "Household #1": [
                             {
-                                'collect_individual_data': ['Invalid value size_only. Check values at /api/rest/data-collecting-types/']
+                                "collect_individual_data": [
+                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                ]
                             }
                         ]
                     },
                     {
-                        'Household #2': [
+                        "Household #2": [
                             {
-                                'collect_individual_data': ['Invalid value size_only. Check values at /api/rest/data-collecting-types/']
+                                "collect_individual_data": [
+                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                ]
                             }
                         ]
                     },
                     {
-                        'Household #3': [
+                        "Household #3": [
                             {
-                                'collect_individual_data': ['Invalid value size_only. Check values at /api/rest/data-collecting-types/']
+                                "collect_individual_data": [
+                                    "Invalid value size_only. Check values at /api/rest/data-collecting-types/"
+                                ]
                             }
                         ]
-                    }
+                    },
                 ]
-            }
+            },
         )

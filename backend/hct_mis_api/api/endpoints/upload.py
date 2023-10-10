@@ -14,15 +14,12 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
-from hct_mis_api.api.endpoints.lookups import COLLECT_TYPE_NONE
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_PARTIAL,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     NON_BENEFICIARY,
