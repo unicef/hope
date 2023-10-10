@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
     BusinessArea,
+    DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
@@ -291,6 +292,13 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
     return reduce_assets_list(assets, only_deployed=only_deployed)
 
 
+class DataCollectingTypeNode(DjangoObjectType):
+    class Meta:
+        model = DataCollectingType
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class Query(graphene.ObjectType):
     business_area = graphene.Field(
         BusinessAreaNode,
@@ -324,6 +332,8 @@ class Query(graphene.ObjectType):
     all_languages = ConnectionField(
         LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
+    data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
+    data_collection_type_choices = graphene.List(ChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -385,3 +395,16 @@ class Query(graphene.ObjectType):
 
     def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
         return Languages.filter_by_code(code)
+
+    def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        # TODO: maybe add filter by BA 'DataCollectingType.limit_to'
+        data_collecting_types = (
+            DataCollectingType.objects.filter(active=True)
+            .only("code", "label")
+            .values("code", "label")
+            .order_by("label")
+        )
+        result = []
+        for data_collection_type in data_collecting_types:
+            result.append({"name": data_collection_type["label"], "value": data_collection_type["code"]})
+        return result

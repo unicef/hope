@@ -109,9 +109,7 @@ export default class Grievance extends BaseComponent {
   }
 
   chooseTicketListRow(num = 0, contains = "GRV-0000002") {
-    // ToDo: Use after fix bug: 164824
-    // return this.getTicketListRow().eq(num);
-    return this.getTicketListRow().eq(num).find("a").contains(contains);
+    return this.getTicketListRow().eq(num).contains(contains);
   }
 
   chooseCategoryFilter(category) {

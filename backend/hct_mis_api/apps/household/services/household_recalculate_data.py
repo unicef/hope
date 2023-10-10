@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Tuple
 
 from django.db import transaction
 from django.db.models import Count, Q
-from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 
@@ -36,7 +35,9 @@ def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
 
 
 @transaction.atomic
-def recalculate_data(household: Household, save: bool = True) -> Tuple[Household, List[str]]:
+def recalculate_data(
+    household: Household, save: bool = True, run_from_migration: bool = False
+) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
     if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
@@ -45,17 +46,19 @@ def recalculate_data(household: Household, save: bool = True) -> Tuple[Household
     individuals_to_update = []
     individuals_fields_to_update = []
 
-    for individual in household.individuals.all().select_for_update().order_by("pk"):
-        _individual, _fields_to_update = individual.recalculate_data(save=False)
-        individuals_to_update.append(_individual)
-        individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
+    if not run_from_migration:  # TODO remove after migration
+        for individual in household.individuals.all().select_for_update().order_by("pk"):
+            _individual, _fields_to_update = individual.recalculate_data(save=False)
+            individuals_to_update.append(_individual)
+            individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
 
-    Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
+        Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
 
-    date_6_years_ago = timezone.now() - relativedelta(years=+6)
-    date_12_years_ago = timezone.now() - relativedelta(years=+12)
-    date_18_years_ago = timezone.now() - relativedelta(years=+18)
-    date_60_years_ago = timezone.now() - relativedelta(years=+60)
+    last_registration_date = household.last_registration_date
+    date_6_years_ago = last_registration_date - relativedelta(years=+6)
+    date_12_years_ago = last_registration_date - relativedelta(years=+12)
+    date_18_years_ago = last_registration_date - relativedelta(years=+18)
+    date_60_years_ago = last_registration_date - relativedelta(years=+60)
 
     is_beneficiary = ~Q(relationship=NON_BENEFICIARY)
     active_beneficiary = Q(withdrawn=False, duplicate=False)
@@ -189,6 +192,7 @@ def recalculate_data(household: Household, save: bool = True) -> Tuple[Household
             household.fchild_hoh = True
         household.child_hoh = True
 
+    household.is_recalculated_group_ages = True
     if save:
         household.save(update_fields=updated_fields)
 

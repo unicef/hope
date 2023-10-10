@@ -527,7 +527,7 @@ class RuleCommitResource(ModelResource):
 class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
-    search_fields = ("name",)
+    search_fields = ("rule__name",)
     readonly_fields = ("updated_by",)
     change_form_template = None
     change_list_template = None

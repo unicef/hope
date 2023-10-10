@@ -29,6 +29,15 @@ describe("Global Program Filter - Impacts", () => {
   });
   describe("E2E tests GPF impacts", () => {
     it("GPF - Registration data import Verification", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (Test Programme)",
+        "Go to Registration data import page",
+        "Check row list: 2 rows",
+        "Choose program (Draft Programme)",
+        "Go to Registration data import page",
+        "Check row list: 0 rows",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -42,6 +51,15 @@ describe("Global Program Filter - Impacts", () => {
       registrationDataImport.getTicketListRow().should("have.length", 0);
     });
     it("GPF - Registration data import - import button", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (Test Programme)",
+        "Go to Registration data import page",
+        "Import button is active",
+        "Choose program (Draft Programme)",
+        "Go to Registration data import page",
+        "Import button is disabled",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -55,6 +73,13 @@ describe("Global Program Filter - Impacts", () => {
       registrationDataImport.getButtonImport().should("be.disabled");
     });
     it("GPF - Program details", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Header Title: " + programmesPage.textTestProgramm,
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Header Title: " + programmesPage.textDraftProgram,
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -69,6 +94,15 @@ describe("Global Program Filter - Impacts", () => {
       programmesPage.getHeaderTitle().contains(programmesPage.textDraftProgram);
     });
     it("GPF - Targeting", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Go to Targeting page",
+        "Check row list: 2 rows",
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Go to Targeting page",
+        "Check row list: 0 rows",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -96,6 +130,15 @@ describe("Global Program Filter - Impacts", () => {
       paymentModulePage.getTicketListRow().should("have.length", 0);
     });
     it("GPF - Payment Verification", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Go to Payment Verification page",
+        "Check row list: 1 rows",
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Go to Payment Verification page",
+        "Check row list: 0 rows",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -109,6 +152,20 @@ describe("Global Program Filter - Impacts", () => {
       paymentVerification.getTicketListRow().should("have.length", 0);
     });
     it("GPF - Population module", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Go to Population module page",
+        "Go to Individual page",
+        "Check row list: 6 rows",
+        "Go to Households page",
+        "Check row list: 2 rows",
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Go to Individual page",
+        "Check row list: 0 rows",
+        "Go to Households page",
+        "Check row list: 0 rows",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -129,6 +186,15 @@ describe("Global Program Filter - Impacts", () => {
       populationHouseholds.getTicketListRow().should("have.length", 0);
     });
     it("GPF - Grievance", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Go to Grievance page",
+        "Check row list: 6 rows",
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Go to Grievance page",
+        "Check row list: 0 rows",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -144,6 +210,15 @@ describe("Global Program Filter - Impacts", () => {
       grievancePage.getTicketListRow().should("have.length", 0);
     });
     it("GPF - Feedback", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Go to Feedback page",
+        "Check row list: 6 rows",
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Go to Feedback page",
+        "Check row list: 0 rows",
+      ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()

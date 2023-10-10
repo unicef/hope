@@ -77,8 +77,8 @@ class FeedbackMessageNode(DjangoObjectType):
 class FeedbackNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
-            Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
-            Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
         ),
     )
 

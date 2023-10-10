@@ -7,7 +7,7 @@ import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
@@ -43,6 +43,8 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)
         business_area = BusinessArea.objects.get(slug=business_area_slug)
+        data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
+        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
         cls.validate(
@@ -51,9 +53,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         )
 
         program = Program(
-            **program_data,
-            status=Program.DRAFT,
-            business_area=business_area,
+            **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type
         )
         program.full_clean()
         program.save()
@@ -103,9 +103,14 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
             end_date=program_data.get("end_date"),
         )
 
+        data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
+        if data_collecting_type_code and data_collecting_type_code != old_program.data_collecting_type.code:
+            program.data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
+
         program.full_clean()
         program.save()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)

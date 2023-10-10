@@ -326,6 +326,7 @@
   "Budget (USD)": "Budget (USD)",
   "Population Goal (# of Individuals)": "Population Goal (# of Individuals)",
   "Num. of Households": "Num. of Households",
+  "Num. of Recipients": "Num. of Recipients",
   "SECTOR": "SECTOR",
   "Programme Details": "Programme Details",
   "START DATE": "START DATE",
@@ -824,6 +825,7 @@
   "Copy Programme": "Copy Programme",
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
+  "Program has to be active to create a new Target Population": "Program has to be active to create a new Target Population",
   "Preview Exclusion": "Preview Exclusion",
-  "Program has to be active to create a new Target Population": "Program has to be active to create a new Target Population"
+  "Data Collecting Type is required": "Data Collecting Type is required"
 }

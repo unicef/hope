@@ -25,10 +25,10 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.erp_datahub.celery_tasks.sync_to_mis_datahub_task",
         "schedule": crontab(minute="*/20"),
     },
-    "recalculate_population_fields_task": {
-        "task": "hct_mis_api.apps.household.celery_tasks.interval_recalculate_population_fields_task",
-        "schedule": crontab(hour="*/24"),
-    },
+    # "recalculate_population_fields_task": {
+    #     "task": "hct_mis_api.apps.household.celery_tasks.interval_recalculate_population_fields_task",
+    #     "schedule": crontab(hour="*/24"),
+    # },
     "extract_records_task": {
         "task": "hct_mis_api.apps.registration_datahub.celery_tasks.extract_records_task",
         "schedule": crontab(hour="*/24"),

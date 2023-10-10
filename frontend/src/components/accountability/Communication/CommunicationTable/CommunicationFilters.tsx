@@ -1,16 +1,13 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useAllTargetPopulationForChoicesQuery } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { SelectFilter } from '../../../core/SelectFilter';
 
 interface CommunicationFiltersProps {
   filter;
@@ -29,7 +26,6 @@ export const CommunicationFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const { businessArea, programId } = useBaseUrl();
   const {
     handleFilterChange,
     applyFilterChanges,
@@ -52,44 +48,26 @@ export const CommunicationFilters = ({
     clearFilter();
   };
 
-  const {
-    data: allTargetPopulationForChoices,
-    loading: targetPopulationsLoading,
-  } = useAllTargetPopulationForChoicesQuery({
-    variables: { businessArea, program: [programId] },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allTargetPopulations =
-    allTargetPopulationForChoices?.allTargetPopulation?.edges || [];
-  const targetPopulations = allTargetPopulations.map((edge) => edge.node);
-
-  if (targetPopulationsLoading) return <LoadingComponent />;
-
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={4}>
-          <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('targetPopulation', e.target.value)
-            }
-            label={t('Target Population')}
+        <Grid xs={4} item>
+          <TargetPopulationAutocomplete
+            name='targetPopulation'
             value={filter.targetPopulation}
-          >
-            {targetPopulations.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+          />
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            label='User'
+            label={t('Created by')}
             filter={filter}
-            name='userId'
-            value={filter.userId}
+            name='createdBy'
+            value={filter.createdBy}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}

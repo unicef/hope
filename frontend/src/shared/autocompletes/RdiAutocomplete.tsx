@@ -77,8 +77,6 @@ export const RdiAutocomplete = ({
     setAppliedFilter,
   );
 
-  if (!data) return null;
-
   return (
     <StyledAutocomplete
       value={value}

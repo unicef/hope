@@ -639,13 +639,14 @@ class DiiaIndividualAdmin(HOPEModelAdminBase):
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
         "disability",
     )
+    raw_id_fields = ("imported_individual", "registration_data_import")
 
 
 @admin.register(DiiaHousehold)
 class DiiaHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import", "rec_id")
     list_display = ("registration_data_import", "status", "rec_id")
-    raw_id_fields = ("registration_data_import",)
+    raw_id_fields = ("registration_data_import", "imported_household")
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),

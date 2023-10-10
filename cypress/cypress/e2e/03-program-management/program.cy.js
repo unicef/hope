@@ -22,7 +22,13 @@ describe("Program Management", () => {
     it.skip("Check Program Management Details page", () => {});
   });
   describe("Component tests Program Management", () => {
+    // ToDo: Refactor in second milestone
     it("Create a program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Create new programme",
+        "Check if programme was created properly",
+      ]);
       programManagement
         .getPageHeaderTitle()
         .should("contain", "Programme Management");
@@ -37,6 +43,8 @@ describe("Program Management", () => {
         programManagement.getSelectOptionUnicef().click();
         programManagement.getInputSector().first().click();
         programManagement.getSelectOptionByName("Multi Purpose").click();
+        programManagement.getInputDataCollectingType().click();
+        programManagement.getSelectOptionByName("Partial").click();
         programManagement.getInputStartDate().click().type("2023-01-01");
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
@@ -64,6 +72,12 @@ describe("Program Management", () => {
       });
     });
     it("Edit Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose Programme",
+        "Edit Programme",
+        "Check if programme was edited properly",
+      ]);
       programManagement.getStatusFilter().click();
       programManagement.getOption().contains("Active").click();
       programManagement.getButtonApply().click();
@@ -135,5 +149,58 @@ describe("Program Management", () => {
   });
   describe.skip("E2E tests Program Management", () => {});
 
-  describe.skip("Regression tests Program Management", () => {});
+  describe("Regression tests Program Management", () => {
+    it.skip("174517: Check clear cache", () => {
+      cy.scenario([
+        "Go to Program Management page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      programManagement.clearCache();
+      cy.get("h5").should("contain", "Programme Management");
+    });
+    // ToDo: 174707
+    it.skip("174707: Create a program without Data Collecting Type", () => {
+      programManagement
+        .getPageHeaderTitle()
+        .should("contain", "Programme Management");
+      programManagement.getButtonNewProgram().click({ force: true });
+      programManagement
+        .getDialogTitle()
+        .should("contain", "Set-up a new Programme");
+      cy.uniqueSeed().then((seed) => {
+        const programName = `Test Program ${seed}`;
+        programManagement.getInputProgrammeName().type(programName);
+        programManagement.getInputCashAssistScope().click();
+        programManagement.getSelectOptionUnicef().click();
+        programManagement.getInputSector().first().click();
+        programManagement.getSelectOptionByName("Multi Purpose").click();
+        programManagement.getInputStartDate().click().type("2023-01-01");
+        programManagement.getInputEndDate().click().type("2033-12-30");
+        programManagement
+          .getInputDescription()
+          .first()
+          .click()
+          .type("test description");
+        programManagement
+          .getInputBudget()
+          .first()
+          .click()
+          .type("{backspace}{backspace}{backspace}{backspace}9999");
+        programManagement.getInputAdminArea().click().type("Some Admin Area");
+        programManagement
+          .getInputPopulationGoal()
+          .click()
+          .type("{backspace}{backspace}{backspace}{backspace}4000");
+        programManagement.getButtonSave().click({ force: true });
+        programDetails.getPageHeaderTitle().should("contain", programName);
+        programDetails.getButtonActivateProgram().click({ force: true });
+        programDetails.getButtonActivateProgramModal().click({
+          force: true,
+        });
+        programDetails.getStatusContainer().should("contain", "ACTIVE");
+      });
+    });
+  });
 });

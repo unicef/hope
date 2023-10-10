@@ -1,8 +1,8 @@
 import PopulationHouseholds from "../../page-objects/pages/population_module/population_households.po";
 import HPDetailsPage from "../../page-objects/pages/population_module/households_details_page.po";
 
-let ph = new PopulationHouseholds();
-let phdp = new HPDetailsPage();
+let populationHouseholds = new PopulationHouseholds();
+let householdsDetailsPage = new HPDetailsPage();
 
 describe("Households Module", () => {
   beforeEach(() => {
@@ -17,6 +17,12 @@ describe("Households Module", () => {
     it.skip("Check Households Population page", () => {});
     it.skip("Check Households Population Details page", () => {
       // ToDo: Global Programme changes
+      cy.scenario([
+        "Go to Population page",
+        "Check if page is in Households",
+        "Choose first Household from list",
+        "Check if all elements on page exist",
+      ]);
       cy.get("div").contains("Households", { timeout: 10000 });
       cy.get('[data-cy="table-title"]').contains("Households");
       cy.get('[data-cy="household-table-row"]').first().click({ force: true });
@@ -46,5 +52,16 @@ describe("Households Module", () => {
   });
   describe.skip("E2E tests Households Population", () => {});
 
-  describe.skip("Regression tests Households Population", () => {});
+  describe("Regression tests Households Population", () => {
+    it.skip("174517: Check clear cache", () => {
+      cy.scenario([
+        "Go to Households page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      populationHouseholds.clearCache();
+      populationHouseholds.getTitle().contains(populationHouseholds.textTitle);
+    });
+  });
 });
