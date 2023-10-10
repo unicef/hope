@@ -1315,7 +1315,6 @@ describe("Grievance", () => {
     it("404 Error page - refresh", () => {
       cy.scenario([
         "Go to Grievance page",
-        "Go to Feedback page",
         "Click first row",
         "Delete part of URL",
         "Check if 404 occurred",
@@ -1337,7 +1336,6 @@ describe("Grievance", () => {
     it("404 Error page - go to country dashboard", () => {
       cy.scenario([
         "Go to Grievance page",
-        "Go to Feedback page",
         "Click first row",
         "Delete part of URL",
         "Check if 404 occurred",
