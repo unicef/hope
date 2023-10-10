@@ -4,8 +4,8 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import PageNotFoundGraphic from './404_graphic.png';
-import HopeLogo from './404_hope_logo.png';
+import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
+import HopeLogo from './something_went_wrong_hope_logo.png';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -47,7 +47,7 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const PageNotFound: React.FC = () => {
+export const SomethingWentWrong: React.FC = () => {
   const goBack = (): void => {
     window.history.back();
   };
@@ -63,18 +63,17 @@ export const PageNotFound: React.FC = () => {
       </LogoContainer>
       <SquareLogo>
         <img
-          src={PageNotFoundGraphic}
-          alt='Brush with paint 404'
+          src={SomethingWentWrongGraphic}
+          alt='Sad face'
           width='354'
           height='293'
         />
       </SquareLogo>
       <TextContainer>
-        <Title>Oops! Page Not Found</Title>
+        <Title>Oops! Something went wrong</Title>
         <Paragraph>
-          Looks like you&apos;ve ventured off the map. Don&apos;t worry, we can
-          help you get back on track. Please try again or explore our other
-          exciting content.
+          Don&apos;t worry! Our team is on it, working to fix the issue. Please
+          try again later. Thank you for your patience.
         </Paragraph>
       </TextContainer>
       <Box display='flex' justifyContent='center' alignItems='center'>
