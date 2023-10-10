@@ -17,9 +17,9 @@ describe("Grievance", () => {
     cy.fixture("grievance_new_ticket").as("newTicket");
     cy.adminLogin();
     cy.navigateToHomePage();
+    grievancePage.clickMenuButtonGrievance();
   });
   beforeEach(() => {
-    grievancePage.clickMenuButtonGrievance();
     grievancePage.clickMenuButtonGrievanceTickets();
   });
 
