@@ -784,7 +784,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         for Accepted and Finished export_file_per_fsp file
         """
         try:
-            if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
+            if self.status == PaymentPlan.Status.LOCKED:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
                 return self.export_file_per_fsp is not None
@@ -799,7 +799,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
         """
-        if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
+        if self.status == PaymentPlan.Status.LOCKED:
             if self.export_file_entitlement and self.export_file_entitlement.file:
                 return self.export_file_entitlement.file.url
             else:
