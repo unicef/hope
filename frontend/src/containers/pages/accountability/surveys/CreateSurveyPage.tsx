@@ -97,8 +97,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const confirm = useConfirmation();
-
-  const category = history.location.state?.category;
+  const [category] = useState(history.location.state?.category);
 
   const initialValues = {
     category,
@@ -239,8 +238,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const matchTitle = (values): string => {
     return category === SurveyCategory.Sms || category === SurveyCategory.Manual
       ? values.title
-      : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id)
-          .name;
+      : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id).id;
   };
 
   const prepareMutationVariables = (
@@ -604,10 +602,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         fontWeight='fontWeightBold'
                       >
                         {t('Number of selected recipients')}:{' '}
-                        {
-                          sampleSizesData?.accountabilitySampleSize
-                            ?.numberOfRecipients
-                        }
+                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}
                       </Box>
                     </Grid>
                   </>

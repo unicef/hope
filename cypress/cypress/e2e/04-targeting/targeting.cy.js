@@ -24,12 +24,20 @@ describe("Targeting", () => {
       targetingPage.checkElementsOnPage();
     });
     it("Check Targeting Details page", () => {
+      cy.scenario([
+        "Go to Targeting Details page",
+        "Check if all elements on page exist",
+      ]);
       targetingPage.selectStatus("Open");
       targetingPage.getTargetPopulationsRows().should("have.length", 1);
       targetingPage.chooseTargetPopulationRow(0).click();
       targetingDetailsPage.checkElementsOnPage("OPEN");
     });
     it("Check Targeting New Ticket page", () => {
+      cy.scenario([
+        "Go to Targeting New Ticket page",
+        "Check if all elements on page exist",
+      ]);
       targetingPage.getButtonCreateNew().click();
       targetingCreateNewPage.checkElementsOnPage();
     });
@@ -37,7 +45,15 @@ describe("Targeting", () => {
 
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
+      // TODO: Refactor in second milestone
       it("Can visit the targeting page and create a target population", () => {
+        cy.scenario([
+          "Go to Targeting New Ticket page",
+          "Press Create New button",
+          "Fill name field",
+          "Press button household rule",
+          "Check if all elements on page exist",
+        ]);
         cy.visit("/");
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
@@ -61,7 +77,7 @@ describe("Targeting", () => {
             .click()
             .type("address");
 
-          // TODO
+          // TODO: Refactor in second milestone
           // cy.contains("Address").click();
           // cy.get('[data-cy="input-filters[0].value"]')
           //   .click()
@@ -91,46 +107,39 @@ describe("Targeting", () => {
       });
     });
     context("Targeting Filters", () => {
-      it.skip("Targeting Search filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Status filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Programme filter", () => {
-        // ToDo
-      });
-      it.skip("Targeting Number of Households filter", () => {
-        // ToDo
-      });
+      it.skip("Targeting Search filter", () => {});
+      it.skip("Targeting Status filter", () => {});
+      it.skip("Targeting Programme filter", () => {});
+      it.skip("Targeting Number of Households filter", () => {});
     });
     context("Edit targeting", () => {
-      it.skip("Edit", () => {
-        // ToDo
-      });
+      it.skip("Edit", () => {});
     });
     context("Rebuild targeting", () => {
-      it.skip("Rebuild", () => {
-        // ToDo
-      });
+      it.skip("Rebuild", () => {});
     });
     context("Lock targeting", () => {
-      it.skip("Lock", () => {
-        // ToDo
-      });
+      it.skip("Lock", () => {});
     });
     context("Unlock targeting", () => {
-      it.skip("Unlock", () => {
-        // ToDo
-      });
+      it.skip("Unlock", () => {});
     });
     context("Mark ready targeting", () => {
-      it.skip("Mark ready", () => {
-        // ToDo
-      });
+      it.skip("Mark ready", () => {});
     });
   });
   describe.skip("E2E tests Targeting", () => {});
 
-  describe.skip("Regression tests Targeting", () => {});
+  describe("Regression tests Targeting", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Targeting page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      targetingPage.clearCache();
+      targetingPage.checkElementsOnPage();
+    });
+  });
 });

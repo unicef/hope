@@ -16,6 +16,7 @@ class ProgramCycleAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEMod
     list_display = ("program", "iteration", "status", "start_date", "end_date")
     date_hierarchy = "program__start_date"
     list_filter = (("status", ChoicesFieldComboFilter),)
+    raw_id_fields = ("program",)
 
 
 class ProgramCycleAdminInline(admin.TabularInline):
@@ -29,7 +30,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
 
 @admin.register(Program)
 class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("name", "status", "start_date", "end_date", "business_area")
+    list_display = ("name", "status", "start_date", "end_date", "business_area", "data_collecting_type")
     date_hierarchy = "start_date"
     list_filter = (
         ("status", ChoicesFieldComboFilter),

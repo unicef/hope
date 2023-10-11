@@ -390,7 +390,16 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     }
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_2_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },
@@ -430,6 +439,35 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_0
 }
 
 snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_type_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_type_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },

@@ -15,6 +15,7 @@ import { ImportErrors } from '../../../../containers/tables/payments/Verificatio
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListPerFspMutation,
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   useImportXlsxPpListPerFspMutation,
@@ -36,6 +37,13 @@ interface ImportXlsxPaymentPlanPaymentListPerFspProps {
   permissions: string[];
 }
 
+const allowedState = [
+  null,
+  PaymentPlanBackgroundActionStatus.XlsxExportError,
+  PaymentPlanBackgroundActionStatus.XlsxImportError,
+  PaymentPlanBackgroundActionStatus.RuleEngineError,
+];
+
 export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   paymentPlan,
   permissions,
@@ -55,10 +63,11 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
     uploadData,
     'importXlsxPaymentPlanPaymentListPerFsp.errors',
   );
-  const canUploadReconciliation = hasPermissions(
-    PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
-    permissions,
-  );
+  const canUploadReconciliation =
+    hasPermissions(
+      PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+      permissions,
+    ) && allowedState.includes(paymentPlan.backgroundActionStatus);
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {

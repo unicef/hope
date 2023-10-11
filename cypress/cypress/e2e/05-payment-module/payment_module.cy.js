@@ -2,9 +2,9 @@ import PaymentModule from "../../page-objects/pages/payment_module/payment_modul
 import PMDetailsPage from "../../page-objects/pages/payment_module/details_page.po";
 import NewPaymentPlan from "../../page-objects/pages/payment_module/new_payment_plan.po";
 
-let t = new PaymentModule();
-let td = new PMDetailsPage();
-let tcn = new NewPaymentPlan();
+let paymentModule = new PaymentModule();
+let paymentModuleDetailsPage = new PMDetailsPage();
+let newPaymentPlan = new NewPaymentPlan();
 
 describe("Payment Module", () => {
   before(() => {
@@ -23,6 +23,12 @@ describe("Payment Module", () => {
   });
   describe("Component tests Payment", () => {
     it("Can create a payment plan", () => {
+      cy.scenario([
+        "Go to payment plan page",
+        "Press New Payment Plan button",
+        "Create New Payment Plan",
+        "Check if Payment Plan was created properly",
+      ]);
       const downloadsFolder = Cypress.config("downloadsFolder");
       const fileName = (id) => `payment_plan_payment_list_${id}`;
       const zipFileName = (id) => `${fileName(id)}.zip`;
@@ -32,7 +38,7 @@ describe("Payment Module", () => {
       let fspXlsxFilenames;
 
       //New Payment Plan page
-      t.createPaymentPlan(targetPopulationName);
+      paymentModule.createPaymentPlan(targetPopulationName);
 
       cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 
@@ -175,9 +181,9 @@ describe("Payment Module", () => {
                   encoding: "base64",
                 });
               });
-              cy.get('[data-cy="file-input"').click({ force: true });
+              cy.get('[data-cy="file-input"]').click({ force: true });
               // cy.get('[data-cy="imported-file-name"]').should('exist'); // TODO
-              cy.get('[data-cy="button-import-submit"').click({ force: true });
+              cy.get('[data-cy="button-import-submit"]').click({ force: true });
               cy.wait(1000);
               cy.get("p").should("not.contain", "Errors");
               cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -190,58 +196,39 @@ describe("Payment Module", () => {
             });
         });
     });
-    context("Select Entitlement Formula", () => {
-      // ToDo
-    });
-    context("Set up FSP", () => {
-      // ToDo
-    });
-    context("Create Exclude", () => {
-      // ToDo
-    });
-    context("Choose field from Payee List", () => {
-      // ToDo
-    });
-    context("Lock FSP", () => {
-      // ToDo
-    });
-    context("Unlock FSP", () => {
-      // ToDo
-    });
-    context("Send for approval", () => {
-      // ToDo
-    });
-    context("Approve", () => {
-      // ToDo
-    });
-    context("Reject from all points of process", () => {
-      // ToDo
-    });
-    context("Authorize", () => {
-      // ToDo
-    });
-    context("Export XLSX", () => {
-      // ToDo
-    });
-    context("Check Acceptance Process", () => {
-      //ToDo
-    });
+    it("Select Entitlement Formula", () => {});
+    it("Set up FSP", () => {});
+    it("Create Exclude", () => {});
+    it("Choose field from Payee List", () => {});
+    it("Lock FSP", () => {});
+    it("Unlock FSP", () => {});
+    it("Send for approval", () => {});
+    it("Approve", () => {});
+    it("Reject from all points of process", () => {});
+    it("Authorize", () => {});
+    it("Export XLSX", () => {});
+    it("Check Acceptance Process", () => {});
     context("Payment Filters", () => {
-      it.skip("Payment Search filter", () => {
-        // ToDo
-      });
-      it.skip("Payment Status filter", () => {
-        // ToDo
-      });
-      it.skip("Payment Entitled Quantity filter", () => {
-        // ToDo
-      });
-      it.skip("Payment Dispersion Date filter", () => {
-        // ToDo
-      });
+      it.skip("Payment Search filter", () => {});
+      it.skip("Payment Status filter", () => {});
+      it.skip("Payment Entitled Quantity filter", () => {});
+      it.skip("Payment Dispersion Date filter", () => {});
     });
   });
   describe.skip("E2E tests Payment", () => {});
 
-  describe.skip("Regression tests Payment", () => {});
+  describe("Regression tests Payment", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Payment module page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      cy.navigateToHomePage();
+      paymentModule.getButtonPaymentModule().click();
+      paymentModule.clearCache();
+      paymentModule.getTitle().contains(paymentModule.textTitle);
+    });
+  });
 });

@@ -125,8 +125,7 @@ describe("Grievance - Feedback", () => {
         feedbackPage.useCreatedByFilter("root@root.com");
         feedbackPage.expectedNumberOfRows(2);
       });
-      // ToDo: Add after fixed: 168323
-      it.skip("Feedback Creation Date filter", () => {
+      it("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
@@ -395,9 +394,22 @@ describe("Grievance - Feedback", () => {
     });
 
     context("Edit Feedback", () => {
-      it.skip("Edit Feedback", () => {});
+      it.skip("Edit Feedback", () => {
+        // ToDo
+      });
     });
   });
   describe.skip("E2E tests Feedback", () => {});
-  describe.skip("Regression tests Feedback", () => {});
+  describe("Regression tests Feedback", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Feedback page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      feedbackPage.clearCache();
+      feedbackPage.checkElementsOnPage();
+    });
+  });
 });

@@ -5,10 +5,17 @@ let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
+const paymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
   beforeEach(() => {
+    cy.adminLogin();
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
+  });
+
+  after(() => {
+    cy.initScenario("init_clear");
+    cy.adminLogin();
   });
 
   describe("Smoke tests Payment Verification", () => {
@@ -41,9 +48,7 @@ describe("Payment Verification", () => {
       });
     });
 
-    it.skip("Check Create Verification Plan pop-up", () => {
-      // ToDo
-    });
+    it.skip("Check Create Verification Plan pop-up", () => {});
   });
 
   describe("Component tests Payment Verification", () => {
@@ -78,22 +83,35 @@ describe("Payment Verification", () => {
     });
 
     context("Verification Plan Settings", () => {
-      it.skip("Test_1", () => {
-        // ToDo
-      });
+      it.skip("Test_1", () => {});
     });
 
     context("Edit Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan();
       });
-      it.skip("Test_1", () => {
-        paymentVerificationDetailsPage.getEditVP().contains("EDIT").click();
-        paymentVerificationDetailsPage.getCVPTitle();
+      it("Edit Verification Plan", () => {
+        cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Verification Plan",
+          "Create New Verification Plan",
+          "After create Verification Plan Press Edit button",
+          "Change verification channel from MANUAL to XLSX",
+          "Press button Save",
+          "Check if Verification Plan was changed",
+        ]);
+        paymentVerificationDetailsPage.getEditVP().contains("Edit").click();
+        paymentVerificationDetailsPage.getCvpInputAdminCheckbox().click();
+        paymentVerificationDetailsPage
+          .getLabelVERIFICATIONCHANNEL()
+          .contains("MANUAL");
+        paymentVerificationDetailsPage.getXLSX().click();
+        paymentVerificationDetailsPage.getCVPSave().click();
+        paymentVerificationDetailsPage
+          .getLabelVERIFICATIONCHANNEL()
+          .contains("XLSX");
       });
     });
 
@@ -107,6 +125,9 @@ describe("Payment Verification", () => {
       });
       it("Delete Verification Plan", () => {
         cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Verification Plan",
+          "Create New Verification Plan",
           "Press Delete button",
           "Press Delete button on pop-up",
           "Check if Verification Plan was deleted",
@@ -131,6 +152,9 @@ describe("Payment Verification", () => {
       });
       it("Activate Verification Plan", () => {
         cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Verification Plan",
+          "Create New Verification Plan",
           "Press Activation button",
           "Press Activate button on pop-up",
           "Check if Summary status = ACTIVE",
@@ -147,15 +171,20 @@ describe("Payment Verification", () => {
 
     context("Finish Verification Plan", () => {
       beforeEach(() => {
-        paymentVerificationPage.getPaymentPlanID().type("PP-0060-23-00000002");
-        paymentVerificationPage.getApply().click();
         paymentVerificationPage.getPaymentPlanRows().should("have.length", 1);
         paymentVerificationPage.choosePaymentPlan(0).click();
         paymentVerificationDetailsPage.createNewVerificationPlan(
           defaultNumberOfVPlans016
         );
       });
-      it.skip("Finish Verification Plan", () => {
+      it("Finish Verification Plan", () => {
+        cy.scenario([
+          "Go to Verification Plan page",
+          "Choose Active Verification Plan",
+          "Press Finish button",
+          "Press Finish button on pop-up",
+          "Check if Verification Plan was Finish",
+        ]);
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
         paymentVerificationDetailsPage.getStatusVP().contains("ACTIVE");
@@ -166,25 +195,17 @@ describe("Payment Verification", () => {
     });
 
     context("Grievance creation/preview", () => {
-      it.skip("Test_1", () => {
-        // ToDo
-      });
+      it.skip("Test_1", () => {});
     });
 
     context("Verify Payment Record", () => {
-      it.skip("Verify Manually", () => {
-        // ToDo
-      });
-      it.skip("Verify using RapidPro", () => {
-        // ToDo
-      });
-      it.skip("Verify using XLSX", () => {
-        // ToDo
-      });
+      it.skip("Verify Manually", () => {});
+      it.skip("Verify using RapidPro", () => {});
+      it.skip("Verify using XLSX", () => {});
     });
   });
   describe("E2E tests Payment Verification", () => {
-    // eslint-disable-next-line mocha/no-setup-in-describe
+    // ToDo: Refactor this in second milestone
     paymentVerificationPage.countPaymentPlanArray().forEach((row_no) => {
       it(`Compare data in Payment Plan Details Page - Row: ${row_no}`, () => {
         paymentVerificationPage.choosePaymentPlan(row_no).click();
@@ -197,8 +218,16 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
-    it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {
-      // ToDo
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Payment Verification page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      paymentVerificationPage.clearCache();
+      paymentVerificationPage.checkPaymentVerificationTitle();
     });
+    it.skip("BUG 161302 - The Status drop-down menu jumps.", () => {});
   });
 });

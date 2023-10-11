@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -19,8 +19,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds($search: String) {
-        allHouseholds(search: $search, orderBy: "size", businessArea: "afghanistan") {
+      query AllHouseholds($search: String, $searchType: String) {
+        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", businessArea: "afghanistan") {
           edges {
             node {
               size
@@ -111,7 +111,8 @@ HOUSEHOLD_QUERY = """
     """
 
 
-class TestHouseholdQuery(APITestCase):
+class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
+    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -160,9 +161,12 @@ class TestHouseholdQuery(APITestCase):
             cls.households.append(household)
 
         household = cls.households[0]
+        household.registration_id = 123
+        household.save()
         household.refresh_from_db()
         household.head_of_household.phone_no = "+18663567905"
         household.head_of_household.save()
+        household.head_of_household.refresh_from_db()
 
         DocumentFactory(
             document_number="123-456-789",
@@ -172,6 +176,7 @@ class TestHouseholdQuery(APITestCase):
 
         # remove after data migration
         migrate_data_to_representations()
+        super().setUpTestData()
 
     @parameterized.expand(
         [
@@ -239,7 +244,7 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"search": f"household_id {household.unicef_id}"},
+            variables={"search": f"{household.unicef_id}", "searchType": "household_id"},
         )
 
     @parameterized.expand(
@@ -256,7 +261,7 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"search": f"individual_id {household.head_of_household.unicef_id}"},
+            variables={"search": f"{household.head_of_household.unicef_id}", "searchType": "individual_id"},
         )
 
     @parameterized.expand(
@@ -273,7 +278,7 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"search": f"individual_id {household.head_of_household.full_name}"},
+            variables={"search": f"{household.head_of_household.full_name}", "searchType": "individual_id"},
         )
 
     @parameterized.expand(
@@ -288,7 +293,7 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"search": "phone_no +18663567905"},
+            variables={"search": "+18663567905", "searchType": "phone_no"},
         )
 
     @parameterized.expand(
@@ -303,5 +308,40 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"search": "national_id 123-456-789"},
+            variables={"search": "123-456-789", "searchType": "national_id"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123"),
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
+            ("without_permission", [], "123"),
+        ]
+    )
+    def test_query_households_by_registration_id_filter(
+        self, _: Any, permissions: List[Permissions], search: str
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={"search": search, "searchType": "registration_id"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_search_without_search_type(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user},
+            variables={
+                "search": "123-456-789",
+            },
         )
