@@ -519,6 +519,10 @@ type CommunicationMessageNode implements Node {
   randomSamplingArguments: JSONString
   sampleSize: Int!
   program: ProgramNode
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: CommunicationMessageNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
 }
 
 type CommunicationMessageNodeConnection {
@@ -796,6 +800,7 @@ type DataCollectingTypeNode implements Node {
   individualFiltersAvailable: Boolean!
   householdFiltersAvailable: Boolean!
   recalculateComposition: Boolean!
+  datacollectingtypeSet(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
@@ -1100,6 +1105,10 @@ type FeedbackNode implements Node {
   program: ProgramNode
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: FeedbackNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
 }
 
@@ -1526,12 +1535,12 @@ type HouseholdNode implements Node {
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
+  dataCollectingType: DataCollectingTypeNode
   program: ProgramNode
   copiedFrom: HouseholdNode
   originUnicefId: String
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
-  dataCollectingType: DataCollectingTypeNode
   isRecalculatedGroupAges: Boolean!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
@@ -2589,10 +2598,10 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
-  bulkUpdateGrievanceAssignee(assignedTo: String, businessAreaSlug: String!, grievanceTicketIds: [ID]): BulkUpdateGrievanceTicketsAssigneesMutation
-  bulkUpdateGrievancePriority(businessAreaSlug: String!, grievanceTicketIds: [ID], priority: Int!): BulkUpdateGrievanceTicketsPriorityMutation
-  bulkUpdateGrievanceUrgency(businessAreaSlug: String!, grievanceTicketIds: [ID], urgency: Int!): BulkUpdateGrievanceTicketsUrgencyMutation
-  bulkGrievanceAddNote(businessAreaSlug: String!, grievanceTicketIds: [ID], note: String): BulkGrievanceAddNoteMutation
+  bulkUpdateGrievanceAssignee(assignedTo: String!, businessAreaSlug: String!, grievanceTicketIds: [ID]!): BulkUpdateGrievanceTicketsAssigneesMutation
+  bulkUpdateGrievancePriority(businessAreaSlug: String!, grievanceTicketIds: [ID]!, priority: Int!): BulkUpdateGrievanceTicketsPriorityMutation
+  bulkUpdateGrievanceUrgency(businessAreaSlug: String!, grievanceTicketIds: [ID]!, urgency: Int!): BulkUpdateGrievanceTicketsUrgencyMutation
+  bulkGrievanceAddNote(businessAreaSlug: String!, grievanceTicketIds: [ID]!, note: String!): BulkGrievanceAddNoteMutation
   createPaymentVerificationPlan(input: CreatePaymentVerificationInput!, version: BigInt): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
