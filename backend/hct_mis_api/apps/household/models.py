@@ -477,7 +477,7 @@ class Household(
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
+    row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
     registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -1062,7 +1062,7 @@ class Individual(
 
     def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
-            self.unicef_id: str = str(original_individual.unicef_id)  # type: ignore
+            self.unicef_id: str = str(original_individual.unicef_id)
         self.documents.update(status=Document.STATUS_INVALID)
         self.duplicate = True
         self.duplicate_date = timezone.now()
