@@ -6,6 +6,7 @@ import {
   useAllAccountabilityCommunicationMessagesQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
@@ -21,9 +22,10 @@ export const CommunicationTable = ({
 }: CommunicationTableProps): ReactElement => {
   const { t } = useTranslation();
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
-    createdAtRange: filter.createdAtRange
-      ? JSON.stringify(filter.createdAtRange)
-      : '',
+    createdAtRange: JSON.stringify({
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+    }),
     program: filter.program,
     targetPopulation: filter.targetPopulation,
     createdBy: filter.createdBy || '',

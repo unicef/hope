@@ -8,7 +8,7 @@ import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
@@ -82,6 +82,7 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
+    data_collecting_type = factory.LazyAttribute(lambda o: DataCollectingType.objects.first())
 
     @factory.post_generation
     def locations(self, create: bool, extracted: bool, **kwargs: Any) -> None:

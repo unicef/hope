@@ -162,6 +162,7 @@ def get_individual_doc(
 class HouseholdDocument(Document):
     head_of_household = fields.ObjectField(
         properties={
+            "unicef_id": fields.TextField(),
             "full_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "given_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "middle_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),

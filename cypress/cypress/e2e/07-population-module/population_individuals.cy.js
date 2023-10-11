@@ -1,8 +1,8 @@
 import PopulationIndividuals from "../../page-objects/pages/population_module/population_individuals.po";
 import IPDetailsPage from "../../page-objects/pages/population_module/individuals_details_page.po";
 
-let pi = new PopulationIndividuals();
-let pidp = new IPDetailsPage();
+let populationIndividuals = new PopulationIndividuals();
+let individualsDetailsPage = new IPDetailsPage();
 
 describe("Individuals Module", () => {
   beforeEach(() => {
@@ -16,6 +16,11 @@ describe("Individuals Module", () => {
   describe("Smoke tests Individuals Population module", () => {
     it.skip("Check Individuals Population page", () => {});
     it("Check Individuals Population Details page", () => {
+      cy.scenario([
+        "Go to Population page",
+        "Go to Individuals page",
+        "Check if all elements on page exist",
+      ]);
       cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
       cy.get("div").contains("Individuals");
       cy.get('[data-cy="table-title"]').contains("Individuals");
@@ -29,30 +34,29 @@ describe("Individuals Module", () => {
   });
   describe("Component tests Individuals Population", () => {
     context("Individuals Population Filters", () => {
-      it.skip("Individuals Population Search filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Programme filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Residence Status filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Admin Level 2 filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Size filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Sorted by filter", () => {
-        // ToDo
-      });
-      it.skip("Individuals Population Status filter", () => {
-        // ToDo
-      });
+      it.skip("Individuals Population Search filter", () => {});
+      it.skip("Individuals Population Programme filter", () => {});
+      it.skip("Individuals Population Residence Status filter", () => {});
+      it.skip("Individuals Population Admin Level 2 filter", () => {});
+      it.skip("Individuals Size filter", () => {});
+      it.skip("Individuals Population Sorted by filter", () => {});
+      it.skip("Individuals Population Status filter", () => {});
     });
   });
   describe.skip("E2E tests Individuals Population", () => {});
 
-  describe.skip("Regression tests Individuals Population", () => {});
+  describe("Regression tests Individuals Population", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Individuals page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      populationIndividuals.clearCache();
+      populationIndividuals
+        .getTitle()
+        .contains(populationIndividuals.textTitle);
+    });
+  });
 });
