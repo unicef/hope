@@ -34,5 +34,16 @@ describe("Grievance Dashboard", () => {
   });
   describe.skip("E2E tests Grievance Dashboard", () => {});
 
-  describe.skip("Regression tests Grievance Dashboard", () => {});
+  describe("Regression tests Grievance Dashboard", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Grievance Dashboard page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      grievanceDashboard.clearCache();
+      grievanceDashboard.checkElementsOnPage();
+    });
+  });
 });

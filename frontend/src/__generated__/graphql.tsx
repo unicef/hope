@@ -1101,7 +1101,7 @@ export type CreateGrievanceTicketInput = {
   assignedTo?: Maybe<Scalars['ID']>,
   category: Scalars['Int'],
   issueType?: Maybe<Scalars['Int']>,
-  admin?: Maybe<Scalars['String']>,
+  admin?: Maybe<Scalars['ID']>,
   area?: Maybe<Scalars['String']>,
   language: Scalars['String'],
   consent: Scalars['Boolean'],
@@ -8119,7 +8119,7 @@ export type UpdateGrievanceTicketInput = {
   ticketId: Scalars['ID'],
   description?: Maybe<Scalars['String']>,
   assignedTo?: Maybe<Scalars['ID']>,
-  admin?: Maybe<Scalars['String']>,
+  admin?: Maybe<Scalars['ID']>,
   area?: Maybe<Scalars['String']>,
   language?: Maybe<Scalars['String']>,
   linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
@@ -8196,6 +8196,7 @@ export type UpdateProgramInput = {
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  dataCollectingTypeCode?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationInput = {
@@ -10616,6 +10617,10 @@ export type CreateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
+      & { dataCollectingType: Maybe<(
+        { __typename?: 'DataCollectingTypeNode' }
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      )> }
     )> }
   )> }
 );
@@ -10647,6 +10652,10 @@ export type UpdateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+      & { dataCollectingType: Maybe<(
+        { __typename?: 'DataCollectingTypeNode' }
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      )> }
     )> }
   )> }
 );
@@ -13287,7 +13296,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'individualFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable'>
         )> }
       )> }
     )>> }
@@ -13306,7 +13315,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
     )> }
   )> }
 );
@@ -18385,6 +18394,13 @@ export const CreateProgramDocument = gql`
       cashPlus
       populationGoal
       individualDataNeeded
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
     validationErrors
   }
@@ -18502,6 +18518,13 @@ export const UpdateProgramDocument = gql`
       administrativeAreasOfImplementation
       individualDataNeeded
       version
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
     validationErrors
   }
@@ -25267,6 +25290,7 @@ export const AllProgramsForChoicesDocument = gql`
         name
         individualDataNeeded
         dataCollectingType {
+          id
           individualFiltersAvailable
         }
       }
@@ -25352,6 +25376,7 @@ export const ProgramDocument = gql`
     individualDataNeeded
     version
     dataCollectingType {
+      id
       code
       label
       active
