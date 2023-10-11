@@ -1,31 +1,17 @@
-from datetime import datetime
-from typing import Any, Dict, List
-
-from django.core.management import call_command
-from django.utils import timezone
 from faker.generator import random
 
-from parameterized import parameterized
-
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.constants import PRIORITY_NOT_SET, PRIORITY_HIGH, URGENCY_NOT_SET, URGENCY_VERY_URGENT
-from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory,
-    TicketNeedsAdjudicationDetailsFactory,
-    TicketSystemFlaggingDetailsFactory,
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_HIGH,
+    PRIORITY_NOT_SET,
+    URGENCY_NOT_SET,
+    URGENCY_VERY_URGENT,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 
 class TestGrievanceApproveAutomaticMutation(APITestCase):
@@ -80,7 +66,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             issue_type=None,
         )
 
-    def test_bulk_update_assignee(self):
+    def test_bulk_update_assignee(self) -> None:
         self.assertEqual(self.grievance_ticket1.assigned_to, self.user)
         self.assertEqual(self.grievance_ticket2.assigned_to, self.user)
         BulkActionService().bulk_assign(
@@ -91,7 +77,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.assertEqual(self.grievance_ticket1.assigned_to, self.user_two)
         self.assertEqual(self.grievance_ticket2.assigned_to, self.user_two)
 
-    def test_bulk_update_priority(self):
+    def test_bulk_update_priority(self) -> None:
         self.assertEqual(self.grievance_ticket1.priority, PRIORITY_NOT_SET)
         self.assertEqual(self.grievance_ticket2.priority, PRIORITY_NOT_SET)
         BulkActionService().bulk_set_priority(
@@ -102,7 +88,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.assertEqual(self.grievance_ticket1.priority, PRIORITY_HIGH)
         self.assertEqual(self.grievance_ticket2.priority, PRIORITY_HIGH)
 
-    def test_bulk_update_urgency(self):
+    def test_bulk_update_urgency(self) -> None:
         self.assertEqual(self.grievance_ticket1.urgency, URGENCY_NOT_SET)
         self.assertEqual(self.grievance_ticket2.urgency, URGENCY_NOT_SET)
         BulkActionService().bulk_set_urgency(
@@ -113,7 +99,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.assertEqual(self.grievance_ticket1.urgency, URGENCY_VERY_URGENT)
         self.assertEqual(self.grievance_ticket2.urgency, URGENCY_VERY_URGENT)
 
-    def test_bulk_add_note(self):
+    def test_bulk_add_note(self) -> None:
         self.assertEqual(self.grievance_ticket1.ticket_notes.count(), 0)
         self.assertEqual(self.grievance_ticket2.ticket_notes.count(), 0)
         BulkActionService().bulk_add_note(
