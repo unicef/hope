@@ -3,9 +3,10 @@ from collections import defaultdict
 from typing import Any, Optional
 
 from django.db import transaction
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Q, QuerySet
+from django.utils import timezone
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Document,
@@ -54,30 +55,40 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     ).order_by("status"):
         logger.info("----- NEW PROGRAM -----")
         logger.info(f"Creating representations for program: {program}")
-        if program.status == Program.ACTIVE:
-            target_populations_ids = TargetPopulation.objects.filter(
-                program=program,
-            ).values_list("id", flat=True)
-        elif program.status == Program.FINISHED:
-            target_populations_ids = TargetPopulation.objects.filter(
+        target_populations_ids = TargetPopulation.objects.filter(
+            program=program,
+        ).values_list("id", flat=True)
+
+        household_selections = HouseholdSelection.original_and_repr_objects.filter(
+            Q(target_population_id__in=target_populations_ids)
+            & Q(is_original=True)
+            & Q(is_migration_handled=False)
+            & (
                 Q(
-                    status__in=[
+                    target_population__status__in=[
                         TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
                         TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
                     ]
                 )
-                & Q(program=program)
-            ).values_list("id", flat=True)
-            delete_target_populations_in_wrong_statuses(program=program)
-
-        household_selections = HouseholdSelection.original_and_repr_objects.filter(
-            target_population_id__in=target_populations_ids, is_original=True, is_migration_handled=False
+                | Q(household__withdrawn=False)
+            )
         )
         household_ids = household_selections.distinct("household").values_list("household_id", flat=True)
 
-        households = Household.original_and_repr_objects.filter(
-            id__in=household_ids, is_migration_handled=False, is_original=True
-        )
+        if program.status == Program.ACTIVE:
+            households_with_compatible_collection_type = Household.original_and_repr_objects.filter(
+                is_original=True,
+                is_migration_handled=False,
+                data_collecting_type__in=program.data_collecting_type.compatible_types.all(),
+                withdrawn=False,
+            ).only("id")
+            households = Household.original_and_repr_objects.filter(
+                Q(id__in=household_ids) | Q(id__in=households_with_compatible_collection_type)
+            ).filter(is_migration_handled=False, is_original=True)
+        else:
+            households = Household.original_and_repr_objects.filter(
+                id__in=household_ids, is_migration_handled=False, is_original=True
+            )
         households_count = households.count()
 
         logger.info(f"Handling households for program: {program}")
@@ -93,8 +104,16 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
                 with transaction.atomic():
                     copy_household_representation(household, program, individuals_per_household_dict[household.id])
 
-        logger.info(f"Handling RDIs for program: {program}")
-        handle_rdis(households, program)
+        if program.status == Program.ACTIVE:
+            logger.info(f"Handling RDIs for program: {program}")
+            handle_rdis(households, program)
+        else:
+            rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
+            rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
+            rdi_through = RegistrationDataImport.programs.through
+            rdi_through.objects.bulk_create(
+                [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis]
+            )
 
         logger.info(f"Copying roles for program: {program}")
         copy_roles(households, program=program)
@@ -108,7 +127,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         business_area=business_area, copied_to__isnull=False, is_original=True
     ).distinct().update(is_migration_handled=True)
     logger.info("Handling objects without any representations yet - enrolling to biggest program")
-    copy_non_program_objects_to_biggest_program(business_area)
+    copy_non_program_objects_to_void_storage_programs(business_area)
 
     # logger.info("Adjusting payments and payment records")
     # adjust_payments(business_area)
@@ -278,21 +297,6 @@ def copy_roles(households: QuerySet, program: Program) -> None:
 
         IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_list)
         del roles_list
-
-
-def delete_target_populations_in_wrong_statuses(program: Program) -> None:
-    tp_to_delete = TargetPopulation.objects.filter(
-        ~Q(
-            status__in=[
-                TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
-                TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
-            ]
-        )
-        & Q(program=program)
-    )
-    with transaction.atomic():
-        HouseholdSelection.objects.filter(target_population__in=tp_to_delete).delete()
-        tp_to_delete.delete()
 
 
 def copy_entitlement_card_per_household(household: Household, household_representation: Household) -> None:
@@ -484,7 +488,7 @@ def handle_rdis(households: QuerySet, program: Program) -> None:
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
             logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
-        rdi_households = rdi.households.filter(is_original=True)
+        rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
 
         household_count = rdi_households.count()
         for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
@@ -510,59 +514,54 @@ def handle_rdis(households: QuerySet, program: Program) -> None:
         rdi.programs.add(program)
 
 
-def get_biggest_program(business_area: BusinessArea) -> Optional[Program]:
-    """
-    Get the program with most households.
-    Household has 2 foreign keys to program, reversed relation for ForeignKey is called household.
-    The 2nd (households) will be deleted after this migration, and names adjusted.
-    """
-    return (
-        Program.objects.filter(business_area=business_area, status=Program.ACTIVE)
-        .annotate(household_count=Count("household"))
-        .order_by("-household_count")
-        .only("id")
-        .first()
-    )
-
-
-def copy_non_program_objects_to_biggest_program(business_area: BusinessArea) -> None:
-    biggest_program = get_biggest_program(business_area)
-    if not biggest_program:
-        return
-    copy_individuals_to_biggest_program(biggest_program, business_area)
-    copy_households_to_biggest_program(biggest_program, business_area)
-    rdis = RegistrationDataImport.objects.filter(programs=None, business_area=business_area).only("id")
-    rdi_through = RegistrationDataImport.programs.through
-    rdi_through.objects.bulk_create(
-        [rdi_through(registrationdataimport_id=rdi.id, program_id=biggest_program.id) for rdi in rdis]
-    )
-
-
-def copy_households_to_biggest_program(program: Program, business_area: BusinessArea) -> None:
+def copy_non_program_objects_to_void_storage_programs(business_area: BusinessArea) -> None:
     households = Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=True, is_original=True
     ).order_by("pk")
+    collecting_types = DataCollectingType.objects.filter(
+        id__in=households.values_list("data_collecting_type", flat=True).distinct().order_by("pk")
+    )
 
-    household_count = households.count()
-    for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
-        batch_end = batch_start + BATCH_SIZE_SMALL
-        logger.info(f"Copying {batch_start} - {batch_end}/{household_count} households to biggest program")
-        household_dict = {}
-        with transaction.atomic():
-            individuals_per_household_dict = defaultdict(list)
-            batched_households = households[0:BATCH_SIZE_SMALL]
-            for individual in Individual.objects.filter(household__in=batched_households):
-                individuals_per_household_dict[individual.household_id].append(individual)
-            for household in batched_households:
-                household_original_id = household.pk
-                household_representation = copy_household(
-                    household,
-                    program,
-                    individuals_per_household_dict[household_original_id],
-                )
-                household_dict[household_original_id] = household_representation
+    for collecting_type in collecting_types:
+        program = create_storage_program_for_collecting_type(business_area, collecting_type)
+        households_with_collecting_type = households.filter(data_collecting_type=collecting_type)
 
-            copy_roles_from_dict(household_dict, program)
+        # Handle rdis before copying households so households query is not changed yet
+        rdis = (
+            RegistrationDataImport.objects.filter(
+                households__in=households_with_collecting_type,
+            )
+            .distinct()
+            .only("id")
+        )
+        rdi_through = RegistrationDataImport.programs.through
+        rdi_through.objects.bulk_create(
+            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis]
+        )
+
+        household_count = households_with_collecting_type.count()
+        for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
+            batch_end = batch_start + BATCH_SIZE_SMALL
+            logger.info(
+                f"Copying {batch_start} - {batch_end}/{household_count} "
+                f"households to program with collecting type {collecting_type}"
+            )
+            household_dict = {}
+            with transaction.atomic():
+                individuals_per_household_dict = defaultdict(list)
+                batched_households = households_with_collecting_type[0:BATCH_SIZE_SMALL]
+                for individual in Individual.objects.filter(household__in=batched_households):
+                    individuals_per_household_dict[individual.household_id].append(individual)
+                for household in batched_households:
+                    household_original_id = household.pk
+                    household_representation = copy_household(
+                        household,
+                        program,
+                        individuals_per_household_dict[household_original_id],
+                    )
+                    household_dict[household_original_id] = household_representation
+
+                copy_roles_from_dict(household_dict, program)
 
 
 def copy_roles_from_dict(household_dict: dict[Any, Household], program: Program) -> None:
@@ -598,11 +597,21 @@ def copy_roles_from_dict(household_dict: dict[Any, Household], program: Program)
     IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_to_create)
 
 
-def copy_individuals_to_biggest_program(program: Program, business_area: BusinessArea) -> None:
-    individuals = Individual.original_and_repr_objects.filter(
+def create_storage_program_for_collecting_type(
+    business_area: BusinessArea, collecting_type: DataCollectingType
+) -> Program:
+    return Program.all_objects.get_or_create(
+        name=f"Storage program - COLLECTION TYPE {collecting_type.label}",
+        data_collecting_type=collecting_type,
+        status=Program.DRAFT,
+        start_date=timezone.now(),
+        end_date=timezone.datetime.max,
         business_area=business_area,
-        is_original=True,
-        copied_to__isnull=True,
-    )
-    for individual in individuals:
-        copy_individual(individual, program)
+        budget=0,
+        frequency_of_payments=Program.ONE_OFF,
+        sector=Program.CHILD_PROTECTION,
+        scope=Program.SCOPE_FOR_PARTNERS,
+        cash_plus=True,
+        population_goal=1,
+        is_removed=True,  # soft-deleted
+    )[0]
