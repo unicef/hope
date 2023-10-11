@@ -421,7 +421,7 @@ class DataCollectingType(TimeStampedModel):
     label = models.CharField(max_length=32, blank=True)
     code = models.CharField(max_length=32)
     description = models.TextField(blank=True)
-    compatible_types = models.ManyToManyField("self", blank=True)
+    compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
     limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
     active = models.BooleanField(default=True)
     individual_filters_available = models.BooleanField(default=False)
