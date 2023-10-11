@@ -1059,7 +1059,7 @@ class Individual(
 
     def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
-            self.unicef_id: str = str(original_individual.unicef_id)
+            self.unicef_id = str(original_individual.unicef_id)
         self.documents.update(status=Document.STATUS_INVALID)
         self.duplicate = True
         self.duplicate_date = timezone.now()
