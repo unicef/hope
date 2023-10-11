@@ -44,7 +44,7 @@ describe("Program Management", () => {
         programManagement.getInputSector().first().click();
         programManagement.getSelectOptionByName("Multi Purpose").click();
         programManagement.getInputDataCollectingType().click();
-        programManagement.getSelectOptionByName("Partial").click();
+        programManagement.getSelectOptionByName("Full").click();
         programManagement.getInputStartDate().click().type("2023-01-01");
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
@@ -193,12 +193,7 @@ describe("Program Management", () => {
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}4000");
         programManagement.getButtonSave().click({ force: true });
-        programDetails.getPageHeaderTitle().should("contain", programName);
-        programDetails.getButtonActivateProgram().click({ force: true });
-        programDetails.getButtonActivateProgramModal().click({
-          force: true,
-        });
-        programDetails.getStatusContainer().should("contain", "ACTIVE");
+        cy.get("p").contains("Data Collecting Type is required");
       });
     });
   });
