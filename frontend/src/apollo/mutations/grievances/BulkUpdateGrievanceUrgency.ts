@@ -2,7 +2,7 @@ import { gql } from 'apollo-boost';
 
 export const BulkUpdateGrievanceUrgency = gql`
   mutation BulkUpdateGrievanceUrgency(
-    $grievanceTicketIds: [ID]
+    $grievanceTicketIds: [ID]!
     $urgency: Int!
     $businessAreaSlug: String!
   ) {

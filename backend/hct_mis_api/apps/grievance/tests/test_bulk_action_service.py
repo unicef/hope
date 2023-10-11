@@ -1,7 +1,11 @@
+from unittest.mock import patch
+
+from django.test import override_settings
+
 from faker.generator import random
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.constants import (
@@ -10,11 +14,15 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_NOT_SET,
     URGENCY_VERY_URGENT,
 )
+from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
 
 
-class TestGrievanceApproveAutomaticMutation(APITestCase):
+@override_settings(ELASTICSEARCH_DSL_AUTOSYNC=True)
+class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
+    databases = "__all__"
+
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -65,39 +73,93 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             business_area=cls.business_area,
             issue_type=None,
         )
+        super().setUpTestData()
 
     def test_bulk_update_assignee(self) -> None:
-        self.assertEqual(self.grievance_ticket1.assigned_to, self.user)
-        self.assertEqual(self.grievance_ticket2.assigned_to, self.user)
-        BulkActionService().bulk_assign(
-            [self.grievance_ticket1.id, self.grievance_ticket2.id], self.user_two.id, self.business_area.slug
-        )
-        self.grievance_ticket1.refresh_from_db()
-        self.grievance_ticket2.refresh_from_db()
-        self.assertEqual(self.grievance_ticket1.assigned_to, self.user_two)
-        self.assertEqual(self.grievance_ticket2.assigned_to, self.user_two)
+        from elasticsearch.helpers import bulk as original_bulk
+
+        with patch("elasticsearch.helpers.bulk") as mock_bulk:
+            mock_bulk.side_effect = lambda *args, **kwargs: original_bulk(*args, **kwargs, refresh="wait_for")
+            self.assertEqual(self.grievance_ticket1.assigned_to, self.user)
+            self.assertEqual(self.grievance_ticket2.assigned_to, self.user)
+            all_documents = GrievanceTicketDocument.search().query("match_all").execute()
+            grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id, str(self.user.id)
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id, str(self.user.id)
+            )
+            BulkActionService().bulk_assign(
+                [self.grievance_ticket1.id, self.grievance_ticket2.id], self.user_two.id, self.business_area.slug
+            )
+            self.assertEqual(mock_bulk.call_count, 1)
+            self.grievance_ticket1.refresh_from_db()
+            self.grievance_ticket2.refresh_from_db()
+            self.assertEqual(self.grievance_ticket1.assigned_to, self.user_two)
+            self.assertEqual(self.grievance_ticket2.assigned_to, self.user_two)
+            all_documents = GrievanceTicketDocument.search().query("match_all").execute()
+            grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id, str(self.user_two.id)
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id, str(self.user_two.id)
+            )
 
     def test_bulk_update_priority(self) -> None:
-        self.assertEqual(self.grievance_ticket1.priority, PRIORITY_NOT_SET)
-        self.assertEqual(self.grievance_ticket2.priority, PRIORITY_NOT_SET)
-        BulkActionService().bulk_set_priority(
-            [self.grievance_ticket1.id, self.grievance_ticket2.id], PRIORITY_HIGH, self.business_area.slug
-        )
-        self.grievance_ticket1.refresh_from_db()
-        self.grievance_ticket2.refresh_from_db()
-        self.assertEqual(self.grievance_ticket1.priority, PRIORITY_HIGH)
-        self.assertEqual(self.grievance_ticket2.priority, PRIORITY_HIGH)
+        from elasticsearch.helpers import bulk as original_bulk
+
+        with patch("elasticsearch.helpers.bulk") as mock_bulk:
+            mock_bulk.side_effect = lambda *args, **kwargs: original_bulk(*args, **kwargs, refresh="wait_for")
+            self.assertEqual(self.grievance_ticket1.priority, PRIORITY_NOT_SET)
+            self.assertEqual(self.grievance_ticket2.priority, PRIORITY_NOT_SET)
+            all_documents = GrievanceTicketDocument.search().query("match_all").execute()
+            grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority, PRIORITY_NOT_SET
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority, PRIORITY_NOT_SET
+            )
+            BulkActionService().bulk_set_priority(
+                [self.grievance_ticket1.id, self.grievance_ticket2.id], PRIORITY_HIGH, self.business_area.slug
+            )
+            self.grievance_ticket1.refresh_from_db()
+            self.grievance_ticket2.refresh_from_db()
+            self.assertEqual(self.grievance_ticket1.priority, PRIORITY_HIGH)
+            self.assertEqual(self.grievance_ticket2.priority, PRIORITY_HIGH)
+            all_documents = GrievanceTicketDocument.search().query("match_all").execute()
+            grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority, PRIORITY_HIGH)
+            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority, PRIORITY_HIGH)
 
     def test_bulk_update_urgency(self) -> None:
-        self.assertEqual(self.grievance_ticket1.urgency, URGENCY_NOT_SET)
-        self.assertEqual(self.grievance_ticket2.urgency, URGENCY_NOT_SET)
-        BulkActionService().bulk_set_urgency(
-            [self.grievance_ticket1.id, self.grievance_ticket2.id], URGENCY_VERY_URGENT, self.business_area.slug
-        )
-        self.grievance_ticket1.refresh_from_db()
-        self.grievance_ticket2.refresh_from_db()
-        self.assertEqual(self.grievance_ticket1.urgency, URGENCY_VERY_URGENT)
-        self.assertEqual(self.grievance_ticket2.urgency, URGENCY_VERY_URGENT)
+        from elasticsearch.helpers import bulk as original_bulk
+
+        with patch("elasticsearch.helpers.bulk") as mock_bulk:
+            mock_bulk.side_effect = lambda *args, **kwargs: original_bulk(*args, **kwargs, refresh="wait_for")
+            self.assertEqual(self.grievance_ticket1.urgency, URGENCY_NOT_SET)
+            self.assertEqual(self.grievance_ticket2.urgency, URGENCY_NOT_SET)
+            all_documents = GrievanceTicketDocument.search().query("match_all").execute()
+            grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency, URGENCY_NOT_SET)
+            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency, URGENCY_NOT_SET)
+            BulkActionService().bulk_set_urgency(
+                [self.grievance_ticket1.id, self.grievance_ticket2.id], URGENCY_VERY_URGENT, self.business_area.slug
+            )
+            self.grievance_ticket1.refresh_from_db()
+            self.grievance_ticket2.refresh_from_db()
+            self.assertEqual(self.grievance_ticket1.urgency, URGENCY_VERY_URGENT)
+            self.assertEqual(self.grievance_ticket2.urgency, URGENCY_VERY_URGENT)
+            all_documents = GrievanceTicketDocument.search().query("match_all").execute()
+            grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency, URGENCY_VERY_URGENT
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency, URGENCY_VERY_URGENT
+            )
 
     def test_bulk_add_note(self) -> None:
         self.assertEqual(self.grievance_ticket1.ticket_notes.count(), 0)
