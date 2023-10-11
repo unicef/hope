@@ -87,8 +87,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 
   const shouldDisableUpload =
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    !canUploadFile ||
-    paymentPlan.isFollowUp;
+    !canUploadFile;
 
   return (
     <>

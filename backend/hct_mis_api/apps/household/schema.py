@@ -240,7 +240,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
-        return parent.preferred_language or None
+        return parent.get_preferred_language_display()
 
     @staticmethod
     def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:

@@ -147,7 +147,6 @@ export const Entitlement = ({
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan.isFollowUp ||
     paymentPlan?.backgroundActionStatus ===
       PaymentPlanBackgroundActionStatus.XlsxExporting;
 
