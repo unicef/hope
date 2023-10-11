@@ -160,8 +160,7 @@ describe("Program Management", () => {
       programManagement.clearCache();
       cy.get("h5").should("contain", "Programme Management");
     });
-    // ToDo: 174707
-    it.skip("174707: Create a program without Data Collecting Type", () => {
+    it("174707: Create a program without Data Collecting Type", () => {
       programManagement
         .getPageHeaderTitle()
         .should("contain", "Programme Management");
