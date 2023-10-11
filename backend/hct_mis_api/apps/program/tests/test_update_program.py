@@ -5,7 +5,10 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -18,6 +21,10 @@ class TestUpdateProgram(APITestCase):
         program {
           name
           status
+          dataCollectingType {
+            label
+            code
+          }
         }
       }
     }
@@ -26,6 +33,8 @@ class TestUpdateProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        generate_data_collecting_types()
+
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(name="initial name", status=Program.DRAFT, business_area=cls.business_area)
 
@@ -69,6 +78,7 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
+                    "dataCollectingTypeCode": "full",
                 },
                 "version": self.program.version,
             },
