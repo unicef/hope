@@ -706,7 +706,6 @@ class TestCreateStorageProgramForCollectingType(TestCase):
         self.rdi2.refresh_from_db()
         self.rdi3.refresh_from_db()
 
-
         self.assertEqual(self.rdi1.programs(manager="all_objects").count(), 1)
         self.assertEqual(self.rdi2.programs(manager="all_objects").count(), 1)
         self.assertEqual(self.rdi3.programs(manager="all_objects").count(), 2)
