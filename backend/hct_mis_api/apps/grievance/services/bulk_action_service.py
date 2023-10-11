@@ -8,6 +8,11 @@ from django.shortcuts import get_object_or_404
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.utils import clear_cache_for_key
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
+from hct_mis_api.apps.grievance.documents import (
+    bulk_update_assigned_to,
+    bulk_update_priority,
+    bulk_update_urgency,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 
 
@@ -26,6 +31,7 @@ class BulkActionService:
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         self._clear_cache(business_area_slug)
+        bulk_update_assigned_to(tickets_ids, assigned_to_id)
         return queryset
 
     @transaction.atomic
@@ -39,6 +45,7 @@ class BulkActionService:
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         self._clear_cache(business_area_slug)
+        bulk_update_priority(tickets_ids, priority)
         return queryset
 
     @transaction.atomic
@@ -52,6 +59,7 @@ class BulkActionService:
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         self._clear_cache(business_area_slug)
+        bulk_update_urgency(tickets_ids, urgency)
         return queryset
 
     @transaction.atomic
