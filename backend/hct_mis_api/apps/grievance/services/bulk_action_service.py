@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional, Sequence
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -18,7 +18,7 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_assign(
-        self, tickets_ids: List[Optional[str]], assigned_to_id: str, business_area_slug: str
+        self, tickets_ids: Sequence[str], assigned_to_id: Optional[str], business_area_slug: str
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
@@ -30,7 +30,7 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_set_priority(
-        self, tickets_ids: List[str], priority: int, business_area_slug: str
+        self, tickets_ids: Sequence[str], priority: int, business_area_slug: str
     ) -> QuerySet[GrievanceTicket]:
         if priority not in [x for x, y in PRIORITY_CHOICES]:
             raise ValidationError("Invalid priority")
@@ -43,7 +43,7 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_set_urgency(
-        self, tickets_ids: List[str], urgency: int, business_area_slug: str
+        self, tickets_ids: Sequence[str], urgency: int, business_area_slug: str
     ) -> QuerySet[GrievanceTicket]:
         if urgency not in [x for x, y in URGENCY_CHOICES]:
             raise ValidationError("Invalid priority")
@@ -56,7 +56,7 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_add_note(
-        self, created_by: User, tickets_ids: List[str], comment: str, business_area_slug: str
+        self, created_by: User, tickets_ids: Sequence[str], comment: str, business_area_slug: str
     ) -> QuerySet[GrievanceTicket]:
         tickets = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
         if len(tickets) != len(tickets_ids):
