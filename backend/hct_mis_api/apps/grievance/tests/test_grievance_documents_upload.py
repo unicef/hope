@@ -11,6 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import UploadDocumentsBase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -90,7 +91,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         cls.grievance_data = {
             "description": "Test Feedback",
             "assignedTo": cls.id_to_base64(cls.user.id, "UserNode"),
-            "admin": cls.admin_area.p_code,
+            "admin": encode_id_base64(str(cls.admin_area.id), "Area"),
             "language": "Polish, English",
         }
 
