@@ -216,7 +216,17 @@ describe("Payment Module", () => {
       it.skip("Payment Dispersion Date filter", () => {});
     });
   });
-  describe.skip("E2E tests Payment", () => {});
+  describe.skip("E2E tests Payment", () => {
+    it("GPF: Disabled button NEW PAYMENT PLAN when program not active", () => {
+      paymentModule.navigateToProgrammePage("Draft Program");
+      paymentModule.clickMenuButtonPaymentModule();
+      paymentModule.getButtonNewPaymentPlan().should("be.visible");
+      paymentModule
+        .getButtonNewPaymentPlan()
+        .should("have.attr", "aria-disabled")
+        .and("equal", "true");
+    });
+  });
 
   describe("Regression tests Payment", () => {
     it.skip("174517: Check clear cache", () => {
