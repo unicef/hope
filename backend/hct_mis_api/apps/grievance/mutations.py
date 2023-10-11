@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -630,8 +630,10 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
         **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        assigned_to_id: str = decode_id_string(assigned_to)
-        decoded_grievance_ticket_ids: List[str] = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        assigned_to_id = decode_id_string(assigned_to)
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
         tickets = BulkActionService().bulk_assign(decoded_grievance_ticket_ids, assigned_to_id, business_area_slug)
         return cls(grievance_tickets=tickets)
 
@@ -652,12 +654,14 @@ class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
         root: Any,
         info: Any,
         grievance_ticket_ids: List[str],
-        urgency: str,
+        urgency: int,
         business_area_slug: str,
         **kwargs: Any,
-    ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
+    ) -> "BulkUpdateGrievanceTicketsUrgencyMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
         tickets = BulkActionService().bulk_set_urgency(decoded_grievance_ticket_ids, urgency, business_area_slug)
         return cls(grievance_tickets=tickets)
 
@@ -678,12 +682,14 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
         root: Any,
         info: Any,
         grievance_ticket_ids: List[str],
-        priority: str,
+        priority: int,
         business_area_slug: str,
         **kwargs: Any,
-    ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
+    ) -> "BulkUpdateGrievanceTicketsPriorityMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
         tickets = BulkActionService().bulk_set_priority(decoded_grievance_ticket_ids, priority, business_area_slug)
         return cls(grievance_tickets=tickets)
 
@@ -707,9 +713,11 @@ class BulkGrievanceAddNoteMutation(PermissionMutation):
         note: str,
         business_area_slug: str,
         **kwargs: Any,
-    ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
+    ) -> "BulkGrievanceAddNoteMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
-        decoded_grievance_ticket_ids = [decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids]
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
         tickets = BulkActionService().bulk_add_note(
             info.context.user, decoded_grievance_ticket_ids, note, business_area_slug
         )
