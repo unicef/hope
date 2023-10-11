@@ -512,9 +512,6 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
-    data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="households", on_delete=models.PROTECT, null=True, blank=True
-    )
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:

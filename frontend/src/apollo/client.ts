@@ -48,12 +48,40 @@ const isDataNull = (data): boolean => {
   return Object.values(data).some((value) => value === null);
 };
 
-//redirect to 404 page if data is null
+const hasResponseErrors = (response): boolean => {
+  return response && (response?.error || response?.errors?.length > 0);
+};
+
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
-    if (response.data && isDataNull(response.data)) {
-      window.location.href = '/404';
+    if (hasResponseErrors(response)) {
+      //When there is an error in Mutation, log it
+      const isMutation = operation.query.definitions.some(
+        (definition) => definition.kind === 'OperationDefinition' && definition.operation === 'mutation'
+      );
+      if(isMutation){
+        // eslint-disable-next-line no-console
+        console.error(response.data?.error || response.data?.errors);
+      } else {
+        //When there is an error in Query, redirect to Something Went Wrong page
+        const pathSegments = window.location.pathname.split('/');
+        const businessArea = pathSegments[1];
+
+        window.location.href = `/error/${businessArea}`;
+      }
     }
+    //When no errors and data is null, redirect to 404 page
+    else if (
+      response.data &&
+      isDataNull(response.data) &&
+      !hasResponseErrors(response)
+    ) {
+      const pathSegments = window.location.pathname.split('/');
+      const businessArea = pathSegments[1];
+
+      window.location.href = `/404/${businessArea}`;
+    }
+
     return response;
   });
 });

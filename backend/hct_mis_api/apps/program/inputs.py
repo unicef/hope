@@ -33,3 +33,4 @@ class UpdateProgramInput(graphene.InputObjectType):
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     individual_data_needed = graphene.Boolean()
+    data_collecting_type_code = graphene.String()
