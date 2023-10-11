@@ -21,12 +21,8 @@ describe("Country Dashboard", () => {
     });
 
     context("Filters", () => {
-      it.skip("Programme filter", () => {
-        // ToDo
-      });
-      it.skip("Admin Level 2 filter", () => {
-        // ToDo
-      });
+      it.skip("Programme filter", () => {});
+      it.skip("Admin Level 2 filter", () => {});
     });
   });
   describe.skip("E2E tests Country Dashboard", () => {});

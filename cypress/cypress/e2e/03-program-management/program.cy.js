@@ -1,8 +1,8 @@
 import ProgramManagement from "../../page-objects/pages/program_management/program_management.po";
 import PMDetailsPage from "../../page-objects/pages/program_management/details_page.po";
 
-let pm = new ProgramManagement();
-let pmd = new PMDetailsPage();
+let programManagement = new ProgramManagement();
+let pmDetailsPage = new PMDetailsPage();
 
 describe("Program Management", () => {
   beforeEach(() => {
@@ -15,7 +15,13 @@ describe("Program Management", () => {
     it.skip("Check Program Management Details page", () => {});
   });
   describe("Component tests Program Management", () => {
+    // ToDo: Refactor in second milestone
     it("Create a program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Create new programme",
+        "Check if programme was created properly",
+      ]);
       cy.get("h5").should("contain", "Programme Management");
       cy.get('[data-cy="button-new-program"]').click({ force: true });
       cy.get("h6").should("contain", "Set-up a new Programme");
@@ -26,6 +32,8 @@ describe("Program Management", () => {
         cy.get('[data-cy="select-option-Unicef"]').click();
         cy.get('[data-cy="input-sector"]').first().click();
         cy.get('[data-cy="select-option-Multi Purpose"]').click();
+        cy.get('[data-cy="input-data-collecting-type"]').first().click();
+        cy.get('[data-cy="select-option-Partial"]').click();
         cy.get('[data-cy="input-start-date"]').click().type("2023-01-01");
         cy.get('[data-cy="input-end-date"]').click().type("2033-12-30");
         cy.get('[data-cy="input-description"]')
@@ -50,6 +58,12 @@ describe("Program Management", () => {
       });
     });
     it("Edit Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose Programme",
+        "Edit Programme",
+        "Check if programme was edited properly",
+      ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="ACTIVE"]').click({ force: true });
       cy.get('[data-cy="button-filters-apply"]').click();
@@ -84,6 +98,12 @@ describe("Program Management", () => {
       });
     });
     it("Finish Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose active Programme",
+        "Finish Programme",
+        "Check if programme was finished properly",
+      ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="ACTIVE"]').click({ force: true });
       cy.get('[data-cy="button-filters-apply"]').click();
@@ -95,6 +115,12 @@ describe("Program Management", () => {
       cy.get('[data-cy="status-container"]').should("contain", "FINISHED");
     });
     it("Reactivate Program", () => {
+      cy.scenario([
+        "Go to Programme Management page",
+        "Choose finished Programme",
+        "Reactivate Programme",
+        "Check if programme was reactivated properly",
+      ]);
       cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({ force: true });
       cy.get('[data-value="FINISHED"]').click({ force: true });
       cy.get('[data-cy="button-filters-apply"]').click();
@@ -107,47 +133,34 @@ describe("Program Management", () => {
       });
       cy.get('[data-cy="status-container"]').should("contain", "ACTIVE");
     });
-    it.skip("Remove Program", () => {
-      // ToDo
-    });
-    it.skip("Activate Program", () => {
-      // ToDo
-    });
-    it.skip("Reactivate Program", () => {
-      // ToDo
-    });
-    it.skip("Open in Cashassist", () => {
-      // ToDo
-    });
+    it.skip("Remove Program", () => {});
+    it.skip("Activate Program", () => {});
+    it.skip("Reactivate Program", () => {});
+    it.skip("Open in Cashassist", () => {});
 
     context("PM Filters", () => {
-      it.skip("PM Programme filter", () => {
-        // ToDo
-      });
-      it.skip("PM Status filter", () => {
-        // ToDo
-      });
-      it.skip("PM FSP filter", () => {
-        // ToDo
-      });
-      it.skip("PM Start Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM End Date filter", () => {
-        // ToDo
-      });
-      it.skip("PM Sector filter", () => {
-        // ToDo
-      });
-      it.skip("PM Num. of Households filter", () => {
-        // ToDo
-      });
-      it.skip("PM Budget (USD) filter", () => {
-        // ToDo
-      });
+      it.skip("PM Programme filter", () => {});
+      it.skip("PM Status filter", () => {});
+      it.skip("PM FSP filter", () => {});
+      it.skip("PM Start Date filter", () => {});
+      it.skip("PM End Date filter", () => {});
+      it.skip("PM Sector filter", () => {});
+      it.skip("PM Num. of Households filter", () => {});
+      it.skip("PM Budget (USD) filter", () => {});
     });
   });
   describe.skip("E2E tests Program Management", () => {});
 
-  describe.skip("Regression tests Program Management", () => {});
+  describe("Regression tests Program Management", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Program Management page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      programManagement.clearCache();
+      cy.get("h5").should("contain", "Programme Management");
+    });
+  });
 });

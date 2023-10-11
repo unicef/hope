@@ -14,6 +14,7 @@ from django_filters import (
     OrderingFilter,
 )
 
+from hct_mis_api.apps.core.exceptions import SearchException
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     BusinessAreaSlugFilter,
@@ -84,6 +85,7 @@ class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
+    search_type = CharFilter(method="search_type_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
@@ -143,68 +145,79 @@ class HouseholdFilter(FilterSet):
 
     def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
         business_area = self.data["business_area"]
-        query_dict = get_elasticsearch_query_for_households(value, business_area)
+        search = value.strip()
+        search_type = self.data.get("search_type")
+
+        if search_type == "kobo_asset_id":
+            split_values_list = search.split(" ")
+            inner_query = Q()
+            for split_value in split_values_list:
+                striped_value = split_value.strip(",")
+                if striped_value.startswith(("HOPE-", "KOBO-")):
+                    _value = _prepare_kobo_asset_id_value(search)
+                    # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    # will filter by '111222' like 111222 is ID
+                    inner_query |= Q(kobo_asset_id__endswith=_value)
+            return qs.filter(inner_query).distinct()
+
+        query_dict = get_elasticsearch_query_for_households(search, search_type, business_area)
         es_response = (
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-
-        split_values_list = value.split(" ")
-        inner_query = Q()
-        for split_value in split_values_list:
-            striped_value = split_value.strip(",")
-            if striped_value.startswith(("HOPE-", "KOBO-")):
-                _value = _prepare_kobo_asset_id_value(value)
-                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                # will filter by '111222' like 111222 is ID
-                inner_query |= Q(kobo_asset_id__endswith=_value)
-        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
+        return qs.filter(id__in=es_ids)
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
-        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
-            return self._search_es(qs, value)
-        return self._search_db(qs, value)
-
-    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
         try:
-            key, value = tuple(value.split(" ", 1))
-        except ValueError:
-            logger.info("Search term cannot be empty string or space")
+            if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
+                return self._search_es(qs, value)
+            return self._search_db(qs, value)
+        except SearchException:
             return qs.none()
 
-        value = value.strip()
-        if key == "household_id":
-            return qs.filter(unicef_id__icontains=value)
-        if key == "individual_id":
-            return qs.filter(head_of_household__unicef_id__icontains=value)
-        if key == "full_name":
-            return qs.filter(head_of_household__full_name__icontains=value)
-        if key == "phone_no":
+    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
+        search = value.strip()
+        search_type = self.data.get("search_type")
+
+        if search_type == "household_id":
+            return qs.filter(unicef_id__icontains=search)
+        if search_type == "individual_id":
+            return qs.filter(head_of_household__unicef_id__icontains=search)
+        if search_type == "full_name":
+            return qs.filter(head_of_household__full_name__icontains=search)
+        if search_type == "phone_no":
             return qs.filter(
-                Q(head_of_household__phone_no__icontains=value)
-                | Q(head_of_household__phone_no_alternative__icontains=value)
+                Q(head_of_household__phone_no__icontains=search)
+                | Q(head_of_household__phone_no_alternative__icontains=search)
             )
-        if key == "registration_id":
-            return qs.filter(registration_id__icontains=value)
-        if key == "kobo_asset_id":
+        if search_type == "registration_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchException("The search value for a given search type should be a number")
+            return qs.filter(registration_id__icontains=search)
+        if search_type == "kobo_asset_id":
             inner_query = Q()
-            split_values_list = value.split(" ")
+            split_values_list = search.split(" ")
             for split_value in split_values_list:
                 striped_value = split_value.strip(",")
                 if striped_value.startswith(("HOPE-", "KOBO-")):
-                    _value = _prepare_kobo_asset_id_value(value)
-                    # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    _value = _prepare_kobo_asset_id_value(search)
+                    # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                     # will filter by '111222' like 111222 is ID
                     inner_query |= Q(kobo_asset_id__endswith=_value)
             return qs.filter(inner_query)
-        if key == "bank_account_number":
-            return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=value)
-        if DocumentType.objects.filter(key=key).exists():
+        if search_type == "bank_account_number":
+            return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=search)
+        if DocumentType.objects.filter(key=search_type).exists():
             return qs.filter(
-                head_of_household__documents__type__key=key,
-                head_of_household__documents__document_number__icontains=value,
+                head_of_household__documents__type__key=search_type,
+                head_of_household__documents__document_number__icontains=search,
             )
-        raise KeyError(f"Invalid search key '{key}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
+
+    def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
+        return qs
 
 
 class IndividualFilter(FilterSet):
@@ -213,6 +226,7 @@ class IndividualFilter(FilterSet):
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
+    search_type = CharFilter(method="search_type_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
         field_name="household__admin_area", queryset=Area.objects.filter(area_type__area_level=2)
@@ -264,7 +278,9 @@ class IndividualFilter(FilterSet):
 
     def _search_es(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
         business_area = self.data["business_area"]
-        query_dict = get_elasticsearch_query_for_individuals(value, business_area)
+        search_type = self.data.get("search_type")
+        search = value.strip()
+        query_dict = get_elasticsearch_query_for_individuals(search, search_type, business_area)
         es_response = (
             get_individual_doc(business_area)
             .search()
@@ -277,33 +293,38 @@ class IndividualFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids)).distinct()
 
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
-            return self._search_es(qs, value)
-        return self._search_db(qs, value)
-
-    def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
         try:
-            key, value = tuple(value.split(" ", 1))
-        except ValueError:
-            logger.info("Search term cannot be empty string or space")
+            if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
+                return self._search_es(qs, value)
+            return self._search_db(qs, value)
+        except SearchException:
             return qs.none()
 
-        value = value.strip()
-        if key == "individual_id":
-            return qs.filter(unicef_id__icontains=value)
-        if key == "household_id":
-            return qs.filter(household__unicef_id__icontains=value)
-        if key == "full_name":
-            return qs.filter(full_name__icontains=value)
-        if key == "phone_no":
-            return qs.filter(Q(phone_no__icontains=value) | Q(phone_no_alternative__icontains=value))
-        if key == "registration_id":
-            return qs.filter(registration_id__icontains=value)
-        if key == "bank_account_number":
-            return qs.filter(bank_account_info__bank_account_number__icontains=value)
-        if DocumentType.objects.filter(key=key).exists():
-            return qs.filter(documents__type__key=key, documents__document_number__icontains=value)
-        raise KeyError(f"Invalid search key '{key}'")
+    def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
+        search_type = self.data.get("search_type")
+        search = value.strip()
+        if search_type == "individual_id":
+            return qs.filter(unicef_id__icontains=search)
+        if search_type == "household_id":
+            return qs.filter(household__unicef_id__icontains=search)
+        if search_type == "full_name":
+            return qs.filter(full_name__icontains=search)
+        if search_type == "phone_no":
+            return qs.filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
+        if search_type == "registration_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchException("The search value for a given search type should be a number")
+            return qs.filter(registration_id__icontains=search)
+        if search_type == "bank_account_number":
+            return qs.filter(bank_account_info__bank_account_number__icontains=search)
+        if DocumentType.objects.filter(key=search_type).exists():
+            return qs.filter(documents__type__key=search_type, documents__document_number__icontains=search)
+        raise SearchException(f"Invalid search key '{search_type}'")
+
+    def search_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
+        return qs
 
     def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()
@@ -320,43 +341,41 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
 
-def get_elasticsearch_query_for_individuals(value: str, business_area: "BusinessArea") -> Dict:
-    try:
-        key, search = tuple(value.split(" ", 1))
-    except ValueError as e:
-        logger.info("Search term cannot be empty string or space")
-        raise ValueError("Search value should have following format 'searchType searchTerm'") from e
-
+def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:
     all_queries: List = []
 
-    if key == "individual_id":
+    if search_type == "individual_id":
         all_queries.append({"match_phrase_prefix": {"unicef_id": {"query": search}}})
-    elif key == "household_id":
+    elif search_type == "household_id":
         all_queries.append({"match_phrase_prefix": {"household.unicef_id": {"query": search}}})
-    elif key == "full_name":
+    elif search_type == "full_name":
         all_queries.append({"match_phrase_prefix": {"full_name": {"query": search}}})
-    elif key == "phone_no":
+    elif search_type == "phone_no":
         all_queries.append({"match_phrase_prefix": {"phone_no_text": {"query": search}}})
         all_queries.append(
             {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
         )
-    elif key == "registration_id":
+    elif search_type == "registration_id":
+        try:
+            int(search)
+        except ValueError:
+            raise SearchException("The search value for a given search type should be a number")
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
-    elif key == "bank_account_number":
+    elif search_type == "bank_account_number":
         all_queries.append({"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}})
-    elif DocumentType.objects.filter(key=key).exists():
+    elif DocumentType.objects.filter(key=search_type).exists():
         all_queries.append(
             {
                 "bool": {
                     "must": [
                         {"match": {"documents.number": {"query": search}}},
-                        {"match": {"documents.key": {"query": key}}},
+                        {"match": {"documents.key": {"query": search_type}}},
                     ],
                 },
             }
         )
     else:
-        raise KeyError(f"Invalid search key '{key}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
 
     return {
         "size": "100",
@@ -371,43 +390,44 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
     }
 
 
-def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessArea") -> Dict:
-    try:
-        key, search = tuple(value.split(" ", 1))
-    except ValueError as e:
-        logger.info("Search term cannot be empty string or space")
-        raise ValueError("Search value should have following format 'searchType searchTerm'") from e
-
+def get_elasticsearch_query_for_households(search: str, search_type: str, business_area: "BusinessArea") -> Dict:
     all_queries: List = []
 
-    if key == "household_id":
+    if search_type == "household_id":
         all_queries.append({"match_phrase_prefix": {"unicef_id": {"query": search}}})
-    elif key == "individual_id":
+    elif search_type == "individual_id":
         all_queries.append({"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}})
-    elif key == "full_name":
+    elif search_type == "full_name":
         all_queries.append({"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}})
-    elif key == "phone_no":
+    elif search_type == "phone_no":
         all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}})
         all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}})
-    elif key == "bank_account_number":
+    elif search_type == "bank_account_number":
         all_queries.append(
             {"match_phrase_prefix": {"head_of_household.bank_account_info.bank_account_number": {"query": search}}}
         )
-    elif key == "registration_id":
+    elif search_type == "registration_id":
+        try:
+            int(search)
+        except ValueError:
+            raise SearchException("The search value for a given search type should be a number")
         all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
-    elif DocumentType.objects.filter(key=key).exists():
+    elif search_type == "kobo_asset_id":
+        # Handled on postgres side
+        pass
+    elif DocumentType.objects.filter(key=search_type).exists():
         all_queries.append(
             {
                 "bool": {
                     "must": [
                         {"match": {"head_of_household.documents.number": {"query": search}}},
-                        {"match": {"head_of_household.documents.key": {"query": key}}},
+                        {"match": {"head_of_household.documents.key": {"query": search_type}}},
                     ],
                 },
             }
         )
     else:
-        raise KeyError(f"Invalid search key '{key}'")
+        raise SearchException(f"Invalid search key '{search_type}'")
 
     query: Dict[str, Any] = {
         "size": "100",

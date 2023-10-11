@@ -26,7 +26,7 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
   const feedback = data?.feedback;
 
   const canEdit = hasPermissions(
-    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
+    PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
     permissions,
   );
   const canViewHouseholdDetails = hasPermissions(

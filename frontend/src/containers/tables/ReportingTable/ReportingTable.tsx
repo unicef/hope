@@ -1,6 +1,6 @@
 import React from 'react';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { choicesToDict } from '../../../utils/utils';
+import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import {
   AllReportsQueryVariables,
   MeQuery,
@@ -26,8 +26,8 @@ export const ReportingTable = ({
 }: ReportingTableProps): React.ReactElement => {
   const initialVariables = {
     businessArea,
-    createdFrom: filter.createdFrom,
-    createdTo: filter.createdTo,
+    createdFrom: dateToIsoString(filter.createdFrom, 'startOfDay'),
+    createdTo: dateToIsoString(filter.createdTo, 'endOfDay'),
     reportType: filter.type,
     status: filter.status,
     createdBy: filter.onlyMy ? meData.me.id : null,

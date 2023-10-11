@@ -44,7 +44,8 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data?.importedHousehold || !choicesData || permissions === null)
+    return null;
 
   const { importedHousehold } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
