@@ -1,17 +1,19 @@
 import { gql } from 'apollo-boost';
-export const Bulk_Update_Grievance_Tickets_Assignees_Mutation = gql`
+export const BulkUpdateGrievanceAssignee = gql`
   mutation BulkUpdateGrievanceAssignee(
-    $grievanceTicketUnicefIds: [ID]
-    $assignedTo: String
+    $grievanceTicketIds: [ID]!
+    $assignedTo: String!
     $businessAreaSlug: String!
   ) {
     bulkUpdateGrievanceAssignee(
-      grievanceTicketUnicefIds: $grievanceTicketUnicefIds
+      grievanceTicketIds: $grievanceTicketIds
       assignedTo: $assignedTo
       businessAreaSlug: $businessAreaSlug
     ) {
       grievanceTickets {
+        id
         assignedTo {
+          id
           firstName
           lastName
           email

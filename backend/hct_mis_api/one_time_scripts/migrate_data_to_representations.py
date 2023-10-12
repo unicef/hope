@@ -241,7 +241,7 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
     individual.pk = None
-    individual.unicef_id = None  # type: ignore
+    individual.unicef_id = None
     individual.program = program
     individual.household = None
     individual.is_original = False
