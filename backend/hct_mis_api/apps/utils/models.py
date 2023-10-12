@@ -2,7 +2,7 @@
 import hashlib
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Iterable, T, List, Sequence
 
 from concurrency.fields import IntegerVersionField
 from django.conf import settings
@@ -14,7 +14,7 @@ from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
-from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager
+from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager, nested_getattr
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -237,8 +237,25 @@ class UnicefIdentifiedModel(models.Model):
             self.refresh_from_db(fields=["unicef_id"])
 
 
+class SignatureManager(models.Manager):
+    def bulk_create_with_signature(self, objs: Iterable[T], *args, **kwargs) -> List[T]:
+        for obj in objs:
+            obj.update_signature_hash()
+        return super().bulk_create(objs, *args, **kwargs)
+
+    def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args, **kwargs) -> int:
+        for obj in objs:
+            if any(field in fields for field in obj._meta.signature_fields):
+                obj.update_signature_hash()
+        new_fields = set(fields)
+        if "signature_hash" not in fields:
+            new_fields.add("signature_hash")
+        return super().bulk_update(objs, new_fields, *args, **kwargs)
+
+
 class SignatureMixin(models.Model):
     signature_hash = models.CharField(max_length=40, blank=True, editable=False)
+    signature_manager = SignatureManager()
 
     class Meta:
         abstract = True
@@ -247,15 +264,15 @@ class SignatureMixin(models.Model):
         self.update_signature_hash()
         super().save(*args, **kwargs)
 
-    def update_signature_hash(self):
+    def update_signature_hash(self) -> None:
         if hasattr(self._meta, "signature_fields") and isinstance(self._meta.signature_fields, (list, tuple)):
             sha1 = hashlib.sha1()
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
 
             for field_name in self._meta.signature_fields:
-                value = getattr(self, field_name, None)
-                if value:
+                value = nested_getattr(self, field_name, None)
+                if value is not None:
                     sha1.update(str(value).encode("utf-8"))
             self.signature_hash = sha1.hexdigest()
         else:

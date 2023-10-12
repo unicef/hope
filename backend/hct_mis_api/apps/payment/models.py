@@ -63,6 +63,7 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    SignatureMixin,
 )
 
 if TYPE_CHECKING:
@@ -1413,7 +1414,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         return self.STATUS_SUCCESS
 
 
-class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, SignatureMixin):
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1513,6 +1514,21 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="token_number_unique_per_program",
             ),
         ]
+        signature_fields = (
+            "parent_id",
+            "conflicted",
+            "excluded",
+            "entitlement_date",
+            "financial_service_provider_id",
+            "collector_id",
+            "source_payment_id",
+            "is_follow_up",
+            "reason_for_unsuccessful_payment",
+            "program_id",
+            "order_number",
+            "token_number",
+            "household_snapshot.household_snapshot",
+        )
 
 
 class ServiceProvider(TimeStampedUUIDModel):
