@@ -1,19 +1,20 @@
 # Create your models here.
+import hashlib
 import logging
 import sys
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
+from concurrency.fields import IntegerVersionField
+from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
 from django.utils import timezone
-
-from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
-
-from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+
+from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -234,3 +235,28 @@ class UnicefIdentifiedModel(models.Model):
         if self._state.adding or self.unicef_id is None:
             # due to existence of "CREATE TRIGGER" in migrations
             self.refresh_from_db(fields=["unicef_id"])
+
+
+class SignatureMixin(models.Model):
+    signature_hash = models.CharField(max_length=40, blank=True, editable=False)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.update_signature_hash()
+        super().save(*args, **kwargs)
+
+    def update_signature_hash(self):
+        if hasattr(self._meta, "signature_fields") and isinstance(self._meta.signature_fields, (list, tuple)):
+            sha1 = hashlib.sha1()
+            salt = settings.SECRET_KEY
+            sha1.update(salt.encode("utf-8"))
+
+            for field_name in self._meta.signature_fields:
+                value = getattr(self, field_name, None)
+                if value:
+                    sha1.update(str(value).encode("utf-8"))
+            self.signature_hash = sha1.hexdigest()
+        else:
+            raise ValueError("Define 'signature_fields' in Meta class for SignatureMixin")
