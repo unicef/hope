@@ -43,3 +43,8 @@ def generate_data_collecting_types() -> None:
 
     for data_dict in data_collecting_types:
         DataCollectingType.objects.update_or_create(**data_dict)
+
+
+class DataCollectingTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = DataCollectingType
