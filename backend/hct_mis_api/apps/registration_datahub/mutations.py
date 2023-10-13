@@ -18,8 +18,10 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -58,7 +60,10 @@ logger = logging.getLogger(__name__)
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(
-    registration_data_import_data: Dict, user: "User", data_source: str
+    registration_data_import_data: Dict,
+    user: "User",
+    data_source: str,
+    program_id: str,
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -84,6 +89,9 @@ def create_registration_data_import_objects(
     )
     created_obj_hct.full_clean()
     created_obj_hct.save()
+
+    program = Program.objects.get(id=program_id)
+    created_obj_hct.programs.add(program)
 
     created_obj_datahub.hct_id = created_obj_hct.id
     created_obj_datahub.save()
@@ -123,12 +131,13 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     ) -> "RegistrationXlsxImportMutation":
         cls.validate_import_data(registration_data_import_data.import_data_id)
 
+        program_id: str = decode_id_string_required(registration_data_import_data["program_id"])
         (
             created_obj_datahub,
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
+        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS", program_id)
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -202,12 +211,15 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     ) -> RegistrationXlsxImportMutation:
         RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
 
+        program_id: str = decode_id_string_required(registration_data_import_data["program_id"])
         (
             created_obj_datahub,
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "KOBO", program_id
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
