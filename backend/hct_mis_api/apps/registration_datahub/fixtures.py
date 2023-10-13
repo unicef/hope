@@ -9,6 +9,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
@@ -18,6 +19,7 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     UNICEF,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -26,6 +28,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
+from hct_mis_api.aurora.models import Organization, Project, Registration
 
 faker = Faker()
 
@@ -189,3 +197,11 @@ class ImportedBankAccountInfoFactory(DjangoModelFactory):
     individual = factory.SubFactory(ImportedIndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
     bank_account_number = random.randint(10**26, 10**27 - 1)
+
+
+def create_aurora_objects(business_area: BusinessArea, program: Program) -> Tuple[Organization, Project, Registration]:
+    organization = OrganizationFactory(business_area=business_area, slug=business_area.slug)
+    project = ProjectFactory(name="fake_project", organization=organization, programme=program)
+    registration = RegistrationFactory(name="fake_registration", project=project)
+
+    return organization, project, registration

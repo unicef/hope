@@ -1,3 +1,5 @@
+from typing import Any, List
+
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -7,10 +9,8 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, Stora
 faker = Faker()
 
 
-def create_afghanistan(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
-    return BusinessArea.objects.create(
+def create_afghanistan(is_payment_plan_applicable: bool = False,) -> BusinessArea:
+    obj, created = BusinessArea.objects.get_or_create(
         **{
             "code": "0060",
             "name": "Afghanistan",
@@ -23,6 +23,55 @@ def create_afghanistan(
             "kobo_token": "XXX",
         },
     )
+    return obj
+
+
+def create_ukraine(is_payment_plan_applicable: bool = False,) -> BusinessArea:
+    obj, created = BusinessArea.objects.get_or_create(
+        **{
+            "code": "0002",
+            "name": "Ukraine",
+            "long_name": "UKRAINE",
+            "region_code": "66",
+            "region_name": "ECAR",
+            "slug": "ukraine",
+            "has_data_sharing_agreement": True,
+            "is_payment_plan_applicable": is_payment_plan_applicable,
+            "kobo_token": "XXX",
+        },
+    )
+    return obj
+
+
+def create_sri_lanka(is_payment_plan_applicable: bool = False) -> BusinessArea:
+    obj, created = BusinessArea.objects.get_or_create(
+        **{
+            "code": "0001",
+            "name": "Sri Lanka",
+            "long_name": "THE DEMOCRATIC SOCIALIST REPUBLIC OF SRI LANKA",
+            "region_code": "64",
+            "region_name": "SAR",
+            "slug": "sri-lanka",
+            "has_data_sharing_agreement": True,
+            "is_payment_plan_applicable": is_payment_plan_applicable,
+            "kobo_token": "XXX",
+        },
+    )
+    return obj
+
+
+def create_czech_republic(is_payment_plan_applicable: bool = False) -> BusinessArea:
+    obj, created = BusinessArea.objects.create(
+        slug="czech-republic",
+        code="BOCZ",
+        name="Czech Republic",
+        long_name="The Czech Republic",
+        region_code="66",
+        region_name="ECAR",
+        has_data_sharing_agreement=True,
+        is_payment_plan_applicable=is_payment_plan_applicable,
+    )
+    return obj
 
 
 class StorageFileFactory(DjangoModelFactory):
@@ -48,3 +97,12 @@ def generate_data_collecting_types() -> None:
 class DataCollectingTypeFactory(DjangoModelFactory):
     class Meta:
         model = DataCollectingType
+
+    @factory.post_generation
+    def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:
+        if not create:
+            return
+
+        if extracted:
+            for business_area in extracted:
+                self.limit_to.add(business_area)

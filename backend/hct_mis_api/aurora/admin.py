@@ -37,7 +37,9 @@ class ProjectAdmin(admin.ModelAdmin):
         self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
     ) -> Type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(business_area=obj.organization.business_area)
+        form.base_fields["programme"].queryset = Program.objects.filter(
+            business_area=obj.organization.business_area, status=Program.ACTIVE  # get only active programs in dropdown!
+        )
         return form
 
 
