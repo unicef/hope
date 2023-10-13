@@ -215,9 +215,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "KOBO"
-        )
+        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
