@@ -2,7 +2,7 @@ import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import BusinessArea, StorageFile
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile, DataCollectingType
 
 faker = Faker()
 
@@ -66,8 +66,6 @@ class StorageFileFactory(DjangoModelFactory):
         model = StorageFile
 
     business_area = factory.LazyAttribute(lambda _: BusinessArea.objects.first())
-<<<<<<< HEAD
-=======
 
 
 def generate_data_collecting_types() -> None:
@@ -86,4 +84,3 @@ def generate_data_collecting_types() -> None:
 class DataCollectingTypeFactory(DjangoModelFactory):
     class Meta:
         model = DataCollectingType
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd

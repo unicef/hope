@@ -114,12 +114,9 @@ class TestMigrationTicketsToFeedback(TestCase):
         # Specific values
 
         self.assertEqual(feedbacks[0].description, "grievance_ticket_1_description")
-<<<<<<< HEAD
         self.assertEqual(feedbacks[0].program, feedbacks[0].linked_grievance.programs.first())
-=======
         self.assertEqual(feedbacks[0].program, self.program_1)
         self.assertEqual(FeedbackMessage.objects.count(), 1)
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
 
         self.assertEqual(feedbacks[1].language, "grievance_ticket_2_language")
         self.assertEqual(feedbacks[1].household_lookup, self.household_1)
