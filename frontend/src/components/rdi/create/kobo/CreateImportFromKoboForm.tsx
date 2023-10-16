@@ -79,18 +79,8 @@ export function CreateImportFromKoboForm({
       history.push(
         `/${businessAreaSlug}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
       );
-    } catch (error) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'registrationXlsxImport',
-        error,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(
-          t('Unexpected problem while creating Registration Data Import'),
-        );
-      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
   const formik = useFormik({
