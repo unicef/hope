@@ -2,6 +2,7 @@ import BaseComponent from "../../base.component";
 
 export default class ProgramManagement extends BaseComponent {
   // Locators
+<<<<<<< HEAD
   buttonNewProgram = 'button[data-cy="button-new-program"]';
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
   dialogTitle = 'h6[data-cy="dialog-title"]';
@@ -27,9 +28,13 @@ export default class ProgramManagement extends BaseComponent {
   inputFrequencyOfPayment = 'div[data-cy="input-frequency-of-payment"]';
   inputCashPlus = 'span[data-cy="input-cashPlus"]';
   inputIndividualDataNeeded = 'div[data-cy="input-individual-data-needed"]';
+=======
+  tableRow = 'tr[role="checkbox"]';
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
   // Texts
 
   // Elements
+<<<<<<< HEAD
   getButtonNewProgram = () => cy.get(this.buttonNewProgram);
   getPageHeaderTitle = () => cy.get(this.pageHeaderTitle);
   getDialogTitle = () => cy.get(this.dialogTitle);
@@ -58,4 +63,7 @@ export default class ProgramManagement extends BaseComponent {
   getTableRowByName = (name) => cy.get(this.tableRowX + name + '"]');
   getInputDataCollectingType = () =>
     cy.get(this.inputDataCollectingType).first();
+=======
+  getTableRow = () => cy.get(this.tableRow);
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
 }

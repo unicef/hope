@@ -52,7 +52,11 @@ describe("Registration Data Import", () => {
   describe.skip("E2E tests Registration Data Import", () => {});
 
   describe("Regression tests Registration Data Import", () => {
+<<<<<<< HEAD
     it.skip("174517: Check clear cache", () => {
+=======
+    it("174517: Check clear cash", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.scenario([
         "Go to Registration Data Import page",
         "Press Menu User Profile button",
