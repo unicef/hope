@@ -88,7 +88,7 @@ export function CreateImportFromKoboForm({
       koboAssetId: '',
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
-      programName: ''
+      programId: ''
     },
     validationSchema,
     onSubmit,
