@@ -15,13 +15,12 @@ import {
   useAllActiveProgramsQuery,
   useCreateRegistrationKoboImportMutation
 } from '../../../../__generated__/graphql';
-import { handleValidationErrors } from '../../../../utils/utils';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import {LoadingComponent} from "../../../core/LoadingComponent";
+import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
 import { KoboProjectSelect } from './KoboProjectSelect';
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
-import {LoadingComponent} from "../../../core/LoadingComponent";
-import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -63,7 +62,7 @@ export function CreateImportFromKoboForm({
     }
   });
 
-  const onSubmit = async (values, { setFieldError }): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
