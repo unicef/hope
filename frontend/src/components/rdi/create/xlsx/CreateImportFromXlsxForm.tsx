@@ -13,7 +13,6 @@ import {
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { handleValidationErrors } from '../../../../utils/utils';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
@@ -47,7 +46,7 @@ export function CreateImportFromXlsxForm({
   const { t } = useTranslation();
   const history = useHistory();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
-  const onSubmit = async (values, { setFieldError }): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
@@ -62,20 +61,11 @@ export function CreateImportFromXlsxForm({
       history.push(
         `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
-    } catch (error) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'registrationXlsxImport',
-        error,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(
-          t('Unexpected problem while creating Registration Data Import'),
-        );
-      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
+
   const formik = useFormik({
     initialValues: {
       name: '',

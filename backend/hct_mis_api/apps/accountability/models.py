@@ -9,6 +9,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.grievance.models import (
+    OnlyOriginalManager,
+    OriginalAndRepresentationsManager,
+)
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
@@ -65,6 +69,20 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
     )
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
+
+    # TODO: remove both after data migration
+    objects = OnlyOriginalManager()
+    original_and_repr_objects = OriginalAndRepresentationsManager()
 
     class Meta:
         ordering = ("created_at",)
@@ -136,6 +154,20 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
         blank=True,
         verbose_name=_("Linked grievance"),
     )
+    is_original = models.BooleanField(default=True)
+    is_migration_handled = models.BooleanField(default=False)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
+
+    # TODO: remove both after data migration
+    objects = OnlyOriginalManager()
+    original_and_repr_objects = OriginalAndRepresentationsManager()
 
     class Meta:
         ordering = ("created_at",)
