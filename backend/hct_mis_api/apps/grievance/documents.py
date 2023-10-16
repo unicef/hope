@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Optional, Sequence, List
+from typing import Any, Callable, List, Optional, Sequence
 
 from django.conf import settings
 from django.db.models import Model, QuerySet
