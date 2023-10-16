@@ -86,7 +86,7 @@ export function CreateImportFromXlsxForm({
       name: '',
       screenBeneficiary: false,
       file: null,
-      programName: ''
+      programId: ''
     },
     validationSchema,
     onSubmit,
