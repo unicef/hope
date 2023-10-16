@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence, List
 
 from django.conf import settings
 from django.db.models import Model, QuerySet
@@ -125,11 +125,7 @@ class GrievanceTicketDocument(Document):
     def get_instances_from_related(self, related_instance: Model) -> QuerySet:
         if isinstance(related_instance, BusinessArea):
             return related_instance.tickets.all()
-<<<<<<< HEAD
         return Model.objects.none()
 
     def prepare_programs(self, instance: GrievanceTicket) -> List[str]:
         return list(instance.programs.values_list("id", flat=True))
-=======
-        return GrievanceTicket.objects.none()
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
