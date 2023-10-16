@@ -125,7 +125,7 @@ class GrievanceTicketDocument(Document):
     def get_instances_from_related(self, related_instance: Model) -> QuerySet:
         if isinstance(related_instance, BusinessArea):
             return related_instance.tickets.all()
-        return Model.objects.none()
+        return GrievanceTicket.objects.none()
 
     def prepare_programs(self, instance: GrievanceTicket) -> List[str]:
         return list(instance.programs.values_list("id", flat=True))
