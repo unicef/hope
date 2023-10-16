@@ -616,7 +616,6 @@ class TestCreateStorageProgramForCollectingType(TestCase):
         self.no_ind_data = DataCollectingType.objects.get(code="no_ind_data")
 
         self.business_area = BusinessAreaFactory.create()
-        self.program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
         self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
         self.rdi2 = RegistrationDataImportFactory(business_area=self.business_area)
         self.rdi3 = RegistrationDataImportFactory(business_area=self.business_area)
@@ -702,7 +701,7 @@ class TestCreateStorageProgramForCollectingType(TestCase):
         ).first()
 
         for void_storage_program in [partial_program, full_program, size_only_program, no_ind_data_program]:
-            self.assertTrue(void_storage_program.is_removed, 4)
+            self.assertTrue(void_storage_program.is_removed)
 
         self.rdi1.refresh_from_db()
         self.rdi2.refresh_from_db()
