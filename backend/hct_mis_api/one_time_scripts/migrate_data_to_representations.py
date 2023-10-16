@@ -1,6 +1,8 @@
+import csv
 import logging
+import os
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -28,10 +30,13 @@ BATCH_SIZE_SMALL = 20
 
 
 def migrate_data_to_representations() -> None:
+    apply_country_specific_rules()
     for business_area in BusinessArea.objects.all():
         logger.info("----- NEW BUSINESS AREA -----")
         logger.info(f"Handling business area: {business_area}")
         migrate_data_to_representations_per_business_area(business_area=business_area)
+
+    apply_congo_withdrawal()
 
 
 def migrate_data_to_representations_per_business_area(business_area: BusinessArea) -> None:
@@ -50,6 +55,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     - adjust payments and payment_records to corresponding representations
 
     """
+    hhs_to_ignore = get_ignored_hhs() if business_area.name == "Afghanistan" else None
     for program in Program.objects.filter(
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
@@ -81,7 +87,12 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
                 is_migration_handled=False,
                 data_collecting_type__in=program.data_collecting_type.compatible_types.all(),
                 withdrawn=False,
+                business_area=business_area,
             ).only("id")
+            if hhs_to_ignore:
+                households_with_compatible_collection_type = households_with_compatible_collection_type.exclude(
+                    id__in=hhs_to_ignore
+                )
             households = Household.original_and_repr_objects.filter(
                 Q(id__in=household_ids) | Q(id__in=households_with_compatible_collection_type)
             ).filter(is_migration_handled=False, is_original=True)
@@ -104,15 +115,16 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
                 with transaction.atomic():
                     copy_household_representation(household, program, individuals_per_household_dict[household.id])
 
+        rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
+        rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
         if program.status == Program.ACTIVE:
             logger.info(f"Handling RDIs for program: {program}")
-            handle_rdis(households, program)
+            handle_rdis(rdis, program, hhs_to_ignore)
         else:
-            rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
-            rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
             rdi_through = RegistrationDataImport.programs.through
             rdi_through.objects.bulk_create(
-                [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis]
+                [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+                ignore_conflicts=True,
             )
 
         logger.info(f"Copying roles for program: {program}")
@@ -126,8 +138,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
     ).distinct().update(is_migration_handled=True)
-    logger.info("Handling objects without any representations yet - enrolling to biggest program")
-    copy_non_program_objects_to_void_storage_programs(business_area)
+    logger.info("Handling objects without any representations yet - enrolling to storage programs")
+    copy_non_program_objects_to_void_storage_programs(business_area, hhs_to_ignore)
 
     # logger.info("Adjusting payments and payment records")
     # adjust_payments(business_area)
@@ -241,7 +253,7 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
     individual.pk = None
-    individual.unicef_id = None  # type: ignore
+    individual.unicef_id = None
     individual.program = program
     individual.household = None
     individual.is_original = False
@@ -481,15 +493,14 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
         del payment_record_updates
 
 
-def handle_rdis(households: QuerySet, program: Program) -> None:
-    rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
-    rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
+def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QuerySet] = None) -> None:
     rdis_count = rdis.count()
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
             logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
         rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
-
+        if hhs_to_ignore:
+            rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
         household_count = rdi_households.count()
         for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
             batch_end = batch_start + BATCH_SIZE_SMALL
@@ -514,10 +525,14 @@ def handle_rdis(households: QuerySet, program: Program) -> None:
         rdi.programs.add(program)
 
 
-def copy_non_program_objects_to_void_storage_programs(business_area: BusinessArea) -> None:
+def copy_non_program_objects_to_void_storage_programs(
+    business_area: BusinessArea, hhs_to_ignore: Optional[QuerySet] = None
+) -> None:
     households = Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=True, is_original=True
     ).order_by("pk")
+    if hhs_to_ignore:
+        households = households.exclude(id__in=hhs_to_ignore)
     collecting_types = DataCollectingType.objects.filter(
         id__in=households.values_list("data_collecting_type", flat=True).distinct().order_by("pk")
     )
@@ -536,7 +551,8 @@ def copy_non_program_objects_to_void_storage_programs(business_area: BusinessAre
         )
         rdi_through = RegistrationDataImport.programs.through
         rdi_through.objects.bulk_create(
-            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis]
+            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+            ignore_conflicts=True,
         )
 
         household_count = households_with_collecting_type.count()
@@ -615,3 +631,125 @@ def create_storage_program_for_collecting_type(
         population_goal=1,
         is_removed=True,  # soft-deleted
     )[0]
+
+
+def apply_country_specific_rules() -> None:
+    apply_congo_rules()
+    apply_sudan_rules()
+
+
+def apply_congo_rules() -> None:
+    logger.info("Applying Congo custom rules")
+
+    business_area_congo = BusinessArea.objects.get(name="Democratic Republic of Congo")
+    csv_congo_programs = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "congo_rdi_program_untargetted.csv",
+    )
+    congo_dict = prepare_program_rdi_dict(csv_congo_programs, business_area_congo)
+
+    for program in congo_dict:
+        rdis = congo_dict[program]
+        untargetted_hhs = Household.objects.filter(
+            selections__isnull=True,
+            registration_data_import__in=rdis,
+        ).distinct()
+
+        individuals_per_household_dict = defaultdict(list)
+        for individual in Individual.objects.filter(household__in=untargetted_hhs):
+            individuals_per_household_dict[individual.household_id].append(individual)
+        for household in untargetted_hhs:
+            with transaction.atomic():
+                copy_household_representation(household, program, individuals_per_household_dict[household.id])
+
+        rdi_through = RegistrationDataImport.programs.through
+        rdi_through.objects.bulk_create(
+            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+            ignore_conflicts=True,
+        )
+        copy_roles(untargetted_hhs, program=program)
+
+    logger.info("Finished applying Congo custom rules")
+
+
+def apply_sudan_rules() -> None:
+    logger.info("Applying Sudan custom rules")
+
+    business_area_sudan = BusinessArea.objects.get(name="Sudan")
+    csv_sudan_programs = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "sudan_rdi_program.csv",
+    )
+    sudan_dict = prepare_program_rdi_dict(csv_sudan_programs, business_area_sudan)
+    for program in sudan_dict:
+        rdis = RegistrationDataImport.objects.filter(
+            id__in=[rdi.id for rdi in sudan_dict[program]],
+        )
+        handle_rdis(rdis, program)
+
+
+def prepare_program_rdi_dict(csv_rdi_program: str, business_area: BusinessArea) -> Dict:
+    program_rdi_dict = {}
+    with open(csv_rdi_program, mode="r", newline="") as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        next(reader)
+        for row in reader:
+            program = Program.objects.filter(name=row[1], business_area=business_area).first()
+            rdi = RegistrationDataImport.objects.filter(name=row[0], business_area=business_area).first()
+            if rdi and program:
+                if program in program_rdi_dict:
+                    program_rdi_dict[program].append(rdi)
+                else:
+                    program_rdi_dict[program] = [rdi]
+    return program_rdi_dict
+
+
+def apply_congo_withdrawal() -> None:
+    logger.info("Applying Congo custom withdrawal rules")
+    business_area_congo = BusinessArea.objects.get(name="Democratic Republic of Congo")
+    csv_congo_withdraw = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "congo_to_withdraw.csv",
+    )
+    rdis_names = []
+    with open(csv_congo_withdraw, mode="r", newline="") as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        for row in reader:
+            rdis_names.append(row[0])
+    untargetted_hhs = (
+        Household.objects.filter(
+            selections__isnull=True,
+            registration_data_import__name__in=rdis_names,
+            registration_data_import__business_area=business_area_congo,
+        )
+        .only("id")
+        .distinct()
+    )
+    Household.original_and_repr_objects.filter(copied_from__id__in=untargetted_hhs).update(withdrawn=True)
+
+
+def get_ignored_hhs() -> QuerySet:
+    business_area_afg = BusinessArea.objects.get(name="Afghanistan")
+    csv_afg_ignore = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "afg_to_ignore.csv",
+    )
+    rdis_names = []
+    with open(csv_afg_ignore, mode="r", newline="") as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        for row in reader:
+            rdis_names.append(row[0])
+
+    return Household.objects.filter(
+        selections__isnull=True,
+        registration_data_import__name__in=rdis_names,
+        registration_data_import__business_area=business_area_afg,
+    ).values_list("id", flat=True)
