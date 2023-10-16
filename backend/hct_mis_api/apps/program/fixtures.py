@@ -83,7 +83,6 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
-    data_collecting_type = factory.LazyAttribute(lambda o: DataCollectingType.objects.first())
 
     @factory.post_generation
     def locations(self, create: bool, extracted: bool, **kwargs: Any) -> None:
