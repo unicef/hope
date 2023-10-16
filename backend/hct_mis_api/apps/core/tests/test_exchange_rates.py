@@ -12,6 +12,7 @@ import requests_mock
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
+from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import (
     EXCHANGE_RATES_API_RESPONSE,
@@ -160,7 +161,8 @@ class TestExchangeRatesAPI(TestCase):
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestExchangeRates(TestCase):
     def test_convert_response_json_to_exchange_rates(self) -> None:
-        converted_response = ExchangeRates._convert_response_json_to_exchange_rates(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
+        exchange_rates_client = ExchangeRateClientDummy(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
+        converted_response = ExchangeRates(api_client=exchange_rates_client)._convert_response_json_to_exchange_rates()
         xeu = converted_response.get("XEU")
         cup1 = converted_response.get("CUP1")
 
@@ -175,15 +177,10 @@ class TestExchangeRates(TestCase):
         self.assertEqual(3, len(xeu.historical_exchange_rates))
 
         xeu_second_historical_rate = xeu.historical_exchange_rates[1]
-        self.assertEqual(
-            xeu_second_historical_rate,
-            {
-                "VALID_FROM": "01-FEB-98",
-                "VALID_TO": "28-FEB-98",
-                "PAST_XRATE": ".926",
-                "PAST_RATIO": "1",
-            },
-        )
+        self.assertEqual(xeu_second_historical_rate.valid_to, datetime(1998, 2, 28))
+        self.assertEqual(xeu_second_historical_rate.valid_from, datetime(1998, 2, 1))
+        self.assertEqual(xeu_second_historical_rate.past_xrate, 0.926)
+        self.assertEqual(xeu_second_historical_rate.past_ratio, 1)
 
         # dispersion_date not provided, return current rate
         self.assertEqual(xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None), xeu.x_rate * xeu.ratio)
@@ -195,7 +192,7 @@ class TestExchangeRates(TestCase):
         # dispersion_date from past valid date range, return past rate
         self.assertEqual(
             xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 2, 15, 0, 0)),
-            float(xeu_second_historical_rate["PAST_XRATE"]) * float(xeu_second_historical_rate["PAST_RATIO"]),
+            float(xeu_second_historical_rate.past_xrate) * float(xeu_second_historical_rate.past_ratio),
         )
 
         self.assertEqual("CUP1", cup1.currency_code)
