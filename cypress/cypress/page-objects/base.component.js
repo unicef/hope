@@ -27,6 +27,8 @@ export default class BaseComponent {
   globalProgramFilter = 'div[data-cy="global-program-filter"]';
   option = 'li[role="option"]';
   ticketListRow = 'tr[role="checkbox"]';
+  menuUserProfile = 'button[data-cy="menu-user-profile"]';
+  menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -39,7 +41,9 @@ export default class BaseComponent {
   textTestProgramm = "Test Programm";
   textDraftProgram = "Draft Program";
 
-  // Elements)
+  // Elements
+  getMenuUserProfile = () => cy.get(this.menuUserProfile);
+  getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
   getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
   getMenuButtonRegistrationDataImport = () =>
     cy.get(this.navRegistrationDataImport);
@@ -110,6 +114,11 @@ export default class BaseComponent {
     this.getMenuButtonPaymentModule()
       .contains(this.buttonPaymentModuleText)
       .click();
+  }
+
+  clearCache() {
+    this.getMenuUserProfile().click();
+    this.getMenuItemClearCache().click();
   }
 
   pressEscapeFromElement(element) {
