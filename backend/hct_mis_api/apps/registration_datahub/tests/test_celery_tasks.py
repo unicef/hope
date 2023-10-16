@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramWithDataCollectingTypeFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -69,6 +69,7 @@ from hct_mis_api.aurora.fixtures import (
     ProjectFactory,
     RegistrationFactory,
 )
+from hct_mis_api.aurora.models import Registration
 
 SRI_LANKA_FIELDS: Dict = {
     "caretaker-info": [
@@ -245,7 +246,7 @@ def create_imported_document_types() -> None:
 
 def create_ukraine_business_area() -> None:
     slug = "ukraine"
-    BusinessArea.objects.create(
+    BusinessArea.objects.get_or_create(
         slug=slug,
         code="1234",
         name="Ukraine",
@@ -255,7 +256,7 @@ def create_ukraine_business_area() -> None:
         has_data_sharing_agreement=True,
     )
     organization = OrganizationFactory(name=slug, slug=slug)
-    prj = ProjectFactory.create(organization=organization)
+    prj = ProjectFactory(organization=organization)
     for id in [2, 3, 21, 26, 27, 28, 29]:
         registration = RegistrationFactory(id=id, project=prj)
         registration.rdi_parser = UkraineRegistrationService
@@ -264,7 +265,7 @@ def create_ukraine_business_area() -> None:
 
 def create_sri_lanka_business_area() -> None:
     slug = "sri-lanka"
-    BusinessArea.objects.create(
+    obj, created = BusinessArea.objects.get_or_create(
         slug=slug,
         code="0608",
         name="Sri Lanka",
@@ -281,7 +282,7 @@ def create_sri_lanka_business_area() -> None:
 
 
 def create_czech_republic_business_area() -> None:
-    BusinessArea.objects.create(
+    BusinessArea.objects.get_or_create(
         slug="czech-republic",
         code="BOCZ",
         name="Czech Republic",
@@ -317,16 +318,15 @@ class TestAutomatingRDICreationTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_ukraine_business_area()
-
         organization = OrganizationFactory.create(slug="ukraine")
         cls.data_collecting_type = DataCollectingTypeFactory(
             label="Partial", code="partial", business_areas=[BusinessArea.objects.get(slug="ukraine")]
         )
-        cls.program = ProgramFactory(
+        cls.program = ProgramWithDataCollectingTypeFactory(
             status="ACTIVE", data_collecting_type=cls.data_collecting_type
         )
         cls.project = ProjectFactory.create(organization=organization, programme=cls.program)
-        cls.registration = RegistrationFactory.create(project=cls.project)
+        cls.registration = RegistrationFactory(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
 
@@ -494,6 +494,17 @@ class TestAutomatingRDICreationTask(TestCase):
                 imported_ind_count += (
                     amount_of_records if registration_id not in [17, 21, 26, 27, 28, 29] else amount_of_records * 2
                 )
+
+                registration = Registration.objects.get(id=registration_id)
+
+                programme = registration.project.programme
+                programme.data_collecting_type.limit_to.set(
+                    [
+                        BusinessArea.objects.get(slug="ukraine"),
+                        BusinessArea.objects.get(slug="sri-lanka"),
+                    ]
+                )
+
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
@@ -546,6 +557,8 @@ class TestAutomatingRDICreationTask(TestCase):
             status=Record.STATUS_TO_IMPORT,
             files=UKRAINE_NEW_FORM_FILES,
         )
+
+        print(self.registration.project.programme.data_collecting_type)
 
         records_ids = Record.objects.all().values_list("id", flat=True)
         self.registration.rdi_parser = UkraineRegistrationService
