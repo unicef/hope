@@ -8,7 +8,6 @@ import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { handleValidationErrors } from '../../../utils/utils';
 import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
@@ -55,7 +54,7 @@ export const DuplicateTargetPopulation = ({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={async (values, { setFieldError }) => {
+        onSubmit={async (values) => {
           try {
             const res = await mutate({
               variables: { input: { targetPopulationData: { ...values } } },
@@ -66,17 +65,7 @@ export const DuplicateTargetPopulation = ({
               historyMethod: 'push',
             });
           } catch (e) {
-            const { nonValidationErrors } = handleValidationErrors(
-              'copyTargetPopulation',
-              e,
-              setFieldError,
-              showMessage,
-            );
-            if (nonValidationErrors.length > 0) {
-              showMessage(
-                t('Unexpected problem while creating Target Population'),
-              );
-            }
+            e.graphQLErrors.map((x) => showMessage(x.message));
           }
         }}
       >
