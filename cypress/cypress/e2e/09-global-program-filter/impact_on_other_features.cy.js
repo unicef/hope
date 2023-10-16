@@ -115,8 +115,7 @@ describe("Global Program Filter - Impacts", () => {
       targetingPage.clickMenuButtonTargeting();
       targetingPage.getTicketListRow().should("have.length", 0);
     });
-    // ToDo: Add after fix 171383:
-    it.skip("GPF - Payment module", () => {
+    it("GPF - Payment module", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -233,7 +232,8 @@ describe("Global Program Filter - Impacts", () => {
       feedbackPage.clickMenuButtonFeedback();
       feedbackPage.getTicketListRow().should("have.length", 0);
     });
+    it("GPF - Country Dashboard", () => {});
   });
 
-  describe.skip("Regression tests Country Dashboard", () => {});
+  describe.skip("Regression tests GPF", () => {});
 });
