@@ -21,11 +21,13 @@ export const DatePickerFilter = ({
         inputVariant='outlined'
         margin='dense'
         autoOk
-        onChange={(date) => {
+        onChange={(date, inputString) => {
           if (date?.valueOf()) {
             const momentDate = moment(date);
-
             onChange(momentDate?.toISOString());
+          }
+          if (!inputString) {
+            onChange(null);
           }
         }}
         value={utcValue}
