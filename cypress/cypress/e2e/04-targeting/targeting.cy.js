@@ -1,7 +1,9 @@
 import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
+import ErrorPage from "../../page-objects/404.po";
 
+let error404Page = new ErrorPage();
 let targetingPage = new Targeting();
 let targetingDetailsPage = new TDetailsPage();
 let targetingCreateNewPage = new CreateNew();
@@ -128,7 +130,23 @@ describe("Targeting", () => {
       it.skip("Mark ready", () => {});
     });
   });
-  describe.skip("E2E tests Targeting", () => {});
+  describe.skip("E2E tests Targeting", () => {
+    it("404 Error page", () => {
+      cy.scenario([
+        "Go to Targeting page",
+        "Click first row",
+        "Delete part of URL",
+        "Check if 404 occurred",
+      ]);
+      targetingPage.getTargetPopulationsRows().first().click();
+      targetingDetailsPage.checkElementsOnPage("OPEN");
+      cy.url().then((url) => {
+        let newUrl = url.slice(0, -10);
+        cy.visit(newUrl);
+        error404Page.getPageNoFound().should("be.visible");
+      });
+    });
+  });
 
   describe("Regression tests Targeting", () => {
     it("174517: Check clear cash", () => {
