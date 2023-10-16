@@ -11,7 +11,6 @@ import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxFie
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import {ImportDataStatus, useCreateRegistrationKoboImportMutation} from '../../../../__generated__/graphql';
-import { handleValidationErrors } from '../../../../utils/utils';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
 import { KoboProjectSelect } from './KoboProjectSelect';
@@ -45,7 +44,7 @@ export function CreateImportFromKoboForm({
   const history = useHistory();
   const businessAreaSlug = useBusinessArea();
   const [createImport] = useCreateRegistrationKoboImportMutation();
-  const onSubmit = async (values, { setFieldError }): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
@@ -60,18 +59,8 @@ export function CreateImportFromKoboForm({
       history.push(
         `/${businessAreaSlug}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
       );
-    } catch (error) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'registrationXlsxImport',
-        error,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(
-          t('Unexpected problem while creating Registration Data Import'),
-        );
-      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
   const formik = useFormik({
