@@ -153,15 +153,10 @@ class TicketCreatorService:
         else:
             admin = None
 
-<<<<<<< HEAD
         if program:
             program = get_object_or_404(Program, pk=decode_id_string(program))
-=======
-        if programme:
-            programme = get_object_or_404(Program, pk=decode_id_string(programme))
         else:
-            programme = None
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+            program = None
 
         new_ticket = GrievanceTicket.objects.create(
             **input_data,
