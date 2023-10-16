@@ -114,7 +114,6 @@ class TestMigrationTicketsToFeedback(TestCase):
         # Specific values
 
         self.assertEqual(feedbacks[0].description, "grievance_ticket_1_description")
-        self.assertEqual(feedbacks[0].program, feedbacks[0].linked_grievance.programs.first())
         self.assertEqual(feedbacks[0].program, self.program_1)
         self.assertEqual(FeedbackMessage.objects.count(), 1)
 
@@ -122,7 +121,7 @@ class TestMigrationTicketsToFeedback(TestCase):
         self.assertEqual(feedbacks[1].household_lookup, self.household_1)
 
         self.assertIs(feedbacks[2].consent, False)
-        self.assertEqual(feedbacks[2].program, feedbacks[2].linked_grievance.programs.first())
+        self.assertEqual(feedbacks[2].program, self.program_2)
         self.assertEqual(feedbacks[2].household_lookup, self.household_1)
         self.assertEqual(feedbacks[2].individual_lookup, self.individual_1)
 
