@@ -1,6 +1,8 @@
 import PaymentVerification from "../../page-objects/pages/payment_verification/payment_verification.po";
 import PVDetailsPage from "../../page-objects/pages/payment_verification/details_page.po";
+import ErrorPage from "../../page-objects/404.po";
 
+let error404Page = new ErrorPage();
 let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
@@ -214,6 +216,24 @@ describe("Payment Verification", () => {
         }).contains("Payment Plan");
         paymentVerificationDetailsPage.checkPaymentPlanDetailsTitle();
         paymentVerificationDetailsPage.checkVerificationPlansSummaryTitle();
+      });
+      // ToDo: Enable after fix 404 page
+      it.skip("404 Error page", () => {
+        cy.scenario([
+          "Go to Payment Plan page",
+          "Click first row",
+          "Delete part of URL",
+          "Check if 404 occurred",
+        ]);
+        paymentVerificationPage.getPaymentPlanRows().first().click();
+        paymentVerificationDetailsPage
+          .getPaymentVerificationTitle()
+          .contains("Payment Plan");
+        cy.url().then((url) => {
+          let newUrl = url.slice(0, -10);
+          cy.visit(newUrl);
+          error404Page.getPageNoFound();
+        });
       });
     });
   });

@@ -156,6 +156,7 @@ export const Drawer = ({
       classes={{
         paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
       }}
+      style={{ height: '100vh' }}
       open={open}
       data-cy={dataCy}
     >
