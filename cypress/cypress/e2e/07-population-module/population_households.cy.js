@@ -15,15 +15,24 @@ describe("Households Module", () => {
   });
   describe("Smoke tests Households Population module", () => {
     it.skip("Check Households Population page", () => {});
+<<<<<<< HEAD
     it.skip("Check Households Population Details page", () => {
       // ToDo: Global Programme changes
+=======
+    it("Check Households Population Details page", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.scenario([
         "Go to Population page",
         "Check if page is in Households",
         "Choose first Household from list",
         "Check if all elements on page exist",
       ]);
+<<<<<<< HEAD
       cy.get("div").contains("Households", { timeout: 10000 });
+=======
+      cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+      cy.get("div").contains("Households");
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.get('[data-cy="table-title"]').contains("Households");
       cy.get('[data-cy="household-table-row"]').first().click({ force: true });
       cy.get('[data-cy="page-header-container"]').contains("Household ID:", {
@@ -53,7 +62,11 @@ describe("Households Module", () => {
   describe.skip("E2E tests Households Population", () => {});
 
   describe("Regression tests Households Population", () => {
+<<<<<<< HEAD
     it.skip("174517: Check clear cache", () => {
+=======
+    it("174517: Check clear cash", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.scenario([
         "Go to Households page",
         "Press Menu User Profile button",

@@ -14,7 +14,10 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    encode_id_base64,
+)
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -289,7 +292,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": self.add_individual_grievance_ticket.description,
                 "assignedTo": self.id_to_base64(self.add_individual_grievance_ticket.assigned_to.id, "UserNode"),
-                "admin": self.add_individual_grievance_ticket.admin2.p_code,
+                "admin": encode_id_base64(str(self.add_individual_grievance_ticket.admin2.id), "Area"),
                 "language": self.add_individual_grievance_ticket.language,
                 "area": self.add_individual_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
@@ -417,7 +420,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "assignedTo": self.id_to_base64(
                     self.individual_data_change_grievance_ticket.assigned_to.id, "UserNode"
                 ),
-                "admin": self.individual_data_change_grievance_ticket.admin2.p_code,
+                "admin": encode_id_base64(str(self.individual_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.individual_data_change_grievance_ticket.language,
                 "area": self.individual_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"),
@@ -566,7 +569,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "this is new description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.household_data_change_grievance_ticket.admin2.p_code,
+                "admin": encode_id_base64(str(self.household_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
@@ -610,7 +613,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "this is new description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.household_data_change_grievance_ticket.admin2.p_code,
+                "admin": encode_id_base64(str(self.household_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
@@ -649,7 +652,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "this is new description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.household_data_change_grievance_ticket.admin2.p_code,
+                "admin": encode_id_base64(str(self.household_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
@@ -697,7 +700,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1.p_code,
+                "admin": encode_id_base64(str(self.admin_area_1.id), "Area"),
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
@@ -840,7 +843,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1.p_code,
+                "admin": encode_id_base64(str(self.admin_area_1.id), "Area"),
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": ticket_id,

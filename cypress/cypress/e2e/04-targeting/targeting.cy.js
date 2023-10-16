@@ -1,7 +1,9 @@
 import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
+import ErrorPage from "../../page-objects/404.po";
 
+let error404Page = new ErrorPage();
 let targetingPage = new Targeting();
 let targetingDetailsPage = new TDetailsPage();
 let targetingCreateNewPage = new CreateNew();
@@ -46,7 +48,11 @@ describe("Targeting", () => {
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
       // TODO: Refactor in second milestone
+<<<<<<< HEAD
       it.skip("Can visit the targeting page and create a target population", () => {
+=======
+      it("Can visit the targeting page and create a target population", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
         cy.scenario([
           "Go to Targeting New Ticket page",
           "Press Create New button",
@@ -54,7 +60,11 @@ describe("Targeting", () => {
           "Press button household rule",
           "Check if all elements on page exist",
         ]);
+<<<<<<< HEAD
         cy.navigateToHomePage();
+=======
+        cy.visit("/");
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
         cy.get('[data-cy="button-target-population-create-new"]').click({
@@ -125,10 +135,30 @@ describe("Targeting", () => {
       it.skip("Mark ready", () => {});
     });
   });
-  describe.skip("E2E tests Targeting", () => {});
+  describe.skip("E2E tests Targeting", () => {
+    it("404 Error page", () => {
+      cy.scenario([
+        "Go to Targeting page",
+        "Click first row",
+        "Delete part of URL",
+        "Check if 404 occurred",
+      ]);
+      targetingPage.getTargetPopulationsRows().first().click();
+      targetingDetailsPage.checkElementsOnPage("OPEN");
+      cy.url().then((url) => {
+        let newUrl = url.slice(0, -10);
+        cy.visit(newUrl);
+        error404Page.getPageNoFound().should("be.visible");
+      });
+    });
+  });
 
   describe("Regression tests Targeting", () => {
+<<<<<<< HEAD
     it.skip("174517: Check clear cache", () => {
+=======
+    it("174517: Check clear cash", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.scenario([
         "Go to Targeting page",
         "Press Menu User Profile button",

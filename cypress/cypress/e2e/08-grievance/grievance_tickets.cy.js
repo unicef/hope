@@ -1,10 +1,12 @@
 import Grievance from "../../page-objects/pages/grievance/grievance_tickets.po";
 import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
+import ErrorPage from "../../page-objects/404.po";
 
 let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
+let error404Page = new ErrorPage();
 
 const systemGenerated = "GRV-0000004";
 const userType6 = "GRV-0000006";
@@ -240,7 +242,11 @@ describe("Grievance", () => {
         ["USER-GENERATED", 5],
         ["SYSTEM-GENERATED", 1],
       ].forEach((testData) => {
+<<<<<<< HEAD
         it.skip(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
+=======
+        it(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
           cy.scenario([
             "Go to Grievance page",
             "Choose tab: " + testData[0],
@@ -422,7 +428,7 @@ describe("Grievance", () => {
           grievancePage.chooseTicketListRow(0, testData[3]);
         });
       });
-      it("Grievance Active Tickets filter", () => {});
+      it.skip("Grievance Active Tickets filter", () => {});
     });
     context("Create New Ticket", () => {
       beforeEach(() => {
@@ -1304,10 +1310,17 @@ describe("Grievance", () => {
         "Choose ticket: GRV-0000001",
         "Check URL",
       ]);
+<<<<<<< HEAD
       grievancePage.chooseTicketListRow(0, userType1).click();
       cy.url().should("include", "/user-generated");
     });
     it.skip("174517: Check clear cache", () => {
+=======
+      grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
+      cy.url().should("include", "/user-generated");
+    });
+    it("174517: Check clear cash", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.scenario([
         "Go to Grievance page",
         "Press Menu User Profile button",

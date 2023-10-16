@@ -38,7 +38,10 @@ describe("Payment Module", () => {
       let fspXlsxFilenames;
 
       //New Payment Plan page
+<<<<<<< HEAD
       paymentModule.navigateToProgrammePage("PaymentPlanProgram");
+=======
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       paymentModule.createPaymentPlan(targetPopulationName);
 
       cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -219,7 +222,11 @@ describe("Payment Module", () => {
   describe.skip("E2E tests Payment", () => {});
 
   describe("Regression tests Payment", () => {
+<<<<<<< HEAD
     it.skip("174517: Check clear cache", () => {
+=======
+    it("174517: Check clear cash", () => {
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       cy.scenario([
         "Go to Payment module page",
         "Press Menu User Profile button",

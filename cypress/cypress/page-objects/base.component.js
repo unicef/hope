@@ -1,5 +1,6 @@
 export default class BaseComponent {
   // Menu Locators
+<<<<<<< HEAD
   buttonPaymentModule = 'a[data-cy="nav-Payment Module"]';
   navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]';
   navProgrammePopulation = 'div[data-cy="nav-Programme Population"]';
@@ -27,9 +28,24 @@ export default class BaseComponent {
   globalProgramFilter = 'div[data-cy="global-program-filter"]';
   option = 'li[role="option"]';
   ticketListRow = 'tr[role="checkbox"]';
+=======
+  buttonPaymentVerification =
+    'span[class="MuiTypography-root MuiListItemText-primary MuiTypography-body1 MuiTypography-displayBlock"]';
+  buttonTargeting =
+    'span[class="MuiTypography-root MuiListItemText-primary MuiTypography-body1 MuiTypography-displayBlock"]';
+  buttonPaymentModule = 'a[data-cy="nav-Payment Module"]';
+  buttonGrievance = 'div[data-cy="nav-Grievance"]';
+  buttonGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]';
+  buttonGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
+  buttonFeedback = 'a[data-cy="nav-Feedback"]';
+  headerTitle = 'h5[data-cy="page-header-title"]';
+  menuUserProfile = 'button[data-cy="menu-user-profile"]';
+  menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
+  buttonPaymentModuleText = "Payment Verification";
   buttonTargetingText = "Targeting";
   buttonPaymentModuleText = "Payment Module";
   buttonGrievanceText = "Grievance";
@@ -39,6 +55,7 @@ export default class BaseComponent {
   textTestProgramm = "Test Programm";
   textDraftProgram = "Draft Program";
 
+<<<<<<< HEAD
   // Elements)
   getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
   getMenuButtonRegistrationDataImport = () =>
@@ -68,6 +85,19 @@ export default class BaseComponent {
   getMenuButtonGrievanceDashboard = () => cy.get(this.navGrievanceDashboard);
   getGlobalProgramFilter = () => cy.get(this.globalProgramFilter);
   getMenuButtonFeedback = () => cy.get(this.navFeedback);
+=======
+  // Elements
+  getMenuUserProfile = () => cy.get(this.menuUserProfile);
+  getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
+  getMenuButtonPaymentVerification = () =>
+    cy.get(this.buttonPaymentVerification);
+  getMenuButtonTargeting = () => cy.get(this.buttonTargeting);
+  getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
+  getMenuButtonGrievance = () => cy.get(this.buttonGrievance);
+  getMenuButtonGrievanceTickets = () => cy.get(this.buttonGrievanceTickets);
+  getMenuButtonGrievanceDashboard = () => cy.get(this.buttonGrievanceDashboard);
+  getMenuButtonFeedback = () => cy.get(this.buttonFeedback);
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
   getHeaderTitle = () => cy.get(this.headerTitle);
   getTicketListRow = () => cy.get(this.ticketListRow);
 
@@ -106,10 +136,16 @@ export default class BaseComponent {
     this.getMenuButtonTargeting().contains(this.buttonTargetingText).click();
   }
 
+<<<<<<< HEAD
   clickMenuButtonPaymentModule() {
     this.getMenuButtonPaymentModule()
       .contains(this.buttonPaymentModuleText)
       .click();
+=======
+  clearCache() {
+    this.getMenuUserProfile().click();
+    this.getMenuItemClearCache().click();
+>>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
   }
 
   pressEscapeFromElement(element) {
