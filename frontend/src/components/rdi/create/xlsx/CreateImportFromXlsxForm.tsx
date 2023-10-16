@@ -14,7 +14,6 @@ import {
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { handleValidationErrors } from '../../../../utils/utils';
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { DropzoneField } from './DropzoneField';
@@ -47,7 +46,7 @@ export function CreateImportFromXlsxForm({
   const { t } = useTranslation();
   const history = useHistory();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
-  const onSubmit = async (values, { setFieldError }): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
@@ -62,20 +61,11 @@ export function CreateImportFromXlsxForm({
       history.push(
         `/${businessAreaSlug}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
-    } catch (error) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'registrationXlsxImport',
-        error,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(
-          t('Unexpected problem while creating Registration Data Import'),
-        );
-      }
+    }catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
+
   const formik = useFormik({
     initialValues: {
       name: '',
