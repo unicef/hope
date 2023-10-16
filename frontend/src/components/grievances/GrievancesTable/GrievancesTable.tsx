@@ -45,7 +45,7 @@ export const GrievancesTable = ({
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
