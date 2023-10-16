@@ -14,11 +14,11 @@ import {
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
+import {LoadingComponent} from "../../../core/LoadingComponent";
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { DropzoneField } from './DropzoneField';
-import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
-import {LoadingComponent} from "../../../core/LoadingComponent";
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -60,7 +60,7 @@ export function CreateImportFromXlsxForm({
     }
   });
 
-  const onSubmit = async (values, { setFieldError }): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
