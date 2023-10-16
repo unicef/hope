@@ -2,7 +2,7 @@ import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import BusinessArea, StorageFile, DataCollectingType
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, StorageFile
 
 faker = Faker()
 
