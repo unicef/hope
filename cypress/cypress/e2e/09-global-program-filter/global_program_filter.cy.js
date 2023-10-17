@@ -4,7 +4,7 @@ let programmesPage = new AllProgrammes();
 
 describe("Global Program Filter", () => {
   beforeEach(() => {
-    programmesPage.navigateToProgrammePage();
+    programmesPage.navigateToProgrammePage("All Programmes");
   });
 
   describe("Smoke tests Global Program Filter", () => {
