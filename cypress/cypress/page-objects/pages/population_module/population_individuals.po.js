@@ -8,14 +8,11 @@ export default class PopulationIndividuals extends BaseComponent {
   textTitle = "Individuals";
 
   // Elements
-<<<<<<< HEAD
 
   clickNavIndividuals() {
     this.getMenuButtonProgrammePopulation().click();
     this.getMenuButtonIndividuals().should("be.visible");
     this.getMenuButtonIndividuals().click();
   }
-=======
   getTitle = () => cy.get(this.titlePage);
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
 }
