@@ -4113,8 +4113,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         handle_payment_related_tickets()
         self.refresh_objects()
 
-        self._test_ticket_complaint_details_with_payments()
         self._test_ticket_sensitive_details_with_payments()
+        self._test_ticket_complaint_details_with_payments()
         self._test_ticket_payment_verification_details_with_payments()
 
     def _test_ticket_complaint_details_with_payments(self) -> None:
