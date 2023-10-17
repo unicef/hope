@@ -67,7 +67,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Plan Start Date"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     <time
@@ -93,7 +93,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Plan End Date"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     <time
@@ -119,7 +119,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Payment Plan Name"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     Military citizen until amount.
@@ -141,7 +141,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-delivery type"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     Voucher
@@ -180,7 +180,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-dispertion date"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     <time
@@ -206,7 +206,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-fc id"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     62947144
@@ -228,7 +228,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-dp id"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     27371694
@@ -250,7 +250,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Target population(s)"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb hcLDQu"
                     color="textSecondary"
                   >
                     <span>
