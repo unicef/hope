@@ -226,7 +226,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI kdOUDe"
+                  class="sc-iwsKbI kivmzR"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6OTljYTYxY2EtMzRmNS00OGFjLWIzMzItZTA4YzY4ZWU0NGNj"
                 >
                   123-21-PR-00009
@@ -279,7 +279,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI kdOUDe"
+                  class="sc-iwsKbI kivmzR"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6NGRmMjhlZWEtMjhjMC00Mzk2LTk2Y2MtZDMzOGU4Yzk0ZDE5"
                 >
                   123-21-PR-00002
@@ -332,7 +332,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-iwsKbI kdOUDe"
+                  class="sc-iwsKbI kivmzR"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payments/UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk"
                 >
                   RCPT-0060-23-0.000.043
