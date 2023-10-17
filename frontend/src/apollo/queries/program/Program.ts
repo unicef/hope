@@ -22,6 +22,13 @@ export const PROGRAM_QUERY = gql`
       administrativeAreasOfImplementation
       individualDataNeeded
       version
+      dataCollectingType {
+        id
+        code
+        label
+        active
+        individualFiltersAvailable
+      }
     }
   }
 `;

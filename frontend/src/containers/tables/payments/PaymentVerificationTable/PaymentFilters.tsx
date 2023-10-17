@@ -12,10 +12,7 @@ import { ContainerWithBorder } from '../../../../components/core/ContainerWithBo
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
-import {
-  createHandleApplyFilterChange,
-  dateToIsoString,
-} from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 interface PaymentFiltersProps {
   filter;
@@ -111,8 +108,9 @@ export const PaymentFilters = ({
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
-            label='Modality'
+            label='Delivery Mechanism'
             data-cy='filter-Modality'
+            multiple
             value={filter.deliveryType}
             fullWidth
             icon={<MonetizationOnIcon />}
@@ -129,12 +127,7 @@ export const PaymentFilters = ({
             label='Start Date'
             fullWidth
             data-cy='filter-start-date'
-            onChange={(date) =>
-              handleFilterChange(
-                'startDate',
-                dateToIsoString(date, 'startOfDay'),
-              )
-            }
+            onChange={(date) => handleFilterChange('startDate', date)}
             value={filter.startDate}
           />
         </Grid>
@@ -143,9 +136,7 @@ export const PaymentFilters = ({
             label='End Date'
             fullWidth
             data-cy='filter-end-date'
-            onChange={(date) =>
-              handleFilterChange('endDate', dateToIsoString(date, 'endOfDay'))
-            }
+            onChange={(date) => handleFilterChange('endDate', date)}
             value={filter.endDate}
           />
         </Grid>

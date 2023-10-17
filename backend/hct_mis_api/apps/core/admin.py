@@ -714,5 +714,21 @@ class MigrationStatusAdmin(admin.ModelAdmin):
 
 
 @admin.register(DataCollectingType)
-class DataCollectingTypeAdmin(admin.ModelAdmin):
-    list_display = ("code", "description", "created", "modified")
+class DataCollectingTypeAdmin(HOPEModelAdminBase):
+    list_display = (
+        "label",
+        "code",
+        "description",
+        "active",
+        "individual_filters_available",
+        "household_filters_available",
+        "recalculate_composition",
+    )
+    list_filter = (
+        ("limit_to", AutoCompleteFilter),
+        "active",
+        "individual_filters_available",
+        "household_filters_available",
+        "recalculate_composition",
+    )
+    filter_horizontal = ("compatible_types", "limit_to")

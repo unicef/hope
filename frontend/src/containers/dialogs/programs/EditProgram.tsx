@@ -7,7 +7,7 @@ import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
+import { decodeIdString } from '../../../utils/utils';
 import {
   ProgramNode,
   useUpdateProgramMutation,
@@ -18,7 +18,7 @@ interface EditProgramProps {
   program: ProgramNode;
 }
 
-export function EditProgram({ program }: EditProgramProps): ReactElement {
+export const EditProgram = ({ program }: EditProgramProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -44,7 +44,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       });
     },
   });
-  const submitFormHandler = async (values, setFieldError): Promise<void> => {
+  const submitFormHandler = async (values): Promise<void> => {
     try {
       const response = await mutate({
         variables: {
@@ -63,13 +63,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       });
       setOpen(false);
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'updateProgram',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      nonValidationErrors.map((x) => showMessage(x.message));
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -111,4 +105,4 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       />
     </span>
   );
-}
+};

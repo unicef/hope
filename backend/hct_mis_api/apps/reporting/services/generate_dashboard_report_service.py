@@ -1,6 +1,7 @@
 import copy
 import datetime
 import functools
+import io
 import logging
 from itertools import chain
 from tempfile import NamedTemporaryFile
@@ -949,7 +950,7 @@ class GenerateDashboardReportService:
                 file = bytes(tmp.read())
             self.report.file.save(
                 f"{file_name}-{self._format_date(self.report.created_at)}.xlsx",
-                file,
+                io.BytesIO(file),
                 save=False,
             )
             self.report.status = DashboardReport.COMPLETED

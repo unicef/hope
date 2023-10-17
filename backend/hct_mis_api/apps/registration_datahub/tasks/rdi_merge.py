@@ -314,7 +314,7 @@ class RdiMergeTask:
         return roles_to_create
 
     def execute(self, registration_data_import_id: str) -> None:
-        individual_ids = []
+        individual_ids, household_ids = [], []
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id)

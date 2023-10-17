@@ -95,9 +95,9 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         cls.create_user_role_with_permissions(
             cls.user,
             [
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
+                Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE,
+                Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
                 Permissions.GRIEVANCES_CREATE,
             ],
             cls.business_area,
@@ -306,7 +306,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                     "description": "Test Feedback",
                     "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
                     "category": GrievanceTicket.CATEGORY_REFERRAL,
-                    "admin": self.admin_area.p_code,
+                    "admin": encode_id_base64(str(self.admin_area.id), "Area"),
                     "language": "Polish, English",
                     "consent": True,
                     "businessArea": "afghanistan",

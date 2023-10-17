@@ -129,6 +129,7 @@ export function TargetingCriteria({
     }
     return closeModal();
   };
+
   return (
     <PaperContainer>
       <Box display='flex' flexDirection='column'>
@@ -155,6 +156,10 @@ export function TargetingCriteria({
                 addCriteria={addCriteria}
                 shouldShowWarningForIndividualFilter={
                   selectedProgram && !selectedProgram.individualDataNeeded
+                }
+                individualFiltersAvailable={
+                  selectedProgram?.dataCollectingType
+                    ?.individualFiltersAvailable || true
                 }
               />
             </>
