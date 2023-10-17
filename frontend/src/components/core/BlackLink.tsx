@@ -6,6 +6,8 @@ export const StyledLink = styled(Link)`
   color: #000;
   max-width: ${(props) => (props.fullWidth ? '100%' : '200px')}
   white-space: wrap;
+  word-wrap: break-word;
+  word-break: break-all;
   display: inline-block;
 `;
 

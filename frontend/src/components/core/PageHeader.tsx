@@ -59,7 +59,7 @@ const StatusErasedWrapper = styled.div`
 `;
 
 const TitleContainer = styled.div`
-  max-width: 90%;
+  width: 100%;
   word-wrap: break-word;
   word-break: break-all;
 `;
