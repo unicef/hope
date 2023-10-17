@@ -58,6 +58,11 @@ const StatusErasedWrapper = styled.div`
   text-transform: uppercase;
 `;
 
+const TitleContainer = styled.div`
+  max-width: 90%;
+  word-wrap: break-word;
+  word-break: break-all;
+`;
 interface Props {
   title: string | React.ReactElement;
   children?: React.ReactElement;
@@ -68,7 +73,7 @@ interface Props {
   isErased?: boolean;
 }
 
-export function PageHeader({
+export const PageHeader = ({
   title,
   children,
   breadCrumbs = null,
@@ -76,7 +81,7 @@ export function PageHeader({
   hasInputComponent,
   flags,
   isErased,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
@@ -94,9 +99,11 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Box display='flex' alignItems='center'>
-                  <Typography data-cy='page-header-title' variant='h5'>
-                    {title}
-                  </Typography>
+                  <TitleContainer>
+                    <Typography data-cy='page-header-title' variant='h5'>
+                      {title}
+                    </Typography>
+                  </TitleContainer>
                   {isErased ? (
                     <StatusErasedWrapper>
                       <StatusBox
@@ -118,4 +125,4 @@ export function PageHeader({
       <TabsWrapper>{tabs}</TabsWrapper>
     </Wrapper>
   );
-}
+};
