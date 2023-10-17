@@ -586,7 +586,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Linked Grievances"
           >
             <span
-              class="sc-htpNat cwQQYq"
+              class="sc-htpNat cjXsvk"
               color="textSecondary"
             >
               <span>
