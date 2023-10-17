@@ -306,7 +306,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                     "description": "Test Feedback",
                     "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
                     "category": GrievanceTicket.CATEGORY_REFERRAL,
-                    "admin": self.admin_area.p_code,
+                    "admin": encode_id_base64(str(self.admin_area.id), "Area"),
                     "language": "Polish, English",
                     "consent": True,
                     "businessArea": "afghanistan",

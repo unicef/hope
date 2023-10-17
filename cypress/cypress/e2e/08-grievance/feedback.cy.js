@@ -3,7 +3,9 @@ import FeedbackDetailsPage from "../../page-objects/pages/grievance/details_feed
 import NewFeedback from "../../page-objects/pages/grievance/new_feedback.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
 import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
+import ErrorPage from "../../page-objects/404.po";
 
+let error404Page = new ErrorPage();
 let feedbackPage = new Feedback();
 let feedbackDetailsPage = new FeedbackDetailsPage();
 let newFeedbackPage = new NewFeedback();
@@ -399,6 +401,45 @@ describe("Grievance - Feedback", () => {
       });
     });
   });
-  describe.skip("E2E tests Feedback", () => {});
-  describe.skip("Regression tests Feedback", () => {});
+  describe("E2E tests Feedback", () => {
+    // ToDo: Enable after fix
+    it.skip("404 Error page - refresh", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Go to Feedback page",
+        "Click first row",
+        "Delete part of URL",
+        "Check if 404 occurred",
+        "Press button refresh",
+        "Check if 404 occurred",
+      ]);
+      feedbackPage.getRows().first().click();
+      feedbackDetailsPage.getTitlePage().contains("Feedback");
+      cy.url().then((url) => {
+        let newUrl = url.slice(0, -10);
+        cy.visit(newUrl);
+        error404Page
+          .getPageNoFound()
+          .its("response.statusCode")
+          .should("eq", 200);
+        error404Page.getButtonRefresh().click();
+        error404Page
+          .getPageNoFound()
+          .its("response.statusCode")
+          .should("eq", 200);
+      });
+    });
+  });
+  describe("Regression tests Feedback", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Feedback page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      feedbackPage.clearCache();
+      feedbackPage.checkElementsOnPage();
+    });
+  });
 });
