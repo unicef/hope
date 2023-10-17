@@ -131,7 +131,7 @@ export default class BaseComponent {
 
   getProgrammesOptions = () => cy.get(this.option);
 
-  navigateToProgrammePage(program = this.textAllProgrammes) {
+  navigateToProgrammePage(program = this.textTestProgramm) {
     cy.visit("/");
     this.getGlobalProgramFilter().click();
     cy.log(`Program: ${program}`);
