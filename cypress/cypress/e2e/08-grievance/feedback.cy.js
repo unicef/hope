@@ -113,18 +113,33 @@ describe("Grievance - Feedback", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
-          "Choose Type cypress@cypress.com",
+          "Create new feedback cy Cypress User",
+          "Press Feedback button in menu",
+          "Choose Type Cypress User",
           "Press button Apply",
           `Check if Tickets List is empty`,
           "Press button Clear",
-          "Choose Type root@root.com",
+          "Choose Type Root Rootkowski",
           "Press button Apply",
           `Check if Tickets List has 2 row`,
         ]);
-        feedbackPage.useCreatedByFilter("cypress@cypress.com");
-        feedbackPage.expectedNumberOfRows(0);
+        feedbackPage.getButtonSubmitNewFeedback().click();
+        newFeedbackPage.chooseOptionByName("Positive");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getHouseholdTab().should("be.visible");
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getReceivedConsent().click();
+        newFeedbackPage.getButtonNext().click();
+        newFeedbackPage.getLabelCategory().contains("Feedback");
+        newFeedbackPage.getDescription().type("Test Description");
+        newFeedbackPage.getButtonNext().contains("Save").click();
+        feedbackPage.clickMenuButtonFeedback();
+
+        feedbackPage.useCreatedByFilter("Cypress User");
+        feedbackPage.expectedNumberOfRows(1);
         feedbackPage.getButtonClear().click();
-        feedbackPage.useCreatedByFilter("root@root.com");
+        feedbackPage.expectedNumberOfRows(3);
+        feedbackPage.useCreatedByFilter("Root Rootkowski");
         feedbackPage.expectedNumberOfRows(2);
       });
       it("Feedback Creation Date filter", () => {
