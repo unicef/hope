@@ -5,7 +5,7 @@ export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Payment Plan ID',
-    id: 'ca_id',
+    id: 'unicef_id',
     numeric: false,
   },
   {
