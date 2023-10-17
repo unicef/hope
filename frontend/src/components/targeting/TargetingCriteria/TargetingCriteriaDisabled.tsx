@@ -56,7 +56,7 @@ export function TargetingCriteriaDisabled({ showTooltip = false }): React.ReactE
         </Title>
           {showTooltip ? (
             <ContentWrapper>
-                <Tooltip title="Make sure program has checked householdFilterFlag or individualFilterFlag">
+                <Tooltip title="Make sure program has checked household filter flag or individual filter flag">
                 <div>
                   <AddCriteria
                     onClick={() => null}
