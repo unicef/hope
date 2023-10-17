@@ -148,10 +148,14 @@ class TicketCreatorService:
         programme = input_data.pop("programme", None)
 
         if admin:
-            admin = get_object_or_404(Area, p_code=admin)
+            admin = get_object_or_404(Area, id=decode_id_string(admin))
+        else:
+            admin = None
 
         if programme:
             programme = get_object_or_404(Program, pk=decode_id_string(programme))
+        else:
+            programme = None
 
         return GrievanceTicket.objects.create(
             **input_data,

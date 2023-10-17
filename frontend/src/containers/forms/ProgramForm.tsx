@@ -47,7 +47,7 @@ const FullWidth = styled.div`
 
 interface ProgramFormPropTypes {
   program?: ProgramNode;
-  onSubmit: (values, setFieldError) => Promise<void>;
+  onSubmit: (values) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;
   onClose: () => void;
@@ -164,7 +164,7 @@ export const ProgramForm = ({
       >
         <Formik
           initialValues={initialValue}
-          onSubmit={(values, { setFieldError }) => {
+          onSubmit={(values) => {
             const newValues = { ...values };
             newValues.budget = Number(values.budget).toFixed(2);
             if (values.individualDataNeeded === 'YES') {
@@ -172,7 +172,7 @@ export const ProgramForm = ({
             } else if (values.individualDataNeeded === 'NO') {
               newValues.individualDataNeeded = false;
             }
-            return onSubmit(newValues, setFieldError);
+            return onSubmit(newValues);
           }}
           validationSchema={validationSchema}
           enableReinitialize

@@ -21,6 +21,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   libpango-1.0-0 \
   libpangocairo-1.0-0 \
   shared-mime-info \
+  wkhtmltopdf \
   curl \
   vim &&\
   addgroup --system --gid 82 hope &&\

@@ -147,7 +147,6 @@ export const Entitlement = ({
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan.isFollowUp ||
     paymentPlan?.backgroundActionStatus ===
       PaymentPlanBackgroundActionStatus.XlsxExporting;
 
@@ -195,7 +194,8 @@ export const Entitlement = ({
                   disabled={
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked
+                    paymentPlan.status !== PaymentPlanStatus.Locked ||
+                    paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun
                   }
                   data-cy='button-apply-steficon'
                   onClick={async () => {
