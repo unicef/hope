@@ -2,6 +2,7 @@ import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
 import ErrorPage from "../../page-objects/404.po";
+import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
 
 let error404Page = new ErrorPage();
 let targetingPage = new Targeting();

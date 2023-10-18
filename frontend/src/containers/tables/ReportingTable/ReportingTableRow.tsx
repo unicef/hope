@@ -16,7 +16,7 @@ const UnderlinedTableCell = styled(TableCell)`
 `;
 const DownloadTableCell = styled(TableCell)`
   span {
-    color: #9f9f9f;
+    color: #003C8F;
     font-weight: 500;
     display: flex;
     justify-content: center;
