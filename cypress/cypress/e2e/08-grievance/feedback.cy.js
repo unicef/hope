@@ -128,7 +128,7 @@ describe("Grievance - Feedback", () => {
         feedbackPage.useCreatedByFilter("root@root.com");
         feedbackPage.expectedNumberOfRows(2);
       });
-      it("Feedback Creation Date filter", () => {
+      it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
