@@ -5,8 +5,11 @@ import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
-  getPhoneNoLabel, paymentStatusDisplayMap,
+  getPhoneNoLabel,
+  paymentStatusDisplayMap,
   paymentStatusToColor,
+  renderIndividualName,
+  renderUserName,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { PaymentQuery } from '../../../__generated__/graphql';
@@ -15,6 +18,10 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { DividerLine } from '../../core/DividerLine';
+import { BlackLink } from '../../core/BlackLink';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { Missing } from '../../core/Missing';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -25,12 +32,15 @@ const Overview = styled(Paper)`
 interface PaymentDetailsProps {
   payment: PaymentQuery['payment'];
   canViewActivityLog: boolean;
+  canViewHouseholdDetails: boolean;
 }
 
-export function PaymentDetails({
+export const PaymentDetails = ({
   payment,
   canViewActivityLog,
-}: PaymentDetailsProps): React.ReactElement {
+  canViewHouseholdDetails,
+}: PaymentDetailsProps): React.ReactElement => {
+  const businessArea = useBusinessArea();
   const { t } = useTranslation();
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (payment.verification && payment.verification.status !== 'PENDING') {
@@ -40,7 +50,7 @@ export function PaymentDetails({
     <>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Payment Details')}</Typography>
+          <Typography variant='h6'>{t('Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -54,20 +64,62 @@ export function PaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('Household')}
-              value={payment.household.unicefId}
+              label={t('ENTITLEMENT QUANTITY')}
+              value={payment.entitlementQuantity}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('TARGET POPULATION')}
-              value={payment.targetPopulation.name}
+              label={t('DELIVERED QUANTITY')}
+              value={payment.deliveredQuantity}
             />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label={t('CURRENCY')} value={payment.currency} />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('DELIVERY DATE')}
+              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label={t('Registration Group')}>
+              {/* {payment.household?.id ? (
+                <BlackLink
+                  to={
+                    canViewHouseholdDetails
+                      ? `/${businessArea}/population/household/${payment.household.id}`
+                      : undefined
+                  }
+                >
+                  {payment.household.unicefId}
+                </BlackLink>
+              ) : (
+                '-'
+              )} */}
+              <Missing />
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label={t('TARGET POPULATION')}>
+              <BlackLink
+                to={`/${businessArea}/target-population/${payment.targetPopulation.id}`}
+              >
+                {payment.targetPopulation?.name}
+              </BlackLink>
+            </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
               value={payment.distributionModality}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Related Payment Id')}
+              value={payment.sourcePayment?.unicefId}
             />
           </Grid>
         </Grid>
@@ -86,6 +138,7 @@ export function PaymentDetails({
                 />
               </LabelizedField>
             </Grid>
+
             <Grid item xs={3}>
               <LabelizedField
                 label={t('AMOUNT RECEIVED')}
@@ -104,15 +157,32 @@ export function PaymentDetails({
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
+            <LabelizedField label={t('HOUSEHOLD ID')}>
+              {payment.household?.id ? (
+                <BlackLink
+                  to={
+                    canViewHouseholdDetails
+                      ? `/${businessArea}/population/household/${payment.household.id}`
+                      : undefined
+                  }
+                >
+                  {payment.household.unicefId}
+                </BlackLink>
+              ) : (
+                '-'
+              )}
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
             <LabelizedField
-              label={t('HOUSEHOLD ID')}
-              value={payment.household.unicefId}
+              label={t("Collector's Name")}
+              value={renderUserName(payment.collector)}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('Collector')}
-              value={payment.collector.unicefId}
+              label={t("Collector's ID")}
+              value={payment.collector?.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -148,29 +218,14 @@ export function PaymentDetails({
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label={t('CURRENCY')} value={payment.currency} />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('DELIVERY TYPE')}
+              label={t('DELIVERY MECHANISM')}
               value={payment.deliveryType}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('DELIVERY DATE')}
-              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
+              label={t('FSP')}
+              value={payment.serviceProvider?.fullName}
             />
           </Grid>
           <Grid item xs={3}>
@@ -179,10 +234,59 @@ export function PaymentDetails({
               value={payment.transactionReferenceId}
             />
           </Grid>
+        </Grid>
+        <DividerLine />
+        <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('FSP')}
-              value={payment.serviceProvider?.fullName}
+              label={t('Bank Name')}
+              value={payment.snapshotCollectorBankName}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Bank Account Number')}
+              value={payment.snapshotCollectorBankAccountNumber}
+            />
+          </Grid>
+        </Grid>
+      </Overview>
+      <Overview>
+        <Title>
+          <Typography variant='h6'>{t('Reconciliation Details')}</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t("Collector's Name")}
+              value={payment.additionalCollectorName}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Document Type')}
+              value={payment.additionalDocumentType}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Document Number')}
+              value={payment.additionalDocumentType}
+            />
+          </Grid>
+        </Grid>
+        <DividerLine />
+        <Grid container spacing={3}>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Failure Reason')}
+              value={payment.reasonForUnsuccessfulPayment}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('Bank Account Number')}
+              value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
         </Grid>
@@ -192,4 +296,4 @@ export function PaymentDetails({
       )}
     </>
   );
-}
+};
