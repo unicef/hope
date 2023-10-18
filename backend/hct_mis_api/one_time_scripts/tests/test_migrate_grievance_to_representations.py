@@ -284,7 +284,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         target_population1 = TargetPopulationFactory(program=self.program1)
         payment_plan = PaymentPlanFactory(target_population=target_population1)
         payment = PaymentFactory(parent=payment_plan)
-        payment.refresh_from_db()
 
         self.complaint_ticket_with_payment = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment,
@@ -292,6 +291,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             payment_object_id=payment.id,
             payment_content_type_id=self.PAYMENT_CT_ID,
         )
+        self.complaint_ticket_with_payment.payment_object = payment
+        self.complaint_ticket_with_payment.save()
 
         # ComplaintTicketDetails with payment_record in pr2, with HH in p2 and pr3
         self.household_complaint_ticket_with_payment_record = self.create_household_with_representations(
@@ -301,13 +302,14 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         payment_record = PaymentRecordFactory(
             target_population=target_population2, household=self.household_complaint_ticket_with_payment_record
         )
-        payment_record.refresh_from_db()
         self.complaint_ticket_with_payment_record = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment_record,
             individual=None,
             payment_object_id=payment_record.id,
             payment_content_type_id=self.PAYMENT_RECORD_CT_ID,
         )
+        self.complaint_ticket_with_payment_record.payment_object = payment_record
+        self.complaint_ticket_with_payment_record.save()
 
         # ComplaintTicketDetails without payment_obj
         # GT is Closed, no HH and no IND
@@ -492,7 +494,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             target_population=target_population1,
             household=self.household_payment_verification_ticket_with_payment_record,
         )
-        payment_record.refresh_from_db()
         payment_verification1 = PaymentVerificationFactory(
             generic_fk_obj=payment_record,
             payment_object_id=payment_record.id,
@@ -4114,8 +4115,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self._test_payment_related_tickets()
 
     def _test_payment_related_tickets(self) -> None:
-        self.hh1, self.ind1, self.pr1 = get_program_and_representations_for_payment(self.complaint_ticket_with_payment)
-        self.assertEqual(self.complaint_ticket_with_payment.payment_obj, None)
         handle_payment_related_tickets()
         self.refresh_objects()
 
@@ -4136,11 +4135,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             .first()
         )
         self.assertEqual(
-            self.complaint_ticket_with_payment.household,
-            repr_household_complaint_ticket_with_payment,
-            msg=f"({self.hh1}, {self.ind1}, {self.pr1}, {self.complaint_ticket_with_payment.payment_obj},"
-            f"{self.complaint_ticket_with_payment.payment_obj.parent.target_population.program})",
-        )
+            self.complaint_ticket_with_payment.household, repr_household_complaint_ticket_with_payment)
         self.assertEqual(self.complaint_ticket_with_payment.individual, repr_individual_complaint_ticket_with_payment)
         self.assertEqual(
             self.complaint_ticket_with_payment.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
