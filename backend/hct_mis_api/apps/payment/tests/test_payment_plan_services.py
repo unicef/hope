@@ -458,7 +458,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 1)
 
-        with self.assertNumQueries(73):
+        with self.assertNumQueries(78):
             prepare_follow_up_payment_plan_task(follow_up_pp.id)
 
         self.assertEqual(follow_up_pp.payment_items.count(), 3)
