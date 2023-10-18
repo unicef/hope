@@ -284,6 +284,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         target_population1 = TargetPopulationFactory(program=self.program1)
         payment_plan = PaymentPlanFactory(target_population=target_population1)
         payment = PaymentFactory(parent=payment_plan)
+        payment.refresh_from_db()
 
         self.complaint_ticket_with_payment = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment,
@@ -300,7 +301,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         payment_record = PaymentRecordFactory(
             target_population=target_population2, household=self.household_complaint_ticket_with_payment_record
         )
-
+        payment_record.refresh_from_db()
         self.complaint_ticket_with_payment_record = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment_record,
             individual=None,
@@ -491,6 +492,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             target_population=target_population1,
             household=self.household_payment_verification_ticket_with_payment_record,
         )
+        payment_record.refresh_from_db()
         payment_verification1 = PaymentVerificationFactory(
             generic_fk_obj=payment_record,
             payment_object_id=payment_record.id,
@@ -508,6 +510,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         target_population2 = TargetPopulationFactory(program=self.program2)
         payment_plan = PaymentPlanFactory(target_population=target_population2)
         payment = PaymentFactory(parent=payment_plan)
+        # payment.refresh_from_db()
         payment_verification2 = PaymentVerificationFactory(
             generic_fk_obj=payment,
             payment_object_id=payment.id,
