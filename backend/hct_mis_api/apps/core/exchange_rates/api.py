@@ -5,7 +5,6 @@ import os
 from typing import Dict, Optional
 
 from django.conf import settings
-from django.core.cache import cache
 
 from requests import session
 from requests.adapters import HTTPAdapter
@@ -16,20 +15,24 @@ logger = logging.getLogger(__name__)
 
 class ExchangeRateClient(abc.ABC):
     @abc.abstractmethod
-    def fetch_exchange_rates(self, with_history: bool = True) -> dict:
+    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
         pass
 
 
 class ExchangeRateClientDummy(ExchangeRateClient):
-    def fetch_exchange_rates(self, with_history: bool = True) -> dict:
+    def __init__(self, exchange_rates: Optional[Dict] = None):
+        self.exchange_rates = exchange_rates or self.populate_from_file()
+
+    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
+        return self.exchange_rates
+
+    def populate_from_file(self) -> Dict:
         exchange_rates_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exchange_rates.json")
         with open(exchange_rates_file_path, "r") as exchange_rates_file:
             return json.load(exchange_rates_file)
 
 
 class ExchangeRateClientAPI(ExchangeRateClient):
-    CACHE_KEY = "exchange_rates"
-
     def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
         self.api_key = api_key or os.getenv("EXCHANGE_RATES_API_KEY")
         self.api_url: str = (
@@ -45,17 +48,8 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
     def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
-        if settings.USE_DUMMY_EXCHANGE_RATES is True:
-            exchange_rates_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exchange_rates.json")
-            with open(exchange_rates_file_path, "r") as exchange_rates_file:
-                return json.load(exchange_rates_file)
-
         params = {}
 
-        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
-            cached_response = cache.get(self.CACHE_KEY)
-            if cached_response is not None:
-                return cached_response
         if with_history is True:
             params["history"] = "yes"
         response = self._client.get(self.api_url, params=params)
@@ -65,10 +59,7 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         except Exception as e:
             logger.exception(e)
             raise
-        response_json = response.json()
-        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
-            cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
-        return response_json
+        return response.json()
 
 
 def get_exchange_rate_client() -> ExchangeRateClient:
