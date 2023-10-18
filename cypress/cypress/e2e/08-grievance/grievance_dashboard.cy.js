@@ -34,11 +34,7 @@ describe("Grievance Dashboard", () => {
   describe.skip("E2E tests Grievance Dashboard", () => {});
 
   describe("Regression tests Grievance Dashboard", () => {
-<<<<<<< HEAD
-    it.skip("174517: Check clear cache", () => {
-=======
-    it("174517: Check clear cash", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Grievance Dashboard page",
         "Press Menu User Profile button",

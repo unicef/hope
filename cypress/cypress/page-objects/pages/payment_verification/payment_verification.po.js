@@ -26,6 +26,7 @@ export default class PaymentVerification extends BaseComponent {
   textStartDate = "Start Date";
   textEndDate = "End Date";
   textProgramme = "Programme";
+  textPaymentPlanID = "Payment Plan ID";
   textVerificationStatus = "Verification Status";
   textCashAmount = "Cash Amount";
   textTimeframe = "Timeframe";

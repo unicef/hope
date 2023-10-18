@@ -1,6 +1,8 @@
 import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
+import ProgramManagement from "../../page-objects/pages/program_management/program_management.po";
 
 let programDetails = new ProgramDetails();
+let programManagement = new ProgramManagement();
 
 describe("Program Details", () => {
   beforeEach(() => {
@@ -96,9 +98,43 @@ describe("Program Details", () => {
       programDetails.getButtonDataCyButtonReactivateProgramPopup().click();
       programDetails.getStatusContainer().should("contain", "ACTIVE");
     });
-    it.skip("Remove Program", () => {});
-    it.skip("Activate Program", () => {});
-    it.skip("Reactivate Program", () => {});
+    it.skip("Copy Program", () => {
+      cy.scenario([
+        "Go to Program Details page (Draft Program)",
+        "Press Copy button",
+        "Change Name",
+        "Choose Data Collection Type",
+        "Press Save",
+        "Check if program created",
+      ]);
+      programDetails.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonCopyProgram().click();
+      programManagement.getSelectDataCollectingTypeCode.click();
+      programManagement.getInputDescription().clear().type("New Name");
+      programManagement.getSelectOptionByName("Full");
+      programManagement.getButtonSave().click();
+      programDetails.getPageHeaderTitle().contains("New Name");
+      programManagement
+        .getPageHeaderTitle()
+        .should("contain", "Programme Management");
+    });
+    it("Remove Program", () => {
+      programDetails.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonRemoveProgram().click();
+      programDetails.getButtonRemoveProgram().eq(1).click();
+      programDetails.getGlobalProgramFilter().click();
+      programDetails
+        .getProgrammesOptions()
+        .should("not.contain", "Draft Program");
+      cy.initScenario("init_clear");
+      cy.adminLogin();
+    });
+    it("Activate Program", () => {
+      programDetails.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonActivateProgram().click();
+      programDetails.getButtonActivateProgramModal().click();
+      programDetails.getStatusContainer().should("contain", "ACTIVE");
+    });
   });
 
   describe.skip("E2E tests Program Details", () => {});

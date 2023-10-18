@@ -1,5 +1,6 @@
 export default class BaseComponent {
   // Menu Locators
+  buttonPaymentModule = 'a[data-cy="nav-Payment Module"]';
   navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]';
   navProgrammePopulation = 'div[data-cy="nav-Programme Population"]';
   navHouseholds = 'a[data-cy="nav-Households"]';
@@ -22,11 +23,10 @@ export default class BaseComponent {
   navResourcesToolsAndMaterials =
     'a[data-cy="nav-resources-Tools and Materials"]';
   navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]';
+  headerTitle = 'h5[data-cy="page-header-title"]';
   globalProgramFilter = 'div[data-cy="global-program-filter"]';
   option = 'li[role="option"]';
   ticketListRow = 'tr[role="checkbox"]';
-  buttonPaymentModule = 'a[data-cy="nav-Payment Module"]';
-  headerTitle = 'h5[data-cy="page-header-title"]';
   menuUserProfile = 'button[data-cy="menu-user-profile"]';
   menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
 
@@ -42,7 +42,9 @@ export default class BaseComponent {
   textDraftProgram = "Draft Program";
   textAllProgrammes = "All Programmes";
 
-  // Elements)
+  // Elements
+  getMenuUserProfile = () => cy.get(this.menuUserProfile);
+  getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
   getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
   getMenuButtonRegistrationDataImport = () =>
     cy.get(this.navRegistrationDataImport);
@@ -71,8 +73,6 @@ export default class BaseComponent {
   getMenuButtonGrievanceDashboard = () => cy.get(this.navGrievanceDashboard);
   getGlobalProgramFilter = () => cy.get(this.globalProgramFilter);
   getMenuButtonFeedback = () => cy.get(this.navFeedback);
-  getMenuUserProfile = () => cy.get(this.menuUserProfile);
-  getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
   getHeaderTitle = () => cy.get(this.headerTitle);
   getTicketListRow = () => cy.get(this.ticketListRow);
 
