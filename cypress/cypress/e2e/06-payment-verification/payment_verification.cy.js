@@ -184,11 +184,7 @@ describe("Payment Verification", () => {
           "Choose Active Verification Plan",
           "Press Finish button",
           "Press Finish button on pop-up",
-<<<<<<< HEAD
           "Check if Verification Plan was finished",
-=======
-          "Check if Verification Plan was Finish",
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
         ]);
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
@@ -241,11 +237,7 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
-<<<<<<< HEAD
-    it.skip("174517: Check clear cache", () => {
-=======
-    it("174517: Check clear cash", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Payment Verification page",
         "Press Menu User Profile button",

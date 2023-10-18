@@ -242,11 +242,7 @@ describe("Grievance", () => {
         ["USER-GENERATED", 5],
         ["SYSTEM-GENERATED", 1],
       ].forEach((testData) => {
-<<<<<<< HEAD
         it.skip(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
-=======
-        it(`Grievance Creation Date To filter of ${testData[0]} tab`, () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
           cy.scenario([
             "Go to Grievance page",
             "Choose tab: " + testData[0],
@@ -428,7 +424,7 @@ describe("Grievance", () => {
           grievancePage.chooseTicketListRow(0, testData[3]);
         });
       });
-      it.skip("Grievance Active Tickets filter", () => {});
+      it("Grievance Active Tickets filter", () => {});
     });
     context("Create New Ticket", () => {
       beforeEach(() => {
@@ -1310,17 +1306,10 @@ describe("Grievance", () => {
         "Choose ticket: GRV-0000001",
         "Check URL",
       ]);
-<<<<<<< HEAD
       grievancePage.chooseTicketListRow(0, userType1).click();
       cy.url().should("include", "/user-generated");
     });
-    it.skip("174517: Check clear cache", () => {
-=======
-      grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
-      cy.url().should("include", "/user-generated");
-    });
-    it("174517: Check clear cash", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Menu User Profile button",

@@ -38,10 +38,7 @@ describe("Payment Module", () => {
       let fspXlsxFilenames;
 
       //New Payment Plan page
-<<<<<<< HEAD
       paymentModule.navigateToProgrammePage("PaymentPlanProgram");
-=======
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
       paymentModule.createPaymentPlan(targetPopulationName);
 
       cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -219,14 +216,20 @@ describe("Payment Module", () => {
       it.skip("Payment Dispersion Date filter", () => {});
     });
   });
-  describe.skip("E2E tests Payment", () => {});
+  describe.skip("E2E tests Payment", () => {
+    it("GPF: Disabled button NEW PAYMENT PLAN when program not active", () => {
+      paymentModule.navigateToProgrammePage("Draft Program");
+      paymentModule.clickMenuButtonPaymentModule();
+      paymentModule.getButtonNewPaymentPlan().should("be.visible");
+      paymentModule
+        .getButtonNewPaymentPlan()
+        .should("have.attr", "aria-disabled")
+        .and("equal", "true");
+    });
+  });
 
   describe("Regression tests Payment", () => {
-<<<<<<< HEAD
-    it.skip("174517: Check clear cache", () => {
-=======
-    it("174517: Check clear cash", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Payment module page",
         "Press Menu User Profile button",

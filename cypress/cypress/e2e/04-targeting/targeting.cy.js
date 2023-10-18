@@ -7,6 +7,7 @@ let error404Page = new ErrorPage();
 let targetingPage = new Targeting();
 let targetingDetailsPage = new TDetailsPage();
 let targetingCreateNewPage = new CreateNew();
+let programDetails = new ProgramDetails();
 
 let programName = "TargetingProgram";
 
@@ -48,11 +49,7 @@ describe("Targeting", () => {
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
       // TODO: Refactor in second milestone
-<<<<<<< HEAD
-      it.skip("Can visit the targeting page and create a target population", () => {
-=======
       it("Can visit the targeting page and create a target population", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
         cy.scenario([
           "Go to Targeting New Ticket page",
           "Press Create New button",
@@ -60,11 +57,7 @@ describe("Targeting", () => {
           "Press button household rule",
           "Check if all elements on page exist",
         ]);
-<<<<<<< HEAD
         cy.navigateToHomePage();
-=======
-        cy.visit("/");
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
         cy.get('[data-cy="button-target-population-create-new"]').click({
@@ -135,8 +128,32 @@ describe("Targeting", () => {
       it.skip("Mark ready", () => {});
     });
   });
-  describe.skip("E2E tests Targeting", () => {
-    it("404 Error page", () => {
+  describe("E2E tests Targeting", () => {
+    it("GPF: Disabled button CREATE NEW when program has draft status", () => {
+      targetingPage.navigateToProgrammePage("Draft Program");
+      targetingPage.clickMenuButtonTargeting();
+      targetingPage.getButtonCreateNew().should("be.visible");
+      targetingPage
+        .getButtonCreateNew()
+        .should("have.attr", "aria-disabled")
+        .and("equal", "true");
+    });
+    it("GPF: Disabled button CREATE NEW when program has finished status", () => {
+      targetingPage.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonActivateProgram().click();
+      programDetails.getButtonActivateProgramModal().click();
+      programDetails.getStatusContainer().should("contain", "ACTIVE");
+      programDetails.getButtonFinishProgram().click();
+      programDetails.getButtonFinishProgram().eq(1).click();
+      programDetails.getStatusContainer().should("contain", "FINISHED");
+      targetingPage.clickMenuButtonTargeting();
+      targetingPage.getButtonCreateNew().should("be.visible");
+      targetingPage
+        .getButtonCreateNew()
+        .should("have.attr", "aria-disabled")
+        .and("equal", "true");
+    });
+    it.skip("404 Error page", () => {
       cy.scenario([
         "Go to Targeting page",
         "Click first row",
@@ -154,11 +171,72 @@ describe("Targeting", () => {
   });
 
   describe("Regression tests Targeting", () => {
-<<<<<<< HEAD
-    it.skip("174517: Check clear cache", () => {
-=======
-    it("174517: Check clear cash", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+    it("173542: GPF: Error occurs after apply empty Number of Households field", () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Delete value from Number of Households",
+        "Press button Apply",
+      ]);
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getApply().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "123");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "456");
+      targetingPage.getMaxNumberOfHouseholdsFilter().clear();
+      targetingPage.getMinNumberOfHouseholdsFilter().clear();
+      targetingPage.getApply().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage.getTargetPopulationsRows().should("have.length", 2);
+    });
+    it('173541: GPF: Clear button does not work for field "Number of Households" in page Targeting', () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Clear",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Press button Clear",
+      ]);
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getClear().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getApply().click();
+      targetingPage.getClear().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+    });
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Targeting page",
         "Press Menu User Profile button",
