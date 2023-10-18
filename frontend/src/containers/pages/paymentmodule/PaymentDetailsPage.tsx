@@ -46,7 +46,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
       to: `/${businessArea}/payment-module/`,
     },
     {
-      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : null} Payment Plan ${
+      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${
         payment.parent.unicefId
       }`,
       to: `/${businessArea}/payment-module/${
@@ -70,6 +70,11 @@ export const PaymentDetailsPage = (): React.ReactElement => {
     return null;
   };
 
+  const canViewHouseholdDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
+
   return (
     <>
       <PageHeader
@@ -85,6 +90,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
             PERMISSIONS.ACTIVITY_LOG_VIEW,
             permissions,
           )}
+          canViewHouseholdDetails={canViewHouseholdDetails}
         />
       </Box>
     </>
