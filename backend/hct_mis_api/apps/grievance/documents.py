@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Optional, Sequence
 
 from django.conf import settings
 from django.db.models import Model, QuerySet
@@ -7,7 +7,6 @@ from django.db.models import Model, QuerySet
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -21,12 +20,12 @@ logger = logging.getLogger(__name__)
 INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
-def es_autosync(is_autosync_enabled: bool) -> Callable:
+def es_autosync() -> Callable:
     """This decorator checks if auto-synchronization with Elasticsearch is turned on"""
 
     def wrapper(func: Callable) -> Callable:
         def inner(*args: Any, **kwargs: Any) -> Optional[Callable]:
-            if is_autosync_enabled:
+            if settings.ELASTICSEARCH_DSL_AUTOSYNC:
                 return func(*args, **kwargs)
             return None
 
@@ -35,8 +34,22 @@ def es_autosync(is_autosync_enabled: bool) -> Callable:
     return wrapper
 
 
-@es_autosync(settings.ELASTICSEARCH_DSL_AUTOSYNC)
-def bulk_update_assigned_to(grievance_tickets_ids: List[str], assigned_to_id: str) -> None:
+def bulk_update_assigned_to(grievance_tickets_ids: Sequence[str], assigned_to_id: Optional[str]) -> None:
+    bulk_update_grievance_ticket_es(grievance_tickets_ids, {"assigned_to": {"id": str(assigned_to_id)}})
+
+
+def bulk_update_priority(grievance_tickets_ids: Sequence[str], priority: int) -> None:
+    bulk_update_grievance_ticket_es(grievance_tickets_ids, {"priority": priority})
+
+
+def bulk_update_urgency(grievance_tickets_ids: Sequence[str], urgency: int) -> None:
+    bulk_update_grievance_ticket_es(grievance_tickets_ids, {"urgency": urgency})
+
+
+@es_autosync()
+def bulk_update_grievance_ticket_es(grievance_tickets_ids: Sequence[str], update_query_doc: dict) -> None:
+    from elasticsearch.helpers import bulk
+
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
     documents_to_update = []
@@ -45,7 +58,7 @@ def bulk_update_assigned_to(grievance_tickets_ids: List[str], assigned_to_id: st
             "_op_type": "update",
             "_index": INDEX,
             "_id": ticket_id,
-            "_source": {"doc": {"assigned_to": {"id": str(assigned_to_id)}}},
+            "_source": {"doc": update_query_doc},
         }
         documents_to_update.append(document)
     bulk(es, documents_to_update)
@@ -111,4 +124,4 @@ class GrievanceTicketDocument(Document):
     def get_instances_from_related(self, related_instance: Model) -> QuerySet:
         if isinstance(related_instance, BusinessArea):
             return related_instance.tickets.all()
-        return Model.objects.none()
+        return GrievanceTicket.objects.none()

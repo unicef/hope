@@ -1,6 +1,9 @@
+import dataclasses
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
+from django.conf import settings
+from django.core.cache import cache
 from django.utils import timezone
 
 from dateutil.parser import parse
@@ -11,97 +14,109 @@ from hct_mis_api.apps.core.exchange_rates.api import (
 )
 
 
+@dataclasses.dataclass(frozen=True)
 class HistoryExchangeRate:
-    def __init__(self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str) -> None:
-        self.valid_from = parse(VALID_FROM)
-        self.valid_to = parse(VALID_TO)
-        self.past_xrate = float(PAST_XRATE)
-        self.past_ratio = float(PAST_RATIO)
+    valid_from: datetime
+    valid_to: datetime
+    past_xrate: float
+    past_ratio: float
 
-    def __repr__(self) -> str:
-        return (
-            f"HistoryExchangeRate(valid_from: {self.valid_from.isoformat()}, valid_to: {self.valid_to.isoformat()}, "
-            f"ratio: {self.past_ratio}, x_rate: {self.past_xrate})"
+    @classmethod
+    def from_dict(cls, data: Dict) -> "HistoryExchangeRate":
+        return cls(
+            valid_from=parse(data["VALID_FROM"]),
+            valid_to=parse(data["VALID_TO"]),
+            past_xrate=float(data["PAST_XRATE"]),
+            past_ratio=float(data["PAST_RATIO"]),
         )
 
-    def is_valid_for_provided_dispersion_date(self, dispersion_date: datetime) -> bool:
+    def is_valid(self, dispersion_date: datetime) -> bool:
+        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
         return self.valid_from <= dispersion_date <= self.valid_to
 
+    def calc_exchange_rate(self) -> float:
+        return self.past_xrate * self.past_ratio
 
+
+@dataclasses.dataclass(frozen=True)
 class SingleExchangeRate:
-    def __init__(
-        self,
-        CURRENCY_CODE: str,
-        CURRENCY_NAME: str,
-        X_RATE: str,
-        VALID_FROM: str,
-        VALID_TO: str,
-        RATIO: str,
-        NO_OF_DECIMAL: str,
-        PAST_XRATE: Optional[Dict],
-    ) -> None:
-        self.currency_code = CURRENCY_CODE
-        self.currency_name = CURRENCY_NAME
-        self.x_rate = float(X_RATE)
-        self.valid_from = parse(VALID_FROM)
-        self.valid_to = datetime(9999, 12, 31) if VALID_TO == "31-DEC-99" else parse(VALID_TO)
-        self.ratio = float(RATIO)
-        self.no_of_decimal = int(NO_OF_DECIMAL)
+    currency_code: str
+    currency_name: str
+    x_rate: float
+    valid_from: datetime
+    valid_to: datetime
+    ratio: float
+    no_of_decimal: int
+    historical_exchange_rates: List[HistoryExchangeRate]
 
-        past_xrates = PAST_XRATE["PAST_XRATE_ROW"] if PAST_XRATE is not None else []
+    @classmethod
+    def from_dict(cls, data: Dict) -> "SingleExchangeRate":
+        valid_to = datetime(9999, 12, 31) if data["VALID_TO"] == "31-DEC-99" else parse(data["VALID_TO"])
+
+        past_xrates = data["PAST_XRATE"]["PAST_XRATE_ROW"] if data["PAST_XRATE"] is not None else []
         if isinstance(past_xrates, dict):
             past_xrates = [past_xrates]
         else:
             past_xrates.reverse()
-        self.historical_exchange_rates = past_xrates
-
-    def __repr__(self) -> str:
-        return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
-
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: Optional[datetime]) -> Optional[float]:
-        today = timezone.now()
-
-        if dispersion_date is None:
-            return self.x_rate * self.ratio
-
-        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
-        dispersion_date_is_in_current_date_range = (
-            self.valid_from <= dispersion_date <= (today if self.valid_to is None else self.valid_to)
+        return cls(
+            currency_code=data["CURRENCY_CODE"],
+            currency_name=data["CURRENCY_NAME"],
+            x_rate=float(data["X_RATE"]),
+            valid_from=parse(data["VALID_FROM"]),
+            valid_to=valid_to,
+            ratio=float(data["RATIO"]),
+            no_of_decimal=int(data["NO_OF_DECIMAL"]),
+            historical_exchange_rates=list(map(HistoryExchangeRate.from_dict, past_xrates)),
         )
-        if dispersion_date_is_in_current_date_range:
-            return self.x_rate * self.ratio
 
-        for historical_exchange_rate_raw_data in self.historical_exchange_rates:
-            historical_exchange_rate = HistoryExchangeRate(**historical_exchange_rate_raw_data)
-            if historical_exchange_rate.is_valid_for_provided_dispersion_date(dispersion_date):
-                return historical_exchange_rate.past_xrate * historical_exchange_rate.past_ratio
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
+        if self.is_valid(dispersion_date):
+            return self.calc_exchange_rate()
+
+        for historical_exchange_rate in self.historical_exchange_rates:
+            if historical_exchange_rate.is_valid(dispersion_date):
+                return historical_exchange_rate.calc_exchange_rate()
 
         return None
 
+    def calc_exchange_rate(self) -> float:
+        return self.x_rate * self.ratio
+
+    def is_valid(self, dispersion_date: datetime) -> bool:
+        if not dispersion_date:
+            return True
+
+        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
+        valid_to = timezone.now() if self.valid_to is None else self.valid_to
+        return self.valid_from <= dispersion_date <= valid_to
+
 
 class ExchangeRates:
-    def __init__(self, with_history: bool = True, api_client: Optional[ExchangeRateClient] = None) -> None:
-        if api_client is None:
-            api_client = get_exchange_rate_client()
+    CACHE_KEY = "exchange_rates"
 
-        self.exchange_rates_dict = self._convert_response_json_to_exchange_rates(
-            api_client.fetch_exchange_rates(with_history=with_history)
-        )
+    def __init__(self, api_client: Optional[ExchangeRateClient] = None) -> None:
+        self.api_client = api_client or get_exchange_rate_client()
+        self.exchange_rates_dict = self._convert_response_json_to_exchange_rates()
 
-    @staticmethod
-    def _convert_response_json_to_exchange_rates(
-        response_json: Dict,
-    ) -> Dict[str, SingleExchangeRate]:
+    def _convert_response_json_to_exchange_rates(self) -> Dict[str, SingleExchangeRate]:
+        response_json = self._get_response()
         raw_exchange_rates = response_json.get("ROWSET", {}).get("ROW", [])
 
-        return {
-            raw_exchange_rate["CURRENCY_CODE"]: SingleExchangeRate(**raw_exchange_rate)
-            for raw_exchange_rate in raw_exchange_rates
-        }
+        exchange_rates = map(SingleExchangeRate.from_dict, raw_exchange_rates)
+        return {exchange_rate.currency_code: exchange_rate for exchange_rate in exchange_rates}
 
-    def get_exchange_rate_for_currency_code(
-        self, currency_code: str, dispersion_date: Optional[datetime] = None
-    ) -> Optional[float]:
+    def _get_response(self) -> Dict:
+        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
+            cached_response = cache.get(self.CACHE_KEY)
+            if cached_response is not None:
+                return cached_response
+
+            response_json = self.api_client.fetch_exchange_rates()
+            cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
+            return response_json
+        return self.api_client.fetch_exchange_rates()
+
+    def get_exchange_rate_for_currency_code(self, currency_code: str, dispersion_date: datetime) -> Optional[float]:
         currency: Optional[SingleExchangeRate] = self.exchange_rates_dict.get(currency_code)
 
         if currency is None:
