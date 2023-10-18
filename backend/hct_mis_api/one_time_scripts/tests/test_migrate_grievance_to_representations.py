@@ -4110,11 +4110,13 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self._test_payment_related_tickets()
 
     def _test_payment_related_tickets(self) -> None:
+        self.hh1, self.ind1, self.pr1 = self.complaint_ticket_with_payment(self.complaint_ticket_with_payment)
+
         handle_payment_related_tickets()
         self.refresh_objects()
 
-        self._test_ticket_sensitive_details_with_payments()
         self._test_ticket_complaint_details_with_payments()
+        self._test_ticket_sensitive_details_with_payments()
         self._test_ticket_payment_verification_details_with_payments()
 
     def _test_ticket_complaint_details_with_payments(self) -> None:
@@ -4129,7 +4131,12 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             .filter(program=self.program1)
             .first()
         )
-        self.assertEqual(self.complaint_ticket_with_payment.household, repr_household_complaint_ticket_with_payment)
+        self.assertEqual(
+            self.complaint_ticket_with_payment.household,
+            repr_household_complaint_ticket_with_payment,
+            msg=f"({self.hh1}, {self.ind1}, {self.pr1}, {self.complaint_ticket_with_payment.payment_obj},"
+                f"{self.complaint_ticket_with_payment.payment_obj.parent.target_population.program})",
+        )
         self.assertEqual(self.complaint_ticket_with_payment.individual, repr_individual_complaint_ticket_with_payment)
         self.assertEqual(
             self.complaint_ticket_with_payment.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
