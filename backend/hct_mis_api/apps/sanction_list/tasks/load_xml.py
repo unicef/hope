@@ -477,7 +477,10 @@ class LoadSanctionListXMLTask:
         # SanctionListIndividualDateOfBirth
         if dob_from_file:
             for single_dob in dob_from_file:
-                (dob_obj, created,) = SanctionListIndividualDateOfBirth.objects.get_or_create(
+                (
+                    dob_obj,
+                    created,
+                ) = SanctionListIndividualDateOfBirth.objects.get_or_create(
                     individual=single_dob.individual,
                     date=single_dob.date,
                 )
