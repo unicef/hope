@@ -7,7 +7,6 @@ import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndi
 export const LookUpHouseholdIndividualSelection = ({
   onValueChange,
   values,
-  disabled,
   errors,
   touched,
   redirectedFromRelatedTicket,
@@ -15,7 +14,6 @@ export const LookUpHouseholdIndividualSelection = ({
 }: {
   onValueChange: (field: string, value, shouldValidate?: boolean) => void;
   values;
-  disabled?: boolean;
   errors?;
   touched?;
   redirectedFromRelatedTicket?: boolean;
@@ -41,12 +39,10 @@ export const LookUpHouseholdIndividualSelection = ({
       />
       <Box display='flex' flexDirection='column'>
         <LookUpHouseholdIndividualSelectionDisplay
-          values={values}
-          disabled={
-            disabled ||
-            redirectedFromRelatedTicket ||
-            isFeedbackWithHouseholdOnly
+          disableUnselectHousehold={
+            redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly
           }
+          disableUnselectIndividual={redirectedFromRelatedTicket}
           onValueChange={onValueChange}
           selectedHousehold={selectedHousehold}
           setSelectedHousehold={setSelectedHousehold}

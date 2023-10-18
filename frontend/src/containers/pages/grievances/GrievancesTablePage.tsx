@@ -37,7 +37,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     assignedTo: '',
     createdBy: '',
     admin2: '',
-    registrationDataImport: id,
+    registrationDataImport: id || '',
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
