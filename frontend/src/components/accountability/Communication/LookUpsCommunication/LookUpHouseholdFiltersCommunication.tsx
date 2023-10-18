@@ -98,7 +98,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            data-cy='hh-filters-admin2'
+            dataCy='hh-filters-admin2'
           />
         </Grid>
         <Grid item xs={3}>
