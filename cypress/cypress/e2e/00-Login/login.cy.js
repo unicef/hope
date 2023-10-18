@@ -9,7 +9,7 @@ context("Login", () => {
     cy.scenario([
       "Log in via admin panel",
       "Go to Home page",
-      "Check if logged",
+      "Check if logged in",
     ]);
     cy.adminLogin();
     cy.navigateToHomePage();
