@@ -34,10 +34,11 @@ class PaymentPlanPDFExportSevice:
 
     def generate_web_links(self) -> None:
         payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
+        program_id = encode_id_base64(self.payment_plan.program.id, "Program")
         path_name = "download-payment-plan-summary-pdf"
         self.download_link = self.get_link(reverse(path_name, args=[payment_plan_id]))
         self.payment_plan_link = self.get_link(
-            f"/{self.payment_plan.business_area.slug}/payment-module/payment-plans/" + str(payment_plan_id)
+            f"/{self.payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{str(payment_plan_id)}"
         )
 
     def get_email_context(self, user: "User") -> Dict:
