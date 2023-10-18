@@ -11980,10 +11980,13 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'reasonForUnsuccessfulPayment'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, sourcePayment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId'>
     )>, verification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
@@ -11996,7 +11999,7 @@ export type PaymentQuery = (
       ) }
     ), collector: (
       { __typename?: 'IndividualNode' }
-      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
+      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'email' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id' | 'status' | 'isFollowUp' | 'unicefId'>
@@ -22128,9 +22131,15 @@ export const PaymentDocument = gql`
     distributionModality
     status
     statusDate
+    snapshotCollectorBankName
+    snapshotCollectorBankAccountNumber
     targetPopulation {
       id
       name
+    }
+    sourcePayment {
+      id
+      unicefId
     }
     verification {
       id
@@ -22161,6 +22170,7 @@ export const PaymentDocument = gql`
       id
       unicefId
       fullName
+      email
       phoneNo
       phoneNoValid
       phoneNoAlternative
@@ -22192,6 +22202,10 @@ export const PaymentDocument = gql`
       id
       fullName
     }
+    additionalCollectorName
+    additionalDocumentType
+    additionalDocumentType
+    reasonForUnsuccessfulPayment
   }
 }
     `;
