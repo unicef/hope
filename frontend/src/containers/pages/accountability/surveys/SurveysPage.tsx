@@ -19,8 +19,8 @@ const initialFilter = {
   program: '',
   targetPopulation: '',
   createdBy: '',
-  createdAtRangeMin: null,
-  createdAtRangeMax: null,
+  createdAtRangeMin: '',
+  createdAtRangeMax: '',
 };
 
 export const SurveysPage = (): React.ReactElement => {
