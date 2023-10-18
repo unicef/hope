@@ -27,6 +27,8 @@ export default class ProgramManagement extends BaseComponent {
   inputFrequencyOfPayment = 'div[data-cy="input-frequency-of-payment"]';
   inputCashPlus = 'span[data-cy="input-cashPlus"]';
   inputIndividualDataNeeded = 'div[data-cy="input-individual-data-needed"]';
+  selectDataCollectingTypeCode =
+    'input[data-cy="select-dataCollectingTypeCode"]';
   tableRow = 'tr[role="checkbox"]';
   // Texts
 
@@ -59,5 +61,7 @@ export default class ProgramManagement extends BaseComponent {
   getTableRowByName = (name) => cy.get(this.tableRowX + name + '"]');
   getInputDataCollectingType = () =>
     cy.get(this.inputDataCollectingType).first();
+  getSelectDataCollectingTypeCode = () =>
+    cy.get(this.selectDataCollectingTypeCode);
   getTableRow = () => cy.get(this.tableRow);
 }

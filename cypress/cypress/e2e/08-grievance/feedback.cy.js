@@ -400,11 +400,6 @@ describe("Grievance - Feedback", () => {
       it.skip("Edit Feedback", () => {});
     });
   });
-<<<<<<< HEAD
-  describe.skip("E2E tests Feedback", () => {});
-  describe("Regression tests Feedback", () => {
-    it.skip("174517: Check clear cache", () => {
-=======
   describe("E2E tests Feedback", () => {
     // ToDo: Enable after fix
     it.skip("404 Error page - refresh", () => {
@@ -435,8 +430,7 @@ describe("Grievance - Feedback", () => {
     });
   });
   describe("Regression tests Feedback", () => {
-    it("174517: Check clear cash", () => {
->>>>>>> 1320d7b3c06f4b8cc0506fbb6d09aaac676921bd
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Feedback page",
         "Press Menu User Profile button",

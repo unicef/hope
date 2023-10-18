@@ -27,6 +27,7 @@ export default class Targeting extends BaseComponent {
   textTabLastEdited = "Last Edited";
   textTabCreatedBy = "Created by";
   buttonApply = 'button[data-cy="button-filters-apply"]';
+  buttonClear = 'button[data-cy="button-filters-clear"]';
 
   // Elements
 
@@ -46,6 +47,7 @@ export default class Targeting extends BaseComponent {
   getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(5);
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);
+  getClear = () => cy.get(this.buttonClear);
   getTargetPopulationsRows = () => cy.get(this.rows);
 
   checkElementsOnPage() {
