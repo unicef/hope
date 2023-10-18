@@ -4115,7 +4115,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
     def _test_payment_related_tickets(self) -> None:
         self.hh1, self.ind1, self.pr1 = get_program_and_representations_for_payment(self.complaint_ticket_with_payment)
-
+        self.assertEqual(self.complaint_ticket_with_payment.payment_obj, None)
         handle_payment_related_tickets()
         self.refresh_objects()
 
