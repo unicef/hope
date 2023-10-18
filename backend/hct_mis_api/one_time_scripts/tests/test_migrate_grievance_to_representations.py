@@ -62,6 +62,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
+    get_program_and_representations_for_payment,
     handle_payment_related_tickets,
     migrate_grievance_to_representations,
 )
@@ -4110,7 +4111,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self._test_payment_related_tickets()
 
     def _test_payment_related_tickets(self) -> None:
-        self.hh1, self.ind1, self.pr1 = self.complaint_ticket_with_payment(self.complaint_ticket_with_payment)
+        self.hh1, self.ind1, self.pr1 = get_program_and_representations_for_payment(self.complaint_ticket_with_payment)
 
         handle_payment_related_tickets()
         self.refresh_objects()
@@ -4135,7 +4136,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             self.complaint_ticket_with_payment.household,
             repr_household_complaint_ticket_with_payment,
             msg=f"({self.hh1}, {self.ind1}, {self.pr1}, {self.complaint_ticket_with_payment.payment_obj},"
-                f"{self.complaint_ticket_with_payment.payment_obj.parent.target_population.program})",
+            f"{self.complaint_ticket_with_payment.payment_obj.parent.target_population.program})",
         )
         self.assertEqual(self.complaint_ticket_with_payment.individual, repr_individual_complaint_ticket_with_payment)
         self.assertEqual(
