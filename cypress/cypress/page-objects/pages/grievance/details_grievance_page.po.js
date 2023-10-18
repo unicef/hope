@@ -6,6 +6,8 @@ export default class GrievanceDetailsPage extends BaseComponent {
   title = 'h5[data-cy="page-header-title"]';
   buttonEdit = 'a[data-cy="button-edit"]';
   buttonSetInProgress = 'button[data-cy="button-set-to-in-progress"]';
+  buttonCloseTicket = 'button[data-cy="button-close-ticket"]';
+  buttonConfirm = 'button[data-cy="button-confirm"]';
   buttonAssignToMe = 'button[data-cy="button-assign-to-me"]';
   ticketStatus = 'div[data-cy="label-Status"]';
   ticketPriority = 'div[data-cy="label-Priority"]';
@@ -87,6 +89,8 @@ export default class GrievanceDetailsPage extends BaseComponent {
   getPageHeaderContainer = () => cy.get(this.pageHeaderContainer);
   getTitle = () => cy.get(this.title);
   getButtonAssignToMe = () => cy.get(this.buttonAssignToMe);
+  getButtonCloseTicket = () => cy.get(this.buttonCloseTicket);
+  getButtonConfirm = () => cy.get(this.buttonConfirm);
   getTicketStatus = () => cy.get(this.ticketStatus);
   getTicketPriority = () => cy.get(this.ticketPriority);
   getTicketUrgency = () => cy.get(this.ticketUrgency);

@@ -217,7 +217,7 @@ describe("Payment Verification", () => {
     });
   });
   describe("Regression tests Payment Verification", () => {
-    it.skip("174517: Check clear cache", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Payment Verification page",
         "Press Menu User Profile button",

@@ -1307,7 +1307,7 @@ describe("Grievance", () => {
       grievancePage.chooseTicketListRow(0, userType1).click();
       cy.url().should("include", "/user-generated");
     });
-    it.skip("174517: Check clear cache", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Menu User Profile button",

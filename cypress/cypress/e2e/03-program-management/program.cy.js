@@ -44,7 +44,7 @@ describe("Program Management", () => {
         programManagement.getInputSector().first().click();
         programManagement.getSelectOptionByName("Multi Purpose").click();
         programManagement.getInputDataCollectingType().click();
-        programManagement.getSelectOptionByName("Partial").click();
+        programManagement.getSelectOptionByName("Full").click();
         programManagement.getInputStartDate().click().type("2023-01-01");
         programManagement.getInputEndDate().click().type("2033-12-30");
         programManagement
@@ -150,7 +150,7 @@ describe("Program Management", () => {
   describe.skip("E2E tests Program Management", () => {});
 
   describe("Regression tests Program Management", () => {
-    it.skip("174517: Check clear cache", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Program Management page",
         "Press Menu User Profile button",
@@ -160,8 +160,7 @@ describe("Program Management", () => {
       programManagement.clearCache();
       cy.get("h5").should("contain", "Programme Management");
     });
-    // ToDo: 174707
-    it.skip("174707: Create a program without Data Collecting Type", () => {
+    it("174707: Create a program without Data Collecting Type", () => {
       programManagement
         .getPageHeaderTitle()
         .should("contain", "Programme Management");
@@ -194,12 +193,7 @@ describe("Program Management", () => {
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}4000");
         programManagement.getButtonSave().click({ force: true });
-        programDetails.getPageHeaderTitle().should("contain", programName);
-        programDetails.getButtonActivateProgram().click({ force: true });
-        programDetails.getButtonActivateProgramModal().click({
-          force: true,
-        });
-        programDetails.getStatusContainer().should("contain", "ACTIVE");
+        cy.get("p").contains("Data Collecting Type is required");
       });
     });
   });
