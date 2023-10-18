@@ -5,6 +5,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 from hct_mis_api.api import endpoints
+from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.router import APIRouter
 
 app_name = "api"
@@ -43,7 +44,7 @@ urlpatterns = [
     ),
     path("areas/", endpoints.lookups.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),
-    path("constance/", endpoints.base.ConstanceSettingsAPIView().as_view(), name="constance-list"),
+    path("constance/", ConstanceSettingsAPIView().as_view(), name="constance-list"),
     path("lookups/document/", endpoints.lookups.DocumentType().as_view(), name="document-list"),
     path("lookups/country/", endpoints.lookups.Country().as_view(), name="country-list"),
     path("lookups/residencestatus/", endpoints.lookups.ResidenceStatus().as_view(), name="residencestatus-list"),
