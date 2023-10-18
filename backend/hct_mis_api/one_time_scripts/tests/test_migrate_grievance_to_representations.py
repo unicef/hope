@@ -62,7 +62,6 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
-    get_program_and_representations_for_payment,
     handle_payment_related_tickets,
     migrate_grievance_to_representations,
 )
@@ -4134,8 +4133,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             .filter(program=self.program1)
             .first()
         )
-        self.assertEqual(
-            self.complaint_ticket_with_payment.household, repr_household_complaint_ticket_with_payment)
+        self.assertEqual(self.complaint_ticket_with_payment.household, repr_household_complaint_ticket_with_payment)
         self.assertEqual(self.complaint_ticket_with_payment.individual, repr_individual_complaint_ticket_with_payment)
         self.assertEqual(
             self.complaint_ticket_with_payment.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
