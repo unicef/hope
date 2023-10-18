@@ -6,11 +6,21 @@ context("Login", () => {
     cy.adminLogin();
   });
   it("login with valid username and valid password", () => {
+    cy.scenario([
+      "Log in via admin panel",
+      "Go to Home page",
+      "Check if logged in",
+    ]);
     cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("h5").should("contain", "Test Programm");
   });
   it("Check the login with valid username and Invalid password", () => {
+    cy.scenario([
+      "Log in via admin panel using invalid password",
+      "Go to Home page",
+      "Check if did not log in",
+    ]);
     Cypress.session.clearCurrentSessionData();
     cy.visit("/");
     l.navigateToLoginPage();
@@ -23,6 +33,11 @@ context("Login", () => {
     );
   });
   it("Check the login with Invalid username and valid password", () => {
+    cy.scenario([
+      "Log in via admin panel using invalid login",
+      "Go to Home page",
+      "Check if did not log in",
+    ]);
     Cypress.session.clearCurrentSessionData();
     l.navigateToLoginPage();
     cy.get('input[name="username"]').type("wrong-username");
@@ -34,6 +49,11 @@ context("Login", () => {
     );
   });
   it("Check the login with Invalid username and Invalid password", () => {
+    cy.scenario([
+      "Log in via admin panel using invalid login and password",
+      "Go to Home page",
+      "Check if did not log in",
+    ]);
     Cypress.session.clearCurrentSessionData();
     l.navigateToLoginPage();
     cy.get('input[name="username"]').type("wrong-username");

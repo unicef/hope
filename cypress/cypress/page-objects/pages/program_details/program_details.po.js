@@ -35,6 +35,7 @@ export default class ProgramDetails extends BaseComponent {
   tableTitle = 'h6[data-cy="table-title"]';
   buttonActivateProgramModal =
     'button[data-cy="button-activate-program-modal"]';
+
   // Texts
 
   // Elements

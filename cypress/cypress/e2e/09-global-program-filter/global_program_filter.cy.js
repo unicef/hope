@@ -2,9 +2,9 @@ import AllProgrammes from "../../page-objects/pages/all_programmes/all_programme
 
 let programmesPage = new AllProgrammes();
 
-describe("Country Dashboard", () => {
+describe("Global Program Filter", () => {
   beforeEach(() => {
-    programmesPage.navigateToProgrammePage();
+    programmesPage.navigateToProgrammePage("All Programmes");
   });
 
   describe("Smoke tests Global Program Filter", () => {

@@ -7,7 +7,11 @@ import PopulationIndividuals from "../../page-objects/pages/population_module/po
 import PopulationHouseholds from "../../page-objects/pages/population_module/population_households.po";
 import PaymentVerification from "../../page-objects/pages/payment_verification/payment_verification.po";
 import RegistrationDataImport from "../../page-objects/pages/registration_data_import/registration_data_import.po";
+import GrievanceDashboard from "../../page-objects/pages/grievance/grievance_dashboard.po";
+import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 
+let grievanceDashboard = new GrievanceDashboard();
+let grievanceDetailsPage = new GrievanceDetailsPage();
 let programmesPage = new AllProgrammes();
 let grievancePage = new Grievance();
 let targetingPage = new Targeting();
@@ -115,8 +119,7 @@ describe("Global Program Filter - Impacts", () => {
       targetingPage.clickMenuButtonTargeting();
       targetingPage.getTicketListRow().should("have.length", 0);
     });
-    // ToDo: Add after fix 171383:
-    it.skip("GPF - Payment module", () => {
+    it("GPF - Payment module", () => {
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
         .getProgrammesOptions()
@@ -233,7 +236,50 @@ describe("Global Program Filter - Impacts", () => {
       feedbackPage.clickMenuButtonFeedback();
       feedbackPage.getTicketListRow().should("have.length", 0);
     });
+    it("GPF - Grievance Dashboard", () => {
+      cy.scenario([
+        "Go to main page (All programmes set)",
+        "Choose program (" + programmesPage.textTestProgramm + ")",
+        "Go to Grievance and close one ticket",
+        "Go to Grievance Dashboard page",
+        "Check data",
+        "Choose program (" + programmesPage.textDraftProgram + ")",
+        "Go to Grievance Dashboard page",
+        "Check if data properly changed",
+      ]);
+      grievancePage.navigateToProgrammePage();
+      grievancePage.clickMenuButtonGrievance();
+      grievanceDashboard.getTicketListRow().contains("GRV-0000005").click();
+      grievanceDetailsPage.getButtonCloseTicket().click();
+      grievanceDetailsPage.getButtonConfirm().click();
+      grievanceDetailsPage.clickMenuButtonGrievanceDashboard();
+      grievanceDashboard.getTotalTickets().contains("7");
+      grievanceDashboard.getSystemGeneratedTickets().contains("1");
+      grievanceDashboard.getUserGeneratedTickets().contains("6");
+      grievanceDashboard.getSystemGeneratedClosed().contains("0");
+      grievanceDashboard.getUserGeneratedClosed().contains("1");
+      grievanceDashboard
+        .getSystemGeneratedResolutions()
+        .should("contain.text", "0 days");
+      grievanceDashboard
+        .getUserGeneratedResolutions()
+        .should("not.have.text", "0 days");
+      grievancePage.navigateToProgrammePage("Draft Program");
+      grievancePage.clickMenuButtonGrievance();
+      grievanceDetailsPage.clickMenuButtonGrievanceDashboard();
+      grievanceDashboard.getTotalTickets().contains("0");
+      grievanceDashboard.getSystemGeneratedTickets().contains("0");
+      grievanceDashboard.getUserGeneratedTickets().contains("0");
+      grievanceDashboard.getSystemGeneratedClosed().contains("0");
+      grievanceDashboard.getUserGeneratedClosed().contains("0");
+      grievanceDashboard
+        .getSystemGeneratedResolutions()
+        .should("contain.text", "0 days");
+      grievanceDashboard
+        .getUserGeneratedResolutions()
+        .should("contain.text", "0 days");
+    });
   });
 
-  describe.skip("Regression tests Country Dashboard", () => {});
+  describe.skip("Regression tests GPF", () => {});
 });

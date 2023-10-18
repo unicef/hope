@@ -86,7 +86,7 @@ export default class RegistrationDataImport extends BaseComponent {
       "1 Individual available to import"
     );
     cy.get("div").contains("Errors").should("not.exist");
-    cy.get('[data-cy="button-import-rdi"').click();
+    cy.get('[data-cy="button-import-rdi"]').click();
 
     cy.wait(1000);
     cy.reload();
