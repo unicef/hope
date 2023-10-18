@@ -367,44 +367,41 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
 
-    @staticmethod
-    def get_primary_collector_or_alternate_collector(household_snapshot_data: Dict) -> Dict:
-        """get primary or alternate collector dict"""
-        return (
-            household_snapshot_data.get("primary_collector")
-            or household_snapshot_data.get("alternate_collector")
-            or dict()
-        )
-
-    def get_collector_field(self, field_name: str) -> Union[None, str, Dict]:
-        """return primary_collector or alternate_collector field value or None"""
-        if household_snapshot := getattr(self, "household_snapshot", None):
-            collector_data = self.get_primary_collector_or_alternate_collector(household_snapshot.snapshot_data)
-            return collector_data.get(field_name)
-        return None
-
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         return self.household_snapshot.snapshot_data.get("size") if self.household_snapshot else None
 
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
-        return self.get_collector_field("full_name")
+        return PaymentNode.get_collector_field(self, "full_name")
 
     def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
-        return self.get_collector_field("payment_delivery_phone_no")
+        return PaymentNode.get_collector_field(self, "payment_delivery_phone_no")
 
     def resolve_snapshot_collector_bank_name(self, info: Any) -> Optional[str]:
-        if bank_account_info := self.get_collector_field("bank_account_info"):
+        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
             return bank_account_info.get("bank_name")
         return None
 
     def resolve_snapshot_collector_bank_account_number(self, info: Any) -> Optional[str]:
-        if bank_account_info := self.get_collector_field("bank_account_info"):
+        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
             return bank_account_info.get("bank_account_number")
         return None
 
     def resolve_snapshot_collector_debit_card_number(self, info: Any) -> Optional[str]:
-        if bank_account_info := self.get_collector_field("bank_account_info"):
+        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
             return bank_account_info.get("debit_card_number")
+        return None
+
+    @classmethod
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+        """return primary_collector or alternate_collector field value or None"""
+        if household_snapshot := getattr(payment, "household_snapshot", None):
+            household_snapshot_data = household_snapshot.snapshot_data
+            collector_data = (
+                household_snapshot_data.get("primary_collector")
+                or household_snapshot_data.get("alternate_collector")
+                or dict()
+            )
+            return collector_data.get(field_name)
         return None
 
     @classmethod
