@@ -30,7 +30,7 @@ def pytest_configure(config: Config) -> None:
     settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
     settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
-    settings.USE_DUMMY_EXCHANGE_RATES = False
+    settings.USE_DUMMY_EXCHANGE_RATES = True
 
     settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
     settings.CSRF_COOKIE_SECURE = False
