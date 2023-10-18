@@ -67,6 +67,7 @@ export const DashboardFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filter-administrative-area'
           />
         </Grid>
       </Grid>

@@ -1,5 +1,5 @@
 import { MenuItem, Select } from '@material-ui/core';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../__generated__/graphql';
@@ -51,18 +51,33 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
+  const isValidProgramId = useCallback(
+    (id: string): boolean => {
+      return data?.allPrograms.edges.some((each) => each.node.id === id);
+    },
+    [data],
+  );
+
+  useEffect(() => {
+    if (programId && !isValidProgramId(programId)) {
+      history.push(`/${businessArea}/programs/all/list`);
+    }
+  }, [programId, history, businessArea, isValidProgramId]);
+
   const onChange = (e): void => {
-    if (e.target.value === 'all') {
-      history.push(`/${businessArea}/programs/${e.target.value}/list`);
+    if (e.target.value === 'all' || !isValidProgramId(e.target.value)) {
+      history.push(`/${businessArea}/programs/all/list`);
     } else {
       history.push(
         `/${businessArea}/programs/${e.target.value}/details/${e.target.value}`,
       );
     }
   };
+
   if (loading) {
     return <LoadingComponent />;
   }
+
   if (!data) {
     return null;
   }
