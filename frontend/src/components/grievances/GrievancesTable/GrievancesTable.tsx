@@ -45,7 +45,7 @@ export const GrievancesTable = ({
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
-  const { businessArea, programId } = useBaseUrl();
+  const { baseUrl,businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -253,7 +253,7 @@ export const GrievancesTable = ({
                     variant='contained'
                     color='primary'
                     component={Link}
-                    to={`/${businessArea}/grievance/new-ticket`}
+                    to={`/${baseUrl}/grievance/new-ticket`}
                     data-cy='button-new-ticket'
                   >
                     {t('NEW TICKET')}

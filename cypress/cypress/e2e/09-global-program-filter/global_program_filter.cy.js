@@ -3,6 +3,10 @@ import AllProgrammes from "../../page-objects/pages/all_programmes/all_programme
 let programmesPage = new AllProgrammes();
 
 describe("Global Program Filter", () => {
+  before(() => {
+    cy.initScenario("init_clear");
+    cy.adminLogin();
+  });
   beforeEach(() => {
     programmesPage.navigateToProgrammePage("All Programmes");
   });
