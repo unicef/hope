@@ -14,8 +14,10 @@ describe("Households Module", () => {
     cy.get("span").contains("Households").click();
   });
   describe("Smoke tests Households Population module", () => {
-    it.skip("Check Households Population page", () => {});
-    it.skip("Check Households Population Details page", () => {
+    it("Check Households Population page", () => {
+      populationHouseholds.checkElementsOnPage();
+    });
+    it("Check Households Population Details page", () => {
       // ToDo: Global Programme changes
       cy.scenario([
         "Go to Population page",
@@ -53,7 +55,7 @@ describe("Households Module", () => {
   describe.skip("E2E tests Households Population", () => {});
 
   describe("Regression tests Households Population", () => {
-    it.skip("174517: Check clear cache", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Households page",
         "Press Menu User Profile button",
@@ -61,7 +63,9 @@ describe("Households Module", () => {
         "Check if page was opened properly",
       ]);
       populationHouseholds.clearCache();
-      populationHouseholds.getTitle().contains(populationHouseholds.textTitle);
+      populationHouseholds
+        .getPageHeaderTitle()
+        .contains(populationHouseholds.textTitle);
     });
   });
 });
