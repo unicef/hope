@@ -160,7 +160,8 @@ class TestPhoneNumberVerification(TestCase):
         first_flow = create_flow_response()
 
         post_request_mock = MagicMock()
-        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]
+
+        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore #empty response in error
         with patch(
             "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
         ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock):
