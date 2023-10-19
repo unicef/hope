@@ -29,7 +29,6 @@ export default class ProgramManagement extends BaseComponent {
   inputIndividualDataNeeded = 'div[data-cy="input-individual-data-needed"]';
   selectDataCollectingTypeCode =
     'input[data-cy="select-dataCollectingTypeCode"]';
-  tableRow = 'tr[role="checkbox"]';
   // Texts
 
   // Elements
@@ -63,5 +62,4 @@ export default class ProgramManagement extends BaseComponent {
     cy.get(this.inputDataCollectingType).first();
   getSelectDataCollectingTypeCode = () =>
     cy.get(this.selectDataCollectingTypeCode);
-  getTableRow = () => cy.get(this.tableRow);
 }
