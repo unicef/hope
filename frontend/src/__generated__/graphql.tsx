@@ -12110,7 +12110,7 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'reasonForUnsuccessfulPayment'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -22497,7 +22497,7 @@ export const PaymentDocument = gql`
     }
     additionalCollectorName
     additionalDocumentType
-    additionalDocumentType
+    additionalDocumentNumber
     reasonForUnsuccessfulPayment
   }
 }

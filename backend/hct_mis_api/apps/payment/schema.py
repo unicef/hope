@@ -324,6 +324,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     service_provider = graphene.Field(FinancialServiceProviderNode)
     household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
+    additional_collector_name = graphene.String()
+    additional_document_type = graphene.String()
+    additional_document_number = graphene.String()
     total_persons_covered = graphene.Int(description="Get from Household Snapshot")
     snapshot_collector_full_name = graphene.String(description="Get from Household Snapshot")
     snapshot_collector_delivery_phone_no = graphene.String(description="Get from Household Snapshot")
@@ -369,6 +372,15 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         return self.household_snapshot.snapshot_data.get("size") if self.household_snapshot else None
+
+    def resolve_additional_collector_name(self, info: Any) -> str:
+        return self.additional_collector_name
+
+    def resolve_additional_document_type(self, info: Any) -> str:
+        return self.additional_document_type
+
+    def resolve_additional_document_number(self, info: Any) -> str:
+        return self.additional_document_number
 
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
         return PaymentNode.get_collector_field(self, "full_name")
