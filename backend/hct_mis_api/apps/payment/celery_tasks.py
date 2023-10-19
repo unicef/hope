@@ -383,7 +383,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 )
                 payment.entitlement_date = timezone.now()
                 updates.append(payment)
-            Payment.objects.bulk_update(
+            Payment.signature_manager.bulk_update_with_signature(
                 updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
             )
 

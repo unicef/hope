@@ -306,7 +306,7 @@ class PaymentPlanService:
                 )
             )
         try:
-            Payment.objects.bulk_create(payments_to_create)
+            Payment.signature_manager.bulk_create_with_signature(payments_to_create)
         except IntegrityError as e:
             raise GraphQLError("Duplicated Households in provided Targeting") from e
 
@@ -586,7 +586,7 @@ class PaymentPlanService:
             )
             for payment in payments_to_copy
         ]
-        Payment.objects.bulk_create(follow_up_payments)
+        Payment.signature_manager.bulk_create_with_signature(follow_up_payments)
 
     @transaction.atomic
     def create_follow_up(
