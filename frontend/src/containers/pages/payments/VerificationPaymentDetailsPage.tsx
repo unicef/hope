@@ -52,7 +52,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     )
       ? [
           {
-            title: `${t('Payment Plan')} ${decodeIdString(payment.parent.id)}`,
+            title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
             to: `/${businessArea}/payment-verification/payment-plan/${payment.parent.id}`,
           },
         ]
@@ -67,7 +67,10 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
       verification.status !== PaymentVerificationPlanStatus.Finished ? (
-        <VerifyManual paymentVerificationId={payment.verification.id} enabled />
+        <VerifyManual
+          paymentVerificationId={payment.verification?.id}
+          enabled
+        />
       ) : null}
     </PageHeader>
   );

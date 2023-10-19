@@ -50,9 +50,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
     )
       ? [
           {
-            title: `${t('Payment Plan')} ${decodeIdString(
-              paymentRecord.parent.id,
-            )}`,
+            title: `${t('Payment Plan')} ${paymentRecord.parent.unicefId}`,
             to: `/${businessArea}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
           },
         ]
