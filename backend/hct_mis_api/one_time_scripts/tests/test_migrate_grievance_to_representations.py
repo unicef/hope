@@ -290,12 +290,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             payment_object_id=self.payment.id,
             payment_content_type_id=self.PAYMENT_CT_ID,
         )
-        self.complaint_ticket_with_payment.payment_object = self.payment
-        self.complaint_ticket_with_payment.payment_object_id = self.payment.id
-        self.complaint_ticket_with_payment.payment_content_type = ContentType.objects.get(
-            app_label="payment", model="payment"
-        )
-        self.complaint_ticket_with_payment.save()
+        self.complaint_ticket_with_payment.refresh_from_db()
+        self.assertEqual(self.complaint_ticket_with_payment.payment_obj, self.payment)
 
         # ComplaintTicketDetails with payment_record in pr2, with HH in p2 and pr3
         self.household_complaint_ticket_with_payment_record = self.create_household_with_representations(
