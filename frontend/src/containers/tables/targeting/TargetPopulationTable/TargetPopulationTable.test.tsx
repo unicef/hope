@@ -13,8 +13,8 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
     program: '',
     numIndividualsMin: null,
     numIndividualsMax: null,
-    createdAtRangeMin: undefined,
-    createdAtRangeMax: undefined,
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
   };
 
   it('should render with data', async () => {
