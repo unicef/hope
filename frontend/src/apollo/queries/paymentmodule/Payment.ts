@@ -81,7 +81,7 @@ export const Payment = gql`
       }
       additionalCollectorName
       additionalDocumentType
-      additionalDocumentType
+      additionalDocumentNumber
       reasonForUnsuccessfulPayment
     }
   }

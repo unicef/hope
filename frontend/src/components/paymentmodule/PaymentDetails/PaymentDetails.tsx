@@ -8,7 +8,6 @@ import {
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
-  renderIndividualName,
   renderUserName,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
@@ -271,7 +270,7 @@ export const PaymentDetails = ({
           <Grid item xs={3}>
             <LabelizedField
               label={t('Document Number')}
-              value={payment.additionalDocumentType}
+              value={payment.additionalDocumentNumber}
             />
           </Grid>
         </Grid>
