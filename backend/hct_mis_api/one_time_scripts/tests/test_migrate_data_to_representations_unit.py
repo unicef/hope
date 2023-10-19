@@ -442,7 +442,10 @@ class TestAdjustPaymentRecords(TestCase):
         self.business_area = BusinessAreaFactory()
         self.other_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
         self.target_population1 = TargetPopulationFactory(program=self.other_program, business_area=self.business_area)
-        (self.household_original, self.individual_original,) = create_origin_household_with_individual(
+        (
+            self.household_original,
+            self.individual_original,
+        ) = create_origin_household_with_individual(
             business_area=self.business_area,
         )
         self.payment_record1 = PaymentRecordFactory(
