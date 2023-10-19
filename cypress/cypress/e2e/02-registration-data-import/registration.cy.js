@@ -3,9 +3,6 @@ import RegistrationDataImport from "../../page-objects/pages/registration_data_i
 let registrationDataImport = new RegistrationDataImport();
 
 describe("Registration Data Import", () => {
-  before(() => {
-    cy.adminLogin();
-  });
   beforeEach(() => {
     cy.navigateToHomePage();
     cy.get("span").contains("Registration Data Import").click();

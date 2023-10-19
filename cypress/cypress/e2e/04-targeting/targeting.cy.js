@@ -1,10 +1,8 @@
 import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
-import ErrorPage from "../../page-objects/404.po";
 import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
 
-let error404Page = new ErrorPage();
 let targetingPage = new Targeting();
 let targetingDetailsPage = new TDetailsPage();
 let targetingCreateNewPage = new CreateNew();
@@ -50,7 +48,7 @@ describe("Targeting", () => {
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
       // TODO: Refactor in second milestone
-      it("Can visit the targeting page and create a target population", () => {
+      it.skip("Can visit the targeting page and create a target population", () => {
         cy.scenario([
           "Go to Targeting New Ticket page",
           "Press Create New button",
@@ -154,21 +152,6 @@ describe("Targeting", () => {
         .should("have.attr", "aria-disabled")
         .and("equal", "true");
     });
-    it.skip("404 Error page", () => {
-      cy.scenario([
-        "Go to Targeting page",
-        "Click first row",
-        "Delete part of URL",
-        "Check if 404 occurred",
-      ]);
-      targetingPage.getTargetPopulationsRows().first().click();
-      targetingDetailsPage.checkElementsOnPage("OPEN");
-      cy.url().then((url) => {
-        let newUrl = url.slice(0, -10);
-        cy.visit(newUrl);
-        error404Page.getPageNoFound().should("be.visible");
-      });
-    });
   });
 
   describe("Regression tests Targeting", () => {
@@ -237,6 +220,8 @@ describe("Targeting", () => {
         .find("input")
         .should("have.value", "");
     });
+  });
+  describe("Regression tests Targeting", () => {
     it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Targeting page",

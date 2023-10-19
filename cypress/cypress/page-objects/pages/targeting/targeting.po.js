@@ -48,6 +48,7 @@ export default class Targeting extends BaseComponent {
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);
   getClear = () => cy.get(this.buttonClear);
+
   getTargetPopulationsRows = () => cy.get(this.rows);
 
   checkElementsOnPage() {

@@ -30,7 +30,6 @@ export default class PopulationHouseholds extends BaseComponent {
   // Texts
   textTitle = "Households";
   // Elements
-  getTitle = () => cy.get(this.pageHeaderTitle);
   getHouseholdTableRow = () => cy.get(this.householdTableRow);
   getStatusContainer = () => cy.get(this.statusContainer);
   getHouseholdId = () => cy.get(this.householdId);

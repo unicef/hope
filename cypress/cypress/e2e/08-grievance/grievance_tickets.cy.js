@@ -1,12 +1,10 @@
 import Grievance from "../../page-objects/pages/grievance/grievance_tickets.po";
 import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
-import ErrorPage from "../../page-objects/404.po";
 
 let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let newTicketPage = new NewTicket();
-let error404Page = new ErrorPage();
 
 const systemGenerated = "GRV-0000004";
 const userType6 = "GRV-0000006";
