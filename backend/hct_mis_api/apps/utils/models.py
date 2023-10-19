@@ -13,12 +13,12 @@ from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+from decimal import Decimal
 
 from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager, nested_getattr
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class SoftDeletableModelWithDate(models.Model):
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 
     def delete(
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+            self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -88,7 +88,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     all_objects = models.Manager()
 
     def delete(
-        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
+            self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -203,7 +203,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     objects = models.Manager()
 
     def delete(
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+            self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -245,7 +245,7 @@ class SignatureManager(models.Manager):
 
     def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args, **kwargs) -> int:
         for obj in objs:
-            if any(field in fields for field in obj._meta.signature_fields):
+            if any(field in fields for field in obj.signature_fields):
                 obj.update_signature_hash()
         new_fields = set(fields)
         if "signature_hash" not in fields:
@@ -264,16 +264,24 @@ class SignatureMixin(models.Model):
         self.update_signature_hash()
         super().save(*args, **kwargs)
 
+    def _normalize(self, name: str, value: Any) -> Any:
+        if '.' in name:
+            return value
+        field = self.__class__._meta.get_field(name)
+        if isinstance(field, models.DecimalField) and value is not None:
+            return f"{{:.{field.decimal_places}f}}".format(value)
+        return value
+
     def update_signature_hash(self) -> None:
-        if hasattr(self._meta, "signature_fields") and isinstance(self._meta.signature_fields, (list, tuple)):
+        if hasattr(self, "signature_fields") and isinstance(self.signature_fields, (list, tuple)):
             sha1 = hashlib.sha1()
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
 
-            for field_name in self._meta.signature_fields:
+            for field_name in self.signature_fields:
                 value = nested_getattr(self, field_name, None)
-                if value is not None:
-                    sha1.update(str(value).encode("utf-8"))
+                value = self._normalize(field_name, value)
+                sha1.update(str(value).encode("utf-8"))
             self.signature_hash = sha1.hexdigest()
         else:
-            raise ValueError("Define 'signature_fields' in Meta class for SignatureMixin")
+            raise ValueError("Define 'signature_fields' in class for SignatureMixin")
