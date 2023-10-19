@@ -373,13 +373,13 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         return self.household_snapshot.snapshot_data.get("size") if self.household_snapshot else None
 
-    def resolve_additional_collector_name(self, info: Any) -> str:
+    def resolve_additional_collector_name(self, info: Any) -> graphene.String:
         return self.additional_collector_name
 
-    def resolve_additional_document_type(self, info: Any) -> str:
+    def resolve_additional_document_type(self, info: Any) -> graphene.String:
         return self.additional_document_type
 
-    def resolve_additional_document_number(self, info: Any) -> str:
+    def resolve_additional_document_number(self, info: Any) -> graphene.String:
         return self.additional_document_number
 
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
