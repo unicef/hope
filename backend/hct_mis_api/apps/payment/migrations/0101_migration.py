@@ -21,7 +21,7 @@ def populate_program_id_for_payments(apps, schema_editor):
             payment.program = payment.parent.program
             to_update.append(payment)
 
-        Payment.objects.bulk_update(to_update, ["program"])
+        Payment.objects.signature_manager.bulk_update_with_signature(to_update, ["program"])
 
 class Migration(migrations.Migration):
 
