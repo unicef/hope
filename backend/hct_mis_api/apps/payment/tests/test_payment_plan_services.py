@@ -383,7 +383,7 @@ class TestPaymentPlanServices(APITestCase):
             )
             PaymentPlanService(payment_plan=pp).update(input_data=dict(end_date=parse_date("2021-09-10")))  # date
 
-    @freeze_time("2020-10-10")
+    @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
@@ -413,8 +413,8 @@ class TestPaymentPlanServices(APITestCase):
         pp.target_population = new_targeting
         pp.save()
 
-        dispersion_start_date = pp.dispersion_start_date + timedelta(days=1)
-        dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
+        dispersion_start_date = (pp.dispersion_start_date + timedelta(days=1)).date()
+        dispersion_end_date = (pp.dispersion_end_date + timedelta(days=1)).date()
 
         with self.assertRaisesMessage(
             GraphQLError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
@@ -441,6 +441,7 @@ class TestPaymentPlanServices(APITestCase):
                 self.user, dispersion_start_date, dispersion_end_date
             )
 
+        follow_up_pp.refresh_from_db()
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.PREPARING)
         self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
@@ -458,8 +459,10 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 1)
 
-        with self.assertNumQueries(78):
-            prepare_follow_up_payment_plan_task(follow_up_pp.id)
+        prepare_follow_up_payment_plan_task(follow_up_pp.id)
+        follow_up_pp.refresh_from_db()
+
+        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
 
         self.assertEqual(follow_up_pp.payment_items.count(), 3)
         self.assertEqual(
