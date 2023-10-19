@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "2023.10.4",
+  "version": "2023.10.5",
   "private": true,
   "dependencies": {
     "@apollo/react-hooks": "^3.1.3",
