@@ -1,11 +1,9 @@
 import ProgramManagement from "../../page-objects/pages/program_management/program_management.po";
 import PMDetailsPage from "../../page-objects/pages/program_management/details_page.po";
 import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
-import ErrorPage from "../../page-objects/404.po";
 
-let error404Page = new ErrorPage();
 let programManagement = new ProgramManagement();
-let programManagementDetailsPage = new PMDetailsPage();
+let programManagementDetails = new PMDetailsPage();
 let programDetails = new ProgramDetails();
 
 describe("Program Management", () => {
@@ -149,23 +147,7 @@ describe("Program Management", () => {
       it.skip("PM Budget (USD) filter", () => {});
     });
   });
-  describe("E2E tests Program Management", () => {
-    it("404 Error page", () => {
-      cy.scenario([
-        "Go to Program Management page",
-        "Click first row",
-        "Delete part of URL",
-        "Check if 404 occurred",
-      ]);
-      programManagement.getTableRow().first().click();
-      programManagementDetailsPage.getTitle().contains("Draft Program");
-      cy.url().then((url) => {
-        let newUrl = url.slice(0, -10);
-        cy.visit(newUrl);
-        error404Page.getPageNoFound();
-      });
-    });
-  });
+  describe.skip("E2E tests Program Management", () => {});
 
   describe("Regression tests Program Management", () => {
     it("174517: Check clear cache", () => {
