@@ -2,7 +2,9 @@ import { Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { PaymentQuery } from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
@@ -11,16 +13,13 @@ import {
   renderUserName,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { PaymentQuery } from '../../../__generated__/graphql';
+import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
+import { DividerLine } from '../../core/DividerLine';
 import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
-import { DividerLine } from '../../core/DividerLine';
-import { BlackLink } from '../../core/BlackLink';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Missing } from '../../core/Missing';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -81,24 +80,6 @@ export const PaymentDetails = ({
               label={t('DELIVERY DATE')}
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label={t('Registration Group')}>
-              {/* {payment.household?.id ? (
-                <BlackLink
-                  to={
-                    canViewHouseholdDetails
-                      ? `/${businessArea}/population/household/${payment.household.id}`
-                      : undefined
-                  }
-                >
-                  {payment.household.unicefId}
-                </BlackLink>
-              ) : (
-                '-'
-              )} */}
-              <Missing />
-            </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label={t('TARGET POPULATION')}>
