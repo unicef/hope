@@ -78,6 +78,25 @@ Cypress.Commands.add("adminLogin", () => {
   return resolveAThing(10);
 });
 
+Cypress.Commands.add("checkIfLoggedIn", () => {
+  cy.visit("/");
+  function retryCheck(n) {
+    cy.url().should("contain", Cypress.config().baseUrl);
+    cy.url().then((url) => {
+      cy.log(url);
+      if (url.includes("login")) {
+        cy.adminLogin();
+      } else if (url.includes("programs")) {
+        return;
+      }
+      if (n === 0) cy.url().should("include", "/programs/all/list");
+      cy.wait(1000);
+      return retryCheck(n - 1);
+    });
+  }
+  return retryCheck(10);
+});
+
 Cypress.Commands.add("navigateToHomePage", () => {
   cy.visit("/");
   cy.url().should("include", "/programs/all/list");

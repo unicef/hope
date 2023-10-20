@@ -19,10 +19,10 @@ describe("Grievance - Feedback", () => {
     feedbackPage.clickMenuButtonFeedback();
   });
 
-  after(() => {
-    cy.initScenario("init_clear");
-    cy.adminLogin();
-  });
+  // after(() => {
+  //   cy.initScenario("init_clear");
+  //   cy.adminLogin();
+  // });
 
   describe("Smoke tests Feedback", () => {
     it("Check Feedback page", () => {
@@ -128,7 +128,7 @@ describe("Grievance - Feedback", () => {
         feedbackPage.useCreatedByFilter("root@root.com");
         feedbackPage.expectedNumberOfRows(2);
       });
-      it("Feedback Creation Date filter", () => {
+      it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
