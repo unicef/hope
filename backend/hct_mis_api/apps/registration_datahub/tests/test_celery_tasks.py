@@ -2,7 +2,7 @@ import base64
 import datetime
 import json
 import uuid
-from abc import ABC
+from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
@@ -619,7 +619,11 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_create_task_for_processing_records_not_implemented_error(self) -> None:
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
-            PROCESS_FLEX_RECORDS_TASK = None
+            @classmethod
+            @property
+            @abstractmethod
+            def PROCESS_FLEX_RECORDS_TASK(cls) -> str:
+                raise NotImplementedError
 
         with self.assertRaises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
