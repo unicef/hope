@@ -3823,6 +3823,7 @@ input RegistrationKoboImportMutationInput {
   pullPictures: Boolean
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: ID!
 }
 
 type RegistrationXlsxImportMutation {
@@ -3835,6 +3836,7 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: ID!
 }
 
 type ReportNode implements Node {

@@ -10,8 +10,14 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import {ImportDataStatus, useCreateRegistrationKoboImportMutation} from '../../../../__generated__/graphql';
+import {
+  ImportDataStatus,
+  useAllActiveProgramsQuery,
+  useCreateRegistrationKoboImportMutation
+} from '../../../../__generated__/graphql';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import {LoadingComponent} from "../../../core/LoadingComponent";
+import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
 import { KoboProjectSelect } from './KoboProjectSelect';
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
@@ -28,6 +34,10 @@ const validationSchema = Yup.object().shape({
     .required('Title is required')
     .min(2, 'Too short')
     .max(255, 'Too long'),
+  programId: Yup.string()
+    .required('Programme Name is required')
+    .min(2, 'Too short')
+    .max(150, 'Too long'),
 });
 export function CreateImportFromKoboForm({
   setSubmitForm,
@@ -44,6 +54,14 @@ export function CreateImportFromKoboForm({
   const history = useHistory();
   const businessAreaSlug = useBusinessArea();
   const [createImport] = useCreateRegistrationKoboImportMutation();
+
+  const { data: programData, loading } = useAllActiveProgramsQuery({
+    variables: {
+      first: 100,
+      businessArea: businessAreaSlug
+    }
+  });
+
   const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
@@ -53,6 +71,7 @@ export function CreateImportFromKoboForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug,
+            programId: values.programId
           },
         },
       });
@@ -69,6 +88,7 @@ export function CreateImportFromKoboForm({
       koboAssetId: '',
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
+      programId: ''
     },
     validationSchema,
     onSubmit,
@@ -97,6 +117,15 @@ export function CreateImportFromKoboForm({
       setSubmitDisabled(false);
     }
   }, [koboImportData]);
+
+  if (loading) {
+    return <LoadingComponent />
+  }
+
+  const mappedProgramChoices = programData?.allActivePrograms?.edges?.map(
+      (element) => ({name: element.node.name, value: element.node.id})
+  );
+
   return (
     <div>
       <FormikProvider value={formik}>
@@ -120,6 +149,16 @@ export function CreateImportFromKoboForm({
           required
           variant='outlined'
           component={FormikTextField}
+        />
+        <Field
+          name='programId'
+          label={t('Program Name')}
+          fullWidth
+          variant='outlined'
+          required
+          choices={mappedProgramChoices}
+          component={FormikSelectField}
+          data-cy='input-data-program-name'
         />
         <ScreenBeneficiaryField />
         <CircularProgressContainer>
