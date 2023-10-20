@@ -14,7 +14,6 @@ import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { handleValidationErrors } from '../../../../utils/utils';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
 import { KoboProjectSelect } from './KoboProjectSelect';
@@ -48,7 +47,7 @@ export function CreateImportFromKoboForm({
   const history = useHistory();
   const { baseUrl, businessArea } = useBaseUrl();
   const [createImport] = useCreateRegistrationKoboImportMutation();
-  const onSubmit = async (values, { setFieldError }): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
@@ -63,18 +62,8 @@ export function CreateImportFromKoboForm({
       history.push(
         `/${baseUrl}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
       );
-    } catch (error) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'registrationXlsxImport',
-        error,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(
-          t('Unexpected problem while creating Registration Data Import'),
-        );
-      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
   const formik = useFormik({

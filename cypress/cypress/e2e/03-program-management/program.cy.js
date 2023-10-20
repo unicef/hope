@@ -7,6 +7,10 @@ let programManagementDetails = new PMDetailsPage();
 let programDetails = new ProgramDetails();
 
 describe("Program Management", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
+
   beforeEach(() => {
     cy.navigateToHomePage();
     cy.get("span").contains("Programme Management").click();
