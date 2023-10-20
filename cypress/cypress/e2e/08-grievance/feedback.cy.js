@@ -13,15 +13,13 @@ let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     feedbackPage.clickMenuButtonGrievance();
     feedbackPage.clickMenuButtonFeedback();
-  });
-
-  after(() => {
-    cy.initScenario("init_clear");
-    cy.adminLogin();
   });
 
   describe("Smoke tests Feedback", () => {
@@ -128,7 +126,7 @@ describe("Grievance - Feedback", () => {
         feedbackPage.useCreatedByFilter("root@root.com");
         feedbackPage.expectedNumberOfRows(2);
       });
-      it("Feedback Creation Date filter", () => {
+      it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",

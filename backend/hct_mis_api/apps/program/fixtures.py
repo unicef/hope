@@ -8,6 +8,7 @@ import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
@@ -81,7 +82,6 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
-    data_collecting_type = factory.LazyAttribute(lambda o: DataCollectingType.objects.first())
 
     @factory.post_generation
     def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -89,3 +89,14 @@ class ProgramFactory(DjangoModelFactory):
             return
 
         ProgramCycleFactory(program=self)
+
+    @factory.post_generation
+    def data_collecting_type(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create or self.data_collecting_type:
+            return
+
+        data_collecting_type = DataCollectingType.objects.first()
+        if not data_collecting_type:
+            data_collecting_type = DataCollectingTypeFactory()
+        self.data_collecting_type = data_collecting_type
+        self.save()

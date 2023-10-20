@@ -9,6 +9,7 @@ let newPaymentPlan = new NewPaymentPlan();
 describe("Payment Module", () => {
   before(() => {
     cy.initScenario("payment_plan");
+    cy.checkIfLoggedIn();
   });
   beforeEach(() => {
     cy.navigateToHomePage();

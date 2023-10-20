@@ -40,6 +40,7 @@ export default class BaseComponent {
   buttonFeedbackText = "Feedback";
   textTestProgramm = "Test Programm";
   textDraftProgram = "Draft Program";
+  textAllProgrammes = "All Programmes";
 
   // Elements
   getMenuUserProfile = () => cy.get(this.menuUserProfile);
