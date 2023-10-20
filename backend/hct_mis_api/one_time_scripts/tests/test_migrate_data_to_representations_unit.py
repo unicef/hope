@@ -403,6 +403,7 @@ class TestAdjustPayments(TestCase):
             household=self.household_original,
             collector=self.individual_original,
             head_of_household=self.individual_original,
+            currency="PLN",
         )
 
     def test_adjust_payments(self) -> None:

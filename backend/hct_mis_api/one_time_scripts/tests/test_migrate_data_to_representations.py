@@ -181,6 +181,7 @@ class TestMigrateDataToRepresentations(TestCase):
             head_of_household=self.individual1_1,
             program=self.program_active,
             entitlement_quantity=103,
+            currency="PLN",
         )
         cash_plan = CashPlanFactory(
             program=self.program_active,
@@ -192,6 +193,7 @@ class TestMigrateDataToRepresentations(TestCase):
             head_of_household=self.individual1_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
             parent=cash_plan,
+            currency="PLN",
         )
 
         # Household2 and its data (no RDI, in 2 programs)
@@ -240,6 +242,7 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household2,
             head_of_household=self.individual2_1,
             program=self.program_active,
+            currency="PLN",
         )
 
         self.payment_record2 = PaymentRecordFactory(
@@ -248,6 +251,7 @@ class TestMigrateDataToRepresentations(TestCase):
             head_of_household=self.collector2_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
             parent=cash_plan,
+            currency="PLN",
         )
 
         # Household3 and its data
@@ -394,6 +398,7 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household5,
             head_of_household=self.individual5_1,
             program=self.program_finished1,
+            currency="PLN",
         )
 
         self.payment_record5 = PaymentRecordFactory(
@@ -414,6 +419,7 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household7,
             head_of_household=self.individual7_1,
             program=self.program_finished2,
+            currency="PLN",
         )
 
         self.payment_record7 = PaymentRecordFactory(
