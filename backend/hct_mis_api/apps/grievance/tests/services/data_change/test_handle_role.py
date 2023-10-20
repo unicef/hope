@@ -1,7 +1,5 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.services.data_change.utils import handle_role
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -10,6 +8,8 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class Test(TestCase):
