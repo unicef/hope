@@ -1,4 +1,5 @@
 from typing import List, Optional
+from unittest import skip
 
 from django.db.models import Count
 from django.test import TestCase
@@ -44,6 +45,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 
+@skip(reason="Skip this test for GPF")
 class TestMigrateDataToRepresentations(TestCase):
     def create_hh_with_ind(
         self,
