@@ -311,6 +311,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "estimated_birth_date",
             "phone_no",
             "phone_no_alternative",
+            "relationship",
         )
         values = [str(getattr(self, field)).lower() for field in fields]
 
