@@ -682,23 +682,35 @@ class TestCreateStorageProgramForCollectingType(TestCase):
 
         copy_non_program_objects_to_void_storage_programs(self.business_area)
 
-        assert Program.all_objects.filter(
-            business_area=self.business_area,
-            data_collecting_type=self.partial,
-        ).count() == 1
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.partial,
+            ).count()
+            == 1
+        )
 
-        assert Program.all_objects.filter(
-            business_area=self.business_area,
-            data_collecting_type=self.full,
-        ).count() == 1
-        assert Program.all_objects.filter(
-            business_area=self.business_area,
-            data_collecting_type=self.size_only,
-        ).count() == 1
-        assert Program.all_objects.filter(
-            business_area=self.business_area,
-            data_collecting_type=self.no_ind_data,
-        ).count() == 1
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.full,
+            ).count()
+            == 1
+        )
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.size_only,
+            ).count()
+            == 1
+        )
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.no_ind_data,
+            ).count()
+            == 1
+        )
 
         partial_program = Program.all_objects.filter(
             business_area=self.business_area,
