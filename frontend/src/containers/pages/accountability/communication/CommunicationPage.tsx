@@ -18,8 +18,8 @@ import { CommunicationTable } from '../../../tables/Communication/CommunicationT
 
 const initialFilter = {
   createdBy: '',
-  createdAtRangeMin: null,
-  createdAtRangeMax: null,
+  createdAtRangeMin: '',
+  createdAtRangeMax: '',
   program: '',
   targetPopulation: '',
 };
