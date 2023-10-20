@@ -6884,6 +6884,7 @@ export type RegistrationKoboImportMutationInput = {
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
+  programId: Scalars['ID'],
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -6897,6 +6898,7 @@ export type RegistrationXlsxImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
+  programId: Scalars['ID'],
 };
 
 export type ReportNode = Node & {
@@ -13347,7 +13349,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
         )> }
       )> }
     )>> }
@@ -13366,7 +13368,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
     )> }
   )> }
 );
@@ -25355,6 +25357,7 @@ export const AllProgramsForChoicesDocument = gql`
         dataCollectingType {
           id
           individualFiltersAvailable
+          householdFiltersAvailable
         }
       }
     }
@@ -25444,6 +25447,7 @@ export const ProgramDocument = gql`
       label
       active
       individualFiltersAvailable
+      householdFiltersAvailable
     }
   }
 }
