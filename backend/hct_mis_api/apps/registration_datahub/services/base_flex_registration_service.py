@@ -71,6 +71,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             status=status,
             program=program,
         )
+        if programme:
+            rdi.programs.add(programme)
 
         import_data = ImportData.objects.create(
             status=ImportData.STATUS_PENDING,
