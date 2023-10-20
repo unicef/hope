@@ -17,7 +17,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     PaymentRecordFactory,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
