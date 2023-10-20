@@ -53,13 +53,26 @@ const hasResponseErrors = (response): boolean => {
   return response && (response?.error || response?.errors?.length > 0);
 };
 
-//redirect to 404 page if data is null
 const redirectLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
     if (hasResponseErrors(response)) {
-      // eslint-disable-next-line no-console
-      console.error(response.data?.error || response.data?.errors);
-    } else if (
+      //When there is an error in Mutation, log it
+      const isMutation = operation.query.definitions.some(
+        (definition) => definition.kind === 'OperationDefinition' && definition.operation === 'mutation'
+      );
+      if(isMutation){
+        // eslint-disable-next-line no-console
+        console.error(response.data?.error || response.data?.errors);
+      } else {
+        //When there is an error in Query, redirect to Something Went Wrong page
+        const pathSegments = window.location.pathname.split('/');
+        const businessArea = pathSegments[1];
+
+        window.location.href = `/error/${businessArea}`;
+      }
+    }
+    //When no errors and data is null, redirect to 404 page
+    else if (
       response.data &&
       isDataNull(response.data) &&
       !hasResponseErrors(response)
@@ -69,6 +82,7 @@ const redirectLink = new ApolloLink((operation, forward) => {
 
       window.location.href = `/404/${businessArea}`;
     }
+
     return response;
   });
 });

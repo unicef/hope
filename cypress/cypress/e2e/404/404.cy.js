@@ -21,7 +21,7 @@ describe("404 Page", () => {
   describe("E2E tests 404 Page", () => {
     afterEach(function () {
       Cypress.session.clearCurrentSessionData();
-      cy.adminLogin();
+      cy.checkIfLoggedIn();
       cy.navigateToHomePage();
       grievancePage.clickMenuButtonGrievance();
     });

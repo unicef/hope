@@ -5,6 +5,9 @@ let populationHouseholds = new PopulationHouseholds();
 let householdsDetailsPage = new HPDetailsPage();
 
 describe("Households Module", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.initScenario("payment_plan");
     cy.navigateToHomePage();
