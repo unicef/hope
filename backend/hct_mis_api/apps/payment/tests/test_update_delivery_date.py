@@ -122,6 +122,8 @@ class TestDeliveryDate(APITestCase):
         import_service.open_workbook()
         import_service.validate()
 
+        self.assertEqual(len(import_service.errors), 1)
+
         error = import_service.errors[0]
         self.assertListEqual(
             [error.sheet, error.coordinates, error.message],
