@@ -89,8 +89,12 @@ class HouseholdFactory(DjangoModelFactory):
         RESIDENCE_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    country_origin = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
-    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    country_origin = factory.LazyAttribute(
+        lambda o: geo_models.Country.objects.exclude(name="Unknown or Not Applicable").order_by("?").first()
+    )
+    country = factory.LazyAttribute(
+        lambda o: geo_models.Country.objects.exclude(name="Unknown or Not Applicable").order_by("?").first()
+    )
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(
