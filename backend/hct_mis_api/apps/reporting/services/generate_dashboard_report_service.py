@@ -513,15 +513,16 @@ class GenerateDashboardReportContentHelpers:
 
     @staticmethod
     def format_payment_verifications_row(instance: Program, *args: Any) -> Tuple:
+        average_sampling = 0
+        if instance.all_possible_payment_records:
+            average_sampling = round((instance.total_verifications_done / instance.all_possible_payment_records) * 100)
         return (
             instance.business_area.cash_assist_code,
             instance.business_area.name,
             instance.name,
             instance.total_cash_plan_verifications,
             instance.total_households,
-            round((instance.total_verifications_done / instance.all_possible_payment_records) * 100)
-            if instance.total_payment_records
-            else 0,
+            average_sampling,
             instance.received,
             instance.not_received,
             instance.received_with_issues,
