@@ -282,7 +282,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
         target_population1 = TargetPopulationFactory(program=self.program1)
         payment_plan = PaymentPlanFactory(target_population=target_population1)
-        payment = PaymentFactory(parent=payment_plan)
+        payment = PaymentFactory(parent=payment_plan, currency="PLN")
 
         self.complaint_ticket_with_payment = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment,
@@ -297,7 +297,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         )
         target_population2 = TargetPopulationFactory(program=self.program2)
         payment_record = PaymentRecordFactory(
-            target_population=target_population2, household=self.household_complaint_ticket_with_payment_record
+            target_population=target_population2,
+            household=self.household_complaint_ticket_with_payment_record,
+            currency="PLN",
         )
 
         self.complaint_ticket_with_payment_record = GrievanceComplaintTicketWithoutExtrasFactory(
@@ -451,6 +453,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         payment_record = PaymentRecordFactory(
             target_population=target_population2,
             household=self.household_sensitive_ticket_with_payment_record,
+            currency="PLN",
         )
         self.sensitive_ticket_with_payment_record = SensitiveGrievanceTicketWithoutExtrasFactory(
             household=self.household_sensitive_ticket_with_payment_record,
