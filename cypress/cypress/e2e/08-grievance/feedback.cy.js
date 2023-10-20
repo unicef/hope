@@ -13,16 +13,14 @@ let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     feedbackPage.clickMenuButtonGrievance();
     feedbackPage.clickMenuButtonFeedback();
   });
-
-  // after(() => {
-  //   cy.initScenario("init_clear");
-  //   cy.adminLogin();
-  // });
 
   describe("Smoke tests Feedback", () => {
     it("Check Feedback page", () => {

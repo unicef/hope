@@ -5,6 +5,9 @@ let populationIndividuals = new PopulationIndividuals();
 let individualsDetailsPage = new IPDetailsPage();
 
 describe("Individuals Module", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.initScenario("payment_plan");
     cy.navigateToHomePage();
