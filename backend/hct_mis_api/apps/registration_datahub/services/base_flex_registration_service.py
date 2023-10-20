@@ -69,7 +69,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             number_of_households=number_of_households,
             business_area=business_area,
             status=status,
-            program=program
+            program=program,
         )
         if program:
             rdi.programs.add(program)
