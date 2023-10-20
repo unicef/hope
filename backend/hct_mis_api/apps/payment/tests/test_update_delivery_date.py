@@ -61,6 +61,7 @@ class TestDeliveryDate(APITestCase):
             household=household_1,
             entitlement_quantity=212,
             delivered_quantity=150,
+            currency="PLN",
         )
 
         hoh2 = IndividualFactory(household=None)
@@ -71,6 +72,7 @@ class TestDeliveryDate(APITestCase):
             household=household_2,
             entitlement_quantity=212,
             delivered_quantity=150,
+            currency="PLN",
         )
 
         hoh3 = IndividualFactory(household=None)
@@ -81,6 +83,7 @@ class TestDeliveryDate(APITestCase):
             household=household_3,
             entitlement_quantity=212,
             delivered_quantity=150,
+            currency="PLN",
         )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)

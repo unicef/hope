@@ -42,6 +42,7 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=None,
             household=household,
+            currency="PLN",
         )
         cls.payment_record_2 = PaymentRecordFactory(
             parent=cls.cash_plan_2,
@@ -51,6 +52,7 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=2000,
             delivered_quantity_usd=None,
             household=household,
+            currency="PLN",
         )
         cls.payment_record_3 = PaymentRecordFactory(
             parent=cls.cash_plan_3,
@@ -60,6 +62,7 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=3000,
             delivered_quantity_usd=None,
             household=household,
+            currency="PLN",
         )
         cls.payment_record_4 = PaymentRecordFactory(
             parent=cls.cash_plan_4,
@@ -69,6 +72,7 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=None,
             household=household,
+            currency="PLN",
         )
 
     @classmethod
