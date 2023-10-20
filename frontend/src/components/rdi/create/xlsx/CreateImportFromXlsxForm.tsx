@@ -10,10 +10,12 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import {
-  ImportDataStatus,
+  ImportDataStatus, useAllActiveProgramsQuery,
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
+import {LoadingComponent} from "../../../core/LoadingComponent";
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { DropzoneField } from './DropzoneField';
@@ -30,6 +32,10 @@ const validationSchema = Yup.object().shape({
     .required('Title is required')
     .min(2, 'Too short')
     .max(255, 'Too long'),
+  programId: Yup.string()
+    .required('Programme Name is required')
+    .min(2, 'Too short')
+    .max(150, 'Too long'),
 });
 export function CreateImportFromXlsxForm({
   setSubmitForm,
@@ -46,6 +52,14 @@ export function CreateImportFromXlsxForm({
   const { t } = useTranslation();
   const history = useHistory();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
+
+  const { data: programData, loading } = useAllActiveProgramsQuery({
+    variables: {
+      first: 100,
+      businessArea: businessAreaSlug
+    }
+  });
+
   const onSubmit = async (values): Promise<void> => {
     try {
       const data = await createImport({
@@ -55,6 +69,7 @@ export function CreateImportFromXlsxForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug,
+            programId: values.programId
           },
         },
       });
@@ -71,6 +86,7 @@ export function CreateImportFromXlsxForm({
       name: '',
       screenBeneficiary: false,
       file: null,
+      programId: ''
     },
     validationSchema,
     onSubmit,
@@ -99,6 +115,15 @@ export function CreateImportFromXlsxForm({
       setSubmitDisabled(false);
     }
   }, [xlsxImportData]);
+
+  if (loading) {
+    return <LoadingComponent />
+  }
+
+  const mappedProgramChoices = programData?.allActivePrograms?.edges?.map(
+      (element) => ({name: element.node.name, value: element.node.id})
+  );
+
   return (
     <div>
       <FormikProvider value={formik}>
@@ -110,6 +135,16 @@ export function CreateImportFromXlsxForm({
           required
           variant='outlined'
           component={FormikTextField}
+        />
+        <Field
+          name='programId'
+          label={t('Program Name')}
+          fullWidth
+          variant='outlined'
+          required
+          choices={mappedProgramChoices}
+          component={FormikSelectField}
+          data-cy='input-data-program-name'
         />
         <ScreenBeneficiaryField />
         <CircularProgressContainer>
