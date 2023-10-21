@@ -197,11 +197,3 @@ class ImportedBankAccountInfoFactory(DjangoModelFactory):
     individual = factory.SubFactory(ImportedIndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
     bank_account_number = random.randint(10**26, 10**27 - 1)
-
-
-def create_aurora_objects(business_area: BusinessArea, program: Program) -> Tuple[Organization, Project, Registration]:
-    organization = OrganizationFactory(business_area=business_area, slug=business_area.slug)
-    project = ProjectFactory(name="fake_project", organization=organization, programme=program)
-    registration = RegistrationFactory(name="fake_registration", project=project)
-
-    return organization, project, registration

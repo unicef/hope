@@ -10,7 +10,6 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_datahub.fixtures import create_aurora_objects
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -23,6 +22,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
+from hct_mis_api.aurora.fixtures import OrganizationFactory, RegistrationFactory, ProjectFactory
 
 
 class TestSriLankaRegistrationService(TestCase):
@@ -40,6 +40,13 @@ class TestSriLankaRegistrationService(TestCase):
         )
 
         cls.business_area = create_sri_lanka()
+        cls.data_collecting_type = DataCollectingType.objects.create(label="Size Only", code="size_only")
+        cls.data_collecting_type.limit_to.add(cls.business_area)
+
+        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
@@ -62,10 +69,7 @@ class TestSriLankaRegistrationService(TestCase):
         admin4.save()
         geo_models.Area.objects.rebuild()
 
-        cls.data_collecting_type = DataCollectingType.objects.create(label="Size Only", code="size_only")
-        cls.data_collecting_type.limit_to.add(cls.business_area)
-        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
-        cls.organization, cls.project, cls.registration = create_aurora_objects(cls.business_area, cls.program)
+
 
         children_info = [
             {

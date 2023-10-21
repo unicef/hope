@@ -18,7 +18,6 @@ from hct_mis_api.apps.household.models import (
     PRIVATE_PARTNER,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_datahub.fixtures import create_aurora_objects
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -31,6 +30,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
     CzechRepublicFlexRegistration,
 )
+from hct_mis_api.aurora.fixtures import OrganizationFactory, ProjectFactory, RegistrationFactory
 
 
 class TestCzechRepublicRegistrationService(TestCase):
@@ -60,10 +60,15 @@ class TestCzechRepublicRegistrationService(TestCase):
         ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
         cls.business_area = create_czech_republic()
+
         cls.data_collecting_type = DataCollectingType.objects.create(label="Partial", code="partial")
         cls.data_collecting_type.limit_to.add(cls.business_area)
+
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
-        cls.organization, cls.project, cls.registration = create_aurora_objects(cls.business_area, cls.program)
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
+
         geo_models.Country.objects.create(name="Czechia")
 
         consent = [

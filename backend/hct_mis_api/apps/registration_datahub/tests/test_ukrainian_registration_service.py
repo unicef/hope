@@ -11,7 +11,6 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_datahub.fixtures import create_aurora_objects
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
@@ -21,6 +20,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
 )
+from hct_mis_api.aurora.fixtures import OrganizationFactory, RegistrationFactory, ProjectFactory
 
 
 class TestUkrainianRegistrationService(TestCase):
@@ -37,10 +37,14 @@ class TestUkrainianRegistrationService(TestCase):
             label=IDENTIFICATION_TYPE_TAX_ID,
         )
         cls.business_area = create_ukraine()
+
         cls.data_collecting_type = DataCollectingType.objects.create(label="Full", code="full")
         cls.data_collecting_type.limit_to.add(cls.business_area)
+
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
-        cls.organization, cls.project, cls.registration = create_aurora_objects(cls.business_area, cls.program)
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
 
         household = [
             {
