@@ -328,7 +328,7 @@ class TestAutomatingRDICreationTask(TestCase):
         cls.project = ProjectFactory.create(organization=organization, programme=cls.program)
         cls.registration = RegistrationFactory(project=cls.project)
         cls.project = ProjectFactory.create(organization=organization)
-        cls.registration = RegistrationFactory.create(project=cls.project)
+        cls.registration = RegistrationFactory(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
 
@@ -349,6 +349,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[0] == "No Records found"
 
     def test_successful_run_with_records_to_import(self) -> None:
+        create_ukraine_business_area()
         create_imported_document_types()
 
         amount_of_records = 10
@@ -374,6 +375,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[3][1] == amount_of_records - 3 * page_size
 
     def test_successful_run_and_automatic_merge(self) -> None:
+        create_ukraine_business_area()
         create_imported_document_types()
 
         amount_of_records = 10
@@ -433,6 +435,7 @@ class TestAutomatingRDICreationTask(TestCase):
         Czech Republic - 18, 19 -> NotImplementedError for now
 
         """
+        create_ukraine_business_area()
         create_imported_document_types()
         create_czech_republic_business_area()
         create_sri_lanka_business_area()
@@ -520,6 +523,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self) -> None:
+        create_ukraine_business_area()
         for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
@@ -552,6 +556,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedHousehold.objects.count() == 0
 
     def test_ukraine_new_registration_form(self) -> None:
+        create_ukraine_business_area()
         for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()

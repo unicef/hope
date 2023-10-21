@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_sri_lanka
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID

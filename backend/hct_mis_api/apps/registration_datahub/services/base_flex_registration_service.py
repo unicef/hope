@@ -47,7 +47,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         organization = project.organization
         programme = project.programme
         business_area = BusinessArea.objects.get(slug=organization.slug)
-        data_collecting_type = getattr(program, "data_collecting_type", None)
+        data_collecting_type = getattr(programme, "data_collecting_type", None)
 
         if not data_collecting_type:
             raise ValidationError("Program of given project does not have any Data Collecting Type")
