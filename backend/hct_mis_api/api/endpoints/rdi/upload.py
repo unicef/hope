@@ -4,6 +4,7 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.transaction import atomic
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 
@@ -17,6 +18,7 @@ from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
 from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
@@ -29,6 +31,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
@@ -39,8 +42,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
-
-    from hct_mis_api.apps.core.models import BusinessArea
 
 
 logger = logging.getLogger(__name__)
@@ -201,6 +202,7 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
 class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     households = HouseholdSerializer(many=True, required=True)
+    program_id = serializers.UUIDField(required=True)
 
     class Meta:
         model = RegistrationDataImportDatahub
@@ -215,10 +217,19 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             raise ValidationError("This field is required.")
         return value
 
+    # Better to use ProgramName than programId
+    def validate_program_id(self, value: str) -> Any:
+        program = get_object_or_404(Program, pk=value)
+        data_collecting_type = program.data_collecting_type
+
+        if data_collecting_type is None or data_collecting_type.code == "unknown":
+            raise ValidationError("DataCollectingType does not exists or equals to unknown.")
+
     @atomic()
     def create(self, validated_data: Dict) -> Dict:
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
+        program_id = validated_data.pop("program_id")
 
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             **validated_data, business_area_slug=self.business_area.slug
@@ -232,6 +243,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             number_of_households=info.households,
             datahub_id=str(rdi_datahub.pk),
             business_area=self.business_area,
+            program_id=program_id
         )
         rdi_datahub.hct_id = rdi_mis.id
         rdi_datahub.save()

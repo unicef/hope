@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Optional, Type, Dict
+from typing import Any, Dict, Optional, Type
 
 from django import forms
 from django.contrib import admin
-from django import forms
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
@@ -29,7 +28,6 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class ProjectForm(forms.ModelForm):
-
     def clean(self) -> Optional[Dict[str, Any]]:
         cleaned_data = self.cleaned_data
         organization = self.cleaned_data["organization"]
@@ -54,9 +52,7 @@ class ProjectAdmin(admin.ModelAdmin):
         form.base_fields["programme"].queryset = Program.objects.filter(
             status=Program.ACTIVE,
             data_collecting_type__isnull=False,
-        ).exclude(
-            data_collecting_type__code="unknown"
-        )
+        ).exclude(data_collecting_type__code="unknown")
         return form
 
 

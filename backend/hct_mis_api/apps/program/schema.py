@@ -319,6 +319,4 @@ class Query(graphene.ObjectType):
             status=Program.ACTIVE,
             business_area__slug=info.context.headers.get("Business-Area").lower(),
             data_collecting_type__isnull=False,
-        ).exclude(
-            data_collecting_type__code="unknown"
-        )
+        ).exclude(data_collecting_type__code="unknown")

@@ -7,6 +7,8 @@ from django.http import JsonResponse
 
 from hct_mis_api.api.endpoints.rdi.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 MEMBER = {
     "birth_date": "2000-01-01",
@@ -30,7 +32,12 @@ class ValidatorTest(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        create_afghanistan()
+
         cls.validator = RDINestedSerializer
+        cls.program_id = ProgramFactory(status="ACTIVE").id
+        print("******")
+        print(cls.program_id)
 
     def _run(self, data: Dict) -> Dict:
         serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))
@@ -47,15 +54,16 @@ class ValidatorTest(TestCase):
             {
                 "households": ["This field is required."],
                 "name": ["This field is required."],
+                "program_id": ["This field is required."],
             },
         )
 
     def test_empty_households(self) -> None:
-        data = {"households": [], "name": "Test1"}
+        data = {"households": [], "name": "Test1", "program_id": self.program_id}
         self.assertErrors(data, {"households": ["This field is required."]})
 
     def test_empty_household_value(self) -> None:
-        data = {"households": [{}], "name": "Test1"}
+        data = {"households": [{}], "name": "Test1", "program_id": self.program_id}
         self.assertErrors(
             data,
             {
@@ -80,6 +88,7 @@ class ValidatorTest(TestCase):
                 {"country": "AF", "collect_individual_data": "N", "residence_status": "IDP", "size": 1, "members": []},
             ],
             "name": "Test1",
+            "program_id": self.program_id,
         }
         self.assertErrors(data, {"households": [{"Household #1": [{"members": ["This field is required"]}]}]})
 
@@ -87,7 +96,7 @@ class ValidatorTest(TestCase):
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
 
-        data = {"name": "Test1", "households": [h1]}
+        data = {"name": "Test1", "households": [h1], "program_id": self.program_id}
         self.assertErrors(
             data,
             {
@@ -107,7 +116,13 @@ class ValidatorTest(TestCase):
     def test_double_entry_multiple_hh(self) -> None:
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
-        data = {"collect_individual_data": "N", "name": "Test1", "households": [HOUSEHOLD, HOUSEHOLD, h1]}
+        data = {
+            "collect_individual_data": "N",
+            "name": "Test1",
+            "households": [HOUSEHOLD, HOUSEHOLD, h1],
+            "program_id": self.program_id,
+        }
+
         self.assertErrors(
             data,
             {

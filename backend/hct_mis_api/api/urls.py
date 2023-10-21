@@ -60,4 +60,14 @@ urlpatterns = [
     ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
+    path(
+        "lookups/programs/",
+        endpoints.ProgramViewSet.as_view({"get": "list"}),
+        name="programs-list",
+    ),
+    path(
+        "lookups/data-collecting-types/",
+        endpoints.rdi.program.DataCollectingTypeViewSet.as_view({"get": "list"}),
+        name="data-collecting-types-list",
+    ),
 ]
