@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, Dict, List
 
 from django.shortcuts import get_object_or_404
 
@@ -62,12 +62,12 @@ class ProgramSerializer(serializers.ModelSerializer):
             "data_collecting_type",
         )
 
-    def validate_data_collecting_type(self, data_collecting_type):
+    def validate_data_collecting_type(self, data_collecting_type: DataCollectingType) -> DataCollectingType:
         if data_collecting_type.code == "unknown":
             raise serializers.ValidationError("DataCollectingType does not exists or equals to unknown.")
         return data_collecting_type
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Program) -> Dict:
         representation = super().to_representation(instance)
         representation["data_collecting_type"] = DataCollectingTypeSerializer(instance.data_collecting_type).data
         return representation
