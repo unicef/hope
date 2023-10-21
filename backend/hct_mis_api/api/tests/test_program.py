@@ -31,7 +31,7 @@ class CreateProgramTests(HOPEApiTestCase):
             "cash_plus": True,
             "population_goal": 101,
             "business_area": self.business_area.id,
-            "data_collecting_type": self.data_collecting_type.id
+            "data_collecting_type": self.data_collecting_type.id,
         }
         response = self.client.post(self.url, data, format="json")
         program = Program.objects.filter(name=data["name"]).first()
@@ -39,28 +39,28 @@ class CreateProgramTests(HOPEApiTestCase):
         self.assertDictEqual(
             response.data,
             {
-                'id': str(program.id),
-                'name': 'Program #1',
-                'start_date': '2022-09-27',
-                'end_date': '2022-09-27',
-                'budget': '10000.00',
-                'frequency_of_payments': 'ONE_OFF',
-                'sector': 'CHILD_PROTECTION',
-                'cash_plus': True,
-                'population_goal': 101,
-                'business_area': self.business_area.id,
-                'data_collecting_type': {
-                    'id': self.data_collecting_type.id,
-                    'label': 'Partial',
-                    'code': 'partial',
-                    'description': '',
-                    'active': True,
-                    'individual_filters_available': False,
-                    'household_filters_available': True,
-                    'recalculate_composition': False,
-                    'compatible_types': [],
-                    'limit_to': [self.business_area.slug]
-                }
+                "id": str(program.id),
+                "name": "Program #1",
+                "start_date": "2022-09-27",
+                "end_date": "2022-09-27",
+                "budget": "10000.00",
+                "frequency_of_payments": "ONE_OFF",
+                "sector": "CHILD_PROTECTION",
+                "cash_plus": True,
+                "population_goal": 101,
+                "business_area": self.business_area.id,
+                "data_collecting_type": {
+                    "id": self.data_collecting_type.id,
+                    "label": "Partial",
+                    "code": "partial",
+                    "description": "",
+                    "active": True,
+                    "individual_filters_available": False,
+                    "household_filters_available": True,
+                    "recalculate_composition": False,
+                    "compatible_types": [],
+                    "limit_to": [self.business_area.slug],
+                },
             },
         )
 

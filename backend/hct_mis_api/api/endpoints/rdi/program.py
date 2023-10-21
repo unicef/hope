@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING, Any, List
+import logging
+from typing import Any, List
 
 from django.shortcuts import get_object_or_404
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, serializers, status
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
@@ -10,10 +12,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import DataCollectingType, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import Program
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,6 @@ class DataCollectingTypeViewSet(mixins.ListModelMixin, GenericViewSet):
 
 
 class ProgramSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Program
         fields = (
@@ -70,11 +69,11 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['data_collecting_type'] = DataCollectingTypeSerializer(instance.data_collecting_type).data
+        representation["data_collecting_type"] = DataCollectingTypeSerializer(instance.data_collecting_type).data
         return representation
 
 
-class ProgramViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSet):
     serializer_class = ProgramSerializer
     model = Program
     queryset = Program.objects.all()

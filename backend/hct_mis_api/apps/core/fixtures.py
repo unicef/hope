@@ -99,7 +99,6 @@ def generate_data_collecting_types() -> None:
 
 
 class DataCollectingTypeFactory(DjangoModelFactory):
-
     class Meta:
         model = DataCollectingType
 
