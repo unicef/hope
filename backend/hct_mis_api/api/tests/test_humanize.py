@@ -1,6 +1,6 @@
 import json
 from typing import Dict
-from unittest import TestCase
+from django.test import TestCase
 from unittest.mock import Mock
 
 from django.http import JsonResponse
@@ -36,8 +36,8 @@ class ValidatorTest(TestCase):
 
         cls.validator = RDINestedSerializer
         cls.program_id = ProgramFactory(status="ACTIVE").id
-        print("******")
-        print(cls.program_id)
+
+        super().setUpClass()
 
     def _run(self, data: Dict) -> Dict:
         serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))

@@ -15,7 +15,9 @@ class CreateProgramTests(HOPEApiTestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
 
-        cls.data_collecting_type = DataCollectingTypeFactory(label="Partial", code="partial", business_areas=[cls.business_area])
+        cls.data_collecting_type = DataCollectingTypeFactory(
+            label="Partial", code="partial", business_areas=[cls.business_area]
+        )
         cls.url = reverse("api:program-create", args=[cls.business_area.slug])
 
     def test_create_program(self) -> None:
@@ -32,10 +34,8 @@ class CreateProgramTests(HOPEApiTestCase):
             "data_collecting_type": self.data_collecting_type.id
         }
         response = self.client.post(self.url, data, format="json")
-        print(response.data)
         program = Program.objects.filter(name=data["name"]).first()
         self.assertEqual(program.name, data["name"])
-        print(data)
         self.assertDictEqual(
             response.data,
             {
@@ -48,17 +48,18 @@ class CreateProgramTests(HOPEApiTestCase):
                 'sector': 'CHILD_PROTECTION',
                 'cash_plus': True,
                 'population_goal': 101,
+                'business_area': self.business_area.id,
                 'data_collecting_type': {
                     'id': self.data_collecting_type.id,
-                    'label': 'Full',
-                    'code': 'full',
+                    'label': 'Partial',
+                    'code': 'partial',
                     'description': '',
                     'active': True,
                     'individual_filters_available': False,
                     'household_filters_available': True,
                     'recalculate_composition': False,
                     'compatible_types': [],
-                    'limit_to': []
+                    'limit_to': [self.business_area.slug]
                 }
             },
         )

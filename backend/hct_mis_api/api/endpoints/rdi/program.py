@@ -13,6 +13,10 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.models import DataCollectingType, BusinessArea
 from hct_mis_api.apps.program.models import Program
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class DataCollectingTypeSerializer(serializers.ModelSerializer):
     limit_to = serializers.SerializerMethodField()
@@ -42,7 +46,6 @@ class DataCollectingTypeViewSet(mixins.ListModelMixin, GenericViewSet):
 
 
 class ProgramSerializer(serializers.ModelSerializer):
-    data_collecting_type = DataCollectingTypeSerializer(read_only=True)
 
     class Meta:
         model = Program
@@ -60,11 +63,15 @@ class ProgramSerializer(serializers.ModelSerializer):
             "data_collecting_type",
         )
 
-    def validate_data_collecting_type(self, value):
-        data_collecting_type = get_object_or_404(DataCollectingType, pk=value)
-        if data_collecting_type is None or data_collecting_type.code == "unknown":
+    def validate_data_collecting_type(self, data_collecting_type):
+        if data_collecting_type.code == "unknown":
             raise serializers.ValidationError("DataCollectingType does not exists or equals to unknown.")
-        return value
+        return data_collecting_type
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['data_collecting_type'] = DataCollectingTypeSerializer(instance.data_collecting_type).data
+        return representation
 
 
 class ProgramViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):

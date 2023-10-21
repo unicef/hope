@@ -29,7 +29,6 @@ class TestDataCollectingTypeViewSet(TestCase):
         response = data_collecting_types_list(request)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print(dict(response.data[0]))
         self.assertEqual(
             dict(response.data[0]),
             {
