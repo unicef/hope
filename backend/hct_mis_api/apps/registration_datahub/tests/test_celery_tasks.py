@@ -13,7 +13,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
@@ -26,6 +27,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
+from hct_mis_api.apps.program.fixtures import ProgramWithDataCollectingTypeFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -67,6 +69,7 @@ from hct_mis_api.aurora.fixtures import (
     ProjectFactory,
     RegistrationFactory,
 )
+from hct_mis_api.aurora.models import Registration
 
 SRI_LANKA_FIELDS: Dict = {
     "caretaker-info": [
@@ -243,7 +246,7 @@ def create_imported_document_types() -> None:
 
 def create_ukraine_business_area() -> None:
     slug = "ukraine"
-    BusinessArea.objects.create(
+    BusinessArea.objects.get_or_create(
         slug=slug,
         code="1234",
         name="Ukraine",
@@ -253,7 +256,7 @@ def create_ukraine_business_area() -> None:
         has_data_sharing_agreement=True,
     )
     organization = OrganizationFactory(name=slug, slug=slug)
-    prj = ProjectFactory.create(organization=organization)
+    prj = ProjectFactory(organization=organization)
     for id in [2, 3, 21, 26, 27, 28, 29]:
         registration = RegistrationFactory(id=id, project=prj)
         registration.rdi_parser = UkraineRegistrationService
@@ -262,7 +265,7 @@ def create_ukraine_business_area() -> None:
 
 def create_sri_lanka_business_area() -> None:
     slug = "sri-lanka"
-    BusinessArea.objects.create(
+    BusinessArea.objects.get_or_create(
         slug=slug,
         code="0608",
         name="Sri Lanka",
@@ -279,7 +282,7 @@ def create_sri_lanka_business_area() -> None:
 
 
 def create_czech_republic_business_area() -> None:
-    BusinessArea.objects.create(
+    BusinessArea.objects.get_or_create(
         slug="czech-republic",
         code="BOCZ",
         name="Czech Republic",
@@ -314,7 +317,16 @@ class TestAutomatingRDICreationTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        create_ukraine_business_area()
         organization = OrganizationFactory.create(slug="ukraine")
+        cls.data_collecting_type = DataCollectingTypeFactory(
+            label="Partial", code="partial", business_areas=[BusinessArea.objects.get(slug="ukraine")]
+        )
+        cls.program = ProgramWithDataCollectingTypeFactory(
+            status="ACTIVE", data_collecting_type=cls.data_collecting_type
+        )
+        cls.project = ProjectFactory.create(organization=organization, programme=cls.program)
+        cls.registration = RegistrationFactory(project=cls.project)
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
@@ -325,7 +337,6 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self) -> None:
-        create_ukraine_business_area()
         create_imported_document_types()
         record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
 
@@ -338,7 +349,6 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[0] == "No Records found"
 
     def test_successful_run_with_records_to_import(self) -> None:
-        create_ukraine_business_area()
         create_imported_document_types()
 
         amount_of_records = 10
@@ -364,7 +374,6 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[3][1] == amount_of_records - 3 * page_size
 
     def test_successful_run_and_automatic_merge(self) -> None:
-        create_ukraine_business_area()
         create_imported_document_types()
 
         amount_of_records = 10
@@ -390,7 +399,6 @@ class TestAutomatingRDICreationTask(TestCase):
             assert merge_task_mock.called
 
     def test_successful_run_and_fix_task_id(self) -> None:
-        create_ukraine_business_area()
         create_imported_document_types()
 
         amount_of_records = 10
@@ -425,7 +433,6 @@ class TestAutomatingRDICreationTask(TestCase):
         Czech Republic - 18, 19 -> NotImplementedError for now
 
         """
-        create_ukraine_business_area()
         create_imported_document_types()
         create_czech_republic_business_area()
         create_sri_lanka_business_area()
@@ -448,6 +455,11 @@ class TestAutomatingRDICreationTask(TestCase):
 
         amount_of_records = 10
         page_size = 5
+
+        data_collecting_type, created = DataCollectingType.objects.get_or_create(label="Partial", code="partial")
+        data_collecting_type.limit_to.set(
+            [BusinessArea.objects.get(slug="sri-lanka"), BusinessArea.objects.get(slug="ukraine")]
+        )
 
         registration_ids = [2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999]
         for registration_id in registration_ids:
@@ -484,6 +496,17 @@ class TestAutomatingRDICreationTask(TestCase):
                 imported_ind_count += (
                     amount_of_records if registration_id not in [17, 21, 26, 27, 28, 29] else amount_of_records * 2
                 )
+
+                registration = Registration.objects.get(id=registration_id)
+
+                programme = registration.project.programme
+                programme.data_collecting_type.limit_to.set(
+                    [
+                        BusinessArea.objects.get(slug="ukraine"),
+                        BusinessArea.objects.get(slug="sri-lanka"),
+                    ]
+                )
+
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,

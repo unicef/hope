@@ -63,6 +63,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+
         household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
             "flex_registrations_record": record,
@@ -72,9 +76,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "country_origin": Country(code="LK"),
             "country": Country(code="LK"),
             "consent": True,
-            "collect_individual_data": YES,
             "size": 0,
             "flex_fields": {"moh_center_of_reference": localization_dict.get("moh_center_of_reference")},
+            "program_id": rdi.program.id,
         }
         admin2 = localization_dict.get("admin2_h_c")
         if admin2 and Area.objects.filter(p_code=admin2).exists():

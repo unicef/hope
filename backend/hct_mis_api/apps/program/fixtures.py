@@ -110,3 +110,7 @@ class ProgramFactory(DjangoModelFactory):
             data_collecting_type = DataCollectingTypeFactory()
         self.data_collecting_type = data_collecting_type
         self.save()
+
+
+class ProgramWithDataCollectingTypeFactory(ProgramFactory):
+    data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)

@@ -174,6 +174,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, self.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
@@ -183,7 +187,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             country_origin=Country(code="UA"),
             country=Country(code="UA"),
             consent=True,
-            collect_individual_data=YES,
+            program_id=rdi.program.id,
         )
 
         if residence_status := household_data.get("residence_status"):

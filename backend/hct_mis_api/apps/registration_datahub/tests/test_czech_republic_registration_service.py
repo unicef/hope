@@ -6,7 +6,8 @@ from django.utils import timezone
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_czech_republic
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -16,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     PRIVATE_PARTNER,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -61,20 +63,16 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
-        slug = "czech-republic"
-        BusinessArea.objects.create(
-            **{
-                "code": "BOCZ",
-                "name": "Czech Republic",
-                "region_name": "CZE",
-                "slug": slug,
-                "has_data_sharing_agreement": True,
-            },
-        )
+        cls.business_area = create_czech_republic()
 
-        cls.organization = OrganizationFactory.create(slug=slug)
-        project = ProjectFactory.create(organization=cls.organization)
-        cls.registration = RegistrationFactory.create(project=project)
+        cls.data_collecting_type = DataCollectingType.objects.create(label="Partial", code="partial")
+        cls.data_collecting_type.limit_to.add(cls.business_area)
+
+        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
+
         geo_models.Country.objects.create(name="Czechia")
 
         consent = [
@@ -239,6 +237,9 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(imported_household.size, 4)
         self.assertEqual(imported_household.zip_code, "19017")
         self.assertEqual(imported_household.village, "Praha")
+
+        self.assertEqual(imported_household.program_id, self.program.id)
+
         self.assertEqual(imported_household.head_of_household, ImportedIndividual.objects.get(full_name="Ivan Drago"))
         self.assertEqual(ImportedIndividual.objects.count(), imported_household.size)
 
