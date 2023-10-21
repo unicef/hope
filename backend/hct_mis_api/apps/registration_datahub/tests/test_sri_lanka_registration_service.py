@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_sri_lanka
+from hct_mis_api.apps.core.fixtures import create_sri_lanka
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
@@ -61,9 +62,8 @@ class TestSriLankaRegistrationService(TestCase):
         admin4.save()
         geo_models.Area.objects.rebuild()
 
-        cls.data_collecting_type = DataCollectingTypeFactory.create(
-            label="Size Only", code="size_only", business_areas=[cls.business_area]
-        )
+        cls.data_collecting_type = DataCollectingType.objects.create(label="Size Only", code="size_only")
+        cls.data_collecting_type.limit_to.add(cls.business_area)
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization, cls.project, cls.registration = create_aurora_objects(cls.business_area, cls.program)
 

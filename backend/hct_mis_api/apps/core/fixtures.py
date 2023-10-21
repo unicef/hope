@@ -9,9 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, Stora
 faker = Faker()
 
 
-def create_afghanistan(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
+def create_afghanistan(is_payment_plan_applicable: bool = False) -> BusinessArea:
     obj, created = BusinessArea.objects.get_or_create(
         **{
             "code": "0060",
@@ -28,9 +26,7 @@ def create_afghanistan(
     return obj
 
 
-def create_ukraine(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
+def create_ukraine(is_payment_plan_applicable: bool = False) -> BusinessArea:
     obj, created = BusinessArea.objects.get_or_create(
         **{
             "code": "0002",
@@ -65,7 +61,7 @@ def create_sri_lanka(is_payment_plan_applicable: bool = False) -> BusinessArea:
 
 
 def create_czech_republic(is_payment_plan_applicable: bool = False) -> BusinessArea:
-    obj, created = BusinessArea.objects.create(
+    obj, created = BusinessArea.objects.get_or_create(
         slug="czech-republic",
         code="BOCZ",
         name="Czech Republic",

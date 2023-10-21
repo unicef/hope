@@ -6,8 +6,8 @@ from django.utils import timezone
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_czech_republic
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -59,20 +59,9 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         ImportedDocumentType.objects.bulk_create(document_types_to_create)
 
-        slug = "czech-republic"
-        cls.business_area = BusinessArea.objects.create(
-            **{
-                "code": "BOCZ",
-                "name": "Czech Republic",
-                "region_name": "CZE",
-                "slug": slug,
-                "has_data_sharing_agreement": True,
-            },
-        )
-
-        cls.data_collecting_type = DataCollectingTypeFactory.create(
-            label="Partial", code="partial", business_areas=[cls.business_area]
-        )
+        cls.business_area = create_czech_republic()
+        cls.data_collecting_type = DataCollectingType.objects.create(label="Partial", code="partial")
+        cls.data_collecting_type.limit_to.add(cls.business_area)
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization, cls.project, cls.registration = create_aurora_objects(cls.business_area, cls.program)
         geo_models.Country.objects.create(name="Czechia")

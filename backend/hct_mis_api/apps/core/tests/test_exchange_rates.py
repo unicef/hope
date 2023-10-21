@@ -13,7 +13,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import (
     EXCHANGE_RATES_API_RESPONSE,
 )
@@ -230,14 +230,7 @@ class TestExchangeRates(TestCase):
 class TestFixExchangeRatesCommand(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        business_area = BusinessArea.objects.create(
-            code="0060",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            has_data_sharing_agreement=True,
-        )
+        business_area = create_afghanistan()
         create_household(
             household_args={"size": 2, "business_area": business_area},
         )

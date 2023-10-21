@@ -6,7 +6,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -48,14 +48,7 @@ class TestDetails(TestCase):
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)
 
-        cls.business_area = BusinessArea.objects.create(
-            code="0060",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            has_data_sharing_agreement=True,
-        )
+        cls.business_area = create_afghanistan()
 
     def test_filtering_business_area_code_with_tax_id(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})

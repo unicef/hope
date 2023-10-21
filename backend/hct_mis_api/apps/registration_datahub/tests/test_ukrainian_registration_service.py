@@ -6,7 +6,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_ukraine
+from hct_mis_api.apps.core.fixtures import create_ukraine
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -35,11 +36,9 @@ class TestUkrainianRegistrationService(TestCase):
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
         )
-
         cls.business_area = create_ukraine()
-        cls.data_collecting_type = DataCollectingTypeFactory.create(
-            label="Partial", code="partial", business_areas=[cls.business_area]
-        )
+        cls.data_collecting_type = DataCollectingType.objects.create(label="Full", code="full")
+        cls.data_collecting_type.limit_to.add(cls.business_area)
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization, cls.project, cls.registration = create_aurora_objects(cls.business_area, cls.program)
 
