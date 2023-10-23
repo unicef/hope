@@ -10,10 +10,18 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
   const initialFilter = {
     name: '',
     status: '',
+<<<<<<< HEAD
     totalHouseholdsCountMin: '',
     totalHouseholdsCountMax: '',
     createdAtRangeMin: undefined,
     createdAtRangeMax: undefined,
+=======
+    program: '',
+    numIndividualsMin: null,
+    numIndividualsMax: null,
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
+>>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
   };
 
   it('should render with data', async () => {
