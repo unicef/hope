@@ -54,15 +54,21 @@ export function UserProfileMenu({
 
     setOpen(false);
   };
+
+  const handleClearCache = async (): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
+  };
+
+  const handleClearCacheAndReloadWindow = async (): Promise<void> => {
+    await handleClearCache();
+    window.location.reload();
+  };
   const handleLogout = (event: React.MouseEvent<EventTarget>): void => {
     window.location.assign('/api/logout');
     localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
-  };
-  const handleClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
-    window.location.reload();
+    handleClearCache();
   };
   function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
@@ -107,7 +113,7 @@ export function UserProfileMenu({
                   onKeyDown={handleListKeyDown}
                 >
                   <MenuItem
-                    onClick={handleClearCache}
+                    onClick={handleClearCacheAndReloadWindow}
                     data-cy='menu-item-clear-cache'
                   >
                     Clear Cache
