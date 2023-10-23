@@ -4086,7 +4086,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 == repr3_feedback_no_gt_2hh_3ind_in_pr3.feedback_messages.order_by("created_at").last().created_at
             )
 
-    def test(self) -> None:
+    def test_migrate_grievance_to_representations(self) -> None:
         migrate_grievance_to_representations()
         self.refresh_objects()
 

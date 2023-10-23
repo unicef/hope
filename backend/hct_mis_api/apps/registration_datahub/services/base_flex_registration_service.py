@@ -44,7 +44,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         self, imported_by: Optional[Any], rdi_name: str = "rdi_name", is_open: bool = False
     ) -> RegistrationDataImport:
         project = self.registration.project
-        # programme = project.programme TODO programme refactoring
+        programme = project.programme
         organization = project.organization
         business_area = BusinessArea.objects.get(slug=organization.slug)
 
@@ -61,6 +61,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             business_area=business_area,
             status=status,
         )
+        if programme:
+            rdi.programs.add(programme)
 
         import_data = ImportData.objects.create(
             status=ImportData.STATUS_PENDING,
