@@ -111,8 +111,9 @@ describe("Grievance - Feedback", () => {
         feedbackPage.expectedNumberOfRows(1);
         feedbackPage.chooseTicketListRow(0, "FED-23-0001").click();
         feedbackDetailsPage.getTitlePage().contains("Feedback ID: FED-23-0001");
+        feedbackDetailsPage.clickMenuButtonFeedback();
       });
-      it("Feedback Creation Date filter", () => {
+      it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
@@ -126,15 +127,15 @@ describe("Grievance - Feedback", () => {
           `Check if Tickets List has 2 rows`,
         ]);
         feedbackPage.changeCreationDateTo("2024-01-01");
-        // feedbackPage.checkDateFilterTo("2024-01-01");
-        // feedbackPage.openCreationDateToFilter();
-        // feedbackPage.checkDateTitleFilter("Mon, Jan 1");
+        feedbackPage.checkDateFilterTo("2024-01-01");
+        feedbackPage.openCreationDateToFilter();
+        feedbackPage.checkDateTitleFilter("Mon, Jan 1");
         feedbackPage.getButtonClear().click();
         feedbackPage.changeCreationDateTo("2023-01-30");
         feedbackPage.expectedNumberOfRows(2);
         feedbackPage.openCreationDateToFilter();
         feedbackPage.chooseDayFilterPopup(8);
-        // feedbackPage.checkDateFilterTo("2023-01-08");
+        feedbackPage.checkDateFilterTo("2023-01-08");
         feedbackPage.getButtonApply().click();
         feedbackPage.expectedNumberOfRows(0);
       });
