@@ -3,13 +3,12 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
-  AllProgramsQuery,
   ProgramQuery,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
@@ -47,50 +46,34 @@ export const DeleteProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea } = useBaseUrl();
-  const [mutate] = useDeleteProgramMutation({
-    variables: {
-      programId: program.id,
-    },
-  });
+  const history = useHistory();
+  const { businessArea, baseUrl } = useBaseUrl();
+  const [mutate] = useDeleteProgramMutation();
+
   const deleteProgram = async (): Promise<void> => {
-    const response = await mutate({
-      update(cache) {
-        const allProgramsData = cache.readQuery<AllProgramsQuery>({
-          query: ALL_PROGRAMS_QUERY,
-          variables: { businessArea },
-        });
-        const filtred = allProgramsData.allPrograms.edges.filter((item) => {
-          return item.node.id !== program.id;
-        });
-        const newAllProgramsData = { ...allProgramsData };
-        newAllProgramsData.allPrograms.edges = filtred;
-        cache.writeQuery({
-          query: ALL_PROGRAMS_QUERY,
-          variables: { businessArea },
-          data: newAllProgramsData,
-        });
-      },
-      refetchQueries: () => [
-        {
-          query: AllProgramsForChoicesDocument,
-          variables: { businessArea, first: 100 },
+    try {
+      await mutate({
+        variables: {
+          programId: program.id,
         },
-      ],
-    });
-    if (!response.errors && response.data.deleteProgram) {
-      showMessage(t('Programme removed.'), {
-        pathname: `/${businessArea}/programs/all/list`,
+
+        refetchQueries: () => [
+          {
+            query: AllProgramsForChoicesDocument,
+            variables: { businessArea, first: 100 },
+          },
+        ],
+      });
+      showMessage(t('Programme removed'), {
+        pathname: `/${baseUrl}/programs/all/list`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });
-      setOpen(false);
-    } else {
-      showMessage(t('Programme remove action failed.'), {
-        dataCy: 'snackbar-program-remove-failure',
-      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
+
   return (
     <span>
       <RemoveButton
