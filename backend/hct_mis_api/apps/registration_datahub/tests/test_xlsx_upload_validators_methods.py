@@ -13,7 +13,7 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 
 
 class TestXLSXValidatorsMethods(APITestCase):
-    databases = "__all__"
+    databases = {"default"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
@@ -505,4 +505,25 @@ class TestXLSXValidatorsMethods(APITestCase):
         ]
 
         result = upload_xlsx_instance_validator.validate_collectors_size(wb)
+        self.assertEqual(result, expected_result)
+
+    def test_validate_collector_unique(self) -> None:
+        file_path = f"{self.FILES_DIR_PATH}/test_collectors.xlsx"
+
+        expected_result = [
+            {
+                "row_number": 3,
+                "header": "Individuals",
+                "message": "Individual from row: 3 cannot be the primary and the alternate collector for households: 992630574 at the same time.",
+            },
+            {
+                "row_number": 4,
+                "header": "Individuals",
+                "message": "Individual from row: 4 cannot be the primary and the alternate collector for households: 853780211 at the same time.",
+            },
+        ]
+
+        with open(file_path, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
