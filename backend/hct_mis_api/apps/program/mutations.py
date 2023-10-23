@@ -40,6 +40,8 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
+        # TODO: add validation for DCT
+
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
@@ -99,7 +101,9 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
 
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         if data_collecting_type_code and data_collecting_type_code != old_program.data_collecting_type.code:
-            program.data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+            # TODO: add validation for DCT
+            data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+            program.data_collecting_type = data_collecting_type
 
         for attrib, value in program_data.items():
             if hasattr(program, attrib):

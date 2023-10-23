@@ -418,7 +418,6 @@ class MigrationStatus(TimeStampedModel):
 
 
 class DataCollectingType(TimeStampedModel):
-
     class Type(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
         SOCIAL = "SOCIAL", "Social Workers"
@@ -430,7 +429,9 @@ class DataCollectingType(TimeStampedModel):
     compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
     limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
     active = models.BooleanField(default=True)
-    deprecated = models.BooleanField(default=False, help_text="Cannot be used in new programs, totally hidden in UI, only admin have access")
+    deprecated = models.BooleanField(
+        default=False, help_text="Cannot be used in new programs, totally hidden in UI, only admin have access"
+    )
     individual_filters_available = models.BooleanField(default=False)
     household_filters_available = models.BooleanField(default=True)
     recalculate_composition = models.BooleanField(default=False)
