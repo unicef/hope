@@ -7,20 +7,19 @@ import {
   DialogTitle,
   IconButton,
 } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
+import { Delete } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Delete } from '@material-ui/icons';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import {
   PaymentPlanQuery,
   useDeletePpMutation,
 } from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { LoadingButton } from '../../../core/LoadingButton';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
