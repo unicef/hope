@@ -8,26 +8,16 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ImportDataStatus,
+  useAllActiveProgramsQuery,
   useCreateRegistrationKoboImportMutation,
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-<<<<<<< HEAD
-=======
-import {
-  ImportDataStatus,
-  useAllActiveProgramsQuery,
-  useCreateRegistrationKoboImportMutation
-} from '../../../../__generated__/graphql';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import {LoadingComponent} from "../../../core/LoadingComponent";
-import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
-import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
-import { KoboProjectSelect } from './KoboProjectSelect';
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
 import { KoboProjectSelect } from './KoboProjectSelect';
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
@@ -68,8 +58,8 @@ export function CreateImportFromKoboForm({
   const { data: programData, loading } = useAllActiveProgramsQuery({
     variables: {
       first: 100,
-      businessArea: businessAreaSlug
-    }
+      businessArea,
+    },
   });
 
   const onSubmit = async (values): Promise<void> => {
@@ -80,12 +70,8 @@ export function CreateImportFromKoboForm({
             importDataId: koboImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
-<<<<<<< HEAD
             businessAreaSlug: businessArea,
-=======
-            businessAreaSlug,
-            programId: values.programId
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
+            programId: values.programId,
           },
         },
       });
@@ -102,7 +88,7 @@ export function CreateImportFromKoboForm({
       koboAssetId: '',
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
-      programId: ''
+      programId: '',
     },
     validationSchema,
     onSubmit,
@@ -133,11 +119,11 @@ export function CreateImportFromKoboForm({
   }, [koboImportData]);
 
   if (loading) {
-    return <LoadingComponent />
+    return <LoadingComponent />;
   }
 
   const mappedProgramChoices = programData?.allActivePrograms?.edges?.map(
-      (element) => ({name: element.node.name, value: element.node.id})
+    (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
   return (

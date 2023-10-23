@@ -14,18 +14,6 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 
-<<<<<<< HEAD
-=======
-const initialFilter = {
-  search: '',
-  program: '',
-  targetPopulation: '',
-  createdBy: '',
-  createdAtRangeMin: '',
-  createdAtRangeMax: '',
-};
-
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
 export const SurveysPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -37,8 +25,8 @@ export const SurveysPage = (): React.ReactElement => {
     search: '',
     targetPopulation: '',
     createdBy: '',
-    createdAtRangeMin: null,
-    createdAtRangeMax: null,
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
   };
 
   const [filter, setFilter] = useState(

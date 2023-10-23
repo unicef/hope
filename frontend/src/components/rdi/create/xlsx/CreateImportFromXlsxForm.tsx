@@ -7,20 +7,16 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
-  ImportDataStatus, useAllActiveProgramsQuery,
+  ImportDataStatus,
+  useAllActiveProgramsQuery,
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-<<<<<<< HEAD
+import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-=======
-import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
-import {LoadingComponent} from "../../../core/LoadingComponent";
-import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
-import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
@@ -61,8 +57,8 @@ export function CreateImportFromXlsxForm({
   const { data: programData, loading } = useAllActiveProgramsQuery({
     variables: {
       first: 100,
-      businessArea: businessAreaSlug
-    }
+      businessArea,
+    },
   });
 
   const onSubmit = async (values): Promise<void> => {
@@ -73,12 +69,8 @@ export function CreateImportFromXlsxForm({
             importDataId: xlsxImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
-<<<<<<< HEAD
             businessAreaSlug: businessArea,
-=======
-            businessAreaSlug,
-            programId: values.programId
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
+            programId: values.programId,
           },
         },
       });
@@ -95,7 +87,7 @@ export function CreateImportFromXlsxForm({
       name: '',
       screenBeneficiary: false,
       file: null,
-      programId: ''
+      programId: '',
     },
     validationSchema,
     onSubmit,
@@ -126,11 +118,11 @@ export function CreateImportFromXlsxForm({
   }, [xlsxImportData]);
 
   if (loading) {
-    return <LoadingComponent />
+    return <LoadingComponent />;
   }
 
   const mappedProgramChoices = programData?.allActivePrograms?.edges?.map(
-      (element) => ({name: element.node.name, value: element.node.id})
+    (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
   return (
