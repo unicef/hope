@@ -12669,7 +12669,7 @@ export type PaymentRecordQuery = (
       ) }
     ), parent: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
+      & Pick<CashPlanNode, 'id' | 'unicefId' | 'caId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -23682,6 +23682,7 @@ export const PaymentRecordDocument = gql`
     }
     parent {
       id
+      unicefId
       caId
       program {
         id
