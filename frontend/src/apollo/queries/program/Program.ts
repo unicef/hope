@@ -28,6 +28,7 @@ export const PROGRAM_QUERY = gql`
         label
         active
         individualFiltersAvailable
+        householdFiltersAvailable
       }
     }
   }

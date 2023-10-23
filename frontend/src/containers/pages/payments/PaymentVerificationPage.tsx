@@ -11,6 +11,19 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
 
+<<<<<<< HEAD
+=======
+const initialFilter = {
+  search: '',
+  verificationStatus: [],
+  program: '',
+  serviceProvider: '',
+  deliveryType: [],
+  startDate: '',
+  endDate: '',
+};
+
+>>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
 export const PaymentVerificationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();

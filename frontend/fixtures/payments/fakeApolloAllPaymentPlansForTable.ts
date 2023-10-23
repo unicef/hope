@@ -10,9 +10,14 @@ export const fakeApolloAllPaymentPlansForTable = [
         status: [],
         totalEntitledQuantityFrom: null,
         totalEntitledQuantityTo: null,
+        dispersionStartDate: null,
+        dispersionEndDate: null,
         isFollowUp: null,
+<<<<<<< HEAD
         program:
           'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+=======
+>>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
         first: 5,
         orderBy: '-created_at',
       },
