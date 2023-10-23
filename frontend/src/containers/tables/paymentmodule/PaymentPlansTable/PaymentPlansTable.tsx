@@ -25,17 +25,10 @@ export const PaymentPlansTable = ({
     businessArea,
     search: filter.search,
     status: filter.status,
-<<<<<<< HEAD
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
-    dispersionStartDate: filter.dispersionStartDate,
-    dispersionEndDate: filter.dispersionEndDate,
-=======
-    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom,
-    totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate || null,
     dispersionEndDate: filter.dispersionEndDate || null,
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
     isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
   };

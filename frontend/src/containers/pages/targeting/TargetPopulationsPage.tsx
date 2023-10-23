@@ -16,33 +16,20 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 
-<<<<<<< HEAD
-=======
 const initialFilter = {
   name: '',
   status: '',
-  program: '',
-  numIndividualsMin: null,
-  numIndividualsMax: null,
+  totalHouseholdsCountMin: null,
+  totalHouseholdsCountMax: null,
   createdAtRangeMin: '',
   createdAtRangeMax: '',
 };
 
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
 export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
-
-  const initialFilter = {
-    name: '',
-    status: '',
-    totalHouseholdsCountMin: '',
-    totalHouseholdsCountMax: '',
-    createdAtRangeMin: undefined,
-    createdAtRangeMax: undefined,
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
