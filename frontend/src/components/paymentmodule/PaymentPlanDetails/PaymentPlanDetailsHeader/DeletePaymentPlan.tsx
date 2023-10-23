@@ -20,6 +20,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -31,19 +32,26 @@ export const DeletePaymentPlan = ({
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
+  const { showMessage } = useSnackbar();
   const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
   const { id } = paymentPlan;
 
-  const handleDelete = (): void => {
-    mutate({
-      variables: {
-        paymentPlanId: id,
-      },
-    });
-    history.push(`/${baseUrl}/payment-module`);
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          paymentPlanId: id,
+        },
+      });
+      showMessage(t('Payment Plan Deleted'), {
+        pathname: `/${baseUrl}/payment-module`,
+        historyMethod: 'push',
+        dataCy: 'snackbar-payment-plan-remove-success',
+      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
   };
-
   return (
     <>
       <Box p={2}>
