@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from django import forms
 from django.contrib import admin
@@ -27,17 +27,33 @@ class OrganizationAdmin(admin.ModelAdmin):
     )
 
 
+class ProjectForm(forms.ModelForm):
+    def clean(self) -> Optional[Dict[str, Any]]:
+        cleaned_data = self.cleaned_data
+        organization = self.cleaned_data["organization"]
+        programme = self.cleaned_data["programme"]
+
+        if organization.business_area != programme.business_area:
+            msg = "BusinessArea of organization is different than BusinessArea of programme."
+            self.add_error("organization", msg)
+        return cleaned_data
+
+
 @smart_register(models.Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "organization")
     list_filter = ("organization", "programme")
     readonly_fields = ("name", "organization")
+    form = ProjectForm
 
     def get_form(
         self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
     ) -> Type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(business_area=obj.organization.business_area)
+        form.base_fields["programme"].queryset = Program.objects.filter(
+            status=Program.ACTIVE,
+            data_collecting_type__isnull=False,
+        ).exclude(data_collecting_type__code="unknown")
         return form
 
 

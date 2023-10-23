@@ -21,7 +21,9 @@ class PartnerFactory(DjangoModelFactory):
 class BusinessAreaFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "BusinessArea{}".format(x))
     code = factory.Sequence(lambda x: "BA{}".format(x))
+    slug = factory.Sequence(lambda n: "ba{}".format(n))
     active = True
+    kobo_token = "XXX"
 
     class Meta:
         model = BusinessArea

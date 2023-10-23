@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -16,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     COLLECT_TYPE_FULL,
@@ -33,15 +35,19 @@ class UploadRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
+        DataCollectingTypeFactory()
+        cls.program = ProgramFactory(status="ACTIVE")
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
 
     def test_upload_single_household(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "IDP",
@@ -75,6 +81,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
         self.assertIsNotNone(hh)
@@ -91,6 +98,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": COLLECT_TYPE_FULL,
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "IDP",
@@ -125,6 +133,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
         self.assertIsNotNone(hh)
@@ -141,6 +150,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "IDP",
@@ -200,6 +210,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "IDP",
@@ -241,6 +252,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
         self.assertIsNotNone(hh)
@@ -260,6 +272,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "IDP",
@@ -378,6 +391,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         hh = ImportedHousehold.objects.filter(registration_data_import=hrdi, village="village1").first()
         self.assertIsNotNone(hh)
@@ -396,6 +410,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "",
@@ -437,6 +452,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "",
@@ -524,6 +540,7 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
+            "program_id": self.program.id,
             "households": [
                 {
                     "residence_status": "",

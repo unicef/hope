@@ -6,7 +6,6 @@ from rest_framework import permissions
 
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
-from hct_mis_api.api.router import APIRouter
 
 app_name = "api"
 
@@ -22,8 +21,6 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=[permissions.IsAuthenticated],
 )
-
-router = APIRouter()
 
 urlpatterns = [
     path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
@@ -60,4 +57,14 @@ urlpatterns = [
     ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
+    path(
+        "lookups/programs/",
+        endpoints.ProgramViewSet.as_view({"get": "list"}),
+        name="programs-list",
+    ),
+    path(
+        "lookups/data-collecting-types/",
+        endpoints.rdi.program.DataCollectingTypeViewSet.as_view({"get": "list"}),
+        name="data-collecting-types-list",
+    ),
 ]

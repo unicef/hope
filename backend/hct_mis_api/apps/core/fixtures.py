@@ -1,3 +1,5 @@
+from typing import Any, List
+
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -7,9 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, Stora
 faker = Faker()
 
 
-def create_afghanistan(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
+def create_afghanistan(is_payment_plan_applicable: bool = False) -> BusinessArea:
     return BusinessArea.objects.create(
         **{
             "code": "0060",
@@ -46,5 +46,18 @@ def generate_data_collecting_types() -> None:
 
 
 class DataCollectingTypeFactory(DjangoModelFactory):
+    label = factory.Sequence(lambda n: f"Label{n}")
+    code = factory.Sequence(lambda n: f"code{n}")
+
     class Meta:
         model = DataCollectingType
+        django_get_or_create = ("label", "code")
+
+    @factory.post_generation
+    def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:
+        if not create:
+            return
+
+        if extracted:
+            for business_area in extracted:
+                self.limit_to.add(business_area)
