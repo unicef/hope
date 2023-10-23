@@ -57,6 +57,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
@@ -69,8 +70,8 @@ from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
 
 class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
     def setUp(self) -> None:
-        self.PAYMENT_RECORD_CT_ID = ContentType.objects.get(app_label="payment", model="paymentrecord").id
-        self.PAYMENT_CT_ID = ContentType.objects.get(app_label="payment", model="payment").id
+        self.PAYMENT_RECORD_CT_ID = ContentType.objects.get_for_model(PaymentRecord).id
+        self.PAYMENT_CT_ID = ContentType.objects.get_for_model(Payment).id
 
         self.business_area = BusinessAreaFactory()
         self.program1 = ProgramFactory(name="program1", business_area=self.business_area, status=Program.ACTIVE)
