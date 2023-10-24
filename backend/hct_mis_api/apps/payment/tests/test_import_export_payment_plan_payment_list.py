@@ -89,7 +89,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(parent=cls.payment_plan, household=household, financial_service_provider=fsp_1)
+            PaymentFactory(
+                parent=cls.payment_plan, household=household, financial_service_provider=fsp_1, currency="PLN"
+            )
 
         cls.user = UserFactory()
         cls.payment_plan = PaymentPlan.objects.all()[0]
