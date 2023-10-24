@@ -204,7 +204,7 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         self.assertEqual(pp.payment_items.count(), 1)
 
         new_targeting = TargetPopulationFactory()
@@ -326,7 +326,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -359,7 +359,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -405,7 +405,9 @@ class TestPaymentPlanServices(APITestCase):
             hh = HouseholdFactory(head_of_household=hoh)
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
-            payment = PaymentFactory(parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+            payment = PaymentFactory(
+                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN"
+            )
             payments.append(payment)
 
         new_targeting.households.set([p.household for p in payments])

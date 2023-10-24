@@ -17,11 +17,15 @@ import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+<<<<<<< HEAD
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+=======
+>>>>>>> develop
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const Container = styled.div`
   && {
@@ -61,7 +65,11 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+<<<<<<< HEAD
   const { businessArea } = useBaseUrl();
+=======
+  const businessArea = useBusinessArea();
+>>>>>>> develop
   const {
     data,
     loading,
@@ -92,7 +100,11 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
         RegistrationDataImportStatus.Merging,
       ].includes(status)
     ) {
+<<<<<<< HEAD
       startPolling(3000);
+=======
+      startPolling(5000);
+>>>>>>> develop
     } else {
       stopPolling();
     }
