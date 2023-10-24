@@ -2,23 +2,13 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-=======
-import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
->>>>>>> develop
+import { CreatedBySurveyAutocomplete } from '../../../../shared/autocompletes/CreatedBySurveyAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
-<<<<<<< HEAD
-=======
-import { SelectFilter } from '../../../core/SelectFilter';
-import {CreatedBySurveyAutocomplete} from '../../../../shared/autocompletes/CreatedBySurveyAutocomplete';
->>>>>>> develop
 
 interface SurveysFiltersProps {
   filter;
