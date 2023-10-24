@@ -6,6 +6,7 @@ export const CREATE_PROGRAM_MUTATION = gql`
       program {
         id
         name
+        programmeCode
         status
         startDate
         endDate

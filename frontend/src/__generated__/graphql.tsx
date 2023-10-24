@@ -10642,7 +10642,7 @@ export type CreateProgramMutation = (
     & Pick<CreateProgram, 'validationErrors'>
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
+      & Pick<ProgramNode, 'id' | 'name' | 'programmeCode' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
       & { dataCollectingType: Maybe<(
         { __typename?: 'DataCollectingTypeNode' }
         & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
@@ -13344,7 +13344,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    & Pick<ProgramNode, 'id' | 'name' | 'programmeCode' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
       & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
@@ -18415,6 +18415,7 @@ export const CreateProgramDocument = gql`
     program {
       id
       name
+      programmeCode
       status
       startDate
       endDate
@@ -25408,6 +25409,7 @@ export const ProgramDocument = gql`
   program(id: $id) {
     id
     name
+    programmeCode
     startDate
     endDate
     status
