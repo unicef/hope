@@ -315,6 +315,8 @@ class Query(graphene.ObjectType):
         return {"labels": months_labels, "datasets": datasets}
 
     def resolve_all_active_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        return Program.objects.exclude(status=Program.DRAFT).filter(
-            business_area__slug=info.context.headers.get("Business-Area").lower()
-        )
+        return Program.objects.filter(
+            status=Program.ACTIVE,
+            business_area__slug=info.context.headers.get("Business-Area").lower(),
+            data_collecting_type__isnull=False,
+        ).exclude(data_collecting_type__code="unknown")
