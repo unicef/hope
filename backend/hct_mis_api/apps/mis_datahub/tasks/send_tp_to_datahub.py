@@ -44,6 +44,7 @@ class SendTPToDatahubTask:
         "individual_data_needed": "individual_data_needed",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
+        "programme_code": "programme_code",
     }
 
     MAPPING_HOUSEHOLD_DICT = {

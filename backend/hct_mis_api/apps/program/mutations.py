@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 import graphene
@@ -38,12 +39,19 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        programme_code = program_data.get("programme_code", "").upper()
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
         )
+
+        if (
+            programme_code
+            and Program.objects.filter(business_area=business_area, programme_code=programme_code).exists()
+        ):
+            raise ValidationError("Programme code is already used.")
 
         program = Program(
             **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type

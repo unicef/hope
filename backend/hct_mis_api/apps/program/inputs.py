@@ -16,6 +16,7 @@ class CreateProgramInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    programme_code = graphene.String()
 
 
 class UpdateProgramInput(graphene.InputObjectType):

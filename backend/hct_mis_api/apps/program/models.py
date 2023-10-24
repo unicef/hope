@@ -1,5 +1,7 @@
+import random
+import string
 from decimal import Decimal
-from typing import Union
+from typing import Any, Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
@@ -149,6 +151,18 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
     )
+    programme_code = models.CharField(max_length=4, null=True, blank=True)
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self.programme_code:
+            self.programme_code = self._generate_programme_code()
+        super().save(*args, **kwargs)
+
+    def _generate_programme_code(self) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+        if Program.objects.filter(business_area_id=self.business_area_id, programme_code=programme_code).exists():
+            return self._generate_programme_code()
+        return programme_code
 
     @staticmethod
     def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:

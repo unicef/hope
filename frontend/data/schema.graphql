@@ -728,6 +728,7 @@ input CreateProgramInput {
   businessAreaSlug: String
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
+  programmeCode: String
 }
 
 type CreateReport {
@@ -3377,6 +3378,7 @@ type ProgramNode implements Node {
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
+  programmeCode: String
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
