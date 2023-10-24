@@ -46,6 +46,7 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        programme_code = program_data.get("programme_code", "").upper()
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -53,6 +54,12 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             data_collecting_type=data_collecting_type,
             business_area=business_area,
         )
+
+        if (
+            programme_code
+            and Program.objects.filter(business_area=business_area, programme_code=programme_code).exists()
+        ):
+            raise ValidationError("Programme code is already used.")
 
         program = Program(
             **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type

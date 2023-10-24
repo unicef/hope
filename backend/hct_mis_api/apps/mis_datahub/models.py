@@ -166,6 +166,7 @@ class Program(SessionModel):
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)
     individual_data_needed = models.BooleanField(default=False)
+    programme_code = models.CharField(max_length=4, null=True, blank=True)
 
     class Meta:
         unique_together = ("session", "mis_id")

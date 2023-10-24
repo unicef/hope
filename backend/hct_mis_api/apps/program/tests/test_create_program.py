@@ -2,11 +2,13 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestCreateProgram(APITestCase):
@@ -140,3 +142,63 @@ class TestCreateProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
         )
+
+    def test_create_program_with_programme_code(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "ABC2"
+
+        self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program = Program.objects.get(name="Test")
+        self.assertEqual(program.programme_code, "ABC2")
+
+    def test_programme_code_should_be_unique_among_the_same_business_area(self) -> None:
+        ProgramFactory(programme_code="ABC2")
+
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "ABC2"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program_count = Program.objects.filter(programme_code="ABC2").count()
+        self.assertEqual(program_count, 1)
+
+    def test_programme_code_can_be_reuse_in_different_business_area(self) -> None:
+        business_area = BusinessAreaFactory()
+        ProgramFactory(programme_code="ABC2", business_area=business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "ABC2"
+
+        self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program_count = Program.objects.filter(programme_code="ABC2").count()
+        self.assertEqual(program_count, 2)
+
+    def test_create_program_without_programme_code(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+
+        self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program = Program.objects.get(name="Test")
+        self.assertIsNotNone(program.programme_code)
+        self.assertEqual(len(program.programme_code), 4)
+
+    def test_create_program_with_programme_code_as_empty_string(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = ""
+
+        self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program = Program.objects.get(name="Test")
+        self.assertIsNotNone(program.programme_code)
+        self.assertEqual(len(program.programme_code), 4)
