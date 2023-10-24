@@ -7,7 +7,6 @@ import {
   DialogTitle,
   IconButton,
 } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Delete } from '@material-ui/icons';
