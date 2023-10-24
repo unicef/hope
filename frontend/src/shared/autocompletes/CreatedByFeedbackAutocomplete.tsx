@@ -18,7 +18,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')};
 `;
 
-export const CreatedByAutocomplete = ({
+export const CreatedByFeedbackAutocomplete = ({
   disabled,
   fullWidth = true,
   name,
@@ -57,7 +57,7 @@ export const CreatedByAutocomplete = ({
       first: 100,
       orderBy: 'first_name,last_name,email',
       search: debouncedInputText,
-      isTicketCreator: true,
+      isFeedbackCreator: true,
     },
   });
 
@@ -106,11 +106,11 @@ export const CreatedByAutocomplete = ({
       getOptionLabel={(option) => {
         let optionLabel;
         if (option.node) {
-          optionLabel = `${option.node.email}`;
+          const {firstName, lastName} = option.node;
+          optionLabel = `${firstName} ${lastName}`;
         } else {
-          optionLabel =
-            data?.allUsers?.edges?.find((el) => el.node.id === option)?.node
-              .email || '';
+          const foundUser = data?.allUsers?.edges?.find((el) => el.node.id === option)?.node;
+          optionLabel = foundUser ? `${foundUser.firstName} ${foundUser.lastName}` : '';
         }
         return `${optionLabel}`;
       }}
