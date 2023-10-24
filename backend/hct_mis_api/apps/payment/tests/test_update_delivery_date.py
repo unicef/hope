@@ -61,6 +61,7 @@ class TestDeliveryDate(APITestCase):
             household=household_1,
             entitlement_quantity=212,
             delivered_quantity=150,
+            currency="PLN",
         )
 
         hoh2 = IndividualFactory(household=None)
@@ -71,6 +72,7 @@ class TestDeliveryDate(APITestCase):
             household=household_2,
             entitlement_quantity=212,
             delivered_quantity=150,
+            currency="PLN",
         )
 
         hoh3 = IndividualFactory(household=None)
@@ -81,6 +83,7 @@ class TestDeliveryDate(APITestCase):
             household=household_3,
             entitlement_quantity=212,
             delivered_quantity=150,
+            currency="PLN",
         )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -118,6 +121,8 @@ class TestDeliveryDate(APITestCase):
         import_service = XlsxPaymentPlanImportPerFspService(self.payment_plan, file_existing_delivery_date)
         import_service.open_workbook()
         import_service.validate()
+
+        self.assertEqual(len(import_service.errors), 1)
 
         error = import_service.errors[0]
         self.assertListEqual(

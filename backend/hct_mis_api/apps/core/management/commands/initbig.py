@@ -20,10 +20,9 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, Program, ProgramFactory
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord
+from hct_mis_api.apps.program.fixtures import Program, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import (
@@ -116,6 +115,7 @@ def create_payment_records(business_area_names: List) -> None:
                     target_population=tp,
                     business_area=household.business_area,
                     status=PaymentRecord.STATUS_SUCCESS,
+                    currency="PLN",
                 )
 
 

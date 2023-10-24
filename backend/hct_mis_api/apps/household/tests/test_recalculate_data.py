@@ -371,7 +371,7 @@ class TestRecalculateData(TestCase):
         ]
 
         household, individuals = create_household_and_individuals(self.household_data, individuals_data)
-        household.last_registration_date = "2023-01-02"
+        household.last_registration_date = timezone.make_aware(datetime.datetime.strptime("2023-01-02", "%Y-%m-%d"))
         household.save()
 
         household, _ = recalculate_data(household=household, save=True)
