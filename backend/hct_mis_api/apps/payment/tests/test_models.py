@@ -37,8 +37,8 @@ class TestPaymentPlanModel(TestCase):
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        PaymentFactory(parent=pp, household=hh1, head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh2, head_of_household=hoh2)
+        PaymentFactory(parent=pp, household=hh1, head_of_household=hoh1, currency="PLN")
+        PaymentFactory(parent=pp, household=hh2, head_of_household=hoh2, currency="PLN")
 
         IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
         IndividualFactory(household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5))
@@ -64,6 +64,7 @@ class TestPaymentPlanModel(TestCase):
             entitlement_quantity_usd=200.00,
             delivered_quantity=50.00,
             delivered_quantity_usd=100.00,
+            currency="PLN",
         )
         PaymentFactory(
             parent=pp,
@@ -71,6 +72,7 @@ class TestPaymentPlanModel(TestCase):
             entitlement_quantity_usd=200.00,
             delivered_quantity=50.00,
             delivered_quantity_usd=100.00,
+            currency="PLN",
         )
 
         pp.update_money_fields()
@@ -86,8 +88,8 @@ class TestPaymentPlanModel(TestCase):
 
     def test_not_excluded_payments(self) -> None:
         pp = PaymentPlanFactory()
-        PaymentFactory(parent=pp, conflicted=False)
-        PaymentFactory(parent=pp, conflicted=True)
+        PaymentFactory(parent=pp, conflicted=False, currency="PLN")
+        PaymentFactory(parent=pp, conflicted=True, currency="PLN")
 
         pp.refresh_from_db()
         self.assertEqual(pp.eligible_payments.count(), 1)
@@ -107,13 +109,13 @@ class TestPaymentPlanModel(TestCase):
             program=program,
             program_cycle=program_cycle,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False)
-        PaymentFactory(parent=pp1_conflicted, household=p1.household, conflicted=False)
+        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
+        PaymentFactory(parent=pp1_conflicted, household=p1.household, conflicted=False, currency="PLN")
         self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create not conflicted payment
-        PaymentFactory(parent=pp1, conflicted=False)
+        PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         self.assertEqual(pp1.can_be_locked, True)
 
 
@@ -133,9 +135,9 @@ class TestPaymentModel(TestCase):
         pp = PaymentPlanFactory()
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         with self.assertRaises(IntegrityError):
-            PaymentFactory(parent=pp, household=hh1)
+            PaymentFactory(parent=pp, household=hh1, currency="PLN")
 
     def test_manager_annotations__pp_conflicts(self) -> None:
         program = RealProgramFactory()
@@ -166,10 +168,10 @@ class TestPaymentModel(TestCase):
             program=program,
             program_cycle=program_cycle,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False)
-        p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False)
-        p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False)
-        p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False)
+        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
+        p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False, currency="PLN")
+        p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False, currency="PLN")
+        p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False, currency="PLN")
 
         for _ in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
             _.refresh_from_db()  # update unicef_id from trigger
@@ -236,13 +238,14 @@ class TestPaymentModel(TestCase):
             source_payment_plan=pp1,
             program_cycle=program_cycle,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False)
+        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         p2 = PaymentFactory(
             parent=pp2,
             household=p1.household,
             conflicted=False,
             is_follow_up=True,
             source_payment=p1,
+            currency="PLN",
         )
         p3 = PaymentFactory(
             parent=pp3,
@@ -250,6 +253,7 @@ class TestPaymentModel(TestCase):
             conflicted=False,
             is_follow_up=True,
             source_payment=p1,
+            currency="PLN",
         )
 
         for _ in [pp1, pp2, pp3, p1, p2, p3]:
