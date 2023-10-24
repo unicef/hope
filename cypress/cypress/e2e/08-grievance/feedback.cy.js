@@ -14,7 +14,11 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
   before(() => {
+<<<<<<< HEAD
     cy.checkIfLoggedIn();
+=======
+    cy.adminLogin();
+>>>>>>> develop
   });
   beforeEach(() => {
     cy.navigateToHomePage();
@@ -107,7 +111,9 @@ describe("Grievance - Feedback", () => {
         feedbackPage.expectedNumberOfRows(1);
         feedbackPage.chooseTicketListRow(0, "FED-23-0001").click();
         feedbackDetailsPage.getTitlePage().contains("Feedback ID: FED-23-0001");
+        feedbackDetailsPage.clickMenuButtonFeedback();
       });
+<<<<<<< HEAD
       it("Feedback Created by filter", () => {
         cy.scenario([
           "Go to Grievance page",
@@ -126,6 +132,8 @@ describe("Grievance - Feedback", () => {
         feedbackPage.useCreatedByFilter("root@root.com");
         feedbackPage.expectedNumberOfRows(2);
       });
+=======
+>>>>>>> develop
       it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
@@ -151,6 +159,46 @@ describe("Grievance - Feedback", () => {
         feedbackPage.checkDateFilterTo("2023-01-08");
         feedbackPage.getButtonApply().click();
         feedbackPage.expectedNumberOfRows(0);
+      });
+      describe("Feedback Created by filter", () => {
+        before(() => {
+          feedbackPage.getButtonSubmitNewFeedback().click();
+          newFeedbackPage.chooseOptionByName("Positive");
+          newFeedbackPage.getButtonNext().click();
+          newFeedbackPage.getHouseholdTab().should("be.visible");
+          newFeedbackPage.getButtonNext().click();
+          newFeedbackPage.getReceivedConsent().click();
+          newFeedbackPage.getButtonNext().click();
+          newFeedbackPage.getLabelCategory().contains("Feedback");
+          newFeedbackPage.getDescription().type("Test Description");
+          newFeedbackPage.getButtonNext().contains("Save").click();
+          feedbackPage.clickMenuButtonFeedback();
+        });
+        after(() => {
+          cy.initScenario("init_clear");
+          cy.adminLogin();
+        });
+        it("Feedback Created by filter", () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Press Feedback button in menu",
+            "Create new feedback cy Cypress User",
+            "Press Feedback button in menu",
+            "Choose Type Cypress User",
+            "Press button Apply",
+            `Check if Tickets List is empty`,
+            "Press button Clear",
+            "Choose Type Root Rootkowski",
+            "Press button Apply",
+            `Check if Tickets List has 2 row`,
+          ]);
+          feedbackPage.useCreatedByFilter("Cypress User");
+          feedbackPage.expectedNumberOfRows(1);
+          feedbackPage.getButtonClear().click();
+          feedbackPage.expectedNumberOfRows(3);
+          feedbackPage.useCreatedByFilter("Root Rootkowski");
+          feedbackPage.expectedNumberOfRows(2);
+        });
       });
     });
     context("Create New Feedback", () => {

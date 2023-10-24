@@ -6526,6 +6526,9 @@ export type QueryAllUsersArgs = {
   search?: Maybe<Scalars['String']>,
   roles?: Maybe<Array<Maybe<Scalars['String']>>>,
   isTicketCreator?: Maybe<Scalars['Boolean']>,
+  isSurveyCreator?: Maybe<Scalars['Boolean']>,
+  isMessageCreator?: Maybe<Scalars['Boolean']>,
+  isFeedbackCreator?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -11503,7 +11506,10 @@ export type AllUsersForFiltersQueryVariables = {
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
-  isTicketCreator?: Maybe<Scalars['Boolean']>
+  isTicketCreator?: Maybe<Scalars['Boolean']>,
+  isSurveyCreator?: Maybe<Scalars['Boolean']>,
+  isMessageCreator?: Maybe<Scalars['Boolean']>,
+  isFeedbackCreator?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -12754,7 +12760,7 @@ export type PaymentRecordQuery = (
       ) }
     ), parent: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
+      & Pick<CashPlanNode, 'id' | 'unicefId' | 'caId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -20678,8 +20684,8 @@ export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const AllUsersForFiltersDocument = gql`
-    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean) {
-  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator) {
+    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean, $isSurveyCreator: Boolean, $isMessageCreator: Boolean, $isFeedbackCreator: Boolean) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator, isSurveyCreator: $isSurveyCreator, isMessageCreator: $isMessageCreator, isFeedbackCreator: $isFeedbackCreator) {
     edges {
       node {
         id
@@ -20729,6 +20735,9 @@ export function withAllUsersForFilters<TProps, TChildProps = {}>(operationOption
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
  *      isTicketCreator: // value for 'isTicketCreator'
+ *      isSurveyCreator: // value for 'isSurveyCreator'
+ *      isMessageCreator: // value for 'isMessageCreator'
+ *      isFeedbackCreator: // value for 'isFeedbackCreator'
  *   },
  * });
  */
@@ -23846,6 +23855,7 @@ export const PaymentRecordDocument = gql`
     }
     parent {
       id
+      unicefId
       caId
       program {
         id
