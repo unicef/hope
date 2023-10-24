@@ -35,8 +35,6 @@ describe("Registration Data Import", () => {
       // ToDo: Refactor this in second milestone
       it("Merge Data", () => {
         registrationDataImport.uploadRDIFile();
-
-        return; // TODO: make this work
         registrationDataImport.mergeRDIFile();
         registrationDataImport.verifyMergedData();
       });
