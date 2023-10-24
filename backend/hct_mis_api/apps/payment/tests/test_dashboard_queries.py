@@ -157,6 +157,7 @@ class TestDashboardQueries(APITestCase):
                 delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
+                currency="PLN",
             )
             PaymentRecordFactory(
                 parent=cash_plan1,
@@ -166,6 +167,7 @@ class TestDashboardQueries(APITestCase):
                 delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
+                currency="PLN",
             )
             PaymentRecordFactory(
                 parent=cash_plan1,
@@ -175,6 +177,7 @@ class TestDashboardQueries(APITestCase):
                 delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
                 business_area=business_area,
+                currency="PLN",
             )
 
             payment_plan1 = PaymentPlanFactory(program=program1, business_area=business_area)
@@ -186,6 +189,7 @@ class TestDashboardQueries(APITestCase):
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household4,
+                currency="PLN",
             )
             PaymentFactory(
                 parent=payment_plan1,
@@ -195,6 +199,7 @@ class TestDashboardQueries(APITestCase):
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household5,
+                currency="PLN",
             )
             PaymentFactory(
                 parent=payment_plan1,
@@ -204,6 +209,7 @@ class TestDashboardQueries(APITestCase):
                 status=GenericPayment.STATUS_ERROR,
                 business_area=business_area,
                 household=household6,
+                currency="PLN",
             )
 
     @parameterized.expand(
