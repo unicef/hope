@@ -558,10 +558,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                             rdi_name = name or {timezone.now()}
                             rdi = service.create_rdi(
                                 imported_by=request.user,
-<<<<<<< HEAD
                                 program=project.program,
-=======
->>>>>>> 6bba15b0bb56ca008d12ef456e490df910b96e3e
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
                                 is_open=is_open,
                             )
