@@ -54,6 +54,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             full_name=cls.individuals_2[0].full_name,
             business_area=cls.business_area,
             parent=cls.cash_plan,
+            currency="PLN",
         )
         cls.individuals_2[0].documents.add(
             DocumentAllowDuplicatesFactory(individual=cls.individuals_2[0], type=cls.document_type, document_number="1")

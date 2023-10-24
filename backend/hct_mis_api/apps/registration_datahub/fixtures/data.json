@@ -1019,5 +1019,269 @@
     "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
     "imported_individual": null
   }
-}
+},
+  {
+    "model": "registration_datahub.record",
+    "pk": 1,
+    "fields": {
+      "registration": 18,
+      "timestamp": "2023-05-01T00:00:00Z",
+      "storage": null,
+      "registration_data_import": null,
+      "ignored": false,
+      "source_id": 1,
+      "data": {},
+      "error_message": null,
+      "status": null,
+      "unique_field": null,
+      "size": null,
+      "counters": null,
+      "fields": {
+        "consent": [
+          {
+            "consent_h_c": "y",
+            "government_partner": "",
+            "consent_sharing_h_c": true,
+            "consent_sharing_h_c_1": "y",
+            "consent_sharing_h_c_2": "n"
+          }
+        ],
+        "needs-assessment": [
+          {
+            "assistance_h_f": "y",
+            "adults_count_h_f": 2,
+            "receiving_mop_h_f": "n",
+            "school_enrolled_i_f": "no",
+            "children_below_18_h_f": 3,
+            "access_health_rate_h_f": "A little Difficult",
+            "additional_support_h_f": "y",
+            "access_education_rate_h_f": "Somewhat Easy",
+            "access_social_services_rate_h_f": "Very Easy",
+            "access_leisure_activities_rate_h_f": "Very Easy",
+            "in_state_provided_accommodation_h_f": "no"
+          }
+        ],
+        "household-address": [
+          {
+            "admin1_h_c": "CZ010",
+            "admin2_h_c": "CZ0109",
+            "address_h_c": "Opočínská 375",
+            "village_h_c": "Praha",
+            "zip_code_h_c": "19017"
+          }
+        ],
+        "primary-carer-info": [
+          {
+            "role_i_c": "primary",
+            "gender_i_c": "female",
+            "id_type_i_c": "national_passport",
+            "phone_no_i_c": "+420774844183",
+            "birth_date_i_c": "1995-08-01",
+            "given_name_i_c": "Tetiana",
+            "family_name_i_c": "Symkanych",
+            "work_status_i_c": "n",
+            "bank_account_h_f": "y",
+            "country_origin_h_c": "ukr",
+            "bank_account_number": "CZ6003000000000306979952",
+            "confirm_phone_number": "+420774844183",
+            "national_passport_i_c": "GB500567",
+            "preferred_language_i_c": "uk-ua",
+            "bank_account_number_h_f": "CZ6003000000000306979952",
+            "czech_formal_employment": "no",
+            "other_communication_language": [
+              "ru-ru"
+            ],
+            "primary_carer_is_legal_guardian": "y"
+          }
+        ],
+        "children-information": [
+          {
+            "gender_i_c": "male",
+            "birth_date_i_c": "2013-07-04",
+            "disability_i_c": "not disabled",
+            "given_name_i_c": "John",
+            "family_name_i_c": "Symkanych",
+            "other_id_no_i_c": "900541571",
+            "follow_up_needed": "n",
+            "relationship_i_c": "son_daughter",
+            "preregistration_case_id": "13277",
+            "birth_certificate_no_i_c": "262873",
+            "has_birth_certificate_i_c": "y",
+            "qualifies_for_programme_i_f": "y"
+          },
+          {
+            "gender_i_c": "female",
+            "id_type_i_c": "national_id",
+            "birth_date_i_c": "2023-04-30",
+            "disability_i_c": "disabled",
+            "follow_up_flag": [
+              "legal_guardianship_documents"
+            ],
+            "given_name_i_c": "TEST",
+            "family_name_i_c": "TEST",
+            "follow_up_needed": "y",
+            "relationship_i_c": "brother_sister",
+            "follow_up_comments": "No comments",
+            "national_id_no_i_c": "123214",
+            "disability_card_i_c": "y",
+            "disability_degree_i_c": "2",
+            "national_passport_i_c": "",
+            "disability_card_no_i_c": "1213",
+            "medical_certificate_i_c": "y",
+            "preregistration_case_id": "10937",
+            "has_birth_certificate_i_c": "n",
+            "medical_certificate_no_i_c": "2321",
+            "qualifies_for_programme_i_f": "y",
+            "disability_card_issuance_i_c": "2023-05-01",
+            "proof_legal_guardianship_no_i_c": "128dj",
+            "medical_certificate_issuance_i_c": "2023-05-01",
+            "medical_certificate_validity_i_c": "2023-05-17",
+            "has_disability_card_and_medical_cert": "Has Both"
+          }
+        ],
+        "legal-guardian-information": [
+          {
+            "gender_i_c": "male",
+            "id_type_i_c": "national_passport",
+            "phone_no_i_c": "+420123123666",
+            "birth_date_i_c": "1988-12-27",
+            "given_name_i_c": "Ivan",
+            "family_name_i_c": "Drago",
+            "work_status_i_c": "y",
+            "relationship_i_c": "head",
+            "national_id_no_i_c": "",
+            "confirm_phone_number": "+420123123666",
+            "national_passport_i_c": "1234567890",
+            "legal_guardia_not_primary_carer": "y"
+          },
+          {
+            "legal_guardia_not_primary_carer": "n"
+          }
+        ]
+      },
+      "files": null,
+      "index1": null,
+      "index2": null,
+      "index3": null
+    }
+  },
+  {
+    "model": "registration_datahub.record",
+    "pk": 2,
+    "fields": {
+        "registration": 17,
+        "timestamp": "2022-04-01T00:00:00Z",
+        "storage": null,
+        "registration_data_import": null,
+        "ignored": false,
+        "source_id": 1,
+        "data": {},
+        "error_message": null,
+        "status": null,
+        "unique_field": null,
+        "size": null,
+        "counters": null,
+        "fields": {
+            "children-info": [
+                {
+                    "gender_i_c": "male",
+                    "full_name_i_c": "Alexis",
+                    "birth_date_i_c": "2022-01-04",
+                    "relationship_i_c": "son_daughter"
+                }
+            ],
+            "id_enumerator": "1992",
+            "caretaker-info": [
+                {
+                    "gender_i_c": "   female",
+                    "full_name_i_c": "Alexis",
+                    "birth_date_i_c": "1989-01-04",
+                    "has_nic_number_i_c": "n",
+                    "who_answers_phone_i_c": "mother/caretaker"
+                }
+            ],
+            "collector-info": [
+                {
+                    "email": "email999@mail.com",
+                    "bank_name": "7472",
+                    "gender_i_c": " male",
+                    "phone_no_i_c": "+94788908046",
+                    "full_name_i_c": "Dome",
+                    "birth_date_i_c": "1980-01-04",
+                    "bank_description": "Axis Bank",
+                    "relationship_i_c": "brother_sister",
+                    "confirm_nic_number": "123456789V",
+                    "national_id_no_i_c": "123456789V",
+                    "branch_or_branch_code": "7472_002",
+                    "who_answers_this_phone": "alternate collector",
+                    "confirm_bank_account_number": "0082785064",
+                    "confirm_alternate_collector_phone_number": "+94788908046",
+                    "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n"
+                }
+            ],
+            "localization-info": [
+                {
+                    "admin2_h_c": "LK11",
+                    "admin3_h_c": "LK1163",
+                    "admin4_h_c": "LK1163020",
+                    "address_h_c": "Alexis",
+                    "moh_center_of_reference": "MOH279"
+                }
+            ],
+            "prefered_language_of_contact": "ta"
+        },
+        "files": null,
+        "index1": null,
+        "index2": null,
+        "index3": null
+    }
+},
+{
+    "model": "registration_datahub.record",
+    "pk": 3,
+    "fields": {
+        "registration": 2,
+        "timestamp": "2022-04-01T00:00:00Z",
+        "storage": null,
+        "registration_data_import": null,
+        "ignored": false,
+        "source_id": 1,
+        "data": {},
+        "error_message": null,
+        "status": null,
+        "unique_field": null,
+        "size": null,
+        "counters": null,
+        "fields": {
+            "household": [
+                {
+                    "size_h_c": 5,
+                    "admin1_h_c": "UA07",
+                    "admin2_h_c": "UA0702",
+                    "admin3_h_c": "UA0702001",
+                    "where_are_you_now": "",
+                    "residence_status_h_c": "non_host"
+                }
+            ],
+            "individuals": [
+                {
+                    "email": "email123@mail.com",
+                    "birth_date": "1991-11-18",
+                    "gender_i_c": "male",
+                    "patronymic": "Roman",
+                    "phone_no_i_c": "0501706662",
+                    "tax_id_no_i_c": "123123123",
+                    "given_name_i_c": "Jan",
+                    "family_name_i_c": "Romaniak",
+                    "bank_account_h_f": "y",
+                    "relationship_i_c": "head"
+                }
+            ]
+        },
+        "files": null,
+        "index1": null,
+        "index2": null,
+        "index3": null
+    }
+  }
 ]
