@@ -3,7 +3,6 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   ProgramQuery,
@@ -46,7 +45,6 @@ export const DeleteProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const history = useHistory();
   const { businessArea, baseUrl } = useBaseUrl();
   const [mutate] = useDeleteProgramMutation();
 
