@@ -422,6 +422,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
+            currency="PLN",
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
 
@@ -800,6 +801,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=99,
             financial_service_provider=None,
+            currency="PLN",
         )
         payment_2 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -812,6 +814,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=2000,
             delivered_quantity_usd=500,
             financial_service_provider=None,
+            currency="PLN",
         )
         payment_3 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -824,6 +827,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=3000,
             delivered_quantity_usd=290,
             financial_service_provider=None,
+            currency="PLN",
         )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
@@ -909,6 +913,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 delivered_quantity=999,
                 delivered_quantity_usd=10,
                 financial_service_provider=None,
+                currency="PLN",
             )
         payment_plan.status_finished()
         payment_plan.save()
