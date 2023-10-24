@@ -2,23 +2,12 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-=======
-import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
->>>>>>> develop
+import { CreatedByMessageAutocomplete } from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
-<<<<<<< HEAD
-=======
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { SelectFilter } from '../../../core/SelectFilter';
-import {CreatedByMessageAutocomplete} from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
->>>>>>> develop
 
 interface CommunicationFiltersProps {
   filter;
