@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+<<<<<<< HEAD
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -10,12 +11,27 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
+=======
+>>>>>>> develop
 import {
   PaymentVerificationPlanStatus,
   usePaymentQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
+<<<<<<< HEAD
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+=======
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { VerificationPaymentDetails } from '../../../components/payments/VerificationPaymentDetails';
+import { VerifyManual } from '../../../components/payments/VerifyManual';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
+>>>>>>> develop
 
 export function VerificationPaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -52,8 +68,13 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     )
       ? [
           {
+<<<<<<< HEAD
             title: `${t('Payment Plan')} ${decodeIdString(payment.parent.id)}`,
             to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
+=======
+            title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
+            to: `/${businessArea}/payment-verification/payment-plan/${payment.parent.id}`,
+>>>>>>> develop
           },
         ]
       : []),
@@ -67,7 +88,10 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
       verification.status !== PaymentVerificationPlanStatus.Finished ? (
-        <VerifyManual paymentVerificationId={payment.verification.id} enabled />
+        <VerifyManual
+          paymentVerificationId={payment.verification?.id}
+          enabled
+        />
       ) : null}
     </PageHeader>
   );
