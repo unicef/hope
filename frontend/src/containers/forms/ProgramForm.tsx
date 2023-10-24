@@ -72,6 +72,9 @@ export const ProgramForm = ({
       .required(t('Programme name is required'))
       .min(2, t('Too short'))
       .max(255, t('Too long')),
+    programmeCode: Yup.string()
+      .min(4, t('Too short'))
+      .max(4, t('Too long')),
     scope: Yup.string()
       .required(t('CashAssist Scope is required'))
       .min(2, t('Too short'))
@@ -116,6 +119,7 @@ export const ProgramForm = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValue: { [key: string]: any } = {
     name: '',
+    programmeCode: '',
     scope: '',
     startDate: '',
     endDate: '',
@@ -201,6 +205,15 @@ export const ProgramForm = ({
                     variant='outlined'
                     component={FormikTextField}
                     data-cy='input-programme-name'
+                  />
+                  <Field
+                    name='programmeCode'
+                    label={t('Programme Code')}
+                    type='text'
+                    fullWidth
+                    variant='outlined'
+                    component={FormikTextField}
+                    data-cy='input-programme-code'
                   />
                   <Field
                     name='scope'

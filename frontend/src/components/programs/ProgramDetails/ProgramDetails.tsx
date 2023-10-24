@@ -77,7 +77,12 @@ export function ProgramDetails({
               value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
-
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Programme Code')}
+              value={program.programmeCode}
+            />
+          </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label={t('Sector')}

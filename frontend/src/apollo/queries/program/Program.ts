@@ -5,6 +5,7 @@ export const PROGRAM_QUERY = gql`
     program(id: $id) {
       id
       name
+      programmeCode
       startDate
       endDate
       status
