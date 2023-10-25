@@ -14,11 +14,7 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
   before(() => {
-<<<<<<< HEAD
     cy.checkIfLoggedIn();
-=======
-    cy.adminLogin();
->>>>>>> develop
   });
   beforeEach(() => {
     cy.navigateToHomePage();
@@ -113,27 +109,6 @@ describe("Grievance - Feedback", () => {
         feedbackDetailsPage.getTitlePage().contains("Feedback ID: FED-23-0001");
         feedbackDetailsPage.clickMenuButtonFeedback();
       });
-<<<<<<< HEAD
-      it("Feedback Created by filter", () => {
-        cy.scenario([
-          "Go to Grievance page",
-          "Press Feedback button in menu",
-          "Choose Type cypress@cypress.com",
-          "Press button Apply",
-          `Check if Tickets List is empty`,
-          "Press button Clear",
-          "Choose Type root@root.com",
-          "Press button Apply",
-          `Check if Tickets List has 2 row`,
-        ]);
-        feedbackPage.useCreatedByFilter("cypress@cypress.com");
-        feedbackPage.expectedNumberOfRows(0);
-        feedbackPage.getButtonClear().click();
-        feedbackPage.useCreatedByFilter("root@root.com");
-        feedbackPage.expectedNumberOfRows(2);
-      });
-=======
->>>>>>> develop
       it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
