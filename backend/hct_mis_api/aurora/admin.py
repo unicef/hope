@@ -38,6 +38,7 @@ class ProjectAdmin(admin.ModelAdmin):
             business_area=obj.organization.business_area,
             status=Program.ACTIVE,
             data_collecting_type__isnull=False,
+            data_collecting_type__deprecated=False,
         ).exclude(data_collecting_type__code="unknown")
         return form
 
