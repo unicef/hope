@@ -60,7 +60,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-START DATE"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 <time
@@ -86,7 +86,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-END DATE"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 <time
@@ -112,7 +112,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Sector"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 Child Protection
@@ -134,7 +134,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Scope"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 Unicef
@@ -173,7 +173,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Frequency of Payment"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 Regular
@@ -195,7 +195,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Administrative Areas of implementation"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 Crime book.
@@ -217,7 +217,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Description"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 Yeah worry might newspaper drive her many.
@@ -239,7 +239,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-CASH+"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 No
@@ -261,7 +261,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"
             >
               <span
-                class="sc-htpNat cwQQYq"
+                class="sc-htpNat gXZdAP"
                 color="textSecondary"
               >
                 No
