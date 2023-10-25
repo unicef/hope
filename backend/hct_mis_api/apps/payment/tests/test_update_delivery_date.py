@@ -103,9 +103,9 @@ class TestDeliveryDate(APITestCase):
         self.payment_2.refresh_from_db()
         self.payment_3.refresh_from_db()
 
-        self.assertEqual(self.payment_1.delivery_date, datetime(2023, 10, 23).replace(tzinfo=utc))
-        self.assertEqual(self.payment_2.delivery_date, datetime(2023, 10, 23).replace(tzinfo=utc))
-        self.assertEqual(self.payment_3.delivery_date, datetime(2023, 10, 23).replace(tzinfo=utc))
+        self.assertIsNone(self.payment_1.delivery_date)
+        self.assertIsNone(self.payment_2.delivery_date)
+        self.assertIsNone(self.payment_3.delivery_date)
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:

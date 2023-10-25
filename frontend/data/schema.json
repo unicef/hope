@@ -13222,6 +13222,18 @@
             "deprecationReason": null
           },
           {
+            "name": "paymentDeliveryPhoneNo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "relationship",
             "description": null,
             "args": [],
@@ -40771,6 +40783,42 @@
             "deprecationReason": null
           },
           {
+            "name": "additionalCollectorName",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "additionalDocumentType",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "additionalDocumentNumber",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "followUps",
             "description": null,
             "args": [
@@ -41021,6 +41069,18 @@
             "deprecationReason": null
           },
           {
+            "name": "serviceProvider",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "FinancialServiceProviderNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "totalPersonsCovered",
             "description": null,
             "args": [],
@@ -41033,12 +41093,60 @@
             "deprecationReason": null
           },
           {
-            "name": "serviceProvider",
+            "name": "snapshotCollectorFullName",
             "description": null,
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "FinancialServiceProviderNode",
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snapshotCollectorDeliveryPhoneNo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snapshotCollectorBankName",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snapshotCollectorBankAccountNumber",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snapshotCollectorDebitCardNumber",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -56749,6 +56857,22 @@
             "deprecationReason": null
           },
           {
+            "name": "paymentDeliveryPhoneNo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "household",
             "description": null,
             "args": [],
@@ -66377,6 +66501,16 @@
               "ofType": null
             },
             "defaultValue": null
+          },
+          {
+            "name": "paymentDeliveryPhoneNo",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -67244,6 +67378,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "Arg",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "paymentDeliveryPhoneNo",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null
