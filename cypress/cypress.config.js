@@ -3,11 +3,7 @@ const { verifyDownloadTasks } = require("cy-verify-downloads");
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
-<<<<<<< HEAD
   numTestsKeptInMemory: 20,
-=======
-  numTestsKeptInMemory: 0,
->>>>>>> develop
   retries: 0,
   viewportWidth: 1920,
   viewportHeight: 1080,
