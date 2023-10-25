@@ -817,8 +817,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             errors = []
 
             for row in primary_collectors:
-                primary_collector = set(collectors_str_ids_to_list(primary_collectors[row].value) or [])
-                alternate_collector = set(collectors_str_ids_to_list(alternate_collectors[row].value) or [])
+                primary_collector = set(
+                    collectors_str_ids_to_list(cell.value if (cell := primary_collectors.get(row)) else None) or []
+                )
+                alternate_collector = set(
+                    collectors_str_ids_to_list(cell.value if (cell := alternate_collectors.get(row)) else None) or []
+                )
                 if households_ids := primary_collector.intersection(alternate_collector):
                     errors.append(
                         {
