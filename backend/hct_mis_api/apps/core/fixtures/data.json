@@ -6730,7 +6730,8 @@
           "label": "Unknown",
           "description": "Unknown",
           "active": true,
-          "individual_filters_available": true,
+          "individual_filters_available": false,
+          "household_filters_available": false,
           "compatible_types": [],
           "limit_to": []
       }
