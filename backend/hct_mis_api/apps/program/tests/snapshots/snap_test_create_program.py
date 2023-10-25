@@ -16,7 +16,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'cashPlus': True,
                 'dataCollectingType': {
                     'active': True,
-                    'code': '1',
+                    'code': 'full',
                     'description': 'Partial individuals collected',
                     'individualFiltersAvailable': True
                 },
@@ -88,6 +88,66 @@ snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
                 }
             ],
             'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_with_deprecated_dct 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Avoid using the deprecated DataCollectingType in Program',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_with_inactive_dct 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Only active DataCollectingType can be used in Program',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_without_dct 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['DataCollectingType is required for creating new Program']",
             'path': [
                 'createProgram'
             ]
