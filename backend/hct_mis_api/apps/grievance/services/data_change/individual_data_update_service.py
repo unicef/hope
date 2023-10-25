@@ -81,6 +81,7 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels_to_edit = individual_data.pop("payment_channels_to_edit", [])
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
+        to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
@@ -92,7 +93,7 @@ class IndividualDataUpdateService(DataChangeService):
             current_value = getattr(individual, field, None)
             if isinstance(current_value, (datetime, date)):
                 current_value = current_value.isoformat()
-            elif field in ("phone_no", "phone_no_alternative"):
+            elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
                 current_value = str(current_value)
             elif field == "role":
                 current_value = individual.role
@@ -166,6 +167,7 @@ class IndividualDataUpdateService(DataChangeService):
         }
         to_phone_number_str(new_individual_data, "phone_no")
         to_phone_number_str(new_individual_data, "phone_no_alternative")
+        to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
@@ -177,7 +179,7 @@ class IndividualDataUpdateService(DataChangeService):
             current_value = getattr(individual, field, None)
             if isinstance(current_value, (datetime, date)):
                 current_value = current_value.isoformat()
-            elif field in ("phone_no", "phone_no_alternative"):
+            elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
                 current_value = str(current_value)
             elif field == "role":
                 current_value = individual.role
