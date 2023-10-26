@@ -371,18 +371,21 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.financial_service_provider
 
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
-        # old Payment has only household.size, backward compatible with legacy data
         # TODO: migrate old data maybe?
-        return self.household_snapshot.snapshot_data.get("size") if self.household_snapshot else self.household.size
+        if household_snapshot := getattr(self, "household_snapshot", None):
+            return household_snapshot.snapshot_data.get("size")
+        else:
+            # old Payment has only household.size, backward compatible with legacy data
+            return self.household.size
 
     def resolve_additional_collector_name(self, info: Any) -> Optional[graphene.String]:
-        return getattr(self, "additional_collector_name")
+        return getattr(self, "additional_collector_name", None)
 
     def resolve_additional_document_type(self, info: Any) -> Optional[graphene.String]:
-        return getattr(self, "additional_document_type")
+        return getattr(self, "additional_document_type", None)
 
     def resolve_additional_document_number(self, info: Any) -> Optional[graphene.String]:
-        return getattr(self, "additional_document_number")
+        return getattr(self, "additional_document_number", None)
 
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
         return PaymentNode.get_collector_field(self, "full_name")
