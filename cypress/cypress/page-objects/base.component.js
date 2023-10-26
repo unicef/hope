@@ -29,6 +29,7 @@ export default class BaseComponent {
   ticketListRow = 'tr[role="checkbox"]';
   menuUserProfile = 'button[data-cy="menu-user-profile"]';
   menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
+  menuItemLogout = 'li[data-cy="menu-item-logout"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -45,6 +46,7 @@ export default class BaseComponent {
   // Elements
   getMenuUserProfile = () => cy.get(this.menuUserProfile);
   getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
+  getMenuItemLogout = () => cy.get(this.menuItemLogout);
   getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
   getMenuButtonRegistrationDataImport = () =>
     cy.get(this.navRegistrationDataImport);
