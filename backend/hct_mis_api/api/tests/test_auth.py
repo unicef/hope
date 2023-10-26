@@ -21,7 +21,7 @@ class HOPEPermissionTest(TestCase):
     def setUp(self) -> None:
         super().setUpTestData()
         user = UserFactory()
-        self.business_area = BusinessAreaFactory(name="Afghanistan")
+        self.business_area = BusinessAreaFactory(name="Afghanistan", code="xyz")
         self.role = RoleFactory(subsystem="API", name="c")
         user.user_roles.create(role=self.role, business_area=self.business_area)
 

@@ -48,6 +48,9 @@ def generate_data_collecting_types() -> None:
 
 
 class DataCollectingTypeFactory(DjangoModelFactory):
+    label = factory.Sequence(lambda n: f"Label{n}")
+    code = factory.Sequence(lambda n: f"code{n}")
+
     class Meta:
         model = DataCollectingType
 
