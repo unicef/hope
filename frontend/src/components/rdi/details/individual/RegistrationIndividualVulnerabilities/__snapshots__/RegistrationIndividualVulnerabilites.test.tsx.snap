@@ -31,7 +31,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
             data-cy="label-muac"
           >
             <span
-              class="sc-bwzfXH emFVa"
+              class="sc-bwzfXH kOktSP"
               color="textSecondary"
             >
               12
@@ -53,7 +53,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
             data-cy="label-school enrolled"
           >
             <span
-              class="sc-bwzfXH emFVa"
+              class="sc-bwzfXH kOktSP"
               color="textSecondary"
             >
               No
@@ -75,7 +75,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
             data-cy="label-school enrolled before"
           >
             <span
-              class="sc-bwzfXH emFVa"
+              class="sc-bwzfXH kOktSP"
               color="textSecondary"
             >
               Yes
