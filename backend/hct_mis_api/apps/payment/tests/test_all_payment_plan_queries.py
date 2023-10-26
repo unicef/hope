@@ -181,22 +181,17 @@ class TestPaymentPlanQueries(APITestCase):
     }
     """
 
-    PAYMENT_PLAN_NODE_SNAPSHOT_DATA = """
-        query PaymentPlan($id: ID!) {
-          paymentPlan(id: $id) {
-            paymentItems {
-              totalCount
-              edges {
-                node {
-                totalPersonsCovered
-                snapshotCollectorFullName
-                snapshotCollectorDeliveryPhoneNo
-                snapshotCollectorBankName
-                snapshotCollectorBankAccountNumber
-                snapshotCollectorDebitCardNumber
-                }
-              }
-            }
+    PAYMENT_NODE_SNAPSHOT_DATA = """
+        query Payment($id: ID!) {
+          payment(id: $id) {
+            totalPersonsCovered
+            snapshotCollectorFullName
+            snapshotCollectorDeliveryPhoneNo
+            snapshotCollectorBankName
+            snapshotCollectorBankAccountNumber
+            snapshotCollectorDebitCardNumber
+            additionalCollectorName
+            reasonForUnsuccessfulPayment
           }
         }
         """
@@ -414,82 +409,86 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
     def test_payment_node_with_legacy_data(self) -> None:
-        with freeze_time("2023-10-10"):
-            program = RealProgramFactory()
-            program_cycle = program.cycles.first()
-            new_pp = PaymentPlanFactory(
-                program=program,
-                program_cycle=program_cycle,
-                dispersion_start_date=datetime(2023, 8, 10),
-                dispersion_end_date=datetime(2023, 12, 10),
-                start_date=timezone.datetime(2023, 9, 10, tzinfo=utc),
-                end_date=timezone.datetime(2023, 11, 10, tzinfo=utc),
-                is_follow_up=False,
-            )
-            hoh_1 = IndividualFactory(household=None)
-            hoh_2 = IndividualFactory(household=None)
-            hoh_3 = IndividualFactory(household=None)
-            household_1 = HouseholdFactory(head_of_household=hoh_1, size=5)
-            household_2 = HouseholdFactory(head_of_household=hoh_2, size=10)
-            household_3 = HouseholdFactory(head_of_household=hoh_3, size=15)
-            PaymentFactory(
-                parent=new_pp,
-                household=household_1,
-                head_of_household=hoh_1,
-                currency="PLN",
-            )
-            payment_new_1 = PaymentFactory(
-                parent=new_pp,
-                household=household_2,
-                head_of_household=hoh_2,
-                currency="PLN",
-                additional_collector_name="AddCollectorName11",
-                additional_document_number="AddDocNumber11",
-                additional_document_type="AddDocType11",
-            )
-            payment_new_2 = PaymentFactory(
-                parent=new_pp,
-                household=household_3,
-                head_of_household=hoh_3,
-                currency="PLN",
-                additional_collector_name="AddCollectorName22",
-                additional_document_number="AddDocNumber22",
-                additional_document_type="AddDocType22",
-            )
-            # create snapshot for payment
-            snapshot_data_hh2 = {
-                "size": 99,
-                "primary_collector": {
-                    "full_name": "PrimaryCollectorFullName",
-                    "payment_delivery_phone_no": "1111111",
-                    "bank_account_info": {
-                        "bank_name": "PrimaryCollBankName",
-                        "bank_account_number": "PrimaryCollBankNumber",
-                        "debit_card_number": "PrimaryCollDebitCardNumber",
-                    },
-                },
-            }
-            snapshot_data_hh3 = {
-                "size": 55,
-                "alternate_collector": {
-                    "full_name": "AlternateCollectorFullName",
-                    "payment_delivery_phone_no": "222222222",
-                    "bank_account_info": {
-                        "bank_name": "AlternateCollBankName",
-                        "bank_account_number": "AlternateCollBankNumber",
-                        "debit_card_number": "AlternateCollDebitCardNumber",
-                    },
-                },
-            }
-            PaymentHouseholdSnapshot.objects.create(
-                payment=payment_new_1, snapshot_data=snapshot_data_hh2, household_id=household_2.id
-            )
-            PaymentHouseholdSnapshot.objects.create(
-                payment=payment_new_2, snapshot_data=snapshot_data_hh3, household_id=household_3.id
-            )
-
-        self.snapshot_graphql_request(
-            request_string=self.PAYMENT_PLAN_NODE_SNAPSHOT_DATA,
-            context={"user": self.user},
-            variables={"id": encode_id_base64(new_pp.pk, "PaymentPlan")},
+        # test get snapshot data only
+        program = RealProgramFactory()
+        program_cycle = program.cycles.first()
+        new_pp = PaymentPlanFactory(
+            program=program,
+            program_cycle=program_cycle,
+            dispersion_start_date=datetime(2023, 8, 10),
+            dispersion_end_date=datetime(2023, 12, 10),
+            start_date=timezone.datetime(2023, 9, 10, tzinfo=utc),
+            end_date=timezone.datetime(2023, 11, 10, tzinfo=utc),
+            is_follow_up=False,
         )
+        hoh_1 = IndividualFactory(household=None)
+        hoh_2 = IndividualFactory(household=None)
+        hoh_3 = IndividualFactory(household=None)
+        household_1 = HouseholdFactory(head_of_household=hoh_1, size=5)
+        household_2 = HouseholdFactory(head_of_household=hoh_2, size=10)
+        household_3 = HouseholdFactory(head_of_household=hoh_3, size=15)
+        payment_legacy = PaymentFactory(
+            parent=new_pp,
+            household=household_1,
+            head_of_household=hoh_1,
+            currency="PLN",
+            reason_for_unsuccessful_payment="reason 123",
+        )
+        payment_new_1 = PaymentFactory(
+            parent=new_pp,
+            household=household_2,
+            head_of_household=hoh_2,
+            currency="PLN",
+            additional_collector_name="AddCollectorName11",
+            additional_document_number="AddDocNumber11",
+            additional_document_type="AddDocType11",
+            reason_for_unsuccessful_payment="reason 222",
+        )
+        payment_new_2 = PaymentFactory(
+            parent=new_pp,
+            household=household_3,
+            head_of_household=hoh_3,
+            currency="PLN",
+            additional_collector_name="AddCollectorName22",
+            additional_document_number="AddDocNumber22",
+            additional_document_type="AddDocType22",
+            reason_for_unsuccessful_payment="reason 333",
+        )
+        # create snapshot for payment
+        snapshot_data_hh2 = {
+            "size": 99,
+            "primary_collector": {
+                "full_name": "PrimaryCollectorFullName",
+                "payment_delivery_phone_no": "1111111",
+                "bank_account_info": {
+                    "bank_name": "PrimaryCollBankName",
+                    "bank_account_number": "PrimaryCollBankNumber",
+                    "debit_card_number": "PrimaryCollDebitCardNumber",
+                },
+            },
+        }
+        snapshot_data_hh3 = {
+            "size": 55,
+            "alternate_collector": {
+                "full_name": "AlternateCollectorFullName",
+                "payment_delivery_phone_no": "222222222",
+                "bank_account_info": {
+                    "bank_name": "AlternateCollBankName",
+                    "bank_account_number": "AlternateCollBankNumber",
+                    "debit_card_number": "AlternateCollDebitCardNumber",
+                },
+            },
+        }
+        PaymentHouseholdSnapshot.objects.create(
+            payment=payment_new_1, snapshot_data=snapshot_data_hh2, household_id=household_2.id
+        )
+        PaymentHouseholdSnapshot.objects.create(
+            payment=payment_new_2, snapshot_data=snapshot_data_hh3, household_id=household_3.id
+        )
+
+        for payment_id in [payment_legacy.pk, payment_new_1.pk, payment_new_2.pk]:
+            self.snapshot_graphql_request(
+                request_string=self.PAYMENT_NODE_SNAPSHOT_DATA,
+                context={"user": self.user},
+                variables={"id": encode_id_base64(payment_id, "Payment")},
+            )
