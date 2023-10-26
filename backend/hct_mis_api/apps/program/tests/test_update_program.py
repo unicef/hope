@@ -5,7 +5,10 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -30,20 +33,16 @@ class TestUpdateProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-
-        data_collecting_types = [
-            {"label": "Partial", "code": "partial", "description": "Partial individuals collected"},
-            {"label": "Full", "code": "full", "description": "Full individual collected"},
-            {"label": "Size only", "code": "size_only", "description": "Size only collected"},
-            {"label": "No individual data", "code": "no_ind", "description": "No individual data"},
-            {"label": "Unknown", "code": "unknown", "description": "Unknown"},
-        ]
-
-        for data_dict in data_collecting_types:
-            DataCollectingType.objects.update_or_create(**data_dict)
+        generate_data_collecting_types()
+        data_collecting_type = DataCollectingType.objects.get(code="full")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(name="initial name", status=Program.DRAFT, business_area=cls.business_area)
+        cls.program = ProgramFactory.create(
+            name="initial name",
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
+        )
 
     def test_update_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
@@ -85,7 +84,7 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
-                    "dataCollectingTypeCode": "full",
+                    "dataCollectingTypeCode": "partial",
                 },
                 "version": self.program.version,
             },
@@ -98,3 +97,68 @@ class TestUpdateProgram(APITestCase):
         else:
             assert updated_program.status == Program.DRAFT
             assert updated_program.name == "initial name"
+
+    def test_update_active_program_with_dct(self) -> None:
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        data_collecting_type = DataCollectingType.objects.get(code="full")
+        Program.objects.filter(id=self.program.id).update(
+            status=Program.ACTIVE, data_collecting_type=data_collecting_type
+        )
+
+        self.program.refresh_from_db()
+        self.assertEqual(self.program.status, Program.ACTIVE)
+        self.assertEqual(self.program.data_collecting_type.code, "full")
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "dataCollectingTypeCode": "partial",
+                },
+                "version": self.program.version,
+            },
+        )
+        self.assertEqual(self.program.data_collecting_type.code, "full")
+
+    def test_update_program_with_deprecated_dct(self) -> None:
+        DataCollectingType.objects.update_or_create(
+            **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
+        )
+
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "dataCollectingTypeCode": "deprecated",
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_with_inactive_dct(self) -> None:
+        DataCollectingType.objects.update_or_create(
+            **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
+        )
+
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "dataCollectingTypeCode": "inactive",
+                },
+                "version": self.program.version,
+            },
+        )
