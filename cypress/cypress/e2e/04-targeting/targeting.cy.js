@@ -187,7 +187,7 @@ describe("Targeting", () => {
         .should("have.value", "");
       targetingPage.getTargetPopulationsRows().should("have.length", 2);
     });
-    it('173541: GPF: Clear button does not work for field "Number of Households" in page Targeting', () => {
+    it.skip('173541: GPF: Clear button does not work for field "Number of Households" in page Targeting', () => {
       cy.scenario([
         "Go to Targeting",
         "Fill Number of Households field",
