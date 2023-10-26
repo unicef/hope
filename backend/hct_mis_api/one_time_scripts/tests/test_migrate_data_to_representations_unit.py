@@ -36,6 +36,7 @@ from hct_mis_api.apps.payment.models import ServiceProvider
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import (
     HouseholdSelectionFactory,
     TargetPopulationFactory,
@@ -411,6 +412,7 @@ class TestAdjustPayments(TestCase):
             household=self.household_original,
             collector=self.individual_original,
             head_of_household=self.individual_original,
+            currency="PLN",
         )
 
     def test_adjust_payments(self) -> None:
@@ -981,7 +983,7 @@ class TestHandleRDIs(TestCase):
         self.assertEqual(self.rdi1.individuals(manager="original_and_repr_objects").count(), 6)
 
         handle_rdis(
-            households=Household.original_and_repr_objects.filter(business_area=self.business_area),
+            rdis=RegistrationDataImport.objects.filter(business_area=self.business_area),
             program=self.program1,
         )
         self.assertEqual(self.rdi1.programs.count(), 1)
@@ -997,7 +999,7 @@ class TestHandleRDIs(TestCase):
         self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 5)
 
         handle_rdis(
-            households=Household.original_and_repr_objects.filter(business_area=self.business_area),
+            rdis=RegistrationDataImport.objects.filter(business_area=self.business_area),
             program=self.program2,
         )
 

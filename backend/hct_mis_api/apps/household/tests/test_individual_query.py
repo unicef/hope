@@ -2,10 +2,14 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -56,14 +60,21 @@ class TestIndividualQuery(APITestCase):
     def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
+        BusinessAreaFactory(name="Democratic Republic of Congo")
+        BusinessAreaFactory(name="Sudan")
+        generate_data_collecting_types()
+        partial = DataCollectingType.objects.get(code="partial")
         cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
         cls.program_draft = ProgramFactory(
             name="Test program DRAFT",
             business_area=cls.business_area,
+            status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)

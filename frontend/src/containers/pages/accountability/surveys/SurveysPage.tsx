@@ -25,8 +25,8 @@ export const SurveysPage = (): React.ReactElement => {
     search: '',
     targetPopulation: '',
     createdBy: '',
-    createdAtRangeMin: null,
-    createdAtRangeMax: null,
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
   };
 
   const [filter, setFilter] = useState(
