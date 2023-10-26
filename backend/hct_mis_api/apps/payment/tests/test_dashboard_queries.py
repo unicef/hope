@@ -15,10 +15,10 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentRecordFactory,
-    FinancialServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
