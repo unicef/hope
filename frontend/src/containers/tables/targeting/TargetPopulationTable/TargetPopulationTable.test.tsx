@@ -12,8 +12,8 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
     status: '',
     totalHouseholdsCountMin: '',
     totalHouseholdsCountMax: '',
-    createdAtRangeMin: undefined,
-    createdAtRangeMax: undefined,
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
   };
 
   it('should render with data', async () => {

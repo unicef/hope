@@ -105,7 +105,7 @@ class TestActionPaymentPlanMutation(APITestCase):
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
             financial_service_provider=cls.financial_service_provider,
         )
-        cls.payment = PaymentFactory(parent=cls.payment_plan, collector=individuals[0])
+        PaymentFactory(parent=cls.payment_plan, collector=individuals[0], currency="PLN")
 
     @parameterized.expand(
         [

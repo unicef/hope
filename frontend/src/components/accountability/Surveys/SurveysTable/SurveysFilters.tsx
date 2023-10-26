@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { CreatedBySurveyAutocomplete } from '../../../../shared/autocompletes/CreatedBySurveyAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
@@ -73,7 +73,7 @@ export const SurveysFilters = ({
         </Grid>
         <Grid container item xs={12} spacing={3} alignItems='flex-end'>
           <Grid item xs={4}>
-            <AssigneeAutocomplete
+            <CreatedBySurveyAutocomplete
               name='createdBy'
               label={t('Created by')}
               value={filter.createdBy}

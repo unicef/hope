@@ -18,8 +18,8 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const initialFilter = {
   type: '',
-  createdFrom: undefined,
-  createdTo: undefined,
+  createdFrom: '',
+  createdTo: '',
   status: '',
   onlyMy: false,
 };

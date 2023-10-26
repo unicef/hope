@@ -10,6 +10,8 @@ export const fakeApolloAllPaymentPlansForTable = [
         status: [],
         totalEntitledQuantityFrom: null,
         totalEntitledQuantityTo: null,
+        dispersionStartDate: null,
+        dispersionEndDate: null,
         isFollowUp: null,
         program:
           'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',

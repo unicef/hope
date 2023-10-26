@@ -6,6 +6,7 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
     name = graphene.String()
     business_area_slug = graphene.String()
     screen_beneficiary = graphene.Boolean()
+    program_id = graphene.ID(required=True)
 
 
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
@@ -14,3 +15,4 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     pull_pictures = graphene.Boolean()
     business_area_slug = graphene.String()
     screen_beneficiary = graphene.Boolean()
+    program_id = graphene.ID(required=True)

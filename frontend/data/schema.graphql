@@ -95,6 +95,7 @@ input AddIndividualDataObjectType {
   businessArea: String
   preferredLanguage: String
   flexFields: Arg
+  paymentDeliveryPhoneNo: String
 }
 
 input AddIndividualIssueTypeExtras {
@@ -2118,6 +2119,7 @@ type ImportedIndividualNode implements Node {
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String
+  paymentDeliveryPhoneNo: String!
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
@@ -2283,6 +2285,7 @@ type IndividualNode implements Node {
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String!
+  paymentDeliveryPhoneNo: String
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
@@ -2454,6 +2457,7 @@ input IndividualUpdateDataObjectType {
   paymentChannelsToRemove: [ID]
   preferredLanguage: String
   flexFields: Arg
+  paymentDeliveryPhoneNo: String
 }
 
 type InvalidPaymentVerificationPlan {
@@ -2798,6 +2802,9 @@ type PaymentNode implements Node {
   program: ProgramNode
   orderNumber: Int
   tokenNumber: Int
+  additionalCollectorName: String
+  additionalDocumentType: String
+  additionalDocumentNumber: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
@@ -2809,8 +2816,13 @@ type PaymentNode implements Node {
   targetPopulation: TargetPopulationNode
   verification: PaymentVerificationNode
   distributionModality: String
-  totalPersonsCovered: Int
   serviceProvider: FinancialServiceProviderNode
+  totalPersonsCovered: Int
+  snapshotCollectorFullName: String
+  snapshotCollectorDeliveryPhoneNo: String
+  snapshotCollectorBankName: String
+  snapshotCollectorBankAccountNumber: String
+  snapshotCollectorDebitCardNumber: String
 }
 
 type PaymentNodeConnection {
@@ -3602,7 +3614,7 @@ type Query {
   individualSearchTypesChoices: [ChoiceObject]
   householdSearchTypesChoices: [ChoiceObject]
   me: UserNode
-  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, orderBy: String): UserNodeConnection
+  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
   userRolesChoices: [ChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
@@ -3840,6 +3852,7 @@ input RegistrationKoboImportMutationInput {
   pullPictures: Boolean
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: ID!
 }
 
 type RegistrationXlsxImportMutation {
@@ -3852,6 +3865,7 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: ID!
 }
 
 type ReportNode implements Node {

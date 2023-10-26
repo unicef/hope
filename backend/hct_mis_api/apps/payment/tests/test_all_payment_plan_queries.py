@@ -218,6 +218,7 @@ class TestPaymentPlanQueries(APITestCase):
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
+                currency="PLN",
             )
             p2 = PaymentFactory(
                 parent=cls.pp,
@@ -228,6 +229,7 @@ class TestPaymentPlanQueries(APITestCase):
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
+                currency="PLN",
             )
 
             # create hard conflicted payment
@@ -252,6 +254,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
                 financial_service_provider=FinancialServiceProviderFactory(name="xxx"),
+                currency="PLN",
             )
             PaymentFactory(
                 parent=cls.pp_conflicted,
@@ -261,6 +264,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity=00.00,
                 delivered_quantity_usd=00.00,
                 financial_service_provider=FinancialServiceProviderFactory(name="yyy"),
+                currency="PLN",
             )
 
             IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))

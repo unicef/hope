@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { CreatedByMessageAutocomplete } from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
@@ -63,7 +63,7 @@ export const CommunicationFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <AssigneeAutocomplete
+          <CreatedByMessageAutocomplete
             label={t('Created by')}
             filter={filter}
             name='createdBy'
