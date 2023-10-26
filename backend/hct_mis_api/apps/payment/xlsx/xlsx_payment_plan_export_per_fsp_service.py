@@ -96,6 +96,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     payment_ids = (
                         self.payment_plan.eligible_payments.filter(financial_service_provider=fsp)
                         .order_by("unicef_id")
+                        .only("id")
                         .values_list("id", flat=True)
                     )
 
