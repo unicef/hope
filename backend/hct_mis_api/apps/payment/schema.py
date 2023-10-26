@@ -375,13 +375,13 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         # TODO: migrate old data maybe?
         return self.household_snapshot.snapshot_data.get("size") if self.household_snapshot else self.household.size
 
-    def resolve_additional_collector_name(self, info: Any) -> graphene.String:
+    def resolve_additional_collector_name(self, info: Any) -> Optional[graphene.String]:
         return getattr(self, "additional_collector_name")
 
-    def resolve_additional_document_type(self, info: Any) -> graphene.String:
+    def resolve_additional_document_type(self, info: Any) -> Optional[graphene.String]:
         return getattr(self, "additional_document_type")
 
-    def resolve_additional_document_number(self, info: Any) -> graphene.String:
+    def resolve_additional_document_number(self, info: Any) -> Optional[graphene.String]:
         return getattr(self, "additional_document_number")
 
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
