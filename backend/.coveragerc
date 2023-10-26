@@ -1,11 +1,17 @@
 [run]
 branch = True
 source = hct_mis_api
+concurrency=multiprocessing
 
 omit =
         */tests/**
         */migrations/*,
         */apps.py,
+        hct_mis_api/one_time_scripts/*,
+        hct_mis_api/libs/*,
+        hct_mis_api/settings/*,
+        hct_mis_api/settings.py,
+        hct_mis_api/apps/core/management/commands/*
 
 [report]
 # Regexes for lines to exclude from consideration
