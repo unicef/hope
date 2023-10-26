@@ -823,5 +823,8 @@
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
   "Program has to be active to create a new Target Population": "Program has to be active to create a new Target Population",
   "Preview Exclusion": "Preview Exclusion",
-  "Data Collecting Type is required": "Data Collecting Type is required"
+  "Data Collecting Type is required": "Data Collecting Type is required",
+  "Registration Group": "Registration Group",
+  "Related Payment Id": "Related Payment Id",
+  "Failure Reason": "Failure Reason"
 }

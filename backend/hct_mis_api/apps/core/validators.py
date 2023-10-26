@@ -18,6 +18,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
@@ -309,3 +310,23 @@ class KoboTemplateValidator:
                 validation_errors.extend(field_choices_errors)
 
         return validation_errors
+
+
+class DataCollectingTypeValidator(BaseValidator):
+    @classmethod
+    def validate_data_collecting_type(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+        data_collecting_type = kwargs.get("data_collecting_type")
+        program = kwargs.get("program")
+
+        # user can update the program and don't update data collecting type
+        if data_collecting_type:
+            if (
+                program
+                and program.status != Program.DRAFT
+                and program.data_collecting_type.code != data_collecting_type.code
+            ):
+                raise ValidationError("DataCollectingType can be updated only for Program within status draft")
+            elif not data_collecting_type.active:
+                raise ValidationError("Only active DataCollectingType can be used in Program")
+            elif data_collecting_type.deprecated:
+                raise ValidationError("Avoid using the deprecated DataCollectingType in Program")
