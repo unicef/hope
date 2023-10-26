@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
-        self.payment_ids_list = payment_plan.eligible_payments.order_by("unicef_id").values_list("id", flat=True)
+        self.payment_ids_list = (
+            payment_plan.eligible_payments.order_by("unicef_id").only("id").values_list("id", flat=True)
+        )
 
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [
