@@ -7,13 +7,13 @@ import phonenumber_field.modelfields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0158_migration'),
+        ('registration_datahub', '0103_migration'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='individual',
+            model_name='importedindividual',
             name='payment_delivery_phone_no',
-            field=phonenumber_field.modelfields.PhoneNumberField(blank=True, max_length=128, null=True, region=None),
+            field=phonenumber_field.modelfields.PhoneNumberField(blank=True, default='', max_length=128, region=None),
         ),
     ]
