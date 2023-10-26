@@ -160,33 +160,33 @@ class TestDashboardQueries(APITestCase):
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household1,
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                currency="USD",
                 delivered_quantity=10 + num,
                 delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
+                currency="PLN",
             )
             PaymentRecordFactory(
                 parent=cash_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household2,
                 delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
-                currency="USD",
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
+                currency="PLN",
             )
             PaymentRecordFactory(
                 parent=cash_plan1,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 household=household3,
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                currency="USD",
                 delivered_quantity=30 + num,
                 delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
                 business_area=business_area,
+                currency="PLN",
             )
 
             payment_plan1 = PaymentPlanFactory(program=program1, business_area=business_area)
@@ -194,34 +194,34 @@ class TestDashboardQueries(APITestCase):
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                currency="USD",
                 delivered_quantity=10 + num,
                 delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household4,
+                currency="PLN",
             )
             PaymentFactory(
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
-                currency="USD",
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household5,
+                currency="PLN",
             )
             PaymentFactory(
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                currency="USD",
                 delivered_quantity=30 + num,
                 delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
                 business_area=business_area,
                 household=household6,
+                currency="PLN",
             )
 
     @parameterized.expand(

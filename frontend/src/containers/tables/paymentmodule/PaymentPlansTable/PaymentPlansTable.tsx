@@ -27,8 +27,8 @@ export const PaymentPlansTable = ({
     status: filter.status,
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
-    dispersionStartDate: filter.dispersionStartDate,
-    dispersionEndDate: filter.dispersionEndDate,
+    dispersionStartDate: filter.dispersionStartDate || null,
+    dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
   };

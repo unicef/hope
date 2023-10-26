@@ -20,7 +20,7 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0
                         },
                         {
                             'currency': 'AFG',
-                            'totalDeliveredQuantity': '1033.00'
+                            'totalDeliveredQuantity': '883.00'
                         }
                     ]
                 },
@@ -29,7 +29,11 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0
                     'quantity': [
                         {
                             'currency': 'USD',
-                            'totalDeliveredQuantity': '1022.00'
+                            'totalDeliveredQuantity': '772.00'
+                        },
+                        {
+                            'currency': 'AFG',
+                            'totalDeliveredQuantity': '1322.00'
                         }
                     ]
                 },
@@ -38,11 +42,11 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0
                     'quantity': [
                         {
                             'currency': 'USD',
-                            'totalDeliveredQuantity': '166.00'
+                            'totalDeliveredQuantity': '66.00'
                         },
                         {
-                            'currency': 'PLN',
-                            'totalDeliveredQuantity': '666.00'
+                            'currency': 'AFG',
+                            'totalDeliveredQuantity': '166.00'
                         }
                     ]
                 }

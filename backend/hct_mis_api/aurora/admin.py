@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Optional, Type
 
 from django import forms
@@ -14,8 +13,6 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.aurora import models
 from hct_mis_api.aurora.forms import FetchForm
 from hct_mis_api.aurora.utils import fetch_records, get_metadata
-
-logger = logging.getLogger(__name__)
 
 
 @smart_register(models.Organization)
@@ -37,7 +34,12 @@ class ProjectAdmin(admin.ModelAdmin):
         self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
     ) -> Type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["programme"].queryset = Program.objects.filter(business_area=obj.organization.business_area)
+        form.base_fields["programme"].queryset = Program.objects.filter(
+            business_area=obj.organization.business_area,
+            status=Program.ACTIVE,
+            data_collecting_type__isnull=False,
+            data_collecting_type__deprecated=False,
+        ).exclude(data_collecting_type__code="unknown")
         return form
 
 

@@ -3,7 +3,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useFeedbackIssueTypeChoicesQuery } from '../../../../__generated__/graphql';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
@@ -11,6 +10,7 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+import {CreatedByFeedbackAutocomplete} from '../../../../shared/autocompletes/CreatedByFeedbackAutocomplete';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -84,7 +84,7 @@ export const FeedbackFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <AssigneeAutocomplete
+          <CreatedByFeedbackAutocomplete
             name='createdBy'
             filter={filter}
             value={filter.createdBy}

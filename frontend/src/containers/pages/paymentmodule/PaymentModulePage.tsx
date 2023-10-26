@@ -16,8 +16,8 @@ import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
 
 const initialFilter = {
   search: '',
-  dispersionStartDate: undefined,
-  dispersionEndDate: undefined,
+  dispersionStartDate: '',
+  dispersionEndDate: '',
   status: [],
   totalEntitledQuantityFrom: '',
   totalEntitledQuantityTo: '',

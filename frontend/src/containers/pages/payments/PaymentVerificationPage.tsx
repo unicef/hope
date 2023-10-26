@@ -11,20 +11,20 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
 
+const initialFilter = {
+  search: '',
+  verificationStatus: [],
+  serviceProvider: '',
+  deliveryType: [],
+  startDate: '',
+  endDate: '',
+};
+
 export const PaymentVerificationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
-
-  const initialFilter = {
-    search: '',
-    verificationStatus: [],
-    serviceProvider: '',
-    deliveryType: [],
-    startDate: undefined,
-    endDate: undefined,
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

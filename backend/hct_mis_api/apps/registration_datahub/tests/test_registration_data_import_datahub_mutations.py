@@ -93,6 +93,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         create_afghanistan()
         cls.business_area_slug = "afghanistan"
         cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
+        cls.program = ProgramFactory(status=Program.ACTIVE)
 
         img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
 
@@ -164,6 +165,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": self.business_area_slug,
+                    "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 }
             },
         )

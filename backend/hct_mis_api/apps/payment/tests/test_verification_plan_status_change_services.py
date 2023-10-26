@@ -82,6 +82,7 @@ class TestPhoneNumberVerification(TestCase):
                 head_of_household=household.head_of_household,
                 target_population=target_population,
                 delivered_quantity_usd=200,
+                currency="PLN",
             )
 
             PaymentVerificationFactory(
@@ -136,6 +137,7 @@ class TestPhoneNumberVerification(TestCase):
                 head_of_household=other_household.head_of_household,
                 target_population=other_target_population,
                 delivered_quantity_usd=200,
+                currency="PLN",
             )
 
             PaymentVerificationFactory(
@@ -161,7 +163,7 @@ class TestPhoneNumberVerification(TestCase):
 
         post_request_mock = MagicMock()
 
-        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore #empty response in error
+        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore
         with patch(
             "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
         ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock):
