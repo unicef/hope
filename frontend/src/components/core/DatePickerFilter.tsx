@@ -35,8 +35,7 @@ export const DatePickerFilter = ({
           format='YYYY-MM-DD'
           InputAdornmentProps={{ position: 'end' }}
           fullWidth={fullWidth}
-          minDate={null}
-          maxDate={null}
+          helperText={null}
           {...props}
         />
       </Box>
