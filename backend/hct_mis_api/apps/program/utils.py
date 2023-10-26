@@ -1,7 +1,9 @@
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import (
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -55,6 +57,9 @@ def copy_individuals(copy_from_program_id: str, program: Program) -> None:
         program_id=copy_from_program_id, withdrawn=False, duplicate=False
     )
     for individual in copied_from_individuals:
+        if not individual.individual_collection:
+            individual.individual_collection = IndividualCollection.objects.create()
+            individual.save()
         copied_from_pk = individual.pk
         individual.pk = None
         individual.program = program
@@ -68,6 +73,9 @@ def copy_households(copy_from_program_id: str, program: Program) -> None:
         withdrawn=False,
     )
     for household in copy_from_households:
+        if not household.household_collection:
+            household.household_collection = HouseholdCollection.objects.create()
+            household.save()
         copy_from_household_id = household.pk
         household.pk = None
         household.program = program
