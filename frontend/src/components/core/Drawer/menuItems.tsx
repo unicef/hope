@@ -1,5 +1,6 @@
 import { Assessment } from '@material-ui/icons';
 import Assignment from '@material-ui/icons/Assignment';
+import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import BallotIcon from '@material-ui/icons/Ballot';
@@ -36,6 +37,13 @@ export type MenuItem = {
   external?: boolean;
 };
 export const menuItems: MenuItem[] = [
+  {
+    name: 'Country Dashboard',
+    href: '/country-dashboard',
+    selectedRegexp: /^\/$/,
+    icon: <DashboardIcon />,
+    permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
+  },
   {
     name: 'Registration Data Import',
     href: '/registration-data-import',
