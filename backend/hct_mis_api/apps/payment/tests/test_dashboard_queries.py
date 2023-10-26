@@ -18,6 +18,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentRecordFactory,
+    FinancialServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -102,6 +103,7 @@ class TestDashboardQueries(APITestCase):
         call_command("loadbusinessareas")
         call_command("loadcountries")
         cls.user = UserFactory()
+        fsp = FinancialServiceProviderFactory()
 
         chosen_business_areas = (("afghanistan", 100), ("botswana", 200), ("angola", 300))
         for business_area_slug, num in chosen_business_areas:
@@ -190,6 +192,7 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 household=household4,
                 currency="PLN",
+                financial_service_provider=fsp,
             )
             PaymentFactory(
                 parent=payment_plan1,
@@ -200,6 +203,7 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 household=household5,
                 currency="PLN",
+                financial_service_provider=fsp,
             )
             PaymentFactory(
                 parent=payment_plan1,
@@ -210,6 +214,7 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 household=household6,
                 currency="PLN",
+                financial_service_provider=fsp,
             )
 
     @parameterized.expand(
