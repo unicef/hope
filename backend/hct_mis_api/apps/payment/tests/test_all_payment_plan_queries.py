@@ -184,7 +184,7 @@ class TestPaymentPlanQueries(APITestCase):
     PAYMENT_PLAN_NODE_SNAPSHOT_DATA = """
         query PaymentPlan($id: ID!) {
           paymentPlan(id: $id) {
-            paymentItems{
+            paymentItems {
               totalCount
               edges {
                 node {
