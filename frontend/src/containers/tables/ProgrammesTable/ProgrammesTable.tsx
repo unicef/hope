@@ -26,8 +26,8 @@ export function ProgrammesTable({
   const initialVariables: AllProgramsQueryVariables = {
     businessArea,
     search: filter.search,
-    startDate: filter.startDate,
-    endDate: filter.endDate,
+    startDate: filter.startDate || null,
+    endDate: filter.endDate || null,
     status: filter.status,
     sector: filter.sector,
     numberOfHouseholds: JSON.stringify({

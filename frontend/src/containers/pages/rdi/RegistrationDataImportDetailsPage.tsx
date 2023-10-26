@@ -92,7 +92,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
         RegistrationDataImportStatus.Merging,
       ].includes(status)
     ) {
-      startPolling(3000);
+      startPolling(5000);
     } else {
       stopPolling();
     }

@@ -58,10 +58,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
 
   const handleMenuItemClick = (category: string): void => {
     history.push({
-      pathname: `/${baseUrl}/accountability/surveys/create`,
-      state: {
-        category,
-      },
+      pathname: `/${baseUrl}/accountability/surveys/create/${category}`,
     });
   };
 
