@@ -45,7 +45,7 @@ export const GrievancesTable = ({
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
-  const { baseUrl,businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -71,7 +71,7 @@ export const GrievancesTable = ({
     priority: filter.priority === 'Not Set' ? 0 : filter.priority,
     urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
-    program: programId,
+    program: isAllPrograms ? '' : programId,
   };
 
   const [inputValue, setInputValue] = useState('');
