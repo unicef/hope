@@ -32,7 +32,7 @@ exclude_lines =
 
 fail_under = 71
 
-ignore_errors = True
+ignore_errors = False
 
 [html]
 directory = ~build/coverage
