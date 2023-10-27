@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  RegistrationDataImportStatus,
+  useHouseholdChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { CommunicationTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCommunication';
 import { LookUpRegistrationFiltersCommunication } from './LookUpRegistrationFiltersCommunication';
 import { LookUpSelectionTablesCommunication } from './LookUpSelectionTablesCommunication';
 import { LookUpTargetPopulationFiltersCommunication } from './LookUpTargetPopulationFiltersCommunication';
-import {
-  RegistrationDataImportStatus,
-  useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
 
 const communicationTabs = ['Household', 'Target Population', 'RDI'];
 
