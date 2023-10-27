@@ -71,7 +71,8 @@ const redirectLink = new ApolloLink((operation, forward) => {
       // If it's not a mutation and the app is not running on localhost or a dev environment, redirect to an error page
       else if (
         !window.location.hostname.includes('localhost') &&
-        !window.location.href.includes('dev')
+        !window.location.href.includes('dev') &&
+        !window.location.href.includes('stg')
       ) {
         // Get the business area from the URL
         const pathSegments = window.location.pathname.split('/');
