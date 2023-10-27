@@ -269,16 +269,16 @@ stages:
           - task: PublishCodeCoverageResults@2
             inputs:
               summaryFileLocation: 'backend/coverage.xml'
-
           - task: DownloadPipelineArtifact@2
+            continueOnError: true # if the artifact doesn't exist, don't fail the build
             inputs:
               source: 'specific'
               project: 'ICTD-HCT-MIS'
               pipeline: '525'
-              runVersion: 'latestFromBranch'  # or 'latest' if you want the latest regardless of branch
-              branchName: refs/heads/$(System.PullRequest.TargetBranch)  # adjust this if you want artifacts from a different branch
-              artifact: 'BackendLineCoverage'    # replace this with the name of the artifact you want to download
-              path: '$(System.ArtifactsDirectory)/old_coverage.xml'  # specify where you want to save the artifact
+              runVersion: 'latestFromBranch'
+              branchName: refs/heads/$(System.PullRequest.TargetBranch)
+              artifact: 'BackendLineCoverage'
+              path: '$(System.ArtifactsDirectory)/old_coverage.xml'
           - task: PythonScript@0
             displayName: 'Check Coverage'
             inputs:
