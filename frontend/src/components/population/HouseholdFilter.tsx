@@ -4,7 +4,10 @@ import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { HouseholdChoiceDataQuery } from '../../__generated__/graphql';
+import {
+  HouseholdChoiceDataQuery,
+  ProgramNode,
+} from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
@@ -16,6 +19,7 @@ import { householdTableOrderOptions } from '../../utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
+  programs: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;
@@ -26,6 +30,7 @@ interface HouseholdFiltersProps {
 
 export const HouseholdFilters = ({
   filter,
+  programs,
   choicesData,
   setFilter,
   initialFilter,
@@ -90,6 +95,21 @@ export const HouseholdFilters = ({
               )}
             </SelectFilter>
           </Grid>
+        </Grid>
+        <Grid item xs={3}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('program', e.target.value)}
+            label={t('Programme')}
+            value={filter.program}
+            fullWidth
+            data-cy='hh-filters-program'
+          >
+            {programs.map((program) => (
+              <MenuItem key={program.id} value={program.id}>
+                {program.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
