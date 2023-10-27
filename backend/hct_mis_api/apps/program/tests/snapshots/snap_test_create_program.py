@@ -95,6 +95,26 @@ snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
     ]
 }
 
+snapshots['TestCreateProgram::test_create_program_with_dct_from_other_ba 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "This Data Collection Type is not assigned to the Program's Business Area",
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCreateProgram::test_create_program_with_deprecated_dct 1'] = {
     'data': {
         'createProgram': None

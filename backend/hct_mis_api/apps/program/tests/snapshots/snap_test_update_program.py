@@ -102,6 +102,26 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_program_with_dct_from_other_ba 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "This Data Collection Type is not assigned to the Program's Business Area",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_with_deprecated_dct 1'] = {
     'data': {
         'updateProgram': None
