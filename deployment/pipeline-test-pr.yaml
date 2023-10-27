@@ -266,6 +266,9 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+          - script: |
+              sed -i 's|/code/hct_mis_api/|backend/hct_mis_api/|g' backend/coverage.xml
+            displayName: "fix coverage.xml"
           - task: PublishCodeCoverageResults@2
             inputs:
               summaryFileLocation: 'backend/coverage.xml'
