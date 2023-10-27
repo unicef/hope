@@ -15,7 +15,7 @@ def get_coverage_from_report(file_path: str) -> Optional[float]:
         root = tree.getroot()
         coverage = float(root.get("line-rate"))  # type: ignore
         return coverage
-    except FileNotFoundError:
+    except (FileNotFoundError, IsADirectoryError):
         return None
 
 
