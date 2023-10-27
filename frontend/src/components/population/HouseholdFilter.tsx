@@ -9,23 +9,24 @@ import {
   ProgramNode,
 } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
+import { householdTableOrderOptions } from '../../utils/constants';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { householdTableOrderOptions } from '../../utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
-  programs: ProgramNode[];
+  programs?: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
+  showProgramFilter?: boolean;
 }
 
 export const HouseholdFilters = ({
@@ -37,6 +38,7 @@ export const HouseholdFilters = ({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
+  showProgramFilter = false,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -96,21 +98,23 @@ export const HouseholdFilters = ({
             </SelectFilter>
           </Grid>
         </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            fullWidth
-            data-cy='hh-filters-program'
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
+        {showProgramFilter && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              fullWidth
+              data-cy='hh-filters-program'
+            >
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) =>
