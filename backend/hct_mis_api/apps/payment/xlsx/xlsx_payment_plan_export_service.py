@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
+        self.batch_size = 5000
         self.payment_plan = payment_plan
         self.payment_ids_list = (
             payment_plan.eligible_payments.order_by("unicef_id").only("id").values_list("id", flat=True)
@@ -39,9 +40,11 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self.ws_export_list.append(payment_row)
 
     def _add_payment_list(self) -> None:
-        for payment_id in self.payment_ids_list:
-            payment = Payment.objects.get(id=payment_id)
-            self._add_payment_row(payment)
+        for i in range(0, len(self.payment_ids_list), self.batch_size):
+            batch_ids = self.payment_ids_list[i : i + self.batch_size]
+            payment_qs = Payment.objects.filter(id__in=batch_ids)
+            for payment in payment_qs:
+                self._add_payment_row(payment)
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
