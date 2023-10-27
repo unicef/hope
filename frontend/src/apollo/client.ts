@@ -58,18 +58,21 @@ const redirectLink = new ApolloLink((operation, forward) => {
     if (hasResponseErrors(response)) {
       //When there is an error in Mutation, log it
       const isMutation = operation.query.definitions.some(
-        (definition) => definition.kind === 'OperationDefinition' && definition.operation === 'mutation'
+        (definition) =>
+          definition.kind === 'OperationDefinition' &&
+          definition.operation === 'mutation',
       );
-      if(isMutation){
+      if (isMutation) {
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      } else {
-        //When there is an error in Query, redirect to Something Went Wrong page
-        const pathSegments = window.location.pathname.split('/');
-        const businessArea = pathSegments[1];
-
-        window.location.href = `/error/${businessArea}`;
       }
+      //  else {
+      //   //When there is an error in Query, redirect to Something Went Wrong page
+      //   const pathSegments = window.location.pathname.split('/');
+      //   const businessArea = pathSegments[1];
+
+      //   window.location.href = `/error/${businessArea}`;
+      // }
     }
     //When no errors and data is null, redirect to 404 page
     else if (

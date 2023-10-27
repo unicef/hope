@@ -111,7 +111,6 @@ export const DrawerItems = ({
       const pagesAvailableForAllPrograms = [
         'Country Dashboard',
         'Programme Management',
-        'Programme Details',
         'Reporting',
         'Grievance',
         'Activity Log',
