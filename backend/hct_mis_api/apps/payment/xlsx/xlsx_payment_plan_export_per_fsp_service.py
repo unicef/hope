@@ -51,6 +51,7 @@ def generate_token_and_order_numbers(payment: Payment) -> Payment:
 
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
+        self.batch_size = 5000
         self.payment_plan = payment_plan
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
@@ -92,6 +93,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                         log_and_raise(msg)
 
                     fsp_xlsx_template = fsp_xlsx_template_per_delivery_mechanism.xlsx_template
+
                     # get payment list id filtered by FSP
                     payment_ids = (
                         self.payment_plan.eligible_payments.filter(financial_service_provider=fsp)
@@ -118,21 +120,24 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     ws_fsp.append(column_list)
 
                     # add rows
-                    for payment_id in payment_ids:
-                        payment = Payment.objects.get(id=payment_id)
-                        if self.payment_generate_token_and_order_numbers:
-                            payment = generate_token_and_order_numbers(payment)
+                    for i in range(0, len(payment_ids), self.batch_size):
+                        batch_ids = payment_ids[i : i + self.batch_size]
+                        payment_qs = Payment.objects.filter(id__in=batch_ids)
 
-                        payment_row = [
-                            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
-                            for column_name in template_column_list
-                        ]
-                        core_fields_row = [
-                            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
-                            for column_name in fsp_xlsx_template.core_fields
-                        ]
-                        payment_row.extend(core_fields_row)
-                        ws_fsp.append(list(map(self.right_format_for_xlsx, payment_row)))
+                        for payment in payment_qs:
+                            if self.payment_generate_token_and_order_numbers:
+                                payment = generate_token_and_order_numbers(payment)
+
+                            payment_row = [
+                                FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+                                for column_name in template_column_list
+                            ]
+                            core_fields_row = [
+                                FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+                                for column_name in fsp_xlsx_template.core_fields
+                            ]
+                            payment_row.extend(core_fields_row)
+                            ws_fsp.append(list(map(self.right_format_for_xlsx, payment_row)))
 
                     self._adjust_column_width_from_col(ws_fsp)
 
