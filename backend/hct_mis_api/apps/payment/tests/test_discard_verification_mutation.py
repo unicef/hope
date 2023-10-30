@@ -93,7 +93,6 @@ class TestDiscardVerificationMutation(APITestCase):
                 parent=cash_plan,
                 household=household,
                 target_population=target_population,
-                currency="PLN",
             )
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,

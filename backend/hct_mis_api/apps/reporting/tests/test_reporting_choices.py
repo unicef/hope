@@ -69,16 +69,10 @@ class TestProgramChoices(APITestCase):
             household_args={"size": 2, "business_area": business_area},
         )
         PaymentRecordFactory(
-            delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-            business_area=business_area,
-            household=household,
-            currency="PLN",
+            delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc), business_area=business_area, household=household
         )
         PaymentFactory(
-            delivery_date=timezone.datetime(2020, 10, 10, tzinfo=utc),
-            business_area=business_area,
-            household=household,
-            currency="PLN",
+            delivery_date=timezone.datetime(2020, 10, 10, tzinfo=utc), business_area=business_area, household=household
         )
 
         self.snapshot_graphql_request(

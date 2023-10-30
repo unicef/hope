@@ -393,7 +393,7 @@ class Query(graphene.ObjectType):
 
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         data_collecting_types = (
-            DataCollectingType.objects.filter(active=True, deprecated=False)
+            DataCollectingType.objects.filter(active=True)
             .only("code", "label")
             .values("code", "label")
             .order_by("label")

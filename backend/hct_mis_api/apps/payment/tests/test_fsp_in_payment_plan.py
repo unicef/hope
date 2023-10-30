@@ -670,7 +670,6 @@ class TestFSPAssignment(APITestCase):
             household=self.household_2,
             delivery_type=None,
             financial_service_provider=None,
-            currency="PLN",
         )
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -827,7 +826,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            currency="PLN",
         )
         payment_2 = PaymentFactory(
             parent=self.payment_plan,
@@ -838,7 +836,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_type=GenericPayment.DELIVERY_TYPE_TRANSFER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            currency="PLN",
         )
 
         # check created payments
@@ -950,7 +947,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             household=self.household_2,
             delivery_type=None,
             financial_service_provider=None,
-            currency="PLN",
         )
         payment3 = PaymentFactory(
             parent=self.payment_plan,
@@ -961,7 +957,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             household=self.household_3,
             delivery_type=None,
             financial_service_provider=None,
-            currency="PLN",
         )
         payment1 = PaymentFactory(
             parent=self.payment_plan,
@@ -972,7 +967,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             household=self.household_1,
             delivery_type=None,
             financial_service_provider=None,
-            currency="PLN",
         )
 
         self.santander_fsp.distribution_limit = 501
@@ -1029,7 +1023,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             household=self.household_2,
             delivery_type=None,
             financial_service_provider=None,
-            currency="PLN",
         )
         PaymentFactory(
             parent=self.payment_plan,
@@ -1040,7 +1033,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             household=self.household_3,
             delivery_type=None,
             financial_service_provider=None,
-            currency="PLN",
         )
         self.bank_of_europe_fsp.distribution_limit = 1001
         self.bank_of_europe_fsp.save()

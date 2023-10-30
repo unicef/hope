@@ -42,7 +42,6 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=None,
             household=household,
-            currency="EUR",
         )
         cls.payment_record_2 = PaymentRecordFactory(
             parent=cls.cash_plan_2,
@@ -52,7 +51,6 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=2000,
             delivered_quantity_usd=None,
             household=household,
-            currency="EUR",
         )
         cls.payment_record_3 = PaymentRecordFactory(
             parent=cls.cash_plan_3,
@@ -62,7 +60,6 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=3000,
             delivered_quantity_usd=None,
             household=household,
-            currency="EUR",
         )
         cls.payment_record_4 = PaymentRecordFactory(
             parent=cls.cash_plan_4,
@@ -72,7 +69,6 @@ class TestPullDataFromErpDatahub(TestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=None,
             household=household,
-            currency="EUR",
         )
 
     @classmethod
@@ -128,8 +124,6 @@ class TestPullDataFromErpDatahub(TestCase):
             Decimal(self.payment_record_1.entitlement_quantity / Decimal(2)),
         )
         self.payment_record_2.refresh_from_db()
-        self.assertIsNotNone(self.payment_record_2.delivered_quantity)
-        self.assertIsNotNone(self.payment_record_2.delivered_quantity_usd)
         self.assertEqual(
             self.payment_record_2.delivered_quantity_usd, Decimal(self.payment_record_2.delivered_quantity / Decimal(2))
         )

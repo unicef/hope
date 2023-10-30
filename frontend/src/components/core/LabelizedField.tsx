@@ -13,7 +13,6 @@ const Value = styled.span`
   color: #253b46;
   font-size: 14px;
   line-height: 19px;
-  overflow-wrap: break-word;
 `;
 
 export interface Props {
