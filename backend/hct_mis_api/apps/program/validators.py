@@ -53,4 +53,4 @@ def validate_data_collecting_type(
     if not program_data_collecting_type:
         raise ValidationError("The original Programme must have a Data Collection Type.")
     if data_collecting_type not in program_data_collecting_type.compatible_types.all():
-        raise ValidationError("The Data Collection Type must match or be compatible with the original Programme.")
+        raise ValidationError("Copied programme must have a compatible Data Collecting Type with the original Programme.")
