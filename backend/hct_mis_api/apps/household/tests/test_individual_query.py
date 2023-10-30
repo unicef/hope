@@ -87,7 +87,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
         generate_data_collecting_types()
-        partial = DataCollectingType.objects.get(code="partial")
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,

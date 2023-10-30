@@ -34,7 +34,7 @@ class TestUpdateProgram(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         generate_data_collecting_types()
-        data_collecting_type = DataCollectingType.objects.get(code="full")
+        data_collecting_type = DataCollectingType.objects.get(code="full_collection")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(
@@ -101,7 +101,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_active_program_with_dct(self) -> None:
         user = UserFactory.create()
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
-        data_collecting_type = DataCollectingType.objects.get(code="full")
+        data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         Program.objects.filter(id=self.program.id).update(
             status=Program.ACTIVE, data_collecting_type=data_collecting_type
         )
