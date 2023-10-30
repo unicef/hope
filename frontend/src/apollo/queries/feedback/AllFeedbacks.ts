@@ -11,7 +11,7 @@ export const AllFeedbacks = gql`
     $createdAtRange: String
     $createdBy: String
     $feedbackId: String
-    $orderBy: String
+    $orderBy: String # $program: String # $isActiveProgram: Boolean
   ) {
     allFeedbacks(
       offset: $offset
@@ -23,8 +23,9 @@ export const AllFeedbacks = gql`
       createdAtRange: $createdAtRange
       createdBy: $createdBy
       feedbackId: $feedbackId
-      orderBy: $orderBy
-    ) {
+      orderBy: $orderBy # isActiveProgram: $isActiveProgram
+    ) # program: $program
+    {
       totalCount
       pageInfo {
         startCursor

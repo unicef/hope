@@ -87,6 +87,8 @@ export const LookUpIndividualTable = ({
     orderBy: filter.orderBy,
     householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
+    //TODO: add program filter
+    // programs: isAllPrograms ? filter.program : programId,
   };
 
   const renderTable = (): React.ReactElement => {
