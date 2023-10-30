@@ -27,6 +27,7 @@ class SurveyCrudServices:
             obj = get_object_or_404(TargetPopulation, id=decode_id_string(target_population))
             households = Household.objects.filter(target_populations=obj)
             survey.target_population = obj
+            survey.program = obj.program
         elif program := input_data.get("program"):
             obj = get_object_or_404(Program, id=decode_id_string(program))
             households = obj.households_with_tp_in_program
@@ -48,6 +49,6 @@ class SurveyCrudServices:
             survey.flow_id = input_data["flow"]
 
         if not result.households:
-            raise Exception("There are no selected recipients.")
+            raise Exception("There are no selected recipients or no recipient meets criteria.")
         survey.save()
         return survey
