@@ -1,22 +1,14 @@
-import io
-import uuid
 from datetime import timedelta
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import Any, List
-from unittest.mock import patch
-
 from decimal import Decimal
-from django.conf import settings
+
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory
 from django.utils import timezone
 
 from graphql import GraphQLError
-from graphql.error import GraphQLLocatedError
+from graphql.execution.base import ResolveInfo
 from parameterized import parameterized
 
-from graphql.execution.base import ResolveInfo
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -24,12 +16,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import (
-    EntitlementCardFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
+from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentRecordFactory,
@@ -40,7 +27,6 @@ from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerifica
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -120,8 +106,12 @@ class TestPaymentVerificationMutations(APITestCase):
             ("0", False, PaymentVerification.STATUS_NOT_RECEIVED),
         ]
     )
-    def test_update_payment_verification_received_and_received_amount(self, received_amount, received, status):
-        from hct_mis_api.apps.payment.mutations import UpdatePaymentVerificationReceivedAndReceivedAmount
+    def test_update_payment_verification_received_and_received_amount(
+        self, received_amount: str, received: bool, status: str
+    ) -> None:
+        from hct_mis_api.apps.payment.mutations import (
+            UpdatePaymentVerificationReceivedAndReceivedAmount,
+        )
 
         payment_verification = self.verification.payment_record_verifications.first()
         self.assertIsNone(payment_verification.received_amount)
@@ -134,8 +124,10 @@ class TestPaymentVerificationMutations(APITestCase):
         self.assertEqual(payment_verification.received_amount, Decimal(received_amount))
         self.assertEqual(payment_verification.status, status)
 
-    def test_update_payment_verification_received_and_received_amount_update_time_restricted(self):
-        from hct_mis_api.apps.payment.mutations import UpdatePaymentVerificationReceivedAndReceivedAmount
+    def test_update_payment_verification_received_and_received_amount_update_time_restricted(self) -> None:
+        from hct_mis_api.apps.payment.mutations import (
+            UpdatePaymentVerificationReceivedAndReceivedAmount,
+        )
 
         payment_verification = self.verification.payment_record_verifications.first()
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
@@ -160,8 +152,10 @@ class TestPaymentVerificationMutations(APITestCase):
             received=True,
         )
 
-    def test_update_payment_verification_received_and_received_amount_payment_status(self):
-        from hct_mis_api.apps.payment.mutations import UpdatePaymentVerificationReceivedAndReceivedAmount
+    def test_update_payment_verification_received_and_received_amount_payment_status(self) -> None:
+        from hct_mis_api.apps.payment.mutations import (
+            UpdatePaymentVerificationReceivedAndReceivedAmount,
+        )
 
         payment_verification = self.verification.payment_record_verifications.first()
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
@@ -185,9 +179,11 @@ class TestPaymentVerificationMutations(APITestCase):
         ]
     )
     def test_update_payment_verification_received_and_received_amount_incorrect_arguments(
-        self, received_amount, received, message
-    ):
-        from hct_mis_api.apps.payment.mutations import UpdatePaymentVerificationReceivedAndReceivedAmount
+        self, received_amount: str, received: bool, message: str
+    ) -> None:
+        from hct_mis_api.apps.payment.mutations import (
+            UpdatePaymentVerificationReceivedAndReceivedAmount,
+        )
 
         payment_verification = self.verification.payment_record_verifications.first()
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
@@ -200,8 +196,10 @@ class TestPaymentVerificationMutations(APITestCase):
                 received=received,
             )
 
-    def test_permissions(self):
-        from hct_mis_api.apps.payment.mutations import UpdatePaymentVerificationReceivedAndReceivedAmount
+    def test_permissions(self) -> None:
+        from hct_mis_api.apps.payment.mutations import (
+            UpdatePaymentVerificationReceivedAndReceivedAmount,
+        )
 
         info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)  # type: ignore
         request = RequestFactory().get("/api/graphql")
