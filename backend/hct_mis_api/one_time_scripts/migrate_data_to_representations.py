@@ -534,7 +534,7 @@ def handle_non_program_objects(
         program = create_program_with_matching_collecting_type(
             business_area, collecting_type, unknown_unassigned_program
         )
-        households_with_collecting_type = households.filter(collect_individual_data=collecting_type)
+        households_with_collecting_type = households.filter(collect_individual_data=collecting_type).only("id")
 
         # Handle rdis before copying households so households query is not changed yet
         RegistrationDataImport.objects.filter(
@@ -706,7 +706,7 @@ def prepare_program_rdi_dict(csv_rdi_program: str, business_area: BusinessArea) 
     program_rdi_dict = {}
     with open(csv_rdi_program, mode="r", newline="") as csvfile:
         reader = csv.reader(csvfile, delimiter=";")
-        next(reader)
+        next(reader)  # skip header
         for row in reader:
             program = Program.objects.filter(name=row[1], business_area=business_area).first()
             rdi = RegistrationDataImport.objects.filter(name=row[0], business_area=business_area).first()
@@ -775,7 +775,7 @@ def get_unknown_unassigned_dict() -> Dict:
     )
     with open(unknown_unassigned_program, mode="r", newline="") as csvfile:
         reader = csv.reader(csvfile, delimiter=";")
-        next(reader)
+        next(reader)  # skip header
         for row in reader:
             business_area = BusinessArea.objects.get(name=row[0])
             program = Program.objects.filter(name=row[1], business_area=business_area).first()

@@ -1617,10 +1617,18 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # 2x household1, 2x household2, 1x household3, 1x household_helper,
-        # 1x household4, 5x from rdi_with_3_hhs, 17x mixed rdis
+        # 1x household4, 5x from rdi_with_3_hhs, 6x from mixed rdi,
+        # 1x(household_mixed_closed_tp_paid, household_mixed_closed_tp_withdrawn_paid,
+        # household_mixed_closed_tp_withdrawn_not_paid, household_mixed_no_tp,household_mixed_active_partial,
+        # household_mixed_active_partial, household_mixed_active_full, household_mixed_active_size_only,
+        # household_mixed_active_no_ind_data, household_full_closed)
         self.assertEqual(Household.original_and_repr_objects.count() - household_count, 28)
         # 2x individual1_1, 2x individual1_2, 2x individual1_3, 2x individual2_1, 2x individual2_2, 2x collector2_1,
-        # 1x individual3_1, 2x individual_helper3, 1x individual4_1, 11 from rdi_with_3_hhs, 17x mixed rdis
+        # 1x individual3_1, 2x individual_helper3, 1x individual4_1, 11 from rdi_with_3_hhs, 6x from mixed rdi, 1x from(
+        # household_mixed_closed_tp_paid, household_mixed_closed_tp_withdrawn_paid,
+        # household_mixed_closed_tp_withdrawn_not_paid, household_mixed_no_tp,household_mixed_active_partial,
+        # household_mixed_active_partial, household_mixed_active_full, household_mixed_active_size_only,
+        # household_mixed_active_no_ind_data, household_full_closed)
         self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 43)
         # 6x for household1, 6x for household2, 1x for household3, 2x for household_helper, 1x for household4
         self.assertEqual(Document.original_and_repr_objects.count() - document_count, 16)
@@ -2180,7 +2188,9 @@ class TestCountrySpecificRules(TestCase):
         # Test Unknown rules
         unknown_coll_type = DataCollectingType.objects.filter(code="unknown").first()
         self.assertIsNotNone(unknown_coll_type)
-        program_storage_unknown = Program.all_objects.get(data_collecting_type=unknown_coll_type)
+        program_storage_unknown = Program.all_objects.get(
+            data_collecting_type=unknown_coll_type, business_area=self.business_area_congo
+        )
 
         self.assertEqual(self.household_unknown_for_storage.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(
