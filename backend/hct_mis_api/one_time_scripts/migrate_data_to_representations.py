@@ -131,10 +131,6 @@ def migrate_data_to_representations_per_business_area(
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
 
-    # logger.info("Adjusting payments and payment records")
-    # adjust_payments(business_area)
-    # adjust_payment_records(business_area)
-
 
 def get_household_representation_per_program_by_old_household_id(
     program: Program,
@@ -393,6 +389,14 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
                 is_migration_handled=True
             )
+
+
+def adjust_payment_objects() -> None:
+    for business_area in BusinessArea.objects.all():
+        logger.info(f"Adjusting payments for business area {business_area.name}")
+        adjust_payments(business_area)
+        logger.info(f"Adjusting payment records for business area {business_area.name}")
+        adjust_payment_records(business_area)
 
 
 def adjust_payments(business_area: BusinessArea) -> None:
