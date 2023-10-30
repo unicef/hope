@@ -84,7 +84,7 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
-                    "dataCollectingTypeCode": "partial",
+                    "dataCollectingTypeCode": "partial_individuals",
                 },
                 "version": self.program.version,
             },
@@ -108,7 +108,7 @@ class TestUpdateProgram(APITestCase):
 
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)
-        self.assertEqual(self.program.data_collecting_type.code, "full")
+        self.assertEqual(self.program.data_collecting_type.code, "full_collection")
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -116,12 +116,12 @@ class TestUpdateProgram(APITestCase):
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "dataCollectingTypeCode": "partial",
+                    "dataCollectingTypeCode": "partial_individuals",
                 },
                 "version": self.program.version,
             },
         )
-        self.assertEqual(self.program.data_collecting_type.code, "full")
+        self.assertEqual(self.program.data_collecting_type.code, "full_collection")
 
     def test_update_program_with_deprecated_dct(self) -> None:
         DataCollectingType.objects.update_or_create(

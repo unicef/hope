@@ -86,6 +86,11 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         cls.business_area = create_afghanistan()
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
+        # Unknown unassigned rules setup
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
+
         generate_data_collecting_types()
         partial = DataCollectingType.objects.get(code="partial_individuals")
         program_one = ProgramFactory(
