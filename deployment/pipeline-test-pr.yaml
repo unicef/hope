@@ -281,14 +281,14 @@ stages:
               runVersion: 'latestFromBranch'
               branchName: refs/heads/$(System.PullRequest.TargetBranch)
               artifact: 'BackendLineCoverage'
-              path: '$(System.ArtifactsDirectory)/old_coverage.xml'
+              path: '$(System.ArtifactsDirectory)/old_coverage'
           - task: PythonScript@0
             displayName: 'Check Coverage'
             inputs:
               scriptSource: 'filePath'
               scriptPath: './backend/compare_coverage.py'
-              arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage.xml'
-              pythonInterpreter: 'python3'  # or 'python3' or the path to your python interpreter
+              arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage/coverage.xml'
+              pythonInterpreter: 'python3'
 
 
 
