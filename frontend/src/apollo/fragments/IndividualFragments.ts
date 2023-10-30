@@ -159,7 +159,6 @@ export const individualDetailed = gql`
       bankAccountNumber
     }
     preferredLanguage
-    paymentDeliveryPhoneNo
   }
 `;
 

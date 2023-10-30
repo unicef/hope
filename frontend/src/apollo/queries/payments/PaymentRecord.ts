@@ -44,7 +44,6 @@ export const PAYMENT_RECORD_QUERY = gql`
       }
       parent {
         id
-        unicefId
         caId
         program {
           id

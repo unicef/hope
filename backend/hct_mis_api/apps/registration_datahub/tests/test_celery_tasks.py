@@ -302,9 +302,6 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
         return automate_rdi_creation_task(*args, **kwargs)
 
 
-@patch(
-    "hct_mis_api.apps.registration_datahub.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
-)
 class TestAutomatingRDICreationTask(TestCase):
     databases = {
         "default",
@@ -323,11 +320,11 @@ class TestAutomatingRDICreationTask(TestCase):
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
 
-    def test_successful_run_without_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
+    def test_successful_run_without_records_to_import(self) -> None:
         result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)
         assert result[0] == "No Records found"
 
-    def test_not_running_with_record_status_not_to_import(self, mock_validate_data_collection_type: Any) -> None:
+    def test_not_running_with_record_status_not_to_import(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
         record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
@@ -340,7 +337,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedIndividual.objects.count() == 0
         assert result[0] == "No Records found"
 
-    def test_successful_run_with_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
+    def test_successful_run_with_records_to_import(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -366,7 +363,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[2][1] == page_size
         assert result[3][1] == amount_of_records - 3 * page_size
 
-    def test_successful_run_and_automatic_merge(self, mock_validate_data_collection_type: Any) -> None:
+    def test_successful_run_and_automatic_merge(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -392,7 +389,7 @@ class TestAutomatingRDICreationTask(TestCase):
             assert len(result) == 4
             assert merge_task_mock.called
 
-    def test_successful_run_and_fix_task_id(self, mock_validate_data_collection_type: Any) -> None:
+    def test_successful_run_and_fix_task_id(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -419,7 +416,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
         assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}
 
-    def test_with_different_registration_ids(self, mock_validate_data_collection_type: Any) -> None:
+    def test_with_different_registration_ids(self) -> None:
         """
         based on registration_id select RegistrationService
         Ukraine - 2, 3 -> UkraineBaseRegistrationService()
@@ -499,7 +496,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[0][1] == page_size
                 assert result[1][1] == page_size
 
-    def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
+    def test_atomic_rollback_if_record_invalid(self) -> None:
         for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
@@ -531,7 +528,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
 
-    def test_ukraine_new_registration_form(self, mock_validate_data_collection_type: Any) -> None:
+    def test_ukraine_new_registration_form(self) -> None:
         for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
@@ -599,9 +596,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert bank_acc_info.debit_card_number == "1236549879991999"
         assert bank_acc_info.bank_name == "Private Bank"
 
-    def test_create_task_for_processing_records_not_implemented_error(
-        self, mock_validate_data_collection_type: Any
-    ) -> None:
+    def test_create_task_for_processing_records_not_implemented_error(self) -> None:
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
             @classmethod
             @property

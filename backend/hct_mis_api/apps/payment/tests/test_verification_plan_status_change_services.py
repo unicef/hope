@@ -82,7 +82,6 @@ class TestPhoneNumberVerification(TestCase):
                 head_of_household=household.head_of_household,
                 target_population=target_population,
                 delivered_quantity_usd=200,
-                currency="PLN",
             )
 
             PaymentVerificationFactory(
@@ -137,7 +136,6 @@ class TestPhoneNumberVerification(TestCase):
                 head_of_household=other_household.head_of_household,
                 target_population=other_target_population,
                 delivered_quantity_usd=200,
-                currency="PLN",
             )
 
             PaymentVerificationFactory(
