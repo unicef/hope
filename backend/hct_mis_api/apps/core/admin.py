@@ -37,7 +37,6 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
@@ -715,14 +714,12 @@ class MigrationStatusAdmin(admin.ModelAdmin):
 
 
 @admin.register(DataCollectingType)
-class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
+class DataCollectingTypeAdmin(HOPEModelAdminBase):
     list_display = (
         "label",
         "code",
-        "type",
         "description",
         "active",
-        "deprecated",
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",

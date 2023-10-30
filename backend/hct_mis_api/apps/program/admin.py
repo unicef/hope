@@ -36,7 +36,6 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("scope", ChoicesFieldComboFilter),
-        "is_visible",
     )
     raw_id_fields = ("business_area",)
     filter_horizontal = ("admin_areas",)

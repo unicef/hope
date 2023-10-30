@@ -81,7 +81,6 @@ class TestXlsxVerificationImport(APITestCase):
                 household=household,
                 head_of_household=household.head_of_household,
                 target_population=target_population,
-                currency="PLN",
             )
 
             PaymentVerificationFactory(
@@ -361,7 +360,6 @@ class TestXlsxVerificationImport(APITestCase):
             household=household_1,
             entitlement_quantity=120,
             delivered_quantity=150,
-            currency="PLN",
         )
 
         hoh2 = IndividualFactory(household=None)
@@ -372,7 +370,6 @@ class TestXlsxVerificationImport(APITestCase):
             household=household_2,
             entitlement_quantity=120,
             delivered_quantity=150,
-            currency="PLN",
         )
 
         payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
