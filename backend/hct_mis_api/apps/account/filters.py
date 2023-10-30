@@ -24,6 +24,9 @@ class UsersFilter(FilterSet):
     partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
     roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
     is_ticket_creator = BooleanFilter(method="is_ticket_creator_filter")
+    is_survey_creator = BooleanFilter(method="is_survey_creator_filter")
+    is_message_creator = BooleanFilter(method="is_message_creator_filter")
+    is_feedback_creator = BooleanFilter(method="is_feedback_creator_filter")
 
     class Meta:
         model = get_user_model()
@@ -42,6 +45,15 @@ class UsersFilter(FilterSet):
 
     def is_ticket_creator_filter(self, qs: "QuerySet[User]", name: str, value: bool) -> "QuerySet[User]":
         return qs.exclude(created_tickets__isnull=value)
+
+    def is_survey_creator_filter(self, qs: "QuerySet[User]", name: str, value: bool) -> "QuerySet[User]":
+        return qs.exclude(surveys__isnull=value)
+
+    def is_message_creator_filter(self, qs: "QuerySet[User]", name: str, value: bool) -> "QuerySet[User]":
+        return qs.exclude(messages__isnull=value)
+
+    def is_feedback_creator_filter(self, qs: "QuerySet[User]", name: str, value: bool) -> "QuerySet[User]":
+        return qs.exclude(feedbacks__isnull=value)
 
     def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         values = value.split(" ")
