@@ -10,7 +10,6 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
-import { LoadingComponent } from '../../components/core/LoadingComponent';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
