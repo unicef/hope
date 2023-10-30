@@ -116,6 +116,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             household=household,
             target_population=target_population,
             ca_id="P8F-21-CSH-00031-123123",
+            currency="PLN",
         )
         payment_verification = PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
