@@ -66,6 +66,15 @@ class SurveyFactory(DjangoModelFactory):
     program = None
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
 
+    @factory.post_generation
+    def cash_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+
+        if self.target_population is not None:
+            self.program = self.target_population.program
+            self.save()
+
 
 class CommunicationMessageFactory(DjangoModelFactory):
     class Meta:
