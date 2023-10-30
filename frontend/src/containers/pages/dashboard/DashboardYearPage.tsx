@@ -50,7 +50,7 @@ export function DashboardYearPage({
   filter,
 }: DashboardYearPageProps): React.ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const isGlobal = businessArea === 'global';
 
   const sharedVariables = {
@@ -62,7 +62,7 @@ export function DashboardYearPage({
       ...sharedVariables,
       businessAreaSlug: businessArea,
       ...(!isGlobal && {
-        program: programId,
+        program: filter.program,
         administrativeArea: filter.administrativeArea,
       }),
     },
