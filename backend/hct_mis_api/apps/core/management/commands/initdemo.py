@@ -8,7 +8,6 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
@@ -73,13 +72,13 @@ class Command(BaseCommand):
             database="registration_datahub",
         )
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data.json")
+        call_command("loaddata", "hct_mis_api/aurora/fixtures/data.json")
 
         call_command("search_index", "--rebuild", "-f")
         update_mis_unicef_id_individual_and_household()
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
-        generate_data_collecting_types()
 
         email_list = [
             "jan.romaniak@kellton.com",

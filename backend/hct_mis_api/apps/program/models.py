@@ -16,6 +16,7 @@ from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
+from hct_mis_api.apps.core.utils import SoftDeletableIsVisibleManager
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
@@ -149,6 +150,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
     )
+    is_visible = models.BooleanField(default=True)
+
+    objects = SoftDeletableIsVisibleManager()
 
     @staticmethod
     def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
