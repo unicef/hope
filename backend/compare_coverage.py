@@ -1,6 +1,16 @@
 import sys
 import xml.etree.ElementTree as ET
 from typing import Optional
+import os
+
+directory_path = sys.argv[2]  # replace with your directory path
+print(directory_path)
+contents = os.listdir(directory_path)
+
+for item in contents:
+    print(item)
+
+
 
 new_file_argument = sys.argv[1]
 old_file_argument = sys.argv[2] if len(sys.argv) == 3 else None
