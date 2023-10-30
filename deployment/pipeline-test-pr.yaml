@@ -288,7 +288,7 @@ stages:
               scriptSource: 'filePath'
               scriptPath: './backend/compare_coverage.py'
               arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage/coverage.xml'
-              pythonInterpreter: 'python3'  
+              pythonInterpreter: 'python3'
 
 
 
