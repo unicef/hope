@@ -10,9 +10,6 @@ export const USERS_FILTER_QUERY = gql`
     $orderBy: String
     $search: String
     $isTicketCreator: Boolean
-    $isSurveyCreator: Boolean
-    $isMessageCreator: Boolean
-    $isFeedbackCreator: Boolean
   ) {
     allUsers(
       businessArea: $businessArea
@@ -23,9 +20,6 @@ export const USERS_FILTER_QUERY = gql`
       orderBy: $orderBy
       search: $search
       isTicketCreator: $isTicketCreator
-      isSurveyCreator: $isSurveyCreator
-      isMessageCreator: $isMessageCreator
-      isFeedbackCreator: $isFeedbackCreator
     ) {
       edges {
         node {
