@@ -5,7 +5,7 @@ import os
 
 directory_path = sys.argv[2]  # replace with your directory path
 print(directory_path)
-contents = os.listdir(directory_path)
+contents = os.listdir('/home/vsts/work/1/a/')
 
 for item in contents:
     print(item)
