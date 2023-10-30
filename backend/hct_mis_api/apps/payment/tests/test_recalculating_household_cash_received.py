@@ -242,6 +242,7 @@ class TestRecalculatingCash(APITestCase):
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
             delivered_quantity=cash_amount_1,
+            currency="PLN",
         )
 
         CashPlanFactory.create(ca_id=cash_plan_ca_id)
@@ -266,6 +267,7 @@ class TestRecalculatingCash(APITestCase):
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
             delivered_quantity=cash_amount_2,
+            currency="PLN",
         )
 
         PullFromDatahubTask(exchange_rates_client=MagicMock()).execute()
