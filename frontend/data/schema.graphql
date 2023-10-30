@@ -818,10 +818,12 @@ type DataCollectingTypeNode implements Node {
   modified: DateTime!
   label: String!
   code: String!
+  type: DataCollectingTypeType
   description: String!
   compatibleTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   active: Boolean!
+  deprecated: Boolean!
   individualFiltersAvailable: Boolean!
   householdFiltersAvailable: Boolean!
   recalculateComposition: Boolean!
@@ -840,6 +842,11 @@ type DataCollectingTypeNodeConnection {
 type DataCollectingTypeNodeEdge {
   node: DataCollectingTypeNode
   cursor: String!
+}
+
+enum DataCollectingTypeType {
+  STANDARD
+  SOCIAL
 }
 
 scalar Date

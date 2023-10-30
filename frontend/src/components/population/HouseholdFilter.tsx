@@ -1,6 +1,7 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import GroupIcon from '@material-ui/icons/Group';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -105,6 +106,7 @@ export const HouseholdFilters = ({
               label={t('Programme')}
               value={filter.program}
               fullWidth
+              icon={<FlashOnIcon />}
               data-cy='hh-filters-program'
             >
               {programs.map((program) => (
