@@ -33,7 +33,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             ("field_collector_name", "collector_name"),
             ("field_currency", "currency"),
             ("field_registration_token", "registration_token"),
-            ("test_wrong_column_name", "invalid_column_name")
+            ("test_wrong_column_name", "invalid_column_name"),
         ]
     )
     def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
@@ -60,6 +60,6 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             "collector_name": "John Wilson",
             "currency": "PLN",
             "registration_token": document.document_number,
-            "invalid_column_name": "wrong_column_name"
+            "invalid_column_name": "wrong_column_name",
         }
         self.assertEqual(accepted_results.get(field_name), result)
