@@ -64,7 +64,8 @@ stages:
               artifact: 'BackendLineCoverage'
               path: '$(System.ArtifactsDirectory)/old_coverage.xml'
           - script: |
-              ls $(System.ArtifactsDirectory)
+              ls -la $(System.ArtifactsDirectory)
+              pwd
           - task: PythonScript@0
             displayName: 'Check Coverage'
             inputs:
