@@ -62,9 +62,9 @@ stages:
               runVersion: 'latestFromBranch'
               branchName: refs/heads/$(System.PullRequest.TargetBranch)
               artifact: 'BackendLineCoverage'
-              path: '$(System.ArtifactsDirectory)/old_coverage.xml'
+              path: '$(System.ArtifactsDirectory)/old_coverage/'
           - script: |
-              ls -la $(System.ArtifactsDirectory)
+              ls -la $(System.ArtifactsDirectory)/old_coverage/
               pwd
           - task: PythonScript@0
             displayName: 'Check Coverage'
