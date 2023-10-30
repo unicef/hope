@@ -179,10 +179,6 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
         search = value.strip()
         search_type = self.data.get("search_type")
 
-        logger.info("****")
-        logger.info(search)
-        logger.info(search_type)
-
         if search_type == "household_id":
             return qs.filter(unicef_id__icontains=search)
         if search_type == "individual_id":
