@@ -67,7 +67,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Plan Start Date"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     <time
@@ -93,7 +93,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Plan End Date"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     <time
@@ -119,7 +119,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Payment Plan Name"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     Military citizen until amount.
@@ -141,7 +141,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-delivery type"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     Voucher
@@ -180,7 +180,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-dispertion date"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     <time
@@ -206,7 +206,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-fc id"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     62947144
@@ -228,7 +228,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-dp id"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     27371694
@@ -250,12 +250,12 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Target population(s)"
                 >
                   <span
-                    class="sc-bxivhb FSIfE"
+                    class="sc-bxivhb fpUyDK"
                     color="textSecondary"
                   >
                     <span>
                       <a
-                        class="sc-bwzfXH djwZJX"
+                        class="sc-bwzfXH kVuoVk"
                         href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZGRlODE4MDUtMWQ0Ny00YzY0LTgzYTMtMzQ3NWEzMGVmZTJk"
                       >
                         Floor anyone remain play most.
@@ -264,7 +264,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH djwZJX"
+                        class="sc-bwzfXH kVuoVk"
                         href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MTdlM2VmMjAtNjczMy00ZDNhLWFiMDUtZjVkOTgzZjViMjI1"
                       >
                         Former center score fire role.
@@ -273,7 +273,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH djwZJX"
+                        class="sc-bwzfXH kVuoVk"
                         href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MjRkMTdhODktMjg4OC00NDI0LTgxMDAtYmU3MTZjOWFkNDk3"
                       >
                         Stock before maybe campaign blue history recently.
@@ -282,7 +282,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH djwZJX"
+                        class="sc-bwzfXH kVuoVk"
                         href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6NzNiNTFhNjctZmRmNy00ODkwLWIyOWItMjhhYzk4NTc4OGRk"
                       >
                         Eight affect late place.
@@ -291,7 +291,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH djwZJX"
+                        class="sc-bwzfXH kVuoVk"
                         href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZjZkZjc2MDctMzMyZi00NDYwLWJiMzgtMTZiZGM4MGVkNTkz"
                       >
                         Seek development woman once worker.

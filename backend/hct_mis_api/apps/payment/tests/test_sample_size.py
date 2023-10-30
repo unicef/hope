@@ -59,6 +59,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             household=self.household,
             head_of_household_id=self.individuals[0].id,
             status=PaymentRecord.STATUS_SUCCESS,
+            currency="PLN",
         )
         manual_sample_query_variables = create_query_variables(self.cash_plan, "MANUAL")
         manual_response = self.graphql_request(
@@ -84,6 +85,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             household=self.household,
             head_of_household_id=self.individuals[1].id,
             status=PaymentRecord.STATUS_SUCCESS,
+            currency="PLN",
         )
         rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
 
