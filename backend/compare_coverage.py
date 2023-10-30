@@ -1,14 +1,10 @@
 import sys
 import xml.etree.ElementTree as ET
 from typing import Optional
-import os
 
-directory_path = sys.argv[2]  # replace with your directory path
-print(directory_path)
-contents = os.listdir('/home/vsts/work/1/a/')
+a = open(sys.argv[2], 'r')
+print(a.readline())
 
-for item in contents:
-    print(item)
 
 
 
