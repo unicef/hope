@@ -1,6 +1,7 @@
 import sys
 import xml.etree.ElementTree as ET
 from typing import Optional
+from decimal import Decimal
 
 new_file_argument = sys.argv[1]
 old_file_argument = sys.argv[2] if len(sys.argv) == 3 else None
@@ -13,7 +14,9 @@ def get_coverage_from_report(file_path: str) -> Optional[float]:
     try:
         tree = ET.parse(file_path)
         root = tree.getroot()
-        coverage = float(root.get("line-rate"))  # type: ignore
+        lines_valid = Decimal(root.get("lines-valid"))  # type: ignore
+        lines_covered = Decimal(root.get("lines-covered"))  # type: ignore
+        coverage = lines_covered / lines_valid
         return coverage
     except (FileNotFoundError, IsADirectoryError):
         return None
@@ -33,5 +36,5 @@ elif current_coverage - previous_coverage < 0.0:
     print(f"coverage decreased from {previous_coverage} to {current_coverage}")
     exit(1)
 else:
-    print("coverage ok")
+    print(f"coverage ok \nprevious coverage: {previous_coverage} \ncurrent coverage: {current_coverage}")
     exit(0)
