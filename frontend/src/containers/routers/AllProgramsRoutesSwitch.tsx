@@ -11,6 +11,10 @@ import { GrievancesDashboardPage } from '../pages/grievances/GrievancesDashboard
 import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
 import { ReportingPage } from '../pages/reporting/ReportingPage';
+import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
+import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
+import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
+import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -51,6 +55,18 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/grievance/dashboard`}>
         <GrievancesDashboardPage key='all' />
+      </SentryRoute>
+      <SentryRoute path={`${path}/grievance/feedback/create`}>
+        <CreateFeedbackPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/grievance/feedback/edit-ticket/:id`}>
+        <EditFeedbackPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/grievance/feedback/:id`}>
+        <FeedbackDetailsPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/grievance/feedback`}>
+        <FeedbackPage />
       </SentryRoute>
       <SentryRoute path={`${path}/activity-log`}>
         <ActivityLogPage />

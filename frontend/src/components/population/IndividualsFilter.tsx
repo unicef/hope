@@ -1,13 +1,17 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
+import {
+  IndividualChoiceDataQuery,
+  ProgramNode,
+} from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
 import { individualTableOrderOptions } from '../../utils/constants';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
@@ -17,22 +21,26 @@ import { SelectFilter } from '../core/SelectFilter';
 
 interface IndividualsFilterProps {
   filter;
+  programs?: ProgramNode[];
   choicesData: IndividualChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
+  showProgramFilter?: boolean;
 }
 
 export const IndividualsFilter = ({
   filter,
+  programs,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
+  showProgramFilter = false,
 }: IndividualsFilterProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -92,6 +100,24 @@ export const IndividualsFilter = ({
             </SelectFilter>
           </Grid>
         </Grid>
+        {showProgramFilter && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              fullWidth
+              icon={<FlashOnIcon />}
+              data-cy='filters-program'
+            >
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             name='admin2'

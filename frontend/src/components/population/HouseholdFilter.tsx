@@ -1,7 +1,7 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -44,7 +44,6 @@ export const HouseholdFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-
   const {
     handleFilterChange,
     applyFilterChanges,
