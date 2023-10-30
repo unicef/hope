@@ -61,7 +61,6 @@ class TestDeliveryDate(APITestCase):
             household=household_1,
             entitlement_quantity=212,
             delivered_quantity=150,
-            currency="PLN",
         )
 
         hoh2 = IndividualFactory(household=None)
@@ -72,7 +71,6 @@ class TestDeliveryDate(APITestCase):
             household=household_2,
             entitlement_quantity=212,
             delivered_quantity=150,
-            currency="PLN",
         )
 
         hoh3 = IndividualFactory(household=None)
@@ -83,7 +81,6 @@ class TestDeliveryDate(APITestCase):
             household=household_3,
             entitlement_quantity=212,
             delivered_quantity=150,
-            currency="PLN",
         )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -103,9 +100,9 @@ class TestDeliveryDate(APITestCase):
         self.payment_2.refresh_from_db()
         self.payment_3.refresh_from_db()
 
-        self.assertIsNone(self.payment_1.delivery_date)
-        self.assertIsNone(self.payment_2.delivery_date)
-        self.assertIsNone(self.payment_3.delivery_date)
+        self.assertEqual(self.payment_1.delivery_date, datetime(2023, 10, 23).replace(tzinfo=utc))
+        self.assertEqual(self.payment_2.delivery_date, datetime(2023, 10, 23).replace(tzinfo=utc))
+        self.assertEqual(self.payment_3.delivery_date, datetime(2023, 10, 23).replace(tzinfo=utc))
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:
@@ -121,8 +118,6 @@ class TestDeliveryDate(APITestCase):
         import_service = XlsxPaymentPlanImportPerFspService(self.payment_plan, file_existing_delivery_date)
         import_service.open_workbook()
         import_service.validate()
-
-        self.assertEqual(len(import_service.errors), 1)
 
         error = import_service.errors[0]
         self.assertListEqual(

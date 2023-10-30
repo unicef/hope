@@ -32,9 +32,7 @@ else
       wait_for_db erp_datahub_db
       wait_for_db registration_datahub_db
       # pytest hct_mis_api -n logical
-      coverage run --parallel-mode ./manage.py test --settings hct_mis_api.settings_test --noinput --parallel
-      coverage combine
-      coverage xml
+      python manage.py test --settings hct_mis_api.settings_test --noinput --parallel
       ;;
     "lint")
       mkdir -p ./lint-results

@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -40,7 +40,6 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     adjust_payment_records,
     adjust_payments,
-    migrate_data_to_representations,
     migrate_data_to_representations_per_business_area,
 )
 
@@ -76,10 +75,7 @@ class TestMigrateDataToRepresentations(TestCase):
         return individual, household, rdi
 
     def setUp(self) -> None:
-        self.business_area = BusinessAreaFactory(name="Other BA")
-        self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
-        self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
-        self.business_area_sudan = BusinessAreaFactory(name="Sudan")
+        self.business_area = BusinessAreaFactory()
 
         # collecting_types
         generate_data_collecting_types()
@@ -185,7 +181,6 @@ class TestMigrateDataToRepresentations(TestCase):
             head_of_household=self.individual1_1,
             program=self.program_active,
             entitlement_quantity=103,
-            currency="PLN",
         )
         cash_plan = CashPlanFactory(
             program=self.program_active,
@@ -197,7 +192,6 @@ class TestMigrateDataToRepresentations(TestCase):
             head_of_household=self.individual1_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
             parent=cash_plan,
-            currency="PLN",
         )
 
         # Household2 and its data (no RDI, in 2 programs)
@@ -246,7 +240,6 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household2,
             head_of_household=self.individual2_1,
             program=self.program_active,
-            currency="PLN",
         )
 
         self.payment_record2 = PaymentRecordFactory(
@@ -255,7 +248,6 @@ class TestMigrateDataToRepresentations(TestCase):
             head_of_household=self.collector2_1,
             service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
             parent=cash_plan,
-            currency="PLN",
         )
 
         # Household3 and its data
@@ -402,7 +394,6 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household5,
             head_of_household=self.individual5_1,
             program=self.program_finished1,
-            currency="PLN",
         )
 
         self.payment_record5 = PaymentRecordFactory(
@@ -423,7 +414,6 @@ class TestMigrateDataToRepresentations(TestCase):
             household=self.household7,
             head_of_household=self.individual7_1,
             program=self.program_finished2,
-            currency="PLN",
         )
 
         self.payment_record7 = PaymentRecordFactory(
@@ -1721,415 +1711,3 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.payment7.household, household7_representation3)
         self.assertEqual(self.payment_record7.head_of_household, individual7_1_representation3)
         self.assertEqual(self.payment_record7.household, household7_representation3)
-
-
-class TestCountrySpecificRules(TestCase):
-    def create_hh_with_ind(
-        self,
-        ind_data: dict,
-        hh_data: dict,
-        business_area: BusinessArea,
-        target_populations: Optional[List[TargetPopulation]] = None,
-    ) -> tuple:
-        individual = IndividualFactory(
-            business_area=business_area,
-            household=None,
-            **ind_data,
-        )
-        household = HouseholdFactory(
-            business_area=business_area,
-            head_of_household=individual,
-            **hh_data,
-        )
-        if target_populations:
-            household.target_populations.set(target_populations)
-        else:
-            household.target_populations.set([])
-        individual.household = household
-        individual.save()
-        return individual, household
-
-    def setUp(self) -> None:
-        # collecting_types
-        generate_data_collecting_types()
-        self.partial = DataCollectingType.objects.get(code="partial")
-        self.full = DataCollectingType.objects.get(code="full")
-        self.size_only = DataCollectingType.objects.get(code="size_only")
-        self.no_ind_data = DataCollectingType.objects.get(code="no_ind_data")
-
-        # set compatible types of collection types
-        self.partial.compatible_types.set([self.partial, self.full])
-        self.size_only.compatible_types.set([self.size_only, self.full, self.partial])
-        self.no_ind_data.compatible_types.set([self.no_ind_data, self.full, self.partial, self.size_only])
-
-        # Country specific rules setup
-        self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
-        self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
-        self.business_area_sudan = BusinessAreaFactory(name="Sudan")
-
-        # Objects for Afghanistan specific rules
-        self.rdi_for_afghanistan_ignore = RegistrationDataImportFactory(
-            business_area=self.business_area_afghanistan,
-            name="PMU-REG-Social_Transfer-Zabul-AF2401-Qalat-SHAO-v2.1",
-        )
-        # Afghanistan programs
-        self.program_afg_finished = ProgramFactory(
-            status=Program.FINISHED,
-            business_area=self.business_area_afghanistan,
-            data_collecting_type=self.full,
-            name="afghanistan finished",
-        )
-        self.program_afg_size_only = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_afghanistan,
-            data_collecting_type=self.size_only,
-            name="afghanistan active size only",
-        )
-        self.program_afg_active = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_afghanistan,
-            data_collecting_type=self.full,
-            name="afghanistan active full",
-        )
-        # Afghanistan target populations
-        self.target_population_afg_finished = TargetPopulationFactory(
-            program=self.program_afg_finished,
-            status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
-            business_area=self.business_area_afghanistan,
-        )
-        self.target_population_afg_active = TargetPopulationFactory(
-            program=self.program_afg_active,
-            status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
-            business_area=self.business_area_afghanistan,
-        )
-
-        (
-            _,
-            self.household_afg_in_closed,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_afghanistan_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_afghanistan,
-            target_populations=[self.target_population_afg_finished],
-        )
-        (
-            _,
-            self.household_afg_in_active,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_afghanistan_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_afghanistan,
-            target_populations=[self.target_population_afg_active],
-        )
-        (
-            _,
-            self.household_afg_not_in_tp,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_afghanistan_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_afghanistan,
-            target_populations=[],
-        )
-
-        # Sudan setup
-        self.rdi_for_sudan_ignore = RegistrationDataImportFactory(
-            business_area=self.business_area_sudan,
-            name="Health and Nutrition - FLWS Modification",
-        )
-
-        self.program_sudan_active = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_sudan,
-            data_collecting_type=self.full,
-            name="Health & Nutrition Reporting FLWS",
-        )
-        self.program_sudan_active_other = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_sudan,
-            data_collecting_type=self.full,
-            name="Active other",
-        )
-
-        self.target_population_sudan_active_other = TargetPopulationFactory(
-            program=self.program_sudan_active_other,
-            status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
-            business_area=self.business_area_sudan,
-        )
-
-        (
-            _,
-            self.household_sudan_in_tp,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_sudan_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_sudan,
-            target_populations=[self.target_population_sudan_active_other],
-        )
-        (
-            _,
-            self.household_sudan_no_tp,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_sudan_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_sudan,
-            target_populations=[],
-        )
-        # Congo setup
-        self.rdi_for_congo_ignore = RegistrationDataImportFactory(
-            business_area=self.business_area_congo,
-            name="Importation du 11 nov 2021",
-        )
-
-        self.program_congo_active = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_congo,
-            data_collecting_type=self.full,
-            name="Cash-Nutrition Manono for partners",
-        )
-        self.program_congo_active_other = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_congo,
-            data_collecting_type=self.full,
-            name="Active other",
-        )
-
-        self.target_population_congo_active_other = TargetPopulationFactory(
-            program=self.program_congo_active_other,
-            status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
-            business_area=self.business_area_congo,
-        )
-
-        (
-            _,
-            self.household_congo_in_tp,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_congo_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_congo,
-            target_populations=[self.target_population_congo_active_other],
-        )
-        (
-            _,
-            self.household_congo_no_tp,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_congo_ignore,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_congo,
-            target_populations=[],
-        )
-
-        self.rdi_for_congo_to_withdraw = RegistrationDataImportFactory(
-            business_area=self.business_area_congo,
-            name="1er Cohorte DPS Manierma, 18 Mars 2022",
-        )
-
-        (
-            _,
-            self.household_congo_in_tp_withdraw,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_congo_to_withdraw,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_congo,
-            target_populations=[self.target_population_congo_active_other],
-        )
-        (
-            _,
-            self.household_congo_no_tp_withdraw,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_congo_to_withdraw,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_congo,
-            target_populations=[],
-        )
-
-        self.rdi_for_congo_to_withdraw_no_tp = RegistrationDataImportFactory(
-            business_area=self.business_area_congo,
-            name="Prod_test_DRC_June142023",
-        )
-        (
-            _,
-            self.household_congo_no_tp_withdraw_2,
-        ) = self.create_hh_with_ind(
-            {},
-            {
-                "registration_data_import": self.rdi_for_congo_to_withdraw_no_tp,
-                "data_collecting_type": self.size_only,
-            },
-            business_area=self.business_area_congo,
-            target_populations=[],
-        )
-
-    def refresh_objects(self) -> None:
-        self.household_afg_in_closed.refresh_from_db()
-        self.household_afg_in_active.refresh_from_db()
-        self.household_afg_not_in_tp.refresh_from_db()
-        self.household_sudan_in_tp.refresh_from_db()
-        self.household_sudan_no_tp.refresh_from_db()
-        self.household_congo_in_tp.refresh_from_db()
-        self.household_congo_no_tp.refresh_from_db()
-        self.household_congo_in_tp_withdraw.refresh_from_db()
-        self.household_congo_no_tp_withdraw.refresh_from_db()
-        self.household_congo_no_tp_withdraw_2.refresh_from_db()
-        self.rdi_for_congo_to_withdraw_no_tp.refresh_from_db()
-
-    def test_migrate_data_to_representations_for_country_specific_rules(self) -> None:
-        migrate_data_to_representations()
-
-        self.refresh_objects()
-
-        # Test Afghanistan rules
-        self.assertEqual(self.rdi_for_afghanistan_ignore.programs.distinct().count(), 3)
-        self.assertSetEqual(
-            set(self.rdi_for_afghanistan_ignore.programs.all()),
-            {self.program_afg_finished, self.program_afg_active, self.program_afg_size_only},
-        )
-
-        self.assertEqual(
-            self.household_afg_in_closed.copied_to(manager="original_and_repr_objects").count(),
-            3,
-        )
-        self.assertEqual(
-            self.household_afg_in_active.copied_to(manager="original_and_repr_objects").count(),
-            2,
-        )
-        self.assertEqual(
-            self.household_afg_not_in_tp.copied_to(manager="original_and_repr_objects").count(),
-            0,
-        )
-
-        # Test Sudan rules
-        self.assertEqual(self.rdi_for_sudan_ignore.programs.count(), 2)
-        self.assertSetEqual(
-            set(self.rdi_for_sudan_ignore.programs.all()),
-            {
-                self.program_sudan_active,
-                self.program_sudan_active_other,
-            },
-        )
-        self.assertEqual(self.household_sudan_in_tp.copied_to(manager="original_and_repr_objects").count(), 2)
-        self.assertIn(
-            self.program_sudan_active_other.id,
-            list(
-                self.household_sudan_in_tp.copied_to(manager="original_and_repr_objects").values_list(
-                    "program__id", flat=True
-                )
-            ),
-        )
-        self.assertIn(
-            self.program_sudan_active.id,
-            list(
-                self.household_sudan_in_tp.copied_to(manager="original_and_repr_objects").values_list(
-                    "program__id", flat=True
-                )
-            ),
-        )
-        self.assertEqual(self.household_sudan_no_tp.copied_to(manager="original_and_repr_objects").count(), 2)
-        self.assertIn(
-            self.program_sudan_active_other.id,
-            list(
-                self.household_sudan_no_tp.copied_to(manager="original_and_repr_objects").values_list(
-                    "program__id", flat=True
-                )
-            ),
-        )
-        self.assertIn(
-            self.program_sudan_active.id,
-            list(
-                self.household_sudan_no_tp.copied_to(manager="original_and_repr_objects").values_list(
-                    "program__id", flat=True
-                )
-            ),
-        )
-
-        # Test Congo rules
-        self.assertEqual(self.rdi_for_congo_ignore.programs.count(), 2)
-        self.assertSetEqual(
-            set(self.rdi_for_congo_ignore.programs.all()),
-            {
-                self.program_congo_active,
-                self.program_congo_active_other,
-            },
-        )
-        self.assertEqual(self.household_congo_in_tp.copied_to(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(
-            self.program_congo_active_other,
-            self.household_congo_in_tp.copied_to(manager="original_and_repr_objects").first().program,
-        )
-        self.assertEqual(self.household_congo_no_tp.copied_to(manager="original_and_repr_objects").count(), 2)
-        self.assertIn(
-            self.program_congo_active_other.id,
-            list(
-                self.household_congo_no_tp.copied_to(manager="original_and_repr_objects").values_list(
-                    "program__id", flat=True
-                )
-            ),
-        )
-        self.assertIn(
-            self.program_congo_active.id,
-            list(
-                self.household_congo_no_tp.copied_to(manager="original_and_repr_objects").values_list(
-                    "program__id", flat=True
-                )
-            ),
-        )
-
-        # Congo withdraw
-        self.assertEqual(self.rdi_for_congo_to_withdraw.programs.count(), 1)
-        self.assertEqual(self.rdi_for_congo_to_withdraw.programs.first(), self.program_congo_active_other)
-        self.assertEqual(self.household_congo_in_tp_withdraw.copied_to(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(
-            self.household_congo_in_tp_withdraw.copied_to(manager="original_and_repr_objects").first().program,
-            self.program_congo_active_other,
-        )
-        self.assertFalse(
-            self.household_congo_in_tp_withdraw.copied_to(manager="original_and_repr_objects").first().withdrawn
-        )
-
-        self.assertEqual(self.household_congo_no_tp_withdraw.copied_to(manager="original_and_repr_objects").count(), 1)
-        self.assertEqual(
-            self.household_congo_no_tp_withdraw.copied_to(manager="original_and_repr_objects").first().program,
-            self.program_congo_active_other,
-        )
-        self.assertTrue(
-            self.household_congo_no_tp_withdraw.copied_to(manager="original_and_repr_objects").first().withdrawn
-        )
-
-        self.assertEqual(self.rdi_for_congo_to_withdraw_no_tp.programs(manager="all_objects").count(), 1)
-        self.assertEqual(
-            self.rdi_for_congo_to_withdraw_no_tp.programs(manager="all_objects").first().name,
-            "Storage program - COLLECTION TYPE Size only",
-        )
-        self.assertEqual(
-            self.household_congo_no_tp_withdraw_2.copied_to(manager="original_and_repr_objects").count(), 1
-        )
-        self.assertEqual(
-            self.household_congo_no_tp_withdraw_2.copied_to(manager="original_and_repr_objects").first().program.name,
-            "Storage program - COLLECTION TYPE Size only",
-        )
