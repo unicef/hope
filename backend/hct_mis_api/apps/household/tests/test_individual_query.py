@@ -165,8 +165,10 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             IndividualFactory(household=household_one if index % 2 else household_two, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
-        household_one.head_of_household = cls.individuals[0]
-        household_two.head_of_household = cls.individuals[1]
+        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == household_one]
+        cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
+        household_one.head_of_household = cls.individuals_from_hh_one[0]
+        household_two.head_of_household = cls.individuals_from_hh_two[1]
         household_one.save()
         household_two.save()
 
