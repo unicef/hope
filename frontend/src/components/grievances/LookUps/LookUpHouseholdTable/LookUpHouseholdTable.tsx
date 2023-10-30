@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
+  AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
@@ -54,7 +55,7 @@ export const LookUpHouseholdTable = ({
     }
     return undefined;
   };
-  const initialVariables: AllHouseholdsQueryVariables = {
+  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
     businessArea,
     familySize: JSON.stringify({
       min: filter.householdSizeMin,
@@ -66,6 +67,8 @@ export const LookUpHouseholdTable = ({
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
+    //TODO: add program filter
+    // programs: isAllPrograms ? filter.program : programId,
   };
 
   const [selected, setSelected] = useState<string[]>(

@@ -22,7 +22,6 @@ import { UniversalMoment } from '../../core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';
-import { get } from 'http';
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];

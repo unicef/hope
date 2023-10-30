@@ -170,7 +170,6 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/grievance/dashboard`}>
         <GrievancesDashboardPage key='all' />
       </SentryRoute>
-
       <SentryRoute path={`${path}/grievance/feedback/create`}>
         <CreateFeedbackPage />
       </SentryRoute>

@@ -58,9 +58,11 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     householdSizeMax: '',
     orderBy: 'unicef_id',
     withdrawn: null,
+    isActiveProgram: true,
   };
   const initialFilterIND = {
     search: '',
+    program: isAllPrograms ? '' : programId,
     searchType: 'individual_id',
     admin2: '',
     sex: '',
@@ -69,6 +71,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     flags: [],
     orderBy: 'unicef_id',
     status: '',
+    isActiveProgram: true,
   };
 
   const {
@@ -182,6 +185,8 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             appliedFilter={appliedFilterIND}
             setAppliedFilter={setAppliedFilterIND}
             isOnPaper={false}
+            showProgramFilter={isAllPrograms}
+            programs={programs}
           />
           <LookUpIndividualTable
             filter={appliedFilterIND}
