@@ -90,7 +90,7 @@ export const GrievancesTable = ({
 
   const optionsData = get(data, 'allUsers.edges', []);
 
-  const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
+  const [selectedTicketsPerPage, setSelectedTicketsPerPag] = useState<{
     [key: number]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   }>({ 0: [] });
 
@@ -102,10 +102,10 @@ export const GrievancesTable = ({
 
   const setSelectedTickets = (
     tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ): void => {
+  ):void => {
     const newSelectedTicketsPerPage = { ...selectedTicketsPerPage };
     newSelectedTicketsPerPage[page] = tickets;
-    setSelectedTicketsPerPage(newSelectedTicketsPerPage);
+    setSelectedTicketsPerPag(newSelectedTicketsPerPage);
   };
 
   const {
@@ -167,13 +167,10 @@ export const GrievancesTable = ({
     const index =
       currentSelectedTickets?.findIndex(
         (ticketItem) => ticketItem.id === ticket.id,
-      ) ?? -1;
-
+      ) || -1;
     const newSelectedTickets = [...(currentSelectedTickets || [])];
     if (index === -1) {
       newSelectedTickets.push(ticket);
-    } else if (index === 0) {
-      newSelectedTickets.shift();
     } else {
       newSelectedTickets.splice(index, 1);
     }

@@ -11,7 +11,7 @@ export const DatePickerFilter = ({
   fullWidth = true,
   ...props
 }): React.ReactElement => {
-  const datePickerValue = value ? moment.utc(value) : null;
+  const utcValue = value ? moment.utc(value) : null;
 
   return (
     <Box display='flex' flexDirection='column'>
@@ -30,7 +30,7 @@ export const DatePickerFilter = ({
             onChange(null);
           }
         }}
-        value={datePickerValue}
+        value={utcValue}
         format='YYYY-MM-DD'
         InputAdornmentProps={{ position: 'end' }}
         fullWidth={fullWidth}

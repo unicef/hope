@@ -57,7 +57,6 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
@@ -70,8 +69,8 @@ from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
 
 class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
     def setUp(self) -> None:
-        self.PAYMENT_RECORD_CT_ID = ContentType.objects.get_for_model(PaymentRecord).id
-        self.PAYMENT_CT_ID = ContentType.objects.get_for_model(Payment).id
+        self.PAYMENT_RECORD_CT_ID = ContentType.objects.get(app_label="payment", model="paymentrecord").id
+        self.PAYMENT_CT_ID = ContentType.objects.get(app_label="payment", model="payment").id
 
         self.business_area = BusinessAreaFactory()
         self.program1 = ProgramFactory(name="program1", business_area=self.business_area, status=Program.ACTIVE)
@@ -283,7 +282,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
         target_population1 = TargetPopulationFactory(program=self.program1)
         payment_plan = PaymentPlanFactory(target_population=target_population1)
-        payment = PaymentFactory(parent=payment_plan, currency="PLN")
+        payment = PaymentFactory(parent=payment_plan)
 
         self.complaint_ticket_with_payment = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment,
@@ -298,9 +297,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         )
         target_population2 = TargetPopulationFactory(program=self.program2)
         payment_record = PaymentRecordFactory(
-            target_population=target_population2,
-            household=self.household_complaint_ticket_with_payment_record,
-            currency="PLN",
+            target_population=target_population2, household=self.household_complaint_ticket_with_payment_record
         )
 
         self.complaint_ticket_with_payment_record = GrievanceComplaintTicketWithoutExtrasFactory(
@@ -454,7 +451,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         payment_record = PaymentRecordFactory(
             target_population=target_population2,
             household=self.household_sensitive_ticket_with_payment_record,
-            currency="PLN",
         )
         self.sensitive_ticket_with_payment_record = SensitiveGrievanceTicketWithoutExtrasFactory(
             household=self.household_sensitive_ticket_with_payment_record,
@@ -4090,7 +4086,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 == repr3_feedback_no_gt_2hh_3ind_in_pr3.feedback_messages.order_by("created_at").last().created_at
             )
 
-    def test_migrate_grievance_to_representations(self) -> None:
+    def test(self) -> None:
         migrate_grievance_to_representations()
         self.refresh_objects()
 

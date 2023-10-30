@@ -949,14 +949,12 @@ type DateType = 'startOfDay' | 'endOfDay';
 export const dateToIsoString = (date: Date, type: DateType): string => {
   if (!date) return null;
   if (type === 'startOfDay') {
-    return moment
-      .utc(date)
+    return moment(date)
       .startOf('day')
       .toISOString();
   }
   if (type === 'endOfDay') {
-    return moment
-      .utc(date)
+    return moment(date)
       .endOf('day')
       .toISOString();
   }
