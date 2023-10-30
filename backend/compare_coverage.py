@@ -2,12 +2,6 @@ import sys
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-a = open(sys.argv[2], 'r')
-print(a.readline()[0:100])
-
-
-
-
 new_file_argument = sys.argv[1]
 old_file_argument = sys.argv[2] if len(sys.argv) == 3 else None
 if not new_file_argument:
