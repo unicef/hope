@@ -1283,10 +1283,12 @@ export type DataCollectingTypeNode = Node & {
   modified: Scalars['DateTime'],
   label: Scalars['String'],
   code: Scalars['String'],
+  type?: Maybe<DataCollectingTypeType>,
   description: Scalars['String'],
   compatibleTypes: DataCollectingTypeNodeConnection,
   limitTo: UserBusinessAreaNodeConnection,
   active: Scalars['Boolean'],
+  deprecated: Scalars['Boolean'],
   individualFiltersAvailable: Scalars['Boolean'],
   householdFiltersAvailable: Scalars['Boolean'],
   recalculateComposition: Scalars['Boolean'],
@@ -1355,6 +1357,11 @@ export type DataCollectingTypeNodeEdge = {
   node?: Maybe<DataCollectingTypeNode>,
   cursor: Scalars['String'],
 };
+
+export enum DataCollectingTypeType {
+  Standard = 'STANDARD',
+  Social = 'SOCIAL'
+}
 
 
 
@@ -11965,6 +11972,9 @@ export type AllGrievanceTicketQuery = (
         )>, relatedTickets: Maybe<Array<Maybe<(
           { __typename?: 'GrievanceTicketNode' }
           & Pick<GrievanceTicketNode, 'id'>
+        )>>>, programs: Maybe<Array<Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
         )>>> }
       )> }
     )>> }
@@ -21914,6 +21924,10 @@ export const AllGrievanceTicketDocument = gql`
         urgency
         updatedAt
         totalDays
+        programs {
+          id
+          name
+        }
       }
     }
   }
@@ -28109,6 +28123,7 @@ export type ResolversTypes = {
   DataCollectingTypeNodeConnection: ResolverTypeWrapper<DataCollectingTypeNodeConnection>,
   DataCollectingTypeNodeEdge: ResolverTypeWrapper<DataCollectingTypeNodeEdge>,
   DataCollectingTypeNode: ResolverTypeWrapper<DataCollectingTypeNode>,
+  DataCollectingTypeType: DataCollectingTypeType,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   ProgramNode: ResolverTypeWrapper<ProgramNode>,
@@ -28617,6 +28632,7 @@ export type ResolversParentTypes = {
   DataCollectingTypeNodeConnection: DataCollectingTypeNodeConnection,
   DataCollectingTypeNodeEdge: DataCollectingTypeNodeEdge,
   DataCollectingTypeNode: DataCollectingTypeNode,
+  DataCollectingTypeType: DataCollectingTypeType,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
   ProgramNode: ProgramNode,
@@ -29624,10 +29640,12 @@ export type DataCollectingTypeNodeResolvers<ContextType = any, ParentType extend
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['DataCollectingTypeType']>, ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   compatibleTypes?: Resolver<ResolversTypes['DataCollectingTypeNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeCompatibleTypesArgs>,
   limitTo?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeLimitToArgs>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individualFiltersAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdFiltersAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   recalculateComposition?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,

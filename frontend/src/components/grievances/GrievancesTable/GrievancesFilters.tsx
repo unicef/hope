@@ -1,9 +1,19 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  MenuItem,
+} from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import {
+  GrievancesChoiceDataQuery,
+  useAllProgramsForChoicesQuery,
+} from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
@@ -23,6 +33,8 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { LoadingComponent } from '../../core/LoadingComponent';
 
 interface GrievancesFiltersProps {
   filter;
@@ -43,8 +55,13 @@ export const GrievancesFilters = ({
   setAppliedFilter,
 }: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { businessArea, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
+  const { data, loading } = useAllProgramsForChoicesQuery({
+    variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const {
     handleFilterChange,
@@ -109,6 +126,11 @@ export const GrievancesFilters = ({
   }, [choicesData.grievanceTicketUrgencyChoices]);
 
   const subCategories = issueTypeDict[filter.category]?.subCategories || [];
+
+  if (loading) return <LoadingComponent />;
+
+  const allPrograms = data?.allPrograms?.edges || [];
+  const programs = allPrograms.map((edge) => edge.node);
 
   return (
     <ContainerWithBorder>
@@ -339,8 +361,7 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        {/* //TODO: show program filter when it is needed */}
-        {/* {!isUserGenerated && (
+        {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
@@ -348,7 +369,7 @@ export const GrievancesFilters = ({
               value={filter.program}
               icon={<FlashOnIcon />}
               fullWidth
-              data-cy='hh-filters-program'
+              data-cy='filters-program'
             >
               <MenuItem value=''>
                 <em>{t('None')}</em>
@@ -360,7 +381,7 @@ export const GrievancesFilters = ({
               ))}
             </SelectFilter>
           </Grid>
-        )} */}
+        )}
         <Grid item container xs={3}>
           <SelectFilter
             onChange={(e) =>
@@ -380,6 +401,29 @@ export const GrievancesFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={12}>
+            <Box ml={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={Boolean(filter.isActiveProgram)}
+                    value={filter.isActiveProgram}
+                    color='primary'
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        handleFilterChange('isActiveProgram', true);
+                      } else {
+                        handleFilterChange('isActiveProgram', false);
+                      }
+                    }}
+                  />
+                }
+                label={t('Show only tickets from Active Programmes')}
+              />
+            </Box>
+          </Grid>
+        )}
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}
