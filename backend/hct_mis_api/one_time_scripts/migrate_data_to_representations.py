@@ -534,7 +534,7 @@ def handle_non_program_objects(
         program = create_program_with_matching_collecting_type(
             business_area, collecting_type, unknown_unassigned_program
         )
-        households_with_collecting_type = households.filter(collect_individual_data=collecting_type).only("id")
+        households_with_collecting_type = households.filter(collect_individual_data=collecting_type)
 
         # Handle rdis before copying households so households query is not changed yet
         RegistrationDataImport.objects.filter(
