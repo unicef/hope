@@ -1753,6 +1753,19 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "age_at_registration",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
     },
+    {
+        "id": "7a647afd-63a3-45d6-830c-f35268f7d512",
+        "type": TYPE_STRING,
+        "name": "payment_delivery_phone_no",
+        "lookup": "payment_delivery_phone_no",
+        "label": {"English(EN)": "Mobile Money Transfer Phone Number"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "payment_delivery_phone_no",
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
