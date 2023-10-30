@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from typing import Optional
 
 a = open(sys.argv[2], 'r')
-print(a.readline())
+print(a.readline()[0:100])
 
 
 
