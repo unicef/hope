@@ -73,7 +73,7 @@ export const GrievancesTable = ({
     preferredLanguage: filter.preferredLanguage,
     program: isAllPrograms ? filter.program : programId,
     //TODO: enable this filter when the backend is ready
-    // isActiveProgram: filter.isActiveProgram ? true : null,
+    // isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [inputValue, setInputValue] = useState('');

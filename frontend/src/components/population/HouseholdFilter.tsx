@@ -17,6 +17,7 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 interface HouseholdFiltersProps {
   filter;
@@ -27,7 +28,6 @@ interface HouseholdFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
-  showProgramFilter?: boolean;
 }
 
 export const HouseholdFilters = ({
@@ -39,11 +39,11 @@ export const HouseholdFilters = ({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-  showProgramFilter = false,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const { isAllPrograms } = useBaseUrl();
   const {
     handleFilterChange,
     applyFilterChanges,
@@ -98,7 +98,7 @@ export const HouseholdFilters = ({
             </SelectFilter>
           </Grid>
         </Grid>
-        {showProgramFilter && (
+        {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
@@ -204,6 +204,23 @@ export const HouseholdFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}

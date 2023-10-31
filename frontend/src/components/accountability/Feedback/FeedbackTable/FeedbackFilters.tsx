@@ -1,10 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-  MenuItem,
-} from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +7,8 @@ import {
   useAllProgramsForChoicesQuery,
   useFeedbackIssueTypeChoicesQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { CreatedByFeedbackAutocomplete } from '../../../../shared/autocompletes/CreatedByFeedbackAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
@@ -20,8 +16,6 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { CreatedByFeedbackAutocomplete } from '../../../../shared/autocompletes/CreatedByFeedbackAutocomplete';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -88,6 +82,27 @@ export const FeedbackFilters = ({
             data-cy='filters-search'
           />
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              icon={<FlashOnIcon />}
+              fullWidth
+              data-cy='filters-program'
+            >
+              <MenuItem value=''>
+                <em>{t('None')}</em>
+              </MenuItem>
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
@@ -135,45 +150,18 @@ export const FeedbackFilters = ({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('program', e.target.value)}
-              label={t('Programme')}
-              value={filter.program}
-              icon={<FlashOnIcon />}
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
               fullWidth
-              data-cy='filters-program'
+              disableClearable
+              data-cy='filters-program-state'
             >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
             </SelectFilter>
-          </Grid>
-        )}
-        {isAllPrograms && (
-          <Grid item xs={12}>
-            <Box ml={2}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={Boolean(filter.isActiveProgram)}
-                    value={filter.isActiveProgram}
-                    color='primary'
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        handleFilterChange('isActiveProgram', true);
-                      } else {
-                        handleFilterChange('isActiveProgram', false);
-                      }
-                    }}
-                  />
-                }
-                label={t('Show only feedbacks from Active Programmes')}
-              />
-            </Box>
           </Grid>
         )}
       </Grid>

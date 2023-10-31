@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
+  AllHouseholdsForPopulationTableQuery,
   AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQuery,
-  AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
@@ -46,6 +47,7 @@ export const LookUpHouseholdTable = ({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): React.ReactElement => {
+  const { isAllPrograms } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -69,6 +71,7 @@ export const LookUpHouseholdTable = ({
     orderBy: filter.orderBy,
     //TODO: add program filter
     // programs: isAllPrograms ? filter.program : programId,
+    // isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [selected, setSelected] = useState<string[]>(
@@ -122,13 +125,30 @@ export const LookUpHouseholdTable = ({
     setFieldValue('identityVerified', false);
   };
 
+  const headCellsWithProgramColumn = [
+    ...headCells,
+    {
+      disablePadding: false,
+      label: 'Programmes',
+      id: 'programs',
+      numeric: false,
+      dataCy: 'programs',
+    },
+  ];
+
+  const preparedHeadcells = isAllPrograms
+    ? headCellsWithProgramColumn
+    : headCells;
+
   const renderTable = (): React.ReactElement => {
     return (
       <UniversalTable<
-        AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-        AllHouseholdsQueryVariables
+        AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
+        AllHouseholdsForPopulationTableQueryVariables
       >
-        headCells={householdMultiSelect ? headCells.slice(1) : headCells}
+        headCells={
+          householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells
+        }
         rowsPerPageOptions={[5, 10, 15, 20]}
         query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'

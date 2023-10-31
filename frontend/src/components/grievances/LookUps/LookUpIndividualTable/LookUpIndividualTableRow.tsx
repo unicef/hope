@@ -1,34 +1,48 @@
-import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
+import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
 import { AllIndividualsQuery } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { sexToCapitalize } from '../../../../utils/utils';
+import { BlackLink } from '../../../core/BlackLink';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
-import { BlackLink } from '../../../core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
-
   radioChangeHandler: (
     individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
   ) => void;
   selectedIndividual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
 }
 
-export function LookUpIndividualTableRow({
+export const LookUpIndividualTableRow = ({
   individual,
   radioChangeHandler,
   selectedIndividual,
-}: LookUpIndividualTableRowProps): React.ReactElement {
+}: LookUpIndividualTableRowProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const renderPrograms = (): string => {
-    const programNames = individual?.household?.programs?.edges?.map(
-      (edge) => edge.node.name,
-    );
-    return programNames?.length ? programNames.join(', ') : '-';
+  const getMappedPrograms = (): React.ReactElement => {
+    //TODO: uncomment this when programs are added to individuals
+
+    // if (individual.programs?.edges?.length) {
+    //   return (
+    //     <TableCell align='left'>
+    //       {individual.programs.edges.map((edge) => (
+    //         <BlackLink
+    //           key={edge.node.id}
+    //           to={`/${baseUrl}/details/${edge.node.id}`}
+    //         >
+    //           {edge.node.id}
+    //         </BlackLink>
+    //       ))}
+    //     </TableCell>
+    //   );
+    // }
+    return <div>-</div>;
   };
+
+  const mappedPrograms = getMappedPrograms();
   return (
     <ClickableTableRow
       onClick={() => {
@@ -65,10 +79,10 @@ export function LookUpIndividualTableRow({
       <TableCell align='left'>
         {individual?.household?.admin2?.name || '-'}
       </TableCell>
-      <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
+      <TableCell align='left'>{mappedPrograms}</TableCell>
     </ClickableTableRow>
   );
-}
+};
