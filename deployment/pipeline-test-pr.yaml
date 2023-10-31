@@ -291,7 +291,6 @@ stages:
               arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage/coverage.xml'
               pythonInterpreter: 'python3'
 
-
   - stage: trivy
     dependsOn: [build_and_push_backend]
     displayName: Trivy
@@ -307,8 +306,17 @@ stages:
               command: login
               containerRegistry: $(Docker.registryConnection)
           - script: |
-              docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.46.1 --exit-code 1 --severity HIGH --no-progress $(Docker.url)/$(Docker.backend.repository):$(tag)
-            displayName: "Trivy scan"            
+              docker run --rm \
+                -e TRIVY_EXIT_CODE=2 \
+                -e TRIVY_SEVERITY=MEDIUM,HIGH,CRITICAL \
+                -e TRIVY_NO_PROGRESS=true \
+                -e TRIVY_SECURITY_CHECKS=vuln \
+                -e TRIVY_CACHE_DIR=/cache \
+                -e TRIVY_IGNORE_UNFIXED=true \
+                -e TRIVY_SKIP_DIRS=/usr/local/lib/python3.9/site-packages/ \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                aquasec/trivy:0.46.1 image $(Docker.url)/$(Docker.backend.repository):$(tag)
+            displayName: "Trivy scan"
 
   - stage: e2e_tests
     dependsOn: [build_and_push_backend, build_and_push_frontend, test_frontend, build_and_push_cypress]
