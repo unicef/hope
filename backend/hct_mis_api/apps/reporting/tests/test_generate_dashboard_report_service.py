@@ -11,9 +11,10 @@ from hct_mis_api.apps.reporting.services.generate_dashboard_report_service impor
 class TestGenerateDashboardReportService(TestCase):
     def test_generate_report_successfully(self) -> None:
         create_afghanistan()
-        report = DashboardReportFactory(status=DashboardReport.IN_PROGRESS)
+        report = DashboardReportFactory(
+            status=DashboardReport.IN_PROGRESS, report_type=[DashboardReport.VOLUME_BY_DELIVERY_MECHANISM]
+        )
         service = GenerateDashboardReportService(report=report)
-
         service.generate_report()
 
         self.assertEqual(report.status, DashboardReport.COMPLETED)
