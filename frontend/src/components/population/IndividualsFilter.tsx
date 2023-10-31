@@ -18,6 +18,7 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 interface IndividualsFilterProps {
   filter;
@@ -28,7 +29,6 @@ interface IndividualsFilterProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
-  showProgramFilter?: boolean;
 }
 
 export const IndividualsFilter = ({
@@ -40,11 +40,11 @@ export const IndividualsFilter = ({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-  showProgramFilter = false,
 }: IndividualsFilterProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const { isAllPrograms } = useBaseUrl();
 
   const {
     handleFilterChange,
@@ -100,7 +100,7 @@ export const IndividualsFilter = ({
             </SelectFilter>
           </Grid>
         </Grid>
-        {showProgramFilter && (
+        {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
@@ -245,6 +245,23 @@ export const IndividualsFilter = ({
             data-cy='ind-filters-reg-date-to'
           />
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}

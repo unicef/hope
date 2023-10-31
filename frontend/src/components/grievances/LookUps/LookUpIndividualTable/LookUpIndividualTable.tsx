@@ -89,6 +89,7 @@ export const LookUpIndividualTable = ({
     excludedId: excludedId || ticket?.individual?.id || null,
     //TODO: add program filter
     // programs: isAllPrograms ? filter.program : programId,
+    // isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const renderTable = (): React.ReactElement => {

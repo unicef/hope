@@ -23,9 +23,8 @@ export const AllFeedbacks = gql`
       createdAtRange: $createdAtRange
       createdBy: $createdBy
       feedbackId: $feedbackId
-      orderBy: $orderBy # isActiveProgram: $isActiveProgram
-    ) # program: $program
-    {
+      orderBy: $orderBy # isActiveProgram: $isActiveProgram # program: $program
+    ) {
       totalCount
       pageInfo {
         startCursor
@@ -52,6 +51,10 @@ export const AllFeedbacks = gql`
             id
             unicefId
             category
+          }
+          program {
+            id
+            name
           }
         }
       }
