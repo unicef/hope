@@ -1,4 +1,5 @@
 from django.test import TestCase
+from parameterized import parameterized
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.reporting.fixtures import DashboardReportFactory
@@ -9,10 +10,23 @@ from hct_mis_api.apps.reporting.services.generate_dashboard_report_service impor
 
 
 class TestGenerateDashboardReportService(TestCase):
-    def test_generate_report_successfully(self) -> None:
+
+    @parameterized.expand(
+        [
+            (DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY,),
+            (DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA,),
+            (DashboardReport.BENEFICIARIES_REACHED,),
+            (DashboardReport.INDIVIDUALS_REACHED,),
+            (DashboardReport.VOLUME_BY_DELIVERY_MECHANISM,),
+            (DashboardReport.GRIEVANCES_AND_FEEDBACK,),
+            (DashboardReport.PROGRAMS,),
+            (DashboardReport.PAYMENT_VERIFICATION,),
+        ]
+    )
+    def test_generate_report_successfully(self, report_type) -> None:
         create_afghanistan()
         report = DashboardReportFactory(
-            status=DashboardReport.IN_PROGRESS, report_type=[DashboardReport.VOLUME_BY_DELIVERY_MECHANISM]
+            status=DashboardReport.IN_PROGRESS, report_type=[report_type]
         )
         service = GenerateDashboardReportService(report=report)
         service.generate_report()
