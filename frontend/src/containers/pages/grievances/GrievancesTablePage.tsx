@@ -47,7 +47,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     urgency: '',
     preferredLanguage: '',
     program: '',
-    isActiveProgram: true,
+    programState: 'active',
   };
 
   const [selectedTab, setSelectedTab] = useState(

@@ -17,10 +17,8 @@ export const AllHouseholdsForPopulationTable = gql`
     $lastRegistrationDate: String
     $admin2: ID
     $withdrawn: Boolean
-    $headOfHouseholdPhoneNoValid: Boolean
-  ) # TODO: Add programs filter
-  # $programs: [ID]
-  {
+    $headOfHouseholdPhoneNoValid: Boolean # TODO: Add programs filter # $programs: [ID]
+  ) {
     allHouseholds(
       after: $after
       before: $before
@@ -37,9 +35,8 @@ export const AllHouseholdsForPopulationTable = gql`
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
       withdrawn: $withdrawn
-      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
-    ) # programs: $programs
-    {
+      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid # programs: $programs
+    ) {
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -69,6 +66,14 @@ export const AllHouseholdsForPopulationTable = gql`
           totalCashReceived
           currency
           lastRegistrationDate
+          programs {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }

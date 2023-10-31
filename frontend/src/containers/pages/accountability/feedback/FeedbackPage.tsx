@@ -21,7 +21,7 @@ const initialFilter = {
   createdAtRangeMin: '',
   createdAtRangeMax: '',
   program: '',
-  isActiveProgram: true,
+  programState: 'active',
 };
 
 export const FeedbackPage = (): React.ReactElement => {

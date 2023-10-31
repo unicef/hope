@@ -11814,6 +11814,9 @@ export type AllFeedbacksQuery = (
         )>, linkedGrievance: Maybe<(
           { __typename?: 'GrievanceTicketNode' }
           & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'category'>
+        )>, program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
         )> }
       )> }
     )>> }
@@ -13103,7 +13106,16 @@ export type AllHouseholdsForPopulationTableQuery = (
         ), admin2: Maybe<(
           { __typename?: 'AreaNode' }
           & Pick<AreaNode, 'id' | 'name'>
-        )> }
+        )>, programs: (
+          { __typename?: 'ProgramNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'ProgramNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'ProgramNode' }
+              & Pick<ProgramNode, 'id' | 'name'>
+            )> }
+          )>> }
+        ) }
       )> }
     )>> }
   )> }
@@ -13231,7 +13243,7 @@ export type AllIndividualsForPopulationTableQuery = (
       & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'lastRegistrationDate' | 'relationship' | 'age' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -13239,6 +13251,9 @@ export type AllIndividualsForPopulationTableQuery = (
             { __typename?: 'AreaNode' }
             & Pick<AreaNode, 'id' | 'name'>
           )> }
+        )>, program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id'>
         )> }
       )> }
     )>> }
@@ -21597,6 +21612,10 @@ export const AllFeedbacksDocument = gql`
           unicefId
           category
         }
+        program {
+          id
+          name
+        }
       }
     }
   }
@@ -24723,6 +24742,14 @@ export const AllHouseholdsForPopulationTableDocument = gql`
         totalCashReceived
         currency
         lastRegistrationDate
+        programs {
+          edges {
+            node {
+              id
+              name
+            }
+          }
+        }
       }
     }
   }
@@ -24950,6 +24977,10 @@ export const AllIndividualsForPopulationTableDocument = gql`
             name
           }
         }
+        program {
+          id
+        }
+        lastRegistrationDate
         relationship
         age
         sex
