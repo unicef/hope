@@ -53,35 +53,50 @@ const hasResponseErrors = (response): boolean => {
 };
 
 const redirectLink = new ApolloLink((operation, forward) => {
+  // Call the next link in the chain and get the response
   return forward(operation).map((response) => {
+    // Check if the response has any errors
     if (hasResponseErrors(response)) {
-      //When there is an error in Mutation, log it
+      // Check if the operation is a mutation
       const isMutation = operation.query.definitions.some(
-        (definition) => definition.kind === 'OperationDefinition' && definition.operation === 'mutation'
+        (definition) =>
+          definition.kind === 'OperationDefinition' &&
+          definition.operation === 'mutation',
       );
-      if(isMutation){
+      // If it's a mutation, log the error to the console
+      if (isMutation) {
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      } else {
-        //When there is an error in Query, redirect to Something Went Wrong page
+      }
+      // If it's not a mutation and the app is not running on localhost or a dev environment, redirect to an error page
+      else if (
+        !window.location.hostname.includes('localhost') &&
+        !window.location.href.includes('dev') &&
+        !window.location.href.includes('stg')
+      ) {
+        // Get the business area from the URL
         const pathSegments = window.location.pathname.split('/');
         const businessArea = pathSegments[1];
 
+        // Redirect to the error page for the business area
         window.location.href = `/error/${businessArea}`;
       }
     }
-    //When no errors and data is null, redirect to 404 page
+    // If there are no errors and the data is null, redirect to a 404 page
     else if (
       response.data &&
       isDataNull(response.data) &&
       !hasResponseErrors(response)
     ) {
+      // Get the business area from the URL
       const pathSegments = window.location.pathname.split('/');
       const businessArea = pathSegments[1];
 
+      // Redirect to the 404 page for the business area
       window.location.href = `/404/${businessArea}`;
     }
 
+    // Return the response
     return response;
   });
 });
