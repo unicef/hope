@@ -45770,23 +45770,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Mobile Money Transfer Phone Number',
-                'labels': [
-                    {
-                        'label': 'Mobile Money Transfer Phone Number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'payment_delivery_phone_no',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
                     {
                         'labelEn': 'At no time',
                         'labels': [
@@ -46594,6 +46577,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'inc_job_h_f',
                 'required': False,
                 'type': 'DECIMAL'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Payment delivery phone number',
+                'labels': [
+                    {
+                        'label': 'Payment delivery phone number',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'payment_delivery_phone_no',
+                'required': False,
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
