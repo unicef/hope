@@ -12,7 +12,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { handleValidationErrors, today } from '../../../utils/utils';
+import { today } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
@@ -102,7 +102,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
       ),
   });
 
-  const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
@@ -124,15 +124,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
         historyMethod: 'push',
       });
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'updatePaymentPlan',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while editing Payment Plan'));
-      }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
