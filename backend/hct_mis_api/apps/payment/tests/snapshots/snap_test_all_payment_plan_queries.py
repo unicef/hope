@@ -341,3 +341,48 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] 
         }
     }
 }
+
+snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 1'] = {
+    'data': {
+        'payment': {
+            'additionalCollectorName': None,
+            'reasonForUnsuccessfulPayment': 'reason 123',
+            'snapshotCollectorBankAccountNumber': None,
+            'snapshotCollectorBankName': None,
+            'snapshotCollectorDebitCardNumber': None,
+            'snapshotCollectorDeliveryPhoneNo': None,
+            'snapshotCollectorFullName': None,
+            'totalPersonsCovered': 5
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 2'] = {
+    'data': {
+        'payment': {
+            'additionalCollectorName': 'AddCollectorName11',
+            'reasonForUnsuccessfulPayment': 'reason 222',
+            'snapshotCollectorBankAccountNumber': 'PrimaryCollBankNumber',
+            'snapshotCollectorBankName': 'PrimaryCollBankName',
+            'snapshotCollectorDebitCardNumber': 'PrimaryCollDebitCardNumber',
+            'snapshotCollectorDeliveryPhoneNo': '1111111',
+            'snapshotCollectorFullName': 'PrimaryCollectorFullName',
+            'totalPersonsCovered': 99
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 3'] = {
+    'data': {
+        'payment': {
+            'additionalCollectorName': 'AddCollectorName22',
+            'reasonForUnsuccessfulPayment': 'reason 333',
+            'snapshotCollectorBankAccountNumber': 'AlternateCollBankNumber',
+            'snapshotCollectorBankName': 'AlternateCollBankName',
+            'snapshotCollectorDebitCardNumber': 'AlternateCollDebitCardNumber',
+            'snapshotCollectorDeliveryPhoneNo': '222222222',
+            'snapshotCollectorFullName': 'AlternateCollectorFullName',
+            'totalPersonsCovered': 55
+        }
+    }
+}
