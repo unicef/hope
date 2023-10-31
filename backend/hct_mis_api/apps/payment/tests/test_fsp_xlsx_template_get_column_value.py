@@ -25,6 +25,18 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area)
 
+    def test_get_column_value_registration_token_empty(self) -> None:
+        household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
+        individual = individuals[0]
+        payment_plan = PaymentPlanFactory(
+            program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
+        )
+        payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+
+        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
+        # return empty string if no document
+        self.assertEqual(result, "")
+
     @parameterized.expand(
         [
             ("field_payment_id", "payment_id"),
