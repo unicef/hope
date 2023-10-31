@@ -6,26 +6,28 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Field } from 'formik';
-import styled from 'styled-components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import {
+  AllProgramsForChoicesQuery,
+  GrievancesChoiceDataQuery,
+  UserChoiceDataQuery,
+} from '../../../../__generated__/graphql';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import {
-  GrievancesChoiceDataQuery,
-  UserChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { choicesToDict } from '../../../../utils/utils';
 import { ContentLink } from '../../../core/ContentLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
-import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
-import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { Title } from '../../../core/Title';
+import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
-import { choicesToDict } from '../../../../utils/utils';
+import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -49,6 +51,7 @@ export interface DescriptionProps {
   baseUrl: string;
   choicesData: GrievancesChoiceDataQuery;
   userChoices: UserChoiceDataQuery;
+  programsData: AllProgramsForChoicesQuery;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
@@ -61,11 +64,13 @@ export const Description = ({
   baseUrl,
   choicesData,
   userChoices,
+  programsData,
   setFieldValue,
   errors,
   permissions,
 }: DescriptionProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isAllPrograms } = useBaseUrl();
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
@@ -75,6 +80,12 @@ export const Description = ({
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,
   );
+  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
+    (element) => ({ name: element.node.name, value: element.node.id }),
+  );
+
+  const isAnonymousTicket =
+    !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
   return (
     <>
@@ -221,6 +232,17 @@ export const Description = ({
               label={t('Urgency')}
               choices={urgencyChoicesData}
               component={FormikSelectField}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <Field
+              name='program'
+              label={t('Programme Name')}
+              fullWidth
+              variant='outlined'
+              choices={mappedProgramChoices}
+              component={FormikSelectField}
+              disabled={!isAllPrograms || !isAnonymousTicket}
             />
           </Grid>
         </Grid>
