@@ -58,7 +58,7 @@ def migrate_data_to_representations_per_business_area(
     delete other TargetPopulations
     For all households and individuals in given TargetPopulations:
     - create new representations
-    - copy all objects related to old households/individuals or adjust existing ones if they are related to program
+    - copy all objects related to old households/individuals
     - handle RDI: if there is RDI for household copy all households in this RDI to current program
     For whole business_area:
     - for rdi that was not related to program: add rdi and copy its households to the biggest program in that ba
@@ -127,9 +127,12 @@ def migrate_data_to_representations_per_business_area(
 
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
-    ).distinct().update(is_migration_handled=True)
+    ).update(is_migration_handled=True)
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
+    Household.original_and_repr_objects.filter(
+        business_area=business_area, copied_to__isnull=False, is_original=True
+    ).update(is_migration_handled=True)
 
 
 def get_household_representation_per_program_by_old_household_id(
