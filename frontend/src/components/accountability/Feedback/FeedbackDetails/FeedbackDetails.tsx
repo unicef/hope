@@ -1,4 +1,4 @@
-import { Grid, GridSize, Typography } from '@material-ui/core';
+import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '../../../../utils/utils';
@@ -12,6 +12,7 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
+import { ContentLink } from '../../../core/ContentLink';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];
@@ -97,7 +98,19 @@ export const FeedbackDetails = ({
               },
               {
                 label: t('Programme'),
-                value: feedback.program?.name,
+                value: (
+                  <span>
+                    {feedback.program?.id ? (
+                      <BlackLink
+                        to={`/${baseUrl}/details/${feedback.program.id}`}
+                      >
+                        {feedback.program.name}
+                      </BlackLink>
+                    ) : (
+                      '-'
+                    )}
+                  </span>
+                ),
                 size: 3,
               },
               {

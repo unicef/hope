@@ -13243,7 +13243,7 @@ export type AllIndividualsForPopulationTableQuery = (
       & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'lastRegistrationDate' | 'relationship' | 'age' | 'sex'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -13251,9 +13251,6 @@ export type AllIndividualsForPopulationTableQuery = (
             { __typename?: 'AreaNode' }
             & Pick<AreaNode, 'id' | 'name'>
           )> }
-        )>, program: Maybe<(
-          { __typename?: 'ProgramNode' }
-          & Pick<ProgramNode, 'id'>
         )> }
       )> }
     )>> }
@@ -24977,10 +24974,6 @@ export const AllIndividualsForPopulationTableDocument = gql`
             name
           }
         }
-        program {
-          id
-        }
-        lastRegistrationDate
         relationship
         age
         sex
