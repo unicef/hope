@@ -88,6 +88,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
+
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.models import BusinessArea
 
