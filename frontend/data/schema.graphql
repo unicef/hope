@@ -794,15 +794,16 @@ type DataCollectingTypeNode implements Node {
   modified: DateTime!
   label: String!
   code: String!
+  type: DataCollectingTypeType
   description: String!
   compatibleTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   active: Boolean!
+  deprecated: Boolean!
   individualFiltersAvailable: Boolean!
   householdFiltersAvailable: Boolean!
   recalculateComposition: Boolean!
   datacollectingtypeSet(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
@@ -816,6 +817,11 @@ type DataCollectingTypeNodeConnection {
 type DataCollectingTypeNodeEdge {
   node: DataCollectingTypeNode
   cursor: String!
+}
+
+enum DataCollectingTypeType {
+  STANDARD
+  SOCIAL
 }
 
 scalar Date
@@ -1536,7 +1542,6 @@ type HouseholdNode implements Node {
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
-  dataCollectingType: DataCollectingTypeNode
   program: ProgramNode
   copiedFrom: HouseholdNode
   originUnicefId: String
@@ -2763,9 +2768,6 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  copiedFrom: PaymentNode
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -2782,7 +2784,6 @@ type PaymentNode implements Node {
   additionalDocumentType: String
   additionalDocumentNumber: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
@@ -3130,9 +3131,6 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  copiedFrom: PaymentRecordNode
   caId: String
   caHashId: UUID
   parent: CashPlanNode
@@ -3147,7 +3145,6 @@ type PaymentRecordNode implements Node {
   visionId: String
   registrationCaId: String
   serviceProvider: ServiceProviderNode!
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verification: PaymentVerificationNode
   unicefId: String
 }
@@ -3389,6 +3386,7 @@ type ProgramNode implements Node {
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
+  isVisible: Boolean!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
