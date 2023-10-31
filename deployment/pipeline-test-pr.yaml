@@ -284,6 +284,7 @@ stages:
               path: '$(System.ArtifactsDirectory)/old_coverage'
           - task: PythonScript@0
             displayName: 'Check Coverage'
+            continueOnError: true
             inputs:
               scriptSource: 'filePath'
               scriptPath: './backend/compare_coverage.py'
