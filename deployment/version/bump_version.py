@@ -20,7 +20,7 @@ def bump_version():
 
 
 def get_hotfix_new_version(version_string):
-    version_regex = "(\d+).(\d+).(\d+)-hotfix-(\d+)"
+    version_regex = r"(\d+).(\d+).(\d+)-hotfix-(\d+)"
     match = re.match(version_regex, version_string)
     if not match:
         return f"{version_string}-hotfix-1"
@@ -30,7 +30,7 @@ def get_hotfix_new_version(version_string):
 
 
 def get_normal_new_version(version_string):
-    version_regex = "(\d+).(\d+).(\d+).*"
+    version_regex = r"(\d+).(\d+).(\d+).*"
     (old_year, old_month, old_minor) = re.match(version_regex, version_string).groups()
     current_year = str(date.today().year)
     current_month = str(date.today().month)
