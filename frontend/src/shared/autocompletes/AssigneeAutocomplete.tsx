@@ -81,6 +81,8 @@ export const AssigneeAutocomplete = ({
     setAppliedFilter,
   );
 
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}

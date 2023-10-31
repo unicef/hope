@@ -81,6 +81,7 @@ export const CreatedByAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
