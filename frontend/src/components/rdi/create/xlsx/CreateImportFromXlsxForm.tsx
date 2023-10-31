@@ -139,7 +139,7 @@ export function CreateImportFromXlsxForm({
         />
         <Field
           name='programId'
-          label={t('Program Name')}
+          label={t('Programme Name')}
           fullWidth
           variant='outlined'
           required
