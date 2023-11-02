@@ -215,6 +215,6 @@ stages:
               summaryFileLocation: 'backend/coverage.xml'
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Pipeline.Workspace)' # string. Alias: path. Required. File or directory path. Default: $(Pipeline.Workspace).
+              targetPath: backend/coverage.xml
               artifact: BackendLineCoverage
               publishLocation: 'pipeline'
