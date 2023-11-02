@@ -29,7 +29,6 @@ export const CreatedByAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  dataCy,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
