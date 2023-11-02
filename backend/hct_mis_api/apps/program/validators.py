@@ -50,5 +50,7 @@ def validate_data_collecting_type(
     program_data_collecting_type: "DataCollectingType", data_collecting_type: "DataCollectingType"
 ) -> None:
     # TODO: maybe add filter by BA 'DataCollectingType.limit_to'
-    if data_collecting_type not in program_data_collecting_type.compatible_types.all():
+    if (
+        data_collecting_type != program_data_collecting_type
+    ) and data_collecting_type not in program_data_collecting_type.compatible_types.all():
         raise ValidationError("The Data Collection Type must match or be compatible with the original Programme.")
