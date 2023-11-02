@@ -119,6 +119,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
+            dataCy='filters-creation-date-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -126,6 +127,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
+            dataCy='filters-creation-date-to'
           />
         </Grid>
       </Grid>
