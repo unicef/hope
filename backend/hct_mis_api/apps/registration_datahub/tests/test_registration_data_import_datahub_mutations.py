@@ -165,7 +165,6 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": self.business_area_slug,
-                    "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 }
             },
         )
