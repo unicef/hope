@@ -75,7 +75,7 @@ class TestChangeProgramStatus(APITestCase):
         self, _: Any, permissions: List[Permissions], initial_status: str, target_status: str
     ) -> None:
         data_collecting_type, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Full", "code": "full", "description": "Full"}
+            **{"label": "Full", "code": "full_collection", "description": "Full"}
         )
         program = ProgramFactory.create(
             status=initial_status,
