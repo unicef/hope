@@ -41,6 +41,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualIdentity,
 )
 from hct_mis_api.conftest import disabled_locally_test
 
@@ -157,6 +158,27 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(role.individual.full_name, "Some Full Name")
 
         self.assertEqual(household_obj_data, household_data)
+
+    def test_execute_handle_identities(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+        self.assertEqual(ImportedIndividualIdentity.objects.count(), 2)
+        self.assertEqual(
+            ImportedIndividualIdentity.objects.filter(
+                document_number="TEST", country="PL", partner="WFP", individual__full_name="Some Full Name"
+            ).count(),
+            1,
+        )
+        self.assertEqual(
+            ImportedIndividualIdentity.objects.filter(
+                document_number="WTG", country="PL", individual__full_name="Some Full Name", partner="UNHCR"
+            ).count(),
+            1,
+        )
 
     def test_handle_document_fields(self) -> None:
         task = self.RdiXlsxCreateTask()
