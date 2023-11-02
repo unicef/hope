@@ -32,7 +32,7 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
         'updateProgram': {
             'program': {
                 'dataCollectingType': {
-                    'code': 'partial',
+                    'code': 'partial_individuals',
                     'label': 'Partial'
                 },
                 'name': 'updated name',
