@@ -9,8 +9,12 @@ const Link = styled.a`
   font-size: 14px;
   line-height: 19px;
   max-width: ${(props) => (props.fullWidth ? '100%' : '200px')}
+<<<<<<< HEAD
   white-space: wrap;
   display: inline-block;
+=======
+  overflow-wrap: break-word;
+>>>>>>> origin
 `;
 
 export const ContentLink = ({

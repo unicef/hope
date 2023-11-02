@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest import skip
 
 from parameterized import parameterized
 
@@ -195,6 +196,25 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+<<<<<<< HEAD
+=======
+    @skip("After merging GPF, remove 2nd program")
+    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
+            context={"user": self.user},
+            variables={"programs": [self.program_two.id]},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+>>>>>>> origin
     def test_query_individuals_by_search_full_name_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
