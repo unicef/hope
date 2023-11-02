@@ -90,12 +90,14 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
             parent=cash_plan,
+            currency="PLN",
         )
         cls.payment_record2 = PaymentRecordFactory(
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
             parent=cash_plan,
+            currency="PLN",
         )
         grievance_1 = GrievanceTicketFactory(
             id="0fdbf2fc-e94e-4c64-acce-6e7edd4bbd87",

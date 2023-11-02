@@ -141,6 +141,7 @@ export type AddIndividualDataObjectType = {
   businessArea?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
 };
 
 export type AddIndividualIssueTypeExtras = {
@@ -3008,6 +3009,7 @@ export type ImportedIndividualNode = Node & {
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   email?: Maybe<Scalars['String']>,
+  paymentDeliveryPhoneNo: Scalars['String'],
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: ImportedIndividualDisability,
@@ -3225,6 +3227,7 @@ export type IndividualNode = Node & {
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   email: Scalars['String'],
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
   relationship?: Maybe<IndividualRelationship>,
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -3570,6 +3573,7 @@ export type IndividualUpdateDataObjectType = {
   paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
 };
 
 export type InvalidPaymentVerificationPlan = {
@@ -4449,6 +4453,9 @@ export type PaymentNode = Node & {
   program?: Maybe<ProgramNode>,
   orderNumber?: Maybe<Scalars['Int']>,
   tokenNumber?: Maybe<Scalars['Int']>,
+  additionalCollectorName?: Maybe<Scalars['String']>,
+  additionalDocumentType?: Maybe<Scalars['String']>,
+  additionalDocumentNumber?: Maybe<Scalars['String']>,
   followUps: PaymentNodeConnection,
   copiedTo: PaymentNodeConnection,
   householdSnapshot?: Maybe<PaymentHouseholdSnapshotNode>,
@@ -4460,8 +4467,13 @@ export type PaymentNode = Node & {
   targetPopulation?: Maybe<TargetPopulationNode>,
   verification?: Maybe<PaymentVerificationNode>,
   distributionModality?: Maybe<Scalars['String']>,
-  totalPersonsCovered?: Maybe<Scalars['Int']>,
   serviceProvider?: Maybe<FinancialServiceProviderNode>,
+  totalPersonsCovered?: Maybe<Scalars['Int']>,
+  snapshotCollectorFullName?: Maybe<Scalars['String']>,
+  snapshotCollectorDeliveryPhoneNo?: Maybe<Scalars['String']>,
+  snapshotCollectorBankName?: Maybe<Scalars['String']>,
+  snapshotCollectorBankAccountNumber?: Maybe<Scalars['String']>,
+  snapshotCollectorDebitCardNumber?: Maybe<Scalars['String']>,
 };
 
 
@@ -6485,6 +6497,9 @@ export type QueryAllUsersArgs = {
   search?: Maybe<Scalars['String']>,
   roles?: Maybe<Array<Maybe<Scalars['String']>>>,
   isTicketCreator?: Maybe<Scalars['Boolean']>,
+  isSurveyCreator?: Maybe<Scalars['Boolean']>,
+  isMessageCreator?: Maybe<Scalars['Boolean']>,
+  isFeedbackCreator?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -9301,7 +9316,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage' | 'paymentDeliveryPhoneNo'>
   & { paymentChannels: Maybe<Array<Maybe<(
     { __typename?: 'BankAccountInfoNode' }
     & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
@@ -11415,7 +11430,10 @@ export type AllUsersForFiltersQueryVariables = {
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
-  isTicketCreator?: Maybe<Scalars['Boolean']>
+  isTicketCreator?: Maybe<Scalars['Boolean']>,
+  isSurveyCreator?: Maybe<Scalars['Boolean']>,
+  isMessageCreator?: Maybe<Scalars['Boolean']>,
+  isFeedbackCreator?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -12100,10 +12118,13 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, sourcePayment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId'>
     )>, verification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
@@ -12116,7 +12137,7 @@ export type PaymentQuery = (
       ) }
     ), collector: (
       { __typename?: 'IndividualNode' }
-      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
+      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'email' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id' | 'status' | 'isFollowUp' | 'unicefId'>
@@ -12663,7 +12684,7 @@ export type PaymentRecordQuery = (
       ) }
     ), parent: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
+      & Pick<CashPlanNode, 'id' | 'unicefId' | 'caId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -14409,6 +14430,7 @@ export const IndividualDetailedFragmentDoc = gql`
     bankAccountNumber
   }
   preferredLanguage
+  paymentDeliveryPhoneNo
 }
     ${IndividualMinimalFragmentDoc}`;
 export const HouseholdMinimalFragmentDoc = gql`
@@ -20509,8 +20531,8 @@ export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const AllUsersForFiltersDocument = gql`
-    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean) {
-  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator) {
+    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean, $isSurveyCreator: Boolean, $isMessageCreator: Boolean, $isFeedbackCreator: Boolean) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator, isSurveyCreator: $isSurveyCreator, isMessageCreator: $isMessageCreator, isFeedbackCreator: $isFeedbackCreator) {
     edges {
       node {
         id
@@ -20560,6 +20582,9 @@ export function withAllUsersForFilters<TProps, TChildProps = {}>(operationOption
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
  *      isTicketCreator: // value for 'isTicketCreator'
+ *      isSurveyCreator: // value for 'isSurveyCreator'
+ *      isMessageCreator: // value for 'isMessageCreator'
+ *      isFeedbackCreator: // value for 'isFeedbackCreator'
  *   },
  * });
  */
@@ -22410,9 +22435,15 @@ export const PaymentDocument = gql`
     distributionModality
     status
     statusDate
+    snapshotCollectorBankName
+    snapshotCollectorBankAccountNumber
     targetPopulation {
       id
       name
+    }
+    sourcePayment {
+      id
+      unicefId
     }
     verification {
       id
@@ -22443,6 +22474,7 @@ export const PaymentDocument = gql`
       id
       unicefId
       fullName
+      email
       phoneNo
       phoneNoValid
       phoneNoAlternative
@@ -22474,6 +22506,10 @@ export const PaymentDocument = gql`
       id
       fullName
     }
+    additionalCollectorName
+    additionalDocumentType
+    additionalDocumentNumber
+    reasonForUnsuccessfulPayment
   }
 }
     `;
@@ -23673,6 +23709,7 @@ export const PaymentRecordDocument = gql`
     }
     parent {
       id
+      unicefId
       caId
       program {
         id
@@ -30263,6 +30300,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  paymentDeliveryPhoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
@@ -30386,6 +30424,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentDeliveryPhoneNo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
@@ -30790,6 +30829,9 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   orderNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  additionalCollectorName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  additionalDocumentType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  additionalDocumentNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
   copiedTo?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeCopiedToArgs>,
   householdSnapshot?: Resolver<Maybe<ResolversTypes['PaymentHouseholdSnapshotNode']>, ParentType, ContextType>,
@@ -30801,8 +30843,13 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   distributionModality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   serviceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+  totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  snapshotCollectorFullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorDeliveryPhoneNo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorBankName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorBankAccountNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorDebitCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type PaymentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentNodeConnection'] = ResolversParentTypes['PaymentNodeConnection']> = {
