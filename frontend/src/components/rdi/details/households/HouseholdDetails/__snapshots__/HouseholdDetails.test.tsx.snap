@@ -102,13 +102,8 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-Head of Household"
             >
               <a
-<<<<<<< HEAD
-                class="sc-bwzfXH kjUrzi"
-                href="/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
-=======
                 class="sc-bwzfXH kVuoVk"
-                href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
->>>>>>> origin
+                href="/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
               >
                 Agata Kowalska
               </a>

@@ -44,11 +44,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Female Children"
                   >
                     <span
-<<<<<<< HEAD
-                      class="sc-bwzfXH eVLibZ"
-=======
                       class="sc-bwzfXH kOktSP"
->>>>>>> origin
                       color="textSecondary"
                     >
                       0
@@ -75,11 +71,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Female Adults"
                   >
                     <span
-<<<<<<< HEAD
-                      class="sc-bwzfXH eVLibZ"
-=======
                       class="sc-bwzfXH kOktSP"
->>>>>>> origin
                       color="textSecondary"
                     >
                       1
@@ -106,11 +98,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Male Children"
                   >
                     <span
-<<<<<<< HEAD
-                      class="sc-bwzfXH eVLibZ"
-=======
                       class="sc-bwzfXH kOktSP"
->>>>>>> origin
                       color="textSecondary"
                     >
                       0
@@ -137,11 +125,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Male Adults"
                   >
                     <span
-<<<<<<< HEAD
-                      class="sc-bwzfXH eVLibZ"
-=======
                       class="sc-bwzfXH kOktSP"
->>>>>>> origin
                       color="textSecondary"
                     >
                       2

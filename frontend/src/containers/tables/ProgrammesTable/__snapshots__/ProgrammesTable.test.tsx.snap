@@ -234,13 +234,8 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-<<<<<<< HEAD
-                    class="sc-htoDjs gqlIhP"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
-=======
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
->>>>>>> origin
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
                   >
                     Notice hair fall college enough perhaps.
                   </a>

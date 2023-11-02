@@ -60,11 +60,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-START DATE"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 <time
@@ -90,11 +86,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-END DATE"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 <time
@@ -120,11 +112,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Sector"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 Child Protection
@@ -146,11 +134,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Scope"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 Unicef
@@ -189,11 +173,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Frequency of Payment"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 Regular
@@ -215,11 +195,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Administrative Areas of implementation"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 Crime book.
@@ -241,11 +217,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Description"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 Yeah worry might newspaper drive her many.
@@ -267,11 +239,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-CASH+"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 No
@@ -293,11 +261,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"
             >
               <span
-<<<<<<< HEAD
-                class="sc-htpNat cjXsvk"
-=======
                 class="sc-htpNat gXZdAP"
->>>>>>> origin
                 color="textSecondary"
               >
                 No
