@@ -50,7 +50,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Cash"
             >
               <span
+<<<<<<< HEAD
                 class="sc-ifAKCX gZXQZf"
+=======
+                class="sc-ifAKCX eVOAmK"
+>>>>>>> origin
                 color="textSecondary"
               >
                 Miranda Ltd
@@ -72,7 +76,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-In Kind"
             >
               <span
+<<<<<<< HEAD
                 class="sc-ifAKCX gZXQZf"
+=======
+                class="sc-ifAKCX eVOAmK"
+>>>>>>> origin
                 color="textSecondary"
               >
                 Frazier-Watson
@@ -94,7 +102,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Transfer"
             >
               <span
+<<<<<<< HEAD
                 class="sc-ifAKCX gZXQZf"
+=======
+                class="sc-ifAKCX eVOAmK"
+>>>>>>> origin
                 color="textSecondary"
               >
                 Bray Group
@@ -147,7 +159,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Cash (Miranda Ltd)"
                   >
                     <span
+<<<<<<< HEAD
                       class="sc-ifAKCX gZXQZf"
+=======
+                      class="sc-ifAKCX eVOAmK"
+>>>>>>> origin
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -174,7 +190,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-In Kind (Frazier-Watson)"
                   >
                     <span
+<<<<<<< HEAD
                       class="sc-ifAKCX gZXQZf"
+=======
+                      class="sc-ifAKCX eVOAmK"
+>>>>>>> origin
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -201,7 +221,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Transfer (Bray Group)"
                   >
                     <span
+<<<<<<< HEAD
                       class="sc-ifAKCX gZXQZf"
+=======
+                      class="sc-ifAKCX eVOAmK"
+>>>>>>> origin
                       color="textSecondary"
                     >
                       0 PLN (0 USD)

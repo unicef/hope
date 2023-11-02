@@ -81,6 +81,7 @@ export const CreatedByMessageAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
@@ -106,11 +107,15 @@ export const CreatedByMessageAutocomplete = ({
       getOptionLabel={(option) => {
         let optionLabel;
         if (option.node) {
-          const {firstName, lastName} = option.node;
+          const { firstName, lastName } = option.node;
           optionLabel = `${firstName} ${lastName}`;
         } else {
-          const foundUser = data?.allUsers?.edges?.find((el) => el.node.id === option)?.node;
-          optionLabel = foundUser ? `${foundUser.firstName} ${foundUser.lastName}` : '';
+          const foundUser = data?.allUsers?.edges?.find(
+            (el) => el.node.id === option,
+          )?.node;
+          optionLabel = foundUser
+            ? `${foundUser.firstName} ${foundUser.lastName}`
+            : '';
         }
         return `${optionLabel}`;
       }}

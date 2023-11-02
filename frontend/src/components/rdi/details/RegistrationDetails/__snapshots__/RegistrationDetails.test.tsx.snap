@@ -71,7 +71,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   data-cy="label-Source of Data"
                 >
                   <span
+<<<<<<< HEAD
                     class="sc-htpNat cjXsvk"
+=======
+                    class="sc-htpNat gXZdAP"
+>>>>>>> origin
                     color="textSecondary"
                   >
                     XLS
@@ -93,7 +97,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   data-cy="label-Import Date"
                 >
                   <span
+<<<<<<< HEAD
                     class="sc-htpNat cjXsvk"
+=======
+                    class="sc-htpNat gXZdAP"
+>>>>>>> origin
                     color="textSecondary"
                   >
                     <time
@@ -119,7 +127,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   data-cy="label-Imported by"
                 >
                   <span
+<<<<<<< HEAD
                     class="sc-htpNat cjXsvk"
+=======
+                    class="sc-htpNat gXZdAP"
+>>>>>>> origin
                     color="textSecondary"
                   >
                     Maciej Szewczyk
