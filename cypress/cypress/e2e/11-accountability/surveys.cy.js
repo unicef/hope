@@ -1,17 +1,14 @@
 import ErrorPage from "../../page-objects/404.po";
-import SurveysPage from "../../page-objects/pages/accountability/communication_page.po";
+import SurveysPage from "../../page-objects/pages/accountability/surveys.po";
 
 let error404Page = new ErrorPage();
 let surveysPage = new SurveysPage();
 
 describe("Accountability - Surveys", () => {
-  before(function () {
-    cy.navigateToHomePage();
-    surveysPage.clickMenuAccountability();
-  });
   beforeEach(() => {
-    surveysPage.clickMenuAccountability();
-    surveysPage.clickMenuSurveys();
+    cy.navigateToHomePage();
+    surveysPage.getMenuButtonAccountability();
+    surveysPage.getMenuButtonSurveys();
   });
 
   describe("Smoke tests Accountability - Surveys", () => {

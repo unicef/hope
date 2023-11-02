@@ -13,9 +13,11 @@ export default class BaseComponent {
   navPaymentVerification = 'a[data-cy="nav-Payment Verification"]';
   navGrievance = 'div[data-cy="nav-Grievance"]';
   navGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]';
-  navGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   navFeedback = 'a[data-cy="nav-Feedback"]';
   navReporting = 'a[data-cy="nav-Reporting"]';
+  navAccountability = 'a[data-cy="nav-Accountability"]';
+  navCommunication = 'a[data-cy="nav-Communication"]';
+  navSurveys = 'a[data-cy="nav-Surveys"]';
   navProgrammeUsers = 'a[data-cy="nav-Programme Users"]';
   navActivityLog = 'a[data-cy="nav-Activity Log"]';
   navResourcesKnowledgeBase = 'a[data-cy="nav-resources-Knowledge Base"]';
@@ -71,6 +73,9 @@ export default class BaseComponent {
   getMenuButtonPaymentVerification = () => cy.get(this.navPaymentVerification);
   getMenuButtonTargeting = () => cy.get(this.navTargeting);
   getMenuButtonGrievance = () => cy.get(this.navGrievance);
+  getMenuButtonAccountability = () => cy.get(this.navAccountability);
+  getMenuButtonCommunication = () => cy.get(this.navCommunication);
+  getMenuButtonSurveys = () => cy.get(this.navSurveys);
   getMenuButtonGrievanceTickets = () => cy.get(this.navGrievanceTickets);
   getMenuButtonGrievanceDashboard = () => cy.get(this.navGrievanceDashboard);
   getGlobalProgramFilter = () => cy.get(this.globalProgramFilter);

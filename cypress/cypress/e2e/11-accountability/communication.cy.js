@@ -1,16 +1,14 @@
 import ErrorPage from "../../page-objects/404.po";
-import CommunicationPage from "../../page-objects/pages/accountability/communication_page.po";
+import CommunicationPage from "../../page-objects/pages/accountability/communication.po";
 
 let error404Page = new ErrorPage();
 let communicationPage = new CommunicationPage();
 
 describe("Accountability - Communication", () => {
-  before(function () {
-    cy.navigateToHomePage();
-    accountabilityPage.clickMenuAccountability();
-  });
   beforeEach(() => {
-    accountabilityPage.clickMenuAccountability();
+    cy.navigateToHomePage();
+    communicationPage.getMenuButtonAccountability();
+    communicationPage.getMenuButtonSurveys();
   });
 
   describe("Smoke tests Accountability - Communication", () => {
