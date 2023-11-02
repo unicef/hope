@@ -116,6 +116,7 @@ export const PaymentPlansFilters = ({
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityFrom', e.target.value)
             }
+            data-cy='filters-total-entitled-quantity-from'
           />
         </Grid>
         <Grid item xs={3}>
@@ -131,6 +132,7 @@ export const PaymentPlansFilters = ({
               filter.totalEntitledQuantityTo &&
               filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo
             }
+            data-cy='filters-total-entitled-quantity-to'
           />
         </Grid>
         <Grid item xs={3}>
