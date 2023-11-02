@@ -16,7 +16,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'cashPlus': True,
                 'dataCollectingType': {
                     'active': True,
-                    'code': 'full',
+                    'code': 'partial_individuals',
                     'description': 'Partial individuals collected',
                     'individualFiltersAvailable': True
                 },
