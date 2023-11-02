@@ -37,6 +37,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
                 parent=cls.payment_plan,
                 household=household,
                 program=program,
+                currency="PLN",
             )
 
     def test_payments_created_payments(self) -> None:
