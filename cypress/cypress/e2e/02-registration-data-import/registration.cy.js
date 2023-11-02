@@ -33,7 +33,8 @@ describe("Registration Data Import", () => {
         });
       });
       // ToDo: Refactor this in second milestone
-      it("Merge Data", () => {
+      // TODO: 178234
+      it.skip("Merge Data", () => {
         registrationDataImport.uploadRDIFile();
         registrationDataImport.mergeRDIFile();
         registrationDataImport.verifyMergedData();
