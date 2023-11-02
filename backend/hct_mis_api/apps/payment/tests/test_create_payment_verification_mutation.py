@@ -50,6 +50,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             delivered_quantity_usd=None,
             household=household,
             status=PaymentRecord.STATUS_SUCCESS,
+            currency="PLN",
         )
         # after .create(...), newly created PaymentRecord does not have `head_of_household` set
         # logic needs it to check record.head_of_household.phone_no

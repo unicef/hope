@@ -54,7 +54,7 @@ export const CreatedByAutocomplete = ({
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
     variables: {
       businessArea,
-      first: 20,
+      first: 100,
       orderBy: 'first_name,last_name,email',
       search: debouncedInputText,
       isTicketCreator: true,
@@ -81,6 +81,7 @@ export const CreatedByAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
