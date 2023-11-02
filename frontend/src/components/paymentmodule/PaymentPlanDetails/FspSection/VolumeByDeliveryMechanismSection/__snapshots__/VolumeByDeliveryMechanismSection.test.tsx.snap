@@ -39,11 +39,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Cash (Miranda Ltd)"
               >
                 <span
-<<<<<<< HEAD
-                  class="sc-bwzfXH eVLibZ"
-=======
                   class="sc-bwzfXH kOktSP"
->>>>>>> origin
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -70,11 +66,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-In Kind (Frazier-Watson)"
               >
                 <span
-<<<<<<< HEAD
-                  class="sc-bwzfXH eVLibZ"
-=======
                   class="sc-bwzfXH kOktSP"
->>>>>>> origin
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -101,11 +93,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Transfer (Bray Group)"
               >
                 <span
-<<<<<<< HEAD
-                  class="sc-bwzfXH eVLibZ"
-=======
                   class="sc-bwzfXH kOktSP"
->>>>>>> origin
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
