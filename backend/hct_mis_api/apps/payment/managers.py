@@ -113,7 +113,7 @@ class PaymentManager(SoftDeletableManager):
     use_for_related_fields = True
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(is_original=True).with_payment_plan_conflicts()
+        return super().get_queryset().with_payment_plan_conflicts()
 
     def eligible(self) -> QuerySet:
         return self.get_queryset().eligible()
