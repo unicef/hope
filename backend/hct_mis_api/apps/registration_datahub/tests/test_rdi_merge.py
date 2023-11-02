@@ -9,6 +9,7 @@ from freezegun import freeze_time
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COLLECT_TYPE_FULL,
@@ -371,3 +372,35 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         role.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
+
+    def test_registration_id_from_kobo_registration_id_should_be_unique(self) -> None:
+        create_household({"registration_id": "ABCD-123123#0"})
+        create_household({"registration_id": "ABCD-321321#0"})
+
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            kobo_registration_id="ABCD-123123",
+        )
+        self.set_imported_individuals(imported_household)
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            kobo_registration_id="ABCD-123123",
+        )
+        self.set_imported_individuals(imported_household)
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            kobo_registration_id="ABCD-111111",
+        )
+        self.set_imported_individuals(imported_household)
+
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+
+        households = Household.objects.all().order_by("created_at")
+
+        self.assertEqual(5, households.count())
+        self.assertEqual("ABCD-123123#0", households[0].registration_id)
+        self.assertEqual("ABCD-321321#0", households[1].registration_id)
+        self.assertEqual("ABCD-123123#1", households[2].registration_id)
+        self.assertEqual("ABCD-123123#2", households[3].registration_id)
+        self.assertEqual("ABCD-111111#0", households[4].registration_id)

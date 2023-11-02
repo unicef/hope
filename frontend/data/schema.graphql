@@ -1539,7 +1539,7 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
-  registrationId: Int
+  registrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
@@ -1990,6 +1990,7 @@ type ImportedHouseholdNode implements Node {
   koboSubmissionUuid: UUID
   koboAssetId: String!
   koboSubmissionTime: DateTime
+  koboRegistrationId: String
   rowId: Int
   diiaRecId: String!
   enumeratorRecId: Int
@@ -2302,7 +2303,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
-  registrationId: Int
+  registrationId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!

@@ -222,6 +222,13 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
                 {household?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </Grid>
+            {household?.registrationId && (
+              <Grid item xs={3}>
+                <LabelizedField label={t('Registration id')}>
+                  {household.registrationId}
+                </LabelizedField>
+              </Grid>
+            )}
           </Grid>
           {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>

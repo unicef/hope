@@ -485,7 +485,9 @@ class Household(
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
-    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
+    registration_id = models.CharField(
+        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and kobo_registration_id"
+    )
     total_cash_received_usd = models.DecimalField(
         null=True,
         decimal_places=2,
@@ -970,7 +972,9 @@ class Individual(
     child_hoh = models.BooleanField(default=False)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
-    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
+    registration_id = models.CharField(
+        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and kobo_registration_id"
+    )
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)

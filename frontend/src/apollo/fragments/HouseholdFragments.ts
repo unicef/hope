@@ -163,6 +163,7 @@ export const householdDetailed = gql`
         currency
       }
     }
+    registrationId
   }
 `;
 
@@ -176,13 +177,13 @@ export const mergedHouseholdMinimal = gql`
     }
     size
     admin1 {
-        id
-        name
-    }    
+      id
+      name
+    }
     admin2 {
-        id
-        name
-    }    
+      id
+      name
+    }
     firstRegistrationDate
     hasDuplicates
   }

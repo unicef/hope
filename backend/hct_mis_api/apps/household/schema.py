@@ -365,6 +365,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         filterset_class=IndividualFilter,
     )
     residence_status = graphene.String()
+    registration_id = graphene.String()
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
@@ -423,6 +424,12 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_active_individuals_count(parent: Household, info: Any) -> int:
         return parent.active_individuals.count()
+
+    @staticmethod
+    def resolve_registration_id(parent: Household, info: Any) -> Optional[str]:
+        if not parent.registration_id:
+            return None
+        return parent.registration_id.split("#")[0]
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Household) -> None:
