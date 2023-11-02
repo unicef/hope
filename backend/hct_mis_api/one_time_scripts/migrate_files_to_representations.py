@@ -8,7 +8,12 @@ from hct_mis_api.apps.grievance.models import GrievanceDocument
 from hct_mis_api.apps.household.models import Document, Household, Individual
 
 
-def migrate_files_to_representations(business_area: BusinessArea) -> None:
+def migrate_files_to_representations() -> None:
+    for business_area in BusinessArea.objects.all():
+        migrate_files_to_representations_per_business_area(business_area)
+
+
+def migrate_files_to_representations_per_business_area(business_area: BusinessArea) -> None:
     migrate_grievance_document_files(business_area)
     migrate_document_files(business_area)
     migrate_individual_files(business_area)
