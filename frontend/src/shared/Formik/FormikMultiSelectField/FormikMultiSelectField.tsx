@@ -69,6 +69,7 @@ export const FormikMultiSelectField = ({
         labelId='mutiple-chip-label'
         id='mutiple-chip'
         multiple
+        data-cy={`select-${field.name}`}
         value={field.value}
         onChange={handleChange}
         input={<Input id='select-multiple-chip' />}

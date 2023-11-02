@@ -87,6 +87,7 @@ export const TargetPopulationAutocomplete = ({
     <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
+      data-cy='filters-target-population-autocomplete'
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) =>
@@ -122,6 +123,7 @@ export const TargetPopulationAutocomplete = ({
         <TextField
           {...params}
           label={label || t('Target Population')}
+          data-cy='filters-target-population-input'
           variant='outlined'
           margin='dense'
           value={inputValue}
