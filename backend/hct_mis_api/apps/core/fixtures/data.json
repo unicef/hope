@@ -6660,7 +6660,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.282Z",
         "modified": "2023-09-25T17:57:16.282Z",
-        "code": "partial",
+        "code": "partial_individuals",
         "label": "Partial",
         "description": "Partial individuals collected",
         "type": "SOCIAL",
@@ -6677,7 +6677,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.284Z",
         "modified": "2023-09-25T17:57:16.284Z",
-        "code": "full",
+        "code": "full_collection",
         "label": "Full",
         "description": "Full individual collected",
         "active": true,
@@ -6710,8 +6710,8 @@
       "fields": {
           "created": "2023-09-25T17:57:16.286Z",
           "modified": "2023-09-25T17:57:16.286Z",
-          "code": "no_ind_data",
-          "label": "No individual data",
+          "code": "size_age_gender_disaggregated",
+          "label": "size/age/gender disaggregated",
           "description": "No individual data",
           "active": true,
           "individual_filters_available": false,
