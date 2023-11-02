@@ -191,7 +191,7 @@ class RdiMergeTask:
                 household_data["country_origin"] = country_origin
 
             if record := imported_household.flex_registrations_record:
-                household_data["registration_id"] = record.registration
+                household_data["registration_id"] = str(record.registration)
 
             if enumerator_rec_id := imported_household.enumerator_rec_id:
                 household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
@@ -389,6 +389,17 @@ class RdiMergeTask:
                     if kobo_submissions:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
+
+                    for imported_household in imported_households:
+                        program_registration_id = imported_household.program_registration_id
+                        if program_registration_id:
+                            household = households_dict[imported_household.id]
+                            reg_id_count = Household.objects.filter(
+                                registration_id__istartswith=program_registration_id
+                            ).count()
+                            Household.objects.filter(id=household.id).update(
+                                registration_id=f"{program_registration_id}#{reg_id_count}"
+                            )
 
                     # DEDUPLICATION
 
