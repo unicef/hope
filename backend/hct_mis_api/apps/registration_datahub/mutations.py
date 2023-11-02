@@ -97,10 +97,6 @@ def create_registration_data_import_objects(
     created_obj_hct.full_clean()
     created_obj_hct.save()
 
-    if program_id:
-        program = get_object_or_404(Program, id=program_id)
-        created_obj_hct.programs.add(program)
-
     created_obj_datahub.hct_id = created_obj_hct.id
     created_obj_datahub.save()
 

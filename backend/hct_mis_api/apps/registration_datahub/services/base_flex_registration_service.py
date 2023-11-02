@@ -60,9 +60,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             number_of_households=number_of_households,
             business_area=business_area,
             status=status,
+            program=programme,
         )
-        if programme:
-            rdi.programs.add(programme)
 
         import_data = ImportData.objects.create(
             status=ImportData.STATUS_PENDING,
