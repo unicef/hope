@@ -163,6 +163,7 @@ export const householdDetailed = gql`
       totalDeliveredQuantity
       currency
     }
+    registrationId
   }
 `;
 

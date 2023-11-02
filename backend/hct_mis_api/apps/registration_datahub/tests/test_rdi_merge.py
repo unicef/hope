@@ -362,6 +362,33 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
+    def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            program_registration_id="ABCD-123123",
+        )
+        self.set_imported_individuals(imported_household)
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            program_registration_id="ABCD-123123",
+        )
+        self.set_imported_individuals(imported_household)
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            program_registration_id="ABCD-111111",
+        )
+        self.set_imported_individuals(imported_household)
+
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+
+        registrations_ids = list(
+            Household.objects.all().order_by("registration_id").values_list("registration_id", flat=True)
+        )
+
+        expected_registrations_ids = ["ABCD-111111#0", "ABCD-123123#0", "ABCD-123123#1"]
+        self.assertEqual(registrations_ids, expected_registrations_ids)
+
     def test_merging_external_collector(self) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
