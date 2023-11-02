@@ -936,6 +936,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
         ("order_number", _("Order Number")),
         ("token_number", _("Token Number")),
+        ("registration_token", _("Registration Token")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1027,6 +1028,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "order_number": (payment, "order_number"),
             "token_number": (payment, "token_number"),
         }
+        additional_columns = {"registration_token": cls.get_registration_token_doc_number}
+        if column_name in additional_columns:
+            method = additional_columns[column_name]
+            return method(payment)
+
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
         if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
@@ -1044,6 +1050,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             )
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
+
+    @staticmethod
+    def get_registration_token_doc_number(payment: "Payment") -> str:
+        doc = Document.objects.filter(individual=payment.collector, type__key="registration_token").first()
+        return doc.document_number if doc else ""
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns) + len(self.core_fields)})"
