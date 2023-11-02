@@ -415,6 +415,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         {sampleSizeTabs.map((tab, index) => (
                           <FormControlLabel
                             value={index}
+                            data-cy={`radio-button-${tab}`}
                             onChange={() => {
                               setFormValues(values);
                               setSelectedSampleSizeType(index);
@@ -632,6 +633,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
+                    data-cy='button-cancel'
                     to={`/${baseUrl}/accountability/surveys`}
                   >
                     {t('Cancel')}
@@ -641,6 +643,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                   <Button
                     disabled={activeStep === SurveySteps.LookUp}
                     onClick={handleBack}
+                    data-cy='button-back'
                   >
                     {t('Back')}
                   </Button>
