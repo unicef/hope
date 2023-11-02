@@ -263,8 +263,13 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
+<<<<<<< HEAD
                     class="sc-gZMcBi fmHLCR"
                     href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NGQxMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAw"
+=======
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ZTNhMTFiMmEtOWExZS00MzExLWJiODctNmZmNDA2ZWY5OTZi"
+>>>>>>> origin
                   >
                     Test Import
                   </a>
@@ -305,7 +310,69 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
+<<<<<<< HEAD
                   Tiffany Glenn
+=======
+                  Christina Wilson
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  XLS
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ODczZTAwYzUtZDQyZS00YTM4LTgzYWYtNmU0M2Q4M2MyZGQ4"
+                  >
+                    Strategy century under. - 1695725903319024055
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725903370"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  8831
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  34
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Michelle Powell
+>>>>>>> origin
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -318,9 +385,470 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 style="height: 54px;"
               >
                 <td
+<<<<<<< HEAD
                   class="MuiTableCell-root MuiTableCell-body"
                   colspan="7"
                 />
+=======
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YmRlOWI1OTAtOGNiMS00YjY5LThjYzAtMzFjYTM3YTJlMWYw"
+                  >
+                    Happy military during. - 1695725903060029722
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725903109"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  9517
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  12
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Ronald Jackson
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  FLEX_REGISTRATION
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6OTg1NjE1NDctZDkxYS00NjAxLWFmNDktYWQyM2FlOTE1YmJj"
+                  >
+                    Knowledge claim event. - 1695725903002218138
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725903054"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  7925
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  9
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Angela Tapia
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  XLS
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ODI0NjdlYzgtZmIyYy00OWFiLTlmZDYtZWRiZDc3MTUzMWFk"
+                  >
+                    Between husband skill. - 1695725902743894221
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725902794"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  6720
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  50
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Brianna Schultz
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  EDOPOMOGA
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YjEzYWIxZTEtMzA5My00YzMzLWFiMTctYjVkMDU0MTk2MjQw"
+                  >
+                    Even activity it. - 1695725902685812513
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725902737"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  8864
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  10
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Daniel Walton
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  FLEX_REGISTRATION
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NWQ3NTI1MWQtOGNlNy00NjRiLThkMTctZTlkZmZlMjk5Y2Q1"
+                  >
+                    Feeling already. - 1695725902434868763
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725902485"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  4923
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  49
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  John Yoder
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  DIIA
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NGFlODQ3YzMtZTFmYi00MmQ0LTk1MzMtOGU5MWIyYTNjNDk5"
+                  >
+                    Response reason positive talk. - 1695725902374813305
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725902427"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  6748
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  23
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Kelly Swanson
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  FLEX_REGISTRATION
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ZWQxNDg2OWItYjg1Ni00NWQwLWI0MmMtOTI5ZGRlYWYxNzFl"
+                  >
+                    Finally teach public. - 1695725902089511388
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725902139"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  3713
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  12
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  David Thompson
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  KOBO
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <a
+                    class="sc-gZMcBi kVsGCB"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6ZDZjMTIyZTUtODlmMy00MmM2LWIzNjUtNzdhMmM5Mzg5MDFk"
+                  >
+                    Hear someone. - 1695725902026326763
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <div
+                    class="sc-dnqmqq fRlUlo"
+                  >
+                    <div
+                      class="sc-iwsKbI kqWHq"
+                      data-cy="status-container"
+                    >
+                      IN REVIEW
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <time
+                    datetime="1695725902084"
+                  >
+                    26 Sep 2023 10:58 AM
+                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  411
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  31
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Sandra Bryan
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  XLS
+                </td>
+>>>>>>> origin
               </tr>
             </tbody>
           </table>

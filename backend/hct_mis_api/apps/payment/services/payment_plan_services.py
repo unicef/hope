@@ -33,6 +33,8 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from hct_mis_api.apps.account.models import User
 
 
@@ -468,19 +470,19 @@ class PaymentPlanService:
         self.payment_plan.delete()
         return self.payment_plan
 
-    def export_xlsx(self, user: "User") -> PaymentPlan:
+    def export_xlsx(self, user_id: "UUID") -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user.pk)
+        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user_id)
         self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
+    def export_xlsx_per_fsp(self, user_id: "UUID") -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
+        create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user_id)
         self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
