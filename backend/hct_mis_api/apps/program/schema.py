@@ -184,7 +184,12 @@ class Query(graphene.ObjectType):
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         return (
-            Program.objects.filter(data_collecting_type__deprecated=False)
+            Program.objects.filter(
+                business_area__slug=info.context.headers.get("Business-Area").lower(),
+                data_collecting_type__deprecated=False,
+                data_collecting_type__isnull=False,
+            )
+            .exclude(data_collecting_type__code="unknown")
             .annotate(
                 custom_order=Case(
                     When(status=Program.DRAFT, then=Value(1)),
