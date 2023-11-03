@@ -120,12 +120,12 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         if program.status == Program.ACTIVE:
             logger.info(f"Handling RDIs for program: {program}")
             handle_rdis(rdis, program, hhs_to_ignore)
-        else:
-            # rdi_through = RegistrationDataImport.programs.through
-            # rdi_through.objects.bulk_create(
-            #     [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-            #     ignore_conflicts=True,
-            # )
+        # else:
+        # rdi_through = RegistrationDataImport.programs.through
+        # rdi_through.objects.bulk_create(
+        #     [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+        #     ignore_conflicts=True,
+        # )
 
         logger.info(f"Copying roles for program: {program}")
         copy_roles(households, program=program)
