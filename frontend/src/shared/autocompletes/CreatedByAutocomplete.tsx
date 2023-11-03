@@ -40,7 +40,6 @@ export const CreatedByAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
