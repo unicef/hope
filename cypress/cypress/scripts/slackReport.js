@@ -68,7 +68,7 @@ fs.readFile(
       const report = JSON.parse(jsonString);
       let branchName = exec(`echo $BRANCH_NAME`).replace(/\s/g, "");
       let buildID = exec(`echo $BUILD_ID`).replace(/\s/g, "");
-      let firstMessage = `Branch: <https://github.com/unicef/hct-mis/compare/${branchName}|${branchName}>`;
+      let firstMessage = `Branch: <https://github.com/unicef/hct-mis/tree/${branchName}|${branchName}>`;
       let pipelineLink = `Pipeline: <https://unicef.visualstudio.com/ICTD-HCT-MIS/_build/results?buildId=${buildID}&view=results|${buildID}>`;
       if (report.stats.failures == "0") {
         sendMessage({
