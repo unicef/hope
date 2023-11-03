@@ -11,11 +11,11 @@ from rest_framework.views import APIView
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
+from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value, HouseholdTableFilter
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     Document,
-    Household,
+    Household, Individual,
 )
 from hct_mis_api.apps.household.serializers import (
     serialize_by_household,
@@ -26,6 +26,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
 )
 from hct_mis_api.apps.utils.profiling import profiling
+from hct_mis_api.apps.utils.views import UniversalTableView
 
 
 def get_individual(tax_id: str, business_area_code: Optional[str]) -> Document:
@@ -122,13 +123,8 @@ class HouseholdStatusView(APIView):
         return Response(data, status=200)
 
 
-class HouseholdTableView(TemplateView):
-    template_name = "household/household_table.html"
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        table_context = self.get_table_context()
-        return {**context, **table_context}
+class HouseholdsTableView(UniversalTableView):
+    template_name = "household/households_table.html"
 
     def get_queryset(self):
         return Household.objects.filter(business_area__slug="afghanistan")
@@ -145,18 +141,20 @@ class HouseholdTableView(TemplateView):
             _("Registration Date"),
         ]
 
-    def get_table_context(self) -> Dict[str, Any]:
-        request = self.request
-        queryset = self.get_queryset()
-        page_number = request.GET.get("page", 1)
-        rows_per_page = request.GET.get("page-size", 5)
-        paginator = Paginator(queryset, rows_per_page)
-        try:
-            page = paginator.page(page_number)
-        except PageNotAnInteger:
-            page = paginator.page(1)
-        except EmptyPage:
-            page = paginator.page(paginator.num_pages)
-        query_params = request.GET.copy()
-        query_params.pop("page", None)
-        return {"page": page, "query_params": query_params, "headers": self.get_headers()}
+
+class IndividualsTableView(UniversalTableView):
+    template_name = "household/individuals_table.html"
+
+    def get_queryset(self):
+        return Individual.objects.filter(business_area__slug="afghanistan")
+
+    def get_headers(self) -> List[str]:
+        return [
+            _("Individual ID"),
+            _("Individual"),
+            _("Household ID"),
+            _("Relationship to HoH"),
+            _("Age"),
+            _("Gender"),
+            _("Administrative Level 2"),
+        ]

@@ -1,0 +1,9 @@
+<tr>
+    <td>{{ item.unicef_id }}</td>
+    <td>{{ item.full_name }}</td>
+    <td>{{ item.household.unicef_id }}</td>
+    <td>{{ item.get_relationship_display|default:"-" }}</td>
+    <td>{{ item.age|default:"-" }}</td>
+    <td>{{ item.get_sex_display}}</td>
+    <td>{{ item.admin2|default:"-" }}</td>
+</tr>

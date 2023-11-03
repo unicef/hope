@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load universal_table_tag %}
+{% block title %}Household{% endblock %}
+{% block page_header %}
+<style>
+    .status {
+        border-radius: 16px;
+        font-size: 10px;
+        font-weight: 500;
+        -webkit-letter-spacing: 1.2px;
+        -moz-letter-spacing: 1.2px;
+        -ms-letter-spacing: 1.2px;
+        letter-spacing: 1.2px;
+        line-height: 16px;
+        padding: 4px;
+        text-align: center;
+        margin-right: 20px;
+    }
+
+    .status-green {
+        color: #10CB16;
+        background-color: #10CB1626;
+    }
+
+</style>
+{% endblock %}
+{% block page_content %}
+<form method="get">
+    {{ filter_set.form.as_p }}
+    <button type="submit">Apply</button>
+</form>
+{% universal_table "Household" page "household/households_table_row.html" headers page_size %}
+{% endblock %}
+

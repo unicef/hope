@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% load universal_table_tag %}
     <meta charset="UTF-8">
-    <title>Households</title>
+    <title>{%block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Compiled and minified JavaScript -->
@@ -41,6 +40,7 @@
 
         .page-body {
             overflow: auto;
+            height: 100%;
         }
 
         body {
@@ -48,26 +48,9 @@
         }
 
 
-        .status {
-            border-radius: 16px;
-            font-size: 10px;
-            font-weight: 500;
-            -webkit-letter-spacing: 1.2px;
-            -moz-letter-spacing: 1.2px;
-            -ms-letter-spacing: 1.2px;
-            letter-spacing: 1.2px;
-            line-height: 16px;
-            padding: 4px;
-            text-align: center;
-            margin-right: 20px;
-        }
-
-        .status-green {
-            color: #10CB16;
-            background-color: #10CB1626;
-        }
-
     </style>
+    {% block page_header %}
+    {% endblock %}
 
 </head>
 <body class="whole-page">
@@ -78,7 +61,8 @@
 <div class="page-container">
     <div class="page-top-bar">top bar</div>
     <div class="page-body">
-        {% universal_table "Household" page "household/household_table_row.html" headers %}
+        {% block page_content %}
+        {% endblock %}
     </div>
 </div>
 <script>

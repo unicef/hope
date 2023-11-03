@@ -1,3 +1,4 @@
+{% block page_header %}
 <style>
     .paper {
         box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
@@ -28,6 +29,7 @@
         align-items: center;
     }
 </style>
+{% endblock %}
 <div class="households-table-container">
     <div class="paper households-table">
         <h3>{{title}}</h3>
@@ -49,9 +51,9 @@
             <form method="GET" action="." class="rows-per-page">
                 <div class="input-field">
                     <select name="page-size" onchange="this.form.submit()">
-                        <option>10</option>
-                        <option>15</option>
-                        <option>20</option>
+                        {% for size in page_sizes %}
+                        <option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }}</option>
+                        {% endfor %}
                     </select>
                     <label>Rows per page</label>
                 </div>

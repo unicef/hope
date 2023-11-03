@@ -504,3 +504,133 @@ class MergedIndividualFilter(FilterSet):
                 Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
             )
         return queryset
+
+
+
+class HouseholdTableFilter(FilterSet):
+    search = CharFilter(method="search_filter")
+    search_type = CharFilter(method="search_type_filter")
+    size = IntegerRangeFilter(field_name="size")
+
+
+    class Meta:
+        model = Household
+        fields = {
+            "size": ["range", "lte", "gte"],
+            "admin2": ["exact"],
+            "programs": ["exact"],
+            "residence_status": ["exact"],
+            "withdrawn": ["exact"],
+        }
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "age",
+            "sex",
+            "household__id",
+            "id",
+            "unicef_id",
+            "household_ca_id",
+            "size",
+            "status_label",
+            Lower("head_of_household__full_name"),
+            Lower("admin_area__name"),
+            "residence_status",
+            Lower("registration_data_import__name"),
+            "total_cash_received",
+            "last_registration_date",
+            "first_registration_date",
+        )
+    )
+
+    def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        """
+        Filter households by phone_no_valid
+        True: get households with valid phone_no or valid phone_no_alternative
+        False: get households with invalid both phone_no and invalid phone_no_alternative
+        """
+        if value is True:
+            return qs.exclude(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        elif value is False:
+            return qs.filter(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        return qs
+
+    def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
+        business_area = self.data["business_area"]
+        search = value.strip()
+        search_type = self.data.get("search_type")
+
+        if search_type == "kobo_asset_id":
+            split_values_list = search.split(" ")
+            inner_query = Q()
+            for split_value in split_values_list:
+                striped_value = split_value.strip(",")
+                if striped_value.startswith(("HOPE-", "KOBO-")):
+                    _value = _prepare_kobo_asset_id_value(search)
+                    # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    # will filter by '111222' like 111222 is ID
+                    inner_query |= Q(kobo_asset_id__endswith=_value)
+            return qs.filter(inner_query).distinct()
+
+        query_dict = get_elasticsearch_query_for_households(search, search_type, business_area)
+        es_response = (
+            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
+        )
+        es_ids = [x.meta["id"] for x in es_response]
+        return qs.filter(id__in=es_ids)
+
+    def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
+        try:
+            if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
+                return self._search_es(qs, value)
+            return self._search_db(qs, value)
+        except SearchException:
+            return qs.none()
+
+    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
+        search = value.strip()
+        search_type = self.data.get("search_type")
+
+        if search_type == "household_id":
+            return qs.filter(unicef_id__icontains=search)
+        if search_type == "individual_id":
+            return qs.filter(head_of_household__unicef_id__icontains=search)
+        if search_type == "full_name":
+            return qs.filter(head_of_household__full_name__icontains=search)
+        if search_type == "phone_no":
+            return qs.filter(
+                Q(head_of_household__phone_no__icontains=search)
+                | Q(head_of_household__phone_no_alternative__icontains=search)
+            )
+        if search_type == "registration_id":
+            try:
+                int(search)
+            except ValueError:
+                raise SearchException("The search value for a given search type should be a number")
+            return qs.filter(registration_id__icontains=search)
+        if search_type == "kobo_asset_id":
+            inner_query = Q()
+            split_values_list = search.split(" ")
+            for split_value in split_values_list:
+                striped_value = split_value.strip(",")
+                if striped_value.startswith(("HOPE-", "KOBO-")):
+                    _value = _prepare_kobo_asset_id_value(search)
+                    # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                    # will filter by '111222' like 111222 is ID
+                    inner_query |= Q(kobo_asset_id__endswith=_value)
+            return qs.filter(inner_query)
+        if search_type == "bank_account_number":
+            return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=search)
+        if DocumentType.objects.filter(key=search_type).exists():
+            return qs.filter(
+                head_of_household__documents__type__key=search_type,
+                head_of_household__documents__document_number__icontains=search,
+            )
+        raise SearchException(f"Invalid search key '{search_type}'")
+
+    def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
+        return qs
