@@ -9,9 +9,10 @@ export const DatePickerFilter = ({
   onChange,
   value = null,
   fullWidth = true,
+  dataCy = 'date-picker-filter',
   ...props
 }): React.ReactElement => {
-  const datePickerValue = value ? moment.utc(value) : null;
+  const datePickerValue = value ? moment(value) : null;
 
   return (
     <Box display='flex' flexDirection='column'>
@@ -19,6 +20,7 @@ export const DatePickerFilter = ({
       <KeyboardDatePicker
         variant='inline'
         inputVariant='outlined'
+        data-cy={dataCy}
         margin='dense'
         autoOk
         onChange={(date, inputString) => {
