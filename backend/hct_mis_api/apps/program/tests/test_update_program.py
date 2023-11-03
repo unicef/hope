@@ -37,6 +37,8 @@ class TestUpdateProgram(APITestCase):
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
+
         cls.program = ProgramFactory.create(
             name="initial name",
             status=Program.DRAFT,
@@ -102,6 +104,7 @@ class TestUpdateProgram(APITestCase):
         user = UserFactory.create()
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
+        data_collecting_type.limit_to.add(self.business_area)
         Program.objects.filter(id=self.program.id).update(
             status=Program.ACTIVE, data_collecting_type=data_collecting_type
         )
@@ -124,9 +127,10 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
 
     def test_update_program_with_deprecated_dct(self) -> None:
-        DataCollectingType.objects.update_or_create(
+        dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
         )
+        dct.limit_to.add(self.business_area)
 
         user = UserFactory.create()
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -144,9 +148,10 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_inactive_dct(self) -> None:
-        DataCollectingType.objects.update_or_create(
+        dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
         )
+        dct.limit_to.add(self.business_area)
 
         user = UserFactory.create()
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -158,6 +163,25 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "inactive",
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_with_dct_from_other_ba(self) -> None:
+        DataCollectingType.objects.update_or_create(
+            **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
+        )
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "dataCollectingTypeCode": "test_wrong_ba",
                 },
                 "version": self.program.version,
             },
