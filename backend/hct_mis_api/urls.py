@@ -118,7 +118,7 @@ urlpatterns = (
         path("", homepage),
         path("_health", homepage),
         path("api/", include(api_patterns)),
-        path("xd/household/", include("hct_mis_api.apps.household.urls", namespace="household")),
+        path("xd/population/", include("hct_mis_api.apps.household.urls", namespace="household")),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

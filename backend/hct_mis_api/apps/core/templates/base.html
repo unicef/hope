@@ -56,7 +56,16 @@
 <body class="whole-page">
 <div class="left-menu">
     <div class="left-menu-top-bar">top bar</div>
-    left menu
+    <div>
+        <a href="{% url 'household:households-table' %}">
+            Households
+        </a>
+    </div>
+    <div>
+        <a href="{% url 'household:individuals-table' %}">
+            Individuals
+        </a>
+    </div>
 </div>
 <div class="page-container">
     <div class="page-top-bar">top bar</div>

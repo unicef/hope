@@ -4,6 +4,6 @@ from hct_mis_api.apps.household.views import HouseholdsTableView, IndividualsTab
 
 app_name = "household"
 urlpatterns = [
-    path("households_table/", HouseholdsTableView.as_view(), name="households_table"),
-    path("individuals_table/", IndividualsTableView.as_view(), name="individuals_table"),
+    path("households-table/", HouseholdsTableView.as_view(), name="households-table"),
+    path("individuals-table/", IndividualsTableView.as_view(), name="individuals-table"),
 ]
