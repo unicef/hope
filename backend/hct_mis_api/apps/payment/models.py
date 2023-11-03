@@ -61,9 +61,9 @@ from hct_mis_api.apps.payment.validators import payment_token_and_order_number_v
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
+    SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
-    SignatureMixin,
 )
 
 if TYPE_CHECKING:
@@ -1507,6 +1507,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, Signatu
                 name="token_number_unique_per_program",
             ),
         ]
+
     signature_fields = (
         "parent_id",
         "conflicted",
@@ -1521,19 +1522,19 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, Signatu
         "order_number",
         "token_number",
         "household_snapshot.snapshot_data",
-        'business_area_id',
-        'status',
-        'status_date',
-        'household_id',
-        'head_of_household_id',
-        'delivery_type',
-        'currency',
-        'entitlement_quantity',
-        'entitlement_quantity_usd',
-        'delivered_quantity',
-        'delivered_quantity_usd',
-        'delivery_date',
-        'transaction_reference_id',
+        "business_area_id",
+        "status",
+        "status_date",
+        "household_id",
+        "head_of_household_id",
+        "delivery_type",
+        "currency",
+        "entitlement_quantity",
+        "entitlement_quantity_usd",
+        "delivered_quantity",
+        "delivered_quantity_usd",
+        "delivery_date",
+        "transaction_reference_id",
     )
 
 
