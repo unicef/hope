@@ -15,6 +15,14 @@ snapshots['TestSurveyQueries::test_query_list_filter_by_created_by 1'] = {
     }
 }
 
+snapshots['TestSurveyQueries::test_query_list_filter_by_program 1'] = {
+    'data': {
+        'allSurveys': {
+            'totalCount': 4
+        }
+    }
+}
+
 snapshots['TestSurveyQueries::test_query_list_filter_by_search 1'] = {
     'data': {
         'allSurveys': {
@@ -26,7 +34,7 @@ snapshots['TestSurveyQueries::test_query_list_filter_by_search 1'] = {
 snapshots['TestSurveyQueries::test_query_list_filter_by_target_population 1'] = {
     'data': {
         'allSurveys': {
-            'totalCount': 4
+            'totalCount': 1
         }
     }
 }
