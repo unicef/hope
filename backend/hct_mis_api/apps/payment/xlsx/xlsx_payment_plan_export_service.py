@@ -42,7 +42,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
     def _add_payment_list(self) -> None:
         for i in range(0, len(self.payment_ids_list), self.batch_size):
             batch_ids = self.payment_ids_list[i : i + self.batch_size]
-            payment_qs = Payment.objects.filter(id__in=batch_ids)
+            payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
             for payment in payment_qs:
                 self._add_payment_row(payment)
 
