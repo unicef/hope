@@ -13,9 +13,10 @@ export default class BaseComponent {
   navPaymentVerification = 'a[data-cy="nav-Payment Verification"]';
   navGrievance = 'div[data-cy="nav-Grievance"]';
   navGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]';
+  navGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   navFeedback = 'a[data-cy="nav-Feedback"]';
   navReporting = 'a[data-cy="nav-Reporting"]';
-  navAccountability = 'a[data-cy="nav-Accountability"]';
+  navAccountability = 'div[data-cy="nav-Accountability"]';
   navCommunication = 'a[data-cy="nav-Communication"]';
   navSurveys = 'a[data-cy="nav-Surveys"]';
   navProgrammeUsers = 'a[data-cy="nav-Programme Users"]';
