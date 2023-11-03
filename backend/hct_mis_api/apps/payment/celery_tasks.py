@@ -465,6 +465,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
         payment_plan.refresh_from_db()
+        create_payment_plan_snapshot_data(payment_plan)
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
         payment_plan.status_open()

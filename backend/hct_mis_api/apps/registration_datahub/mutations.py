@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
 from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -58,7 +59,9 @@ logger = logging.getLogger(__name__)
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(
-    registration_data_import_data: Dict, user: "User", data_source: str
+    registration_data_import_data: Dict,
+    user: "User",
+    data_source: str,
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -66,6 +69,7 @@ def create_registration_data_import_objects(
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
+    program_id = decode_id_string(registration_data_import_data.pop("program_id", None))
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
         business_area_slug=business_area.slug,
         import_data=import_data_obj,
@@ -84,6 +88,10 @@ def create_registration_data_import_objects(
     )
     created_obj_hct.full_clean()
     created_obj_hct.save()
+
+    if program_id:
+        program = get_object_or_404(Program, id=program_id)
+        created_obj_hct.programs.add(program)
 
     created_obj_datahub.hct_id = created_obj_hct.id
     created_obj_datahub.save()

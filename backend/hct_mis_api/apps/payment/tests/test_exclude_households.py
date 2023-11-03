@@ -60,19 +60,27 @@ class TestExcludeHouseholds(APITestCase):
 
         hoh1 = IndividualFactory(household=None)
         cls.household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", head_of_household=hoh1)
-        cls.payment_1 = PaymentFactory(parent=cls.payment_plan, household=cls.household_1, excluded=False)
+        cls.payment_1 = PaymentFactory(
+            parent=cls.payment_plan, household=cls.household_1, excluded=False, currency="PLN"
+        )
 
         hoh2 = IndividualFactory(household=None)
         cls.household_2 = HouseholdFactory(id="4ccd6a58-d56a-4ad2-9448-dabca4cfcb84", head_of_household=hoh2)
-        cls.payment_2 = PaymentFactory(parent=cls.payment_plan, household=cls.household_2, excluded=False)
+        cls.payment_2 = PaymentFactory(
+            parent=cls.payment_plan, household=cls.household_2, excluded=False, currency="PLN"
+        )
 
         hoh3 = IndividualFactory(household=None)
         cls.household_3 = HouseholdFactory(id="e1bdabf2-a54a-40c4-b92d-166b79d10542", head_of_household=hoh3)
-        cls.payment_3 = PaymentFactory(parent=cls.payment_plan, household=cls.household_3, excluded=False)
+        cls.payment_3 = PaymentFactory(
+            parent=cls.payment_plan, household=cls.household_3, excluded=False, currency="PLN"
+        )
 
         hoh4 = IndividualFactory(household=None)
         cls.household_4 = HouseholdFactory(id="7e14efa4-3ff3-4947-aecc-b517c659ebda", head_of_household=hoh4)
-        cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
+        cls.payment_4 = PaymentFactory(
+            parent=cls.another_payment_plan, household=cls.household_4, excluded=False, currency="PLN"
+        )
 
     def test_payment_plan_within_not_status_open_or_lock(self) -> None:
         payment_plan_id = encode_id_base64(self.source_payment_plan.id, "PaymentPlan")
@@ -190,7 +198,7 @@ class TestExcludeHouseholds(APITestCase):
             is_follow_up=False,
             program_cycle=self.program_cycle,
         )
-        PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False)
+        PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False, currency="PLN")
 
         self.payment_1.excluded = True
         self.payment_1.save()
