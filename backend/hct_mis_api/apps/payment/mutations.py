@@ -86,8 +86,9 @@ from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
-if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
+if TYPE_CHECKING:  # pragma: no cover
+    from uuid import UUID
+
     from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -831,13 +832,13 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan_id = graphene.ID(required=True)
 
     @classmethod
-    def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
+    def export_action(cls, payment_plan: PaymentPlan, user_id: "UUID") -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
             msg = "You can only export Payment List for LOCKED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
-        return PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=user)
+        return PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=user_id)
 
     @classmethod
     @is_authenticated
@@ -850,7 +851,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = cls.export_action(payment_plan=payment_plan, user=info.context.user)
+        payment_plan = cls.export_action(payment_plan=payment_plan, user_id=info.context.user.pk)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -865,7 +866,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
-    def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
+    def export_action(cls, payment_plan: PaymentPlan, user_id: "UUID") -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             msg = "You can only export Payment List Per FSP for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
@@ -876,7 +877,7 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             logger.error(msg)
             raise GraphQLError(msg)
 
-        return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
+        return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user_id=user_id)
 
 
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
