@@ -855,13 +855,8 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
 
         old_payment_plan = copy_model_object(payment_plan)
-
-<<<<<<< HEAD
-        payment_plan = cls.export_action(payment_plan=payment_plan, user=info.context.user)
-=======
         payment_plan = cls.export_action(payment_plan=payment_plan, user_id=info.context.user.pk)
 
->>>>>>> origin
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

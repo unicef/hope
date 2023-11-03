@@ -1,7 +1,5 @@
 [
-<<<<<<< HEAD
 {
-=======
   {
     "fields": {
       "is_removed": false,
@@ -28,7 +26,6 @@
       "admin_areas": [],
       "data_collecting_type": 2
     },
->>>>>>> origin
     "model": "program.program",
     "pk": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "fields": {
