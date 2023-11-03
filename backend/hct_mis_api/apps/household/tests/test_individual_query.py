@@ -63,9 +63,14 @@ class TestIndividualQuery(APITestCase):
         cls.business_area = create_afghanistan()
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
+        # Unknown unassigned rules setup
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
+
         generate_data_collecting_types()
-        partial = DataCollectingType.objects.get(code="partial")
-        cls.program = ProgramFactory(
+        partial = DataCollectingType.objects.get(code="partial_individuals")
+        program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
             status=Program.ACTIVE,
@@ -138,6 +143,10 @@ class TestIndividualQuery(APITestCase):
         ]
         household_one.head_of_household = cls.individuals[0]
         household_one.program = cls.program
+        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == household_one]
+        cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
+        household_one.head_of_household = cls.individuals_from_hh_one[0]
+        household_two.head_of_household = cls.individuals_from_hh_two[1]
         household_one.save()
 
         cls.national_id = DocumentFactory(
