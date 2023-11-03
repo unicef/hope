@@ -32,7 +32,7 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
               data-cy="label-muac"
             >
               <span
-                class="sc-bwzfXH emFVa"
+                class="sc-bwzfXH kOktSP"
                 color="textSecondary"
               >
                 334
@@ -54,7 +54,7 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
               data-cy="label-school enrolled"
             >
               <span
-                class="sc-bwzfXH emFVa"
+                class="sc-bwzfXH kOktSP"
                 color="textSecondary"
               >
                 Yes
@@ -76,7 +76,7 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
               data-cy="label-school enrolled before"
             >
               <span
-                class="sc-bwzfXH emFVa"
+                class="sc-bwzfXH kOktSP"
                 color="textSecondary"
               >
                 No

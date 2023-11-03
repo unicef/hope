@@ -106,6 +106,7 @@ interface TargetCriteriaFormPropTypes {
   onClose: () => void;
   shouldShowWarningForIndividualFilter?: boolean;
   individualFiltersAvailable: boolean
+  householdFiltersAvailable: boolean
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -117,7 +118,8 @@ export function TargetCriteriaForm({
   open,
   onClose,
   shouldShowWarningForIndividualFilter,
-  individualFiltersAvailable
+  individualFiltersAvailable,
+  householdFiltersAvailable
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -293,27 +295,31 @@ export function TargetCriteriaForm({
                   </ArrayFieldWrapper>
                 )}
               />
-              <Box display='flex' flexDirection='column'>
-                <ButtonBox>
-                  <Button
-                    onClick={() =>
-                      filtersArrayWrapperRef.current
-                        .getArrayHelpers()
-                        .push({ fieldName: '' })
-                    }
-                    color='primary'
-                    startIcon={<AddCircleOutline />}
-                    data-cy='button-household-rule'
-                  >
-                    ADD HOUSEHOLD RULE
-                  </Button>
-                </ButtonBox>
-              </Box>
+              {householdFiltersAvailable ? (
+                <Box display='flex' flexDirection='column'>
+                  <ButtonBox>
+                    <Button
+                      onClick={() =>
+                        filtersArrayWrapperRef.current
+                          .getArrayHelpers()
+                          .push({ fieldName: '' })
+                      }
+                      color='primary'
+                      startIcon={<AddCircleOutline />}
+                      data-cy='button-household-rule'
+                    >
+                      ADD HOUSEHOLD RULE
+                    </Button>
+                  </ButtonBox>
+                </Box>
+              ) : null}
               {individualFiltersAvailable ? (
                   <>
-                    <AndDivider>
-                      <AndDividerLabel>And</AndDividerLabel>
-                    </AndDivider>
+                    {householdFiltersAvailable ? (
+                      <AndDivider>
+                        <AndDividerLabel>And</AndDividerLabel>
+                      </AndDivider>
+                    ) : null}
                     {values.individualsFiltersBlocks.length &&
                     shouldShowWarningForIndividualFilter ? (
                       <DialogDescription>

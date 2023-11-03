@@ -266,7 +266,33 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
-          
+          - script: |
+              sed -i 's|/code/hct_mis_api|backend/hct_mis_api|g' backend/coverage.xml
+            displayName: "fix coverage.xml"
+          - task: PublishCodeCoverageResults@2
+            inputs:
+              summaryFileLocation: 'backend/coverage.xml'
+          - task: DownloadPipelineArtifact@2
+            continueOnError: true # if the artifact doesn't exist, don't fail the build
+            inputs:
+              source: 'specific'
+              project: 'ICTD-HCT-MIS'
+              pipeline: '525'
+              runVersion: 'latestFromBranch'
+              branchName: refs/heads/$(System.PullRequest.TargetBranch)
+              artifact: 'BackendLineCoverage'
+              path: '$(System.ArtifactsDirectory)/old_coverage'
+          - task: PythonScript@0
+            displayName: 'Check Coverage'
+            continueOnError: true
+            inputs:
+              scriptSource: 'filePath'
+              scriptPath: './backend/compare_coverage.py'
+              arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage/coverage.xml'
+              pythonInterpreter: 'python3'
+
+
+
 
   - stage: e2e_tests
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]

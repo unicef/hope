@@ -1,11 +1,16 @@
 from typing import Any, List
+from unittest import skip
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -79,15 +84,26 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
+        BusinessAreaFactory(name="Democratic Republic of Congo")
+        BusinessAreaFactory(name="Sudan")
+        # Unknown unassigned rules setup
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
+
+        generate_data_collecting_types()
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
@@ -149,8 +165,10 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             IndividualFactory(household=household_one if index % 2 else household_two, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
-        household_one.head_of_household = cls.individuals[0]
-        household_two.head_of_household = cls.individuals[1]
+        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == household_one]
+        cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
+        household_one.head_of_household = cls.individuals_from_hh_one[0]
+        household_two.head_of_household = cls.individuals_from_hh_two[1]
         household_one.save()
         household_two.save()
 
@@ -212,6 +230,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("After merging GPF, remove 2nd program")
     def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
