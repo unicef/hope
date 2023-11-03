@@ -124,7 +124,7 @@ class TestHouseholdQuery(APITestCase):
         cls.business_area = create_afghanistan()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         generate_data_collecting_types()
-        partial = DataCollectingType.objects.get(code="partial")
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         cls.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
