@@ -37,9 +37,7 @@ class TestUpdateProgram(APITestCase):
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        for dct in DataCollectingType.objects.all():
-            dct.limit_to.add(cls.business_area)
+        cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
 
         cls.program = ProgramFactory.create(
             name="initial name",
