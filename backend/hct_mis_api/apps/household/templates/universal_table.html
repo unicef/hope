@@ -1,0 +1,78 @@
+<style>
+    .paper {
+        box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+        border-radius: 4px;
+        color: rgba(0, 0, 0, 0.87);
+        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        background-color: #fff;
+    }
+
+    .households-table-container {
+        width: 100%;
+        padding: 24px;
+    }
+
+    .households-table {
+        width: 100%;
+        padding: 24px;
+    }
+
+    .rows-per-page {
+        width: 100px;
+    }
+
+    .paginator {
+        display: flex;
+        flex-direction: row;
+        justify-content: end;
+        align-items: center;
+    }
+</style>
+<div class="households-table-container">
+    <div class="paper households-table">
+        <h3>{{title}}</h3>
+        <table>
+            <thead>
+            <tr>
+                {% for column in headers %}
+                <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in page %}
+            {% include row_template %}
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="paginator">
+            <form method="GET" action="." class="rows-per-page">
+                <div class="input-field">
+                    <select name="page-size" onchange="this.form.submit()">
+                        <option>10</option>
+                        <option>15</option>
+                        <option>20</option>
+                    </select>
+                    <label>Rows per page</label>
+                </div>
+            </form>
+            <div>
+                <a
+                        {% if not page.has_previous %}disabled
+                        {% else %}
+                        href="?{% if query_params %}{{ query_params.urlencode }}&{% endif %}page={{ page.previous_page_number }}"
+                        {% endif %}>
+                    <i class="material-icons">chevron_left</i>
+                </a>
+                <a
+                        {% if not page.has_next %}disabled
+                        {% else %}
+                        href="?{% if query_params %}{{ query_params.urlencode }}&{% endif %}page={{ page.next_page_number }}"
+                        {% endif %}
+                >
+                    <i class="material-icons">chevron_right</i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

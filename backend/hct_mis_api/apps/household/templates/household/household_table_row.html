@@ -1,0 +1,21 @@
+<tr>
+    <td>{{ item.unicef_id }}</td>
+    <td>
+        <div class="status {% if item.status == 'ACTIVE' %}
+             status-green
+           {% elif household.status == 'in progress' %}
+             status-in-progress
+           {% elif household.status == 'completed' %}
+             status-completed
+           {% else %}
+             status-unknown
+           {% endif %}">{{ item.status }}
+        </div>
+    </td>
+    <td>{{ item.head_of_household.full_name }}</td>
+    <td>{{ item.size }}</td>
+    <td>{{ item.admin2|default:"-" }}</td>
+    <td>{{ item.get_residence_status_display|default:"-" }}</td>
+    <td>USD {{ item.total_cash_received_usd|default:'0.00' }}</td>
+    <td>{{ item.first_registration_date|date:"d M Y" }}</td>
+</tr>
