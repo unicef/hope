@@ -196,8 +196,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-<<<<<<< HEAD
-=======
+
     @skip("After merging GPF, remove 2nd program")
     def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
@@ -214,7 +213,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
->>>>>>> origin
     def test_query_individuals_by_search_full_name_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
