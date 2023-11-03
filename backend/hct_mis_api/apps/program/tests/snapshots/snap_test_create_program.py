@@ -17,6 +17,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'dataCollectingType': {
                     'active': True,
                     'code': 'partial',
+                    'code': 'partial_individuals',
                     'description': 'Partial individuals collected',
                     'individualFiltersAvailable': True,
                     'label': 'Partial'
@@ -89,6 +90,26 @@ snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
                 }
             ],
             'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_with_dct_from_other_ba 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "This Data Collection Type is not assigned to the Program's Business Area",
             'path': [
                 'createProgram'
             ]
