@@ -82,23 +82,23 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <StyledMenuItem>
+        <StyledMenuItem data-cy='menu-item-rapid-pro'>
           <ListItemText
-            data-cy='menu-item-rapid-pro'
+            data-cy='menu-item-rapid-pro-text'
             onClick={() => handleMenuItemClick(SurveyCategory.RapidPro)}
             primary={t('New Survey with Rapid Pro')}
           />
         </StyledMenuItem>
-        <StyledMenuItem>
+        <StyledMenuItem data-cy='menu-item-sms-text'>
           <ListItemText
-            data-cy='menu-item-sms'
+            data-cy='menu-item-sms-text'
             onClick={() => handleMenuItemClick(SurveyCategory.Sms)}
             primary={t('New Survey with SMS')}
           />
         </StyledMenuItem>
-        <StyledMenuItem>
+        <StyledMenuItem data-cy='menu-item-manual'>
           <ListItemText
-            data-cy='menu-item-manual'
+            data-cy='menu-item-manual-text'
             onClick={() => handleMenuItemClick(SurveyCategory.Manual)}
             primary={t('New Survey with Manual Process')}
           />
