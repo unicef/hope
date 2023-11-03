@@ -6906,7 +6906,6 @@ export type RegistrationKoboImportMutationInput = {
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
-  programId: Scalars['ID'],
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -6920,7 +6919,6 @@ export type RegistrationXlsxImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
-  programId: Scalars['ID'],
 };
 
 export type ReportNode = Node & {

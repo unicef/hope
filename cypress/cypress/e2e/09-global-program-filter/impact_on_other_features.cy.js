@@ -252,6 +252,7 @@ describe("Global Program Filter - Impacts", () => {
       grievanceDashboard.getTicketListRow().contains("GRV-0000005").click();
       grievanceDetailsPage.getButtonCloseTicket().click();
       grievanceDetailsPage.getButtonConfirm().click();
+      grievanceDetailsPage.getTicketStatus().contains("Closed");
       grievanceDetailsPage.clickMenuButtonGrievanceDashboard();
       grievanceDashboard.getTotalTickets().contains("7");
       grievanceDashboard.getSystemGeneratedTickets().contains("1");
