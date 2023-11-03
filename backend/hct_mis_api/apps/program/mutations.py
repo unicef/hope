@@ -51,6 +51,7 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
             data_collecting_type=data_collecting_type,
+            business_area=business_area,
         )
 
         program = Program(
