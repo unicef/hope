@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Households</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <style>
+        .whole-page {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .left-menu {
+            width: 270px;
+            height: 100vh;
+        }
+
+        .left-menu-top-bar {
+            min-height: 64px;
+            background-color: #00ADEF;
+            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+        }
+
+        .page-top-bar {
+            min-height: 64px;
+            background-color: #233944;
+            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+        }
+
+        .page-container {
+            width: 100%;
+            height: 100vh;
+            background-color: #EEEEEE;
+            overflow: clip;
+        }
+
+        .page-body {
+            overflow: auto;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .paper {
+            box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+            border-radius: 4px;
+            color: rgba(0, 0, 0, 0.87);
+            transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+            background-color: #fff;
+        }
+
+        .households-table-container {
+            width: 100%;
+            padding: 24px;
+        }
+
+        .households-table {
+            width: 100%;
+            padding: 24px;
+        }
+
+        .status {
+            border-radius: 16px;
+            font-size: 10px;
+            font-weight: 500;
+            -webkit-letter-spacing: 1.2px;
+            -moz-letter-spacing: 1.2px;
+            -ms-letter-spacing: 1.2px;
+            letter-spacing: 1.2px;
+            line-height: 16px;
+            padding: 4px;
+            text-align: center;
+            margin-right: 20px;
+        }
+
+        .status-green {
+            color: #10CB16;
+            background-color: #10CB1626;
+        }
+
+        .rows-per-page {
+            width: 100px;
+        }
+
+        .paginator {
+            display: flex;
+            flex-direction: row;
+            justify-content: end;
+            align-items: center;
+        }
+    </style>
+
+</head>
+<body class="whole-page">
+<div class="left-menu">
+    <div class="left-menu-top-bar">top bar</div>
+    left menu
+</div>
+<div class="page-container">
+    <div class="page-top-bar">top bar</div>
+    <div class="page-body">
+        <div class="households-table-container">
+            <div class="paper households-table">
+                <h3>Households</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Household ID</th>
+                        <th>Status</th>
+                        <th>Head of Household</th>
+                        <th>Household Size</th>
+                        <th>Administrative Level 2</th>
+                        <th>Residence Status</th>
+                        <th>Total Cash Received</th>
+                        <th>Registration Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for household in households %}
+                    <tr>
+                        <td>{{ household.unicef_id }}</td>
+                        <td>
+                            <div class="status {% if household.status == 'ACTIVE' %}
+             status-green
+           {% elif household.status == 'in progress' %}
+             status-in-progress
+           {% elif household.status == 'completed' %}
+             status-completed
+           {% else %}
+             status-unknown
+           {% endif %}">{{ household.status }}
+                            </div>
+                        </td>
+                        <td>{{ household.head_of_household }}</td>
+                        <td>{{ household.size }}</td>
+                        <td>{{ household.admin2|default:"-" }}</td>
+                        <td>{{ household.get_residence_status_display }}</td>
+                        <td>USD {{ household.total_cash_received_usd|default:'0.00' }}</td>
+                        <td>{{ household.first_registration_date|date:"d M Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="paginator">
+                    <form method="GET" action="." class="rows-per-page">
+                        <div class="input-field">
+                            <select name="page-size" onchange="this.form.submit()">
+                                <option>10</option>
+                                <option>15</option>
+                                <option>20</option>
+                            </select>
+                            <label>Rows per page</label>
+                        </div>
+                    </form>
+                    <div>
+                        <a
+                                {% if not households.has_previous %}disabled
+                                {% else %}
+                                href="?{% if query_params %}{{ query_params.urlencode }}&{% endif %}page={{ households.previous_page_number }}"
+                                {% endif %}>
+                            <i class="material-icons">chevron_left</i>
+                        </a>
+                        <a
+                                {% if not households.has_next %}disabled
+                                {% else %}
+                                href="?{% if query_params %}{{ query_params.urlencode }}&{% endif %}page={{ households.next_page_number }}"
+                                {% endif %}
+                        >
+                            <i class="material-icons">chevron_right</i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems);
+    });
+
+</script>
+</body>
+</html>

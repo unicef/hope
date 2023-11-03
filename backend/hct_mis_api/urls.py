@@ -114,7 +114,12 @@ if settings.CYPRESS_TESTING:
     api_patterns.append(path("cypress/xlsx/<int:seed>/", get_cypress_xlsx_file))
 
 urlpatterns = (
-    [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
+    [
+        path("", homepage),
+        path("_health", homepage),
+        path("api/", include(api_patterns)),
+        path("xd/household/", include("hct_mis_api.apps.household.urls", namespace="household")),
+    ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 )

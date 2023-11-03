@@ -1,5 +1,7 @@
 from typing import Dict, Optional
 
+from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
+from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -116,3 +118,25 @@ class HouseholdStatusView(APIView):
             return Response({"status": "not found", "error_message": str(exception)}, status=404)
 
         return Response(data, status=200)
+
+
+def household_table_view(request: Request) -> Response:
+    households = Household.objects.filter(business_area__slug="afghanistan")
+    page = request.GET.get("page", 1)
+    rows_per_page = request.GET.get("page-size", 5)
+    paginator = Paginator(households, rows_per_page)
+    try:
+        items = paginator.page(page)
+    except PageNotAnInteger:
+        items = paginator.page(1)
+    except EmptyPage:
+        items = paginator.page(paginator.num_pages)
+
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+
+    return render(
+        request,
+        "household/household_table.html",
+        {"households": items, "query_params": query_params, "paginator": paginator},
+    )
