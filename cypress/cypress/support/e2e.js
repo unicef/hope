@@ -63,6 +63,7 @@ Cypress.Commands.add("adminLogin", () => {
     cy.get('input[name="username"]').type(Cypress.env("username"));
     cy.get('input[name="password"]').type(Cypress.env("password"));
     cy.get("input").contains("Log in").click();
+    cy.get("a").contains("HOPE Administration");
     cy.navigateToHomePage();
     cy.get("div")
       .find("div")
