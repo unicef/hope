@@ -76,7 +76,7 @@ def create_registration_data_import_objects(
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
-    program_id = decode_id_string(registration_data_import_data.pop("program_id", None))
+    program_id = registration_data_import_data.pop("program_id", None)
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
         business_area_slug=business_area.slug,
         import_data=import_data_obj,
@@ -139,6 +139,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     ) -> "RegistrationXlsxImportMutation":
         cls.validate_import_data(registration_data_import_data.import_data_id)
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
+        registration_data_import_data["program_id"] = program_id
         (
             created_obj_datahub,
             created_obj_hct,
@@ -236,6 +237,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     ) -> RegistrationXlsxImportMutation:
         RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
+        registration_data_import_data["program_id"] = program_id
         (
             created_obj_datahub,
             created_obj_hct,

@@ -7,6 +7,9 @@ let defaultNumberOfVPlans016 = 0;
 
 const paymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
