@@ -112,6 +112,7 @@ Cypress.Commands.add("initScenario", (scenario) => {
     cy.exec(
       `yarn init-scenario ${Cypress.config().baseUrl} ${scenario} ${seed}`
     );
+    cy.wait(1000);
   });
 });
 
