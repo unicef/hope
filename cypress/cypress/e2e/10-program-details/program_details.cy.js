@@ -5,6 +5,9 @@ let programDetails = new ProgramDetails();
 let programManagement = new ProgramManagement();
 
 describe("Program Details", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
   });
