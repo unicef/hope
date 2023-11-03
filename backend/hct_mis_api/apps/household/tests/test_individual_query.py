@@ -196,7 +196,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-
     @skip("After merging GPF, remove 2nd program")
     def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
