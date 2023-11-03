@@ -121,11 +121,11 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             logger.info(f"Handling RDIs for program: {program}")
             handle_rdis(rdis, program, hhs_to_ignore)
         else:
-            rdi_through = RegistrationDataImport.programs.through
-            rdi_through.objects.bulk_create(
-                [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-                ignore_conflicts=True,
-            )
+            # rdi_through = RegistrationDataImport.programs.through
+            # rdi_through.objects.bulk_create(
+            #     [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+            #     ignore_conflicts=True,
+            # )
 
         logger.info(f"Copying roles for program: {program}")
         copy_roles(households, program=program)
@@ -522,7 +522,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
 
                 copy_roles_from_dict(household_dict, program)  # type: ignore
 
-        rdi.programs.add(program)
+        # rdi.programs.add(program)
 
 
 def copy_non_program_objects_to_void_storage_programs(
@@ -542,18 +542,18 @@ def copy_non_program_objects_to_void_storage_programs(
         households_with_collecting_type = households.filter(data_collecting_type=collecting_type)
 
         # Handle rdis before copying households so households query is not changed yet
-        rdis = (
-            RegistrationDataImport.objects.filter(
-                households__in=households_with_collecting_type,
-            )
-            .distinct()
-            .only("id")
-        )
-        rdi_through = RegistrationDataImport.programs.through
-        rdi_through.objects.bulk_create(
-            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-            ignore_conflicts=True,
-        )
+        # rdis = (
+        #     RegistrationDataImport.objects.filter(
+        #         households__in=households_with_collecting_type,
+        #     )
+        #     .distinct()
+        #     .only("id")
+        # )
+        # rdi_through = RegistrationDataImport.programs.through
+        # rdi_through.objects.bulk_create(
+        #     [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+        #     ignore_conflicts=True,
+        # )
 
         household_count = households_with_collecting_type.count()
         for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
@@ -664,11 +664,11 @@ def apply_congo_rules() -> None:
             with transaction.atomic():
                 copy_household_representation(household, program, individuals_per_household_dict[household.id])
 
-        rdi_through = RegistrationDataImport.programs.through
-        rdi_through.objects.bulk_create(
-            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-            ignore_conflicts=True,
-        )
+        # rdi_through = RegistrationDataImport.programs.through
+        # rdi_through.objects.bulk_create(
+        #     [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
+        #     ignore_conflicts=True,
+        # )
         copy_roles(untargetted_hhs, program=program)
 
     logger.info("Finished applying Congo custom rules")
