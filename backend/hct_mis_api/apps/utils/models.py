@@ -2,20 +2,30 @@
 import hashlib
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Iterable, T, List, Sequence
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    T,
+    Tuple,
+)
 
-from concurrency.fields import IntegerVersionField
 from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
 from django.utils import timezone
+
+from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
-from mptt.managers import TreeManager
-from mptt.models import MPTTModel
-from decimal import Decimal
 
 from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager, nested_getattr
+from mptt.managers import TreeManager
+from mptt.models import MPTTModel
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -50,7 +60,7 @@ class SoftDeletableModelWithDate(models.Model):
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 
     def delete(
-            self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -88,7 +98,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     all_objects = models.Manager()
 
     def delete(
-            self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
+        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -203,7 +213,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     objects = models.Manager()
 
     def delete(
-            self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -238,19 +248,27 @@ class UnicefIdentifiedModel(models.Model):
 
 
 class SignatureManager(models.Manager):
-    def bulk_create_with_signature(self, objs: Iterable[T], *args, **kwargs) -> List[T]:
-        for obj in objs:
-            obj.update_signature_hash()
-        return super().bulk_create(objs, *args, **kwargs)
+    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> List[T]:
+        from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+            bulk_create_payment_snapshot_data,
+        )
 
-    def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args, **kwargs) -> int:
+        created_objects = super().bulk_create(objs, *args, **kwargs)
+        bulk_create_payment_snapshot_data([x.id for x in created_objects])
+        for obj in created_objects:
+            obj.update_signature_hash()
+            # print(obj.signature_hash)
+        super().bulk_update(created_objects, ["signature_hash"])
+        return created_objects
+
+    def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args: Any, **kwargs: Any) -> int:
         for obj in objs:
             if any(field in fields for field in obj.signature_fields):
                 obj.update_signature_hash()
         new_fields = set(fields)
         if "signature_hash" not in fields:
             new_fields.add("signature_hash")
-        return super().bulk_update(objs, new_fields, *args, **kwargs)
+        return super().bulk_update(objs, list(new_fields), *args, **kwargs)
 
 
 class SignatureMixin(models.Model):
@@ -260,12 +278,12 @@ class SignatureMixin(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.update_signature_hash()
         super().save(*args, **kwargs)
 
     def _normalize(self, name: str, value: Any) -> Any:
-        if '.' in name:
+        if "." in name:
             return value
         field = self.__class__._meta.get_field(name)
         if isinstance(field, models.DecimalField) and value is not None:

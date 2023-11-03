@@ -20,7 +20,6 @@ from hct_mis_api.apps.payment.models import (
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 
-
 encode_typedict: Dict[type, Callable[[Any], Any]] = {
     UUID: lambda x: str(x),
     PhoneNumber: lambda x: str(x),
@@ -47,11 +46,18 @@ def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
         .values_list("id", flat=True)
         .order_by("id")
     )
+    bulk_create_payment_snapshot_data(payments_ids)
+
+
+def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
     payments_queryset = (
         Payment.objects.filter(id__in=payments_ids)
         .select_related("household")
         .prefetch_related(
-            "household__individuals", "household__individuals__documents", "household__individuals_and_roles"
+            "household__individuals",
+            "household__individuals__documents",
+            "household__individuals_and_roles",
+            "household__individuals__bank_account_info",
         )
         .order_by("id")
     )
