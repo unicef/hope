@@ -167,6 +167,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id,
         )
         self.assertEqual(ImportedIndividualIdentity.objects.count(), 2)
         self.assertEqual(
