@@ -70,7 +70,7 @@ class TestIndividualQuery(APITestCase):
 
         generate_data_collecting_types()
         partial = DataCollectingType.objects.get(code="partial_individuals")
-        ProgramFactory(
+        cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
             status=Program.ACTIVE,
