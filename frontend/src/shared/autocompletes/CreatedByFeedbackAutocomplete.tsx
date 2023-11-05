@@ -80,6 +80,8 @@ export const CreatedByFeedbackAutocomplete = ({
     setAppliedFilter,
   );
 
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}
