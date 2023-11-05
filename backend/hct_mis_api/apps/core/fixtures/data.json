@@ -6660,7 +6660,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.282Z",
         "modified": "2023-09-25T17:57:16.282Z",
-        "code": "partial",
+        "code": "partial_individuals",
         "label": "Partial",
         "description": "Partial individuals collected",
         "type": "SOCIAL",
@@ -6668,7 +6668,7 @@
         "individual_filters_available": false,
         "household_filters_available": true,
         "compatible_types": [],
-        "limit_to": []
+        "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
 },
 {
@@ -6677,14 +6677,14 @@
     "fields": {
         "created": "2023-09-25T17:57:16.284Z",
         "modified": "2023-09-25T17:57:16.284Z",
-        "code": "full",
+        "code": "full_collection",
         "label": "Full",
         "description": "Full individual collected",
         "active": true,
         "individual_filters_available": true,
         "household_filters_available": true,
         "compatible_types": [],
-        "limit_to": []
+        "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
   },
   {
@@ -6701,7 +6701,7 @@
           "individual_filters_available": false,
           "household_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
@@ -6710,14 +6710,14 @@
       "fields": {
           "created": "2023-09-25T17:57:16.286Z",
           "modified": "2023-09-25T17:57:16.286Z",
-          "code": "no_ind_data",
-          "label": "No individual data",
+          "code": "size_age_gender_disaggregated",
+          "label": "size/age/gender disaggregated",
           "description": "No individual data",
           "active": true,
           "individual_filters_available": false,
           "household_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
@@ -6733,7 +6733,7 @@
           "individual_filters_available": false,
           "household_filters_available": false,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
@@ -6748,7 +6748,7 @@
           "active": false,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
@@ -6764,7 +6764,7 @@
           "deprecated": true,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
