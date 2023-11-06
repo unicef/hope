@@ -80,6 +80,8 @@ export const CreatedBySurveyAutocomplete = ({
     setAppliedFilter,
   );
 
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}

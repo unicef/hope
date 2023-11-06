@@ -79,6 +79,7 @@ export const CreatedByMessageAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete

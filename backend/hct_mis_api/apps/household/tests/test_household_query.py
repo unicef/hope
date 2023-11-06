@@ -124,7 +124,7 @@ class TestHouseholdQuery(APITestCase):
         cls.business_area = create_afghanistan()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         generate_data_collecting_types()
-        partial = DataCollectingType.objects.get(code="partial")
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         cls.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
@@ -360,4 +360,19 @@ class TestHouseholdQuery(APITestCase):
             variables={
                 "search": "123-456-789",
             },
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_search_incorrect_kobo_asset_id(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            variables={"search": "qwerty12345", "searchType": "kobo_asset_id"},
         )
