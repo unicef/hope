@@ -98,6 +98,22 @@ Cypress.Commands.add("checkIfLoggedIn", () => {
   return retryCheck(10);
 });
 
+Cypress.Commands.add("checkStatus", (status = "IN REVIEW", repeat = 10) => {
+  function retryCheck(n) {
+    cy.wait(100);
+    cy.get('[data-cy="status-container"]').then((value) => {
+      cy.log(value.text());
+      if (value.text().includes(status)) {
+        return;
+      }
+      if (n === 0) cy.get('[data-cy="status-container"]').contains(status);
+      cy.wait(500);
+      return retryCheck(n - 1);
+    });
+  }
+  return retryCheck(repeat);
+});
+
 Cypress.Commands.add("navigateToHomePage", () => {
   cy.visit("/");
   cy.url().should("include", "/programs/all/list");
