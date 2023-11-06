@@ -7,7 +7,7 @@ from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.core.models import DataCollectingType
+    from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +47,13 @@ class CashPlanValidator(BaseValidator):
 
 
 def validate_data_collecting_type(
-    program_data_collecting_type: Optional["DataCollectingType"] = None, data_collecting_type: Optional["DataCollectingType"] = None
+    business_area: "BusinessArea",
+    original_program_data_collecting_type: Optional["DataCollectingType"] = None,
+    data_collecting_type: Optional["DataCollectingType"] = None,
 ) -> None:
-    # TODO: maybe add filter by BA 'DataCollectingType.limit_to'
-    if not program_data_collecting_type:
+    if business_area not in data_collecting_type.limit_to.all():
+        raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
+    if not original_program_data_collecting_type:
         raise ValidationError("The original Programme must have a Data Collection Type.")
-    if data_collecting_type not in program_data_collecting_type.compatible_types.all():
-        raise ValidationError("Copied programme must have a compatible Data Collecting Type with the original Programme.")
+    elif data_collecting_type not in original_program_data_collecting_type.compatible_types.all():
+        raise ValidationError("The Data Collection Type must be compatible with the original Programme.")

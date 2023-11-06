@@ -22,7 +22,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     else:
         data_collecting_type = program.data_collecting_type
 
-    validate_data_collecting_type(program.data_collecting_type, data_collecting_type)
+    validate_data_collecting_type(program.data_collecting_type, data_collecting_type, program.business_area)
 
     program_data["data_collecting_type_id"] = data_collecting_type.id
 
@@ -60,7 +60,7 @@ def copy_individuals(copy_from_program_id: str, program: Program) -> None:
         copy_individual(individual, program)
 
 
-def copy_individual(individual: Individual, program: Program):
+def copy_individual(individual: Individual, program: Program) -> None:
     if not individual.individual_collection:
         individual.individual_collection = IndividualCollection.objects.create()
         individual.save()

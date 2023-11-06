@@ -29,7 +29,6 @@ export const CreatedByAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  dataCy,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
@@ -41,7 +40,6 @@ export const CreatedByAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -81,11 +79,12 @@ export const CreatedByAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
       value={value}
-      data-cy={dataCy}
+      data-cy='filters-created-by-autocomplete'
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
@@ -120,6 +119,7 @@ export const CreatedByAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
+          data-cy='filters-created-by-input'
           label={label || t('Created By')}
           variant='outlined'
           margin='dense'
