@@ -5,6 +5,9 @@ let error404Page = new ErrorPage();
 let surveysPage = new SurveysPage();
 
 describe("Accountability - Surveys", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     surveysPage.getMenuButtonAccountability();

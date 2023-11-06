@@ -5,6 +5,9 @@ let error404Page = new ErrorPage();
 let communicationPage = new CommunicationPage();
 
 describe("Accountability - Communication", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     communicationPage.getMenuButtonAccountability();
