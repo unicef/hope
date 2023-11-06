@@ -200,5 +200,15 @@ describe("Program Management", () => {
         cy.get("p").contains("Data Collecting Type is required");
       });
     });
+    it("171253 GPF: After delete program it is still visible and clickable in GPF", () => {
+      programDetails.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonRemoveProgram().click();
+      programDetails.getButtonRemoveProgram().eq(1).click();
+      programDetails.getGlobalProgramFilter().click();
+      programDetails
+        .getProgrammesOptions()
+        .should("not.contain", "Draft Program");
+      cy.url().should("include", "programs/all/list");
+    });
   });
 });
