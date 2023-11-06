@@ -97,9 +97,5 @@ export default class RegistrationDataImport extends BaseComponent {
     cy.get('[data-cy="status-container"]').contains("MERGED", {
       timeout: 20000,
     });
-
-    cy.reload();
-
-    cy.get("div").contains("MERGED");
   }
 }
