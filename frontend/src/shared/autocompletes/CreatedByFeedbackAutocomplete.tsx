@@ -80,6 +80,8 @@ export const CreatedByFeedbackAutocomplete = ({
     setAppliedFilter,
   );
 
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}
@@ -123,7 +125,7 @@ export const CreatedByFeedbackAutocomplete = ({
         <TextField
           {...params}
           label={label || t('Created By')}
-          data-cy='created-by-input'
+          data-cy='filters-created-by'
           variant='outlined'
           margin='dense'
           value={inputValue}
