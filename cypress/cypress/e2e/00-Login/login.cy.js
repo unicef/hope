@@ -1,9 +1,19 @@
 import Login from "../../page-objects/pages/login/login.po";
 
 let l = new Login();
+let bubaNetworka = [];
 context("Login", () => {
+  before(() => {
+    cy.intercept("*", (request) => {
+      request.continue((response) => {
+        if (response.statusMessage !== "OK") {
+          bubaNetworka.push({ request, response });
+        }
+      });
+    }).as("network");
+  });
   after(() => {
-    cy.adminLogin();
+    cy.writeFile("cypress/report/networkFails.json", bubaNetworka);
   });
   it("login with valid username and valid password", () => {
     cy.scenario([
@@ -86,5 +96,6 @@ context("Login", () => {
     cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("h5").should("contain", "Test Programm");
+    cy.adminLogin();
   });
 });

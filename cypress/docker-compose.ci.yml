@@ -43,9 +43,7 @@ services:
       - proxy
       - celery_worker
     volumes:
-      - ../cypress-results:/code/cypress/results
-      - ../cypress-report:/code/cypress/report
-      - ../cypress-screenshots:/code/cypress/screenshots
+      - ./cypress/report:/code/cypress/report
       - /code/node_modules
       - ./:/code
 
