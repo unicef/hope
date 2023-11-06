@@ -90,6 +90,7 @@ export const SurveysFilters = ({
               label='From'
               onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
               value={filter.createdAtRangeMin}
+              dataCy='filters-creation-date-from'
             />
           </Grid>
           <Grid item xs={4}>
@@ -97,6 +98,7 @@ export const SurveysFilters = ({
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
               value={filter.createdAtRangeMax}
+              dataCy='filters-creation-date-to'
             />
           </Grid>
         </Grid>

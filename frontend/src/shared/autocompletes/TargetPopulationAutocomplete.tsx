@@ -82,11 +82,13 @@ export const TargetPopulationAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
+      data-cy='filters-target-population-autocomplete'
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) =>
@@ -105,7 +107,7 @@ export const TargetPopulationAutocomplete = ({
       }}
       getOptionLabel={(option) => {
         let optionLabel;
-        if (option.node) {
+        if (option?.node) {
           optionLabel = `${option.node.name}`;
         } else {
           optionLabel =
@@ -122,6 +124,7 @@ export const TargetPopulationAutocomplete = ({
         <TextField
           {...params}
           label={label || t('Target Population')}
+          data-cy='filters-target-population-input'
           variant='outlined'
           margin='dense'
           value={inputValue}

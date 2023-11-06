@@ -291,7 +291,6 @@ export const GrievancesFilters = ({
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
-              dataCy='filters-created-by'
             />
           </Grid>
         )}

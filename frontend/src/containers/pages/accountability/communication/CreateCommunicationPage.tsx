@@ -580,6 +580,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 <Button
                   component={Link}
                   to={`/${baseUrl}/accountability/communication`}
+                  data-cy='button-cancel'
                 >
                   {t('Cancel')}
                 </Button>
@@ -588,6 +589,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 <Button
                   disabled={activeStep === CommunicationSteps.LookUp}
                   onClick={() => handleBack(values)}
+                  data-cy='button-back'
                 >
                   {t('Back')}
                 </Button>
