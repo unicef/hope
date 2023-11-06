@@ -206,6 +206,8 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
                     # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                     # will filter by '111222' like 111222 is ID
                     inner_query |= Q(kobo_asset_id__endswith=_value)
+                else:
+                    inner_query = Q(kobo_asset_id__endswith=search)
             return qs.filter(inner_query)
         if search_type == "bank_account_number":
             return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=search)

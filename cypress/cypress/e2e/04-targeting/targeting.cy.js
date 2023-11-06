@@ -11,6 +11,9 @@ let programDetails = new ProgramDetails();
 let programName = "TargetingProgram";
 
 describe("Targeting", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.initScenario("targeting");
     cy.navigateToHomePage();
