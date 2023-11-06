@@ -137,6 +137,15 @@ class APITestCase(SnapshotTestTestCase):
 
 
 class BaseElasticSearchTestCase(TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        seed_in_env = os.getenv("RANDOM_SEED")
+        self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
+        faker = factory.faker.Faker._get_faker()
+        faker.random.seed(seed_in_env)
+        random.seed(self.seed)
+        self.maxDiff = None
+
     @classmethod
     def setUpTestData(cls) -> None:
         connections.create_connection(hosts=["elasticsearch:9200"], timeout=20)
