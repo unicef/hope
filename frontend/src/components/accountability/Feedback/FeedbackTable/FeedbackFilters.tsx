@@ -127,7 +127,6 @@ export const FeedbackFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            dataCy='filters-created-by'
           />
         </Grid>
         <Grid item xs={3}>

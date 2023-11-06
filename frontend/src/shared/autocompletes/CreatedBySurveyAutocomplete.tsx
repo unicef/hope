@@ -29,7 +29,6 @@ export const CreatedBySurveyAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  dataCy,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
@@ -41,7 +40,6 @@ export const CreatedBySurveyAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -82,10 +80,12 @@ export const CreatedBySurveyAutocomplete = ({
     setAppliedFilter,
   );
 
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}
-      data-cy={dataCy}
+      data-cy='filters-created-by-autocomplete'
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
@@ -106,11 +106,15 @@ export const CreatedBySurveyAutocomplete = ({
       getOptionLabel={(option) => {
         let optionLabel;
         if (option.node) {
-          const {firstName, lastName} = option.node;
+          const { firstName, lastName } = option.node;
           optionLabel = `${firstName} ${lastName}`;
         } else {
-          const foundUser = data?.allUsers?.edges?.find((el) => el.node.id === option)?.node;
-          optionLabel = foundUser ? `${foundUser.firstName} ${foundUser.lastName}` : '';
+          const foundUser = data?.allUsers?.edges?.find(
+            (el) => el.node.id === option,
+          )?.node;
+          optionLabel = foundUser
+            ? `${foundUser.firstName} ${foundUser.lastName}`
+            : '';
         }
         return `${optionLabel}`;
       }}
@@ -121,6 +125,7 @@ export const CreatedBySurveyAutocomplete = ({
         <TextField
           {...params}
           label={label || t('Created By')}
+          data-cy='filters-created-by-input'
           variant='outlined'
           margin='dense'
           value={inputValue}

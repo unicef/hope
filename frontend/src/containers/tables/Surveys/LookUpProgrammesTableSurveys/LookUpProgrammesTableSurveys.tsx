@@ -43,7 +43,7 @@ export const LookUpProgrammesTableSurveys = ({
     status: filter.status,
     sector: filter.sector,
     numberOfHouseholdsWithTpInProgram: JSON.stringify({
-      min: filter.numberOfHouseholdsMin,
+      min: filter.numberOfHouseholdsMin || 1,
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify(filter.budget),

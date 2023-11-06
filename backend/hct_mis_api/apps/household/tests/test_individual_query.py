@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest import skip
 
 from parameterized import parameterized
 
@@ -62,8 +63,13 @@ class TestIndividualQuery(APITestCase):
         cls.business_area = create_afghanistan()
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
+        # Unknown unassigned rules setup
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
+
         generate_data_collecting_types()
-        partial = DataCollectingType.objects.get(code="partial")
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
@@ -137,6 +143,10 @@ class TestIndividualQuery(APITestCase):
         ]
         household_one.head_of_household = cls.individuals[0]
         household_one.program = cls.program
+        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == household_one]
+        # cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
+        household_one.head_of_household = cls.individuals_from_hh_one[0]
+        # household_two.head_of_household = cls.individuals_from_hh_two[1]
         household_one.save()
 
         cls.national_id = DocumentFactory(
@@ -187,6 +197,22 @@ class TestIndividualQuery(APITestCase):
             request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    @skip("After merging GPF, remove 2nd program")
+    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
+            context={"user": self.user},
+            variables={"programs": [self.program_two.id]},
         )
 
     @parameterized.expand(

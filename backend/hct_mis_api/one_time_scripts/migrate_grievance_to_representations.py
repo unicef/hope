@@ -1,4 +1,5 @@
 import copy
+import logging
 from itertools import chain
 from typing import Any, Optional, Union
 
@@ -40,6 +41,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     get_household_representation_per_program_by_old_household_id,
     get_individual_representation_per_program_by_old_individual_id,
 )
+
+logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 100
 
@@ -86,9 +89,9 @@ def migrate_grievance_tickets() -> None:
     """
     # print("Handle payment related tickets")
     # handle_payment_related_tickets()
-    print("Handle non payment related tickets")
+    logger.info("Handle non payment related tickets")
     handle_non_payment_related_tickets()
-    print("Handle tickets not connected to any program")
+    logger.info("Handle tickets not connected to any program")
     handle_non_program_tickets()
 
 
@@ -97,29 +100,29 @@ def handle_non_payment_related_tickets() -> None:
     Copy grievance tickets to representations.
     Applied for tickets not connected to specific payment but connected to household or its individual.
     """
-    print("Handle TicketComplaintDetails without payment")
+    logger.info("Handle TicketComplaintDetails without payment")
     handle_complaint_tickets_without_payments()
-    print("Handle TicketSensitiveDetails without payment")
+    logger.info("Handle TicketSensitiveDetails without payment")
     handle_sensitive_tickets_without_payments()
-    print("Handle TicketHouseholdDataUpdateDetails")
+    logger.info("Handle TicketHouseholdDataUpdateDetails")
     handle_household_data_update_tickets()
-    print("Handle TicketIndividualDataUpdateDetails")
+    logger.info("Handle TicketIndividualDataUpdateDetails")
     handle_individual_data_update_tickets()
-    print("Handle TicketAddIndividualDetails")
+    logger.info("Handle TicketAddIndividualDetails")
     handle_add_individual_tickets()
-    print("Handle TicketDeleteIndividualDetails")
+    logger.info("Handle TicketDeleteIndividualDetails")
     handle_delete_individual_tickets()
-    print("Handle TicketDeleteHouseholdDetails")
+    logger.info("Handle TicketDeleteHouseholdDetails")
     handle_delete_household_tickets()
-    print("Handle TicketSystemFlaggingDetails")
+    logger.info("Handle TicketSystemFlaggingDetails")
     handle_system_flagging_details_tickets()
-    print("Handle TicketPositiveFeedbackDetails")
+    logger.info("Handle TicketPositiveFeedbackDetails")
     handle_positive_feedback_tickets()
-    print("Handle TicketNegativeFeedbackDetails")
+    logger.info("Handle TicketNegativeFeedbackDetails")
     handle_negative_feedback_tickets()
-    print("Handle TicketReferralDetails")
+    logger.info("Handle TicketReferralDetails")
     handle_referral_tickets()
-    print("Handle TicketNeedsAdjudicationDetails")
+    logger.info("Handle TicketNeedsAdjudicationDetails")
     handle_needs_adjudication_tickets()
 
 
@@ -148,7 +151,7 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> No
     In case of closed complaint ticket, we need to copy the ticket to random representation of assigned
     household/individual.
     """
-    print("Handle closed tickets with household and individual")
+    logger.info("Handle closed tickets with household and individual")
     closed_tickets = tickets.filter(ticket__status=GrievanceTicket.STATUS_CLOSED)
 
     for closed_ticket in closed_tickets.iterator():
@@ -196,7 +199,7 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet) -> No
     """
     For active complaint tickets, we need to copy tickets for every household/individual representation
     """
-    print("Handle active tickets with household and individual")
+    logger.info("Handle active tickets with household and individual")
     active_tickets = tickets.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator()
 
     for active_ticket in active_tickets:
@@ -486,7 +489,7 @@ def handle_needs_adjudication_tickets() -> None:
 
 
 def migrate_messages() -> None:
-    print("Handle Messages")
+    logger.info("Handle Messages")
     message_objects = (
         Message.objects.select_related(
             "target_population",
@@ -513,7 +516,7 @@ def migrate_messages() -> None:
                 message.is_migration_handled = True
                 message.save(update_fields=["is_migration_handled"])
 
-    print("Handle Messages not connected to any program")
+    logger.info("Handle Messages not connected to any program")
     handle_non_program_messages()
 
 
@@ -541,13 +544,13 @@ def copy_message(active_message: Message, program: Program) -> None:
 
 
 def migrate_feedback() -> None:
-    print("Handle Feedback objects")
+    logger.info("Handle Feedback objects")
     # Handle closed Feedback (Feedback related to a closed grievance ticket) OR Feedback with program
     copy_feedback_to_specific_program()
     # Handle active Feedback objects without program -
     # (Feedback with active tickets OR Feedback not related to any ticket) AND without defined program
     handle_active_feedback()
-    print("Handle Feedback not connected to any program")
+    logger.info("Handle Feedback not connected to any program")
     handle_non_program_feedback()
 
 
@@ -738,8 +741,8 @@ def copy_grievance_ticket(
 
 
 def create_void_program(business_area: BusinessArea) -> Program:
-    return Program.objects.get_or_create(
-        name="Void Program",
+    return Program.all_objects.get_or_create(
+        name="Storage Program For Non-Program Grievance And Accountability",
         business_area=business_area,
         defaults=dict(
             status=Program.DRAFT,
@@ -751,13 +754,14 @@ def create_void_program(business_area: BusinessArea) -> Program:
             scope=Program.SCOPE_FOR_PARTNERS,
             cash_plus=True,
             population_goal=1,
+            is_visible=False,
         ),
     )[0]
 
 
 def handle_non_program_tickets() -> None:
     """
-    Handle tickets that are not connected to any project. They should be moved to dummy program.
+    Handle tickets that are not connected to any program. They should be moved to dummy program.
     Exclude payment-related-tickets that will be handled during sync.
     """
     for business_area in BusinessArea.objects.all().iterator():
