@@ -876,7 +876,6 @@ def generate_payment_plan() -> None:
         business_area=afghanistan,
         program=program,
     )
-    rdi.programs.add(program)
 
     individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
     individual_1 = Individual.objects.update_or_create(
