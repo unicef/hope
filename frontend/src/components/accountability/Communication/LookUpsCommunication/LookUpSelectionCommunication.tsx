@@ -42,10 +42,10 @@ export const LookUpSelectionCommunication = ({
     search: '',
     importedBy: '',
     status: RegistrationDataImportStatus.Merged,
-    sizeMin: '',
-    sizeMax: '',
-    importDateRangeMin: undefined,
-    importDateRangeMax: undefined,
+    totalHouseholdsCountWithValidPhoneNoMin: '',
+    totalHouseholdsCountWithValidPhoneNoMax: '',
+    importDateRangeMin: '',
+    importDateRangeMax: '',
   };
 
   const [filterRDI, setFilterRDI] = useState(
@@ -58,10 +58,10 @@ export const LookUpSelectionCommunication = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    numIndividualsMin: null,
-    numIndividualsMax: null,
-    totalHouseholdsCountWithValidPhoneNoMin: null,
-    totalHouseholdsCountWithValidPhoneNoMax: null,
+    totalHouseholdsCountWithValidPhoneNoMin: '',
+    totalHouseholdsCountWithValidPhoneNoMax: '',
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
   };
 
   const [filterTP, setFilterTP] = useState(
