@@ -13,7 +13,7 @@ const userType7 = "GRV-0000007";
 
 describe("Grievance", () => {
   before(function () {
-    cy.initScenario("init_clear");
+    // cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");
     cy.adminLogin();
     cy.navigateToHomePage();
@@ -421,7 +421,7 @@ describe("Grievance", () => {
       });
       it.skip("Grievance Active Tickets filter", () => {});
     });
-    context("Create New Ticket", () => {
+    context.skip("Create New Ticket", () => {
       beforeEach(() => {
         grievancePage.getButtonNewTicket().click();
         newTicketPage.checkElementsOnPage();

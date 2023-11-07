@@ -11,7 +11,7 @@ case "$1" in
         echo "Waiting for proxy to be ready"
         waitforit -host=proxy -port=80 --timeout 300
         echo "Staring cypress tests..."
-        exec npm run parallel
+        exec npm run test
         ;;
     *)
         exec "$@"

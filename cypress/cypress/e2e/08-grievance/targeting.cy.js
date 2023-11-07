@@ -11,6 +11,9 @@ let targetingCreateNewPage = new CreateNew();
 let programName = "TargetingProgram";
 
 describe("Targeting", () => {
+  before(() => {
+    cy.adminLogin();
+  });
   beforeEach(() => {
     cy.initScenario("targeting");
     cy.navigateToHomePage();
