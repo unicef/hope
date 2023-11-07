@@ -47,6 +47,7 @@ USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
+    permissions = JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
         return self.name
