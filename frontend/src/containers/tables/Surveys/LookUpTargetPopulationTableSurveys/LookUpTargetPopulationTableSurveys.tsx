@@ -49,8 +49,8 @@ export const LookUpTargetPopulationTableSurveys = ({
     businessArea,
     program: [programId],
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: filter.createdAtRangeMin || null,
+      max: filter.createdAtRangeMax || null,
     }),
     statusNot: TargetPopulationStatus.Open,
   };
