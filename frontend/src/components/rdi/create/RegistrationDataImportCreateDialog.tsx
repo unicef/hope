@@ -19,6 +19,7 @@ import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapp
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
+import {ButtonTooltip} from "../../core/ButtonTooltip";
 
 const ComboBox = styled(Select)`
   & {
@@ -51,33 +52,17 @@ export const RegistrationDataImportCreateDialog = ({ isImportDisabled }): React.
     }
   }, [open]);
   const openModalButton = (
-
-        isImportDisabled ?
-            <Tooltip title="Program must be ACTIVE to import RDI">
-              <span>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  startIcon={<ExitToAppRoundedIcon />}
-                  disabled={isImportDisabled}
-                  onClick={() => setOpen(true)}
-                  data-cy='button-import'
-                >
-                  {t('IMPORT')}
-                </Button>
-              </span>
-            </Tooltip>
-            :
-            <Button
-              variant='contained'
-              color='primary'
-              startIcon={<ExitToAppRoundedIcon />}
-              disabled={isImportDisabled}
-              onClick={() => setOpen(true)}
-              data-cy='button-import'
-            >
-              {t('IMPORT')}
-            </Button>
+    <ButtonTooltip
+      title='Program must be ACTIVE to create RDI'
+      variant='contained'
+      color='primary'
+      startIcon={<ExitToAppRoundedIcon />}
+      disabled={isImportDisabled}
+      onClick={() => setOpen(true)}
+      data-cy='button-import'
+    >
+      {t('IMPORT')}
+    </ButtonTooltip>
   );
   let importTypeForm;
   switch (importType) {

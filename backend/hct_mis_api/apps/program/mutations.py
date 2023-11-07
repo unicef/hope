@@ -88,8 +88,11 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
-
         program = Program.objects.select_for_update().get(id=program_id)
+
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to update program, status must not be finished")
+
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area

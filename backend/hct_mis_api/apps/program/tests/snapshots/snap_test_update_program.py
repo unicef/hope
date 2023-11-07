@@ -102,6 +102,26 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['In order to update program, status must not be finished']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_with_dct_from_other_ba 1'] = {
     'data': {
         'updateProgram': None

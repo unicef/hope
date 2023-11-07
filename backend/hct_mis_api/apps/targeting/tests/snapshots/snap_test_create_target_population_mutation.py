@@ -95,3 +95,23 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_compari
         }
     ]
 }
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_when_program_finished 1'] = {
+    'data': {
+        'createTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Active program can be assigned to Targeting']",
+            'path': [
+                'createTargetPopulation'
+            ]
+        }
+    ]
+}

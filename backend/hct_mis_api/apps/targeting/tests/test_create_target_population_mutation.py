@@ -52,6 +52,9 @@ class TestCreateTargetPopulationMutation(APITestCase):
         )
         business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(name="program1", status=Program.ACTIVE, business_area=business_area)
+        cls.program_finished = ProgramFactory.create(
+            name="program2", status=Program.FINISHED, business_area=business_area
+        )
 
     @parameterized.expand(
         [
@@ -190,3 +193,35 @@ class TestCreateTargetPopulationMutation(APITestCase):
         )
         assert "errors" not in response_ok
         self.assertEqual(TargetPopulation.objects.count(), 1)
+
+    def test_create_mutation_with_when_program_finished(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5555",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program_finished.id, "ProgramNode"),
+                "excludedIds": "",
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "CONTAINS",
+                                    "arguments": [],
+                                    "fieldName": "registration_data_import",
+                                    "isFlexField": False,
+                                }
+                            ],
+                            "individualsFiltersBlocks": [],
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
