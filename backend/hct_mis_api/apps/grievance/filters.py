@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     ChoiceFilter,
     FilterSet,
@@ -26,6 +27,7 @@ from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_quer
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +165,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     grievance_status = CharFilter(method="filter_grievance_status")
     total_days = IntegerFilter(field_name="total_days")
     program = CharFilter(method="filter_by_program")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         fields = {
@@ -340,6 +343,14 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         if val == "active":
             return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs
+
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        if value is True:
+            return qs.filter(programs__status=Program.ACTIVE)
+        elif value is False:
+            return qs.filter(programs__status=Program.FINISHED)
+        else:
+            return qs
 
 
 class ExistingGrievanceTicketFilter(FilterSet):
