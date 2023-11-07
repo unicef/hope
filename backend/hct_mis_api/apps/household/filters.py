@@ -92,6 +92,7 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         model = Household
@@ -221,6 +222,15 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
     def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
 
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        # TODO: after migrations will use only program
+        if value is True:
+            return qs.filter(Q(programs__status=Program.ACTIVE) | Q(program__status=Program.ACTIVE))
+        elif value is False:
+            return qs.filter(Q(programs__status=Program.FINISHED) | Q(program__status=Program.FINISHED))
+        else:
+            return qs
+
 
 class IndividualFilter(GlobalProgramFilter, FilterSet):
     business_area = BusinessAreaSlugFilter()
@@ -237,6 +247,7 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         model = Individual
@@ -341,6 +352,19 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
 
     def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         return qs.exclude(id=decode_id_string(value))
+
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        # TODO: after migrations will use only program
+        if value is True:
+            return qs.filter(
+                Q(household__programs__status=Program.ACTIVE) | Q(household__program__status=Program.ACTIVE)
+            )
+        elif value is False:
+            return qs.filter(
+                Q(household__programs__status=Program.FINISHED) | Q(household__program__status=Program.FINISHED)
+            )
+        else:
+            return qs
 
 
 def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:
