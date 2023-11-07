@@ -57,6 +57,7 @@ export const CreatedByFeedbackAutocomplete = ({
       search: debouncedInputText,
       isFeedbackCreator: true,
     },
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
