@@ -21,7 +21,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import BaseValidator
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -96,10 +95,6 @@ def create_registration_data_import_objects(
     )
     created_obj_hct.full_clean()
     created_obj_hct.save()
-
-    if program_id:
-        program = get_object_or_404(Program, id=program_id)
-        created_obj_hct.programs.add(program)
 
     created_obj_datahub.hct_id = created_obj_hct.id
     created_obj_datahub.save()
