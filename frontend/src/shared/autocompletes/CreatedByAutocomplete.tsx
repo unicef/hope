@@ -57,6 +57,7 @@ export const CreatedByAutocomplete = ({
       search: debouncedInputText,
       isTicketCreator: true,
     },
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {

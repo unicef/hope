@@ -57,6 +57,7 @@ export const CreatedByMessageAutocomplete = ({
       search: debouncedInputText,
       isMessageCreator: true,
     },
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {

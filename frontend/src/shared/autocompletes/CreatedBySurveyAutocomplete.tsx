@@ -57,6 +57,7 @@ export const CreatedBySurveyAutocomplete = ({
       search: debouncedInputText,
       isSurveyCreator: true,
     },
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
