@@ -21,7 +21,11 @@ from hct_mis_api.apps.core.filters import (
     DateRangeFilter,
     IntegerRangeFilter,
 )
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    decode_id_string_required,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -92,6 +96,7 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
+    program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
@@ -223,13 +228,19 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
         return qs
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        # TODO: after migrations will use only program
+        # TODO: after data migrations will use only program
         if value is True:
             return qs.filter(Q(programs__status=Program.ACTIVE) | Q(program__status=Program.ACTIVE))
         elif value is False:
             return qs.filter(Q(programs__status=Program.FINISHED) | Q(program__status=Program.FINISHED))
         else:
             return qs
+
+    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Household]":
+        # TODO: after data migrations will use only program
+        return qs.filter(
+            Q(programs__id=decode_id_string_required(value)) | Q(program__id=decode_id_string_required(value))
+        )
 
 
 class IndividualFilter(GlobalProgramFilter, FilterSet):
@@ -353,8 +364,8 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
     def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         return qs.exclude(id=decode_id_string(value))
 
-    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        # TODO: after migrations will use only program
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
+        # TODO: after data migrations will use only program
         if value is True:
             return qs.filter(
                 Q(household__programs__status=Program.ACTIVE) | Q(household__program__status=Program.ACTIVE)
@@ -365,6 +376,13 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
             )
         else:
             return qs
+
+    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Individual]":
+        # TODO: after data migrations will use only program
+        return qs.filter(
+            Q(household__programs__id=decode_id_string_required(value))
+            | Q(household__program__id=decode_id_string_required(value))
+        )
 
 
 def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:
