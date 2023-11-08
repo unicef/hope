@@ -14,7 +14,7 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
@@ -862,6 +862,7 @@ def generate_payment_plan() -> None:
         frequency_of_payments=Program.ONE_OFF,
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
+        data_collecting_type=DataCollectingType.objects.get(code="full"),
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,
@@ -876,7 +877,6 @@ def generate_payment_plan() -> None:
         business_area=afghanistan,
         program=program,
     )
-    rdi.programs.add(program)
 
     individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
     individual_1 = Individual.objects.update_or_create(
