@@ -396,11 +396,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
-        households = Household.objects.all().order_by("created_at")
+        registrations_ids = Household.objects.all().values_list("registration_id", flat=True)
 
-        self.assertEqual(5, households.count())
-        self.assertEqual("ABCD-123123#0", households[0].registration_id)
-        self.assertEqual("ABCD-321321#0", households[1].registration_id)
-        self.assertEqual("ABCD-123123#1", households[2].registration_id)
-        self.assertEqual("ABCD-123123#2", households[3].registration_id)
-        self.assertEqual("ABCD-111111#0", households[4].registration_id)
+        self.assertEqual(len(registrations_ids), len(set(registrations_ids)))

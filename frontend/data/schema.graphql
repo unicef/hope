@@ -4872,6 +4872,7 @@ input UpdateProgramInput {
   administrativeAreasOfImplementation: String
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
+  programmeCode: String
 }
 
 input UpdateTargetPopulationInput {

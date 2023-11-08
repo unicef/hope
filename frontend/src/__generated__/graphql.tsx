@@ -8224,6 +8224,7 @@ export type UpdateProgramInput = {
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingTypeCode?: Maybe<Scalars['String']>,
+  programmeCode?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationInput = {

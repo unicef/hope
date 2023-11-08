@@ -35,3 +35,4 @@ class UpdateProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    programme_code = graphene.String()
