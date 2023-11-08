@@ -128,7 +128,9 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     }
                 }
             },
-            context=self.generate_context(**{"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}}),
+            context=self.generate_context(
+                **{"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}}
+            ),
         )
         if should_have_copy:
             target_population_copy = TargetPopulation.objects.get(
