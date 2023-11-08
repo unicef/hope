@@ -91,9 +91,11 @@ export const AssigneeAutocomplete = ({
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.id) {
+          handleFilterChange(name, selectedValue.node.id);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}
