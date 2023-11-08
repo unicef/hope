@@ -23,8 +23,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds($search: String, $searchType: String) {
-        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", businessArea: "afghanistan") {
+      query AllHouseholds($search: String, $searchType: String, $program: String) {
+        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", program: $program, businessArea: "afghanistan") {
           edges {
             node {
               size
@@ -36,11 +36,12 @@ ALL_HOUSEHOLD_QUERY = """
       }
     """
 ALL_HOUSEHOLD_QUERY_RANGE = """
-    query AllHouseholds{
+    query AllHouseholds($program: String){
       allHouseholds(
         orderBy: "size",
         size: "{\\"min\\": 3, \\"max\\": 9}",
-        businessArea: "afghanistan"
+        businessArea: "afghanistan",
+        program: $program
       ) {
         edges {
           node {
@@ -53,8 +54,8 @@ ALL_HOUSEHOLD_QUERY_RANGE = """
     }
     """
 ALL_HOUSEHOLD_QUERY_MIN = """
-    query AllHouseholds{
-      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan") {
+    query AllHouseholds($program: String){
+      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan", program: $program) {
         edges {
           node {
             size
@@ -66,8 +67,8 @@ ALL_HOUSEHOLD_QUERY_MIN = """
     }
     """
 ALL_HOUSEHOLD_QUERY_MAX = """
-    query AllHouseholds{
-      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan") {
+    query AllHouseholds($program: String){
+      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan", program: $program) {
         edges {
           node {
             size
@@ -215,7 +216,8 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=query_string,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={"user": self.user},
+            variables={"program": self.id_to_base64(self.program_two.id, "ProgramNode")},
         )
 
     @parameterized.expand(

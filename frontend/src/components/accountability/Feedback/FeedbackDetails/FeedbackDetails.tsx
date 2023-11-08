@@ -1,4 +1,4 @@
-import { Box, Grid, GridSize, Typography } from '@material-ui/core';
+import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '../../../../utils/utils';
@@ -12,7 +12,6 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
-import { ContentLink } from '../../../core/ContentLink';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];

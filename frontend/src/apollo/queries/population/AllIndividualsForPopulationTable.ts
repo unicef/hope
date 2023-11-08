@@ -22,9 +22,9 @@ export const AllIndividualsForPopulationTable = gql`
     $withdrawn: Boolean
     $admin2: [ID]
     $flags: [String]
-  ) # TODO: Add programs filter
-  # $programs: [ID]
-  {
+    $program: String
+    $isActiveProgram: Boolean
+  ) {
     allIndividuals(
       before: $before
       after: $after
@@ -46,8 +46,9 @@ export const AllIndividualsForPopulationTable = gql`
       withdrawn: $withdrawn
       admin2: $admin2
       flags: $flags
-    ) # programs: $programs
-    {
+      program: $program
+      isActiveProgram: $isActiveProgram
+    ) {
       totalCount
       pageInfo {
         startCursor
@@ -74,6 +75,11 @@ export const AllIndividualsForPopulationTable = gql`
           relationship
           age
           sex
+          lastRegistrationDate
+          program {
+            id
+            name
+          }
         }
       }
     }
