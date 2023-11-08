@@ -60,6 +60,13 @@ class BusinessAreaPartnerPermissions:
 
     @classmethod
     def from_dict(cls, data_permissions: Dict) -> List["BusinessAreaPartnerPermissions"]:
+        """
+        return: [BusinessAreaPartnerPermissions(
+            business_area_id='uuid_ba',
+            roles=['role_id_1', 'role_id_2'],
+            programs={'program_id_1': ['area_1', 'area_2']}
+        )]
+        """
         ba_partner_perms_list: List = []
         for business_area_id in data_permissions:
             ba_partner_perms_list.append(
