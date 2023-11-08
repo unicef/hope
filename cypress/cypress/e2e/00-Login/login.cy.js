@@ -97,6 +97,5 @@ context("Login", () => {
     cy.adminLogin();
     cy.navigateToHomePage();
     cy.get("h5").should("contain", "Test Programm");
-    cy.adminLogin();
   });
 });
