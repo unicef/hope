@@ -60,7 +60,7 @@ export const LookUpHouseholdTableRow = ({
               key={edge.node.id}
               to={`/${baseUrl}/details/${edge.node.id}`}
             >
-              {edge.node.id}
+              {edge.node.name}
             </BlackLink>
           ))}
         </TableCell>

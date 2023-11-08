@@ -18,9 +18,12 @@ from hct_mis_api.apps.accountability.models import (
     Survey,
 )
 from hct_mis_api.apps.core.filters import BusinessAreaSlugFilter, DateTimeRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    decode_id_string_required,
+)
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.program.models import Program
 
 
@@ -85,13 +88,14 @@ class MessageRecipientsMapFilter(FilterSet):
     )
 
 
-class FeedbackFilter(GlobalProgramFilter, FilterSet):
+class FeedbackFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
     feedback_id = CharFilter(method="filter_feedback_id")
     is_active_program = BooleanFilter(method="filter_is_active_program")
+    program = CharFilter(method="filter_by_program")
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(created_by__pk=value)
@@ -106,6 +110,9 @@ class FeedbackFilter(GlobalProgramFilter, FilterSet):
             return qs.filter(program__status=Program.FINISHED)
         else:
             return qs
+
+    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> QuerySet[Feedback]:
+        return qs.filter(program_id=decode_id_string_required(value))
 
     class Meta:
         model = Feedback

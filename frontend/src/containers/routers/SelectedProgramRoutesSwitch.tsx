@@ -53,11 +53,15 @@ import { CreateCommunicationPage } from '../pages/accountability/communication/C
 import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
 import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
 import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
+import { DashboardPage } from '../pages/dashboard/DashboardPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
   return (
     <Switch>
+      <SentryRoute label='/ - Dashboard' path={`${path}/country-dashboard`}>
+        <DashboardPage />
+      </SentryRoute>
       <SentryRoute path={`${path}/population/household/:id`}>
         <PopulationHouseholdDetailsPage />
       </SentryRoute>

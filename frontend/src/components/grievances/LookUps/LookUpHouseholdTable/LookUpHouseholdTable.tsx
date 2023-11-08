@@ -47,7 +47,7 @@ export const LookUpHouseholdTable = ({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): React.ReactElement => {
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -69,9 +69,8 @@ export const LookUpHouseholdTable = ({
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
-    //TODO: add program filter
-    // programs: isAllPrograms ? filter.program : programId,
-    // isActiveProgram: filter.programState === 'active' ? true : null,
+    program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [selected, setSelected] = useState<string[]>(
