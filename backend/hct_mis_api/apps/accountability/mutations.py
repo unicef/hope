@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Any, Dict
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 
@@ -43,6 +44,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.program.models import Program
 
 
@@ -54,6 +56,7 @@ class CreateCommunicationMessageMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateCommunicationMessageMutation":
         user = info.context.user
@@ -88,6 +91,9 @@ class CreateFeedbackMutation(PermissionMutation):
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         program = Program.objects.get(id=decode_id_string(encoded_program_id))
 
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished")
+
         cls.has_permission(info, Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE, business_area)
         feedback = FeedbackCrudServices.create(user, business_area, program, input)
         log_create(
@@ -104,6 +110,7 @@ class UpdateFeedbackMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "UpdateFeedbackMutation":
         user = info.context.user
@@ -131,6 +138,7 @@ class CreateFeedbackMessageMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMessageMutation":
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback"]))
@@ -150,6 +158,7 @@ class CreateSurveyMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateSurveyMutation":
         business_area_slug = info.context.headers.get("Business-Area")
@@ -177,6 +186,7 @@ class ExportSurveySampleMutationMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, survey_id: str) -> "ExportSurveySampleMutationMutation":
         survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, survey.business_area)
