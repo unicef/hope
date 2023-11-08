@@ -296,7 +296,7 @@ stages:
 
   - stage: e2e_tests_seqiential
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
-    displayName: E2E-Tests
+    displayName: E2E-Tests-Sequential
     jobs:
       - job: cypress_tests
         pool:
@@ -343,7 +343,7 @@ stages:
 
   - stage: e2e_tests_parallel
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
-    displayName: E2E-Tests
+    displayName: E2E-Tests-Parallel
     jobs:
       - job: cypress_tests
         pool:
