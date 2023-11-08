@@ -13,7 +13,6 @@ from django.db.models import (
     When,
 )
 from django.db.models.functions import Coalesce
-from django.shortcuts import get_object_or_404
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
