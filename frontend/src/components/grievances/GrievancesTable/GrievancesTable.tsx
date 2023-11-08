@@ -19,6 +19,7 @@ import {
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
@@ -35,7 +36,6 @@ import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { useDebounce } from '../../../hooks/useDebounce';
 
 interface GrievancesTableProps {
   filter;
