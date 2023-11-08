@@ -445,6 +445,9 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
         qs = queryset.order_by(reverse + "custom_order")
     elif order_by == "unicef_id":
         qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+    elif order_by == "dispersion_date":
+        # TODO this field is empty at the moment
+        qs = queryset
     else:
         qs = queryset.order_by(reverse + order_by)
 
