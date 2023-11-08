@@ -1,5 +1,7 @@
+import dataclasses
+from uuid import UUID
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Dict
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -44,9 +46,44 @@ USER_STATUS_CHOICES = (
 USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
+@dataclasses.dataclass(frozen=True)
+class ProgramAreasList:
+    program_id: UUID
+    areas: List[UUID]
+
+
+@dataclasses.dataclass(frozen=True)
+class BusinessAreaPartnerPermissions:
+    business_area_id: UUID
+    roles: List[UUID]
+    programs: ProgramAreasList
+
+    @classmethod
+    def from_dict(cls, data_permissions: Dict) -> List["BusinessAreaPartnerPermissions"]:
+        ba_partner_perms_list: List = []
+        for business_area_id in data_permissions:
+            ba_partner_perms_list.append(
+                cls(
+                    business_area_id=business_area_id,
+                    roles=data_permissions[business_area_id].get("roles", []),
+                    programs=data_permissions[business_area_id].get("programs", {}),
+                )
+            )
+        return ba_partner_perms_list
+
+
 class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
+    """
+        permissions structure
+        {
+            "business_area_id": {
+                "roles": ["role_id_1", "role_id_2"]
+                "programs": {"program_id":["admin_id"]}
+            }
+        }
+    """
     permissions = JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
