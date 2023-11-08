@@ -206,7 +206,7 @@ class MassEnrolForm(forms.Form):
             label="Select a program to enrol households to",
         )
 
-    def clean(self):
+    def clean(self) -> Optional[Dict[str, Any]]:
         cleaned_data = super().clean()
         if "apply" in self.data:
             program_for_enrol = cleaned_data.get("program_for_enrol")
@@ -218,10 +218,13 @@ class MassEnrolForm(forms.Form):
                     household.program
                     and household.program.data_collecting_type
                     and program_for_enrol.data_collecting_type
-                    and program_for_enrol.data_collecting_type in household.program.data_collecting_type.compatible_types.all()
+                    and program_for_enrol.data_collecting_type
+                    in household.program.data_collecting_type.compatible_types.all()
                 ):
                     # Set the warning message
-                    warning_message = "Not all households have data collecting type compatible with the selected program"
+                    warning_message = (
+                        "Not all households have data collecting type compatible with the selected program"
+                    )
                     break  # Exit the loop after the first incompatible household
 
             if warning_message:

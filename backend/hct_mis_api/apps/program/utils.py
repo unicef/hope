@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.db import transaction
 
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -162,7 +164,7 @@ def copy_bank_account_info_per_individual(new_individual: Individual) -> None:
         bank_account_info.save()
 
 
-def enrol_household_to_program(household: Household, program: Program) -> (Household, int):
+def enrol_household_to_program(household: Household, program: Program) -> Tuple[Household, int]:
     if household.program == program:
         return household, 0
     elif household_representation_in_new_program := Household.original_and_repr_objects.filter(
@@ -201,7 +203,7 @@ def create_new_household_representation(household: Household, program: Program) 
     ).first()
     household.save()
 
-    for individual in individuals_to_create:  # type: ignore
+    for individual in individuals_to_create:
         individual.household = household
 
     Individual.original_and_repr_objects.bulk_update(individuals_to_create, ["household"])
@@ -258,7 +260,9 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
             copied_from=role.individual,
         ).first()
         if not individual_representation:
-            individual_representation = create_new_individual_representation(program=program, individual=role.individual)
+            individual_representation = create_new_individual_representation(
+                program=program, individual=role.individual
+            )
 
         role.pk = None
         role.household = new_household

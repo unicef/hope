@@ -8,8 +8,7 @@ from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -281,7 +280,7 @@ class HouseholdAdmin(
             form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
                 enrolled_hh_count = 0
-                program_for_enrol = form.cleaned_data['program_for_enrol']
+                program_for_enrol = form.cleaned_data["program_for_enrol"]
                 for household in qs:
                     _, created = enrol_household_to_program(household, program_for_enrol)
                     enrolled_hh_count += created
@@ -303,7 +302,7 @@ class HouseholdAdmin(
         form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enrol_to_another_program"
-        return TemplateResponse(request, 'admin/household/household/enrol_households_to_program.html', context)
+        return TemplateResponse(request, "admin/household/household/enrol_households_to_program.html", context)
         # return render(request, 'admin/household/household/enrol_households_to_program.html', {'form': form})
 
     mass_enrol_to_another_program.short_description = "Mass enrol households to another program"
