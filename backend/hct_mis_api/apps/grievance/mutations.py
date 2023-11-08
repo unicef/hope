@@ -321,6 +321,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "UpdateGrievanceTicketMutation":
         user = info.context.user
