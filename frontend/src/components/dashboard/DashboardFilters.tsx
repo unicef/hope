@@ -34,6 +34,44 @@ interface DashboardFiltersProps {
   setAppliedFilter;
 }
 
+interface ProgramSelectProps {
+  onChange: CallableFunction;
+  value: string;
+}
+
+const ProgramSelect = ({
+  onChange,
+  value,
+}: ProgramSelectProps): React.ReactElement => {
+  const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
+  const { data, loading } = useAllProgramsForChoicesQuery({
+    variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
+  });
+  if (loading) return <LoadingComponent />;
+
+  const allPrograms = data?.allPrograms?.edges || [];
+  const programs = allPrograms.map((edge) => edge.node);
+
+  return (
+    <SelectFilter
+      onChange={onChange}
+      label={t('Programme')}
+      value={value}
+      icon={<FlashOnIcon />}
+      data-cy='filter-program'
+      fullWidth
+    >
+      {programs.map((program) => (
+        <MenuItem key={program.id} value={program.id}>
+          {program.name}
+        </MenuItem>
+      ))}
+    </SelectFilter>
+  );
+};
+
 export const DashboardFilters = ({
   filter,
   setFilter,
@@ -43,16 +81,7 @@ export const DashboardFilters = ({
 }: DashboardFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
-  const { businessArea } = useBaseUrl();
-  const { t } = useTranslation();
-  const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-  if (loading) return <LoadingComponent />;
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
+  const { isAllPrograms } = useBaseUrl();
 
   const {
     handleFilterChange,
@@ -78,22 +107,14 @@ export const DashboardFilters = ({
   return (
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={5}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            data-cy='filter-program'
-            fullWidth
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
+        {isAllPrograms && (
+          <Grid item xs={5}>
+            <ProgramSelect
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              value={filter.program}
+            />
+          </Grid>
+        )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             fullWidth

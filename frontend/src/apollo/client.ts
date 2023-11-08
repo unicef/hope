@@ -161,11 +161,14 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
 });
 
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
-  operation.setContext({
-    headers: {
-      'Business-Area': window.location.pathname.split('/')[1],
-    },
-  });
+  const businessAreaSlug = window.location.pathname.split('/')[1];
+  const programId = window.location.pathname.split('/')[3];
+  const headers = {
+    'Business-Area': businessAreaSlug,
+    Program: programId,
+  };
+
+  operation.setContext({ headers });
   return forward(operation);
 });
 

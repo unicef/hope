@@ -1,7 +1,7 @@
 import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { AllIndividualsQuery } from '../../../../__generated__/graphql';
+import { AllIndividualsForPopulationTableQuery } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { sexToCapitalize } from '../../../../utils/utils';
 import { BlackLink } from '../../../core/BlackLink';
@@ -9,11 +9,11 @@ import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
-  individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+  individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
   radioChangeHandler: (
-    individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
+    individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
   ) => void;
-  selectedIndividual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+  selectedIndividual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
 }
 
 export const LookUpIndividualTableRow = ({
@@ -79,10 +79,10 @@ export const LookUpIndividualTableRow = ({
       <TableCell align='left'>
         {individual?.household?.admin2?.name || '-'}
       </TableCell>
+      <TableCell align='left'>{mappedPrograms}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{mappedPrograms}</TableCell>
     </ClickableTableRow>
   );
 };

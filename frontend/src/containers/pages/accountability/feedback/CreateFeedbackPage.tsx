@@ -226,6 +226,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     area: values.area,
     language: values.language,
     consent: values.consent,
+    program: values.program,
   });
 
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(

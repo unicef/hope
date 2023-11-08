@@ -17,7 +17,9 @@ export const AllHouseholdsForPopulationTable = gql`
     $lastRegistrationDate: String
     $admin2: ID
     $withdrawn: Boolean
-    $headOfHouseholdPhoneNoValid: Boolean # TODO: Add programs filter # $programs: [ID]
+    $headOfHouseholdPhoneNoValid: Boolean
+    $program: String
+    $isActiveProgram: Boolean
   ) {
     allHouseholds(
       after: $after
@@ -35,7 +37,9 @@ export const AllHouseholdsForPopulationTable = gql`
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
       withdrawn: $withdrawn
-      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid # programs: $programs
+      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
+      program: $program
+      isActiveProgram: $isActiveProgram
     ) {
       pageInfo {
         hasNextPage

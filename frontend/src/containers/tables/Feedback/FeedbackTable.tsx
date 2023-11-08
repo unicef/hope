@@ -22,7 +22,7 @@ export const FeedbackTable = ({
   canViewDetails,
 }: FeedbackTableProps): ReactElement => {
   const { t } = useTranslation();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, programId } = useBaseUrl();
   const initialVariables: AllFeedbacksQueryVariables = {
     feedbackId: filter.feedbackId,
     issueType: filter.issueType || '',
@@ -34,8 +34,8 @@ export const FeedbackTable = ({
             max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
           })
         : '',
-    // program: isAllPrograms ? filter.program : programId,
-    // isActiveProgram: filter.programState === 'active' ? true : null,
+    program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const headCellsWithProgramColumn = [

@@ -44,7 +44,6 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -86,7 +85,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:
     return code
 
 
-class HouseholdFilter(GlobalProgramFilter, FilterSet):
+class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -240,10 +239,10 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
         # TODO: after data migrations will use only program
         return qs.filter(
             Q(programs__id=decode_id_string_required(value)) | Q(program__id=decode_id_string_required(value))
-        )
+        ).distinct()
 
 
-class IndividualFilter(GlobalProgramFilter, FilterSet):
+class IndividualFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
@@ -258,6 +257,7 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
+    program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
@@ -382,7 +382,7 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
         return qs.filter(
             Q(household__programs__id=decode_id_string_required(value))
             | Q(household__program__id=decode_id_string_required(value))
-        )
+        ).distinct()
 
 
 def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:

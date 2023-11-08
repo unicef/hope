@@ -551,9 +551,11 @@ class Query(graphene.ObjectType):
     household_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
-        program = Program.objects.filter(id=decode_id_string(info.context.headers.get("Program"))).first()
-        if program and program.status == Program.DRAFT:
-            return Individual.objects.none()
+        program_id = info.context.headers.get("Program")
+        if program_id != "all":
+            program = Program.objects.filter(id=decode_id_string(program_id)).first()
+            if program and program.status == Program.DRAFT:
+                return Individual.objects.none()
         queryset = Individual.objects
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")  # type: ignore
@@ -573,9 +575,11 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
-        program = Program.objects.filter(id=decode_id_string(info.context.headers.get("Program"))).first()
-        if program and program.status == Program.DRAFT:
-            return Household.objects.none()
+        program_id = info.context.headers.get("Program")
+        if program_id != "all":
+            program = Program.objects.filter(id=decode_id_string(program_id)).first()
+            if program and program.status == Program.DRAFT:
+                return Household.objects.none()
         queryset = Household.objects.order_by("created_at")
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")
