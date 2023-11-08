@@ -37,7 +37,7 @@ volumes:
 services:
   cypress:
     image: ${CYPRESS_IMAGE}
-    command: "ci-test"
+    command: ci-test-sequential
     depends_on:
       - proxy
       - celery_worker

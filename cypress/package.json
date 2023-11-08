@@ -25,13 +25,14 @@
     "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*",
     "pretest": "npm run clean:reports",
     "scripts": "cypress run",
-    "parallel": "cypress-parallel -s scripts -t 4 -d cypress/e2e/08-grievance/ -a '\"--headless --config baseUrl=http://proxy,video=false\"'",
     "clean:reports": "mkdir -p cypress/reports/mochareports ",
     "combine-reports": "mochawesome-merge cypress/reports/mocha/*.json > cypress/reports/mochareports/report.json",
     "generate-report": "marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports --inline",
     "zip-report": "zip -r report.zip cypress/reports/mochareports",
     "posttest": "npm run combine-reports && npm run generate-report && npm run zip-report && node ./cypress/scripts/slackReport.js",
-    "test": "npm run parallel || npm run posttest"
+    "parallel": "cypress-parallel -s scripts -t 4 -d cypress/e2e/08-grievance/ -a '\"--headless --config baseUrl=http://proxy,video=false\"'",
+    "sequential": "cypress run --tag sequential --headless --config baseUrl=http://proxy,video=false",
+    "test": "npm run sequential && npm run parallel"
   },
   "dependencies": {
     "axios": "^1.4.0",

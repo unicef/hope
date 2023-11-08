@@ -38,7 +38,7 @@ services:
   cypress:
     build:
       dockerfile: Dockerfile
-    command: "ci-test"
+    command: ci-test-sequential
     depends_on:
       - proxy
       - celery_worker

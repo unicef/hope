@@ -294,7 +294,7 @@ stages:
 
 
 
-  - stage: e2e_tests
+  - stage: e2e_tests_seqiential
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
     displayName: E2E-Tests
     jobs:
@@ -317,7 +317,54 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run cypress ci-test'
+              dockerComposeCommand: 'run cypress ci-test-sequential'
+              dockerComposeFileArgs: |
+               BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
+               CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
+               BRANCH_NAME=$(System.PullRequest.SourceBranch)
+               BUILD_ID=$(Build.BuildId)
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Test Report Artifacts'
+            condition: always()
+            inputs:
+              PathtoPublish: './cypress-reports'
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: './cypress-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST E2E Results'
+
+
+  - stage: e2e_tests_parallel
+    dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
+    displayName: E2E-Tests
+    jobs:
+      - job: cypress_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CYPRESS TEST]"
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
+          - script: |
+              mkdir -p cypress-results cypress-reports
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registryConnection)
+              dockerComposeFile: '**/docker-compose.cy.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run cypress ci-test-sequential'
               dockerComposeFileArgs: |
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
