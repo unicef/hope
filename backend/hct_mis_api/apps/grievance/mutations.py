@@ -622,6 +622,7 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
         cls,
@@ -651,6 +652,7 @@ class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
         cls,
@@ -679,6 +681,7 @@ class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
         cls,
@@ -707,6 +710,7 @@ class BulkGrievanceAddNoteMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
         cls,
@@ -736,6 +740,7 @@ class CreateTicketNoteMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, note_input: Dict, **kwargs: Any) -> "CreateTicketNoteMutation":
         user = info.context.user
