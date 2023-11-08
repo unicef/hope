@@ -50,6 +50,7 @@ export const LookUpAdminAreaAutocomplete = ({
       businessArea,
       level: 2,
     },
+    fetchPolicy: 'cache-and-network',
   });
   useEffect(() => {
     if (open) {
