@@ -32,9 +32,22 @@ Cypress.Commands.add("createExcel", () => {
 Cypress.Commands.add("adminLogin", () => {
   Cypress.session.clearCurrentSessionData();
   Cypress.session.clearAllSavedSessions();
+  waitForClearedSession(10);
   cy.visit("/");
   const expected_url =
     Cypress.config().baseUrl + "/api/unicorn/login/?next=/api/unicorn/";
+  function waitForClearedSession(n) {
+    //function waitForClearedSession created because of asynchronous session Clearing in Cypress
+    cy.getCookie("csrftoken").then((csrftoken) => {
+      if (csrftoken != null) {
+        if (n === 0) cy.getCookie("csrftoken").should("be.null");
+        cy.wait(100);
+        return waitForClearedSession(n - 1);
+      } else {
+        cy.writeFile("cypress/report/tokeny.txt", "null\n\n");
+      }
+    });
+  }
   function checkApiUrl(n) {
     cy.url().then((url) => {
       if (expected_url !== url) {

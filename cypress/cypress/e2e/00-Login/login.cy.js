@@ -7,13 +7,14 @@ context("Login", () => {
     cy.intercept("*", (request) => {
       request.continue((response) => {
         if (response.statusMessage !== "OK") {
-          bubaNetworka.push({ request, response });
+          let headers = response.headers;
+          bubaNetworka.push({ request: [request, { headers, response }] });
         }
       });
     }).as("network");
   });
   after(() => {
-    cy.writeFile("cypress/report/networkFails.json", bubaNetworka);
+    cy.writeFile("cypress/report/networkFails.txt", bubaNetworka);
   });
   it("login with valid username and valid password", () => {
     cy.scenario([
