@@ -46,7 +46,7 @@ export const CreatedByAutocomplete = ({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 500);
+  const debouncedInputText = useDebounce(inputValue, 1000);
   const businessArea = useBusinessArea();
 
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
@@ -57,7 +57,7 @@ export const CreatedByAutocomplete = ({
       search: debouncedInputText,
       isTicketCreator: true,
     },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
@@ -106,11 +106,15 @@ export const CreatedByAutocomplete = ({
       getOptionLabel={(option) => {
         let optionLabel;
         if (option.node) {
-          optionLabel = `${option.node.email}`;
+          const { firstName, lastName } = option.node;
+          optionLabel = `${firstName} ${lastName}`;
         } else {
-          optionLabel =
-            data?.allUsers?.edges?.find((el) => el.node.id === option)?.node
-              .email || '';
+          const foundUser = data?.allUsers?.edges?.find(
+            (el) => el.node.id === option,
+          )?.node;
+          optionLabel = foundUser
+            ? `${foundUser.firstName} ${foundUser.lastName}`
+            : '';
         }
         return `${optionLabel}`;
       }}

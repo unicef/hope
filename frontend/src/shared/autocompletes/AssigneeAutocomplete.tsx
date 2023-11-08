@@ -48,7 +48,7 @@ export const AssigneeAutocomplete = ({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 500);
+  const debouncedInputText = useDebounce(inputValue, 1000);
   const { businessArea } = useBaseUrl();
 
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
@@ -58,6 +58,7 @@ export const AssigneeAutocomplete = ({
       orderBy: 'first_name,last_name,email',
       search: debouncedInputText,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
