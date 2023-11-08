@@ -63,10 +63,7 @@ class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
         cls.ticket = PositiveFeedbackTicketWithoutExtrasFactory()
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
-        cls.program = ProgramFactory(
-            business_area=BusinessArea.objects.first(),
-            status=Program.ACTIVE
-        )
+        cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
 
     @parameterized.expand(
         [
