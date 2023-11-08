@@ -60,6 +60,7 @@ export const TargetPopulationAutocomplete = ({
       name: debouncedInputText,
       program: [programId],
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
@@ -91,16 +92,19 @@ export const TargetPopulationAutocomplete = ({
       data-cy='filters-target-population-autocomplete'
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.id) {
+          handleFilterChange(name, selectedValue.node.id);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}
       onClose={(e, reason) => {
         setOpen(false);
-        if (reason === 'select-option') return;
-        onInputTextChange('');
+        if (reason !== 'select-option') {
+          onInputTextChange('');
+        }
       }}
       getOptionSelected={(option, value1) => {
         return option.node?.id === value1;
