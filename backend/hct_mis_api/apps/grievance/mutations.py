@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     to_snake_case,
 )
+from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.inputs import (
     CreateGrievanceTicketInput,
@@ -226,6 +227,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateGrievanceTicketMutation":
         user = info.context.user
