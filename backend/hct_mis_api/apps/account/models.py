@@ -1,7 +1,7 @@
 import dataclasses
-from uuid import UUID
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from uuid import UUID
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
