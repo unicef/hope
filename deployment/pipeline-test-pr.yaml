@@ -364,7 +364,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run cypress ci-test-sequential'
+              dockerComposeCommand: 'run cypress ci-test-parallel'
               dockerComposeFileArgs: |
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
                FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
