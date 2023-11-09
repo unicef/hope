@@ -12,7 +12,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class TestFilterIndividualsByProgram(APITestCase):
     QUERY = """
-    query AllIndividuals($program: String){
+    query AllIndividuals($program: ID){
       allIndividuals(businessArea: "afghanistan", program: $program) {
         edges {
           node {

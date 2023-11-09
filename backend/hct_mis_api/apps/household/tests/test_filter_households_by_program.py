@@ -16,7 +16,7 @@ class TestFilterHouseholdsByProgram(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     QUERY = """
-        query AllHouseholds($program: String){
+        query AllHouseholds($program: ID){
           allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan") {
             edges {
               node {

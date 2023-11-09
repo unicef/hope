@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import {
   AllHouseholdsForPopulationTableQuery,
   AllHouseholdsForPopulationTableQueryVariables,
-  AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
@@ -113,7 +112,7 @@ export const LookUpHouseholdTable = ({
   };
 
   const handleRadioChange = (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+    household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
   ): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);

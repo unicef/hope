@@ -51,25 +51,6 @@ export const LookUpHouseholdTableRow = ({
       radioChangeHandler(household);
     }
   };
-  const getMappedPrograms = (): React.ReactElement => {
-    if (household.programs?.edges?.length) {
-      return (
-        <TableCell align='left'>
-          {household.programs.edges.map((edge) => (
-            <BlackLink
-              key={edge.node.id}
-              to={`/${baseUrl}/details/${edge.node.id}`}
-            >
-              {edge.node.name}
-            </BlackLink>
-          ))}
-        </TableCell>
-      );
-    }
-    return <div>-</div>;
-  };
-
-  const mappedPrograms = getMappedPrograms();
 
   const isSelectionDisabled =
     redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
@@ -120,7 +101,15 @@ export const LookUpHouseholdTableRow = ({
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{mappedPrograms}</TableCell>
+      <TableCell align='left'>
+        {household.program ? (
+          <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
+            {household.program.name}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
+      </TableCell>
     </ClickableTableRow>
   );
 };

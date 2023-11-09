@@ -2326,6 +2326,7 @@ export type HouseholdNodeIndividualsArgs = {
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
   household_AdminArea?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<Scalars['ID']>,
   age?: Maybe<Scalars['String']>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   search?: Maybe<Scalars['String']>,
@@ -2335,7 +2336,6 @@ export type HouseholdNodeIndividualsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
-  program?: Maybe<Scalars['String']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -6384,13 +6384,13 @@ export type QueryAllHouseholdsArgs = {
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<Scalars['ID']>,
   size?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   searchType?: Maybe<Scalars['String']>,
   headOfHousehold_PhoneNoValid?: Maybe<Scalars['Boolean']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
-  program?: Maybe<Scalars['String']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -6415,6 +6415,7 @@ export type QueryAllIndividualsArgs = {
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
   household_AdminArea?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<Scalars['ID']>,
   age?: Maybe<Scalars['String']>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   search?: Maybe<Scalars['String']>,
@@ -6424,7 +6425,6 @@ export type QueryAllIndividualsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
-  program?: Maybe<Scalars['String']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -13036,7 +13036,7 @@ export type AllHouseholdsForPopulationTableQueryVariables = {
   admin2?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   headOfHouseholdPhoneNoValid?: Maybe<Scalars['Boolean']>,
-  program?: Maybe<Scalars['String']>,
+  program?: Maybe<Scalars['ID']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>
 };
 
@@ -13070,7 +13070,10 @@ export type AllHouseholdsForPopulationTableQuery = (
               & Pick<ProgramNode, 'id' | 'name'>
             )> }
           )>> }
-        ) }
+        ), program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
       )> }
     )>> }
   )> }
@@ -13182,7 +13185,7 @@ export type AllIndividualsForPopulationTableQueryVariables = {
   withdrawn?: Maybe<Scalars['Boolean']>,
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
-  program?: Maybe<Scalars['String']>,
+  program?: Maybe<Scalars['ID']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>
 };
 
@@ -24671,7 +24674,7 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: String, $isActiveProgram: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
   allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, searchType: $searchType, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, program: $program, isActiveProgram: $isActiveProgram) {
     pageInfo {
       hasNextPage
@@ -24709,6 +24712,10 @@ export const AllHouseholdsForPopulationTableDocument = gql`
               name
             }
           }
+        }
+        program {
+          id
+          name
         }
       }
     }
@@ -24914,7 +24921,7 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: String, $isActiveProgram: Boolean) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
   allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, searchType: $searchType, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags, program: $program, isActiveProgram: $isActiveProgram) {
     totalCount
     pageInfo {
