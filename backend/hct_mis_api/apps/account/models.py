@@ -104,7 +104,7 @@ class Partner(models.Model):
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), blank=True, unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
@@ -137,24 +137,44 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
+    def get_partner_role_ids_list(
+        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+    ) -> List:
+        if not business_area_id and business_area_slug:
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        partner_role_ids = self.partner.permissions.get(str(business_area_id), {}).get("roles", [])
+        return partner_role_ids
+
     def permissions_in_business_area(self, business_area_slug: str) -> List:
-        all_roles_permissions_list = list(
+        partner_role_ids = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
+
+        all_partner_roles_permissions_list = list(
+            Role.objects.filter(id__in=partner_role_ids).values_list("permissions", flat=True)
+        )
+        all_user_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
                 user_roles__business_area__slug=business_area_slug,
             ).values_list("permissions", flat=True)
         )
-        return [
-            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
-        ]
+
+        all_perms_list = list(set(all_user_roles_permissions_list + all_partner_roles_permissions_list))
+        return [permission for roles_permissions in all_perms_list for permission in roles_permissions or []]
 
     def has_permission(self, permission: str, business_area: "BusinessArea", write: bool = False) -> bool:
-        query = Role.objects.filter(
+        partner_role_ids = self.get_partner_role_ids_list(business_area_id=business_area.pk)
+
+        partner_roles = Role.objects.filter(
+            id__in=partner_role_ids,
+            permissions__contains=[permission],
+        )
+
+        user_roles = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
             user_roles__business_area=business_area,
         )
-        return query.count() > 0
+        return user_roles.count() > 0 or partner_roles.count() > 0
 
     def can_download_storage_files(self) -> bool:
         return any(
