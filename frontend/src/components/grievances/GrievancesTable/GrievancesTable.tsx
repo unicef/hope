@@ -19,6 +19,7 @@ import {
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
@@ -45,7 +46,7 @@ export const GrievancesTable = ({
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
-  const { baseUrl,businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -75,14 +76,16 @@ export const GrievancesTable = ({
   };
 
   const [inputValue, setInputValue] = useState('');
+  const debouncedInputText = useDebounce(inputValue, 1000);
   const [page, setPage] = useState<number>(0);
   const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
     variables: {
       businessArea,
       first: 20,
       orderBy: 'first_name,last_name,email',
-      search: inputValue,
+      search: debouncedInputText,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
