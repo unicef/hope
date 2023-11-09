@@ -39,7 +39,7 @@ export const NewReportForm = (): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, baseUrl } = useBaseUrl();
   const validationSchema = Yup.object().shape({
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
@@ -146,7 +146,7 @@ export const NewReportForm = (): React.ReactElement => {
     });
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.', {
-        pathname: `/${businessArea}/reporting/${response.data.createReport.report.id}`,
+        pathname: `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
         historyMethod: 'push',
       });
     } else {

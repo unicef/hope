@@ -23,7 +23,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds($search: String, $searchType: String, $program: String) {
+      query AllHouseholds($search: String, $searchType: String, $program: ID) {
         allHouseholds(search: $search, searchType: $searchType, orderBy: "size", program: $program, businessArea: "afghanistan") {
           edges {
             node {
@@ -36,7 +36,7 @@ ALL_HOUSEHOLD_QUERY = """
       }
     """
 ALL_HOUSEHOLD_QUERY_RANGE = """
-    query AllHouseholds($program: String){
+    query AllHouseholds($program: ID){
       allHouseholds(
         orderBy: "size",
         size: "{\\"min\\": 3, \\"max\\": 9}",
@@ -54,7 +54,7 @@ ALL_HOUSEHOLD_QUERY_RANGE = """
     }
     """
 ALL_HOUSEHOLD_QUERY_MIN = """
-    query AllHouseholds($program: String){
+    query AllHouseholds($program: ID){
       allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan", program: $program) {
         edges {
           node {
@@ -67,7 +67,7 @@ ALL_HOUSEHOLD_QUERY_MIN = """
     }
     """
 ALL_HOUSEHOLD_QUERY_MAX = """
-    query AllHouseholds($program: String){
+    query AllHouseholds($program: ID){
       allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan", program: $program) {
         edges {
           node {

@@ -29,7 +29,7 @@ class TestIndividualQuery(APITestCase):
     databases = "__all__"
 
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals($search: String, $searchType: String, $program: String) {
+    query AllIndividuals($search: String, $searchType: String, $program: ID) {
       allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, program: $program, orderBy:"id") {
         edges {
           node {
