@@ -52,6 +52,7 @@ export const LanguageAutocomplete = ({
       first: 20,
       code: debouncedInputText,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {

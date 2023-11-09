@@ -59,6 +59,7 @@ export const AdminAreaAutocomplete = ({
       businessArea,
       level: 2,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
@@ -89,9 +90,11 @@ export const AdminAreaAutocomplete = ({
       data-cy={dataCy}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.id) {
+          handleFilterChange(name, selectedValue.node.id);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}

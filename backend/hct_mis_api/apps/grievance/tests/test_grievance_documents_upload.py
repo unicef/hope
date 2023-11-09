@@ -20,6 +20,8 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 @override_settings(MEDIA_ROOT=UploadDocumentsBase.TEST_DIR)
@@ -66,6 +68,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         call_command("loadcountries")
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -117,7 +120,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -153,7 +156,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         )
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -174,7 +177,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         )
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -200,7 +203,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -228,7 +231,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -258,7 +261,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -289,7 +292,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -320,7 +323,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -343,7 +346,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -374,7 +377,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -412,7 +415,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -434,7 +437,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -467,7 +470,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -509,7 +512,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -548,7 +551,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     **self.grievance_data_to_update,
