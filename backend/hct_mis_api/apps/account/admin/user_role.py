@@ -5,7 +5,6 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from admin_sync.mixin import GetManyFromRemoteMixin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import AllValuesComboFilter
@@ -28,12 +27,16 @@ class UserRoleInline(admin.TabularInline):
 
 
 @admin.register(account_models.UserRole)
-class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
+class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     autocomplete_fields = ("role",)
     raw_id_fields = ("user", "business_area", "role")
-    search_fields = ("user__username__istartswith",)
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+    )
     list_filter = (
         ("business_area", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
