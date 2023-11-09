@@ -61,7 +61,7 @@ context("Login", () => {
   });
   it(
     "Check the login with Invalid username and Invalid password",
-    { tags: "#buba" },
+    { tags: "#smoke" },
     () => {
       cy.scenario([
         "Log in via admin panel using invalid login and password",
