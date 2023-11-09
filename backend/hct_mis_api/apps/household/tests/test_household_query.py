@@ -185,6 +185,9 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         # remove after data migration
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
         migrate_data_to_representations_per_business_area(business_area=cls.business_area)
         super().setUpTestData()
 
