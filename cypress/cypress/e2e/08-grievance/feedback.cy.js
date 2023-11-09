@@ -15,14 +15,14 @@ let grievanceDetailsPage = new GrievanceDetailsPage();
 describe("Grievance - Feedback", () => {
   before(() => {
     cy.checkIfLoggedIn();
-    cy.intercept("*", (request) => {
-      request.continue((response) => {
-        if (response.statusMessage !== "OK") {
-          cy.log(request.body);
-          cy.log(response.body);
-        }
-      });
-    });
+    // cy.intercept("*", (request) => {
+    //   request.continue((response) => {
+    //     if (response.statusMessage !== "OK") {
+    //       cy.log(request.body);
+    //       cy.log(response.body);
+    //     }
+    //   });
+    // });
   });
   beforeEach(() => {
     cy.navigateToHomePage();
@@ -36,7 +36,7 @@ describe("Grievance - Feedback", () => {
         "Go to Grievance page",
         "Go to Feedback page",
         "Elements of Grievance menu are visible",
-        "Check if all elements on page exist",
+        "Check if all elements on page exist"
       ]);
       feedbackPage.checkGrievanceMenu();
       feedbackPage.checkElementsOnPage();
@@ -46,7 +46,7 @@ describe("Grievance - Feedback", () => {
         "Go to Grievance page",
         "Go to Feedback page",
         "Choose first row from Feedbacks List",
-        "Check if all elements on details page exist",
+        "Check if all elements on details page exist"
       ]);
       feedbackPage.chooseTableRow(0);
       feedbackDetailsPage.checkElementsOnPage();
@@ -55,7 +55,7 @@ describe("Grievance - Feedback", () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Submit New Feedback button",
-        "Check if all elements on details page exist",
+        "Check if all elements on details page exist"
       ]);
       feedbackPage.clickButtonSubmitNewFeedback();
       newFeedbackPage.checkElementsOnPage();
@@ -64,7 +64,7 @@ describe("Grievance - Feedback", () => {
 
   describe("Component tests Feedback", () => {
     context("Feedback Filters", () => {
-      [["FED-23-0001", 1, "Feedback ID: FED-23-0001"]].forEach((testData) => {
+      [["FED-23-0001", 1, "Feedback ID: FED-23-0001"]].forEach(testData => {
         it("Grievance Search filter", () => {
           cy.scenario([
             "Go to Grievance page",
@@ -77,7 +77,7 @@ describe("Grievance - Feedback", () => {
             "Press button Apply",
             `Check if Tickets List has ${testData[1]} rows`,
             "Press first row from Ticket List and check data",
-            "Come back to Feedback Page",
+            "Come back to Feedback Page"
           ]);
           feedbackPage.useSearchFilter("Not Exist");
           feedbackPage.expectedNumberOfRows(0);
@@ -103,7 +103,7 @@ describe("Grievance - Feedback", () => {
           "Press button Apply",
           `Check if Tickets List has 1 row`,
           "Press first row from Ticket List and check data",
-          "Come back to Feedback Page",
+          "Come back to Feedback Page"
         ]);
         feedbackPage.useIssueTypeFilter("Positive feedback");
         feedbackPage.expectedNumberOfRows(1);
@@ -128,7 +128,7 @@ describe("Grievance - Feedback", () => {
           "Check if Creation date",
           "Choose other day using calendar popup",
           "Press button Apply",
-          `Check if Tickets List has 2 rows`,
+          `Check if Tickets List has 2 rows`
         ]);
         feedbackPage.changeCreationDateTo("2024-01-01");
         feedbackPage.checkDateFilterTo("2024-01-01");
@@ -154,7 +154,10 @@ describe("Grievance - Feedback", () => {
           newFeedbackPage.getButtonNext().click();
           newFeedbackPage.getLabelCategory().contains("Feedback");
           newFeedbackPage.getDescription().type("Test Description");
-          newFeedbackPage.getButtonNext().contains("Save").click();
+          newFeedbackPage
+            .getButtonNext()
+            .contains("Save")
+            .click();
           feedbackPage.clickMenuButtonFeedback();
         });
         after(() => {
@@ -173,7 +176,7 @@ describe("Grievance - Feedback", () => {
             "Press button Clear",
             "Choose Type Root Rootkowski",
             "Press button Apply",
-            `Check if Tickets List has 2 row`,
+            `Check if Tickets List has 2 row`
           ]);
           feedbackPage.useCreatedByFilter("Cypress User");
           feedbackPage.expectedNumberOfRows(1);
@@ -196,7 +199,7 @@ describe("Grievance - Feedback", () => {
           "Select 'Received Consent*' and press Next button",
           "Fill all fields",
           `Press button Save`,
-          `Check data in details page`,
+          `Check data in details page`
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Negative");
@@ -211,10 +214,16 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getDescription().type("Test Description");
         newFeedbackPage.getComments().type("Test comment");
         newFeedbackPage.getAdminAreaAutocomplete().click();
-        newFeedbackPage.getOption().contains("Zari").click();
+        newFeedbackPage
+          .getOption()
+          .contains("Zari")
+          .click();
         newFeedbackPage.getInputArea().type("Test Area");
         newFeedbackPage.getInputLanguage().type("Random Language");
-        newFeedbackPage.getButtonNext().contains("Save").click();
+        newFeedbackPage
+          .getButtonNext()
+          .contains("Save")
+          .click();
         feedbackDetailsPage.getDescription().contains("Test Description");
         feedbackDetailsPage.getComments().contains("Test comment");
         feedbackDetailsPage.getAdministrativeLevel2().contains("Zari");
@@ -235,7 +244,7 @@ describe("Grievance - Feedback", () => {
           "Select 'Received Consent*' and press Next button",
           "Fill all fields",
           `Press button Save`,
-          `Check data in details page`,
+          `Check data in details page`
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Positive");
@@ -253,10 +262,16 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getDescription().type("Test Description");
         newFeedbackPage.getComments().type("Test comment");
         newFeedbackPage.getAdminAreaAutocomplete().click();
-        newFeedbackPage.getOption().contains("Zari").click();
+        newFeedbackPage
+          .getOption()
+          .contains("Zari")
+          .click();
         newFeedbackPage.getInputArea().type("Test Area");
         newFeedbackPage.getInputLanguage().type("Random Language");
-        newFeedbackPage.getButtonNext().contains("Save").click();
+        newFeedbackPage
+          .getButtonNext()
+          .contains("Save")
+          .click();
         feedbackDetailsPage.getDescription().contains("Test Description");
         feedbackDetailsPage.getComments().contains("Test comment");
         feedbackDetailsPage.getAdministrativeLevel2().contains("Zari");
@@ -306,7 +321,7 @@ describe("Grievance - Feedback", () => {
           "Select 'Received Consent*'",
           "Press button Next",
           "Fill all fields",
-          `Press button Save`,
+          `Press button Save`
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.getButtonBack().should("be.disabled");
@@ -356,7 +371,10 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getReceivedConsent().click();
         newFeedbackPage.getButtonNext().click();
         newFeedbackPage.getDescription().type("Test Description");
-        newFeedbackPage.getButtonNext().contains("Save").click();
+        newFeedbackPage
+          .getButtonNext()
+          .contains("Save")
+          .click();
       });
       it("Create Linked Ticket", () => {
         cy.scenario([
@@ -373,7 +391,7 @@ describe("Grievance - Feedback", () => {
           `Check data in details page`,
           `Press Create Linked Ticket`,
           "Create Grievance Ticket",
-          "Check If Grievance Ticket is linked to Feedback",
+          "Check If Grievance Ticket is linked to Feedback"
         ]);
         feedbackPage.getButtonSubmitNewFeedback().click();
         newFeedbackPage.chooseOptionByName("Negative");
@@ -386,11 +404,14 @@ describe("Grievance - Feedback", () => {
         newFeedbackPage.getReceivedConsent().click();
         newFeedbackPage.getButtonNext().click();
         newFeedbackPage.getDescription().type("Test Description");
-        newFeedbackPage.getButtonNext().contains("Save").click();
+        newFeedbackPage
+          .getButtonNext()
+          .contains("Save")
+          .click();
         feedbackDetailsPage
           .getTitlePage()
           .contains("Feedback ID:")
-          .then(($textFeedbackID) => {
+          .then($textFeedbackID => {
             const feedbackID = $textFeedbackID.text().split("ID: ")[1];
             feedbackDetailsPage.getButtonCreateLinkedTicket().click();
             grievanceNewTicketPage.chooseCategory("Referral");
@@ -400,11 +421,14 @@ describe("Grievance - Feedback", () => {
             grievanceNewTicketPage
               .getDescription()
               .type("Test Grievance Ticket");
-            grievanceNewTicketPage.getButtonNext().contains("Save").click();
+            grievanceNewTicketPage
+              .getButtonNext()
+              .contains("Save")
+              .click();
             grievanceDetailsPage
               .getTitle()
               .contains("Ticket ID: ")
-              .then(($textGrievanceID) => {
+              .then($textGrievanceID => {
                 const grievanceID = $textGrievanceID.text().split("ID: ")[1];
                 feedbackPage.clickMenuButtonFeedback();
                 feedbackPage
@@ -439,11 +463,14 @@ describe("Grievance - Feedback", () => {
         "Delete part of URL",
         "Check if 404 occurred",
         "Press button refresh",
-        "Check if 404 occurred",
+        "Check if 404 occurred"
       ]);
-      feedbackPage.getRows().first().click();
+      feedbackPage
+        .getRows()
+        .first()
+        .click();
       feedbackDetailsPage.getTitlePage().contains("Feedback");
-      cy.url().then((url) => {
+      cy.url().then(url => {
         let newUrl = url.slice(0, -10);
         cy.visit(newUrl);
         error404Page
@@ -465,7 +492,7 @@ describe("Grievance - Feedback", () => {
         "Press button Submit New Feedback",
         "Choose type (e.g. Negative) and press Next button",
         "Choose Household and press Next button",
-        "Select Received Consent* and press Next button",
+        "Select Received Consent* and press Next button"
       ]);
       feedbackPage.getButtonSubmitNewFeedback().click();
       newFeedbackPage.chooseOptionByName("Negative");
@@ -484,7 +511,7 @@ describe("Grievance - Feedback", () => {
         "Go to Feedback page",
         "Press Menu User Profile button",
         "Press Clear Cache button",
-        "Check if page was opened properly",
+        "Check if page was opened properly"
       ]);
       feedbackPage.clearCache();
       feedbackPage.checkElementsOnPage();
