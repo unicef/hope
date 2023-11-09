@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@cypress/grep": "^4.0.1",
     "copy": "^0.3.2",
-    "cypress": "^13.4.0",
+    "cypress": "^13.5.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-repeat": "^2.3.3",
@@ -24,12 +25,13 @@
     "lint": "eslint .",
     "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*",
     "pretest": "npm run clean:reports",
-    "scripts": "cypress run --headless --config baseUrl=http://proxy,video=false",
+    "scripts": "cypress run --env grepTags='-#smoke' -s cypress/e2e/00-Login",
+    "scripts2": "cypress run -s cypress/e2e/02-registration-data-import  --headless --config baseUrl=http://proxy,video=false",
     "clean:reports": "mkdir -p cypress/reports/mochareports ",
     "combine-reports": "mochawesome-merge cypress/reports/mocha/*.json > cypress/reports/mochareports/report.json",
     "generate-report": "marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports --inline",
     "zip-report": "zip -r report.zip cypress/reports/mochareports",
-    "posttest": "npm run combine-reports && npm run generate-report && npm run zip-report && node ./cypress/scripts/slackReport.js",
+    "posttest": "npm run combine-reports && npm run generate-report && npm run zip-report",
     "test": "npm run scripts || npm run posttest"
   },
   "dependencies": {

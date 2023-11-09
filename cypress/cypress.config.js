@@ -10,7 +10,8 @@ module.exports = defineConfig({
   e2e: {
     testIsolation: false,
     setupNodeEvents(on, config) {
-      on("task", verifyDownloadTasks);
+      require("@cypress/grep/src/plugin")(config);
+      return config;
     },
     projectId: "cypress",
     baseUrl: "http://localhost:8082",
