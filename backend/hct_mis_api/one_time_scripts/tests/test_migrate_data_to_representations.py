@@ -88,6 +88,9 @@ class TestMigrateDataToRepresentations(TestCase):
         self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
         self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
         self.business_area_sudan = BusinessAreaFactory(name="Sudan")
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
 
         # collecting_types
         generate_data_collecting_types()
