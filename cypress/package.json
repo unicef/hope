@@ -31,7 +31,7 @@
     "generate-report": "marge cypress/reports/mochareports/report.json -f report-sequential -o cypress/reports/mochareports --inline",
     "generate-report:parallel": "marge cypress/reports/mochareports/report.json -f report-parallel -o cypress/reports/mochareports --inline",
     "posttest": "npm run combine-reports && npm run generate-report && node ./cypress/scripts/slackReport.js",
-    "posttest:parallel": "npm run combine-reports && npm run generate-report:parallel && npm run zip-report",
+    "posttest:parallel": "npm run combine-reports && npm run generate-report:parallel && node ./cypress/scripts/slackReport.js",
     "parallel": "cypress-parallel -s scripts -t 4 -d cypress/e2e/08-grievance/ -a '\"--env grepTags='#smoke' --headless --config baseUrl=http://proxy,video=false\"'",
     "sequential": "cypress run -s cypress/e2e/00-Login --headless --config baseUrl=http://proxy,video=false",
     "test:parallel": "npm run parallel || (npm run posttest:parallel && exit 1)",
