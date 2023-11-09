@@ -21,11 +21,7 @@ from hct_mis_api.apps.core.filters import (
     DateRangeFilter,
     IntegerRangeFilter,
 )
-from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
-    decode_id_string,
-    decode_id_string_required,
-)
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
