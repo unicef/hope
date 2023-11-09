@@ -6984,6 +6984,16 @@
                 "defaultValue": null
               },
               {
+                "name": "program",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "size",
                 "description": null,
                 "type": {
@@ -7035,16 +7045,6 @@
               },
               {
                 "name": "countryOrigin",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -7248,6 +7248,16 @@
                 "defaultValue": null
               },
               {
+                "name": "program",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "age",
                 "description": null,
                 "type": {
@@ -7350,16 +7360,6 @@
                     "name": "String",
                     "ofType": null
                   }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -17300,6 +17300,16 @@
                 "defaultValue": null
               },
               {
+                "name": "program",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "age",
                 "description": null,
                 "type": {
@@ -17402,16 +17412,6 @@
                     "name": "String",
                     "ofType": null
                   }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "program",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
                 },
                 "defaultValue": null
               },

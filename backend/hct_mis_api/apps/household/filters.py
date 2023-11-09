@@ -95,7 +95,6 @@ class HouseholdFilter(FilterSet):
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
-    program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
@@ -110,6 +109,7 @@ class HouseholdFilter(FilterSet):
             "target_populations": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
+            "program": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -227,19 +227,12 @@ class HouseholdFilter(FilterSet):
         return qs
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        # TODO: after data migrations will use only program
         if value is True:
-            return qs.filter(Q(programs__status=Program.ACTIVE) | Q(program__status=Program.ACTIVE))
+            return qs.filter(program__status=Program.ACTIVE)
         elif value is False:
-            return qs.filter(Q(programs__status=Program.FINISHED) | Q(program__status=Program.FINISHED))
+            return qs.filter(program__status=Program.FINISHED)
         else:
             return qs
-
-    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Household]":
-        # TODO: after data migrations will use only program
-        return qs.filter(
-            Q(programs__id=decode_id_string_required(value)) | Q(program__id=decode_id_string_required(value))
-        ).distinct()
 
 
 class IndividualFilter(FilterSet):
@@ -257,7 +250,6 @@ class IndividualFilter(FilterSet):
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
-    program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
@@ -269,6 +261,7 @@ class IndividualFilter(FilterSet):
             "sex": ["exact"],
             "household__admin_area": ["exact"],
             "withdrawn": ["exact"],
+            "program": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -365,24 +358,12 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
-        # TODO: after data migrations will use only program
         if value is True:
-            return qs.filter(
-                Q(household__programs__status=Program.ACTIVE) | Q(household__program__status=Program.ACTIVE)
-            )
+            return qs.filter(program__status=Program.ACTIVE)
         elif value is False:
-            return qs.filter(
-                Q(household__programs__status=Program.FINISHED) | Q(household__program__status=Program.FINISHED)
-            )
+            return qs.filter(program__status=Program.FINISHED)
         else:
             return qs
-
-    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Individual]":
-        # TODO: after data migrations will use only program
-        return qs.filter(
-            Q(household__programs__id=decode_id_string_required(value))
-            | Q(household__program__id=decode_id_string_required(value))
-        ).distinct()
 
 
 def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:

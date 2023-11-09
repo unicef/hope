@@ -22,27 +22,7 @@ export const LookUpIndividualTableRow = ({
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const getMappedPrograms = (): React.ReactElement => {
-    //TODO: uncomment this when programs are added to individuals
 
-    // if (individual.programs?.edges?.length) {
-    //   return (
-    //     <TableCell align='left'>
-    //       {individual.programs.edges.map((edge) => (
-    //         <BlackLink
-    //           key={edge.node.id}
-    //           to={`/${baseUrl}/details/${edge.node.id}`}
-    //         >
-    //           {edge.node.id}
-    //         </BlackLink>
-    //       ))}
-    //     </TableCell>
-    //   );
-    // }
-    return <div>-</div>;
-  };
-
-  const mappedPrograms = getMappedPrograms();
   return (
     <ClickableTableRow
       onClick={() => {
@@ -79,7 +59,15 @@ export const LookUpIndividualTableRow = ({
       <TableCell align='left'>
         {individual?.household?.admin2?.name || '-'}
       </TableCell>
-      <TableCell align='left'>{mappedPrograms}</TableCell>
+      <TableCell align='left'>
+        {individual.program ? (
+          <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
+            {individual.program.name}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
+      </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>

@@ -18,7 +18,7 @@ export const AllHouseholdsForPopulationTable = gql`
     $admin2: ID
     $withdrawn: Boolean
     $headOfHouseholdPhoneNoValid: Boolean
-    $program: String
+    $program: ID
     $isActiveProgram: Boolean
   ) {
     allHouseholds(
@@ -77,6 +77,10 @@ export const AllHouseholdsForPopulationTable = gql`
                 name
               }
             }
+          }
+          program {
+            id
+            name
           }
         }
       }

@@ -22,7 +22,7 @@ export const AllIndividualsForPopulationTable = gql`
     $withdrawn: Boolean
     $admin2: [ID]
     $flags: [String]
-    $program: String
+    $program: ID
     $isActiveProgram: Boolean
   ) {
     allIndividuals(
