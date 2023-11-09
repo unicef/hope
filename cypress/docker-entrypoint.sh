@@ -15,11 +15,11 @@ wait_for_stuff() {
 case "$1" in
     "ci-test-sequential")
         wait_for_stuff
-        exec npm run sequential || npm run posttest
+        exec npm run test -- test:sequential
         ;;
     "ci-test-parallel")
         wait_for_stuff
-        exec npm run parallel || npm run posttest
+        exec npm run test -- test:parallel
         ;;
     *)
         exec "$@"

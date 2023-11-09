@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@cypress/grep": "^4.0.1",
     "copy": "^0.3.2",
-    "cypress": "^13.4.0",
+    "cypress": "^13.5.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-repeat": "^2.3.3",
@@ -30,9 +31,11 @@
     "generate-report": "marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports --inline",
     "zip-report": "zip -r report.zip cypress/reports/mochareports",
     "posttest": "npm run combine-reports && npm run generate-report && npm run zip-report && node ./cypress/scripts/slackReport.js",
-    "parallel": "cypress-parallel -s scripts -t 4 -d cypress/e2e/08-grievance/ -a '\"--headless --config baseUrl=http://proxy,video=false\"'",
-    "sequential": "cypress run --tag sequential --headless --config baseUrl=http://proxy,video=false",
-    "test": "npm run sequential && npm run parallel"
+    "parallel": "cypress-parallel -s scripts -t 4 -d cypress/e2e/08-grievance/ -a '\"--env grepTags='#smoke' --headless --config baseUrl=http://proxy,video=false\"'",
+    "sequential": "cypress run -s cypress/e2e/00-Login --headless --config baseUrl=http://proxy,video=false",
+    "test:parallel": "npm run parallel || npm run posttest",
+    "test:sequential": "npm run sequential || npm run posttest",
+    "test": "npm run"
   },
   "dependencies": {
     "axios": "^1.4.0",

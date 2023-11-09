@@ -23,7 +23,7 @@ describe("Grievance", () => {
     grievancePage.clickMenuButtonGrievanceTickets();
   });
 
-  describe("Smoke tests Grievance", () => {
+  describe("Smoke tests Grievance", { tags: "#smoke" }, () => {
     it("Check Grievance page", () => {
       cy.scenario([
         "Go to Grievance page",
@@ -34,7 +34,7 @@ describe("Grievance", () => {
       grievancePage.checkElementsOnUserGeneratedPage();
       grievancePage.checkElementsOnSystemGeneratedPage();
     });
-    it("Check Grievance Details page", () => {
+    it("Check Grievance Details page", { tags: "#smoke" }, () => {
       cy.scenario([
         "Go to Grievance page",
         "Press tab: System-Generated",

@@ -20,7 +20,7 @@ describe("Targeting", () => {
     targetingPage.clickMenuButtonTargeting();
   });
 
-  describe("Smoke tests Targeting", () => {
+  context("Smoke tests Targeting", { tags: "#smoke" }, () => {
     it("Check Targeting page", () => {
       cy.scenario([
         "Go to Targeting page",
