@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 from django.db.models import (
     Case,
     CharField,
@@ -1378,6 +1379,7 @@ class Query(graphene.ObjectType):
         payment_plan_qs = payment_plan_qs.annotate(
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
             delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
+            currency_order=F("currency"),
         )
         cash_plan_qs = CashPlan.objects.all().annotate(
             unicef_id=F("ca_id"),
@@ -1388,6 +1390,7 @@ class Query(graphene.ObjectType):
                 function="array_append",
                 output_field=ArrayField(CharField(null=True)),
             ),
+            currency_order=PaymentRecord.objects.filter(parent_id=OuterRef("id")).values("currency")[:1],
         )
         qs = (
             ExtendedQuerySetSequence(payment_plan_qs, cash_plan_qs)
@@ -1407,6 +1410,16 @@ class Query(graphene.ObjectType):
                     ),
                     output_field=IntegerField(),
                     default=Value(0),
+                ),
+                total_number_of_households=Count("payment_items"),
+                total_entitled_quantity_order=Coalesce(
+                    "total_entitled_quantity", 0, output_field=models.DecimalField()
+                ),
+                total_delivered_quantity_order=Coalesce(
+                    "total_delivered_quantity", 0, output_field=models.DecimalField()
+                ),
+                total_undelivered_quantity_order=Coalesce(
+                    "total_undelivered_quantity", 0, output_field=models.DecimalField()
                 ),
             )
             .order_by("-updated_at", "custom_order")

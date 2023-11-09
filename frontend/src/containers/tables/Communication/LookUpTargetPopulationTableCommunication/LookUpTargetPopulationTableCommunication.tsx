@@ -45,14 +45,14 @@ export const LookUpTargetPopulationTableCommunication = ({
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
     totalHouseholdsCountWithValidPhoneNoMin:
-      filter.totalHouseholdsCountWithValidPhoneNoMin,
+      filter.totalHouseholdsCountWithValidPhoneNoMin || 0,
     totalHouseholdsCountWithValidPhoneNoMax:
-      filter.totalHouseholdsCountWithValidPhoneNoMax,
+      filter.totalHouseholdsCountWithValidPhoneNoMax || null,
     status: filter.status,
     businessArea,
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: filter.createdAtRangeMin || null,
+      max: filter.createdAtRangeMax || null,
     }),
     statusNot: TargetPopulationStatus.Open,
   };
