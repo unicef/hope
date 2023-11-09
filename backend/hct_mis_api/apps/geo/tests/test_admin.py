@@ -10,7 +10,7 @@ from factory import fuzzy
 from webtest import Upload
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User, Partner
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.geo.admin import AreaAdmin
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area, AreaType
