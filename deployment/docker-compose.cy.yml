@@ -46,7 +46,7 @@ services:
       - BUILD_ID=${BUILD_ID}
     volumes:
       - ../cypress-results:/code/cypress/results
-      - ../cypress-reports:/code/cypress/reports
+      - ../cypress-reports:/code/cypress/reports/mochareports
 
 
   proxy:
