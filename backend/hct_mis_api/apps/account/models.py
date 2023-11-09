@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
 from django import forms
@@ -23,15 +23,12 @@ from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.core.models import BusinessArea
-
 
 logger = logging.getLogger(__name__)
 
@@ -157,11 +154,14 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
                 user_roles__business_area__slug=business_area_slug,
             ).values_list("permissions", flat=True)
         )
+        return list(
+            set(
+                [perm for perms in all_partner_roles_permissions_list for perm in perms]
+                + [perm for perms in all_user_roles_permissions_list for perm in perms]
+            )
+        )
 
-        all_perms_list = list(set(all_user_roles_permissions_list + all_partner_roles_permissions_list))
-        return [permission for roles_permissions in all_perms_list for permission in roles_permissions or []]
-
-    def has_permission(self, permission: str, business_area: "BusinessArea", write: bool = False) -> bool:
+    def has_permission(self, permission: str, business_area: BusinessArea, write: bool = False) -> bool:
         partner_role_ids = self.get_partner_role_ids_list(business_area_id=business_area.pk)
 
         partner_roles = Role.objects.filter(
