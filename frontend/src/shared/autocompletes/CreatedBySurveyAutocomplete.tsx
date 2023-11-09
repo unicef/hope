@@ -117,7 +117,7 @@ export const CreatedBySurveyAutocomplete = ({
           )?.node;
           optionLabel = foundUser
             ? `${foundUser.firstName} ${foundUser.lastName}`
-            : '';
+            : inputValue;
         }
         return `${optionLabel}`;
       }}
