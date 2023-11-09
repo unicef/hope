@@ -114,10 +114,10 @@ export const TargetPopulationAutocomplete = ({
         if (option?.node) {
           optionLabel = `${option.node.name}`;
         } else {
-          optionLabel =
-            data?.allTargetPopulation?.edges?.find(
-              (el) => el.node.id === option,
-            )?.node.name || '';
+          const foundTP = data?.allTargetPopulation?.edges?.find(
+            (el) => el.node.id === option,
+          )?.node.name;
+          optionLabel = foundTP ? `${foundTP}` : inputValue;
         }
         return `${optionLabel}`;
       }}

@@ -104,9 +104,10 @@ export const LanguageAutocomplete = ({
         if (option.node) {
           label = `${option.node.english}`;
         } else {
-          label =
-            data?.allLanguages?.edges?.find((el) => el.node.code === option)
-              ?.node.english || '';
+          const foundLang = data?.allLanguages?.edges?.find(
+            (el) => el.node.code === option,
+          )?.node.english;
+          label = foundLang ? `${foundLang}` : inputValue;
         }
         return `${label}`;
       }}
