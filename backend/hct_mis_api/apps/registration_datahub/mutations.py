@@ -138,7 +138,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
         if program.status == Program.FINISHED:
-            raise ValidationError(f"In order to proceed this action, program status must not be finished")
+            raise ValidationError("In order to proceed this action, program status must not be finished")
 
         registration_data_import_data["program_id"] = program_id
         (
@@ -242,7 +242,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
         if program.status == Program.FINISHED:
-            raise ValidationError(f"In order to proceed this action, program status must not be finished")
+            raise ValidationError("In order to proceed this action, program status must not be finished")
 
         registration_data_import_data["program_id"] = program_id
         (
