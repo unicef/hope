@@ -95,21 +95,6 @@ class TestEnrolHouseholdToProgram(TestCase):
             role=ROLE_ALTERNATE,
         )
 
-        # household with external collector - collector enrolled outside of household.individuals
-        self.individual_hoh_e = IndividualFactory(household=None, program=self.program1)
-        self.household_external = HouseholdFactory(
-            program=self.program1,
-            head_of_household=self.individual_hoh_e,
-        )
-        self.individual_hoh_e.household = self.household_external
-        self.individual_hoh_e.save()
-
-        self.individual_external = IndividualFactory(household=None, program=self.program1)
-        self.role_external = IndividualRoleInHouseholdFactory(
-            individual=self.individual_external,
-            household=self.household_external,
-            role=ROLE_PRIMARY,
-        )
 
     def test_enrol_household_to_program_already_enrolled(self) -> None:
         hh_count = Household.objects.count()

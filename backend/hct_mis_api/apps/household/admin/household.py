@@ -303,6 +303,5 @@ class HouseholdAdmin(
         context["form"] = form
         context["action"] = "mass_enrol_to_another_program"
         return TemplateResponse(request, "admin/household/household/enrol_households_to_program.html", context)
-        # return render(request, 'admin/household/household/enrol_households_to_program.html', {'form': form})
 
     mass_enrol_to_another_program.short_description = "Mass enrol households to another program"
