@@ -54,7 +54,7 @@ export const GrievancesTableRow = ({
   setInputValue,
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
@@ -99,6 +99,26 @@ export const GrievancesTableRow = ({
     }
     return null;
   };
+
+  const getMappedPrograms = (): React.ReactElement => {
+    if (ticket.programs?.length) {
+      return (
+        <TableCell align='left'>
+          {ticket.programs.map((program) => (
+            <BlackLink
+              key={program.id}
+              to={`/${baseUrl}/details/${program.id}`}
+            >
+              {program.name}
+            </BlackLink>
+          ))}
+        </TableCell>
+      );
+    }
+    return <div>-</div>;
+  };
+
+  const mappedPrograms = getMappedPrograms();
 
   return (
     <ClickableTableRow
@@ -190,6 +210,7 @@ export const GrievancesTableRow = ({
         <UniversalMoment>{ticket.userModified}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>{ticket.totalDays}</TableCell>
+      {isAllPrograms && <TableCell align='left'>{mappedPrograms}</TableCell>}
     </ClickableTableRow>
   );
 };

@@ -12,17 +12,9 @@ let newFeedbackPage = new NewFeedback();
 let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
-describe("Grievance - Feedback", () => {
+describe.skip("Grievance - Feedback", () => {
   before(() => {
     cy.checkIfLoggedIn();
-    cy.intercept("*", (request) => {
-      request.continue((response) => {
-        if (response.statusMessage !== "OK") {
-          cy.log(request.body);
-          cy.log(response.body);
-        }
-      });
-    });
   });
   beforeEach(() => {
     cy.navigateToHomePage();

@@ -46,7 +46,7 @@ export const CreatedBySurveyAutocomplete = ({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 500);
+  const debouncedInputText = useDebounce(inputValue, 1000);
   const businessArea = useBusinessArea();
 
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
@@ -57,6 +57,7 @@ export const CreatedBySurveyAutocomplete = ({
       search: debouncedInputText,
       isSurveyCreator: true,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
@@ -89,9 +90,11 @@ export const CreatedBySurveyAutocomplete = ({
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.id) {
+          handleFilterChange(name, selectedValue.node.id);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}

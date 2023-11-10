@@ -97,7 +97,19 @@ export const FeedbackDetails = ({
               },
               {
                 label: t('Programme'),
-                value: feedback.program?.name,
+                value: (
+                  <span>
+                    {feedback.program?.id ? (
+                      <BlackLink
+                        to={`/${baseUrl}/details/${feedback.program.id}`}
+                      >
+                        {feedback.program.name}
+                      </BlackLink>
+                    ) : (
+                      '-'
+                    )}
+                  </span>
+                ),
                 size: 3,
               },
               {
