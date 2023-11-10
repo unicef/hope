@@ -85,9 +85,11 @@ export const LanguageAutocomplete = ({
       data-cy={dataCy}
       open={open}
       filterOptions={(options) => options}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.code)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.code) {
+          handleFilterChange(name, selectedValue?.node?.code);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}
