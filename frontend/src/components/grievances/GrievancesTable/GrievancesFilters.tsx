@@ -1,10 +1,15 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import {
+  GrievancesChoiceDataQuery,
+  useAllProgramsForChoicesQuery,
+} from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
 import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
@@ -20,6 +25,7 @@ import { createHandleApplyFilterChange } from '../../../utils/utils';
 import { ClearApplyButtons } from '../../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
@@ -43,8 +49,13 @@ export const GrievancesFilters = ({
   setAppliedFilter,
 }: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { businessArea, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
+  const { data, loading } = useAllProgramsForChoicesQuery({
+    variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const {
     handleFilterChange,
@@ -110,6 +121,11 @@ export const GrievancesFilters = ({
 
   const subCategories = issueTypeDict[filter.category]?.subCategories || [];
 
+  if (loading) return <LoadingComponent />;
+
+  const allPrograms = data?.allPrograms?.edges || [];
+  const programs = allPrograms.map((edge) => edge.node);
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -143,6 +159,27 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </Grid>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              icon={<FlashOnIcon />}
+              fullWidth
+              data-cy='filters-program'
+            >
+              <MenuItem value=''>
+                <em>{t('None')}</em>
+              </MenuItem>
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid container item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -338,28 +375,6 @@ export const GrievancesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        {/* //TODO: show program filter when it is needed */}
-        {/* {!isUserGenerated && (
-          <Grid item xs={3}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('program', e.target.value)}
-              label={t('Programme')}
-              value={filter.program}
-              icon={<FlashOnIcon />}
-              fullWidth
-              data-cy='hh-filters-program'
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </Grid>
-        )} */}
         <Grid item container xs={3}>
           <SelectFilter
             onChange={(e) =>
@@ -379,6 +394,23 @@ export const GrievancesFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}

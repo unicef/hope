@@ -55,6 +55,7 @@ export const RdiAutocomplete = ({
       orderBy: 'name',
       name: debouncedInputText,
     },
+    fetchPolicy: 'cache-and-network',
   });
   useEffect(() => {
     if (open) {
@@ -86,9 +87,11 @@ export const RdiAutocomplete = ({
       data-cy={dataCy}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.id) {
+          handleFilterChange(name, selectedValue.node.id);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}

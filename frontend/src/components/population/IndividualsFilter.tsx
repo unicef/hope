@@ -1,22 +1,28 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
+import {
+  IndividualChoiceDataQuery,
+  ProgramNode,
+} from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
 import { individualTableOrderOptions } from '../../utils/constants';
+import { createHandleApplyFilterChange } from '../../utils/utils';
 import { ClearApplyButtons } from '../core/ClearApplyButtons';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 interface IndividualsFilterProps {
   filter;
+  programs?: ProgramNode[];
   choicesData: IndividualChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;
@@ -27,6 +33,7 @@ interface IndividualsFilterProps {
 
 export const IndividualsFilter = ({
   filter,
+  programs,
   choicesData,
   setFilter,
   initialFilter,
@@ -37,6 +44,7 @@ export const IndividualsFilter = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const { isAllPrograms } = useBaseUrl();
 
   const {
     handleFilterChange,
@@ -92,6 +100,24 @@ export const IndividualsFilter = ({
             </SelectFilter>
           </Grid>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              fullWidth
+              icon={<FlashOnIcon />}
+              data-cy='filters-program'
+            >
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             name='admin2'
@@ -219,6 +245,23 @@ export const IndividualsFilter = ({
             data-cy='ind-filters-reg-date-to'
           />
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
       <ClearApplyButtons
         clearHandler={handleClearFilter}

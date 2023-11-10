@@ -11,6 +11,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProFlowResponse
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
@@ -44,16 +45,21 @@ class TestCreateSurvey(APITestCase):
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Doe")
-        cls.tp = TargetPopulationFactory(
-            business_area=cls.business_area, program=ProgramFactory(business_area=cls.business_area)
-        )
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.tp = TargetPopulationFactory(business_area=cls.business_area, program=cls.program)
 
     def test_create_survey_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "title": "Test survey",
@@ -72,7 +78,13 @@ class TestCreateSurvey(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "title": "Test survey",
@@ -94,7 +106,13 @@ class TestCreateSurvey(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "title": "Test survey",
@@ -123,7 +141,13 @@ class TestCreateSurvey(APITestCase):
         ) as task_mock:
             self.snapshot_graphql_request(
                 request_string=self.CREATE_SURVEY_MUTATION,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {
+                        "Business-Area": self.business_area.slug,
+                        "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    },
+                },
                 variables={
                     "input": {
                         "title": "Test survey",
@@ -211,7 +235,13 @@ class TestCreateSurvey(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "title": "Test survey",
@@ -235,6 +265,12 @@ class TestCreateSurvey(APITestCase):
         ):
             self.snapshot_graphql_request(
                 request_string=self.AVAILABLE_FLOWS,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {
+                        "Business-Area": self.business_area.slug,
+                        "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    },
+                },
                 variables={},
             )
