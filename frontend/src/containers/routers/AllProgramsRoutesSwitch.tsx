@@ -15,6 +15,7 @@ import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedb
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
 import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
+import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -28,6 +29,9 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/details/:id`}>
         <ProgramDetailsPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/reporting/:id`}>
+        <ReportingDetailsPage />
       </SentryRoute>
       <SentryRoute path={`${path}/reporting`}>
         <ReportingPage />
