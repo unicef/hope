@@ -346,14 +346,16 @@ def raise_program_status_is(status: str) -> typing.Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             if len(args) >= 3 and isinstance(args[2], ResolveInfo):
                 info = args[2]
+                inputs = kwargs.get("input", {})
             else:
                 raise Exception("ResolveInfo object missing")
 
-            program_id = decode_id_string_required(info.context.headers.get("Program"))
-            program = Program.objects.get(id=program_id)
+            encoded_program_id = inputs.get("program") or info.context.headers.get("Program")
+            if encoded_program_id and encoded_program_id != "all":
+                program = Program.objects.get(id=decode_id_string_required(encoded_program_id))
 
-            if program.status == status:
-                raise ValidationError(f"In order to proceed this action, program status must not be {status}")
+                if program.status == status:
+                    raise ValidationError(f"In order to proceed this action, program status must not be {status}")
 
             return func(*args, **kwargs)
 
