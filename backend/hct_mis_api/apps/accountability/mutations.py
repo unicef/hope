@@ -84,18 +84,20 @@ class CreateFeedbackMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMutation":
+        program = None
         user = info.context.user
         business_area_slug = info.context.headers.get("Business-Area")
-        encoded_program_id = info.context.headers.get("Program")
-
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-        program = Program.objects.get(id=decode_id_string(encoded_program_id))
+        encoded_program_id = input.get("program") or info.context.headers.get("Program")
+        if encoded_program_id:
+            program = Program.objects.get(id=decode_id_string(encoded_program_id))
 
-        if program.status == Program.FINISHED:
+        if program and program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
 
         cls.has_permission(info, Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE, business_area)
-        feedback = FeedbackCrudServices.create(user, business_area, program, input)
+
+        feedback = FeedbackCrudServices.create(user, business_area, input)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, getattr(feedback.program, "pk", None), None, feedback
         )

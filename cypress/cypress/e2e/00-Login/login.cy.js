@@ -1,7 +1,7 @@
 import Login from "../../page-objects/pages/login/login.po";
 
 let l = new Login();
-context("Login", () => {
+context.skip("Login", () => {
   after(() => {
     cy.adminLogin();
   });

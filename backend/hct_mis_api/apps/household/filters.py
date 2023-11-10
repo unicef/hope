@@ -40,7 +40,6 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -82,7 +81,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:
     return code
 
 
-class HouseholdFilter(GlobalProgramFilter, FilterSet):
+class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -92,6 +91,7 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         model = Household
@@ -105,6 +105,7 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
             "target_populations": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
+            "program": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -221,8 +222,16 @@ class HouseholdFilter(GlobalProgramFilter, FilterSet):
     def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
 
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        if value is True:
+            return qs.filter(program__status=Program.ACTIVE)
+        elif value is False:
+            return qs.filter(program__status=Program.FINISHED)
+        else:
+            return qs
 
-class IndividualFilter(GlobalProgramFilter, FilterSet):
+
+class IndividualFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
@@ -237,6 +246,7 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         model = Individual
@@ -247,6 +257,7 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
             "sex": ["exact"],
             "household__admin_area": ["exact"],
             "withdrawn": ["exact"],
+            "program": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -341,6 +352,14 @@ class IndividualFilter(GlobalProgramFilter, FilterSet):
 
     def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         return qs.exclude(id=decode_id_string(value))
+
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
+        if value is True:
+            return qs.filter(program__status=Program.ACTIVE)
+        elif value is False:
+            return qs.filter(program__status=Program.FINISHED)
+        else:
+            return qs
 
 
 def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:

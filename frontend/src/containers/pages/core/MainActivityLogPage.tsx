@@ -53,7 +53,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const initialFilter = { search: '', module: '', userId: '' };
   const permissions = usePermissions();
 
@@ -66,7 +66,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
-      programId,
+      programId: isAllPrograms ? null : programId,
       first: rowsPerPage,
       last: undefined,
       after: undefined,

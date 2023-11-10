@@ -16,10 +16,10 @@ describe("Global Program Filter", () => {
     it("Check All Programmes - Programme Management page", () => {
       cy.scenario([
         "Go to main page (All programmes set)",
-        "Check if all elements on page exist",
+        "Check if all elements on page exist"
       ]);
       programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
-      programmesPage.getMenuButtonFeedback().should("not.exist");
+      programmesPage.getMenuButtonFeedback().should("not.be.visible");
       programmesPage.getMenuButtonRegistrationDataImport().should("not.exist");
       programmesPage.getMenuButtonProgrammePopulation().should("not.exist");
       programmesPage.getMenuButtonHouseholds().should("not.exist");
@@ -27,16 +27,16 @@ describe("Global Program Filter", () => {
       programmesPage.getMenuButtonProgrammeDetails().should("not.exist");
       programmesPage.getMenuButtonCashAssist().should("not.exist");
       programmesPage.getMenuButtonPaymentModule().should("not.exist");
-      programmesPage.getMenuButtonReporting().should("not.exist");
+      programmesPage.getMenuButtonReporting().should("be.visible");
       programmesPage.getMenuButtonProgrammeUsers().should("not.exist");
-      programmesPage.getMenuButtonActivityLog().should("not.exist");
+      programmesPage.getMenuButtonActivityLog().should("be.visible");
       programmesPage.getMenuButtonResourcesKnowledgeBase().should("be.visible");
       programmesPage.getMenuButtonResourcesConversations().should("be.visible");
       programmesPage
         .getMenuButtonResourcesToolsAndMaterials()
         .should("be.visible");
       programmesPage.getMenuButtonResourcesReleaseNote().should("be.visible");
-      programmesPage.getMenuButtonGrievanceTickets().should("not.exist");
+      programmesPage.getMenuButtonGrievanceTickets().should("not.be.visible");
       programmesPage.getButtonNewProgram().should("be.visible");
       programmesPage.getFiltersSearch().should("be.visible");
       programmesPage.getFiltersStartDate().should("be.visible");
@@ -67,7 +67,7 @@ describe("Global Program Filter", () => {
       cy.scenario([
         "Go to main page (All programmes set)",
         "Choose program (Test Programm)",
-        "Check if all elements on page exist",
+        "Check if all elements on page exist"
       ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
@@ -111,7 +111,7 @@ describe("Global Program Filter", () => {
         "Go to main page (All programmes set)",
         "Choose program (Test Programme)",
         "Come back to All Programmes",
-        "Check if all elements on page exist",
+        "Check if all elements on page exist"
       ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
@@ -130,7 +130,7 @@ describe("Global Program Filter", () => {
       cy.url().should("include", "programs/all/list");
 
       programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
-      programmesPage.getMenuButtonFeedback().should("not.exist");
+      programmesPage.getMenuButtonFeedback().should("not.be.visible");
       programmesPage.getMenuButtonRegistrationDataImport().should("not.exist");
       programmesPage.getMenuButtonProgrammePopulation().should("not.exist");
       programmesPage.getMenuButtonHouseholds().should("not.exist");
@@ -138,16 +138,16 @@ describe("Global Program Filter", () => {
       programmesPage.getMenuButtonProgrammeDetails().should("not.exist");
       programmesPage.getMenuButtonCashAssist().should("not.exist");
       programmesPage.getMenuButtonPaymentModule().should("not.exist");
-      programmesPage.getMenuButtonReporting().should("not.exist");
+      programmesPage.getMenuButtonReporting().should("be.visible");
       programmesPage.getMenuButtonProgrammeUsers().should("not.exist");
-      programmesPage.getMenuButtonActivityLog().should("not.exist");
+      programmesPage.getMenuButtonActivityLog().should("be.visible");
       programmesPage.getMenuButtonResourcesKnowledgeBase().should("be.visible");
       programmesPage.getMenuButtonResourcesConversations().should("be.visible");
       programmesPage
         .getMenuButtonResourcesToolsAndMaterials()
         .should("be.visible");
       programmesPage.getMenuButtonResourcesReleaseNote().should("be.visible");
-      programmesPage.getMenuButtonGrievanceTickets().should("not.exist");
+      programmesPage.getMenuButtonGrievanceTickets().should("not.be.visible");
     });
   });
 

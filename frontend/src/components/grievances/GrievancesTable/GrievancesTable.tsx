@@ -46,7 +46,7 @@ export const GrievancesTable = ({
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -72,7 +72,8 @@ export const GrievancesTable = ({
     priority: filter.priority === 'Not Set' ? 0 : filter.priority,
     urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
-    program: programId,
+    program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [inputValue, setInputValue] = useState('');
@@ -195,6 +196,17 @@ export const GrievancesTable = ({
     setSelectedTickets([]);
   };
 
+  const headCellsWithProgramColumn = [
+    ...headCells,
+    {
+      disablePadding: false,
+      label: 'Programmes',
+      id: 'programs',
+      numeric: false,
+      dataCy: 'programs',
+    },
+  ];
+
   return (
     <>
       <Box display='flex' flexDirection='column' px={5} pt={5}>
@@ -271,7 +283,7 @@ export const GrievancesTable = ({
               AllGrievanceTicketQueryVariables
             >
               isOnPaper={false}
-              headCells={headCells}
+              headCells={isAllPrograms ? headCellsWithProgramColumn : headCells}
               rowsPerPageOptions={[10, 15, 20, 40]}
               query={useAllGrievanceTicketQuery}
               onSelectAllClick={handleSelectAllCheckboxesClick}
