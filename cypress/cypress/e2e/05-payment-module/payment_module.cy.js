@@ -16,7 +16,7 @@ describe("Payment Module", () => {
     cy.get("th").contains("Afghanistan").parent().find("a").click();
     cy.get("#id_is_payment_plan_applicable").should("be.checked");
   });
-  context("Smoke tests Payment module", { tags: "#smoke" }, () => {
+  describe("Smoke tests Payment module", () => {
     it.skip("Check Payment page", () => {});
     it.skip("Check Payment Details page", () => {});
     it.skip("Check Payment New Ticket page", () => {});

@@ -23,7 +23,7 @@ describe("Grievance", () => {
     grievancePage.clickMenuButtonGrievanceTickets();
   });
 
-  describe("Smoke tests Grievance", { tags: "#smoke" }, () => {
+  describe("Smoke tests Grievance", { tags: "#parallel" }, () => {
     it("Check Grievance page", () => {
       cy.scenario([
         "Go to Grievance page",
@@ -34,7 +34,7 @@ describe("Grievance", () => {
       grievancePage.checkElementsOnUserGeneratedPage();
       grievancePage.checkElementsOnSystemGeneratedPage();
     });
-    it("Check Grievance Details page", { tags: "#smoke" }, () => {
+    it("Check Grievance Details page", { tags: "#parallel" }, () => {
       cy.scenario([
         "Go to Grievance page",
         "Press tab: System-Generated",
@@ -77,7 +77,7 @@ describe("Grievance", () => {
     context("Export", () => {
       it.skip("Export", () => {});
     });
-    context("Grievance Filters", () => {
+    context("Grievance Filters", { tags: "#parallel" }, () => {
       beforeEach(() => {
         grievancePage.getButtonClear().click();
       });
@@ -1295,16 +1295,20 @@ describe("Grievance", () => {
   describe.skip("E2E tests Grievance", () => {});
 
   describe("Regression tests Grievance", () => {
-    it('164824 GM: Cannot select a row except texts from "Ticket ID" column.', () => {
-      cy.scenario([
-        "Go to Grievance page",
-        "Choose ticket: GRV-0000001",
-        "Check URL",
-      ]);
-      grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
-      cy.url().should("include", "/user-generated");
-    });
-    it("174517: Check clear cash", () => {
+    it(
+      '164824 GM: Cannot select a row except texts from "Ticket ID" column.',
+      { tags: "#parallel" },
+      () => {
+        cy.scenario([
+          "Go to Grievance page",
+          "Choose ticket: GRV-0000001",
+          "Check URL",
+        ]);
+        grievancePage.chooseTicketListRow(0, "GRV-0000001").click();
+        cy.url().should("include", "/user-generated");
+      }
+    );
+    it("174517: Check clear cash", { tags: "#parallel" }, () => {
       cy.scenario([
         "Go to Grievance page",
         "Press Menu User Profile button",

@@ -4,7 +4,7 @@ import IPDetailsPage from "../../page-objects/pages/population_module/individual
 let populationIndividuals = new PopulationIndividuals();
 let individualsDetailsPage = new IPDetailsPage();
 
-describe("Individuals Module", () => {
+describe("Individuals Module", { tags: "#parallel" }, () => {
   beforeEach(() => {
     cy.initScenario("payment_plan");
     cy.navigateToHomePage();

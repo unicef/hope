@@ -20,7 +20,7 @@ describe("Payment Verification", () => {
     cy.adminLogin();
   });
 
-  describe("Smoke tests Payment Verification", () => {
+  describe("Smoke tests Payment Verification", { tags: "#parallel" }, () => {
     it("Check Payment Verification page", () => {
       cy.scenario([
         "Go to Payment Verification page",

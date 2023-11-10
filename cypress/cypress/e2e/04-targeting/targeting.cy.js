@@ -11,16 +11,13 @@ let targetingCreateNewPage = new CreateNew();
 let programName = "TargetingProgram";
 
 describe("Targeting", () => {
-  before(() => {
-    cy.adminLogin();
-  });
   beforeEach(() => {
     cy.initScenario("targeting");
     cy.navigateToHomePage();
     targetingPage.clickMenuButtonTargeting();
   });
 
-  context("Smoke tests Targeting", { tags: "#smoke" }, () => {
+  describe("Smoke tests Targeting", () => {
     it("Check Targeting page", () => {
       cy.scenario([
         "Go to Targeting page",

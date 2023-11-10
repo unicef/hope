@@ -2,7 +2,7 @@ import Login from "../../page-objects/pages/login/login.po";
 
 let l = new Login();
 
-context("Availibility", () => {
+context("Availibility", { tags: "#parallel" }, () => {
   it("Main page is available and shows the AD login view", () => {
     cy.scenario(["Go to Home page without login", "Check Login page"]);
     cy.navigateToHomePage();

@@ -6,7 +6,7 @@ let error404Page = new ErrorPage();
 let programManagement = new ProgramManagement();
 let programManagementDetailsPage = new PMDetailsPage();
 
-describe("Program Management", () => {
+describe("Program Management", { tags: "#parallel" }, () => {
   beforeEach(() => {
     cy.navigateToHomePage();
     cy.get("span").contains("Programme Management").click();

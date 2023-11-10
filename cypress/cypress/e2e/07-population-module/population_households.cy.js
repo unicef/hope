@@ -4,7 +4,7 @@ import HPDetailsPage from "../../page-objects/pages/population_module/households
 let populationHouseholds = new PopulationHouseholds();
 let householdsDetailsPage = new HPDetailsPage();
 
-describe("Households Module", () => {
+describe("Households Module", { tags: "#parallel" }, () => {
   beforeEach(() => {
     cy.initScenario("payment_plan");
     cy.navigateToHomePage();
