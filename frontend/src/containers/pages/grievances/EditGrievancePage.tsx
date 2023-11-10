@@ -14,6 +14,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsForChoicesQuery,
   useAllUsersQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
@@ -89,7 +90,7 @@ const BoxWithBottomBorders = styled.div`
 
 export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -129,6 +130,15 @@ export const EditGrievancePage = (): React.ReactElement => {
     data: householdFieldsData,
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
+  const {
+    data: programsData,
+    loading: programsDataLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -146,7 +156,8 @@ export const EditGrievancePage = (): React.ReactElement => {
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    currentUserDataLoading
+    currentUserDataLoading ||
+    programsDataLoading
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -158,7 +169,8 @@ export const EditGrievancePage = (): React.ReactElement => {
     permissions === null ||
     !householdFieldsData ||
     !householdFieldsDict ||
-    !individualFieldsDict
+    !individualFieldsDict ||
+    !programsData
   )
     return null;
 
@@ -257,6 +269,10 @@ export const EditGrievancePage = (): React.ReactElement => {
     GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
       GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
     ] || '';
+
+  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
+    (element) => ({ name: element.node.name, value: element.node.id }),
+  );
 
   return (
     <Formik
@@ -488,6 +504,20 @@ export const EditGrievancePage = (): React.ReactElement => {
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Field
+                            name='program'
+                            label={t('Programme Name')}
+                            fullWidth
+                            variant='outlined'
+                            choices={mappedProgramChoices}
+                            component={FormikSelectField}
+                            disabled={
+                              !isAllPrograms ||
+                              Boolean(ticket.programs?.[0]?.id)
+                            }
                           />
                         </Grid>
                       </Grid>

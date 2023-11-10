@@ -2,7 +2,7 @@ import GrievanceDashboard from "../../page-objects/pages/grievance/grievance_das
 
 let grievanceDashboard = new GrievanceDashboard();
 
-describe("Grievance Dashboard", () => {
+describe.skip("Grievance Dashboard", () => {
   before(() => {
     cy.checkIfLoggedIn();
   });

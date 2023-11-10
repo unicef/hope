@@ -11,11 +11,10 @@ from hct_mis_api.apps.core.filters import (
     IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
-from hct_mis_api.apps.program.filters import GlobalProgramFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
-class RegistrationDataImportFilter(GlobalProgramFilter, FilterSet):
+class RegistrationDataImportFilter(FilterSet):
     import_date = DateFilter(field_name="import_date__date")
     business_area = CharFilter(field_name="business_area__slug")
     import_date_range = DateTimeRangeFilter(field_name="import_date")
