@@ -53,6 +53,7 @@ services:
       - "8080:8000"
     volumes:
       - ./backend:/code/
+      - ./backend/static:/data/staticserve
       - backend-data:/data
       - ipython_data_local:/root/.ipython
     command: "dev"
