@@ -30,8 +30,9 @@ Cypress.Commands.add("createExcel", () => {
   });
 });
 Cypress.Commands.add("adminLogin", () => {
-  Cypress.session.clearCurrentSessionData();
-  Cypress.session.clearAllSavedSessions();
+  // Cypress.session.clearCurrentSessionData();
+  // Cypress.session.clearAllSavedSessions();
+  cy.clearAllCookies();
   waitForClearedSession(10);
   cy.visit("/");
   const expected_url =
@@ -44,7 +45,9 @@ Cypress.Commands.add("adminLogin", () => {
         cy.wait(100);
         return waitForClearedSession(n - 1);
       } else {
-        cy.writeFile("cypress/report/tokeny.txt", "null\n\n");
+        // Cypress.Cookies.defaults({
+        //   preserve: "csrftoken",
+        // });
       }
     });
   }

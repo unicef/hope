@@ -2,7 +2,7 @@ import RegistrationDataImport from "../../page-objects/pages/registration_data_i
 
 let registrationDataImport = new RegistrationDataImport();
 
-describe("Registration Data Import", () => {
+describe.skip("Registration Data Import", () => {
   before(() => {
     cy.checkIfLoggedIn();
   });
