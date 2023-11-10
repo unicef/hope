@@ -625,9 +625,11 @@ class DocumentValidator(TimeStampedUUIDModel):
 class DocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     key = models.CharField(max_length=50, unique=True)
-    is_identity_document = models.BooleanField(default=True)
+    is_identity_document = models.BooleanField(default=True, help_text="Document type is used for deduplication")
     unique_for_individual = models.BooleanField(default=False)
-    valid_for_deduplication = models.BooleanField(default=False)
+    valid_for_deduplication = models.BooleanField(
+        default=False, help_text="The document type id added to the signature"
+    )
 
     class Meta:
         ordering = [
