@@ -18,6 +18,8 @@ export const AllHouseholdsForPopulationTable = gql`
     $admin2: ID
     $withdrawn: Boolean
     $headOfHouseholdPhoneNoValid: Boolean
+    $program: ID
+    $isActiveProgram: Boolean
   ) {
     allHouseholds(
       after: $after
@@ -36,6 +38,8 @@ export const AllHouseholdsForPopulationTable = gql`
       admin2: $admin2
       withdrawn: $withdrawn
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
+      program: $program
+      isActiveProgram: $isActiveProgram
     ) {
       pageInfo {
         hasNextPage
@@ -66,6 +70,18 @@ export const AllHouseholdsForPopulationTable = gql`
           totalCashReceived
           currency
           lastRegistrationDate
+          programs {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
+          program {
+            id
+            name
+          }
         }
       }
     }

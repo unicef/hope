@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -8,6 +9,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
 
@@ -25,6 +27,7 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -35,7 +38,7 @@ export const HouseholdTable = ({
     return undefined;
   };
 
-  const initialVariables: AllHouseholdsQueryVariables = {
+  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
     businessArea,
     familySize: JSON.stringify({
       min: filter.householdSizeMin,
@@ -47,6 +50,7 @@ export const HouseholdTable = ({
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
+    program: programId,
   };
   return (
     <TableWrapper>

@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import get from 'lodash/get';
 import {
+  useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../../__generated__/graphql';
@@ -44,11 +46,11 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, isAllPrograms, programId } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
   const initialFilterHH = {
     search: '',
-    program: programId,
+    program: isAllPrograms ? '' : programId,
     searchType: 'household_id',
     residenceStatus: '',
     admin2: '',
@@ -56,9 +58,11 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     householdSizeMax: '',
     orderBy: 'unicef_id',
     withdrawn: null,
+    programState: 'active',
   };
   const initialFilterIND = {
     search: '',
+    program: isAllPrograms ? '' : programId,
     searchType: 'individual_id',
     admin2: '',
     sex: '',
@@ -67,6 +71,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     flags: [],
     orderBy: 'unicef_id',
     status: '',
+    programState: 'active',
   };
 
   const {
@@ -93,16 +98,27 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     loading: individualChoicesLoading,
   } = useIndividualChoiceDataQuery();
 
-  if (householdChoicesLoading || individualChoicesLoading)
+  const {
+    data: programsData,
+    loading: programsLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, first: 100 },
+    fetchPolicy: 'cache-first',
+  });
+
+  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
     return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData) {
+  if (!individualChoicesData || !householdChoicesData || !programsData) {
     return null;
   }
 
   const onSelect = (key, value): void => {
     onValueChange(key, value);
   };
+
+  const allPrograms = get(programsData, 'allPrograms.edges', []);
+  const programs = allPrograms.map((edge) => edge.node);
 
   return (
     <>
@@ -143,6 +159,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
               appliedFilter={appliedFilterHH}
               setAppliedFilter={setAppliedFilterHH}
               isOnPaper={false}
+              programs={programs}
             />
           </Box>
           <LookUpHouseholdTable
@@ -167,6 +184,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             appliedFilter={appliedFilterIND}
             setAppliedFilter={setAppliedFilterIND}
             isOnPaper={false}
+            programs={programs}
           />
           <LookUpIndividualTable
             filter={appliedFilterIND}
