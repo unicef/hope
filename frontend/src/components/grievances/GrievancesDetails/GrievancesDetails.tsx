@@ -242,22 +242,22 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: showIssueType ? 3 : 6,
+                size: 3,
               },
               {
                 label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
-                size: showPartner ? 3 : 12,
+                size: 3,
               },
               {
                 label: t('Programme'),
                 value: mappedPrograms(),
-                size: showPartner ? 3 : 9,
+                size: 3,
               },
               showPartner && {
                 label: t('Partner'),
                 value: ticket.partner?.name,
-                size: 6,
+                size: 3,
               },
               {
                 label: t('Created By'),
@@ -272,7 +272,7 @@ export const GrievancesDetails = ({
               {
                 label: t('Last Modified Date'),
                 value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
-                size: 6,
+                size: 3,
               },
               {
                 label: t('Administrative Level 2'),

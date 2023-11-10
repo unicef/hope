@@ -52,6 +52,7 @@ export const AdminAreaFixedAutocomplete = ({
       level: level === 1 ? 1 : 2,
       parentId: parentId || '',
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {

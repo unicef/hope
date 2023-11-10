@@ -22,6 +22,8 @@ export const AllIndividualsForPopulationTable = gql`
     $withdrawn: Boolean
     $admin2: [ID]
     $flags: [String]
+    $program: ID
+    $isActiveProgram: Boolean
   ) {
     allIndividuals(
       before: $before
@@ -44,6 +46,8 @@ export const AllIndividualsForPopulationTable = gql`
       withdrawn: $withdrawn
       admin2: $admin2
       flags: $flags
+      program: $program
+      isActiveProgram: $isActiveProgram
     ) {
       totalCount
       pageInfo {
@@ -71,6 +75,11 @@ export const AllIndividualsForPopulationTable = gql`
           relationship
           age
           sex
+          lastRegistrationDate
+          program {
+            id
+            name
+          }
         }
       }
     }

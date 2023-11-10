@@ -4,11 +4,7 @@ from django.db import connections
 
 
 def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
-    if connection_name == "default":
-        # TODO: sometimes tables not dropped if using .django_table_names()
-        tables = connection.introspection.table_names(include_views=False)
-    else:
-        tables = connection.introspection.django_table_names(only_existing=True, include_views=False)
+    tables = connection.introspection.table_names(include_views=False)
     tables.append("django_migrations")
     if not tables:
         return ""
@@ -22,8 +18,10 @@ def drop_databases() -> None:
         if connection_name == "read_only":
             continue
         connection = connections[connection_name]
+        print(f"dropping tables for {connection_name}")
         with connection.cursor() as cursor:
             sql = sql_drop_tables(connection)
+            print(sql)
             if not sql:
                 continue
-            cursor.execute(sql)
+            return cursor.execute(sql)

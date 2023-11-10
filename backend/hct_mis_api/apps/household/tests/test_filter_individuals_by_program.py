@@ -12,8 +12,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class TestFilterIndividualsByProgram(APITestCase):
     QUERY = """
-    query AllIndividuals{
-      allIndividuals(businessArea: "afghanistan") {
+    query AllIndividuals($program: ID){
+      allIndividuals(businessArea: "afghanistan", program: $program) {
         edges {
           node {
             program {
@@ -116,5 +116,5 @@ class TestFilterIndividualsByProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user, "headers": headers},
-            variables={},
+            variables={"program": self.id_to_base64(self.program1.id, "ProgramNode")},
         )

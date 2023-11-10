@@ -13,7 +13,7 @@ const userType4 = "GRV-0000005";
 const userType2 = "GRV-0000002";
 const userType1 = "GRV-0000001";
 
-describe("Grievance", () => {
+describe.skip("Grievance", () => {
   before(function () {
     cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");

@@ -53,11 +53,15 @@ import { CreateCommunicationPage } from '../pages/accountability/communication/C
 import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
 import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
 import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
+import { DashboardPage } from '../pages/dashboard/DashboardPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
   return (
     <Switch>
+      <SentryRoute label='/ - Dashboard' path={`${path}/country-dashboard`}>
+        <DashboardPage />
+      </SentryRoute>
       <SentryRoute path={`${path}/population/household/:id`}>
         <PopulationHouseholdDetailsPage />
       </SentryRoute>
@@ -170,7 +174,6 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/grievance/dashboard`}>
         <GrievancesDashboardPage key='all' />
       </SentryRoute>
-
       <SentryRoute path={`${path}/grievance/feedback/create`}>
         <CreateFeedbackPage />
       </SentryRoute>
@@ -201,7 +204,6 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/accountability/communication`}>
         <CommunicationPage />
       </SentryRoute>
-
       <SentryRoute path={`${path}/population/household`}>
         <PopulationHouseholdPage />
       </SentryRoute>
