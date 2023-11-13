@@ -3,7 +3,7 @@ from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
@@ -48,6 +48,8 @@ class Command(BaseCommand):
         call_command("loaddata", "hct_mis_api/apps/grievance/fixtures/data-cypress.json")
         call_command("loaddata", "hct_mis_api/apps/accountability/fixtures/data-cypress.json")
 
+        partner = Partner.objects.get(name="UNICEF")
+
         UserRole.objects.create(
             user=User.objects.create_superuser(
                 "cypress-username",
@@ -56,6 +58,7 @@ class Command(BaseCommand):
                 first_name="Cypress",
                 last_name="User",
                 status="ACTIVE",
+                partner=partner,
             ),
             role=Role.objects.get(name="Role with all permissions"),
             business_area=BusinessArea.objects.get(name="Afghanistan"),
