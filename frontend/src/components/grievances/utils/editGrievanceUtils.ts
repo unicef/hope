@@ -508,7 +508,7 @@ export function prepareVariables(businessArea, values, ticket) {
     urgency: values.urgency === 'Not set' ? 0 : values.urgency,
     partner: values.partner,
     comments: values.comments,
-    program: ticket.programs?.[0]?.id,
+    program: ticket.programs?.[0]?.id || values?.program,
     paymentRecord: values.selectedPaymentRecords
       ? values.selectedPaymentRecords[0]
       : null,
