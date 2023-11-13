@@ -45,7 +45,7 @@ export const DeleteProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const [mutate] = useDeleteProgramMutation();
 
   const deleteProgram = async (): Promise<void> => {
@@ -63,7 +63,7 @@ export const DeleteProgram = ({
         ],
       });
       showMessage(t('Programme removed'), {
-        pathname: `/${baseUrl}/programs/all/list`,
+        pathname: `/${businessArea}/programs/all/list`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });
