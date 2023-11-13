@@ -95,7 +95,6 @@ class TestEnrolHouseholdToProgram(TestCase):
             role=ROLE_ALTERNATE,
         )
 
-
     def test_enrol_household_to_program_already_enrolled(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
