@@ -30,8 +30,43 @@ Cypress.Commands.add("createExcel", () => {
   });
 });
 Cypress.Commands.add("adminLogin", () => {
-  // Cypress.session.clearCurrentSessionData();
-  // Cypress.session.clearAllSavedSessions();
+  cy.visit("/api/unicorn/");
+  cy.get('input[name="username"]').type(Cypress.env("username"));
+  cy.get('input[name="password"]').type(Cypress.env("password"));
+  cy.get("input").contains("Log in").click();
+  cy.navigateToHomePage();
+});
+Cypress.Commands.add("adminLoginNew", () => {
+  return cy
+    .request({
+      url: "/api/unicorn/",
+      method: "HEAD", // cookies are in the HTTP headers, so HEAD suffices
+    })
+    .then(() => {
+      // cy.getCookie("sessionid").should("not.exist");
+      cy.getCookie("csrftoken")
+        .its("value")
+        .then((token) => {
+          cy.request({
+            url: "/api/unicorn/",
+            method: "POST",
+            form: true,
+            followRedirect: false, // no need to retrieve the page after login
+            body: {
+              username: Cypress.env("username"),
+              password: Cypress.env("password"),
+              csrfmiddlewaretoken: token,
+            },
+          }).then(() => {
+            // cy.getCookie("sessionid").should("exist");
+            return cy.getCookie("csrftoken").its("value");
+          });
+        });
+    });
+});
+Cypress.Commands.add("adminLoginOld", () => {
+  Cypress.session.clearCurrentSessionData();
+  Cypress.session.clearAllSavedSessions();
   cy.clearAllCookies();
   waitForClearedSession(10);
   cy.visit("/");
@@ -45,9 +80,6 @@ Cypress.Commands.add("adminLogin", () => {
         cy.wait(100);
         return waitForClearedSession(n - 1);
       } else {
-        // Cypress.Cookies.defaults({
-        //   preserve: "csrftoken",
-        // });
       }
     });
   }
