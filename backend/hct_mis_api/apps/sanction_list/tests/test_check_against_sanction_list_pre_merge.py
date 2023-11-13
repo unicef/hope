@@ -144,3 +144,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
         self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 3)
+
+        self.household.refresh_from_db()
+        for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
+            self.assertEqual(grievance_ticket.household_unicef_id, self.household.unicef_id)
