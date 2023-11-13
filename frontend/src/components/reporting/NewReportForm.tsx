@@ -13,7 +13,6 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { ALL_REPORTS_QUERY } from '../../apollo/queries/reporting/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
@@ -140,9 +139,6 @@ export const NewReportForm = (): React.ReactElement => {
       variables: {
         reportData: prepareVariables(values),
       },
-      refetchQueries: () => [
-        { query: ALL_REPORTS_QUERY, variables: { businessArea } },
-      ],
     });
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.', {

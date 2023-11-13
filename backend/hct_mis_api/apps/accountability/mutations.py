@@ -89,7 +89,7 @@ class CreateFeedbackMutation(PermissionMutation):
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         encoded_program_id = input.get("program") or info.context.headers.get("Program")
-        if encoded_program_id:
+        if encoded_program_id and encoded_program_id != "all":
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
 
         if program and program.status == Program.FINISHED:
