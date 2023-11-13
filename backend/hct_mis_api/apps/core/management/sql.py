@@ -1,11 +1,14 @@
 from typing import Any
 
 from django.db import connections
+from django.contrib.gis.db.backends import postgis
 
 
 def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
     tables = connection.introspection.table_names(include_views=False)
     tables.append("django_migrations")
+    gis_tables = ["addr", "addrfeat"]
+    tables = list(set(tables) - set(gis_tables))
     print("=>>> TABLES:", tables)
     if not tables:
         return ""
