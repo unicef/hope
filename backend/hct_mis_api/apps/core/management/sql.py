@@ -6,6 +6,7 @@ from django.db import connections
 def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
     tables = connection.introspection.table_names(include_views=False)
     tables.append("django_migrations")
+    print("=>>> TABLES:", tables)
     if not tables:
         return ""
     tables_sql = ", ".join(connection.ops.quote_name(table) for table in tables)
