@@ -265,12 +265,11 @@ class RdiMergeTask:
             individual = Individual(
                 **values,
                 household=household,
+                registration_id=household.registration_id,
                 business_area=obj_hct.business_area,
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
             )
-            if household:
-                individual.registration_id = household.registration_id
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:
                 household.head_of_household = individual
