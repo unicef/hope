@@ -24,7 +24,6 @@ from hct_mis_api.apps.reporting.models import DashboardReport
 if TYPE_CHECKING:
     from uuid import UUID
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -103,5 +102,5 @@ class UploadFile(UploadFilePermissionMixin, View):
         return form.errors.get_json_data()["__all__"][0]["message"]
 
 
-def react_main(request):
-    return render(request,'core/react-main.html')
+def react_main(request: HttpRequest) -> HttpResponse:
+    return render(request, "core/react-main.html")

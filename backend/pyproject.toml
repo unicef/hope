@@ -54,13 +54,10 @@ show_error_codes = true
 exclude = [
   "migrations",
   "venv",
-  "snapshots",
+  "snapshots", "bump_version.py"
 ]
-
 strict = true
-
 ignore_missing_imports = true # TODO
-
 # TODO: remove one, fix errors, repeat
 disable_error_code = [
   "var-annotated", # this enforces Django Model fields to have type annotations
@@ -72,7 +69,7 @@ disable_error_code = [
 ]
 
 [tool.django-stubs]
-django_settings_module = "hct_mis_api.settings.dev"
+django_settings_module = "hct_mis_api.settings"
 
 
 [tool.poetry]
@@ -179,7 +176,7 @@ pytest-cov = "^4.1.0"
 coverage = "^7.3.2"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "0.982"
+mypy = "1.6.1"
 django-stubs = "~1.12.0"  # more pypi
 django-stubs-ext = "^0.7.0"  # more pypi
 djangorestframework-stubs = "~1.7.0"  # more pypi

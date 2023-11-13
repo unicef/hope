@@ -23,9 +23,9 @@ from hct_mis_api.apps.core.views import (
     homepage,
     hope_redirect,
     logout_view,
+    react_main,
     schema,
     trigger_error,
-    react_main,
 )
 from hct_mis_api.apps.utils.cypress import get_cypress_xlsx_file, handle_cypress_command
 

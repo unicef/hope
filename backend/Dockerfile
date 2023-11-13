@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.9.12-slim-bullseye as base
+FROM python:3.9.6-slim-bullseye as base
 
 ARG UID=82
 
