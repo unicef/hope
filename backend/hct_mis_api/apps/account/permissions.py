@@ -234,18 +234,6 @@ POPULATION_DETAILS = (
 )
 
 
-POPULATION_LIST = (
-    Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
-)
-
-
-POPULATION_DETAILS = (
-    Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-    Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
-)
-
-
 class BasePermission:
     @classmethod
     def has_permission(cls, info: Any, **kwargs: Any) -> bool:
