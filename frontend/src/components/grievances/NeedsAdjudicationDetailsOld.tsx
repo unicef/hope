@@ -152,7 +152,30 @@ export function NeedsAdjudicationDetailsOld({
                 variant='outlined'
                 color='primary'
               >
-                {t('Mark Duplicate')}
+                {t('Mark as Duplicate')}
+              </Button>
+            )}
+            {isEditable && canApprove && (
+              <Button
+                disabled={isApproveDisabled()}
+                data-cy='button-mark-duplicate'
+                onClick={() =>
+                  confirm({
+                    content: confirmationText,
+                  }).then(() => {
+                    approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        selectedIndividualId: selectedDuplicate,
+                      },
+                    });
+                    setIsEditMode(false);
+                  })
+                }
+                variant='outlined'
+                color='primary'
+              >
+                {t('Mark as Distinct')}
               </Button>
             )}
           </Box>

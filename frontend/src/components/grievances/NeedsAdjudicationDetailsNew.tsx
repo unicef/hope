@@ -9,6 +9,8 @@ import {
   Typography,
 } from '@material-ui/core';
 import React, { useState } from 'react';
+import GroupIcon from '@material-ui/icons/Group';
+import PersonIcon from '@material-ui/icons/Person';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -53,41 +55,33 @@ export function NeedsAdjudicationDetailsNew({
   const [isEditMode, setIsEditMode] = useState(false);
 
   const handleChecked = (id: string): void => {
-    let newSelected = [...selectedDuplicates];
-    if (selectedDuplicates.includes(id)) {
-      newSelected = newSelected.filter((el) => el !== id);
-    } else {
-      newSelected.push(id);
-    }
-    setSelectedDuplicates(newSelected);
+    setSelectedDuplicates((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((el) => el !== id)
+        : [...prevSelected, id],
+    );
   };
 
   const allSelected = (): boolean => {
-    let tableItemsCount = details.possibleDuplicates.length;
-    if (details.goldenRecordsIndividual?.id) {
-      tableItemsCount += 1;
-    }
+    const tableItemsCount =
+      details.possibleDuplicates.length +
+      (details.goldenRecordsIndividual?.id ? 1 : 0);
     return tableItemsCount === selectedDuplicates.length;
   };
 
   const getConfirmationText = (): string => {
-    let confirmationText = '';
-    if (selectedDuplicates.length === 1) {
-      confirmationText = t(
-        'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
-      );
-    }
-    if (selectedDuplicates.length > 1) {
-      confirmationText = t(
-        'Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.',
-      );
-    }
+    const singleRecordText =
+      'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.';
+    const multipleRecordsText =
+      'Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.';
+    const allSelectedText = 'You cannot mark all individuals as duplicates';
 
-    if (allSelected()) {
-      confirmationText = t('You cannot mark all individuals as duplicates');
-    }
-    return confirmationText;
+    if (allSelected()) return t(allSelectedText);
+    return t(
+      selectedDuplicates.length > 1 ? multipleRecordsText : singleRecordText,
+    );
   };
+
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
 
@@ -104,17 +98,25 @@ export function NeedsAdjudicationDetailsNew({
     return records?.find(findRecord(individualId))?.score;
   };
 
+  const getRecordSimilarity = (
+    extraDataRecords,
+    deduplicationRecords,
+    individualId,
+  ): number | string => {
+    return (
+      getSimilarity(extraDataRecords, individualId) ||
+      getSimilarity(deduplicationRecords, individualId) ||
+      '-'
+    );
+  };
+
   const getGoldenRecordSimilarity = (): number | string => {
     const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
     const individualId = possibleDuplicate?.id;
-    const extraDataGoldenRecords = extraData?.goldenRecords;
-    const deduplicationGoldenRecordResults =
-      goldenRecordsIndividual?.deduplicationGoldenRecordResults;
-
-    return (
-      getSimilarity(extraDataGoldenRecords, individualId) ||
-      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
-      '-'
+    return getRecordSimilarity(
+      extraData?.goldenRecords,
+      goldenRecordsIndividual?.deduplicationGoldenRecordResults,
+      individualId,
     );
   };
 
@@ -123,19 +125,16 @@ export function NeedsAdjudicationDetailsNew({
   ): number | string => {
     const { extraData, goldenRecordsIndividual } = details;
     const individualId = goldenRecordsIndividual?.id;
-    const extraDataPossibleDuplicate1 = extraData?.possibleDuplicate;
-    const deduplicationGoldenRecordResults =
-      possibleDuplicate?.deduplicationGoldenRecordResults;
-
-    return (
-      getSimilarity(extraDataPossibleDuplicate1, individualId) ||
-      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
-      '-'
+    return getRecordSimilarity(
+      extraData?.possibleDuplicate,
+      possibleDuplicate?.deduplicationGoldenRecordResults,
+      individualId,
     );
   };
 
   const renderPossibleDuplicateRow = (
     possibleDuplicate,
+    index,
   ): React.ReactElement => {
     return (
       <TableRow key={possibleDuplicate?.id}>
@@ -149,6 +148,10 @@ export function NeedsAdjudicationDetailsNew({
             checked={selectedDuplicates.includes(possibleDuplicate?.id)}
             onChange={() => handleChecked(possibleDuplicate?.id)}
           />
+        </TableCell>
+        <TableCell align='left'>
+          {/* //TODO: take uniqueness from the backend */}
+          {index % 2 === 0 ? <GroupIcon /> : <PersonIcon />}
         </TableCell>
         <TableCell align='left'>
           <BlackLink
@@ -196,11 +199,11 @@ export function NeedsAdjudicationDetailsNew({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
+        <Box display='flex' flexDirection='column'>
           <Typography variant='h6'>
             {t('Needs Adjudication Details')}
           </Typography>
-          <Box gridGap={24} display='flex'>
+          <Box gridGap={24} display='flex' mt={2}>
             <Button
               onClick={() =>
                 history.push({
@@ -230,6 +233,30 @@ export function NeedsAdjudicationDetailsNew({
             {isEditable && canApprove && (
               <Button
                 disabled={isApproveDisabled()}
+                data-cy='button-mark-distinct'
+                onClick={() =>
+                  confirm({
+                    content: getConfirmationText(),
+                    disabled: allSelected(),
+                  }).then(() => {
+                    approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        selectedIndividualIds: selectedDuplicates,
+                      },
+                    });
+                    setIsEditMode(false);
+                  })
+                }
+                variant='contained'
+                color='primary'
+              >
+                {t('Mark as Distinct')}
+              </Button>
+            )}
+            {isEditable && canApprove && (
+              <Button
+                disabled={isApproveDisabled()}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
@@ -245,10 +272,10 @@ export function NeedsAdjudicationDetailsNew({
                     setIsEditMode(false);
                   })
                 }
-                variant='outlined'
+                variant='contained'
                 color='primary'
               >
-                {t('Mark Duplicate')}
+                {t('Mark as Duplicate')}
               </Button>
             )}
           </Box>
@@ -258,6 +285,9 @@ export function NeedsAdjudicationDetailsNew({
         <TableHead>
           <TableRow>
             <TableCell align='left' />
+            <TableCell data-cy='table-cell-uniqueness' align='left'>
+              {t('Uniqueness')}
+            </TableCell>
             <TableCell data-cy='table-cell-individual-id' align='left'>
               {t('Individual ID')}
             </TableCell>
@@ -311,7 +341,10 @@ export function NeedsAdjudicationDetailsNew({
                 }
               />
             </TableCell>
-
+            <TableCell align='left'>
+              {/* //TODO: take uniqueness from the backend */}
+              <PersonIcon />
+            </TableCell>
             <TableCell align='left'>
               <BlackLink
                 to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
@@ -362,8 +395,8 @@ export function NeedsAdjudicationDetailsNew({
               {details.goldenRecordsIndividual?.household?.village}
             </TableCell>
           </TableRow>
-          {details.possibleDuplicates.map((el) =>
-            renderPossibleDuplicateRow(el),
+          {details.possibleDuplicates.map((el, index) =>
+            renderPossibleDuplicateRow(el, index),
           )}
         </TableBody>
       </StyledTable>

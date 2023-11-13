@@ -166,7 +166,8 @@
   "Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.": "Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.",
   "Create Linked Ticket": "Create Linked Ticket",
   "Confirmation": "Confirmation",
-  "Mark Duplicate": "Mark Duplicate",
+  "Mark as Duplicate": "Mark as Duplicate",
+  "Mark as Unique": "Mark as Unique",
   "Similarity Score": "Similarity Score",
   "Last Registration Date": "Last Registration Date",
   "Doc Type": "Doc Type",
@@ -823,5 +824,6 @@
   "Data Collecting Type is required": "Data Collecting Type is required",
   "Registration Group": "Registration Group",
   "Related Payment Id": "Related Payment Id",
-  "Failure Reason": "Failure Reason"
+  "Failure Reason": "Failure Reason",
+  "Uniqueness": "Uniqueness"
 }
