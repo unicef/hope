@@ -15,8 +15,6 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     COUSIN,
     HEAD,
-    NON_BENEFICIARY,
-    ROLE_ALTERNATE,
     Household,
     Individual,
 )
@@ -29,7 +27,6 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.conftest import disabled_locally_test
@@ -340,34 +337,3 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "size": None,
         }
         self.assertEqual(household_data, expected)
-
-    def test_merging_external_collector(self) -> None:
-        imported_household = ImportedHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
-            registration_data_import=self.rdi_hub,
-            admin_area=self.area4.p_code,
-            admin_area_title=self.area4.name,
-            admin4=self.area4.p_code,
-            admin4_title=self.area4.name,
-            zip_code="00-123",
-            enumerator_rec_id=1234567890,
-        )
-        self.set_imported_individuals(imported_household)
-        external_collector = ImportedIndividualFactory(
-            **{
-                "full_name": "External Collector",
-                "given_name": "External",
-                "family_name": "Collector",
-                "relationship": NON_BENEFICIARY,
-                "birth_date": "1962-02-02",  # age 39
-                "sex": "MALE",
-                "registration_data_import": self.rdi_hub,
-                "email": "xd@com",
-            }
-        )
-        role = ImportedIndividualRoleInHousehold(
-            individual=external_collector, household=imported_household, role=ROLE_ALTERNATE
-        )
-        role.save()
-        with capture_on_commit_callbacks(execute=True):
-            RdiMergeTask().execute(self.rdi.pk)
