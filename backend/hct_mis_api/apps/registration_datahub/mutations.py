@@ -20,7 +20,8 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.core.validators import BaseValidator, raise_program_status_is
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -133,7 +134,12 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> "RegistrationXlsxImportMutation":
         cls.validate_import_data(registration_data_import_data.import_data_id)
+
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
+        program = Program.objects.get(id=program_id)
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished")
+
         registration_data_import_data["program_id"] = program_id
         (
             created_obj_datahub,
@@ -192,6 +198,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(
         cls, root: Any, info: Any, registration_data_import_datahub_id: Optional[str], **kwargs: Any
     ) -> "RegistrationDeduplicationMutation":
@@ -231,7 +238,12 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> RegistrationXlsxImportMutation:
         RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
+
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
+        program = Program.objects.get(id=program_id)
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished")
+
         registration_data_import_data["program_id"] = program_id
         (
             created_obj_datahub,
@@ -279,6 +291,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "MergeRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(
@@ -327,6 +340,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
@@ -372,6 +386,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
