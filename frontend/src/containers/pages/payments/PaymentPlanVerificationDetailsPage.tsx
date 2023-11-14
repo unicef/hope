@@ -192,16 +192,14 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
         : null}
       {canSeeVerificationRecords() ? (
         <>
-          <Container>
-            <VerificationRecordsFilters
-              filter={filter}
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              verifications={paymentPlan.verificationPlans}
-            />
-          </Container>
+          <VerificationRecordsFilters
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            verifications={paymentPlan.verificationPlans}
+          />
           <TableWrapper>
             <VerificationsTable
               paymentPlanId={paymentPlan.id}

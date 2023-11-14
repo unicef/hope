@@ -1,45 +1,72 @@
-import { Button, Grid, MenuItem } from '@material-ui/core';
-import moment from 'moment';
+import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LookUpAdminAreaAutocomplete } from '../../../../shared/autocompletes/LookUpAdminAreaAutocomplete';
+import { useHistory, useLocation } from 'react-router-dom';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
+import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 
 interface LookUpLinkedTicketsFiltersProps {
-  onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
-  setFilterApplied?;
-  filterInitial?;
+  setFilter: (filter) => void;
+  initialFilter;
+  appliedFilter;
+  setAppliedFilter: (filter) => void;
 }
-export function LookUpLinkedTicketsFilters({
-  onFilterChange,
+export const LookUpLinkedTicketsFilters = ({
   filter,
   choicesData,
-  setFilterApplied,
-  filterInitial,
-}: LookUpLinkedTicketsFiltersProps): React.ReactElement {
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+}: LookUpLinkedTicketsFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const location = useLocation();
+  const history = useHistory();
+  const {
+    handleFilterChange,
+    applyFilterChanges,
+    clearFilter,
+  } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
+
+  const handleApplyFilter = (): void => {
+    applyFilterChanges();
+  };
+
+  const handleClearFilter = (): void => {
+    clearFilter();
+  };
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
-            onChange={(e) => handleFilterChange(e, 'search')}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='filters-search'
           />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status || null}
             data-cy='filters-status'
@@ -57,7 +84,7 @@ export function LookUpLinkedTicketsFilters({
           <SearchTextField
             label={t('FSP')}
             value={filter.fsp}
-            onChange={(e) => handleFilterChange(e, 'fsp')}
+            onChange={(e) => handleFilterChange('fsp', e.target.value)}
             data-cy='filters-fsp'
           />
         </Grid>
@@ -65,65 +92,32 @@ export function LookUpLinkedTicketsFilters({
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label='From'
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  min: moment(date)
-                    .startOf('day')
-                    .toISOString(),
-                },
-              })
-            }
-            value={filter.createdAtRange.min}
+            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
+            value={filter.createdAtRangeMin}
             data-cy='filters-creation-date-from'
           />
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
             label={t('To')}
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  max: moment(date)
-                    .endOf('day')
-                    .toISOString(),
-                },
-              })
-            }
-            value={filter.createdAtRange.max}
+            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
+            value={filter.createdAtRangeMax}
             data-cy='filters-creation-date-to'
           />
         </Grid>
         <Grid item xs={3}>
-          <LookUpAdminAreaAutocomplete
-            onFilterChange={onFilterChange}
+          <AdminAreaAutocomplete
             name='admin2'
+            value={filter.admin2}
+            setFilter={setFilter}
+            filter={filter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
             dataCy='filters-admin'
           />
         </Grid>
-        <Grid container justifyContent='flex-end'>
-          <Button
-            color='primary'
-            onClick={() => {
-              setFilterApplied(filterInitial);
-              onFilterChange(filterInitial);
-            }}
-          >
-            {t('Clear')}
-          </Button>
-          <Button
-            color='primary'
-            variant='outlined'
-            onClick={() => setFilterApplied(filter)}
-          >
-            {t('Apply')}
-          </Button>
-        </Grid>
       </Grid>
-    </ContainerWithBorder>
+    </FiltersSection>
   );
-}
+};
