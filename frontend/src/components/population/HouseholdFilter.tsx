@@ -9,15 +9,14 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { householdTableOrderOptions } from '../../utils/constants';
 import { createHandleApplyFilterChange } from '../../utils/utils';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { FiltersSection } from '../core/FiltersSection';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 interface HouseholdFiltersProps {
   filter;
@@ -66,8 +65,12 @@ export const HouseholdFilters = ({
     clearFilter();
   };
 
-  const filtersComponent = (
-    <>
+  return (
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+      isOnPaper={isOnPaper}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid container item xs={6} spacing={0}>
           <Grid item xs={8}>
@@ -222,16 +225,6 @@ export const HouseholdFilters = ({
           </Grid>
         )}
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </>
-  );
-
-  return isOnPaper ? (
-    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
-  ) : (
-    filtersComponent
+    </FiltersSection>
   );
 };

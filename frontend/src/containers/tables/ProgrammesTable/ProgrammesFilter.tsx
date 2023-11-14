@@ -4,9 +4,8 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
-import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
+import { FiltersSection } from '../../../components/core/FiltersSection';
 import { NumberTextField } from '../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
@@ -54,7 +53,10 @@ export const ProgrammesFilters = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -164,10 +166,6 @@ export const ProgrammesFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };
