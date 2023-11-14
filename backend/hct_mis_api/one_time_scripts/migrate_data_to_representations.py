@@ -104,7 +104,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
             batched_households = households[batch_start:batch_end]
-            for individual in Individual.objects.filter(household__in=batched_households):
+            for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
+                "documents", "identities", "bank_account_info"
+            ):
                 individuals_per_household_dict[individual.household_id].append(individual)
             for household in batched_households:
                 with transaction.atomic():
@@ -496,7 +498,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
     rdis_count = rdis.count()
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
-            logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
+            logger.info(f"Handling {i} - {i + 99}/{rdis_count} RDIs")
         rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
