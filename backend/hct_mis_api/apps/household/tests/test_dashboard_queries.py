@@ -173,18 +173,21 @@ class TestDashboardQueries(APITestCase):
             delivery_date=delivery_date,
             household=household1,
             delivered_quantity_usd=100,
+            currency="PLN",
         )
         PaymentRecordFactory(
             parent=cash_plan1,
             delivery_date=delivery_date,
             household=household2,
             delivered_quantity_usd=100,
+            currency="PLN",
         )
         PaymentRecordFactory(
             parent=cash_plan1,
             delivery_date=delivery_date,
             household=household3,
             delivered_quantity_usd=100,
+            currency="PLN",
         )
 
         payment_plan1 = PaymentPlanFactory(program=cls.program_two)
@@ -193,18 +196,21 @@ class TestDashboardQueries(APITestCase):
             delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household1,
+            currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household2,
+            currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household4,
+            currency="PLN",
         )
 
     @parameterized.expand(

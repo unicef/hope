@@ -33,7 +33,7 @@ class Languages:
     def get_choices(cls) -> List[Dict[str, Any]]:
         return [
             {
-                "label": {"English(EN)": language.code},
+                "label": {"English(EN)": language.english},
                 "value": language.code,
             }
             for language in LANGUAGES
@@ -41,8 +41,8 @@ class Languages:
 
     @classmethod
     def get_tuple(cls) -> Tuple[Tuple[str, str], ...]:
-        return tuple((lang.code, lang.code) for lang in LANGUAGES)
+        return tuple((lang.code, lang.english) for lang in LANGUAGES)
 
     @classmethod
     def filter_by_code(cls, name: str) -> List[Language]:
-        return [language for language in LANGUAGES if name.lower() in language.code.lower()]
+        return [language for language in LANGUAGES if name.lower() in language.english.lower()]

@@ -18,8 +18,8 @@ import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 
 const initialFilter = {
   type: '',
-  createdFrom: undefined,
-  createdTo: undefined,
+  createdFrom: '',
+  createdTo: '',
   status: '',
   onlyMy: false,
 };

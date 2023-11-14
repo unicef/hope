@@ -477,7 +477,7 @@ class Household(
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
+    row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
     registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -494,9 +494,6 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
-    data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="households", on_delete=models.PROTECT, null=True, blank=True
-    )
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
     )  # TODO Add later related name, when no clash with programs, set null=False after migration
@@ -512,9 +509,6 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
-    data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="households", on_delete=models.PROTECT, null=True, blank=True
-    )
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
@@ -862,6 +856,7 @@ class Individual(
             "kobo_asset_id",
             "row_id",
             "registration_id",
+            "payment_delivery_phone_no",
         ]
     )
     individual_collection = models.ForeignKey(
@@ -890,6 +885,7 @@ class Individual(
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
     phone_no_alternative_valid = models.BooleanField(null=True, db_index=True)
     email = models.CharField(max_length=255, blank=True)
+    payment_delivery_phone_no = PhoneNumberField(blank=True, null=True)
 
     relationship = models.CharField(
         max_length=255,
@@ -1062,7 +1058,7 @@ class Individual(
 
     def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
-            self.unicef_id: str = str(original_individual.unicef_id)  # type: ignore
+            self.unicef_id = str(original_individual.unicef_id)
         self.documents.update(status=Document.STATUS_INVALID)
         self.duplicate = True
         self.duplicate_date = timezone.now()

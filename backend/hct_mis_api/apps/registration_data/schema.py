@@ -4,9 +4,11 @@ import graphene
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -85,7 +87,7 @@ class Query(graphene.ObjectType):
     all_registration_data_imports = DjangoPermissionFilterConnectionField(
         RegistrationDataImportNode,
         filterset_class=RegistrationDataImportFilter,
-        permission_classes=(hopePermissionClass(Permissions.RDI_VIEW_LIST),),
+        permission_classes=(hopeOneOfPermissionClass(Permissions.RDI_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),),
     )
     registration_data_status_choices = graphene.List(ChoiceObject)
 

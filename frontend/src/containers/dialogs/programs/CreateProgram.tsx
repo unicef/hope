@@ -5,11 +5,10 @@ import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms'
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 
-export function CreateProgram(): ReactElement {
+export const CreateProgram = (): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -20,7 +19,7 @@ export function CreateProgram(): ReactElement {
     ],
   });
 
-  const submitFormHandler = async (values, setFieldError): Promise<void> => {
+  const submitFormHandler = async (values): Promise<void> => {
     try {
       const response = await mutate({
         variables: {
@@ -36,16 +35,8 @@ export function CreateProgram(): ReactElement {
         pathname: `/${businessArea}/programs/${response.data.createProgram.program.id}`,
         historyMethod: 'push',
       });
-    } catch (error) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'createProgram',
-        error,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Programme create action failed.'));
-      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -87,4 +78,4 @@ export function CreateProgram(): ReactElement {
       />
     </div>
   );
-}
+};

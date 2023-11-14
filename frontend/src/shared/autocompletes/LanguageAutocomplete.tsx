@@ -75,6 +75,8 @@ export const LanguageAutocomplete = ({
     setAppliedFilter,
   );
 
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}

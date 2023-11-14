@@ -322,9 +322,17 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
     distribution_modality = graphene.String()
-    total_persons_covered = graphene.Int()
     service_provider = graphene.Field(FinancialServiceProviderNode)
     household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
+    additional_collector_name = graphene.String()
+    additional_document_type = graphene.String()
+    additional_document_number = graphene.String()
+    total_persons_covered = graphene.Int(description="Get from Household Snapshot")
+    snapshot_collector_full_name = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_delivery_phone_no = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_bank_name = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_bank_account_number = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_debit_card_number = graphene.String(description="Get from Household Snapshot")
 
     class Meta:
         model = Payment
@@ -359,12 +367,59 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_distribution_modality(self, info: Any) -> str:
         return self.parent.unicef_id
 
-    def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
-        # TODO: in feature will get data from snap shot
-        return self.household.size
-
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
+
+    def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
+        # TODO: migrate old data maybe?
+        if household_snapshot := getattr(self, "household_snapshot", None):
+            return household_snapshot.snapshot_data.get("size")
+        else:
+            # old Payment has only household.size, backward compatible with legacy data
+            return self.household.size
+
+    def resolve_additional_collector_name(self, info: Any) -> Optional[graphene.String]:
+        return getattr(self, "additional_collector_name", None)
+
+    def resolve_additional_document_type(self, info: Any) -> Optional[graphene.String]:
+        return getattr(self, "additional_document_type", None)
+
+    def resolve_additional_document_number(self, info: Any) -> Optional[graphene.String]:
+        return getattr(self, "additional_document_number", None)
+
+    def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
+        return PaymentNode.get_collector_field(self, "full_name")
+
+    def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
+        return PaymentNode.get_collector_field(self, "payment_delivery_phone_no")
+
+    def resolve_snapshot_collector_bank_name(self, info: Any) -> Optional[str]:
+        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
+            return bank_account_info.get("bank_name")
+        return None
+
+    def resolve_snapshot_collector_bank_account_number(self, info: Any) -> Optional[str]:
+        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
+            return bank_account_info.get("bank_account_number")
+        return None
+
+    def resolve_snapshot_collector_debit_card_number(self, info: Any) -> Optional[str]:
+        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
+            return bank_account_info.get("debit_card_number")
+        return None
+
+    @classmethod
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+        """return primary_collector or alternate_collector field value or None"""
+        if household_snapshot := getattr(payment, "household_snapshot", None):
+            household_snapshot_data = household_snapshot.snapshot_data
+            collector_data = (
+                household_snapshot_data.get("primary_collector")
+                or household_snapshot_data.get("alternate_collector")
+                or dict()
+            )
+            return collector_data.get(field_name)
+        return None
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:

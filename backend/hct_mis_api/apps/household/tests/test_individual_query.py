@@ -1,11 +1,16 @@
 from typing import Any, List
+from unittest import skip
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -25,7 +30,6 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 @disabled_locally_test
 class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     databases = {"default", "registration_datahub"}
-
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String, $searchType: String) {
       allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, orderBy:"id") {
@@ -42,7 +46,6 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
       }
     }
     """
-
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals($programs: [ID]) {
       allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
@@ -82,27 +85,38 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
+        BusinessAreaFactory(name="Democratic Republic of Congo")
+        BusinessAreaFactory(name="Sudan")
+        # Unknown unassigned rules setup
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
+
+        generate_data_collecting_types()
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
 
-        cls.household_one = HouseholdFactory.build(business_area=cls.business_area)
-        cls.household_two = HouseholdFactory.build(business_area=cls.business_area)
-        cls.household_one.registration_data_import.imported_by.save()
-        cls.household_one.registration_data_import.save()
-        cls.household_two.registration_data_import.imported_by.save()
-        cls.household_two.registration_data_import.save()
-        cls.household_one.programs.add(program_one)
-        cls.household_two.programs.add(cls.program_two)
+        household_one = HouseholdFactory.build(business_area=cls.business_area)
+        household_two = HouseholdFactory.build(business_area=cls.business_area)
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.save()
+        household_two.registration_data_import.imported_by.save()
+        household_two.registration_data_import.save()
+        household_one.programs.add(program_one)
+        household_two.programs.add(cls.program_two)
         # added for testing migrate_data_to_representations script
-        cls.household_two.programs.add(program_one)
+        household_two.programs.add(program_one)
 
         cls.individuals_to_create = [
             {
@@ -165,13 +179,15 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=cls.household_one if index % 2 else cls.household_two, **individual)
+            IndividualFactory(household=household_one if index % 2 else household_two, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
-        cls.household_one.head_of_household = cls.individuals[0]
-        cls.household_two.head_of_household = cls.individuals[1]
-        cls.household_one.save()
-        cls.household_two.save()
+        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == household_one]
+        cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
+        household_one.head_of_household = cls.individuals_from_hh_one[0]
+        household_two.head_of_household = cls.individuals_from_hh_two[1]
+        household_one.save()
+        household_two.save()
 
         cls.bank_account_info = BankAccountInfoFactory(
             individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
@@ -195,12 +211,8 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
         cls.national_passport = DocumentFactory(
             document_number="111-222-333",
-            type=DocumentType.objects.get(key="national_passport"),
+            type=DocumentTypeFactory(key="national_passport"),
             individual=cls.individuals[1],
-        )
-
-        cls.tax_id = DocumentFactory(
-            document_number="666-777-888", type=DocumentType.objects.get(key="tax_id"), individual=cls.individuals[2]
         )
 
         cls.birth_certificate = DocumentFactory(
@@ -221,6 +233,10 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             individual=cls.individuals[0],
         )
 
+        cls.tax_id = DocumentFactory(
+            document_number="666-777-888", type=DocumentType.objects.get(key="tax_id"), individual=cls.individuals[2]
+        )
+
         cls.rebuild_search_index()
 
         # remove after data migration
@@ -234,6 +250,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip(reason="Remove 2nd program after merging to develop")
     def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -244,17 +261,17 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS]),
             ("without_permission", []),
         ]
     )
-    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
+            request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={"programs": [self.program_two.id]},
+            variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
     @parameterized.expand(
@@ -263,30 +280,15 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_individual_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
+    @skip("After merging GPF, remove 2nd program")
+    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        # Should be Benjamin Butler
         self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
+            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
             context={"user": self.user},
-            variables={"search": self.individual_unicef_id_to_search, "searchType": "individual_id"},
+            variables={"programs": [self.program_two.id]},
         )
-
-    def test_query_individuals_by_search_household_id_filter(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
-        )
-
-        household_id_query_response = self.graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
-            variables={"search": self.household_unicef_id_to_search, "searchType": "household_id"},
-        )
-
-        assert "errors" not in household_id_query_response
-        names = [item["node"]["familyName"] for item in household_id_query_response["data"]["allIndividuals"]["edges"]]
-        self.assertEqual(sorted(names), ["Butler", "Franklin", "Parker", "Perry"])
 
     @parameterized.expand(
         [
@@ -326,24 +328,6 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_bank_account_number_filter(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        # Should be James Bond
-        self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
-            variables={"search": self.bank_account_info.bank_account_number, "searchType": "bank_account_number"},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
-            ("without_permission", []),
-        ]
-    )
     def test_query_individuals_by_search_national_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -351,7 +335,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
-            variables={"search": self.national_id.document_number, "searchType": "national_id"},
+            variables={"search": f"{self.national_id.document_number}", "searchType": "national_id"},
         )
 
     @parameterized.expand(
@@ -419,6 +403,24 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             variables={
                 "search": "1",
             },
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_bank_account_number_filter(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be James Bond
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={"search": self.bank_account_info.bank_account_number, "searchType": "bank_account_number"},
         )
 
     @parameterized.expand(

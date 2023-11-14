@@ -189,7 +189,7 @@ class TestDetails(TestCase):
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
-        payment_record = PaymentRecordFactory(household=household)
+        payment_record = PaymentRecordFactory(household=household, currency="PLN")
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         self.assertEqual(response.status_code, 200)

@@ -8,7 +8,7 @@ from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
 
 class ReportFactory(DjangoModelFactory):
@@ -32,3 +32,13 @@ class ReportFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     created_by = factory.SubFactory(UserFactory)
+
+
+class DashboardReportFactory(DjangoModelFactory):
+    class Meta:
+        model = DashboardReport
+
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    created_by = factory.SubFactory(UserFactory)
+    status = fuzzy.FuzzyChoice(DashboardReport.STATUSES, getter=lambda c: c[0])
+    report_type = fuzzy.FuzzyChoice(DashboardReport.REPORT_TYPES, getter=lambda c: [c[0]])

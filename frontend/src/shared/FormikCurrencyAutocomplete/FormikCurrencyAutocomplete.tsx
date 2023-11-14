@@ -36,6 +36,7 @@ export const FormikCurrencyAutocomplete = ({
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
 
+  if (!data) return null;
   return (
     <Box mt={1}>
       <StyledAutocomplete

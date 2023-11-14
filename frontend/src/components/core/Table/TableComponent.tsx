@@ -167,7 +167,7 @@ export function TableComponent<T>({
             headCells={headCells}
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
-            rowCount={itemsCount}
+            rowCount={data.length}
             allowSort={allowSort}
             onSelectAllClick={onSelectAllClick}
             data={data}

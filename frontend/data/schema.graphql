@@ -95,6 +95,7 @@ input AddIndividualDataObjectType {
   businessArea: String
   preferredLanguage: String
   flexFields: Arg
+  paymentDeliveryPhoneNo: String
 }
 
 input AddIndividualIssueTypeExtras {
@@ -268,7 +269,19 @@ input BankTransferObjectType {
 
 scalar BigInt
 
+type BulkGrievanceAddNoteMutation {
+  grievanceTickets: [GrievanceTicketNode]
+}
+
 type BulkUpdateGrievanceTicketsAssigneesMutation {
+  grievanceTickets: [GrievanceTicketNode]
+}
+
+type BulkUpdateGrievanceTicketsPriorityMutation {
+  grievanceTickets: [GrievanceTicketNode]
+}
+
+type BulkUpdateGrievanceTicketsUrgencyMutation {
   grievanceTickets: [GrievanceTicketNode]
 }
 
@@ -507,6 +520,10 @@ type CommunicationMessageNode implements Node {
   randomSamplingArguments: JSONString
   sampleSize: Int!
   program: ProgramNode
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: CommunicationMessageNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
 }
 
 type CommunicationMessageNodeConnection {
@@ -648,7 +665,7 @@ input CreateGrievanceTicketInput {
   assignedTo: ID
   category: Int!
   issueType: Int
-  admin: String
+  admin: ID
   area: String
   language: String!
   consent: Boolean!
@@ -777,14 +794,16 @@ type DataCollectingTypeNode implements Node {
   modified: DateTime!
   label: String!
   code: String!
+  type: DataCollectingTypeType
   description: String!
   compatibleTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   active: Boolean!
+  deprecated: Boolean!
   individualFiltersAvailable: Boolean!
   householdFiltersAvailable: Boolean!
   recalculateComposition: Boolean!
-  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  datacollectingtypeSet(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
@@ -798,6 +817,11 @@ type DataCollectingTypeNodeConnection {
 type DataCollectingTypeNodeEdge {
   node: DataCollectingTypeNode
   cursor: String!
+}
+
+enum DataCollectingTypeType {
+  STANDARD
+  SOCIAL
 }
 
 scalar Date
@@ -1088,6 +1112,10 @@ type FeedbackNode implements Node {
   program: ProgramNode
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  copiedFrom: FeedbackNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
 }
 
@@ -1519,7 +1547,6 @@ type HouseholdNode implements Node {
   originUnicefId: String
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
-  dataCollectingType: DataCollectingTypeNode
   isRecalculatedGroupAges: Boolean!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
@@ -2074,6 +2101,7 @@ type ImportedIndividualNode implements Node {
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String
+  paymentDeliveryPhoneNo: String!
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
@@ -2239,6 +2267,7 @@ type IndividualNode implements Node {
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String!
+  paymentDeliveryPhoneNo: String
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
@@ -2410,6 +2439,7 @@ input IndividualUpdateDataObjectType {
   paymentChannelsToRemove: [ID]
   preferredLanguage: String
   flexFields: Arg
+  paymentDeliveryPhoneNo: String
 }
 
 type InvalidPaymentVerificationPlan {
@@ -2567,7 +2597,6 @@ type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
-  bulkUpdateGrievanceAssignee(assignedTo: String, businessAreaSlug: String!, grievanceTicketUnicefIds: [ID]): BulkUpdateGrievanceTicketsAssigneesMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
@@ -2578,6 +2607,10 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
+  bulkUpdateGrievanceAssignee(assignedTo: String!, businessAreaSlug: String!, grievanceTicketIds: [ID]!): BulkUpdateGrievanceTicketsAssigneesMutation
+  bulkUpdateGrievancePriority(businessAreaSlug: String!, grievanceTicketIds: [ID]!, priority: Int!): BulkUpdateGrievanceTicketsPriorityMutation
+  bulkUpdateGrievanceUrgency(businessAreaSlug: String!, grievanceTicketIds: [ID]!, urgency: Int!): BulkUpdateGrievanceTicketsUrgencyMutation
+  bulkGrievanceAddNote(businessAreaSlug: String!, grievanceTicketIds: [ID]!, note: String!): BulkGrievanceAddNoteMutation
   createPaymentVerificationPlan(input: CreatePaymentVerificationInput!, version: BigInt): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
@@ -2735,9 +2768,6 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  copiedFrom: PaymentNode
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -2750,8 +2780,10 @@ type PaymentNode implements Node {
   program: ProgramNode
   orderNumber: Int
   tokenNumber: Int
+  additionalCollectorName: String
+  additionalDocumentType: String
+  additionalDocumentNumber: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
@@ -2761,8 +2793,13 @@ type PaymentNode implements Node {
   targetPopulation: TargetPopulationNode
   verification: PaymentVerificationNode
   distributionModality: String
-  totalPersonsCovered: Int
   serviceProvider: FinancialServiceProviderNode
+  totalPersonsCovered: Int
+  snapshotCollectorFullName: String
+  snapshotCollectorDeliveryPhoneNo: String
+  snapshotCollectorBankName: String
+  snapshotCollectorBankAccountNumber: String
+  snapshotCollectorDebitCardNumber: String
 }
 
 type PaymentNodeConnection {
@@ -3094,9 +3131,6 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  copiedFrom: PaymentRecordNode
   caId: String
   caHashId: UUID
   parent: CashPlanNode
@@ -3111,7 +3145,6 @@ type PaymentRecordNode implements Node {
   visionId: String
   registrationCaId: String
   serviceProvider: ServiceProviderNode!
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verification: PaymentVerificationNode
   unicefId: String
 }
@@ -3353,6 +3386,7 @@ type ProgramNode implements Node {
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
+  isVisible: Boolean!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3555,7 +3589,7 @@ type Query {
   individualSearchTypesChoices: [ChoiceObject]
   householdSearchTypesChoices: [ChoiceObject]
   me: UserNode
-  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, orderBy: String): UserNodeConnection
+  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
   userRolesChoices: [ChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
@@ -3787,6 +3821,7 @@ input RegistrationKoboImportMutationInput {
   pullPictures: Boolean
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: ID!
 }
 
 type RegistrationXlsxImportMutation {
@@ -3799,6 +3834,7 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
+  programId: ID!
 }
 
 type ReportNode implements Node {
@@ -4760,7 +4796,7 @@ input UpdateGrievanceTicketInput {
   ticketId: ID!
   description: String
   assignedTo: ID
-  admin: String
+  admin: ID
   area: String
   language: String
   linkedTickets: [ID]

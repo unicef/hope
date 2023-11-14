@@ -38,8 +38,8 @@ export const LookUpProgrammesTableSurveys = ({
   const initialVariables: AllActiveProgramsQueryVariables = {
     businessArea,
     search: filter.search,
-    startDate: filter.startDate,
-    endDate: filter.endDate,
+    startDate: filter.startDate || null,
+    endDate: filter.endDate || null,
     status: filter.status,
     sector: filter.sector,
     numberOfHouseholdsWithTpInProgram: JSON.stringify({

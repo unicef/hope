@@ -57,6 +57,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         ("imported_by__username", "imported by"),
         ("business_area__name", "business area"),
     )
+    filter_horizontal = ["programs"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area")

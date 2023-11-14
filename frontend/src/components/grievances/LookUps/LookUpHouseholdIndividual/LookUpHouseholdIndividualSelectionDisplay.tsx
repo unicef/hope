@@ -14,19 +14,21 @@ const Flex = styled.div`
 `;
 
 export const LookUpHouseholdIndividualSelectionDisplay = ({
-  values,
   onValueChange,
-  disabled,
-  setSelectedIndividual,
+  disableUnselectIndividual,
+  disableUnselectHousehold,
+  selectedHousehold,
   setSelectedHousehold,
+  selectedIndividual,
+  setSelectedIndividual,
 }: {
-  values;
   onValueChange;
-  disabled?: boolean;
-  selectedIndividual?;
-  selectedHousehold?;
-  setSelectedIndividual?;
-  setSelectedHousehold?;
+  disableUnselectIndividual: boolean;
+  disableUnselectHousehold: boolean;
+  selectedHousehold;
+  setSelectedHousehold: Function;
+  selectedIndividual;
+  setSelectedIndividual: Function;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (type): void => {
@@ -44,18 +46,18 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   return (
     <Grid container spacing={5}>
       <Grid item xs={4}>
-        <StyledBox disabled={disabled}>
+        <StyledBox disabled={disableUnselectHousehold}>
           <Grid container alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Box display='flex'>
                 {t('Household ID')}:
                 <BlueText>
                   &ensp;
-                  {values?.selectedHousehold?.unicefId || '-'}
+                  {selectedHousehold?.unicefId || '-'}
                 </BlueText>
               </Box>
             </Grid>
-            {!disabled && values?.selectedHousehold?.unicefId && (
+            {!disableUnselectHousehold && selectedHousehold?.unicefId && (
               <Grid item>
                 <DarkGrey>
                   <Flex>
@@ -72,18 +74,18 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
         </StyledBox>
       </Grid>
       <Grid item xs={4}>
-        <StyledBox disabled={disabled}>
+        <StyledBox disabled={disableUnselectIndividual}>
           <Grid container alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Box display='flex'>
                 {t('Individual ID')}:
                 <BlueText>
                   &ensp;
-                  {values?.selectedIndividual?.unicefId || '-'}
+                  {selectedIndividual?.unicefId || '-'}
                 </BlueText>
               </Box>
             </Grid>
-            {!disabled && values?.selectedIndividual?.unicefId && (
+            {!disableUnselectIndividual && selectedIndividual?.unicefId && (
               <Grid item>
                 <DarkGrey>
                   <Flex>

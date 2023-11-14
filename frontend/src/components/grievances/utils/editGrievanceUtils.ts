@@ -500,7 +500,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values?.admin?.node?.pCode,
+    admin: values?.admin?.node?.id,
     area: values.area,
     household: values.selectedHousehold?.id,
     individual: values.selectedIndividual?.id,

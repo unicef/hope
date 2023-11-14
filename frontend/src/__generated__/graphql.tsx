@@ -141,6 +141,7 @@ export type AddIndividualDataObjectType = {
   businessArea?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
 };
 
 export type AddIndividualIssueTypeExtras = {
@@ -411,8 +412,23 @@ export type BankTransferObjectType = {
 };
 
 
+export type BulkGrievanceAddNoteMutation = {
+   __typename?: 'BulkGrievanceAddNoteMutation',
+  grievanceTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
+};
+
 export type BulkUpdateGrievanceTicketsAssigneesMutation = {
    __typename?: 'BulkUpdateGrievanceTicketsAssigneesMutation',
+  grievanceTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
+};
+
+export type BulkUpdateGrievanceTicketsPriorityMutation = {
+   __typename?: 'BulkUpdateGrievanceTicketsPriorityMutation',
+  grievanceTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
+};
+
+export type BulkUpdateGrievanceTicketsUrgencyMutation = {
+   __typename?: 'BulkUpdateGrievanceTicketsUrgencyMutation',
   grievanceTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
 };
 
@@ -868,10 +884,23 @@ export type CommunicationMessageNode = Node & {
   randomSamplingArguments?: Maybe<Scalars['JSONString']>,
   sampleSize: Scalars['Int'],
   program?: Maybe<ProgramNode>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<CommunicationMessageNode>,
+  copiedTo: CommunicationMessageNodeConnection,
 };
 
 
 export type CommunicationMessageNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type CommunicationMessageNodeCopiedToArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -1086,7 +1115,7 @@ export type CreateGrievanceTicketInput = {
   assignedTo?: Maybe<Scalars['ID']>,
   category: Scalars['Int'],
   issueType?: Maybe<Scalars['Int']>,
-  admin?: Maybe<Scalars['String']>,
+  admin?: Maybe<Scalars['ID']>,
   area?: Maybe<Scalars['String']>,
   language: Scalars['String'],
   consent: Scalars['Boolean'],
@@ -1224,14 +1253,16 @@ export type DataCollectingTypeNode = Node & {
   modified: Scalars['DateTime'],
   label: Scalars['String'],
   code: Scalars['String'],
+  type?: Maybe<DataCollectingTypeType>,
   description: Scalars['String'],
   compatibleTypes: DataCollectingTypeNodeConnection,
   limitTo: UserBusinessAreaNodeConnection,
   active: Scalars['Boolean'],
+  deprecated: Scalars['Boolean'],
   individualFiltersAvailable: Scalars['Boolean'],
   householdFiltersAvailable: Scalars['Boolean'],
   recalculateComposition: Scalars['Boolean'],
-  households: HouseholdNodeConnection,
+  datacollectingtypeSet: DataCollectingTypeNodeConnection,
   programs: ProgramNodeConnection,
 };
 
@@ -1255,7 +1286,7 @@ export type DataCollectingTypeNodeLimitToArgs = {
 };
 
 
-export type DataCollectingTypeNodeHouseholdsArgs = {
+export type DataCollectingTypeNodeDatacollectingtypeSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -1286,6 +1317,11 @@ export type DataCollectingTypeNodeEdge = {
   node?: Maybe<DataCollectingTypeNode>,
   cursor: Scalars['String'],
 };
+
+export enum DataCollectingTypeType {
+  Standard = 'STANDARD',
+  Social = 'SOCIAL'
+}
 
 
 
@@ -1614,7 +1650,20 @@ export type FeedbackNode = Node & {
   program?: Maybe<ProgramNode>,
   createdBy?: Maybe<UserNode>,
   linkedGrievance?: Maybe<GrievanceTicketNode>,
+  isOriginal: Scalars['Boolean'],
+  isMigrationHandled: Scalars['Boolean'],
+  copiedFrom?: Maybe<FeedbackNode>,
+  copiedTo: FeedbackNodeConnection,
   feedbackMessages: FeedbackMessageNodeConnection,
+};
+
+
+export type FeedbackNodeCopiedToArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2185,7 +2234,6 @@ export type HouseholdNode = Node & {
   originUnicefId?: Maybe<Scalars['String']>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
-  dataCollectingType?: Maybe<DataCollectingTypeNode>,
   isRecalculatedGroupAges: Scalars['Boolean'],
   copiedTo: HouseholdNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
@@ -2957,6 +3005,7 @@ export type ImportedIndividualNode = Node & {
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   email?: Maybe<Scalars['String']>,
+  paymentDeliveryPhoneNo: Scalars['String'],
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: ImportedIndividualDisability,
@@ -3174,6 +3223,7 @@ export type IndividualNode = Node & {
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   email: Scalars['String'],
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
   relationship?: Maybe<IndividualRelationship>,
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -3519,6 +3569,7 @@ export type IndividualUpdateDataObjectType = {
   paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   preferredLanguage?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
+  paymentDeliveryPhoneNo?: Maybe<Scalars['String']>,
 };
 
 export type InvalidPaymentVerificationPlan = {
@@ -3704,7 +3755,6 @@ export type Mutations = {
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
-  bulkUpdateGrievanceAssignee?: Maybe<BulkUpdateGrievanceTicketsAssigneesMutation>,
   createTicketNote?: Maybe<CreateTicketNoteMutation>,
   approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
   approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
@@ -3715,6 +3765,10 @@ export type Mutations = {
   approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
   approvePaymentDetails?: Maybe<PaymentDetailsApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
+  bulkUpdateGrievanceAssignee?: Maybe<BulkUpdateGrievanceTicketsAssigneesMutation>,
+  bulkUpdateGrievancePriority?: Maybe<BulkUpdateGrievanceTicketsPriorityMutation>,
+  bulkUpdateGrievanceUrgency?: Maybe<BulkUpdateGrievanceTicketsUrgencyMutation>,
+  bulkGrievanceAddNote?: Maybe<BulkGrievanceAddNoteMutation>,
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>,
   editPaymentVerificationPlan?: Maybe<EditPaymentVerificationMutation>,
   exportXlsxPaymentVerificationPlanFile?: Maybe<ExportXlsxPaymentVerificationPlanFile>,
@@ -3832,13 +3886,6 @@ export type MutationsGrievanceStatusChangeArgs = {
 };
 
 
-export type MutationsBulkUpdateGrievanceAssigneeArgs = {
-  assignedTo?: Maybe<Scalars['String']>,
-  businessAreaSlug: Scalars['String'],
-  grievanceTicketUnicefIds?: Maybe<Array<Maybe<Scalars['ID']>>>
-};
-
-
 export type MutationsCreateTicketNoteArgs = {
   noteInput: CreateTicketNoteInput,
   version?: Maybe<Scalars['BigInt']>
@@ -3923,6 +3970,34 @@ export type MutationsReassignRoleArgs = {
   newIndividualId?: Maybe<Scalars['ID']>,
   role: Scalars['String'],
   version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsBulkUpdateGrievanceAssigneeArgs = {
+  assignedTo: Scalars['String'],
+  businessAreaSlug: Scalars['String'],
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>
+};
+
+
+export type MutationsBulkUpdateGrievancePriorityArgs = {
+  businessAreaSlug: Scalars['String'],
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  priority: Scalars['Int']
+};
+
+
+export type MutationsBulkUpdateGrievanceUrgencyArgs = {
+  businessAreaSlug: Scalars['String'],
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  urgency: Scalars['Int']
+};
+
+
+export type MutationsBulkGrievanceAddNoteArgs = {
+  businessAreaSlug: Scalars['String'],
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  note: Scalars['String']
 };
 
 
@@ -4359,9 +4434,6 @@ export type PaymentNode = Node & {
   deliveredQuantityUsd?: Maybe<Scalars['Float']>,
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId?: Maybe<Scalars['String']>,
-  isOriginal: Scalars['Boolean'],
-  isMigrationHandled: Scalars['Boolean'],
-  copiedFrom?: Maybe<PaymentNode>,
   parent: PaymentPlanNode,
   conflicted: Scalars['Boolean'],
   excluded: Scalars['Boolean'],
@@ -4374,8 +4446,10 @@ export type PaymentNode = Node & {
   program?: Maybe<ProgramNode>,
   orderNumber?: Maybe<Scalars['Int']>,
   tokenNumber?: Maybe<Scalars['Int']>,
+  additionalCollectorName?: Maybe<Scalars['String']>,
+  additionalDocumentType?: Maybe<Scalars['String']>,
+  additionalDocumentNumber?: Maybe<Scalars['String']>,
   followUps: PaymentNodeConnection,
-  copiedTo: PaymentNodeConnection,
   householdSnapshot?: Maybe<PaymentHouseholdSnapshotNode>,
   paymentPlanHardConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
@@ -4385,21 +4459,17 @@ export type PaymentNode = Node & {
   targetPopulation?: Maybe<TargetPopulationNode>,
   verification?: Maybe<PaymentVerificationNode>,
   distributionModality?: Maybe<Scalars['String']>,
-  totalPersonsCovered?: Maybe<Scalars['Int']>,
   serviceProvider?: Maybe<FinancialServiceProviderNode>,
+  totalPersonsCovered?: Maybe<Scalars['Int']>,
+  snapshotCollectorFullName?: Maybe<Scalars['String']>,
+  snapshotCollectorDeliveryPhoneNo?: Maybe<Scalars['String']>,
+  snapshotCollectorBankName?: Maybe<Scalars['String']>,
+  snapshotCollectorBankAccountNumber?: Maybe<Scalars['String']>,
+  snapshotCollectorDebitCardNumber?: Maybe<Scalars['String']>,
 };
 
 
 export type PaymentNodeFollowUpsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type PaymentNodeCopiedToArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -4779,9 +4849,6 @@ export type PaymentRecordNode = Node & {
   deliveredQuantityUsd?: Maybe<Scalars['Float']>,
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId?: Maybe<Scalars['String']>,
-  isOriginal: Scalars['Boolean'],
-  isMigrationHandled: Scalars['Boolean'],
-  copiedFrom?: Maybe<PaymentRecordNode>,
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['UUID']>,
   parent?: Maybe<CashPlanNode>,
@@ -4796,18 +4863,8 @@ export type PaymentRecordNode = Node & {
   visionId?: Maybe<Scalars['String']>,
   registrationCaId?: Maybe<Scalars['String']>,
   serviceProvider: ServiceProviderNode,
-  copiedTo: PaymentRecordNodeConnection,
   verification?: Maybe<PaymentVerificationNode>,
   unicefId?: Maybe<Scalars['String']>,
-};
-
-
-export type PaymentRecordNodeCopiedToArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 export type PaymentRecordNodeConnection = {
@@ -5100,6 +5157,7 @@ export type ProgramNode = Node & {
   administrativeAreasOfImplementation: Scalars['String'],
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingType?: Maybe<DataCollectingTypeNode>,
+  isVisible: Scalars['Boolean'],
   households: HouseholdNodeConnection,
   householdSet: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
@@ -6410,6 +6468,9 @@ export type QueryAllUsersArgs = {
   search?: Maybe<Scalars['String']>,
   roles?: Maybe<Array<Maybe<Scalars['String']>>>,
   isTicketCreator?: Maybe<Scalars['Boolean']>,
+  isSurveyCreator?: Maybe<Scalars['Boolean']>,
+  isMessageCreator?: Maybe<Scalars['Boolean']>,
+  isFeedbackCreator?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6797,6 +6858,7 @@ export type RegistrationKoboImportMutationInput = {
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
+  programId: Scalars['ID'],
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -6810,6 +6872,7 @@ export type RegistrationXlsxImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
   screenBeneficiary?: Maybe<Scalars['Boolean']>,
+  programId: Scalars['ID'],
 };
 
 export type ReportNode = Node & {
@@ -8080,7 +8143,7 @@ export type UpdateGrievanceTicketInput = {
   ticketId: Scalars['ID'],
   description?: Maybe<Scalars['String']>,
   assignedTo?: Maybe<Scalars['ID']>,
-  admin?: Maybe<Scalars['String']>,
+  admin?: Maybe<Scalars['ID']>,
   area?: Maybe<Scalars['String']>,
   language?: Maybe<Scalars['String']>,
   linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
@@ -9224,7 +9287,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage' | 'paymentDeliveryPhoneNo'>
   & { paymentChannels: Maybe<Array<Maybe<(
     { __typename?: 'BankAccountInfoNode' }
     & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
@@ -9809,9 +9872,27 @@ export type ApproveSystemFlaggingMutation = (
   )> }
 );
 
+export type BulkUpdateGrievanceAddNoteMutationVariables = {
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  note: Scalars['String'],
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type BulkUpdateGrievanceAddNoteMutation = (
+  { __typename?: 'Mutations' }
+  & { bulkGrievanceAddNote: Maybe<(
+    { __typename?: 'BulkGrievanceAddNoteMutation' }
+    & { grievanceTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id'>
+    )>>> }
+  )> }
+);
+
 export type BulkUpdateGrievanceAssigneeMutationVariables = {
-  grievanceTicketUnicefIds?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  assignedTo?: Maybe<Scalars['String']>,
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  assignedTo: Scalars['String'],
   businessAreaSlug: Scalars['String']
 };
 
@@ -9822,10 +9903,47 @@ export type BulkUpdateGrievanceAssigneeMutation = (
     { __typename?: 'BulkUpdateGrievanceTicketsAssigneesMutation' }
     & { grievanceTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id'>
       & { assignedTo: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName' | 'email'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
       )> }
+    )>>> }
+  )> }
+);
+
+export type BulkUpdateGrievancePriorityMutationVariables = {
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  priority: Scalars['Int'],
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type BulkUpdateGrievancePriorityMutation = (
+  { __typename?: 'Mutations' }
+  & { bulkUpdateGrievancePriority: Maybe<(
+    { __typename?: 'BulkUpdateGrievanceTicketsPriorityMutation' }
+    & { grievanceTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'priority'>
+    )>>> }
+  )> }
+);
+
+export type BulkUpdateGrievanceUrgencyMutationVariables = {
+  grievanceTicketIds: Array<Maybe<Scalars['ID']>>,
+  urgency: Scalars['Int'],
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type BulkUpdateGrievanceUrgencyMutation = (
+  { __typename?: 'Mutations' }
+  & { bulkUpdateGrievanceUrgency: Maybe<(
+    { __typename?: 'BulkUpdateGrievanceTicketsUrgencyMutation' }
+    & { grievanceTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'urgency'>
     )>>> }
   )> }
 );
@@ -11283,7 +11401,10 @@ export type AllUsersForFiltersQueryVariables = {
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
-  isTicketCreator?: Maybe<Scalars['Boolean']>
+  isTicketCreator?: Maybe<Scalars['Boolean']>,
+  isSurveyCreator?: Maybe<Scalars['Boolean']>,
+  isMessageCreator?: Maybe<Scalars['Boolean']>,
+  isFeedbackCreator?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -11968,10 +12089,13 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, sourcePayment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId'>
     )>, verification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
@@ -11984,7 +12108,7 @@ export type PaymentQuery = (
       ) }
     ), collector: (
       { __typename?: 'IndividualNode' }
-      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
+      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'email' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id' | 'status' | 'isFollowUp' | 'unicefId'>
@@ -12531,7 +12655,7 @@ export type PaymentRecordQuery = (
       ) }
     ), parent: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
+      & Pick<CashPlanNode, 'id' | 'unicefId' | 'caId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -13202,7 +13326,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
         )> }
       )> }
     )>> }
@@ -13221,7 +13345,7 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
     )> }
   )> }
 );
@@ -14277,6 +14401,7 @@ export const IndividualDetailedFragmentDoc = gql`
     bankAccountNumber
   }
   preferredLanguage
+  paymentDeliveryPhoneNo
 }
     ${IndividualMinimalFragmentDoc}`;
 export const HouseholdMinimalFragmentDoc = gql`
@@ -16135,11 +16260,66 @@ export function useApproveSystemFlaggingMutation(baseOptions?: ApolloReactHooks.
 export type ApproveSystemFlaggingMutationHookResult = ReturnType<typeof useApproveSystemFlaggingMutation>;
 export type ApproveSystemFlaggingMutationResult = ApolloReactCommon.MutationResult<ApproveSystemFlaggingMutation>;
 export type ApproveSystemFlaggingMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>;
-export const BulkUpdateGrievanceAssigneeDocument = gql`
-    mutation BulkUpdateGrievanceAssignee($grievanceTicketUnicefIds: [ID], $assignedTo: String, $businessAreaSlug: String!) {
-  bulkUpdateGrievanceAssignee(grievanceTicketUnicefIds: $grievanceTicketUnicefIds, assignedTo: $assignedTo, businessAreaSlug: $businessAreaSlug) {
+export const BulkUpdateGrievanceAddNoteDocument = gql`
+    mutation BulkUpdateGrievanceAddNote($grievanceTicketIds: [ID]!, $note: String!, $businessAreaSlug: String!) {
+  bulkGrievanceAddNote(grievanceTicketIds: $grievanceTicketIds, note: $note, businessAreaSlug: $businessAreaSlug) {
     grievanceTickets {
+      id
+    }
+  }
+}
+    `;
+export type BulkUpdateGrievanceAddNoteMutationFn = ApolloReactCommon.MutationFunction<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>;
+export type BulkUpdateGrievanceAddNoteComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>, 'mutation'>;
+
+    export const BulkUpdateGrievanceAddNoteComponent = (props: BulkUpdateGrievanceAddNoteComponentProps) => (
+      <ApolloReactComponents.Mutation<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables> mutation={BulkUpdateGrievanceAddNoteDocument} {...props} />
+    );
+    
+export type BulkUpdateGrievanceAddNoteProps<TChildProps = {}> = ApolloReactHoc.MutateProps<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables> & TChildProps;
+export function withBulkUpdateGrievanceAddNote<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  BulkUpdateGrievanceAddNoteMutation,
+  BulkUpdateGrievanceAddNoteMutationVariables,
+  BulkUpdateGrievanceAddNoteProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables, BulkUpdateGrievanceAddNoteProps<TChildProps>>(BulkUpdateGrievanceAddNoteDocument, {
+      alias: 'bulkUpdateGrievanceAddNote',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useBulkUpdateGrievanceAddNoteMutation__
+ *
+ * To run a mutation, you first call `useBulkUpdateGrievanceAddNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBulkUpdateGrievanceAddNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [bulkUpdateGrievanceAddNoteMutation, { data, loading, error }] = useBulkUpdateGrievanceAddNoteMutation({
+ *   variables: {
+ *      grievanceTicketIds: // value for 'grievanceTicketIds'
+ *      note: // value for 'note'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useBulkUpdateGrievanceAddNoteMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>) {
+        return ApolloReactHooks.useMutation<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>(BulkUpdateGrievanceAddNoteDocument, baseOptions);
+      }
+export type BulkUpdateGrievanceAddNoteMutationHookResult = ReturnType<typeof useBulkUpdateGrievanceAddNoteMutation>;
+export type BulkUpdateGrievanceAddNoteMutationResult = ApolloReactCommon.MutationResult<BulkUpdateGrievanceAddNoteMutation>;
+export type BulkUpdateGrievanceAddNoteMutationOptions = ApolloReactCommon.BaseMutationOptions<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>;
+export const BulkUpdateGrievanceAssigneeDocument = gql`
+    mutation BulkUpdateGrievanceAssignee($grievanceTicketIds: [ID]!, $assignedTo: String!, $businessAreaSlug: String!) {
+  bulkUpdateGrievanceAssignee(grievanceTicketIds: $grievanceTicketIds, assignedTo: $assignedTo, businessAreaSlug: $businessAreaSlug) {
+    grievanceTickets {
+      id
       assignedTo {
+        id
         firstName
         lastName
         email
@@ -16180,7 +16360,7 @@ export function withBulkUpdateGrievanceAssignee<TProps, TChildProps = {}>(operat
  * @example
  * const [bulkUpdateGrievanceAssigneeMutation, { data, loading, error }] = useBulkUpdateGrievanceAssigneeMutation({
  *   variables: {
- *      grievanceTicketUnicefIds: // value for 'grievanceTicketUnicefIds'
+ *      grievanceTicketIds: // value for 'grievanceTicketIds'
  *      assignedTo: // value for 'assignedTo'
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *   },
@@ -16192,6 +16372,114 @@ export function useBulkUpdateGrievanceAssigneeMutation(baseOptions?: ApolloReact
 export type BulkUpdateGrievanceAssigneeMutationHookResult = ReturnType<typeof useBulkUpdateGrievanceAssigneeMutation>;
 export type BulkUpdateGrievanceAssigneeMutationResult = ApolloReactCommon.MutationResult<BulkUpdateGrievanceAssigneeMutation>;
 export type BulkUpdateGrievanceAssigneeMutationOptions = ApolloReactCommon.BaseMutationOptions<BulkUpdateGrievanceAssigneeMutation, BulkUpdateGrievanceAssigneeMutationVariables>;
+export const BulkUpdateGrievancePriorityDocument = gql`
+    mutation BulkUpdateGrievancePriority($grievanceTicketIds: [ID]!, $priority: Int!, $businessAreaSlug: String!) {
+  bulkUpdateGrievancePriority(grievanceTicketIds: $grievanceTicketIds, priority: $priority, businessAreaSlug: $businessAreaSlug) {
+    grievanceTickets {
+      id
+      priority
+    }
+  }
+}
+    `;
+export type BulkUpdateGrievancePriorityMutationFn = ApolloReactCommon.MutationFunction<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>;
+export type BulkUpdateGrievancePriorityComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>, 'mutation'>;
+
+    export const BulkUpdateGrievancePriorityComponent = (props: BulkUpdateGrievancePriorityComponentProps) => (
+      <ApolloReactComponents.Mutation<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables> mutation={BulkUpdateGrievancePriorityDocument} {...props} />
+    );
+    
+export type BulkUpdateGrievancePriorityProps<TChildProps = {}> = ApolloReactHoc.MutateProps<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables> & TChildProps;
+export function withBulkUpdateGrievancePriority<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  BulkUpdateGrievancePriorityMutation,
+  BulkUpdateGrievancePriorityMutationVariables,
+  BulkUpdateGrievancePriorityProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables, BulkUpdateGrievancePriorityProps<TChildProps>>(BulkUpdateGrievancePriorityDocument, {
+      alias: 'bulkUpdateGrievancePriority',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useBulkUpdateGrievancePriorityMutation__
+ *
+ * To run a mutation, you first call `useBulkUpdateGrievancePriorityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBulkUpdateGrievancePriorityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [bulkUpdateGrievancePriorityMutation, { data, loading, error }] = useBulkUpdateGrievancePriorityMutation({
+ *   variables: {
+ *      grievanceTicketIds: // value for 'grievanceTicketIds'
+ *      priority: // value for 'priority'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useBulkUpdateGrievancePriorityMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>) {
+        return ApolloReactHooks.useMutation<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>(BulkUpdateGrievancePriorityDocument, baseOptions);
+      }
+export type BulkUpdateGrievancePriorityMutationHookResult = ReturnType<typeof useBulkUpdateGrievancePriorityMutation>;
+export type BulkUpdateGrievancePriorityMutationResult = ApolloReactCommon.MutationResult<BulkUpdateGrievancePriorityMutation>;
+export type BulkUpdateGrievancePriorityMutationOptions = ApolloReactCommon.BaseMutationOptions<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>;
+export const BulkUpdateGrievanceUrgencyDocument = gql`
+    mutation BulkUpdateGrievanceUrgency($grievanceTicketIds: [ID]!, $urgency: Int!, $businessAreaSlug: String!) {
+  bulkUpdateGrievanceUrgency(grievanceTicketIds: $grievanceTicketIds, urgency: $urgency, businessAreaSlug: $businessAreaSlug) {
+    grievanceTickets {
+      id
+      urgency
+    }
+  }
+}
+    `;
+export type BulkUpdateGrievanceUrgencyMutationFn = ApolloReactCommon.MutationFunction<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>;
+export type BulkUpdateGrievanceUrgencyComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>, 'mutation'>;
+
+    export const BulkUpdateGrievanceUrgencyComponent = (props: BulkUpdateGrievanceUrgencyComponentProps) => (
+      <ApolloReactComponents.Mutation<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables> mutation={BulkUpdateGrievanceUrgencyDocument} {...props} />
+    );
+    
+export type BulkUpdateGrievanceUrgencyProps<TChildProps = {}> = ApolloReactHoc.MutateProps<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables> & TChildProps;
+export function withBulkUpdateGrievanceUrgency<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  BulkUpdateGrievanceUrgencyMutation,
+  BulkUpdateGrievanceUrgencyMutationVariables,
+  BulkUpdateGrievanceUrgencyProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables, BulkUpdateGrievanceUrgencyProps<TChildProps>>(BulkUpdateGrievanceUrgencyDocument, {
+      alias: 'bulkUpdateGrievanceUrgency',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useBulkUpdateGrievanceUrgencyMutation__
+ *
+ * To run a mutation, you first call `useBulkUpdateGrievanceUrgencyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBulkUpdateGrievanceUrgencyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [bulkUpdateGrievanceUrgencyMutation, { data, loading, error }] = useBulkUpdateGrievanceUrgencyMutation({
+ *   variables: {
+ *      grievanceTicketIds: // value for 'grievanceTicketIds'
+ *      urgency: // value for 'urgency'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useBulkUpdateGrievanceUrgencyMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>) {
+        return ApolloReactHooks.useMutation<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>(BulkUpdateGrievanceUrgencyDocument, baseOptions);
+      }
+export type BulkUpdateGrievanceUrgencyMutationHookResult = ReturnType<typeof useBulkUpdateGrievanceUrgencyMutation>;
+export type BulkUpdateGrievanceUrgencyMutationResult = ApolloReactCommon.MutationResult<BulkUpdateGrievanceUrgencyMutation>;
+export type BulkUpdateGrievanceUrgencyMutationOptions = ApolloReactCommon.BaseMutationOptions<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>;
 export const CreateGrievanceDocument = gql`
     mutation CreateGrievance($input: CreateGrievanceTicketInput!) {
   createGrievanceTicket(input: $input) {
@@ -20214,8 +20502,8 @@ export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const AllUsersForFiltersDocument = gql`
-    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean) {
-  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator) {
+    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String, $isTicketCreator: Boolean, $isSurveyCreator: Boolean, $isMessageCreator: Boolean, $isFeedbackCreator: Boolean) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search, isTicketCreator: $isTicketCreator, isSurveyCreator: $isSurveyCreator, isMessageCreator: $isMessageCreator, isFeedbackCreator: $isFeedbackCreator) {
     edges {
       node {
         id
@@ -20265,6 +20553,9 @@ export function withAllUsersForFilters<TProps, TChildProps = {}>(operationOption
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
  *      isTicketCreator: // value for 'isTicketCreator'
+ *      isSurveyCreator: // value for 'isSurveyCreator'
+ *      isMessageCreator: // value for 'isMessageCreator'
+ *      isFeedbackCreator: // value for 'isFeedbackCreator'
  *   },
  * });
  */
@@ -22115,9 +22406,15 @@ export const PaymentDocument = gql`
     distributionModality
     status
     statusDate
+    snapshotCollectorBankName
+    snapshotCollectorBankAccountNumber
     targetPopulation {
       id
       name
+    }
+    sourcePayment {
+      id
+      unicefId
     }
     verification {
       id
@@ -22148,6 +22445,7 @@ export const PaymentDocument = gql`
       id
       unicefId
       fullName
+      email
       phoneNo
       phoneNoValid
       phoneNoAlternative
@@ -22179,6 +22477,10 @@ export const PaymentDocument = gql`
       id
       fullName
     }
+    additionalCollectorName
+    additionalDocumentType
+    additionalDocumentNumber
+    reasonForUnsuccessfulPayment
   }
 }
     `;
@@ -23378,6 +23680,7 @@ export const PaymentRecordDocument = gql`
     }
     parent {
       id
+      unicefId
       caId
       program {
         id
@@ -25035,6 +25338,7 @@ export const AllProgramsForChoicesDocument = gql`
         dataCollectingType {
           id
           individualFiltersAvailable
+          householdFiltersAvailable
         }
       }
     }
@@ -25124,6 +25428,7 @@ export const ProgramDocument = gql`
       label
       active
       individualFiltersAvailable
+      householdFiltersAvailable
     }
   }
 }
@@ -27602,6 +27907,7 @@ export type ResolversTypes = {
   DataCollectingTypeNodeConnection: ResolverTypeWrapper<DataCollectingTypeNodeConnection>,
   DataCollectingTypeNodeEdge: ResolverTypeWrapper<DataCollectingTypeNodeEdge>,
   DataCollectingTypeNode: ResolverTypeWrapper<DataCollectingTypeNode>,
+  DataCollectingTypeType: DataCollectingTypeType,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   ProgramNode: ResolverTypeWrapper<ProgramNode>,
@@ -27970,7 +28276,6 @@ export type ResolversTypes = {
   GrievanceDocumentUpdateInput: GrievanceDocumentUpdateInput,
   UpdateGrievanceTicketMutation: ResolverTypeWrapper<UpdateGrievanceTicketMutation>,
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
-  BulkUpdateGrievanceTicketsAssigneesMutation: ResolverTypeWrapper<BulkUpdateGrievanceTicketsAssigneesMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>,
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
@@ -27980,6 +28285,10 @@ export type ResolversTypes = {
   NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>,
   PaymentDetailsApproveMutation: ResolverTypeWrapper<PaymentDetailsApproveMutation>,
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
+  BulkUpdateGrievanceTicketsAssigneesMutation: ResolverTypeWrapper<BulkUpdateGrievanceTicketsAssigneesMutation>,
+  BulkUpdateGrievanceTicketsPriorityMutation: ResolverTypeWrapper<BulkUpdateGrievanceTicketsPriorityMutation>,
+  BulkUpdateGrievanceTicketsUrgencyMutation: ResolverTypeWrapper<BulkUpdateGrievanceTicketsUrgencyMutation>,
+  BulkGrievanceAddNoteMutation: ResolverTypeWrapper<BulkGrievanceAddNoteMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   CreateVerificationPlanMutation: ResolverTypeWrapper<CreateVerificationPlanMutation>,
   GenericPaymentPlanNode: ResolverTypeWrapper<GenericPaymentPlanNode>,
@@ -28105,6 +28414,7 @@ export type ResolversParentTypes = {
   DataCollectingTypeNodeConnection: DataCollectingTypeNodeConnection,
   DataCollectingTypeNodeEdge: DataCollectingTypeNodeEdge,
   DataCollectingTypeNode: DataCollectingTypeNode,
+  DataCollectingTypeType: DataCollectingTypeType,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
   ProgramNode: ProgramNode,
@@ -28473,7 +28783,6 @@ export type ResolversParentTypes = {
   GrievanceDocumentUpdateInput: GrievanceDocumentUpdateInput,
   UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation,
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
-  BulkUpdateGrievanceTicketsAssigneesMutation: BulkUpdateGrievanceTicketsAssigneesMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: CreateTicketNoteMutation,
   IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
@@ -28483,6 +28792,10 @@ export type ResolversParentTypes = {
   NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation,
   PaymentDetailsApproveMutation: PaymentDetailsApproveMutation,
   ReassignRoleMutation: ReassignRoleMutation,
+  BulkUpdateGrievanceTicketsAssigneesMutation: BulkUpdateGrievanceTicketsAssigneesMutation,
+  BulkUpdateGrievanceTicketsPriorityMutation: BulkUpdateGrievanceTicketsPriorityMutation,
+  BulkUpdateGrievanceTicketsUrgencyMutation: BulkUpdateGrievanceTicketsUrgencyMutation,
+  BulkGrievanceAddNoteMutation: BulkGrievanceAddNoteMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   CreateVerificationPlanMutation: CreateVerificationPlanMutation,
   GenericPaymentPlanNode: GenericPaymentPlanNode,
@@ -28742,7 +29055,19 @@ export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
   name: 'BigInt'
 }
 
+export type BulkGrievanceAddNoteMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['BulkGrievanceAddNoteMutation'] = ResolversParentTypes['BulkGrievanceAddNoteMutation']> = {
+  grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+};
+
 export type BulkUpdateGrievanceTicketsAssigneesMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['BulkUpdateGrievanceTicketsAssigneesMutation'] = ResolversParentTypes['BulkUpdateGrievanceTicketsAssigneesMutation']> = {
+  grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+};
+
+export type BulkUpdateGrievanceTicketsPriorityMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['BulkUpdateGrievanceTicketsPriorityMutation'] = ResolversParentTypes['BulkUpdateGrievanceTicketsPriorityMutation']> = {
+  grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+};
+
+export type BulkUpdateGrievanceTicketsUrgencyMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['BulkUpdateGrievanceTicketsUrgencyMutation'] = ResolversParentTypes['BulkUpdateGrievanceTicketsUrgencyMutation']> = {
   grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
 
@@ -28961,6 +29286,10 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, CommunicationMessageNodeCopiedToArgs>,
 };
 
 export type CommunicationMessageNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNodeConnection'] = ResolversParentTypes['CommunicationMessageNodeConnection']> = {
@@ -29085,14 +29414,16 @@ export type DataCollectingTypeNodeResolvers<ContextType = any, ParentType extend
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['DataCollectingTypeType']>, ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   compatibleTypes?: Resolver<ResolversTypes['DataCollectingTypeNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeCompatibleTypesArgs>,
   limitTo?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeLimitToArgs>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individualFiltersAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdFiltersAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   recalculateComposition?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeHouseholdsArgs>,
+  datacollectingtypeSet?: Resolver<ResolversTypes['DataCollectingTypeNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeDatacollectingtypeSetArgs>,
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, DataCollectingTypeNodeProgramsArgs>,
 };
 
@@ -29332,6 +29663,10 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  copiedFrom?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>,
+  copiedTo?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, FeedbackNodeCopiedToArgs>,
   feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, FeedbackNodeFeedbackMessagesArgs>,
 };
 
@@ -29703,7 +30038,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>,
   isRecalculatedGroupAges?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, HouseholdNodeCopiedToArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
@@ -29939,6 +30273,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  paymentDeliveryPhoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
@@ -30062,6 +30397,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentDeliveryPhoneNo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
@@ -30298,7 +30634,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
-  bulkUpdateGrievanceAssignee?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsAssigneesMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceAssigneeArgs, 'businessAreaSlug'>>,
   createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>,
   approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
   approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
@@ -30309,6 +30644,10 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
+  bulkUpdateGrievanceAssignee?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsAssigneesMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceAssigneeArgs, 'assignedTo' | 'businessAreaSlug' | 'grievanceTicketIds'>>,
+  bulkUpdateGrievancePriority?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsPriorityMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievancePriorityArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'priority'>>,
+  bulkUpdateGrievanceUrgency?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsUrgencyMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceUrgencyArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'urgency'>>,
+  bulkGrievanceAddNote?: Resolver<Maybe<ResolversTypes['BulkGrievanceAddNoteMutation']>, ParentType, ContextType, RequireFields<MutationsBulkGrievanceAddNoteArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'note'>>,
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>,
   editPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditPaymentVerificationPlanArgs, 'input'>>,
   exportXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ExportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentVerificationPlanFileArgs, 'paymentVerificationPlanId'>>,
@@ -30448,9 +30787,6 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  copiedFrom?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
   parent?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
   conflicted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -30463,8 +30799,10 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   orderNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  additionalCollectorName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  additionalDocumentType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  additionalDocumentNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeFollowUpsArgs>,
-  copiedTo?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentNodeCopiedToArgs>,
   householdSnapshot?: Resolver<Maybe<ResolversTypes['PaymentHouseholdSnapshotNode']>, ParentType, ContextType>,
   paymentPlanHardConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
@@ -30474,8 +30812,13 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   distributionModality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   serviceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+  totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  snapshotCollectorFullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorDeliveryPhoneNo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorBankName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorBankAccountNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  snapshotCollectorDebitCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type PaymentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentNodeConnection'] = ResolversParentTypes['PaymentNodeConnection']> = {
@@ -30599,9 +30942,6 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  copiedFrom?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
@@ -30616,7 +30956,6 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
-  copiedTo?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, PaymentRecordNodeCopiedToArgs>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -30789,6 +31128,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>,
+  isVisible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdSetArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, ProgramNodeIndividualsArgs>,
@@ -32148,7 +32488,10 @@ export type Resolvers<ContextType = any> = {
   BankAccountInfoNodeConnection?: BankAccountInfoNodeConnectionResolvers<ContextType>,
   BankAccountInfoNodeEdge?: BankAccountInfoNodeEdgeResolvers<ContextType>,
   BigInt?: GraphQLScalarType,
+  BulkGrievanceAddNoteMutation?: BulkGrievanceAddNoteMutationResolvers<ContextType>,
   BulkUpdateGrievanceTicketsAssigneesMutation?: BulkUpdateGrievanceTicketsAssigneesMutationResolvers<ContextType>,
+  BulkUpdateGrievanceTicketsPriorityMutation?: BulkUpdateGrievanceTicketsPriorityMutationResolvers<ContextType>,
+  BulkUpdateGrievanceTicketsUrgencyMutation?: BulkUpdateGrievanceTicketsUrgencyMutationResolvers<ContextType>,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
   BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
   BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>,

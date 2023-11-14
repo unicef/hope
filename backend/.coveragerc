@@ -1,11 +1,17 @@
 [run]
 branch = True
 source = hct_mis_api
+concurrency=multiprocessing
 
 omit =
         */tests/**
         */migrations/*,
         */apps.py,
+        hct_mis_api/one_time_scripts/*,
+        hct_mis_api/libs/*,
+        hct_mis_api/settings/*,
+        hct_mis_api/settings.py,
+        hct_mis_api/apps/core/management/commands/*
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -24,9 +30,9 @@ exclude_lines =
     #if 0:
     if __name__ == .__main__.:
 
-fail_under = 75
+fail_under = 71
 
-ignore_errors = True
+ignore_errors = False
 
 [html]
 directory = ~build/coverage

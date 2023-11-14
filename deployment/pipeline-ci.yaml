@@ -210,3 +210,11 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+          - task: PublishCodeCoverageResults@2
+            inputs:
+              summaryFileLocation: 'backend/coverage.xml'
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: backend/coverage.xml
+              artifact: BackendLineCoverage
+              publishLocation: 'pipeline'

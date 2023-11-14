@@ -2,10 +2,13 @@ import BaseComponent from "../../base.component";
 
 export default class PaymentModule extends BaseComponent {
   // Locators
+  titlePage = 'h5[data-cy="page-header-title"]';
 
   // Texts
+  textTitle = "Payment Module";
 
   // Elements
+  getTitle = () => cy.get(this.titlePage);
 
   createPaymentPlan(targetPopulationName) {
     cy.visit("/");

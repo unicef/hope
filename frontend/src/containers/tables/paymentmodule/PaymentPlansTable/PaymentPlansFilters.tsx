@@ -144,13 +144,13 @@ export const PaymentPlansFilters = ({
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
-                  moment(date).format('YYYY-MM-DD'),
+                  date ? moment(date).format('YYYY-MM-DD') : '',
                 );
-                handleFilterChange('dispersionEndDate', undefined);
+                handleFilterChange('dispersionEndDate', '');
               } else {
                 handleFilterChange(
                   'dispersionStartDate',
-                  moment(date).format('YYYY-MM-DD'),
+                  date ? moment(date).format('YYYY-MM-DD') : '',
                 );
               }
             }}
@@ -163,7 +163,7 @@ export const PaymentPlansFilters = ({
             onChange={(date) =>
               handleFilterChange(
                 'dispersionEndDate',
-                moment(date).format('YYYY-MM-DD'),
+                date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
             value={filter.dispersionEndDate}

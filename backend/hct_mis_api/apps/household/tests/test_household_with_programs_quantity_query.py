@@ -51,12 +51,12 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             }
         )
         cls.household = household
-        cls.program1 = ProgramFactory.create(name="Test program ONE", business_area=cls.business_area)
-        cls.program2 = ProgramFactory.create(name="Test program TWO", business_area=cls.business_area)
-        cls.program3 = ProgramFactory.create(name="Test program THREE", business_area=cls.business_area)
+        program1 = ProgramFactory.create(name="Test program ONE", business_area=cls.business_area)
+        program2 = ProgramFactory.create(name="Test program TWO", business_area=cls.business_area)
+        program3 = ProgramFactory.create(name="Test program THREE", business_area=cls.business_area)
 
-        cash_plans_program1 = CashPlanFactory.create_batch(2, program=cls.program1)
-        cash_plans_program2 = CashPlanFactory.create_batch(2, program=cls.program2)
+        cash_plans_program1 = CashPlanFactory.create_batch(2, program=program1)
+        cash_plans_program2 = CashPlanFactory.create_batch(2, program=program2)
 
         PaymentRecordFactory.create_batch(
             3,
@@ -72,7 +72,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             parent=cash_plans_program1[1],
             currency="AFG",
             delivered_quantity_usd=100,
-            delivered_quantity=200,
+            delivered_quantity=150,
             household=household,
             status=PaymentRecord.STATUS_SUCCESS,
         )
@@ -80,28 +80,28 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         PaymentRecordFactory.create_batch(
             3,
             parent=cash_plans_program2[0],
-            currency="USD",
+            currency="AFG",
             delivered_quantity_usd=100,
-            delivered_quantity=100,
+            delivered_quantity=200,
             household=household,
             status=PaymentRecord.STATUS_SUCCESS,
         )
         PaymentRecordFactory.create_batch(
             3,
             parent=cash_plans_program2[1],
-            currency="USD",
-            delivered_quantity_usd=200,
+            currency="AFG",
+            delivered_quantity_usd=150,
             delivered_quantity=200,
             household=household,
             status=PaymentRecord.STATUS_SUCCESS,
         )
 
-        cls.household.programs.add(cls.program1)
-        cls.household.programs.add(cls.program2)
+        cls.household.programs.add(program1)
+        cls.household.programs.add(program2)
 
-        payment_plan_program1 = PaymentPlanFactory(program=cls.program1)
-        payment_plan_program2 = PaymentPlanFactory(program=cls.program2)
-        payment_plan_program3 = PaymentPlanFactory(program=cls.program3)
+        payment_plan_program1 = PaymentPlanFactory(program=program1)
+        payment_plan_program2 = PaymentPlanFactory(program=program2)
+        payment_plan_program3 = PaymentPlanFactory(program=program3)
 
         PaymentFactory(
             parent=payment_plan_program1,
@@ -112,16 +112,16 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         )
         PaymentFactory(
             parent=payment_plan_program2,
-            currency="USD",
-            delivered_quantity_usd=122,
+            currency="AFG",
+            delivered_quantity_usd=22,
             delivered_quantity=122,
             household=cls.household,
         )
         PaymentFactory(
             parent=payment_plan_program3,
-            currency="PLN",
-            delivered_quantity_usd=166,
-            delivered_quantity=666,
+            currency="AFG",
+            delivered_quantity_usd=66,
+            delivered_quantity=166,
             household=cls.household,
         )
 
