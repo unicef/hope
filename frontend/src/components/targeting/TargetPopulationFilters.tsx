@@ -8,16 +8,14 @@ import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
 } from '../../utils/utils';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { FiltersSection } from '../core/FiltersSection';
 
 interface TargetPopulationFiltersProps {
   filter;
-  addBorder?: boolean;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -25,7 +23,6 @@ interface TargetPopulationFiltersProps {
 }
 export const TargetPopulationFilters = ({
   filter,
-  addBorder = true,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -62,8 +59,11 @@ export const TargetPopulationFilters = ({
     ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
     : Object.values(TargetPopulationStatus);
 
-  const renderTable = (): React.ReactElement => (
-    <>
+  return (
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -129,16 +129,6 @@ export const TargetPopulationFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        applyHandler={handleApplyFilter}
-        clearHandler={handleClearFilter}
-      />
-    </>
-  );
-
-  return addBorder ? (
-    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
-  ) : (
-    renderTable()
+    </FiltersSection>
   );
 };
