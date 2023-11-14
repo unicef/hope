@@ -14,7 +14,6 @@ import {
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
-  renderUserName,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { BlackLink } from '../../core/BlackLink';
@@ -170,7 +169,7 @@ export const PaymentDetails = ({
           <Grid item xs={3}>
             <LabelizedField
               label={t("Collector's Name")}
-              value={renderUserName(payment.snapshotCollectorFullName)}
+              value={payment.snapshotCollectorFullName}
             />
           </Grid>
           <Grid item xs={3}>
