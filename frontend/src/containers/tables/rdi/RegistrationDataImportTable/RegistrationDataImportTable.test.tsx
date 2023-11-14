@@ -12,8 +12,8 @@ const initialFilter = {
   status: '',
   sizeMin: '',
   sizeMax: '',
-  importDateRangeMin: undefined,
-  importDateRangeMax: undefined,
+  importDateRangeMin: '',
+  importDateRangeMax: '',
 };
 
 describe('containers/tables/rdi/RegistrationDataImportTable', () => {

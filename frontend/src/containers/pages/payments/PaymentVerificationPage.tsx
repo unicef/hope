@@ -23,8 +23,8 @@ const initialFilter = {
   program: '',
   serviceProvider: '',
   deliveryType: [],
-  startDate: undefined,
-  endDate: undefined,
+  startDate: '',
+  endDate: '',
 };
 
 export const PaymentVerificationPage = (): React.ReactElement => {

@@ -1,6 +1,6 @@
 import { Tab, Typography } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,11 +17,11 @@ import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const Container = styled.div`
   && {
@@ -62,7 +62,13 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const { data, loading, error, stopPolling } = useRegistrationDataImportQuery({
+  const {
+    data,
+    loading,
+    error,
+    stopPolling,
+    startPolling,
+  } = useRegistrationDataImportQuery({
     variables: { id },
     pollInterval: 30000,
     fetchPolicy: 'cache-and-network',
@@ -74,13 +80,29 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
 
   const [selectedTab, setSelectedTab] = useState(0);
 
+  const status = data?.registrationDataImport?.status;
+  useEffect(() => {
+    if (
+      [
+        RegistrationDataImportStatus.Loading,
+        RegistrationDataImportStatus.Deduplication,
+        RegistrationDataImportStatus.ImportScheduled,
+        RegistrationDataImportStatus.Importing,
+        RegistrationDataImportStatus.MergeScheduled,
+        RegistrationDataImportStatus.Merging,
+      ].includes(status)
+    ) {
+      startPolling(5000);
+    } else {
+      stopPolling();
+    }
+    return stopPolling;
+  }, [status, startPolling, stopPolling]);
+
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data?.registrationDataImport || !choicesData || permissions === null) {
     return null;
-  }
-  if (data.registrationDataImport.status !== 'IMPORTING') {
-    stopPolling();
   }
 
   const isMerged =

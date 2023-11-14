@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.accountability.models import Feedback
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
@@ -9,6 +9,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     NegativeFeedbackTicketWithoutExtrasFactory,
     PositiveFeedbackTicketWithoutExtrasFactory,
+    TicketNoteFactory,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -44,6 +45,8 @@ class TestMigrationFosterChild(TestCase):
 
         cls.ticket_1 = GrievanceTicketFactory(description="grievance_ticket_1_description", programme=cls.program_1)
         cls.ticket_positive_1 = PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.ticket_1)
+
+        cls.ticket_note_1 = TicketNoteFactory(ticket=cls.ticket_1, description="test ticket note")
 
         cls.ticket_2 = GrievanceTicketFactory(language="grievance_ticket_2_language")
         cls.ticket_positive_2 = PositiveFeedbackTicketWithoutExtrasFactory(
@@ -85,7 +88,7 @@ class TestMigrationFosterChild(TestCase):
 
         self.assertEqual(TicketPositiveFeedbackDetails.objects.count(), 0)
         self.assertEqual(TicketNegativeFeedbackDetails.objects.count(), 0)
-        self.assertEqual(GrievanceTicket.objects.count(), 6)
+        self.assertEqual(GrievanceTicket.objects.count(), 0)
         self.assertEqual(Feedback.objects.count(), 6)
 
         feedbacks = Feedback.objects.all()
@@ -106,17 +109,11 @@ class TestMigrationFosterChild(TestCase):
         self.assertEqual(feedbacks[4].created_at, self.ticket_5_created_at)
         self.assertEqual(feedbacks[5].created_at, self.ticket_6_created_at)
 
-        self.assertEqual(feedbacks[0].linked_grievance, self.ticket_1)
-        self.assertEqual(feedbacks[1].linked_grievance, self.ticket_2)
-        self.assertEqual(feedbacks[2].linked_grievance, self.ticket_3)
-        self.assertEqual(feedbacks[3].linked_grievance, self.ticket_4)
-        self.assertEqual(feedbacks[4].linked_grievance, self.ticket_5)
-        self.assertEqual(feedbacks[5].linked_grievance, self.ticket_6)
-
         # Specific values
 
         self.assertEqual(feedbacks[0].description, "grievance_ticket_1_description")
         self.assertEqual(feedbacks[0].program, self.program_1)
+        self.assertEqual(FeedbackMessage.objects.count(), 1)
 
         self.assertEqual(feedbacks[1].language, "grievance_ticket_2_language")
         self.assertEqual(feedbacks[1].household_lookup, self.household_1)
@@ -138,3 +135,8 @@ class TestMigrationFosterChild(TestCase):
         self.assertEqual(feedbacks[5].individual_lookup, self.individual_2)
 
         self.assertIs(Feedback._meta.get_field("created_at").auto_now_add, True)
+
+        feedback_tickets_count = GrievanceTicket.objects.filter(
+            category__in=[GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK]
+        ).count()
+        self.assertEqual(feedback_tickets_count, 0)

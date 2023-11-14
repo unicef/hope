@@ -289,8 +289,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="1", description="Full individual collected", active=True
+            code="full", description="Full individual collected", active=True
         )
+        cls.data_collecting_type.limit_to.add(cls.business_area)
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
@@ -422,6 +423,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
+            currency="PLN",
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
 
@@ -800,6 +802,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=99,
             financial_service_provider=None,
+            currency="PLN",
         )
         payment_2 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -812,6 +815,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=2000,
             delivered_quantity_usd=500,
             financial_service_provider=None,
+            currency="PLN",
         )
         payment_3 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -824,6 +828,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=3000,
             delivered_quantity_usd=290,
             financial_service_provider=None,
+            currency="PLN",
         )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
@@ -909,6 +914,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 delivered_quantity=999,
                 delivered_quantity_usd=10,
                 financial_service_provider=None,
+                currency="PLN",
             )
         payment_plan.status_finished()
         payment_plan.save()

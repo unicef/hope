@@ -47,7 +47,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.utils import IsOriginalManager, nested_getattr
+from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
@@ -307,16 +307,6 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    is_original = models.BooleanField(default=True)
-    is_migration_handled = models.BooleanField(default=False)
-    copied_from = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="copied_to",
-        help_text="If this object was copied from another, this field will contain the object it was copied from.",
-    )
 
     class Meta:
         abstract = True
@@ -405,6 +395,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
         BackgroundActionStatus.RULE_ENGINE_ERROR,
+        BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -783,7 +774,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         for Accepted and Finished export_file_per_fsp file
         """
         try:
-            if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
+            if self.status == PaymentPlan.Status.LOCKED:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
                 return self.export_file_per_fsp is not None
@@ -798,7 +789,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
         """
-        if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
+        if self.status == PaymentPlan.Status.LOCKED:
             if self.export_file_entitlement and self.export_file_entitlement.file:
                 return self.export_file_entitlement.file.url
             else:
@@ -935,6 +926,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
         ("order_number", _("Order Number")),
         ("token_number", _("Token Number")),
+        ("additional_collector_name", _("Additional Collector Name")),
+        ("additional_document_type", _("Additional Document Type")),
+        ("additional_document_number", _("Additional Document Number")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1025,6 +1019,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
             "order_number": (payment, "order_number"),
             "token_number": (payment, "token_number"),
+            "additional_collector_name": (payment, "additional_collector_name"),
+            "additional_document_type": (payment, "additional_document_type"),
+            "additional_document_number": (payment, "additional_document_number"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1160,6 +1157,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
+    # TODO: remove? do we using this one?
     IN_PROGRESS = 1
     COMPLETED = 2
     FAILED = 3
@@ -1400,10 +1398,6 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         related_query_name="payment_record",
     )
 
-    # remove after data migration
-    objects = IsOriginalManager()
-    original_and_repr_objects = models.Manager()
-
     @property
     def unicef_id(self) -> str:
         return self.ca_id
@@ -1471,6 +1465,18 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment",
+    )
+    additional_collector_name = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector",
+    )
+    additional_document_type = models.CharField(
+        max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
+    )
+    additional_document_number = models.CharField(
+        max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
     )
 
     @property

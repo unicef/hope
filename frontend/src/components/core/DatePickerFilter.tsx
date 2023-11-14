@@ -11,29 +11,34 @@ export const DatePickerFilter = ({
   fullWidth = true,
   ...props
 }): React.ReactElement => {
-  const utcValue = value ? moment.utc(value) : null;
+  const datePickerValue = value ? moment(value) : null;
 
   return (
     <Box display='flex' flexDirection='column'>
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-      <KeyboardDatePicker
-        variant='inline'
-        inputVariant='outlined'
-        margin='dense'
-        autoOk
-        onChange={(date) => {
-          if (date?.valueOf()) {
-            const momentDate = moment(date);
-
-            onChange(momentDate?.toISOString());
-          }
-        }}
-        value={utcValue}
-        format='YYYY-MM-DD'
-        InputAdornmentProps={{ position: 'end' }}
-        fullWidth={fullWidth}
-        {...props}
-      />
+      <Box display='inline-flex'>
+        <KeyboardDatePicker
+          variant='inline'
+          inputVariant='outlined'
+          margin='dense'
+          autoOk
+          onChange={(date, inputString) => {
+            if (date?.valueOf()) {
+              const momentDate = moment(date);
+              onChange(momentDate?.toISOString());
+            }
+            if (!inputString) {
+              onChange(null);
+            }
+          }}
+          value={datePickerValue}
+          format='YYYY-MM-DD'
+          InputAdornmentProps={{ position: 'end' }}
+          fullWidth={fullWidth}
+          helperText={null}
+          {...props}
+        />
+      </Box>
     </Box>
   );
 };

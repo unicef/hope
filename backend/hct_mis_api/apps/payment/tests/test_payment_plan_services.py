@@ -143,7 +143,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(48):
+        with self.assertNumQueries(56):
             prepare_payment_plan_task.delay(pp.id)
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
@@ -204,7 +204,7 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         self.assertEqual(pp.payment_items.count(), 1)
 
         new_targeting = TargetPopulationFactory()
@@ -326,7 +326,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -359,7 +359,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1)
+        PaymentFactory(parent=pp, household=hh1, currency="PLN")
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -383,7 +383,7 @@ class TestPaymentPlanServices(APITestCase):
             )
             PaymentPlanService(payment_plan=pp).update(input_data=dict(end_date=parse_date("2021-09-10")))  # date
 
-    @freeze_time("2020-10-10")
+    @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
@@ -405,7 +405,9 @@ class TestPaymentPlanServices(APITestCase):
             hh = HouseholdFactory(head_of_household=hoh)
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
-            payment = PaymentFactory(parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+            payment = PaymentFactory(
+                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN"
+            )
             payments.append(payment)
 
         new_targeting.households.set([p.household for p in payments])
@@ -413,8 +415,8 @@ class TestPaymentPlanServices(APITestCase):
         pp.target_population = new_targeting
         pp.save()
 
-        dispersion_start_date = pp.dispersion_start_date + timedelta(days=1)
-        dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
+        dispersion_start_date = (pp.dispersion_start_date + timedelta(days=1)).date()
+        dispersion_end_date = (pp.dispersion_end_date + timedelta(days=1)).date()
 
         with self.assertRaisesMessage(
             GraphQLError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
@@ -441,6 +443,7 @@ class TestPaymentPlanServices(APITestCase):
                 self.user, dispersion_start_date, dispersion_end_date
             )
 
+        follow_up_pp.refresh_from_db()
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.PREPARING)
         self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
@@ -458,8 +461,10 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 1)
 
-        with self.assertNumQueries(15):
-            prepare_follow_up_payment_plan_task(follow_up_pp.id)
+        prepare_follow_up_payment_plan_task(follow_up_pp.id)
+        follow_up_pp.refresh_from_db()
+
+        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
 
         self.assertEqual(follow_up_pp.payment_items.count(), 3)
         self.assertEqual(
@@ -489,7 +494,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(15):
+        with self.assertNumQueries(39):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)

@@ -12,11 +12,13 @@ from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
+    POPULATION_DETAILS,
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
     DjangoPermissionFilterFastConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
 )
 from hct_mis_api.apps.account.schema import PartnerType
@@ -459,6 +461,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
+            hopeOneOfPermissionClass(*POPULATION_DETAILS),
         ),
     )
     existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(

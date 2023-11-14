@@ -24,7 +24,6 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
@@ -269,6 +268,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "target_population", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
 
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return False
+
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
@@ -306,6 +308,9 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return False
 
 
 @admin.register(DeliveryMechanismPerPaymentPlan)
@@ -454,18 +459,3 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return request.user.can_change_fsp()
-
-
-@admin.register(FinancialServiceProviderXlsxReport)
-class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
-    list_display = ("id", "status", "file")
-    list_filter = ("status",)
-    list_select_related = ("financial_service_provider",)
-    # search_fields = ("id",)
-    readonly_fields = ("file", "status", "financial_service_provider")
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return False

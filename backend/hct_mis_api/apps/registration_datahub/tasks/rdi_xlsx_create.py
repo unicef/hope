@@ -430,6 +430,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "bank_account_number_i_c": self._handle_bank_account_fields,
                 "debit_card_number_i_c": self._handle_bank_account_fields,
                 "first_registration_date_i_c": self._handle_datetime,
+                "unhcr_id_no_i_c": self._handle_identity_fields,
+                "unhcr_id_photo_i_c": self._handle_identity_photo,
+                "unhcr_id_issuer_i_c": self._handle_identity_issuing_country_fields,
+                "scope_id_no_i_c": self._handle_identity_fields,
+                "scope_id_photo_i_c": self._handle_identity_photo,
+                "scope_id_issuer_i_c": self._handle_identity_issuing_country_fields,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,

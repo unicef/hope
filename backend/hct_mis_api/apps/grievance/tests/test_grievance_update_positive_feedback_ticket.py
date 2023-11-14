@@ -9,6 +9,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -80,7 +81,7 @@ class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
                 "input": {
                     "description": "Test Feedback",
                     "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                    "admin": self.admin_area.p_code,
+                    "admin": encode_id_base64(str(self.admin_area.id), "Area"),
                     "language": "Polish, English",
                     "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
                 }

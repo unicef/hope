@@ -83,7 +83,10 @@ export const ProgrammesFilters = ({
           <DatePickerFilter
             label='Start Date'
             onChange={(date) =>
-              handleFilterChange('startDate', moment(date).format('YYYY-MM-DD'))
+              handleFilterChange(
+                'startDate',
+                date ? moment(date).format('YYYY-MM-DD') : '',
+              )
             }
             value={filter.startDate}
           />
@@ -92,7 +95,10 @@ export const ProgrammesFilters = ({
           <DatePickerFilter
             label='End Date'
             onChange={(date) =>
-              handleFilterChange('endDate', moment(date).format('YYYY-MM-DD'))
+              handleFilterChange(
+                'endDate',
+                date ? moment(date).format('YYYY-MM-DD') : '',
+              )
             }
             value={filter.endDate}
           />

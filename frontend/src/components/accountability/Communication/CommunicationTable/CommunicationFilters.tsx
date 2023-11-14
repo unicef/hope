@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
@@ -12,6 +11,7 @@ import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SelectFilter } from '../../../core/SelectFilter';
+import {CreatedByMessageAutocomplete} from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
 
 interface CommunicationFiltersProps {
   filter;
@@ -92,7 +92,7 @@ export const CommunicationFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <AssigneeAutocomplete
+          <CreatedByMessageAutocomplete
             label={t('Created by')}
             filter={filter}
             name='createdBy'

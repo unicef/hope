@@ -1498,7 +1498,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "first_registration_date_i_c",
-        "scope": [Scope.XLSX, Scope.TARGETING],
+        "scope": [Scope.GLOBAL, Scope.XLSX, Scope.TARGETING],
     },
     {
         "id": "2fe6d876-388f-45d9-b497-eb2f8af923e8",
@@ -1511,7 +1511,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "first_registration_date_h_c",
-        "scope": [Scope.XLSX, Scope.TARGETING],
+        "scope": [Scope.GLOBAL, Scope.XLSX, Scope.TARGETING],
     },
     {
         "id": "c8da2910-4348-47ab-a82e-725b4cebc332",

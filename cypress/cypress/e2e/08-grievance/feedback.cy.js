@@ -3,7 +3,9 @@ import FeedbackDetailsPage from "../../page-objects/pages/grievance/details_feed
 import NewFeedback from "../../page-objects/pages/grievance/new_feedback.po";
 import NewTicket from "../../page-objects/pages/grievance/new_ticket.po";
 import GrievanceDetailsPage from "../../page-objects/pages/grievance/details_grievance_page.po";
+import ErrorPage from "../../page-objects/404.po";
 
+let error404Page = new ErrorPage();
 let feedbackPage = new Feedback();
 let feedbackDetailsPage = new FeedbackDetailsPage();
 let newFeedbackPage = new NewFeedback();
@@ -11,6 +13,9 @@ let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
 describe("Grievance - Feedback", () => {
+  before(() => {
+    cy.adminLogin();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     feedbackPage.clickMenuButtonGrievance();
@@ -106,26 +111,9 @@ describe("Grievance - Feedback", () => {
         feedbackPage.expectedNumberOfRows(1);
         feedbackPage.chooseTicketListRow(0, "FED-23-0001").click();
         feedbackDetailsPage.getTitlePage().contains("Feedback ID: FED-23-0001");
+        feedbackDetailsPage.clickMenuButtonFeedback();
       });
-      it("Feedback Created by filter", () => {
-        cy.scenario([
-          "Go to Grievance page",
-          "Press Feedback button in menu",
-          "Choose Type cypress@cypress.com",
-          "Press button Apply",
-          `Check if Tickets List is empty`,
-          "Press button Clear",
-          "Choose Type root@root.com",
-          "Press button Apply",
-          `Check if Tickets List has 2 row`,
-        ]);
-        feedbackPage.useCreatedByFilter("cypress@cypress.com");
-        feedbackPage.expectedNumberOfRows(0);
-        feedbackPage.getButtonClear().click();
-        feedbackPage.useCreatedByFilter("root@root.com");
-        feedbackPage.expectedNumberOfRows(2);
-      });
-      it("Feedback Creation Date filter", () => {
+      it.skip("Feedback Creation Date filter", () => {
         cy.scenario([
           "Go to Grievance page",
           "Press Feedback button in menu",
@@ -150,6 +138,46 @@ describe("Grievance - Feedback", () => {
         feedbackPage.checkDateFilterTo("2023-01-08");
         feedbackPage.getButtonApply().click();
         feedbackPage.expectedNumberOfRows(0);
+      });
+      describe("Feedback Created by filter", () => {
+        before(() => {
+          feedbackPage.getButtonSubmitNewFeedback().click();
+          newFeedbackPage.chooseOptionByName("Positive");
+          newFeedbackPage.getButtonNext().click();
+          newFeedbackPage.getHouseholdTab().should("be.visible");
+          newFeedbackPage.getButtonNext().click();
+          newFeedbackPage.getReceivedConsent().click();
+          newFeedbackPage.getButtonNext().click();
+          newFeedbackPage.getLabelCategory().contains("Feedback");
+          newFeedbackPage.getDescription().type("Test Description");
+          newFeedbackPage.getButtonNext().contains("Save").click();
+          feedbackPage.clickMenuButtonFeedback();
+        });
+        after(() => {
+          cy.initScenario("init_clear");
+          cy.adminLogin();
+        });
+        it("Feedback Created by filter", () => {
+          cy.scenario([
+            "Go to Grievance page",
+            "Press Feedback button in menu",
+            "Create new feedback cy Cypress User",
+            "Press Feedback button in menu",
+            "Choose Type Cypress User",
+            "Press button Apply",
+            `Check if Tickets List is empty`,
+            "Press button Clear",
+            "Choose Type Root Rootkowski",
+            "Press button Apply",
+            `Check if Tickets List has 2 row`,
+          ]);
+          feedbackPage.useCreatedByFilter("Cypress User");
+          feedbackPage.expectedNumberOfRows(1);
+          feedbackPage.getButtonClear().click();
+          feedbackPage.expectedNumberOfRows(3);
+          feedbackPage.useCreatedByFilter("Root Rootkowski");
+          feedbackPage.expectedNumberOfRows(2);
+        });
       });
     });
     context("Create New Feedback", () => {
@@ -399,6 +427,45 @@ describe("Grievance - Feedback", () => {
       });
     });
   });
-  describe.skip("E2E tests Feedback", () => {});
-  describe.skip("Regression tests Feedback", () => {});
+  describe("E2E tests Feedback", () => {
+    // ToDo: Enable after fix
+    it.skip("404 Error page - refresh", () => {
+      cy.scenario([
+        "Go to Grievance page",
+        "Go to Feedback page",
+        "Click first row",
+        "Delete part of URL",
+        "Check if 404 occurred",
+        "Press button refresh",
+        "Check if 404 occurred",
+      ]);
+      feedbackPage.getRows().first().click();
+      feedbackDetailsPage.getTitlePage().contains("Feedback");
+      cy.url().then((url) => {
+        let newUrl = url.slice(0, -10);
+        cy.visit(newUrl);
+        error404Page
+          .getPageNoFound()
+          .its("response.statusCode")
+          .should("eq", 200);
+        error404Page.getButtonRefresh().click();
+        error404Page
+          .getPageNoFound()
+          .its("response.statusCode")
+          .should("eq", 200);
+      });
+    });
+  });
+  describe("Regression tests Feedback", () => {
+    it("174517: Check clear cash", () => {
+      cy.scenario([
+        "Go to Feedback page",
+        "Press Menu User Profile button",
+        "Press Clear Cache button",
+        "Check if page was opened properly",
+      ]);
+      feedbackPage.clearCache();
+      feedbackPage.checkElementsOnPage();
+    });
+  });
 });

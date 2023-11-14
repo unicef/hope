@@ -18,8 +18,8 @@ const initialFilter = {
   feedbackId: '',
   issueType: '',
   createdBy: '',
-  createdAtRangeMin: null,
-  createdAtRangeMax: null,
+  createdAtRangeMin: '',
+  createdAtRangeMax: '',
 };
 
 export const FeedbackPage = (): React.ReactElement => {

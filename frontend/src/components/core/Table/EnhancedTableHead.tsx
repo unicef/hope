@@ -80,7 +80,6 @@ export function EnhancedTableHead<T>(
     onRequestSort(event, property);
   };
   const classes = useStyles();
-
   return (
     <TableHead>
       <TableRow>

@@ -233,6 +233,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
     phone_no_alternative_valid = models.BooleanField(null=True)
     email = models.CharField(max_length=255, blank=True)
+    payment_delivery_phone_no = PhoneNumberField(blank=True, default=BLANK)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -311,6 +312,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "estimated_birth_date",
             "phone_no",
             "phone_no_alternative",
+            "relationship",
         )
         values = [str(getattr(self, field)).lower() for field in fields]
 

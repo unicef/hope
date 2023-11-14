@@ -360,7 +360,6 @@
   "Add Filter": "Add Filter",
   "Score": "Score",
   "You need to select at least one targeting criteria": "You need to select at least one targeting criteria",
-  "Unexpected problem while creating Target Population": "Unexpected problem while creating Target Population",
   "Target Population Updated": "Target Population Updated",
   "Enter Target Population Name": "Enter Target Population Name",
   "Select Field": "Select Field",
@@ -540,7 +539,6 @@
   "Import from": "Import from",
   "Kobo Project": "Kobo Project",
   "IMPORT": "IMPORT",
-  "Unexpected problem while creating Registration Data Import": "Unexpected problem while creating Registration Data Import",
   "Title": "Title",
   "DOWNLOAD TEMPLATE": "DOWNLOAD TEMPLATE",
   "Import Date": "Import Date",
@@ -674,7 +672,6 @@
   "Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Release stage.": "Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Release stage.",
   "FSPs": "FSPs",
   "Payment Plan Created": "Payment Plan Created",
-  "Unexpected problem while creating Payment Plan": "Unexpected problem while creating Payment Plan",
   "Dispersion Start Date is required": "Dispersion Start Date is required",
   "End date has to be greater than": "End date has to be greater than",
   "Dispersion End Date is required": "Dispersion End Date is required",
@@ -682,7 +679,6 @@
   "Dispersion End Date has to be greater than": "Dispersion End Date has to be greater than",
   "Payment Plan Edited": "Payment Plan Edited",
   "Edit Payment Plan": "Edit Payment Plan",
-  "Unexpected problem while editing Payment Plan": "Unexpected problem while editing Payment Plan",
   "Error during locking Payment Plan.": "Error during locking Payment Plan.",
   "Payment Plan has been locked.": "Payment Plan has been locked.",
   "Payment Plan has been rejected.": "Payment Plan has been rejected.",
@@ -824,5 +820,8 @@
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
   "Preview Exclusion": "Preview Exclusion",
-  "Data Collecting Type is required": "Data Collecting Type is required"
+  "Data Collecting Type is required": "Data Collecting Type is required",
+  "Registration Group": "Registration Group",
+  "Related Payment Id": "Related Payment Id",
+  "Failure Reason": "Failure Reason"
 }

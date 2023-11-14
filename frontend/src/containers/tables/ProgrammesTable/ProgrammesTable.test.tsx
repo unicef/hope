@@ -10,8 +10,8 @@ import { fakeApolloAllPrograms } from '../../../../fixtures/programs/fakeApolloA
 describe('containers/tables/ProgrammesTable', () => {
   const initialFilter = {
     search: '',
-    startDate: undefined,
-    endDate: undefined,
+    startDate: '',
+    endDate: '',
     status: '',
     sector: [],
     numberOfHouseholdsMin: '',

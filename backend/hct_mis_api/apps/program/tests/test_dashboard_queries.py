@@ -84,13 +84,13 @@ class TestDashboardQueries(APITestCase):
         cash_plan1 = CashPlanFactory(program=program1)
         cash_plan2 = CashPlanFactory(program=program2)
         delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
-        PaymentRecordFactory(parent=cash_plan1, delivery_date=delivery_date, household=household)
-        PaymentRecordFactory(parent=cash_plan2, delivery_date=delivery_date, household=household)
+        PaymentRecordFactory(parent=cash_plan1, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentRecordFactory(parent=cash_plan2, delivery_date=delivery_date, household=household, currency="PLN")
 
         payment_plan1 = PaymentPlanFactory(program=program3)
         payment_plan2 = PaymentPlanFactory(program=program4)
-        PaymentFactory(parent=payment_plan1, delivery_date=delivery_date, household=household)
-        PaymentFactory(parent=payment_plan2, delivery_date=delivery_date, household=household)
+        PaymentFactory(parent=payment_plan1, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentFactory(parent=payment_plan2, delivery_date=delivery_date, household=household, currency="PLN")
 
         self.snapshot_graphql_request(
             request_string=QUERY_CHART_PROGRAMMES_BY_SECTOR,
@@ -112,6 +112,7 @@ class TestDashboardQueries(APITestCase):
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
+            currency="PLN",
         )
         PaymentRecordFactory(
             parent=cash_plan1,
@@ -119,6 +120,7 @@ class TestDashboardQueries(APITestCase):
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
+            currency="PLN",
         )
         PaymentRecordFactory(
             parent=cash_plan1,
@@ -126,6 +128,7 @@ class TestDashboardQueries(APITestCase):
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
+            currency="PLN",
         )
         PaymentRecordFactory(
             parent=cash_plan1,
@@ -133,6 +136,7 @@ class TestDashboardQueries(APITestCase):
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
+            currency="PLN",
         )
 
         payment_plan1 = PaymentPlanFactory(program=program1)
@@ -141,24 +145,28 @@ class TestDashboardQueries(APITestCase):
             delivery_date=delivery_date1,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
+            currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date1,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
+            currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date2,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
+            currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date2,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
+            currency="PLN",
         )
 
         self.snapshot_graphql_request(
