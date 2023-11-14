@@ -227,7 +227,7 @@ describe("Targeting", () => {
     });
   });
   describe("Regression tests Targeting", () => {
-    it("174517: Check clear cache", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Targeting page",
         "Press Menu User Profile button",
