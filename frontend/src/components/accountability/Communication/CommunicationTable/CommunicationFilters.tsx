@@ -5,9 +5,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { CreatedByMessageAutocomplete } from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 
 interface CommunicationFiltersProps {
   filter;
@@ -49,7 +48,10 @@ export const CommunicationFilters = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete
@@ -94,10 +96,6 @@ export const CommunicationFilters = ({
           </Grid>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

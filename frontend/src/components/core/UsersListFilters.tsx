@@ -2,12 +2,11 @@ import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
-import { ContainerWithBorder } from './ContainerWithBorder';
+import { createHandleApplyFilterChange } from '../../utils/utils';
+import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
-import { ClearApplyButtons } from './ClearApplyButtons';
 
 interface UsersListFiltersProps {
   filter;
@@ -56,7 +55,10 @@ export const UsersListFilters = ({
   }
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -111,10 +113,6 @@ export const UsersListFilters = ({
           </SelectFilter>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };
