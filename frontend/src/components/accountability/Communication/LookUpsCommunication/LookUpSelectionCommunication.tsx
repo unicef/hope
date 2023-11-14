@@ -168,7 +168,6 @@ export const LookUpSelectionCommunication = ({
             initialFilter={initialFilterTP}
             appliedFilter={appliedFilterTP}
             setAppliedFilter={setAppliedFilterTP}
-            addBorder={false}
           />
         )}
         {selectedTab === CommunicationTabsValues.RDI && (
@@ -178,7 +177,6 @@ export const LookUpSelectionCommunication = ({
             initialFilter={initialFilterRDI}
             appliedFilter={appliedFilterRDI}
             setAppliedFilter={setAppliedFilterRDI}
-            addBorder={false}
           />
         )}
       </Box>

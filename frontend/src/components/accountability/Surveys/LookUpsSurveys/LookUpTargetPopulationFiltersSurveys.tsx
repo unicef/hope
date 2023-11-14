@@ -8,16 +8,14 @@ import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
 } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 
 interface LookUpTargetPopulationFiltersSurveysProps {
   filter;
-  addBorder?: boolean;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -25,7 +23,6 @@ interface LookUpTargetPopulationFiltersSurveysProps {
 }
 export const LookUpTargetPopulationFiltersSurveys = ({
   filter,
-  addBorder = true,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -62,8 +59,12 @@ export const LookUpTargetPopulationFiltersSurveys = ({
     ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
     : Object.values(TargetPopulationStatus);
 
-  const renderTable = (): React.ReactElement => (
-    <>
+  return (
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+      isOnPaper={false}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -131,16 +132,6 @@ export const LookUpTargetPopulationFiltersSurveys = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        applyHandler={handleApplyFilter}
-        clearHandler={handleClearFilter}
-      />
-    </>
-  );
-
-  return addBorder ? (
-    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
-  ) : (
-    renderTable()
+    </FiltersSection>
   );
 };

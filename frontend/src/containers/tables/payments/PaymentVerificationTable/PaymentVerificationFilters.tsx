@@ -3,27 +3,26 @@ import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
-import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { FiltersSection } from '../../../../components/core/FiltersSection';
 
-interface PaymentFiltersProps {
+interface PaymentVerificationFiltersProps {
   filter;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const PaymentFilters = ({
+export const PaymentVerificationFilters = ({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PaymentFiltersProps): React.ReactElement => {
+}: PaymentVerificationFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
   const {
@@ -57,7 +56,10 @@ export const PaymentFilters = ({
   }
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+    >
       <Grid container spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -135,10 +137,6 @@ export const PaymentFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

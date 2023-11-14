@@ -10,12 +10,11 @@ import {
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { CreatedByFeedbackAutocomplete } from '../../../../shared/autocompletes/CreatedByFeedbackAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -72,7 +71,10 @@ export const FeedbackFilters = ({
   const programs = allPrograms.map((edge) => edge.node);
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -164,10 +166,6 @@ export const FeedbackFilters = ({
           </Grid>
         )}
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };
