@@ -9,7 +9,7 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
-import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
+import { PaymentVerificationFilters } from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
 
 const initialFilter = {
   search: '',
@@ -40,7 +40,7 @@ export const PaymentVerificationPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Payment Verification')} />
-      <PaymentFilters
+      <PaymentVerificationFilters
         filter={filter}
         setFilter={setFilter}
         initialFilter={initialFilter}

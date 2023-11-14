@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { choicesToDict } from '../../../../utils/utils';
+import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -30,7 +30,10 @@ export const LookUpLinkedTicketsTable = ({
     searchType: 'ticket_id',
     status: [filter.status],
     fsp: filter.fsp,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
+    createdAtRange: JSON.stringify({
+      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+    }),
     admin2: filter?.admin2?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);

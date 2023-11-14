@@ -143,7 +143,6 @@ export const LookUpSelectionSurveys = ({
               initialFilter={initialFilterTP}
               appliedFilter={appliedFilterTP}
               setAppliedFilter={setAppliedFilterTP}
-              addBorder={false}
             />
           )}
         </Box>
