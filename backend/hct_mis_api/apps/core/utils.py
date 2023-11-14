@@ -641,6 +641,9 @@ def chart_permission_decorator(
 
 
 def chart_filters_decoder(filters: Dict) -> Dict:
+    # in GPF we have filtering by all programs in this case need to remove key {program: "all"}
+    if "program" in filters and filters.get("program") == "all":
+        filters.pop("program")
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 

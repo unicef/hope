@@ -85,9 +85,11 @@ export const LanguageAutocomplete = ({
       data-cy={dataCy}
       open={open}
       filterOptions={(options) => options}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.code)
-      }
+      onChange={(_, selectedValue) => {
+        if (selectedValue?.node?.code) {
+          handleFilterChange(name, selectedValue?.node?.code);
+        }
+      }}
       onOpen={() => {
         setOpen(true);
       }}
@@ -104,9 +106,10 @@ export const LanguageAutocomplete = ({
         if (option.node) {
           label = `${option.node.english}`;
         } else {
-          label =
-            data?.allLanguages?.edges?.find((el) => el.node.code === option)
-              ?.node.english || '';
+          const foundLang = data?.allLanguages?.edges?.find(
+            (el) => el.node.code === option,
+          )?.node.english;
+          label = foundLang ? `${foundLang}` : inputValue;
         }
         return `${label}`;
       }}

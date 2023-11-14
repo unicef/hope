@@ -108,10 +108,10 @@ export const RdiAutocomplete = ({
         if (option.node) {
           label = `${option.node.name}`;
         } else {
-          label =
-            data?.allRegistrationDataImports?.edges?.find(
-              (el) => el.node.id === option,
-            )?.node.name || '';
+          const foundRdi = data?.allRegistrationDataImports?.edges?.find(
+            (el) => el.node.id === option,
+          )?.node.name;
+          label = foundRdi ? `${foundRdi}` : inputValue;
         }
         return `${label}`;
       }}
