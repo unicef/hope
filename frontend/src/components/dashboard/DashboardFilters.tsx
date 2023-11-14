@@ -1,30 +1,15 @@
-import { Grid, MenuItem, Paper } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
+import { FiltersSection } from '../core/FiltersSection';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-
-const Container = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  align-items: center;
-  && > div {
-    margin: 5px;
-  }
-`;
 
 interface DashboardFiltersProps {
   filter;
@@ -105,7 +90,10 @@ export const DashboardFilters = ({
   };
 
   return (
-    <Container>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         {isAllPrograms && (
           <Grid item xs={5}>
@@ -129,10 +117,6 @@ export const DashboardFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        applyHandler={handleApplyFilter}
-        clearHandler={handleClearFilter}
-      />
-    </Container>
+    </FiltersSection>
   );
 };

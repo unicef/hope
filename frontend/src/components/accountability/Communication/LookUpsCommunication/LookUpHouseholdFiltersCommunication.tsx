@@ -7,12 +7,11 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { householdTableOrderOptions } from '../../../../utils/constants';
+import { FiltersSection } from '../../../core/FiltersSection';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
@@ -21,7 +20,6 @@ interface LookUpHouseholdFiltersCommunicationProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
-  isOnPaper?: boolean;
 }
 
 export const LookUpHouseholdFiltersCommunication = ({
@@ -31,7 +29,6 @@ export const LookUpHouseholdFiltersCommunication = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-  isOnPaper = true,
 }: LookUpHouseholdFiltersCommunicationProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -59,8 +56,12 @@ export const LookUpHouseholdFiltersCommunication = ({
     clearFilter();
   };
 
-  const filtersComponent = (
-    <>
+  return (
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+      isOnPaper={false}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -159,16 +160,6 @@ export const LookUpHouseholdFiltersCommunication = ({
           </SelectFilter>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </>
-  );
-
-  return isOnPaper ? (
-    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
-  ) : (
-    filtersComponent
+    </FiltersSection>
   );
 };
