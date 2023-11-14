@@ -61,6 +61,7 @@ from hct_mis_api.apps.payment.validators import payment_token_and_order_number_v
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
+    SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -1378,12 +1379,6 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         object_id_field="payment_object_id",
         related_query_name="payment_record",
     )
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment_record",
-    )
     ticket_complaint_details = GenericRelation(
         "grievance.TicketComplaintDetails",
         content_type_field="payment_content_type",
@@ -1406,7 +1401,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         return self.STATUS_SUCCESS
 
 
-class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, SignatureMixin):
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1421,12 +1416,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     payment_verification = GenericRelation(
         "payment.PaymentVerification",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment",
-    )
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment",
@@ -1518,6 +1507,35 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="token_number_unique_per_program",
             ),
         ]
+
+    signature_fields = (
+        "parent_id",
+        "conflicted",
+        "excluded",
+        "entitlement_date",
+        "financial_service_provider_id",
+        "collector_id",
+        "source_payment_id",
+        "is_follow_up",
+        "reason_for_unsuccessful_payment",
+        "program_id",
+        "order_number",
+        "token_number",
+        "household_snapshot.snapshot_data",
+        "business_area_id",
+        "status",
+        "status_date",
+        "household_id",
+        "head_of_household_id",
+        "delivery_type",
+        "currency",
+        "entitlement_quantity",
+        "entitlement_quantity_usd",
+        "delivered_quantity",
+        "delivered_quantity_usd",
+        "delivery_date",
+        "transaction_reference_id",
+    )
 
 
 class ServiceProvider(TimeStampedUUIDModel):
