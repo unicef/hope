@@ -33,6 +33,7 @@ export default class BaseComponent {
   menuUserProfile = 'button[data-cy="menu-user-profile"]';
   menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
   menuItemLogout = 'li[data-cy="menu-item-logout"]';
+  buttonFiltersExpand = 'button[data-cy="button-filters-expand"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -47,6 +48,7 @@ export default class BaseComponent {
   textAllProgrammes = "All Programmes";
 
   // Elements
+  getButtonFiltersExpand = () => cy.get(this.buttonFiltersExpand);
   getMenuUserProfile = () => cy.get(this.menuUserProfile);
   getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
   getMenuItemLogout = () => cy.get(this.menuItemLogout);

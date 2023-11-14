@@ -10,13 +10,14 @@ describe("Global Program Filter", () => {
 
   beforeEach(() => {
     programmesPage.navigateToProgrammePage("All Programmes");
+    programmesPage.getButtonFiltersExpand().click();
   });
 
   describe("Smoke tests Global Program Filter", () => {
     it("Check All Programmes - Programme Management page", () => {
       cy.scenario([
         "Go to main page (All programmes set)",
-        "Check if all elements on page exist"
+        "Check if all elements on page exist",
       ]);
       programmesPage.getMenuButtonProgrammeManagement().should("be.visible");
       programmesPage.getMenuButtonFeedback().should("not.be.visible");
@@ -67,7 +68,7 @@ describe("Global Program Filter", () => {
       cy.scenario([
         "Go to main page (All programmes set)",
         "Choose program (Test Programm)",
-        "Check if all elements on page exist"
+        "Check if all elements on page exist",
       ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
@@ -111,7 +112,7 @@ describe("Global Program Filter", () => {
         "Go to main page (All programmes set)",
         "Choose program (Test Programme)",
         "Come back to All Programmes",
-        "Check if all elements on page exist"
+        "Check if all elements on page exist",
       ]);
       programmesPage.getGlobalProgramFilter().click();
       programmesPage
