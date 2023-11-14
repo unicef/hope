@@ -54,6 +54,7 @@ export const LookUpLinkedTicketsFilters = ({
     <FiltersSection
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
+      isOnPaper={false}
     >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
