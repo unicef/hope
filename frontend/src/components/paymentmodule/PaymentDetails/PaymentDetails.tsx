@@ -170,7 +170,7 @@ export const PaymentDetails = ({
           <Grid item xs={3}>
             <LabelizedField
               label={t("Collector's Name")}
-              value={renderUserName(payment.collector)}
+              value={renderUserName(payment.snapshotCollectorFullName)}
             />
           </Grid>
           <Grid item xs={3}>
