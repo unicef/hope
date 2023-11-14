@@ -20,7 +20,6 @@ interface LookUpHouseholdFiltersCommunicationProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
-  isOnPaper?: boolean;
 }
 
 export const LookUpHouseholdFiltersCommunication = ({
@@ -30,7 +29,6 @@ export const LookUpHouseholdFiltersCommunication = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-  isOnPaper = true,
 }: LookUpHouseholdFiltersCommunicationProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
