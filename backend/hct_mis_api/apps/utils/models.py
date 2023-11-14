@@ -1,8 +1,20 @@
 # Create your models here.
+import hashlib
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    T,
+    Tuple,
+)
 
+from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
 from django.utils import timezone
@@ -11,13 +23,12 @@ from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 
-from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager
+from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager, nested_getattr
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
 
 logger = logging.getLogger(__name__)
 
@@ -234,3 +245,61 @@ class UnicefIdentifiedModel(models.Model):
         if self._state.adding or self.unicef_id is None:
             # due to existence of "CREATE TRIGGER" in migrations
             self.refresh_from_db(fields=["unicef_id"])
+
+
+class SignatureManager(models.Manager):
+    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> List[T]:
+        from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+            bulk_create_payment_snapshot_data,
+        )
+
+        created_objects = super().bulk_create(objs, *args, **kwargs)
+        bulk_create_payment_snapshot_data([x.id for x in created_objects])
+        for obj in created_objects:
+            obj.update_signature_hash()
+            # print(obj.signature_hash)
+        super().bulk_update(created_objects, ["signature_hash"])
+        return created_objects
+
+    def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args: Any, **kwargs: Any) -> int:
+        for obj in objs:
+            if any(field in fields for field in obj.signature_fields):
+                obj.update_signature_hash()
+        new_fields = set(fields)
+        if "signature_hash" not in fields:
+            new_fields.add("signature_hash")
+        return super().bulk_update(objs, list(new_fields), *args, **kwargs)
+
+
+class SignatureMixin(models.Model):
+    signature_hash = models.CharField(max_length=40, blank=True, editable=False)
+    signature_manager = SignatureManager()
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.update_signature_hash()
+        super().save(*args, **kwargs)
+
+    def _normalize(self, name: str, value: Any) -> Any:
+        if "." in name:
+            return value
+        field = self.__class__._meta.get_field(name)
+        if isinstance(field, models.DecimalField) and value is not None:
+            return f"{{:.{field.decimal_places}f}}".format(value)
+        return value
+
+    def update_signature_hash(self) -> None:
+        if hasattr(self, "signature_fields") and isinstance(self.signature_fields, (list, tuple)):
+            sha1 = hashlib.sha1()
+            salt = settings.SECRET_KEY
+            sha1.update(salt.encode("utf-8"))
+
+            for field_name in self.signature_fields:
+                value = nested_getattr(self, field_name, None)
+                value = self._normalize(field_name, value)
+                sha1.update(str(value).encode("utf-8"))
+            self.signature_hash = sha1.hexdigest()
+        else:
+            raise ValueError("Define 'signature_fields' in class for SignatureMixin")
