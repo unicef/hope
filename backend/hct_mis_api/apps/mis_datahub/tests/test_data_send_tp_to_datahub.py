@@ -4,11 +4,11 @@ from decimal import Decimal
 from typing import Any
 
 from django.core.management import call_command
-from django.test import TestCase
 from django.utils import timezone
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -28,7 +28,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
-class TestDataSendTpToDatahub(TestCase):
+class TestDataSendTpToDatahub(DefaultTestCase):
     multi_db = True
     databases = "__all__"
 

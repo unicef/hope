@@ -1,8 +1,7 @@
 from io import StringIO
 from unittest import mock
 
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -14,7 +13,7 @@ from hct_mis_api.one_time_scripts.migrate_household_admin_area import (
 )
 
 
-class TestMigrateAdminArea(TestCase):
+class TestMigrateAdminArea(DefaultTestCase):
     databases = {"default", "registration_datahub"}
 
     @classmethod

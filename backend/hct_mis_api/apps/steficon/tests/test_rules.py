@@ -1,5 +1,4 @@
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.steficon.models import Rule
 
@@ -24,7 +23,7 @@ s = s.upper()
 """
 
 
-class TestBasicRule(TestCase):
+class TestBasicRule(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.household = HouseholdFactory.build()

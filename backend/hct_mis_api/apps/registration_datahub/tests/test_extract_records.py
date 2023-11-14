@@ -3,14 +3,14 @@ import json
 from pathlib import Path
 
 from django.conf import settings
-from django.test import TestCase
 from django.utils import timezone
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.registration_datahub.celery_tasks import extract_records_task
 from hct_mis_api.apps.registration_datahub.models import Record
 
 
-class TestExtractRecords(TestCase):
+class TestExtractRecords(DefaultTestCase):
     databases = {"default", "registration_datahub"}
 
     @classmethod

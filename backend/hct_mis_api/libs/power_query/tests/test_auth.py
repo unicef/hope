@@ -1,4 +1,4 @@
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.urls import reverse
 
 from power_query.fixtures import (
@@ -10,13 +10,14 @@ from power_query.fixtures import (
 from power_query.models import Formatter, Query, Report
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.libs.power_query.defaults import hope_create_defaults
 from hct_mis_api.libs.power_query.tests.utils import user_grant_office_permission
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQuery(TestCase):
+class TestPowerQuery(DefaultTestCase):
     databases = {"default"}
 
     @classmethod

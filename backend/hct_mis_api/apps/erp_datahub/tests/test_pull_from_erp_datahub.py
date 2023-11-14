@@ -1,8 +1,7 @@
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.erp_datahub.fixtures import FundsCommitmentFactory
 from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
@@ -12,7 +11,7 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 
 
-class TestPullDataFromErpDatahub(TestCase):
+class TestPullDataFromErpDatahub(DefaultTestCase):
     databases = "__all__"
     cash_plan_1 = None
     cash_plan_2 = None

@@ -1,14 +1,14 @@
 from typing import List, Optional, Type
 
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.admin import AcceptanceProcessThresholdFormset
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 
 
-class TestAcceptanceProcessThreshold(TestCase):
+class TestAcceptanceProcessThreshold(DefaultTestCase):
     @parameterized.expand(
         [
             ([[12, 24]], ValidationError, "Ranges need to start from 0"),

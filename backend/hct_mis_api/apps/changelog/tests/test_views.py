@@ -1,17 +1,18 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.changelog.factory import ChangelogFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 
 User = get_user_model()
 
 
-class APITestCase(TestCase):
+class APITestCase(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.superuser = UserFactory(is_superuser=True, is_staff=True)
         self.user = UserFactory()
 

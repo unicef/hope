@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase
 from django.utils import timezone
 
 import requests_mock
@@ -26,6 +25,7 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
     PullFromDatahubTask,
 )
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_exchange_rates import (
@@ -42,7 +42,7 @@ class DummyExchangeRates:
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
-class TestPullDataFromDatahub(TestCase):
+class TestPullDataFromDatahub(DefaultTestCase):
     databases = "__all__"
     program = None
     target_population = None
@@ -281,7 +281,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(self.household.total_cash_received, 10)
 
 
-class TestSessionsPullDataFromDatahub(TestCase):
+class TestSessionsPullDataFromDatahub(DefaultTestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 

@@ -1,5 +1,4 @@
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.services.data_change.utils import handle_role
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -10,7 +9,7 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-class Test(TestCase):
+class Test(DefaultTestCase):
     def test_handle_role(self) -> None:
         create_afghanistan()
         household = HouseholdFactory.build()

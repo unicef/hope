@@ -1,9 +1,8 @@
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.utils.celery_utils import format_tasks
 
 
-class TestCeleryUtils(TestCase):
+class TestCeleryUtils(DefaultTestCase):
     def test_format_tasks(self) -> None:
         tasks_dict = {
             "celery@high-priority-hope-celery-worker-6b77cc79b8-9wp5h": [],

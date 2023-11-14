@@ -1,11 +1,11 @@
 import datetime
 
-from django.test import TestCase
 from django.utils import timezone
 
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
@@ -37,7 +37,7 @@ from hct_mis_api.aurora.fixtures import (
 )
 
 
-class TestCzechRepublicRegistrationService(TestCase):
+class TestCzechRepublicRegistrationService(DefaultTestCase):
     databases = {
         "default",
         "registration_datahub",

@@ -2,10 +2,10 @@ from typing import Any
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_DATE,
     TYPE_DECIMAL,
@@ -21,7 +21,7 @@ class MockSuperUser:
         return True
 
 
-class TestSettingTypesForCalculateFields(TestCase):
+class TestSettingTypesForCalculateFields(DefaultTestCase):
     @staticmethod
     def load_xls_file(name: str) -> None:
         task = FlexibleAttributeImporter()

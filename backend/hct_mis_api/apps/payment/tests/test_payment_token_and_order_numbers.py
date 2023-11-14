@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import create_household
@@ -16,7 +16,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service impo
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestPaymentTokenAndOrderNumbers(TestCase):
+class TestPaymentTokenAndOrderNumbers(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = create_afghanistan()

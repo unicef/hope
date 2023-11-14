@@ -2,12 +2,12 @@ from typing import Any
 
 from django.core.management import call_command
 from django.db.utils import IntegrityError
-from django.test import TestCase
 
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -38,7 +38,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
-class TestSendTpToDatahub(TestCase):
+class TestSendTpToDatahub(DefaultTestCase):
     databases = "__all__"
 
     @staticmethod

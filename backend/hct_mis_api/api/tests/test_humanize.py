@@ -1,12 +1,12 @@
 import json
 from typing import Dict
-from unittest import TestCase
 from unittest.mock import Mock
 
 from django.http import JsonResponse
 
 from hct_mis_api.api.endpoints.rdi.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 
 MEMBER = {
     "birth_date": "2000-01-01",
@@ -25,7 +25,7 @@ HOUSEHOLD = {
 }
 
 
-class ValidatorTest(TestCase):
+class ValidatorTest(DefaultTestCase):
     maxDiff = None
 
     @classmethod

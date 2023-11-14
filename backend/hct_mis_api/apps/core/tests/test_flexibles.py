@@ -2,10 +2,10 @@ from typing import Any
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from xlrd import XLRDError
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
@@ -19,7 +19,7 @@ class MockSuperUser:
         return True
 
 
-class TestFlexibles(TestCase):
+class TestFlexibles(DefaultTestCase):
     def load_xls(self, name: str) -> None:
         task = FlexibleAttributeImporter()
         task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")

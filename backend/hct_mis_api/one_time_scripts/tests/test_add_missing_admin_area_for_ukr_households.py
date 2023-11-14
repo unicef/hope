@@ -3,8 +3,7 @@ import os
 from io import StringIO
 from unittest import mock
 
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household
@@ -13,7 +12,7 @@ from hct_mis_api.one_time_scripts.add_missing_admin_area_for_ukr_households impo
 )
 
 
-class TestUpdateAdminAreaFromFile(TestCase):
+class TestUpdateAdminAreaFromFile(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.test_file_path = os.path.join(

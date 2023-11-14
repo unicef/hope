@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, Mock
 
-from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
@@ -15,11 +14,12 @@ from hct_mis_api.apps.account.fixtures import (
     RoleFactory,
     UserFactory,
 )
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 
 
-class HOPEPermissionTest(TestCase):
+class HOPEPermissionTest(DefaultTestCase):
     def setUp(self) -> None:
-        super().setUpTestData()
+        super().setUp()
         user = UserFactory()
         self.business_area = BusinessAreaFactory(name="Afghanistan")
         self.role = RoleFactory(subsystem="API", name="c")

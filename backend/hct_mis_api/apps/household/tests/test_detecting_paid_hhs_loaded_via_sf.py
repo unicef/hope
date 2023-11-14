@@ -1,5 +1,4 @@
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import StorageFileFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
@@ -13,7 +12,7 @@ from hct_mis_api.apps.household.management.commands.detect_paid_households impor
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 
 
-class TestDetectingAlreadyPaidHouseholds(TestCase):
+class TestDetectingAlreadyPaidHouseholds(DefaultTestCase):
     databases = {"default"}
 
     @classmethod

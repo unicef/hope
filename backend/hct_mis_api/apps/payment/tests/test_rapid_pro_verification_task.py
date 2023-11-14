@@ -3,9 +3,8 @@ from decimal import Decimal
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
-
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
@@ -30,7 +29,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
-class TestRapidProVerificationTask(TestCase):
+class TestRapidProVerificationTask(DefaultTestCase):
     START_UUID = "3d946aa7-af58-4838-8dfd-553786d9bb35"
     ORIGINAL_RAPIDPRO_RUNS_RESPONSE: List[Dict] = [
         {
@@ -321,7 +320,7 @@ class TestRapidProVerificationTask(TestCase):
         self.assertFalse(ind.phone_no_valid)
 
 
-class TestPhoneNumberVerification(TestCase):
+class TestPhoneNumberVerification(DefaultTestCase):
     def test_phone_numbers(self) -> None:
         self.assertFalse(is_valid_phone_number("+40 032 215 789"))
         self.assertTrue(is_valid_phone_number("+48 632 215 789"))

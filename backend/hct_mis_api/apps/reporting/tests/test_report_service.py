@@ -3,13 +3,13 @@ from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import TestCase
 from django.utils import timezone
 
 from parameterized import parameterized
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -29,7 +29,7 @@ from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 
 
-class TestGenerateReportService(TestCase):
+class TestGenerateReportService(DefaultTestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod

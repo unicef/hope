@@ -1,8 +1,7 @@
 import time
 from threading import Thread
 
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 
 
@@ -18,7 +17,7 @@ class DummyClass:
             self._executed = True
 
 
-class TestLockedCache(TestCase):
+class TestLockedCache(DefaultTestCase):
     def test_locked_cache(self) -> None:
         dummy_class1 = DummyClass()
         dummy_class2 = DummyClass()

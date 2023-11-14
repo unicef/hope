@@ -4,10 +4,10 @@ from typing import Any
 from unittest.mock import patch
 
 from django.db.utils import IntegrityError
-from django.test import TestCase
 
 from dateutil.relativedelta import relativedelta
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 
-class TestPaymentPlanModel(TestCase):
+class TestPaymentPlanModel(DefaultTestCase):
     databases = "__all__"
 
     @classmethod
@@ -119,7 +119,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp1.can_be_locked, True)
 
 
-class TestPaymentModel(TestCase):
+class TestPaymentModel(DefaultTestCase):
     databases = "__all__"
 
     @classmethod

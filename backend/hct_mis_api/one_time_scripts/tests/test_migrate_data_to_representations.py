@@ -1,9 +1,9 @@
 from typing import List, Optional
 
 from django.db.models import Count
-from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
@@ -45,7 +45,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 
-class TestMigrateDataToRepresentations(TestCase):
+class TestMigrateDataToRepresentations(DefaultTestCase):
     def create_hh_with_ind(
         self,
         ind_data: dict,
@@ -76,6 +76,7 @@ class TestMigrateDataToRepresentations(TestCase):
         return individual, household, rdi
 
     def setUp(self) -> None:
+        super().setUp()
         self.business_area = BusinessAreaFactory(name="Other BA")
         self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
         self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
@@ -1723,7 +1724,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.payment_record7.household, household7_representation3)
 
 
-class TestCountrySpecificRules(TestCase):
+class TestCountrySpecificRules(DefaultTestCase):
     def create_hh_with_ind(
         self,
         ind_data: dict,
@@ -1750,6 +1751,7 @@ class TestCountrySpecificRules(TestCase):
         return individual, household
 
     def setUp(self) -> None:
+        super().setUp()
         # collecting_types
         generate_data_collecting_types()
         self.partial = DataCollectingType.objects.get(code="partial")

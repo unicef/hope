@@ -1,7 +1,7 @@
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-class TestHousehold(TestCase):
+class TestHousehold(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -78,7 +78,7 @@ class TestHousehold(TestCase):
         self.assertEqual(household.admin4, None)
 
 
-class TestDocument(TestCase):
+class TestDocument(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadcountries")

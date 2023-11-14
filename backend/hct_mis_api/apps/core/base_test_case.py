@@ -29,23 +29,17 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
 
 
-class APITestCase(SnapshotTestTestCase):
-    def setUp(self) -> None:
-        from hct_mis_api.schema import schema
-
-        super().setUp()
-        self.client: Client = Client(schema)
-
+class BaseTestCase:
+    def setUpBaseTestCase(self) -> None:
         seed_in_env = os.getenv("RANDOM_SEED")
         self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
         faker = factory.faker.Faker._get_faker()
         faker.random.seed(seed_in_env)
         random.seed(self.seed)
         self.maxDiff = None
-
         self.start_time = time.time()
 
-    def tearDown(self) -> None:
+    def tearDownBaseTestCase(self) -> None:
         with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
             f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
 
@@ -64,6 +58,27 @@ class APITestCase(SnapshotTestTestCase):
                     msg = [x for x in text.split("\n")[1:] if not x.startswith(" ")][0]
                     print(f"Seed: {self.seed}", file=sys.stderr)
                     print("%s: %s\n%s" % (typ, self.id(), msg), file=sys.stderr)
+
+
+class DefaultTestCase(TestCase, BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.setUpBaseTestCase()
+
+    def tearDown(self) -> None:
+        self.tearDownBaseTestCase()
+
+
+class APITestCase(SnapshotTestTestCase, BaseTestCase):
+    def setUp(self) -> None:
+        from hct_mis_api.schema import schema
+
+        super().setUp()
+        self.client: Client = Client(schema)
+        self.setUpBaseTestCase()
+
+    def tearDown(self) -> None:
+        self.tearDownBaseTestCase()
 
     def snapshot_graphql_request(
         self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
@@ -136,7 +151,7 @@ class APITestCase(SnapshotTestTestCase):
         return user_role
 
 
-class BaseElasticSearchTestCase(TestCase):
+class BaseElasticSearchTestCase(TestCase, BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         seed_in_env = os.getenv("RANDOM_SEED")

@@ -2,8 +2,8 @@ from operator import itemgetter
 from typing import Dict, Tuple
 
 from django.conf import settings
-from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.validators import (
@@ -11,7 +11,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 )
 
 
-class TestKoboSaveValidatorsMethods(TestCase):
+class TestKoboSaveValidatorsMethods(DefaultTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 

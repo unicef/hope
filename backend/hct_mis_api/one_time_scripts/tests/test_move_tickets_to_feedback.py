@@ -1,7 +1,6 @@
-from django.test import TestCase
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
@@ -23,7 +22,7 @@ from hct_mis_api.one_time_scripts.move_tickets_to_feedback import (
 )
 
 
-class TestMigrationFosterChild(TestCase):
+class TestMigrationFosterChild(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()

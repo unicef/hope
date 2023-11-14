@@ -1,5 +1,6 @@
-from django.test import TestCase, override_settings
+from django.test import override_settings
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
@@ -13,7 +14,7 @@ from hct_mis_api.one_time_scripts.assign_foster_child import migrate_foster_chil
 
 
 @override_settings(USE_TZ=False)
-class TestMigrationFosterChild(TestCase):
+class TestMigrationFosterChild(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()

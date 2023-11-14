@@ -1,9 +1,10 @@
 from datetime import date
 
-from django.test import TestCase
-
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import (
+    BaseElasticSearchTestCase,
+    DefaultTestCase,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import TicketAddIndividualDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.add_individual_service import (

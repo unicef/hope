@@ -1,8 +1,7 @@
 from decimal import Decimal
 
-from django.test import TestCase
-
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
@@ -10,7 +9,7 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-class TestTargetingSteficon(TestCase):
+class TestTargetingSteficon(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         rule, __ = Rule.objects.update_or_create(

@@ -1,16 +1,17 @@
-from django.test import TestCase, override_settings
+from django.test import override_settings
 
 from power_query.fixtures import ParametrizerFactory, QueryFactory
 from power_query.models import Formatter, Query
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.libs.power_query.backends import PowerQueryBackend
 from hct_mis_api.libs.power_query.defaults import hope_create_defaults
 from hct_mis_api.libs.power_query.tests.utils import user_grant_office_permission
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestBackend(TestCase):
+class TestBackend(DefaultTestCase):
     databases = {"default"}
 
     @classmethod

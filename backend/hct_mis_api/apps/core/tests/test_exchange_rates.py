@@ -5,12 +5,12 @@ from typing import Any
 from unittest import mock
 
 from django.core.management import call_command
-from django.test import TestCase
 from django.utils import timezone
 
 import requests_mock
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
 from hct_mis_api.apps.core.models import BusinessArea
@@ -102,7 +102,7 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 }
 
 
-class TestExchangeRatesAPI(TestCase):
+class TestExchangeRatesAPI(DefaultTestCase):
     @mock.patch.dict(os.environ, clear=True)
     def test_test_api_class_initialization_key_not_in_env(self) -> None:
         self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateClientAPI)
@@ -159,7 +159,7 @@ class TestExchangeRatesAPI(TestCase):
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
-class TestExchangeRates(TestCase):
+class TestExchangeRates(DefaultTestCase):
     def test_convert_response_json_to_exchange_rates(self) -> None:
         exchange_rates_client = ExchangeRateClientDummy(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
         converted_response = ExchangeRates(api_client=exchange_rates_client)._convert_response_json_to_exchange_rates()
@@ -227,7 +227,7 @@ class TestExchangeRates(TestCase):
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
-class TestFixExchangeRatesCommand(TestCase):
+class TestFixExchangeRatesCommand(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = BusinessArea.objects.create(

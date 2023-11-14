@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, PartnerFactory
 from hct_mis_api.apps.accountability.fixtures import (
@@ -10,6 +9,7 @@ from hct_mis_api.apps.accountability.fixtures import (
     FeedbackMessageFactory,
 )
 from hct_mis_api.apps.accountability.models import Feedback
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -68,8 +68,9 @@ from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
 )
 
 
-class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
+class TestMigrateGrievanceTicketsAndFeedbacks(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.PAYMENT_RECORD_CT_ID = ContentType.objects.get_for_model(PaymentRecord).id
         self.PAYMENT_CT_ID = ContentType.objects.get_for_model(Payment).id
 

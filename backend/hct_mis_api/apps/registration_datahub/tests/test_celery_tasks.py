@@ -10,9 +10,9 @@ from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase
 from django.utils import timezone
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
@@ -305,7 +305,7 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
 @patch(
     "hct_mis_api.apps.registration_datahub.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
-class TestAutomatingRDICreationTask(TestCase):
+class TestAutomatingRDICreationTask(DefaultTestCase):
     databases = {
         "default",
         "cash_assist_datahub_ca",
@@ -613,7 +613,7 @@ class TestAutomatingRDICreationTask(TestCase):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
 
 
-class RemoveOldRDIDatahubLinksTest(TestCase):
+class RemoveOldRDIDatahubLinksTest(DefaultTestCase):
     databases = {"default", "registration_datahub"}
 
     @classmethod

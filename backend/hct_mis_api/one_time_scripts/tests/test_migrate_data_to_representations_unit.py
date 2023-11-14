@@ -1,8 +1,7 @@
 from typing import Dict, Optional
 
-from django.test import TestCase
-
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
@@ -83,8 +82,9 @@ def create_origin_household_with_individual(
     return household, individual
 
 
-class TestCopyDocumentPerIndividual(TestCase):
+class TestCopyDocumentPerIndividual(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         business_area = BusinessAreaFactory()
 
         program = ProgramFactory()
@@ -107,8 +107,9 @@ class TestCopyDocumentPerIndividual(TestCase):
         self.assertEqual(Document.original_and_repr_objects.count() - documents_count, 2)
 
 
-class TestCopyIndividualIdentityPerIndividual(TestCase):
+class TestCopyIndividualIdentityPerIndividual(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         business_area = BusinessAreaFactory()
         program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
@@ -131,8 +132,9 @@ class TestCopyIndividualIdentityPerIndividual(TestCase):
         self.assertEqual(IndividualIdentity.original_and_repr_objects.count() - individual_identities_count, 2)
 
 
-class TestCopyBankAccountInfoPerIndividual(TestCase):
+class TestCopyBankAccountInfoPerIndividual(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         business_area = BusinessAreaFactory()
         program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
@@ -157,8 +159,9 @@ class TestCopyBankAccountInfoPerIndividual(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 2)
 
 
-class TestCopyEntitlementCardPerHousehold(TestCase):
+class TestCopyEntitlementCardPerHousehold(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         business_area = BusinessAreaFactory()
         program = ProgramFactory()
         individual1 = IndividualFactory(household=None, program_id=program.id, business_area=business_area)
@@ -185,8 +188,9 @@ class TestCopyEntitlementCardPerHousehold(TestCase):
         self.assertEqual(EntitlementCard.original_and_repr_objects.count() - entitlement_card_count, 2)
 
 
-class TestCopyIndividualRepresentation(TestCase):
+class TestCopyIndividualRepresentation(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         business_area = BusinessAreaFactory()
         self.program = ProgramFactory()
         self.individual1 = IndividualFactory(household=None, business_area=business_area)
@@ -255,8 +259,9 @@ class TestCopyIndividualRepresentation(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 2)
 
 
-class TestCopyHouseholdRepresentation(TestCase):
+class TestCopyHouseholdRepresentation(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         business_area = BusinessAreaFactory()
         self.program = ProgramFactory()
 
@@ -389,8 +394,9 @@ class TestCopyHouseholdRepresentation(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 4)
 
 
-class TestAdjustPayments(TestCase):
+class TestAdjustPayments(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.business_area = BusinessAreaFactory()
         self.other_program = ProgramFactory(status=Program.ACTIVE)
         self.target_population1 = TargetPopulationFactory(program=self.other_program, business_area=self.business_area)
@@ -439,8 +445,9 @@ class TestAdjustPayments(TestCase):
         self.assertEqual(self.payment1.household, household_this_program)
 
 
-class TestAdjustPaymentRecords(TestCase):
+class TestAdjustPaymentRecords(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.business_area = BusinessAreaFactory()
         self.other_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
         self.target_population1 = TargetPopulationFactory(program=self.other_program, business_area=self.business_area)
@@ -490,8 +497,9 @@ class TestAdjustPaymentRecords(TestCase):
         self.assertEqual(self.payment_record1.household, household_this_program)
 
 
-class TestCopyHouseholdSelections(TestCase):
+class TestCopyHouseholdSelections(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.business_area = BusinessAreaFactory()
         self.program = ProgramFactory(status=Program.ACTIVE)
 
@@ -540,8 +548,9 @@ class TestCopyHouseholdSelections(TestCase):
         self.assertNotEqual(household_selection.household, household_selection_original.household)
 
 
-class TestCopyRoles(TestCase):
+class TestCopyRoles(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.business_area = BusinessAreaFactory()
 
         self.program = ProgramFactory(status=Program.ACTIVE)
@@ -608,8 +617,9 @@ class TestCopyRoles(TestCase):
         self.assertEqual(self.household_representation.representatives(manager="original_and_repr_objects").count(), 2)
 
 
-class TestCreateStorageProgramForCollectingType(TestCase):
+class TestCreateStorageProgramForCollectingType(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         generate_data_collecting_types()
         self.partial = DataCollectingType.objects.get(code="partial")
         self.full = DataCollectingType.objects.get(code="full")
@@ -800,8 +810,9 @@ class TestCreateStorageProgramForCollectingType(TestCase):
         self.assertEqual(Individual.original_and_repr_objects.count() - individuals_count, 5)
 
 
-class TestHandleRDIs(TestCase):
+class TestHandleRDIs(DefaultTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.business_area = BusinessAreaFactory()
         self.program1 = ProgramFactory(status=Program.ACTIVE)
         self.program2 = ProgramFactory(status=Program.ACTIVE)

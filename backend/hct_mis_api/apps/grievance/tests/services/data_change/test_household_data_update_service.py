@@ -1,6 +1,5 @@
-from django.test import TestCase
-
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import TicketHouseholdDataUpdateDetailsFactory
@@ -10,7 +9,7 @@ from hct_mis_api.apps.grievance.services.data_change.household_data_update_servi
 from hct_mis_api.apps.household.fixtures import create_household
 
 
-class TestHouseholdDataUpdateService(TestCase):
+class TestHouseholdDataUpdateService(DefaultTestCase):
     databases = {"default"}
 
     def test_propagate_admin_areas_on_close_ticket(self) -> None:

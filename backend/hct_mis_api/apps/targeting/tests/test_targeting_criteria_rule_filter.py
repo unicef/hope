@@ -3,12 +3,12 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db.models import QuerySet
-from django.test import TestCase
 from django.utils import timezone
 
 from freezegun import freeze_time
 from pytz import utc
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
@@ -22,7 +22,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-class TargetingCriteriaRuleFilterTestCase(TestCase):
+class TargetingCriteriaRuleFilterTestCase(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         households = []
@@ -292,7 +292,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 1)
 
 
-class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
+class TargetingCriteriaFlexRuleFilterTestCase(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")

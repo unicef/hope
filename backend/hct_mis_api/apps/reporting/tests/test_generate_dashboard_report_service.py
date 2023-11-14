@@ -1,7 +1,6 @@
-from django.test import TestCase
-
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.reporting.fixtures import DashboardReportFactory
 from hct_mis_api.apps.reporting.models import DashboardReport
@@ -10,7 +9,7 @@ from hct_mis_api.apps.reporting.services.generate_dashboard_report_service impor
 )
 
 
-class TestGenerateDashboardReportService(TestCase):
+class TestGenerateDashboardReportService(DefaultTestCase):
     @parameterized.expand(
         [
             (DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY,),

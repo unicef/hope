@@ -1,12 +1,11 @@
-from django.test import TestCase
-
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
 
 
-class TestImportedHousehold(TestCase):
+class TestImportedHousehold(DefaultTestCase):
     databases = {"default", "registration_datahub"}
 
     @classmethod

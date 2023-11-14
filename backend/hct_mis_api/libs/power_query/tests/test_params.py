@@ -1,10 +1,12 @@
-from django.test import TestCase, override_settings
+from django.test import override_settings
 
 from power_query.fixtures import ParametrizerFactory, QueryFactory
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
+
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQuery(TestCase):
+class TestPowerQuery(DefaultTestCase):
     databases = {"default"}
 
     def test_create_defaults(self) -> None:

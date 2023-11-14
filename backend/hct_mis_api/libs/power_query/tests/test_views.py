@@ -1,6 +1,6 @@
 import base64
 
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.urls import reverse
 
 from power_query.defaults import create_defaults
@@ -13,10 +13,11 @@ from power_query.fixtures import (
 from power_query.models import Query, Report
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQueryViews(TestCase):
+class TestPowerQueryViews(DefaultTestCase):
     databases = {"default"}
 
     @classmethod
@@ -96,7 +97,7 @@ class TestPowerQueryViews(TestCase):
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQueryBasicAuth(TestCase):
+class TestPowerQueryBasicAuth(DefaultTestCase):
     databases = {"default"}
 
     @classmethod

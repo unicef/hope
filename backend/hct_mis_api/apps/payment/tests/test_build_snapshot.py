@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from django.test import TestCase
 from django.utils import timezone
 
 from freezegun import freeze_time
 from pytz import utc
 
+from hct_mis_api.apps.core.base_test_case import DefaultTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 )
 
 
-class TestBuildSnapshot(TestCase):
+class TestBuildSnapshot(DefaultTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.maxDiff = None
