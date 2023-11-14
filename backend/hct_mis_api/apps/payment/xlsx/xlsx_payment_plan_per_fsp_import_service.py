@@ -193,7 +193,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row, exchange_rate)
 
-        Payment.objects.bulk_update(
+        Payment.signature_manager.bulk_update_with_signature(
             self.payments_to_save,
             (
                 "delivered_quantity",
