@@ -1,6 +1,8 @@
 # Base image
 FROM python:3.9.12-slim-bullseye as base
 
+ARG UID=82
+
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
   --mount=type=cache,target=/var/lib/apt,sharing=private \
@@ -21,18 +23,21 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   libpango-1.0-0 \
   libpangocairo-1.0-0 \
   shared-mime-info \
+  wkhtmltopdf \
   curl \
   vim &&\
-  addgroup --system --gid 82 hope &&\
-  adduser --system --uid 82 --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
+  addgroup --system --gid "${UID}" hope &&\
+  adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
   mkdir -p /code /tmp /data &&\
-  chown -R hope:hope /code /tmp /data
+  mkdir -p -m 0700 /run/user/"${UID}" &&\
+  chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
 ENV WAITFORIT_VERSION="v2.4.1" \
   PYTHONPYCACHEPREFIX=/tmp/pycache \
   VIRTUAL_ENV=/opt/venv \
   POETRY_HOME=/opt/poetry \
-  PATH=/opt/venv/bin:/opt/poetry/bin:${PATH}
+  PATH=/opt/venv/bin:/opt/poetry/bin:${PATH} \
+  XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR /code
 

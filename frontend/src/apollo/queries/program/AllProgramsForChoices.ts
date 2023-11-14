@@ -48,6 +48,7 @@ export const AllProgramsForChoices = gql`
           dataCollectingType {
             id
             individualFiltersAvailable
+            householdFiltersAvailable
           }
         }
       }

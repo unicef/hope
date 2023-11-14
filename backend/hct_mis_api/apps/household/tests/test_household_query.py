@@ -4,10 +4,14 @@ from django.conf import settings
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    generate_data_collecting_types,
+)
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
@@ -15,7 +19,7 @@ from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    migrate_data_to_representations,
+    migrate_data_to_representations_per_business_area,
 )
 
 ALL_HOUSEHOLD_QUERY = """
@@ -120,15 +124,19 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = create_afghanistan()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
+        generate_data_collecting_types()
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         cls.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
         cls.program_two = ProgramFactory(
             name="Test program TWO",
             business_area=cls.business_area,
             status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
 
         cls.households = []
@@ -175,7 +183,12 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         )
 
         # remove after data migration
-        migrate_data_to_representations()
+        BusinessAreaFactory(name="Democratic Republic of Congo")
+        BusinessAreaFactory(name="Sudan")
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
+        migrate_data_to_representations_per_business_area(business_area=cls.business_area)
         super().setUpTestData()
 
     @parameterized.expand(

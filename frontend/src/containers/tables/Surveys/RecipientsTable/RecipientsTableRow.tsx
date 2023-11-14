@@ -43,7 +43,7 @@ export function RecipientsTableRow({
   if (choicesLoading) return <LoadingComponent />;
 
   const residenceStatusChoiceDict = choicesToDict(
-    choicesData.residenceStatusChoices,
+    choicesData?.residenceStatusChoices,
   );
 
   return (

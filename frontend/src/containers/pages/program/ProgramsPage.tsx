@@ -15,8 +15,8 @@ import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter
 
 const initialFilter = {
   search: '',
-  startDate: undefined,
-  endDate: undefined,
+  startDate: '',
+  endDate: '',
   status: '',
   sector: [],
   numberOfHouseholdsMin: '',

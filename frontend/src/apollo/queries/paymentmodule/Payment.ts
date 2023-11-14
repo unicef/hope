@@ -8,9 +8,15 @@ export const Payment = gql`
       distributionModality
       status
       statusDate
+      snapshotCollectorBankName
+      snapshotCollectorBankAccountNumber
       targetPopulation {
         id
         name
+      }
+      sourcePayment {
+        id
+        unicefId
       }
       verification {
         id
@@ -41,6 +47,7 @@ export const Payment = gql`
         id
         unicefId
         fullName
+        email
         phoneNo
         phoneNoValid
         phoneNoAlternative
@@ -72,6 +79,10 @@ export const Payment = gql`
         id
         fullName
       }
+      additionalCollectorName
+      additionalDocumentType
+      additionalDocumentNumber
+      reasonForUnsuccessfulPayment
     }
   }
 `;

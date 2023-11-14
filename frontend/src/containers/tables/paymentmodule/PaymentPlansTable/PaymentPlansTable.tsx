@@ -27,8 +27,8 @@ export function PaymentPlansTable({
     status: filter.status,
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom,
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
-    dispersionStartDate: filter.dispersionStartDate,
-    dispersionEndDate: filter.dispersionEndDate,
+    dispersionStartDate: filter.dispersionStartDate || null,
+    dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
   };
 

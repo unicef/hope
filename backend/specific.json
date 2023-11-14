@@ -5,7 +5,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.282Z",
         "modified": "2023-09-25T17:57:16.282Z",
-        "code": "0",
+        "code": "partial_individuals",
         "description": "Partial individuals collected",
         "active": true,
         "individual_filters_available": false,
@@ -19,7 +19,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.284Z",
         "modified": "2023-09-25T17:57:16.284Z",
-        "code": "1",
+        "code": "full_collection",
         "description": "Full individual collected",
         "active": true,
         "individual_filters_available": false,
@@ -33,7 +33,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.285Z",
         "modified": "2023-09-25T17:57:16.285Z",
-        "code": "2",
+        "code": "size_only",
         "description": "Size only collected",
         "active": true,
         "individual_filters_available": false,
@@ -47,7 +47,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.286Z",
         "modified": "2023-09-25T17:57:16.286Z",
-        "code": "3",
+        "code": "size_age_gender_disaggregated",
         "description": "No individual data",
         "active": true,
         "individual_filters_available": false,
@@ -61,7 +61,7 @@
     "fields": {
         "created": "2023-09-25T17:57:16.287Z",
         "modified": "2023-09-25T17:57:16.287Z",
-        "code": "99",
+        "code": "unknown",
         "description": "Unknown",
         "active": true,
         "individual_filters_available": false,

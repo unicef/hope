@@ -7,7 +7,6 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
 import openpyxl
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
@@ -18,6 +17,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
@@ -51,10 +51,8 @@ def generate_token_and_order_numbers(payment: Payment) -> Payment:
 
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
+        self.batch_size = 5000
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.eligible_payments.select_related(
-            "household", "collector", "financial_service_provider"
-        ).order_by("unicef_id")
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
 
@@ -71,8 +69,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 f"Not possible to generate export file. "
                 f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
             )
-            logger.error(msg)
-            raise GraphQLError(msg)
+            log_and_raise(msg)
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
@@ -93,10 +90,17 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                             f"There isn't any FSP XLSX Template assigned to Payment Plan {self.payment_plan.unicef_id} "
                             f"for FSP {fsp.name} and delivery mechanism {delivery_mechanism_per_payment_plan.delivery_mechanism}."
                         )
-                        logger.error(msg)
-                        raise GraphQLError(msg)
+                        log_and_raise(msg)
+
                     fsp_xlsx_template = fsp_xlsx_template_per_delivery_mechanism.xlsx_template
-                    payment_qs = self.payment_list.filter(financial_service_provider=fsp)
+
+                    # get payment list id filtered by FSP
+                    payment_ids = (
+                        self.payment_plan.eligible_payments.filter(financial_service_provider=fsp)
+                        .order_by("unicef_id")
+                        .only("id")
+                        .values_list("id", flat=True)
+                    )
 
                     # get headers
                     column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
@@ -106,8 +110,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                         diff_columns = list(set(template_column_list).difference(set(column_list)))
                         if diff_columns:
                             msg = f"Please contact admin because we can't export columns: {diff_columns}"
-                            logger.error(msg)
-                            raise GraphQLError(msg)
+                            log_and_raise(msg)
                         column_list = list(template_column_list)
 
                     for core_field in fsp_xlsx_template.core_fields:
@@ -117,20 +120,24 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     ws_fsp.append(column_list)
 
                     # add rows
-                    for payment in payment_qs:
-                        if self.payment_generate_token_and_order_numbers:
-                            payment = generate_token_and_order_numbers(payment)
+                    for i in range(0, len(payment_ids), self.batch_size):
+                        batch_ids = payment_ids[i : i + self.batch_size]
+                        payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
 
-                        payment_row = [
-                            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
-                            for column_name in template_column_list
-                        ]
-                        core_fields_row = [
-                            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
-                            for column_name in fsp_xlsx_template.core_fields
-                        ]
-                        payment_row.extend(core_fields_row)
-                        ws_fsp.append(list(map(self.right_format_for_xlsx, payment_row)))
+                        for payment in payment_qs:
+                            if self.payment_generate_token_and_order_numbers:
+                                payment = generate_token_and_order_numbers(payment)
+
+                            payment_row = [
+                                FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+                                for column_name in template_column_list
+                            ]
+                            core_fields_row = [
+                                FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+                                for column_name in fsp_xlsx_template.core_fields
+                            ]
+                            payment_row.extend(core_fields_row)
+                            ws_fsp.append(list(map(self.right_format_for_xlsx, payment_row)))
 
                     self._adjust_column_width_from_col(ws_fsp)
 

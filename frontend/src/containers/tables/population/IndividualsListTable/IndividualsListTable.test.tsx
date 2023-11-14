@@ -18,8 +18,8 @@ describe('containers/tables/population/IndividualsListTable', () => {
     flags: [],
     orderBy: 'unicef_id',
     status: '',
-    lastRegistrationDateMin: undefined,
-    lastRegistrationDateMax: undefined,
+    lastRegistrationDateMin: '',
+    lastRegistrationDateMax: '',
   };
 
   it('should render with data', async () => {

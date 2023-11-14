@@ -14,7 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
-from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
+from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING

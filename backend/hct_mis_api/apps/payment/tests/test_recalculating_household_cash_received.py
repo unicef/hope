@@ -97,8 +97,9 @@ class TestRecalculatingCash(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="1", description="Full individual collected", active=True
+            code="full", description="Full individual collected", active=True
         )
+        cls.data_collecting_type.limit_to.add(cls.business_area)
 
         cls.create_program_mutation_variables = {
             "programData": {
@@ -242,6 +243,7 @@ class TestRecalculatingCash(APITestCase):
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
             delivered_quantity=cash_amount_1,
+            currency="PLN",
         )
 
         CashPlanFactory.create(ca_id=cash_plan_ca_id)
@@ -266,6 +268,7 @@ class TestRecalculatingCash(APITestCase):
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
             delivered_quantity=cash_amount_2,
+            currency="PLN",
         )
 
         PullFromDatahubTask(exchange_rates_client=MagicMock()).execute()

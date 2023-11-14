@@ -13,9 +13,9 @@ export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
 }
 
-export function ActivateVerificationPlan({
+export const ActivateVerificationPlan = ({
   paymentVerificationPlanId,
-}: ActivateVerificationPlanProps): React.ReactElement {
+}: ActivateVerificationPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
@@ -26,21 +26,8 @@ export function ActivateVerificationPlan({
       await mutate({
         variables: { paymentVerificationPlanId },
       });
-    } catch (error) {
-      /* eslint-disable-next-line no-console */
-      console.log('error', error?.graphQLErrors);
-      if (
-        error?.graphQLErrors?.[0]?.validationErrors
-          ?.activateCashPlanPaymentVerification?.phone_numbers
-      ) {
-        showMessage(
-          error?.graphQLErrors?.[0]?.validationErrors?.activateCashPlanPaymentVerification?.phone_numbers.join(
-            '\n',
-          ),
-        );
-      } else {
-        showMessage(t('Error during activating.'));
-      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
     setActivateDialogOpen(false);
     showMessage(t('Verification plan has been activated.'));
@@ -93,4 +80,4 @@ export function ActivateVerificationPlan({
       </Dialog>
     </>
   );
-}
+};

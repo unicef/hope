@@ -221,6 +221,34 @@ snapshots['TestIndividualQuery::test_individual_query_all_1_without_permission 1
     ]
 }
 
+snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 27,
+                    'line': 3
+                }
+            ],
+            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 27,
+                    'line': 3
+                }
+            ],
+            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+        }
+    ]
+}
+
 snapshots['TestIndividualQuery::test_query_individuals_by_search_bank_account_number_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {

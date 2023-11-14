@@ -1,11 +1,9 @@
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -20,12 +18,10 @@ from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
-    clear_cache_for_key,
     decode_id_string,
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
 from hct_mis_api.apps.grievance.inputs import (
     CreateGrievanceTicketInput,
     CreateTicketNoteInput,
@@ -34,6 +30,7 @@ from hct_mis_api.apps.grievance.inputs import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
 from hct_mis_api.apps.grievance.services.data_change_services import (
     update_data_change_extras,
 )
@@ -421,7 +418,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
 
         if admin := input_data.pop("admin", None):
-            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
+            grievance_ticket.admin2 = get_object_or_404(Area, id=decode_id_string(admin))
 
         linked_tickets_encoded_ids = input_data.pop("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
@@ -616,8 +613,8 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
     grievance_tickets = graphene.List(GrievanceTicketNode)
 
     class Arguments:
-        grievance_ticket_unicef_ids = graphene.List(graphene.ID)
-        assigned_to = graphene.String()
+        grievance_ticket_ids = graphene.List(graphene.ID, required=True)
+        assigned_to = graphene.String(required=True)
         business_area_slug = graphene.String(required=True)
 
     @classmethod
@@ -627,31 +624,104 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
         cls,
         root: Any,
         info: Any,
-        grievance_ticket_unicef_ids: List[str],
+        grievance_ticket_ids: List[str],
         assigned_to: str,
         business_area_slug: str,
         **kwargs: Any,
     ) -> "BulkUpdateGrievanceTicketsAssigneesMutation":
         cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
         assigned_to_id = decode_id_string(assigned_to)
-        assigned_to_obj: AbstractBaseUser = get_object_or_404(get_user_model(), id=assigned_to_id)
-        grievance_tickets = GrievanceTicket.objects.filter(
-            ~Q(status=GrievanceTicket.STATUS_CLOSED),
-            ~Q(assigned_to__id=assigned_to_obj.id),
-            unicef_id__in=grievance_ticket_unicef_ids,
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
+        tickets = BulkActionService().bulk_assign(decoded_grievance_ticket_ids, assigned_to_id, business_area_slug)
+        return cls(grievance_tickets=tickets)
+
+
+class BulkUpdateGrievanceTicketsUrgencyMutation(PermissionMutation):
+    grievance_tickets = graphene.List(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_ids = graphene.List(graphene.ID, required=True)
+        urgency = graphene.Int(required=True)
+        business_area_slug = graphene.String(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_ids: List[str],
+        urgency: int,
+        business_area_slug: str,
+        **kwargs: Any,
+    ) -> "BulkUpdateGrievanceTicketsUrgencyMutation":
+        cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
+        tickets = BulkActionService().bulk_set_urgency(decoded_grievance_ticket_ids, urgency, business_area_slug)
+        return cls(grievance_tickets=tickets)
+
+
+class BulkUpdateGrievanceTicketsPriorityMutation(PermissionMutation):
+    grievance_tickets = graphene.List(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_ids = graphene.List(graphene.ID, required=True)
+        priority = graphene.Int(required=True)
+        business_area_slug = graphene.String(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_ids: List[str],
+        priority: int,
+        business_area_slug: str,
+        **kwargs: Any,
+    ) -> "BulkUpdateGrievanceTicketsPriorityMutation":
+        cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
+        tickets = BulkActionService().bulk_set_priority(decoded_grievance_ticket_ids, priority, business_area_slug)
+        return cls(grievance_tickets=tickets)
+
+
+class BulkGrievanceAddNoteMutation(PermissionMutation):
+    grievance_tickets = graphene.List(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_ids = graphene.List(graphene.ID, required=True)
+        note = graphene.String(required=True)
+        business_area_slug = graphene.String(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_ids: List[str],
+        note: str,
+        business_area_slug: str,
+        **kwargs: Any,
+    ) -> "BulkGrievanceAddNoteMutation":
+        cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
+        decoded_grievance_ticket_ids: Sequence[str] = [
+            decode_id_string(ticket_id) for ticket_id in grievance_ticket_ids
+        ]
+        tickets = BulkActionService().bulk_add_note(
+            info.context.user, decoded_grievance_ticket_ids, note, business_area_slug
         )
-        grievance_tickets_ids = list(grievance_tickets.values_list("id", flat=True))
-
-        if grievance_tickets.exists():
-            business_area_slug = grievance_tickets.first().business_area.slug
-            grievance_tickets.filter(status=GrievanceTicket.STATUS_NEW).update(status=GrievanceTicket.STATUS_ASSIGNED)
-            grievance_tickets.update(assigned_to=assigned_to_obj)
-            bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id)
-            # count cache must be removed for proper filtering in grievance tickets
-            cache_key = f"count_{business_area_slug}_GrievanceTicketNodeConnection_"
-            clear_cache_for_key(cache_key)
-
-        return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
+        return cls(grievance_tickets=tickets)
 
 
 class CreateTicketNoteMutation(PermissionMutation):
@@ -1156,7 +1226,6 @@ class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
     grievance_status_change = GrievanceStatusChangeMutation.Field()
-    bulk_update_grievance_assignee = BulkUpdateGrievanceTicketsAssigneesMutation.Field()
     create_ticket_note = CreateTicketNoteMutation.Field()
     approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
@@ -1167,3 +1236,7 @@ class Mutations(graphene.ObjectType):
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
+    bulk_update_grievance_assignee = BulkUpdateGrievanceTicketsAssigneesMutation.Field()
+    bulk_update_grievance_priority = BulkUpdateGrievanceTicketsPriorityMutation.Field()
+    bulk_update_grievance_urgency = BulkUpdateGrievanceTicketsUrgencyMutation.Field()
+    bulk_grievance_add_note = BulkGrievanceAddNoteMutation.Field()

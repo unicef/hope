@@ -16,8 +16,8 @@ const initialFilter = {
   status: '',
   sizeMin: '',
   sizeMax: '',
-  importDateRangeMin: undefined,
-  importDateRangeMax: undefined,
+  importDateRangeMin: '',
+  importDateRangeMax: '',
 };
 
 export const RegistrationDataImportPage = (): React.ReactElement => {

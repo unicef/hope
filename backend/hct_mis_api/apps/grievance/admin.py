@@ -43,6 +43,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "admin2",
         "business_area",
         "registration_data_import",
+        "partner",
         "programme",
         "copied_from",
     )
@@ -68,6 +69,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
 
     readonly_fields = ("unicef_id",)
+    filter_horizontal = ("linked_tickets", "programs")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
         return (
@@ -139,6 +141,7 @@ class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase
 @admin.register(TicketPaymentVerificationDetails)
 class TicketPaymentVerificationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket",)
+    filter_horizontal = ["payment_verifications"]
 
 
 @admin.register(TicketPositiveFeedbackDetails)

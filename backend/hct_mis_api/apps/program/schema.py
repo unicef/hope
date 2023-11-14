@@ -183,14 +183,23 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        return Program.objects.annotate(
-            custom_order=Case(
-                When(status=Program.DRAFT, then=Value(1)),
-                When(status=Program.ACTIVE, then=Value(2)),
-                When(status=Program.FINISHED, then=Value(3)),
-                output_field=IntegerField(),
+        return (
+            Program.objects.filter(
+                business_area__slug=info.context.headers.get("Business-Area").lower(),
+                data_collecting_type__deprecated=False,
+                data_collecting_type__isnull=False,
             )
-        ).order_by("custom_order", "start_date")
+            .exclude(data_collecting_type__code="unknown")
+            .annotate(
+                custom_order=Case(
+                    When(status=Program.DRAFT, then=Value(1)),
+                    When(status=Program.ACTIVE, then=Value(2)),
+                    When(status=Program.FINISHED, then=Value(3)),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("custom_order", "start_date")
+        )
 
     def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
@@ -315,6 +324,9 @@ class Query(graphene.ObjectType):
         return {"labels": months_labels, "datasets": datasets}
 
     def resolve_all_active_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        return Program.objects.exclude(status=Program.DRAFT).filter(
-            business_area__slug=info.context.headers.get("Business-Area").lower()
-        )
+        return Program.objects.filter(
+            status=Program.ACTIVE,
+            business_area__slug=info.context.headers.get("Business-Area").lower(),
+            data_collecting_type__isnull=False,
+            data_collecting_type__deprecated=False,
+        ).exclude(data_collecting_type__code="unknown")

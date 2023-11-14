@@ -1,4 +1,7 @@
+from typing import Any, Optional
+
 from django.contrib import admin
+from django.http import HttpRequest
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
@@ -18,7 +21,6 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, admin.ModelAdm
     )
     date_hierarchy = "timestamp"
     search_fields = ("object_repr", "object_id")
-    raw_id_fields = ("business_area", "user")
     list_filter = (
         "action",
         ("user", AutoCompleteFilter),
@@ -30,3 +32,10 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, admin.ModelAdm
         "user",
         "content_type",
     )
+    readonly_fields = [field.name for field in LogEntry._meta.get_fields()]
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return False

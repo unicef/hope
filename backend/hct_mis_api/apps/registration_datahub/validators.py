@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -728,7 +728,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header: str, data_dict: Dict, household_ids: Iterable[str]) -> List[Dict[str, Any]]:
+    def collector_column_validator(header: str, data_dict: Dict, household_ids: Set[str]) -> List[Dict[str, Any]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []
@@ -805,7 +805,32 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     household_ids,
                 )
             )
+            errors.extend(self.validate_collectors_unique(primary_collectors_data, alternate_collectors_data))
 
+            return errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    def validate_collectors_unique(self, primary_collectors: Dict, alternate_collectors: Dict) -> List[Dict[str, Any]]:
+        try:
+            errors = []
+
+            for row in primary_collectors:
+                primary_collector = set(
+                    collectors_str_ids_to_list(cell.value if (cell := primary_collectors.get(row)) else None) or []
+                )
+                alternate_collector = set(
+                    collectors_str_ids_to_list(cell.value if (cell := alternate_collectors.get(row)) else None) or []
+                )
+                if households_ids := primary_collector.intersection(alternate_collector):
+                    errors.append(
+                        {
+                            "row_number": row,
+                            "header": "Individuals",
+                            "message": f"Individual from row: {row} cannot be the primary and the alternate collector for households: {', '.join(households_ids)} at the same time.",
+                        }
+                    )
             return errors
         except Exception as e:
             logger.exception(e)

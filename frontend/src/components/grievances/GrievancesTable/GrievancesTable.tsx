@@ -3,6 +3,7 @@ import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import Paper from '@material-ui/core/Paper';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
@@ -12,23 +13,27 @@ import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
+  GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
 import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import {
+  AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
+  useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
   useMeQuery,
-  AllGrievanceTicketQuery,
-  useAllGrievanceTicketQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
-import { BulkAssignModal } from './BulkAssignModal';
+import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
+import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
+import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
+import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -69,7 +74,7 @@ export const GrievancesTable = ({
   };
 
   const [inputValue, setInputValue] = useState('');
-
+  const [page, setPage] = useState<number>(0);
   const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
     variables: {
       businessArea,
@@ -85,7 +90,23 @@ export const GrievancesTable = ({
 
   const optionsData = get(data, 'allUsers.edges', []);
 
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
+    [key: number]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  }>({ 0: [] });
+
+  const selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][] = [];
+  const currentSelectedTickets = selectedTicketsPerPage[page];
+  for (const pageKey of Object.keys(selectedTicketsPerPage)) {
+    selectedTickets.push(...selectedTicketsPerPage[pageKey]);
+  }
+
+  const setSelectedTickets = (
+    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
+  ): void => {
+    const newSelectedTicketsPerPage = { ...selectedTicketsPerPage };
+    newSelectedTicketsPerPage[page] = tickets;
+    setSelectedTicketsPerPage(newSelectedTicketsPerPage);
+  };
 
   const {
     data: choicesData,
@@ -141,49 +162,39 @@ export const GrievancesTable = ({
   };
 
   const handleCheckboxClick = (
-    _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    name: string,
+    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
   ): void => {
-    _event.stopPropagation();
-    const selectedIndex = selected.indexOf(name);
-    const newSelected = [...selected];
+    const index =
+      currentSelectedTickets?.findIndex(
+        (ticketItem) => ticketItem.id === ticket.id,
+      ) ?? -1;
 
-    if (selectedIndex === -1) {
-      newSelected.push(name);
+    const newSelectedTickets = [...(currentSelectedTickets || [])];
+    if (index === -1) {
+      newSelectedTickets.push(ticket);
+    } else if (index === 0) {
+      newSelectedTickets.shift();
     } else {
-      newSelected.splice(selectedIndex, 1);
+      newSelectedTickets.splice(index, 1);
     }
-
-    setSelected(newSelected);
+    setSelectedTickets(newSelectedTickets);
   };
 
   const handleSelectAllCheckboxesClick = (event, rows): void => {
-    event.preventDefault();
-    if (!selected.length) {
-      const newSelecteds = rows
+    if (!currentSelectedTickets?.length) {
+      const newSelected = rows
         .filter((row) => row.status !== GRIEVANCE_TICKET_STATES.CLOSED)
-        .map((row) => row.unicefId);
-      setSelected(newSelecteds);
-
+        .map((row) => row);
+      setSelectedTickets(newSelected);
       return;
     }
-    setSelected([]);
+    setSelectedTickets([]);
   };
 
   return (
     <>
       <Box display='flex' flexDirection='column' px={5} pt={5}>
         <Box display='flex' justifyContent='space-between' px={5}>
-          <BulkAssignModal
-            optionsData={optionsData}
-            selected={selected}
-            businessArea={businessArea}
-            initialVariables={initialVariables}
-            setInputValue={setInputValue}
-            setSelected={setSelected}
-          />
           <Box display='flex' ml='auto'>
             <Box>
               {/* TODO: Enable Export Report button */}
@@ -211,54 +222,82 @@ export const GrievancesTable = ({
               {t('Upload Tickets')}
             </Button> */}
             </Box>
-            {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
-              hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-                <Button
-                  alignItems='center'
-                  variant='contained'
-                  color='primary'
-                  component={Link}
-                  to={`/${businessArea}/grievance/new-ticket`}
-                  data-cy='button-new-ticket'
-                >
-                  {t('NEW TICKET')}
-                </Button>
-              )}
           </Box>
         </Box>
         <TableWrapper>
-          <UniversalTable<
-            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-            AllGrievanceTicketQueryVariables
-          >
-            headCells={headCells}
-            title={t('Grievance Tickets List')}
-            rowsPerPageOptions={[10, 15, 20, 40]}
-            query={useAllGrievanceTicketQuery}
-            onSelectAllClick={handleSelectAllCheckboxesClick}
-            numSelected={selected.length}
-            queriedObjectName='allGrievanceTicket'
-            initialVariables={initialVariables}
-            defaultOrderBy='created_at'
-            defaultOrderDirection='desc'
-            renderRow={(row) => (
-              <GrievancesTableRow
-                key={row.id}
-                ticket={row}
-                statusChoices={statusChoices}
-                categoryChoices={categoryChoices}
-                issueTypeChoicesData={issueTypeChoicesData}
-                priorityChoicesData={priorityChoicesData}
-                urgencyChoicesData={urgencyChoicesData}
-                canViewDetails={getCanViewDetailsOfTicket(row)}
-                checkboxClickHandler={handleCheckboxClick}
-                selected={selected}
-                optionsData={optionsData}
-                setInputValue={setInputValue}
-                initialVariables={initialVariables}
+          <Paper>
+            <EnhancedTableToolbar title={t('Grievance Tickets List')} />
+            <Box display='flex' flexDirection='row' marginX={6} gridGap={16}>
+              <BulkAssignModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
+                setSelected={setSelectedTickets}
               />
-            )}
-          />
+              <BulkSetPriorityModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
+                setSelected={setSelectedTickets}
+              />
+              <BulkSetUrgencyModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
+                setSelected={setSelectedTickets}
+              />
+              <BulkAddNoteModal
+                selectedTickets={selectedTickets}
+                businessArea={businessArea}
+                setSelected={setSelectedTickets}
+              />
+              {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
+                hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+                  <Button
+                    alignItems='center'
+                    variant='contained'
+                    color='primary'
+                    component={Link}
+                    to={`/${businessArea}/grievance/new-ticket`}
+                    data-cy='button-new-ticket'
+                  >
+                    {t('NEW TICKET')}
+                  </Button>
+                )}
+            </Box>
+            <UniversalTable<
+              AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+              AllGrievanceTicketQueryVariables
+            >
+              isOnPaper={false}
+              headCells={headCells}
+              rowsPerPageOptions={[10, 15, 20, 40]}
+              query={useAllGrievanceTicketQuery}
+              onSelectAllClick={handleSelectAllCheckboxesClick}
+              numSelected={currentSelectedTickets?.length || 0}
+              queriedObjectName='allGrievanceTicket'
+              initialVariables={initialVariables}
+              defaultOrderBy='created_at'
+              defaultOrderDirection='desc'
+              onPageChanged={setPage}
+              renderRow={(row) => (
+                <GrievancesTableRow
+                  key={row.id}
+                  ticket={row}
+                  statusChoices={statusChoices}
+                  categoryChoices={categoryChoices}
+                  issueTypeChoicesData={issueTypeChoicesData}
+                  priorityChoicesData={priorityChoicesData}
+                  urgencyChoicesData={urgencyChoicesData}
+                  canViewDetails={getCanViewDetailsOfTicket(row)}
+                  checkboxClickHandler={handleCheckboxClick}
+                  isSelected={Boolean(
+                    selectedTickets.find((ticket) => ticket.id === row.id),
+                  )}
+                  optionsData={optionsData}
+                  setInputValue={setInputValue}
+                  initialVariables={initialVariables}
+                />
+              )}
+            />
+          </Paper>
         </TableWrapper>
       </Box>
     </>

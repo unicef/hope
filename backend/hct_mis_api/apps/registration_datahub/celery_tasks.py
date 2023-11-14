@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
+from constance import config
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
@@ -569,3 +570,22 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
     except Exception:
         logger.error("Removing old RDI objects failed")
         raise
+
+
+@app.task
+@sentry_tags
+def clean_old_record_files_task(default_timedelta: int = 60) -> None:
+    """This task once a month clears (sets to null) Record's files field"""
+    from datetime import timedelta
+
+    try:
+        time_threshold = max(
+            timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA),
+            timezone.now() - timedelta(default_timedelta),
+        )
+        Record.objects.filter(timestamp__lt=time_threshold, status=Record.STATUS_IMPORTED).exclude(files=None).update(
+            files=None
+        )
+        logger.info("Record's files have benn successfully cleared")
+    except Exception:
+        logger.error("Clearance of record's files failed")

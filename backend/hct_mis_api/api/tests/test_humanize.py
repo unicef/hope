@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 from django.http import JsonResponse
 
-from hct_mis_api.api.endpoints.upload import RDINestedSerializer
+from hct_mis_api.api.endpoints.rdi.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
 
 MEMBER = {

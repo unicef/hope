@@ -1,25 +1,25 @@
 import { Form, Formik } from 'formik';
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import moment from 'moment';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
-import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { handleValidationErrors, today } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '../../../__generated__/graphql';
-import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
+import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
+import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { today } from '../../../utils/utils';
 
 export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -103,7 +103,7 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
       ),
   });
 
-  const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
@@ -125,15 +125,7 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
         historyMethod: 'push',
       });
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'updatePaymentPlan',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while editing Payment Plan'));
-      }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
