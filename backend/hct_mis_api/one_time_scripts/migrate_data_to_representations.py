@@ -380,7 +380,9 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     household_selections = household_selections.order_by("id")
 
     household_selection_count = household_selections.count()
+    counter = 0
     for _ in range(0, household_selection_count, BATCH_SIZE):
+        logger.info(f"Copying household selections {counter} - {counter + BATCH_SIZE}/{household_selection_count}")
         household_selections_to_create = []
         batched_household_selections = household_selections[0:BATCH_SIZE]
 
@@ -398,6 +400,8 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
                 is_migration_handled=True
             )
+
+        counter += BATCH_SIZE
 
 
 def adjust_payment_objects() -> None:
