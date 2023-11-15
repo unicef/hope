@@ -127,8 +127,18 @@ class APITestCase(SnapshotTestTestCase):
 
     @staticmethod
     def update_user_partner_perm_for_program(user: "User", business_area: "BusinessArea", program: "Program") -> None:
-        # TODO: add MB update for exists BA in partner.permissions?
-        user.partner.permissions = {f"{str(business_area.pk)}": {"programs": {f"{str(program.pk)}": []}}}
+        partner_permissions = user.partner.permissions or {}
+        if str(business_area.pk) in partner_permissions:
+            # only add new program_id
+            if str(program.pk) not in partner_permissions[str(business_area.pk)]["programs"]:
+                partner_permissions[str(business_area.pk)]["programs"].update({str(program.pk): []})
+            else:
+                pass
+                # TODO: add MB update program's areas
+        else:
+            partner_permissions.update({str(business_area.pk): {"programs": {str(program.pk): []}}})
+
+        user.partner.permissions = partner_permissions
         user.partner.save()
 
     @classmethod

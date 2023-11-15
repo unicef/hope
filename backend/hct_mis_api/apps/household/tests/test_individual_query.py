@@ -82,6 +82,8 @@ class TestIndividualQuery(APITestCase):
             status=Program.ACTIVE,
             data_collecting_type=partial,
         )
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
         household_one.household_collection.save()
