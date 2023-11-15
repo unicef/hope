@@ -32,6 +32,7 @@ mutation ExportSurveySample($surveyId: ID!) {
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area, name="Test Target Population")
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         households = [create_household()[0] for _ in range(14)]
         cls.target_population.households.set(households)
