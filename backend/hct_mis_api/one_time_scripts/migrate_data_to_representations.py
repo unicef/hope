@@ -10,6 +10,11 @@ from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_SIZE_ONLY,
+    COLLECT_TYPE_UNKNOWN,
     BankAccountInfo,
     Document,
     EntitlementCard,
@@ -30,13 +35,10 @@ BATCH_SIZE_SMALL = 20
 
 
 def migrate_data_to_representations() -> None:
-    apply_country_specific_rules()
     for business_area in BusinessArea.objects.all():
         logger.info("----- NEW BUSINESS AREA -----")
         logger.info(f"Handling business area: {business_area}")
         migrate_data_to_representations_per_business_area(business_area=business_area)
-
-    apply_congo_withdrawal()
 
 
 def migrate_data_to_representations_per_business_area(business_area: BusinessArea) -> None:
@@ -48,14 +50,23 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     delete other TargetPopulations
     For all households and individuals in given TargetPopulations:
     - create new representations
-    - copy all objects related to old households/individuals or adjust existing ones if they are related to program
+    - copy all objects related to old households/individuals
     - handle RDI: if there is RDI for household copy all households in this RDI to current program
     For whole business_area:
     - for rdi that was not related to program: add rdi and copy its households to the biggest program in that ba
     - adjust payments and payment_records to corresponding representations
 
     """
+    unknown_unassigned_dict = get_unknown_unassigned_dict()
+    unknown_unassigned_program = unknown_unassigned_dict.get(business_area)
+
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_rules()
+    elif business_area.name == "Sudan":
+        apply_sudan_rules()
+
     hhs_to_ignore = get_ignored_hhs() if business_area.name == "Afghanistan" else None
+
     for program in Program.objects.filter(
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
@@ -81,25 +92,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         )
         household_ids = household_selections.distinct("household").values_list("household_id", flat=True)
 
-        if program.status == Program.ACTIVE:
-            households_with_compatible_collection_type = Household.original_and_repr_objects.filter(
-                is_original=True,
-                is_migration_handled=False,
-                data_collecting_type__in=program.data_collecting_type.compatible_types.all(),
-                withdrawn=False,
-                business_area=business_area,
-            ).only("id")
-            if hhs_to_ignore:
-                households_with_compatible_collection_type = households_with_compatible_collection_type.exclude(
-                    id__in=hhs_to_ignore
-                )
-            households = Household.original_and_repr_objects.filter(
-                Q(id__in=household_ids) | Q(id__in=households_with_compatible_collection_type)
-            ).filter(is_migration_handled=False, is_original=True)
-        else:
-            households = Household.original_and_repr_objects.filter(
-                id__in=household_ids, is_migration_handled=False, is_original=True
-            )
+        households = Household.original_and_repr_objects.filter(
+            id__in=household_ids, is_migration_handled=False, is_original=True
+        )
         households_count = households.count()
 
         logger.info(f"Handling households for program: {program}")
@@ -121,11 +116,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             logger.info(f"Handling RDIs for program: {program}")
             handle_rdis(rdis, program, hhs_to_ignore)
         else:
-            rdi_through = RegistrationDataImport.programs.through
-            rdi_through.objects.bulk_create(
-                [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-                ignore_conflicts=True,
-            )
+            rdis.filter(program__isnull=True).update(program=program)
 
         logger.info(f"Copying roles for program: {program}")
         copy_roles(households, program=program)
@@ -137,13 +128,15 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
-    ).distinct().update(is_migration_handled=True)
+    ).update(is_migration_handled=True)
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
-    copy_non_program_objects_to_void_storage_programs(business_area, hhs_to_ignore)
+    handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
+    Household.original_and_repr_objects.filter(
+        business_area=business_area, copied_to__isnull=False, is_original=True
+    ).update(is_migration_handled=True)
 
-    # logger.info("Adjusting payments and payment records")
-    # adjust_payments(business_area)
-    # adjust_payment_records(business_area)
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_withdrawal()
 
 
 def get_household_representation_per_program_by_old_household_id(
@@ -405,6 +398,14 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             )
 
 
+def adjust_payment_objects() -> None:
+    for business_area in BusinessArea.objects.all():
+        logger.info(f"Adjusting payments for business area {business_area.name}")
+        adjust_payments(business_area)
+        logger.info(f"Adjusting payment records for business area {business_area.name}")
+        adjust_payment_records(business_area)
+
+
 def adjust_payments(business_area: BusinessArea) -> None:
     """
     Adjust payment individuals and households to their representations.
@@ -459,7 +460,7 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
     Adjust PaymentRecord individuals and households to their representations.
     PaymentRecord is already related to program through TargetPopulation.
     """
-    payment_records = PaymentRecord.original_and_repr_objects.filter(
+    payment_records = PaymentRecord.objects.filter(
         target_population__program__business_area=business_area, household__is_original=True
     ).order_by("pk")
     payment_records_count = payment_records.count()
@@ -487,9 +488,7 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
                 payment_record.household = representation_household
                 payment_record_updates.append(payment_record)
 
-        PaymentRecord.original_and_repr_objects.bulk_update(
-            payment_record_updates, fields=["head_of_household_id", "household_id"]
-        )
+        PaymentRecord.objects.bulk_update(payment_record_updates, fields=["head_of_household_id", "household_id"])
         del payment_record_updates
 
 
@@ -521,46 +520,41 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
                     household_dict[household_original_id] = household_representation
 
                 copy_roles_from_dict(household_dict, program)  # type: ignore
+    rdis.filter(program__isnull=True).update(program=program)
 
-        rdi.programs.add(program)
 
-
-def copy_non_program_objects_to_void_storage_programs(
-    business_area: BusinessArea, hhs_to_ignore: Optional[QuerySet] = None
+def handle_non_program_objects(
+    business_area: BusinessArea,
+    hhs_to_ignore: Optional[QuerySet] = None,
+    unknown_unassigned_program: Optional[Program] = None,
 ) -> None:
     households = Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=True, is_original=True
     ).order_by("pk")
     if hhs_to_ignore:
         households = households.exclude(id__in=hhs_to_ignore)
-    collecting_types = DataCollectingType.objects.filter(
-        id__in=households.values_list("data_collecting_type", flat=True).distinct().order_by("pk")
+    collecting_types_from_charfield = (
+        households.values_list("collect_individual_data", flat=True).distinct().order_by("pk")
     )
 
-    for collecting_type in collecting_types:
-        program = create_storage_program_for_collecting_type(business_area, collecting_type)
-        households_with_collecting_type = households.filter(data_collecting_type=collecting_type)
+    for collecting_type in collecting_types_from_charfield:
+        program = create_program_with_matching_collecting_type(
+            business_area, collecting_type, unknown_unassigned_program
+        )
+        households_with_collecting_type = households.filter(collect_individual_data=collecting_type)
 
         # Handle rdis before copying households so households query is not changed yet
-        rdis = (
-            RegistrationDataImport.objects.filter(
-                households__in=households_with_collecting_type,
-            )
-            .distinct()
-            .only("id")
-        )
-        rdi_through = RegistrationDataImport.programs.through
-        rdi_through.objects.bulk_create(
-            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-            ignore_conflicts=True,
-        )
+        RegistrationDataImport.objects.filter(
+            households__in=households_with_collecting_type,
+            program__isnull=True,
+        ).update(program=program)
 
         household_count = households_with_collecting_type.count()
         for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
             batch_end = batch_start + BATCH_SIZE_SMALL
             logger.info(
                 f"Copying {batch_start} - {batch_end}/{household_count} "
-                f"households to program with collecting type {collecting_type}"
+                f"households to program with collect_individual_data {collecting_type}"
             )
             household_dict = {}
             with transaction.atomic():
@@ -578,6 +572,32 @@ def copy_non_program_objects_to_void_storage_programs(
                     household_dict[household_original_id] = household_representation
 
                 copy_roles_from_dict(household_dict, program)
+
+
+def create_program_with_matching_collecting_type(
+    business_area: BusinessArea,
+    collecting_type: DataCollectingType,
+    unknown_unassigned_program: Optional[Program] = None,
+) -> Program:
+    if collecting_type == COLLECT_TYPE_FULL:
+        program_collecting_type = DataCollectingType.objects.get(code="full_collection")
+    elif collecting_type == COLLECT_TYPE_PARTIAL:
+        program_collecting_type = DataCollectingType.objects.get(code="partial_individuals")
+    elif collecting_type == COLLECT_TYPE_SIZE_ONLY:
+        program_collecting_type = DataCollectingType.objects.get(code="size_only")
+    elif collecting_type == COLLECT_TYPE_NONE:
+        program_collecting_type = DataCollectingType.objects.get(code="size_age_gender_disaggregated")
+    elif collecting_type == COLLECT_TYPE_UNKNOWN:
+        if unknown_unassigned_program:
+            return unknown_unassigned_program
+        program_collecting_type, _ = DataCollectingType.objects.get_or_create(
+            code="unknown",
+            label="Unknown",
+            defaults={"description": "Unknown", "deprecated": True},
+        )
+    else:  # in case there are some deprecated collecting types
+        program_collecting_type = None
+    return create_storage_program_for_collecting_type(business_area, program_collecting_type)
 
 
 def copy_roles_from_dict(household_dict: dict[Any, Household], program: Program) -> None:
@@ -614,10 +634,10 @@ def copy_roles_from_dict(household_dict: dict[Any, Household], program: Program)
 
 
 def create_storage_program_for_collecting_type(
-    business_area: BusinessArea, collecting_type: DataCollectingType
+    business_area: BusinessArea, collecting_type: Optional[DataCollectingType] = None
 ) -> Program:
     return Program.all_objects.get_or_create(
-        name=f"Storage program - COLLECTION TYPE {collecting_type.label}",
+        name=(f"Storage program - COLLECTION TYPE {collecting_type.label}" if collecting_type else "Storage program"),
         data_collecting_type=collecting_type,
         status=Program.DRAFT,
         start_date=timezone.now(),
@@ -629,7 +649,7 @@ def create_storage_program_for_collecting_type(
         scope=Program.SCOPE_FOR_PARTNERS,
         cash_plus=True,
         population_goal=1,
-        is_removed=True,  # soft-deleted
+        is_visible=False,
     )[0]
 
 
@@ -664,11 +684,8 @@ def apply_congo_rules() -> None:
             with transaction.atomic():
                 copy_household_representation(household, program, individuals_per_household_dict[household.id])
 
-        rdi_through = RegistrationDataImport.programs.through
-        rdi_through.objects.bulk_create(
-            [rdi_through(registrationdataimport_id=rdi.id, program_id=program.id) for rdi in rdis],
-            ignore_conflicts=True,
-        )
+        RegistrationDataImport.objects.filter(id__in=[rdi.id for rdi in rdis]).update(program=program)
+
         copy_roles(untargetted_hhs, program=program)
 
     logger.info("Finished applying Congo custom rules")
@@ -696,7 +713,7 @@ def prepare_program_rdi_dict(csv_rdi_program: str, business_area: BusinessArea) 
     program_rdi_dict = {}
     with open(csv_rdi_program, mode="r", newline="") as csvfile:
         reader = csv.reader(csvfile, delimiter=";")
-        next(reader)
+        next(reader)  # skip header
         for row in reader:
             program = Program.objects.filter(name=row[1], business_area=business_area).first()
             rdi = RegistrationDataImport.objects.filter(name=row[0], business_area=business_area).first()
@@ -753,3 +770,22 @@ def get_ignored_hhs() -> QuerySet:
         registration_data_import__name__in=rdis_names,
         registration_data_import__business_area=business_area_afg,
     ).values_list("id", flat=True)
+
+
+def get_unknown_unassigned_dict() -> Dict:
+    unknown_unassigned_dict = {}
+    unknown_unassigned_program = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "unknown_unassigned_program.csv",
+    )
+    with open(unknown_unassigned_program, mode="r", newline="") as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        next(reader)  # skip header
+        for row in reader:
+            business_area = BusinessArea.objects.get(name=row[0])
+            program = Program.objects.filter(name=row[1], business_area=business_area).first()
+            if program:
+                unknown_unassigned_dict[business_area] = program
+    return unknown_unassigned_dict

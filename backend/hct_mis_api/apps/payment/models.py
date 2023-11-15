@@ -47,7 +47,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.utils import IsOriginalManager, nested_getattr
+from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
@@ -61,6 +61,7 @@ from hct_mis_api.apps.payment.validators import payment_token_and_order_number_v
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
+    SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -307,16 +308,6 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    is_original = models.BooleanField(default=True)
-    is_migration_handled = models.BooleanField(default=False)
-    copied_from = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="copied_to",
-        help_text="If this object was copied from another, this field will contain the object it was copied from.",
-    )
 
     class Meta:
         abstract = True
@@ -1388,12 +1379,6 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         object_id_field="payment_object_id",
         related_query_name="payment_record",
     )
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment_record",
-    )
     ticket_complaint_details = GenericRelation(
         "grievance.TicketComplaintDetails",
         content_type_field="payment_content_type",
@@ -1408,10 +1393,6 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         related_query_name="payment_record",
     )
 
-    # remove after data migration
-    objects = IsOriginalManager()
-    original_and_repr_objects = models.Manager()
-
     @property
     def unicef_id(self) -> str:
         return self.ca_id
@@ -1420,7 +1401,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         return self.STATUS_SUCCESS
 
 
-class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, SignatureMixin):
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1435,12 +1416,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     payment_verification = GenericRelation(
         "payment.PaymentVerification",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment",
-    )
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment",
@@ -1532,6 +1507,35 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="token_number_unique_per_program",
             ),
         ]
+
+    signature_fields = (
+        "parent_id",
+        "conflicted",
+        "excluded",
+        "entitlement_date",
+        "financial_service_provider_id",
+        "collector_id",
+        "source_payment_id",
+        "is_follow_up",
+        "reason_for_unsuccessful_payment",
+        "program_id",
+        "order_number",
+        "token_number",
+        "household_snapshot.snapshot_data",
+        "business_area_id",
+        "status",
+        "status_date",
+        "household_id",
+        "head_of_household_id",
+        "delivery_type",
+        "currency",
+        "entitlement_quantity",
+        "entitlement_quantity_usd",
+        "delivered_quantity",
+        "delivered_quantity_usd",
+        "delivery_date",
+        "transaction_reference_id",
+    )
 
 
 class ServiceProvider(TimeStampedUUIDModel):

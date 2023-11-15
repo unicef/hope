@@ -125,7 +125,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         cls.business_area = create_afghanistan()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         generate_data_collecting_types()
-        partial = DataCollectingType.objects.get(code="partial")
+        partial = DataCollectingType.objects.get(code="partial_individuals")
         cls.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
@@ -185,6 +185,9 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         # remove after data migration
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
         migrate_data_to_representations_per_business_area(business_area=cls.business_area)
         super().setUpTestData()
 

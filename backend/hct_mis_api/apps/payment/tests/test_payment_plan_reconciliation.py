@@ -289,8 +289,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="1", description="Full individual collected", active=True
+            code="full", description="Full individual collected", active=True
         )
+        cls.data_collecting_type.limit_to.add(cls.business_area)
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
