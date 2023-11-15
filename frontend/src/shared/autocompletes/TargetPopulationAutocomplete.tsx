@@ -1,26 +1,23 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
-import TextField from '../TextField';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 6px;
-  }
-`;
+import { useDebounce } from '../../hooks/useDebounce';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleAutocompleteClose,
+  handleOptionSelected,
+} from '../../utils/utils';
+import TextField from '../TextField';
+import { StyledAutocomplete } from './StyledAutocomplete';
 
 export const TargetPopulationAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -85,44 +82,35 @@ export const TargetPopulationAutocomplete = ({
   );
   if (!data) return null;
 
+  const allEdges = get(data, 'allTargetPopulations.edges', []);
+
   return (
     <StyledAutocomplete
       value={value}
-      fullWidth={fullWidth}
       data-cy='filters-target-population-autocomplete'
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) => {
-        if (selectedValue?.node?.id) {
-          handleFilterChange(name, selectedValue.node.id);
-        }
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        );
       }}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (reason !== 'select-option') {
-          onInputTextChange('');
-        }
-      }}
-      getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
-      }}
-      getOptionLabel={(option) => {
-        let optionLabel;
-        if (option?.node) {
-          optionLabel = `${option.node.name}`;
-        } else {
-          const foundTP = data?.allTargetPopulation?.edges?.find(
-            (el) => el.node.id === option,
-          )?.node.name;
-          optionLabel = foundTP ? `${foundTP}` : inputValue;
-        }
-        return `${optionLabel}`;
-      }}
+      onClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      getOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      getOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
+      }
       disabled={disabled}
-      options={get(data, 'allTargetPopulation.edges', [])}
+      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField

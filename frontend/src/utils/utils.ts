@@ -962,3 +962,84 @@ export const dateToIsoString = (date: Date, type: DateType): string => {
   }
   throw new Error('Invalid type specified');
 };
+
+//autocompletes utils
+export const handleAutocompleteChange = (
+  name,
+  value,
+  handleFilterChange,
+): void => {
+  if (value) {
+    handleFilterChange(name, value);
+  }
+  if (value === null) {
+    handleFilterChange(name, '');
+  }
+};
+
+export const handleAutocompleteClose = (
+  setOpen,
+  onInputTextChange,
+  reason,
+): void => {
+  setOpen(false);
+  if (reason === 'select-option') return;
+  onInputTextChange('');
+};
+
+export const getAutocompleteOptionLabel = (
+  option,
+  edges,
+  inputValue: string,
+  type: 'default' | 'individual' | 'language' = 'default',
+): string => {
+  const renderNameOrEmail = (node): string => {
+    if (!node) {
+      return '-';
+    }
+    if (node?.firstName && node?.lastName) {
+      return `${node.firstName} ${node.lastName}`;
+    }
+    if (node?.email) {
+      return `${node.email}`;
+    }
+    return '-';
+  };
+
+  let optionLabel;
+  if (option?.node) {
+    switch (type) {
+      case 'individual':
+        optionLabel = renderNameOrEmail(option.node);
+        break;
+      case 'language':
+        optionLabel = `${option.node.english}`;
+        break;
+      default:
+        optionLabel = `${option.node.name}`;
+    }
+  } else {
+    let foundNode;
+    switch (type) {
+      case 'individual':
+        foundNode = edges?.find((el) => el.node?.id === option)?.node;
+        optionLabel = foundNode ? renderNameOrEmail(foundNode) : inputValue;
+        break;
+      case 'language':
+        foundNode = edges?.find((el) => el.node?.code === option)?.node;
+        optionLabel = foundNode ? `${foundNode.english}` : inputValue;
+        break;
+      default:
+        foundNode = edges?.find((el) => el.node?.id === option)?.node;
+        optionLabel = foundNode ? `${foundNode?.name}` : inputValue;
+    }
+  }
+  return optionLabel;
+};
+
+export const handleOptionSelected = (optionValue, value): boolean => {
+  if (value === '' || value === null) {
+    return false;
+  }
+  return optionValue === value;
+};

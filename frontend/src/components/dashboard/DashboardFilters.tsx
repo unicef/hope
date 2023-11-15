@@ -105,7 +105,6 @@ export const DashboardFilters = ({
         )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            fullWidth
             name='administrativeArea'
             value={filter.administrativeArea}
             filter={filter}

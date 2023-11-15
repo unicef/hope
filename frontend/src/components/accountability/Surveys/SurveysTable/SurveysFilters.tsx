@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { CreatedBySurveyAutocomplete } from '../../../../shared/autocompletes/CreatedBySurveyAutocomplete';
+import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
@@ -75,7 +75,7 @@ export const SurveysFilters = ({
         </Grid>
         <Grid container item xs={12} spacing={3} alignItems='flex-end'>
           <Grid item xs={4}>
-            <CreatedBySurveyAutocomplete
+            <CreatedByAutocomplete
               name='createdBy'
               label={t('Created by')}
               value={filter.createdBy}
@@ -84,6 +84,7 @@ export const SurveysFilters = ({
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
+              additionalVariables={{ isSurveyCreator: true }}
             />
           </Grid>
           <Grid item xs={4}>

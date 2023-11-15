@@ -27,7 +27,7 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
   applyHandler,
   isOnPaper = true,
 }): ReactElement => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const { t } = useTranslation();
 
   const filtersComponent = (
