@@ -97,6 +97,12 @@ export const DrawerItems = ({
     };
     const cashAssistIndex = getIndexByName('Cash Assist');
     const programDetailsIndex = getIndexByName('Programme Details');
+    const reportingIndex = getIndexByName('Reporting');
+
+    // Remove 'Reporting' item when program is selected
+    if (reportingIndex !== -1 && !isAllPrograms) {
+      updatedMenuItems.splice(reportingIndex, 1);
+    }
 
     //Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =

@@ -2,11 +2,11 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { CreatedByMessageAutocomplete } from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
+import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface CommunicationFiltersProps {
   filter;
@@ -65,7 +65,7 @@ export const CommunicationFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <CreatedByMessageAutocomplete
+          <CreatedByAutocomplete
             label={t('Created by')}
             filter={filter}
             name='createdBy'
@@ -74,6 +74,7 @@ export const CommunicationFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isMessageCreator: true }}
           />
         </Grid>
         <Grid container item xs={6} spacing={3} alignItems='flex-end'>

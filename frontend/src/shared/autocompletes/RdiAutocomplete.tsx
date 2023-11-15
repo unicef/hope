@@ -1,26 +1,23 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useRdiAutocompleteLazyQuery } from '../../__generated__/graphql';
-import TextField from '../TextField';
-import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-`;
+import { useDebounce } from '../../hooks/useDebounce';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleAutocompleteClose,
+  handleOptionSelected,
+} from '../../utils/utils';
+import TextField from '../TextField';
+import { StyledAutocomplete } from './StyledAutocomplete';
 
 export const RdiAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -28,10 +25,8 @@ export const RdiAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  dataCy,
 }: {
   disabled?;
-  fullWidth?: boolean;
   name: string;
   filter?;
   value?: string;
@@ -39,7 +34,6 @@ export const RdiAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-  dataCy?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -80,48 +74,41 @@ export const RdiAutocomplete = ({
 
   if (!data) return null;
 
+  const allEdges = get(data, 'allRegistrationDataImports.edges', []);
+
   return (
     <StyledAutocomplete
       value={value}
-      fullWidth={fullWidth}
-      data-cy={dataCy}
+      data-cy='filters-registration-data-import'
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) => {
-        if (selectedValue?.node?.id) {
-          handleFilterChange(name, selectedValue.node.id);
-        }
-      }}
+      onChange={(_, selectedValue) =>
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        )
+      }
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (reason === 'select-option') return;
-        onInputTextChange('');
-      }}
-      getOptionSelected={(option, value1) => {
-        return value1 === option.node.id;
-      }}
-      getOptionLabel={(option) => {
-        let label;
-        if (option.node) {
-          label = `${option.node.name}`;
-        } else {
-          const foundRdi = data?.allRegistrationDataImports?.edges?.find(
-            (el) => el.node.id === option,
-          )?.node.name;
-          label = foundRdi ? `${foundRdi}` : inputValue;
-        }
-        return `${label}`;
-      }}
+      onClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      getOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      getOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
+      }
       disabled={disabled}
-      options={get(data, 'allRegistrationDataImports.edges', [])}
+      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField
           {...params}
           label={t('Registration Data Import')}
+          data-cy='filters-registration-data-import-input'
           variant='outlined'
           margin='dense'
           value={inputValue}
