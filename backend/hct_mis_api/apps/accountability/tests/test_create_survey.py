@@ -47,6 +47,7 @@ class TestCreateSurvey(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Doe")
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.tp = TargetPopulationFactory(business_area=cls.business_area, program=cls.program)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
     def test_create_survey_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
