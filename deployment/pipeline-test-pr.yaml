@@ -306,6 +306,7 @@ stages:
               command: login
               containerRegistry: $(Docker.registryConnection)
           - script: |
+              docker pull $(Docker.url)/$(Docker.backend.repository):$(tag)
               docker run aquasec/trivy:0.47.0 image $(Docker.url)/$(Docker.backend.repository):$(tag)
 
   - stage: e2e_tests
