@@ -45,8 +45,14 @@ def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
     return target_population
 
 
-def full_rebuild(target_population: TargetPopulation) -> TargetPopulation:
+def full_rebuild(target_population: TargetPopulation, batch_size: int = 10000) -> TargetPopulation:
     households = Household.objects.filter(business_area=target_population.business_area)
     households = households.filter(target_population.targeting_criteria.get_query())
-    target_population.households.set(households)
+    households = households.only("id")
+    target_population.households.clear()
+
+    index = 0
+    while households_ids := households[index * batch_size : (index + 1) * batch_size]:
+        target_population.households.add(*households_ids)
+        index += 1
     return refresh_stats(target_population)

@@ -317,6 +317,12 @@ class DataCollectingTypeValidator(BaseValidator):
     def validate_data_collecting_type(cls, *args: Any, **kwargs: Any) -> Optional[None]:
         data_collecting_type = kwargs.get("data_collecting_type")
         program = kwargs.get("program")
+        business_area = kwargs.get("business_area") or getattr(program, "business_area", None)
+
+        # validate program BA and DCT.limit_to
+        if data_collecting_type and business_area:
+            if business_area not in data_collecting_type.limit_to.all():
+                raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
 
         # user can update the program and don't update data collecting type
         if data_collecting_type:

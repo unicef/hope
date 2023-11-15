@@ -15,6 +15,11 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_SIZE_ONLY,
+    COLLECT_TYPE_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
@@ -42,6 +47,9 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     adjust_payments,
     migrate_data_to_representations,
     migrate_data_to_representations_per_business_area,
+)
+from hct_mis_api.one_time_scripts.soft_delete_original_objects import (
+    soft_delete_original_objects,
 )
 
 
@@ -80,18 +88,16 @@ class TestMigrateDataToRepresentations(TestCase):
         self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
         self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
         self.business_area_sudan = BusinessAreaFactory(name="Sudan")
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
 
         # collecting_types
         generate_data_collecting_types()
-        self.partial = DataCollectingType.objects.get(code="partial")
-        self.full = DataCollectingType.objects.get(code="full")
+        self.partial = DataCollectingType.objects.get(code="partial_individuals")
+        self.full = DataCollectingType.objects.get(code="full_collection")
         self.size_only = DataCollectingType.objects.get(code="size_only")
-        self.no_ind_data = DataCollectingType.objects.get(code="no_ind_data")
-
-        # set compatible types of collection types
-        self.partial.compatible_types.set([self.partial, self.full])
-        self.size_only.compatible_types.set([self.size_only, self.full, self.partial])
-        self.no_ind_data.compatible_types.set([self.no_ind_data, self.full, self.partial, self.size_only])
+        self.no_ind_data = DataCollectingType.objects.get(code="size_age_gender_disaggregated")
 
         Program.objects.all().delete()
         # programs
@@ -150,7 +156,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual1_1,
             registration_data_import=None,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.household1.target_populations.set([self.target_population1, self.target_population_paid])
 
@@ -211,7 +217,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual2_1,
             registration_data_import=None,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.household2.target_populations.set([self.target_population1, self.target_population_paid])
 
@@ -266,7 +272,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual_helper3,
             registration_data_import=None,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.individual_helper3.household = self.household_helper
         self.individual_helper3.save()
@@ -277,7 +283,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household3 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual3_1,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.document3_1 = DocumentFactory(individual=self.individual3_1, program=None)
         self.individual3_1.household = self.household3
@@ -303,7 +309,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual4_1,
             registration_data_import=self.rdi4_1,
-            data_collecting_type=self.full,
+            collect_individual_data=COLLECT_TYPE_FULL,
         )
         self.individual4_1.household = self.household4
         self.individual4_1.save()
@@ -325,7 +331,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual5_1,
             registration_data_import=self.rdi_with_3_hhs,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.individual5_1.household = self.household5
         self.individual5_1.save()
@@ -355,7 +361,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual6_1,
             registration_data_import=self.rdi_with_3_hhs,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.individual6_1.household = self.household6
         self.individual6_1.save()
@@ -374,7 +380,7 @@ class TestMigrateDataToRepresentations(TestCase):
             business_area=self.business_area,
             head_of_household=self.individual7_1,
             registration_data_import=self.rdi_with_3_hhs,
-            data_collecting_type=self.no_ind_data,
+            collect_individual_data=COLLECT_TYPE_NONE,
         )
         self.individual7_1.household = self.household7
         self.individual7_1.save()
@@ -445,7 +451,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             target_populations=[self.target_population_paid],
         )
@@ -458,7 +464,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
                 "withdrawn": True,
             },
             target_populations=[self.target_population_paid],
@@ -472,7 +478,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
                 "withdrawn": True,
             },
             target_populations=[self.target_population_open_in_program_finished],
@@ -486,7 +492,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
         )
 
@@ -501,7 +507,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed_active,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             target_populations=[self.target_population_paid],
         )
@@ -514,7 +520,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed_active,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
                 "withdrawn": True,
             },
             target_populations=[self.target_population_paid],
@@ -528,7 +534,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed_active,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
                 "withdrawn": True,
             },
             target_populations=[self.target_population_open_in_program_finished],
@@ -542,7 +548,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed_active,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
         )
 
@@ -554,7 +560,7 @@ class TestMigrateDataToRepresentations(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_mixed_active,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             target_populations=[self.target_population1],
         )
@@ -565,7 +571,7 @@ class TestMigrateDataToRepresentations(TestCase):
             _,
         ) = self.create_hh_with_ind(
             {},
-            {"data_collecting_type": self.partial},
+            {"collect_individual_data": COLLECT_TYPE_PARTIAL},
         )
         (
             self.individual_mixed_active_full,
@@ -573,7 +579,7 @@ class TestMigrateDataToRepresentations(TestCase):
             _,
         ) = self.create_hh_with_ind(
             {},
-            {"data_collecting_type": self.full},
+            {"collect_individual_data": COLLECT_TYPE_FULL},
         )
         (
             self.individual_mixed_active_full_withdrawn,
@@ -581,7 +587,7 @@ class TestMigrateDataToRepresentations(TestCase):
             _,
         ) = self.create_hh_with_ind(
             {},
-            {"data_collecting_type": self.full, "withdrawn": True},
+            {"collect_individual_data": COLLECT_TYPE_FULL, "withdrawn": True},
         )
         (
             self.individual_mixed_active_size_only,
@@ -589,7 +595,7 @@ class TestMigrateDataToRepresentations(TestCase):
             _,
         ) = self.create_hh_with_ind(
             {},
-            {"data_collecting_type": self.size_only},
+            {"collect_individual_data": COLLECT_TYPE_SIZE_ONLY},
         )
         (
             self.individual_mixed_active_no_ind_data,
@@ -597,7 +603,7 @@ class TestMigrateDataToRepresentations(TestCase):
             _,
         ) = self.create_hh_with_ind(
             {},
-            {"data_collecting_type": self.no_ind_data},
+            {"collect_individual_data": COLLECT_TYPE_NONE},
         )
 
         (
@@ -607,7 +613,7 @@ class TestMigrateDataToRepresentations(TestCase):
         ) = self.create_hh_with_ind(
             {},
             {
-                "data_collecting_type": self.full,
+                "collect_individual_data": COLLECT_TYPE_FULL,
             },
             target_populations=[self.target_population_paid],
         )
@@ -657,6 +663,10 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household_mixed_active_size_only.refresh_from_db()
         self.household_mixed_active_no_ind_data.refresh_from_db()
         self.household_full_closed.refresh_from_db()
+        self.rdi4_1.refresh_from_db()
+        self.rdi_with_3_hhs.refresh_from_db()
+        self.rdi_mixed.refresh_from_db()
+        self.rdi_mixed_active.refresh_from_db()
 
     def test_migrate_data_to_representations_per_business_area(self) -> None:
         household_count = Household.original_and_repr_objects.filter(business_area=self.business_area).count()
@@ -1157,7 +1167,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.individual_helper3.copied_to(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(self.document_helper.copied_to(manager="original_and_repr_objects").count(), 2)
 
-        # check the copied household - copied to storage programs
+        # check the copied household - copied to program_finished1
         self.assertEqual(self.household3.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(self.individual3_1.copied_to(manager="original_and_repr_objects").count(), 1)
 
@@ -1224,12 +1234,13 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(self.household4.target_populations.count(), 0)
         self.assertEqual(self.household4.selections.count(), 0)
 
-        # check the copied household - moved to active programs with compatible type
+        # check the copied household - moved to storage program
         self.assertEqual(self.household4.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(self.individual4_1.copied_to(manager="original_and_repr_objects").count(), 1)
 
         household4_representation = self.household4.copied_to(manager="original_and_repr_objects").first()
-        self.assertEqual(household4_representation.program, self.program_active)
+        program_storage_full = Program.all_objects.get(name=f"Storage program - COLLECTION TYPE " f"{self.full.label}")
+        self.assertEqual(household4_representation.program, program_storage_full)
         self.assertEqual(household4_representation.is_original, False)
         self.assertEqual(household4_representation.origin_unicef_id, self.household4.unicef_id)
         self.assertEqual(household4_representation.copied_from, self.household4)
@@ -1239,7 +1250,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(household4_representation.selections(manager="original_and_repr_objects").count(), 0)
 
         individual4_1_representation = self.individual4_1.copied_to(manager="original_and_repr_objects").first()
-        self.assertEqual(individual4_1_representation.program, self.program_active)
+        self.assertEqual(individual4_1_representation.program, program_storage_full)
         self.assertEqual(individual4_1_representation.is_original, False)
         self.assertEqual(individual4_1_representation.origin_unicef_id, self.individual4_1.unicef_id)
         self.assertEqual(individual4_1_representation.copied_from, self.individual4_1)
@@ -1248,7 +1259,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(individual4_1_representation.documents(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(
             individual4_1_representation.documents(manager="original_and_repr_objects").first().program,
-            self.program_active,
+            program_storage_full,
         )
         self.assertEqual(individual4_1_representation.identities(manager="original_and_repr_objects").count(), 0)
         self.assertEqual(individual4_1_representation.bank_account_info(manager="original_and_repr_objects").count(), 0)
@@ -1260,7 +1271,7 @@ class TestMigrateDataToRepresentations(TestCase):
             self.rdi4_1.households(manager="original_and_repr_objects").filter(is_original=False).count(), 1
         )
         self.assertEqual(self.rdi4_1.individuals(manager="original_and_repr_objects").count(), 2)
-        self.assertEqual(self.rdi4_1.programs.count(), 1)
+        self.assertEqual(self.rdi4_1.program, program_storage_full)
 
         # Test household5, 6, 7
         # check the original households
@@ -1324,7 +1335,9 @@ class TestMigrateDataToRepresentations(TestCase):
             self.rdi_with_3_hhs.households(manager="original_and_repr_objects").filter(is_original=False).count(), 5
         )
         self.assertEqual(self.rdi_with_3_hhs.individuals(manager="original_and_repr_objects").count(), 16)
-        self.assertEqual(self.rdi_with_3_hhs.programs.count(), 3)
+        self.assertIn(
+            self.rdi_with_3_hhs.program, [self.program_active, self.program_finished1, self.program_finished2]
+        )
 
         household5_1_representation1 = Household.original_and_repr_objects.filter(
             is_original=False, copied_from=self.household5, program=self.program_active
@@ -1444,7 +1457,10 @@ class TestMigrateDataToRepresentations(TestCase):
             2,
         )
         # Test mixed households/rdi
-        self.assertEqual(self.rdi_mixed.programs(manager="all_objects").count(), 2)
+        self.assertIn(
+            self.rdi_mixed.program.name,
+            [self.program_finished1.name, f"Storage program - COLLECTION TYPE {self.size_only.label}"],
+        )
 
         self.assertEqual(self.household_mixed_closed_tp_paid.copied_to(manager="original_and_repr_objects").count(), 1)
         repr_household_mixed_closed_tp_paid = self.household_mixed_closed_tp_paid.copied_to(
@@ -1468,23 +1484,28 @@ class TestMigrateDataToRepresentations(TestCase):
         ).first()
         self.assertEqual(
             repr_household_mixed_closed_tp_withdrawn_not_paid.program.name,
-            f"Storage program - COLLECTION TYPE "
-            f"{self.household_mixed_closed_tp_withdrawn_not_paid.data_collecting_type.label}",
+            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
         )
-        self.assertEqual(
-            repr_household_mixed_closed_tp_withdrawn_not_paid.program.is_removed,
-            True,
+        self.assertFalse(
+            repr_household_mixed_closed_tp_withdrawn_not_paid.program.is_visible,
         )
 
         self.assertEqual(self.household_mixed_no_tp.copied_to(manager="original_and_repr_objects").count(), 1)
         repr_household_mixed_no_tp = self.household_mixed_no_tp.copied_to(manager="original_and_repr_objects").first()
         self.assertEqual(
             repr_household_mixed_no_tp.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.household_mixed_no_tp.data_collecting_type.label}",
+            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
         )
 
         # Test mixed households/rdi
-        self.assertEqual(self.rdi_mixed_active.programs(manager="all_objects").count(), 3)
+        self.assertIn(
+            self.rdi_mixed_active.program.name,
+            [
+                f"Storage program - COLLECTION TYPE {self.size_only.label}",
+                self.program_active.name,
+                self.program_finished1.name,
+            ],
+        )
 
         self.assertEqual(
             self.household_mixed_closed_tp_paid_active.copied_to(manager="original_and_repr_objects").count(), 2
@@ -1519,8 +1540,7 @@ class TestMigrateDataToRepresentations(TestCase):
         )
         self.assertEqual(
             repr_household_mixed_closed_tp_withdrawn_not_paid_active.program.name,
-            f"Storage program - COLLECTION TYPE "
-            f"{self.household_mixed_closed_tp_withdrawn_not_paid_active.data_collecting_type.label}",
+            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
         )
 
         self.assertEqual(self.household_mixed_no_tp_active.copied_to(manager="original_and_repr_objects").count(), 1)
@@ -1543,9 +1563,12 @@ class TestMigrateDataToRepresentations(TestCase):
         repr_household_mixed_active_partial = self.household_mixed_active_partial.copied_to(
             manager="original_and_repr_objects"
         ).first()
+        program_storage_partial = Program.all_objects.get(
+            name=f"Storage program - COLLECTION TYPE {self.partial.label}"
+        )
         self.assertEqual(
             repr_household_mixed_active_partial.program,
-            self.program_active,
+            program_storage_partial,
         )
 
         self.assertEqual(self.household_mixed_active_full.copied_to(manager="original_and_repr_objects").count(), 1)
@@ -1554,7 +1577,7 @@ class TestMigrateDataToRepresentations(TestCase):
         ).first()
         self.assertEqual(
             repr_household_mixed_active_full.program,
-            self.program_active,
+            program_storage_full,
         )
 
         self.assertEqual(
@@ -1592,23 +1615,27 @@ class TestMigrateDataToRepresentations(TestCase):
 
         self.assertEqual(
             self.household_full_closed.copied_to(manager="original_and_repr_objects").count(),
-            2,
+            1,
         )
-        self.assertIn(
-            self.program_active.id,
-            self.household_full_closed.copied_to(manager="original_and_repr_objects").values_list("program", flat=True),
-        )
-        self.assertIn(
-            self.program_finished1.id,
-            self.household_full_closed.copied_to(manager="original_and_repr_objects").values_list("program", flat=True),
+        self.assertEqual(
+            self.household_full_closed.copied_to(manager="original_and_repr_objects").first().program,
+            self.program_finished1,
         )
 
         # 2x household1, 2x household2, 1x household3, 1x household_helper,
-        # 1x household4, 5x from rdi_with_3_hhs, 17x mixed rdis
-        self.assertEqual(Household.original_and_repr_objects.count() - household_count, 29)
+        # 1x household4, 5x from rdi_with_3_hhs, 6x from mixed rdi,
+        # 1x(household_mixed_closed_tp_paid, household_mixed_closed_tp_withdrawn_paid,
+        # household_mixed_closed_tp_withdrawn_not_paid, household_mixed_no_tp,household_mixed_active_partial,
+        # household_mixed_active_partial, household_mixed_active_full, household_mixed_active_size_only,
+        # household_mixed_active_no_ind_data, household_full_closed)
+        self.assertEqual(Household.original_and_repr_objects.count() - household_count, 28)
         # 2x individual1_1, 2x individual1_2, 2x individual1_3, 2x individual2_1, 2x individual2_2, 2x collector2_1,
-        # 1x individual3_1, 2x individual_helper3, 1x individual4_1, 11 from rdi_with_3_hhs, 17x mixed rdis
-        self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 44)
+        # 1x individual3_1, 2x individual_helper3, 1x individual4_1, 11 from rdi_with_3_hhs, 6x from mixed rdi, 1x from(
+        # household_mixed_closed_tp_paid, household_mixed_closed_tp_withdrawn_paid,
+        # household_mixed_closed_tp_withdrawn_not_paid, household_mixed_no_tp,household_mixed_active_partial,
+        # household_mixed_active_partial, household_mixed_active_full, household_mixed_active_size_only,
+        # household_mixed_active_no_ind_data, household_full_closed)
+        self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 43)
         # 6x for household1, 6x for household2, 1x for household3, 2x for household_helper, 1x for household4
         self.assertEqual(Document.original_and_repr_objects.count() - document_count, 16)
         # 2x for household1, 2x for household2, 1x for household_helper, 1x for household3, 6x mixed rdis
@@ -1620,6 +1647,34 @@ class TestMigrateDataToRepresentations(TestCase):
         # 4x for household1, 4x for household2, 2x for household3, 1x for household4, 4x household7,
         # 1x household6, 4x household5
         self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 20)
+
+        # test soft delete of original objects
+        soft_delete_original_objects()
+        self.refresh_objects()
+        self.assertEqual(Household.all_objects.filter(is_removed=True).count(), household_count)
+        self.assertEqual(Household.all_objects.filter(is_removed=True, is_original=True).count(), household_count)
+        self.assertEqual(Household.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(Individual.all_objects.filter(is_removed=True).count(), individual_count)
+        self.assertEqual(Individual.all_objects.filter(is_removed=True, is_original=True).count(), individual_count)
+        self.assertEqual(Individual.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(IndividualRoleInHousehold.all_objects.filter(is_removed=True).count(), roles_count)
+        self.assertEqual(
+            IndividualRoleInHousehold.all_objects.filter(is_removed=True, is_original=True).count(), roles_count
+        )
+        self.assertEqual(IndividualRoleInHousehold.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(Document.all_objects.filter(is_removed=True).count(), document_count)
+        self.assertEqual(Document.all_objects.filter(is_removed=True, is_original=True).count(), document_count)
+        self.assertEqual(Document.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(IndividualIdentity.all_objects.filter(is_removed=True).count(), identity_count)
+        self.assertEqual(
+            IndividualIdentity.all_objects.filter(is_removed=True, is_original=True).count(), identity_count
+        )
+        self.assertEqual(IndividualIdentity.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(BankAccountInfo.all_objects.filter(is_removed=True).count(), bank_account_info_count)
+        self.assertEqual(
+            BankAccountInfo.all_objects.filter(is_removed=True, is_original=True).count(), bank_account_info_count
+        )
+        self.assertEqual(BankAccountInfo.all_objects.filter(is_removed=True, is_original=False).count(), 0)
 
     def test_adjust_payments_and_payment_records(self) -> None:
         payment_count = Payment.objects.filter(business_area=self.business_area).count()
@@ -1752,20 +1807,20 @@ class TestCountrySpecificRules(TestCase):
     def setUp(self) -> None:
         # collecting_types
         generate_data_collecting_types()
-        self.partial = DataCollectingType.objects.get(code="partial")
-        self.full = DataCollectingType.objects.get(code="full")
+        self.partial = DataCollectingType.objects.get(code="partial_individuals")
+        self.full = DataCollectingType.objects.get(code="full_collection")
         self.size_only = DataCollectingType.objects.get(code="size_only")
-        self.no_ind_data = DataCollectingType.objects.get(code="no_ind_data")
-
-        # set compatible types of collection types
-        self.partial.compatible_types.set([self.partial, self.full])
-        self.size_only.compatible_types.set([self.size_only, self.full, self.partial])
-        self.no_ind_data.compatible_types.set([self.no_ind_data, self.full, self.partial, self.size_only])
+        self.no_ind_data = DataCollectingType.objects.get(code="size_age_gender_disaggregated")
 
         # Country specific rules setup
         self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
         self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
         self.business_area_sudan = BusinessAreaFactory(name="Sudan")
+
+        # Unknown unassigned rules setup
+        self.business_area_trinidad_and_tobago = BusinessAreaFactory(name="Trinidad & Tobago")
+        self.business_area_slovakia = BusinessAreaFactory(name="Slovakia")
+        self.business_area_sri_lanka = BusinessAreaFactory(name="Sri Lanka")
 
         # Objects for Afghanistan specific rules
         self.rdi_for_afghanistan_ignore = RegistrationDataImportFactory(
@@ -1778,12 +1833,6 @@ class TestCountrySpecificRules(TestCase):
             business_area=self.business_area_afghanistan,
             data_collecting_type=self.full,
             name="afghanistan finished",
-        )
-        self.program_afg_size_only = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=self.business_area_afghanistan,
-            data_collecting_type=self.size_only,
-            name="afghanistan active size only",
         )
         self.program_afg_active = ProgramFactory(
             status=Program.ACTIVE,
@@ -1810,7 +1859,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_afghanistan_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_afghanistan,
             target_populations=[self.target_population_afg_finished],
@@ -1822,7 +1871,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_afghanistan_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_afghanistan,
             target_populations=[self.target_population_afg_active],
@@ -1834,7 +1883,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_afghanistan_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_afghanistan,
             target_populations=[],
@@ -1872,7 +1921,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_sudan_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_sudan,
             target_populations=[self.target_population_sudan_active_other],
@@ -1884,7 +1933,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_sudan_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_sudan,
             target_populations=[],
@@ -1921,7 +1970,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_congo_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_congo,
             target_populations=[self.target_population_congo_active_other],
@@ -1933,7 +1982,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_congo_ignore,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_congo,
             target_populations=[],
@@ -1951,7 +2000,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_congo_to_withdraw,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_congo,
             target_populations=[self.target_population_congo_active_other],
@@ -1963,7 +2012,7 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_congo_to_withdraw,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_congo,
             target_populations=[],
@@ -1980,10 +2029,57 @@ class TestCountrySpecificRules(TestCase):
             {},
             {
                 "registration_data_import": self.rdi_for_congo_to_withdraw_no_tp,
-                "data_collecting_type": self.size_only,
+                "collect_individual_data": COLLECT_TYPE_SIZE_ONLY,
             },
             business_area=self.business_area_congo,
             target_populations=[],
+        )
+
+        # Unknown setup
+        (
+            _,
+            self.household_unknown_for_storage,
+        ) = self.create_hh_with_ind(
+            {},
+            {
+                "collect_individual_data": COLLECT_TYPE_UNKNOWN,
+            },
+            business_area=self.business_area_congo,
+            target_populations=[],
+        )
+        (
+            _,
+            self.household_unknown_from_sudan,
+        ) = self.create_hh_with_ind(
+            {},
+            {
+                "collect_individual_data": COLLECT_TYPE_UNKNOWN,
+            },
+            business_area=self.business_area_sudan,
+            target_populations=[],
+        )
+        (
+            _,
+            self.household_unknown_from_trinidad,
+        ) = self.create_hh_with_ind(
+            {},
+            {
+                "collect_individual_data": COLLECT_TYPE_UNKNOWN,
+            },
+            business_area=self.business_area_trinidad_and_tobago,
+            target_populations=[],
+        )
+        self.program_sudan_for_unknown = ProgramFactory(
+            status=Program.ACTIVE,
+            business_area=self.business_area_sudan,
+            data_collecting_type=self.full,
+            name="MCCT programme",
+        )
+        self.program_trinidad_for_unknown = ProgramFactory(
+            status=Program.ACTIVE,
+            business_area=self.business_area_trinidad_and_tobago,
+            data_collecting_type=self.full,
+            name="TEEN",
         )
 
     def refresh_objects(self) -> None:
@@ -1998,26 +2094,31 @@ class TestCountrySpecificRules(TestCase):
         self.household_congo_no_tp_withdraw.refresh_from_db()
         self.household_congo_no_tp_withdraw_2.refresh_from_db()
         self.rdi_for_congo_to_withdraw_no_tp.refresh_from_db()
+        self.rdi_for_afghanistan_ignore.refresh_from_db()
+        self.rdi_for_sudan_ignore.refresh_from_db()
+        self.rdi_for_congo_ignore.refresh_from_db()
+        self.rdi_for_congo_to_withdraw.refresh_from_db()
+        self.household_unknown_for_storage.refresh_from_db()
+        self.household_unknown_from_sudan.refresh_from_db()
+        self.household_unknown_from_trinidad.refresh_from_db()
 
     def test_migrate_data_to_representations_for_country_specific_rules(self) -> None:
+        self.assertIsNone(DataCollectingType.objects.filter(code="unknown").first())
+
         migrate_data_to_representations()
 
         self.refresh_objects()
 
         # Test Afghanistan rules
-        self.assertEqual(self.rdi_for_afghanistan_ignore.programs.distinct().count(), 3)
-        self.assertSetEqual(
-            set(self.rdi_for_afghanistan_ignore.programs.all()),
-            {self.program_afg_finished, self.program_afg_active, self.program_afg_size_only},
-        )
+        self.assertIn(self.rdi_for_afghanistan_ignore.program, [self.program_afg_finished, self.program_afg_active])
 
         self.assertEqual(
             self.household_afg_in_closed.copied_to(manager="original_and_repr_objects").count(),
-            3,
+            2,
         )
         self.assertEqual(
             self.household_afg_in_active.copied_to(manager="original_and_repr_objects").count(),
-            2,
+            1,
         )
         self.assertEqual(
             self.household_afg_not_in_tp.copied_to(manager="original_and_repr_objects").count(),
@@ -2025,14 +2126,7 @@ class TestCountrySpecificRules(TestCase):
         )
 
         # Test Sudan rules
-        self.assertEqual(self.rdi_for_sudan_ignore.programs.count(), 2)
-        self.assertSetEqual(
-            set(self.rdi_for_sudan_ignore.programs.all()),
-            {
-                self.program_sudan_active,
-                self.program_sudan_active_other,
-            },
-        )
+        self.assertIn(self.rdi_for_sudan_ignore.program, [self.program_sudan_active, self.program_sudan_active_other])
         self.assertEqual(self.household_sudan_in_tp.copied_to(manager="original_and_repr_objects").count(), 2)
         self.assertIn(
             self.program_sudan_active_other.id,
@@ -2069,14 +2163,7 @@ class TestCountrySpecificRules(TestCase):
         )
 
         # Test Congo rules
-        self.assertEqual(self.rdi_for_congo_ignore.programs.count(), 2)
-        self.assertSetEqual(
-            set(self.rdi_for_congo_ignore.programs.all()),
-            {
-                self.program_congo_active,
-                self.program_congo_active_other,
-            },
-        )
+        self.assertIn(self.rdi_for_congo_ignore.program, [self.program_congo_active, self.program_congo_active_other])
         self.assertEqual(self.household_congo_in_tp.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(
             self.program_congo_active_other,
@@ -2101,8 +2188,7 @@ class TestCountrySpecificRules(TestCase):
         )
 
         # Congo withdraw
-        self.assertEqual(self.rdi_for_congo_to_withdraw.programs.count(), 1)
-        self.assertEqual(self.rdi_for_congo_to_withdraw.programs.first(), self.program_congo_active_other)
+        self.assertEqual(self.rdi_for_congo_to_withdraw.program, self.program_congo_active_other)
         self.assertEqual(self.household_congo_in_tp_withdraw.copied_to(manager="original_and_repr_objects").count(), 1)
         self.assertEqual(
             self.household_congo_in_tp_withdraw.copied_to(manager="original_and_repr_objects").first().program,
@@ -2121,15 +2207,39 @@ class TestCountrySpecificRules(TestCase):
             self.household_congo_no_tp_withdraw.copied_to(manager="original_and_repr_objects").first().withdrawn
         )
 
-        self.assertEqual(self.rdi_for_congo_to_withdraw_no_tp.programs(manager="all_objects").count(), 1)
         self.assertEqual(
-            self.rdi_for_congo_to_withdraw_no_tp.programs(manager="all_objects").first().name,
-            "Storage program - COLLECTION TYPE Size only",
+            self.rdi_for_congo_to_withdraw_no_tp.program.name,
+            f"Storage program - COLLECTION TYPE {self.size_only.label}",
         )
         self.assertEqual(
             self.household_congo_no_tp_withdraw_2.copied_to(manager="original_and_repr_objects").count(), 1
         )
         self.assertEqual(
             self.household_congo_no_tp_withdraw_2.copied_to(manager="original_and_repr_objects").first().program.name,
-            "Storage program - COLLECTION TYPE Size only",
+            f"Storage program - COLLECTION TYPE {self.size_only.label}",
+        )
+
+        # Test Unknown rules
+        unknown_coll_type = DataCollectingType.objects.filter(code="unknown").first()
+        self.assertIsNotNone(unknown_coll_type)
+        program_storage_unknown = Program.all_objects.get(
+            data_collecting_type=unknown_coll_type, business_area=self.business_area_congo
+        )
+
+        self.assertEqual(self.household_unknown_for_storage.copied_to(manager="original_and_repr_objects").count(), 1)
+        self.assertEqual(
+            self.household_unknown_for_storage.copied_to(manager="original_and_repr_objects").first().program,
+            program_storage_unknown,
+        )
+
+        self.assertEqual(self.household_unknown_from_sudan.copied_to(manager="original_and_repr_objects").count(), 1)
+        self.assertEqual(
+            self.household_unknown_from_sudan.copied_to(manager="original_and_repr_objects").first().program,
+            self.program_sudan_for_unknown,
+        )
+
+        self.assertEqual(self.household_unknown_from_trinidad.copied_to(manager="original_and_repr_objects").count(), 1)
+        self.assertEqual(
+            self.household_unknown_from_trinidad.copied_to(manager="original_and_repr_objects").first().program,
+            self.program_trinidad_for_unknown,
         )

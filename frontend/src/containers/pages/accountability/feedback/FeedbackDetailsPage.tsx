@@ -25,6 +25,11 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
 
   const feedback = data?.feedback;
 
+  if (loading) return <LoadingComponent />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
+  if (!data || permissions === null) return null;
+
   const canEdit = hasPermissions(
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
     permissions,
@@ -38,12 +43,6 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     permissions,
   );
-
-  if (loading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
-
-  if (!data || permissions === null) return null;
-
   return (
     <>
       <FeedbackDetailsToolbar canEdit={canEdit} feedback={feedback} />
