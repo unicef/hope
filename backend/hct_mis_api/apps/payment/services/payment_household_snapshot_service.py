@@ -131,7 +131,7 @@ def get_individual_snapshot(individual: Individual) -> dict:
     bank_account_info = individual.bank_account_info.first()
     if bank_account_info:
         individual_data["bank_account_info"] = {
-            "bank_name": bank_account_info.bank_account_info,
+            "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
             "debit_card_number": bank_account_info.debit_card_number,
         }
