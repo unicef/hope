@@ -316,6 +316,19 @@
     }
 },
 {
+    "model": "household.documenttype",
+    "pk": "10cceec6-8371-48ec-b05e-767bbbc983a3",
+    "fields": {
+        "created_at": "2023-05-25T12:39:46.671Z",
+        "updated_at": "2023-05-25T12:39:46.671Z",
+        "label": "Registration Token",
+        "key": "registration_token",
+        "is_identity_document": true,
+        "unique_for_individual": false,
+        "valid_for_deduplication": false
+    }
+},
+{
   "model": "household.document",
   "pk": "0040cb2a-4b86-41b2-82b1-d5ac4d11471d",
   "fields": {
@@ -426,6 +439,22 @@
     "status": "VALID",
     "cleared_date": "2022-08-10T14:30:11.116Z"
   }
+},
+{
+  "model": "household.document",
+  "pk": "43575a6d-5238-4006-8cbb-a848fd3df5b4",
+  "fields": {
+      "is_removed": false,
+      "created_at": "2022-08-10T14:30:11.116Z",
+      "updated_at": "2022-08-10T14:30:11.116Z",
+      "document_number": "reg_token_test_123123",
+      "photo": "",
+      "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
+      "type": "10cceec6-8371-48ec-b05e-767bbbc983a3",
+      "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
+      "status": "VALID",
+      "cleared_date": "2022-08-10T14:30:11.116Z"
+    }
 },
 {
   "model": "household.individualidentity",
