@@ -1,19 +1,16 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { AccountBalance } from '@material-ui/icons';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  GrievancesChoiceDataQuery,
-  useAllProgramsForChoicesQuery,
-} from '../../../__generated__/graphql';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
 import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
+import { ProgramAutocomplete } from '../../../shared/autocompletes/ProgramAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
@@ -24,7 +21,6 @@ import {
 import { createHandleApplyFilterChange } from '../../../utils/utils';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { FiltersSection } from '../../core/FiltersSection';
-import { LoadingComponent } from '../../core/LoadingComponent';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
@@ -48,13 +44,9 @@ export const GrievancesFilters = ({
   setAppliedFilter,
 }: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
-  const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
 
   const {
     handleFilterChange,
@@ -120,11 +112,6 @@ export const GrievancesFilters = ({
 
   const subCategories = issueTypeDict[filter.category]?.subCategories || [];
 
-  if (loading) return <LoadingComponent />;
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
   return (
     <FiltersSection
       clearHandler={handleClearFilter}
@@ -163,23 +150,15 @@ export const GrievancesFilters = ({
         </Grid>
         {isAllPrograms && (
           <Grid item xs={3}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('program', e.target.value)}
-              label={t('Programme')}
+            <ProgramAutocomplete
+              filter={filter}
+              name='program'
               value={filter.program}
-              icon={<FlashOnIcon />}
-              fullWidth
-              data-cy='filters-program'
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
           </Grid>
         )}
         <Grid container item xs={3}>
@@ -293,6 +272,7 @@ export const GrievancesFilters = ({
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
+              additionalVariables={{ isTicketCreator: true }}
             />
           </Grid>
         )}
@@ -328,7 +308,6 @@ export const GrievancesFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
-            dataCy='filters-registration-data-import'
           />
         </Grid>
         <Grid item xs={3}>

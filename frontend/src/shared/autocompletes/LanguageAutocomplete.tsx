@@ -1,25 +1,21 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleOptionSelected,
+} from '../../utils/utils';
 import TextField from '../TextField';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-`;
+import { StyledAutocomplete } from './StyledAutocomplete';
 
 export const LanguageAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -30,7 +26,6 @@ export const LanguageAutocomplete = ({
   dataCy,
 }: {
   disabled?;
-  fullWidth?: boolean;
   name: string;
   filter?;
   value?: string;
@@ -78,43 +73,37 @@ export const LanguageAutocomplete = ({
 
   if (!data) return null;
 
+  const allEdges = get(data, 'allLanguages.edges', []);
+
   return (
     <StyledAutocomplete
       value={value}
-      fullWidth={fullWidth}
       data-cy={dataCy}
       open={open}
       filterOptions={(options) => options}
       onChange={(_, selectedValue) => {
-        if (selectedValue?.node?.code) {
-          handleFilterChange(name, selectedValue?.node?.code);
-        }
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.code,
+          handleFilterChange,
+        );
       }}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e, reason) => {
+      onClose={(_, reason) => {
         setOpen(false);
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, v) => {
-        return v === option.node.code;
-      }}
-      getOptionLabel={(option) => {
-        let label;
-        if (option.node) {
-          label = `${option.node.english}`;
-        } else {
-          const foundLang = data?.allLanguages?.edges?.find(
-            (el) => el.node.code === option,
-          )?.node.english;
-          label = foundLang ? `${foundLang}` : inputValue;
-        }
-        return `${label}`;
-      }}
+      getOptionSelected={(option, value1) =>
+        handleOptionSelected(option.node?.code, value1)
+      }
+      getOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue, 'language')
+      }
       disabled={disabled}
-      options={get(data, 'allLanguages.edges', [])}
+      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField

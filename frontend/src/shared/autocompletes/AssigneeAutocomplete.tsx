@@ -1,26 +1,23 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import TextField from '../TextField';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')};
-`;
+import { useDebounce } from '../../hooks/useDebounce';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleAutocompleteClose,
+  handleOptionSelected,
+} from '../../utils/utils';
+import TextField from '../TextField';
+import { StyledAutocomplete } from './StyledAutocomplete';
 
 export const AssigneeAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -32,7 +29,6 @@ export const AssigneeAutocomplete = ({
   dataCy,
 }: {
   disabled?;
-  fullWidth?: boolean;
   name: string;
   filter;
   value: string;
@@ -84,42 +80,35 @@ export const AssigneeAutocomplete = ({
 
   if (!data) return null;
 
+  const allEdges = get(data, 'allUsers.edges', []);
+
   return (
     <StyledAutocomplete
       value={value}
       data-cy={dataCy}
-      fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) => {
-        if (selectedValue?.node?.id) {
-          handleFilterChange(name, selectedValue.node.id);
-        }
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        );
       }}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (reason === 'select-option') return;
-        onInputTextChange('');
-      }}
-      getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
-      }}
-      getOptionLabel={(option) => {
-        let optionLabel;
-        if (option.node) {
-          optionLabel = `${option.node.email}`;
-        } else {
-          optionLabel =
-            data?.allUsers?.edges?.find((el) => el.node.id === option)?.node
-              .email || '';
-        }
-        return `${optionLabel}`;
-      }}
+      onClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      getOptionSelected={(option, value1) =>
+        handleOptionSelected(option.node?.id, value1)
+      }
+      getOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
+      }
       disabled={disabled}
-      options={get(data, 'allUsers.edges', [])}
+      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField

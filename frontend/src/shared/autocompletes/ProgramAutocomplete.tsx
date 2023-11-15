@@ -1,62 +1,52 @@
+import { InputAdornment } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleOptionSelected,
+} from '../../utils/utils';
 import TextField from '../TextField';
+import { StyledAutocomplete } from './StyledAutocomplete';
 
-const StyledAutocomplete = styled(Autocomplete)`
-  .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')};
-`;
-
-export const CreatedBySurveyAutocomplete = ({
+export const ProgramAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
-  label,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
   setFilter,
 }: {
-  disabled?: boolean;
-  fullWidth?: boolean;
+  disabled?;
   name: string;
-  filter;
-  value: string;
-  label?: string;
+  filter?;
+  value?: string;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
+  dataCy?: string;
 }): React.ReactElement => {
+  const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const history = useHistory();
   const location = useLocation();
-  const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 1000);
-  const businessArea = useBusinessArea();
 
-  const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
-    variables: {
-      businessArea,
-      first: 100,
-      orderBy: 'first_name,last_name,email',
-      search: debouncedInputText,
-      isSurveyCreator: true,
-    },
+  const [loadData, { data, loading }] = useAllProgramsForChoicesLazyQuery({
+    variables: { businessArea, search: debouncedInputText },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -66,7 +56,7 @@ export const CreatedBySurveyAutocomplete = ({
     }
   }, [open, debouncedInputText, loadData]);
 
-  // load all users on mount to match the value from the url
+  // load all languages on mount to match the value from the url
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -83,58 +73,54 @@ export const CreatedBySurveyAutocomplete = ({
 
   if (!data) return null;
 
+  const allEdges = get(data, 'allPrograms.edges', []);
+
   return (
     <StyledAutocomplete
       value={value}
-      data-cy='filters-created-by-autocomplete'
-      fullWidth={fullWidth}
+      icon={<FlashOnIcon />}
+      data-cy='filters-program'
       open={open}
-      filterOptions={(options1) => options1}
+      filterOptions={(options) => options}
       onChange={(_, selectedValue) => {
-        if (selectedValue?.node?.id) {
-          handleFilterChange(name, selectedValue.node.id);
-        }
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        );
       }}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e, reason) => {
+      onClose={(_, reason) => {
         setOpen(false);
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
-      }}
-      getOptionLabel={(option) => {
-        let optionLabel;
-        if (option.node) {
-          const { firstName, lastName } = option.node;
-          optionLabel = `${firstName} ${lastName}`;
-        } else {
-          const foundUser = data?.allUsers?.edges?.find(
-            (el) => el.node.id === option,
-          )?.node;
-          optionLabel = foundUser
-            ? `${foundUser.firstName} ${foundUser.lastName}`
-            : inputValue;
-        }
-        return `${optionLabel}`;
-      }}
+      getOptionSelected={(option, value1) =>
+        handleOptionSelected(option.node?.id, value1)
+      }
+      getOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
+      }
       disabled={disabled}
-      options={get(data, 'allUsers.edges', [])}
+      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label || t('Created By')}
-          data-cy='filters-created-by-input'
+          label={t('Programme')}
           variant='outlined'
           margin='dense'
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position='start'>
+                <FlashOnIcon />
+              </InputAdornment>
+            ),
             endAdornment: (
               <>
                 {loading ? (

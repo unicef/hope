@@ -1,26 +1,23 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleAutocompleteClose,
+  handleOptionSelected,
+} from '../../utils/utils';
 import TextField from '../TextField';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')};
-`;
+import { StyledAutocomplete } from './StyledAutocomplete';
 
 export const CreatedByAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -29,9 +26,9 @@ export const CreatedByAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  additionalVariables,
 }: {
   disabled?: boolean;
-  fullWidth?: boolean;
   name: string;
   filter;
   value: string;
@@ -40,6 +37,7 @@ export const CreatedByAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
+  additionalVariables;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -55,7 +53,7 @@ export const CreatedByAutocomplete = ({
       first: 100,
       orderBy: 'first_name,last_name,email',
       search: debouncedInputText,
-      isTicketCreator: true,
+      ...additionalVariables,
     },
     fetchPolicy: 'cache-and-network',
   });
@@ -71,6 +69,12 @@ export const CreatedByAutocomplete = ({
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (!value) {
+      onInputTextChange('');
+    }
+  }, [value, onInputTextChange]);
+
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
     history,
@@ -82,46 +86,35 @@ export const CreatedByAutocomplete = ({
   );
   if (!data) return null;
 
+  const allEdges = get(data, 'allUsers.edges', []);
+
   return (
     <StyledAutocomplete
       value={value}
       data-cy='filters-created-by-autocomplete'
-      fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
       onChange={(_, selectedValue) => {
-        if (selectedValue?.node?.id) {
-          handleFilterChange(name, selectedValue.node.id);
-        }
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        );
       }}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (reason === 'select-option') return;
-        onInputTextChange('');
-      }}
-      getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
-      }}
-      getOptionLabel={(option) => {
-        let optionLabel;
-        if (option.node) {
-          const { firstName, lastName } = option.node;
-          optionLabel = `${firstName} ${lastName}`;
-        } else {
-          const foundUser = data?.allUsers?.edges?.find(
-            (el) => el.node.id === option,
-          )?.node;
-          optionLabel = foundUser
-            ? `${foundUser.firstName} ${foundUser.lastName}`
-            : inputValue;
-        }
-        return `${optionLabel}`;
-      }}
+      onClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      getOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      getOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
+      }
       disabled={disabled}
-      options={get(data, 'allUsers.edges', [])}
+      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField
