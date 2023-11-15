@@ -162,9 +162,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return list of permissions based on User Role BA and User Partner
         if program_id in arguments need to check if user.partner.permmisions json has program
         """
+        # TODO: MB remove in future default value 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
-            has_program_access = program_id in self.get_partner_programs_areas_dict(
+            has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
                 business_area_slug=business_area_slug
             )
 
@@ -193,6 +194,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
+        # TODO: MB remove in future default value 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
             has_program_access = program_id in self.get_partner_programs_areas_dict(business_area_id=business_area.pk)

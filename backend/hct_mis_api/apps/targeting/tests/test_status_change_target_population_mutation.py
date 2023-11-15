@@ -63,6 +63,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.user.partner.permissions = {f"{str(cls.business_area.pk)}": {"programs": {f"{str(cls.program.pk)}": []}}}
+        cls.user.partner.save()
 
         tp = TargetPopulation(
             name="Draft Target Population",
