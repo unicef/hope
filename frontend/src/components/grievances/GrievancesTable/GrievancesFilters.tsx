@@ -253,6 +253,7 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <AssigneeAutocomplete
             filter={filter}
+            label={t('Assigned To')}
             name='assignedTo'
             value={filter.assignedTo}
             setFilter={setFilter}

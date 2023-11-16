@@ -29,7 +29,7 @@ export const AssigneeAutocomplete = ({
   name: string;
   filter;
   value: string;
-  label?: string;
+  label: string;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;

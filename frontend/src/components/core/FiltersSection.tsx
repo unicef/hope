@@ -1,9 +1,6 @@
-import { Box, Button, Collapse, Grid } from '@material-ui/core';
+import { Box, Collapse, Grid } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
-import ExpandLess from '@material-ui/icons/ExpandLessRounded';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import React, { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ClearApplyButtons } from './ClearApplyButtons';
 
@@ -27,11 +24,11 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
   applyHandler,
   isOnPaper = true,
 }): ReactElement => {
-  const [expanded, setExpanded] = useState(true);
-  const { t } = useTranslation();
+  const [expanded] = useState(true);
 
   const filtersComponent = (
     <>
+      {/* //TODO: hiding controlers for now */}
       <Grid container alignItems='flex-end' spacing={3}>
         <Box
           pt={4}
@@ -41,7 +38,7 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
           justifyContent='flex-start'
           width='100%'
         >
-          <Button
+          {/* <Button
             variant='text'
             color='primary'
             endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
@@ -49,7 +46,7 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
             data-cy='button-filters-expand'
           >
             {expanded ? t('HIDE FILTERS') : t('SHOW FILTERS')}
-          </Button>
+          </Button> */}
         </Box>
       </Grid>
       <Collapse in={expanded}>
