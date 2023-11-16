@@ -1040,10 +1040,8 @@ export const getAutocompleteOptionLabel = (
 export const handleOptionSelected = (
   optionValue: string,
   value: string | null | undefined,
-  // onInputTextChange?: (value: string) => void,
 ): boolean => {
   if (value === '' || value === null) {
-    // onInputTextChange('');
     return false;
   }
   return optionValue === value;

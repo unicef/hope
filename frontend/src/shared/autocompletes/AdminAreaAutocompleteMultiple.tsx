@@ -36,7 +36,7 @@ export function AdminAreaAutocompleteMultiple({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputTextChange] = React.useState('');
 
-  const debouncedInputText = useDebounce(inputValue, 1000);
+  const debouncedInputText = useDebounce(inputValue, 800);
   const [newValue, setNewValue] = useState([]);
   const { businessArea } = useBaseUrl();
   const { data, loading } = useAllAdminAreasQuery({

@@ -42,7 +42,7 @@ export const CreatedByAutocomplete = ({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 1000);
+  const debouncedInputText = useDebounce(inputValue, 800);
   const businessArea = useBusinessArea();
 
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
