@@ -930,6 +930,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_collector_name", _("Additional Collector Name")),
         ("additional_document_type", _("Additional Document Type")),
         ("additional_document_number", _("Additional Document Number")),
+        ("registration_token", _("Registration Token")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -944,7 +945,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
-        max_length=500,
+        max_length=1000,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -1024,6 +1025,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
         }
+        additional_columns = {"registration_token": cls.get_registration_token_doc_number}
+        if column_name in additional_columns:
+            method = additional_columns[column_name]
+            return method(payment)
+
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
         if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
@@ -1041,6 +1047,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             )
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
+
+    @staticmethod
+    def get_registration_token_doc_number(payment: "Payment") -> str:
+        doc = Document.objects.filter(individual=payment.collector, type__key="registration_token").first()
+        return doc.document_number if doc else ""
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns) + len(self.core_fields)})"
