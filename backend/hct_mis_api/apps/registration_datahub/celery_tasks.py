@@ -587,5 +587,6 @@ def clean_old_record_files_task(default_timedelta: int = 60) -> None:
             files=None
         )
         logger.info("Record's files have benn successfully cleared")
-    except Exception:
-        logger.error("Clearance of record's files failed")
+    except Exception as e:
+        logger.error(e)
+        raise
