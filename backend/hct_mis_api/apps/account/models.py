@@ -207,7 +207,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             if self.partner.is_unicef:
                 has_program_access = True
             else:
-                has_program_access = program_id in self.get_partner_programs_areas_dict(business_area_id=business_area.pk)
+                has_program_access = program_id in self.get_partner_programs_areas_dict(
+                    business_area_id=business_area.pk
+                )
 
         partner_role_ids = self.get_partner_role_ids_list(business_area_id=business_area.pk)
 
