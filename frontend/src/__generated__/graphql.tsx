@@ -16,10 +16,10 @@ export type Scalars = {
   Int: number,
   Float: number,
   DateTime: any,
+  JSONString: any,
   BigInt: any,
   Date: any,
   UUID: any,
-  JSONString: any,
   Decimal: any,
   Arg: any,
   GeoJSON: any,
@@ -4375,6 +4375,7 @@ export type PartnerType = {
   id: Scalars['ID'],
   name: Scalars['String'],
   isUn: Scalars['Boolean'],
+  permissions: Scalars['JSONString'],
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -13426,7 +13427,7 @@ export type AllProgramsForChoicesQuery = (
       & Pick<ProgramNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'individualDataNeeded'>
+        & Pick<ProgramNode, 'id' | 'name' | 'status' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
           & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
@@ -25552,6 +25553,7 @@ export const AllProgramsForChoicesDocument = gql`
       node {
         id
         name
+        status
         individualDataNeeded
         dataCollectingType {
           id
@@ -28092,6 +28094,7 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   UserStatus: UserStatus,
   PartnerType: ResolverTypeWrapper<PartnerType>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
@@ -28109,7 +28112,6 @@ export type ResolversTypes = {
   AreaNode: ResolverTypeWrapper<AreaNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   AreaTypeNodeConnection: ResolverTypeWrapper<AreaTypeNodeConnection>,
   AreaTypeNodeEdge: ResolverTypeWrapper<AreaTypeNodeEdge>,
   AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>,
@@ -28601,6 +28603,7 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'],
   UserStatus: UserStatus,
   PartnerType: PartnerType,
+  JSONString: Scalars['JSONString'],
   Int: Scalars['Int'],
   UserNodeConnection: UserNodeConnection,
   PageInfo: PageInfo,
@@ -28618,7 +28621,6 @@ export type ResolversParentTypes = {
   AreaNode: AreaNode,
   UUID: Scalars['UUID'],
   AreaTypeNode: AreaTypeNode,
-  JSONString: Scalars['JSONString'],
   AreaTypeNodeConnection: AreaTypeNodeConnection,
   AreaTypeNodeEdge: AreaTypeNodeEdge,
   AreaNodeConnection: AreaNodeConnection,
@@ -30969,6 +30971,7 @@ export type PartnerTypeResolvers<ContextType = any, ParentType extends Resolvers
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerTypeIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerTypeGrievanceticketSetArgs>,

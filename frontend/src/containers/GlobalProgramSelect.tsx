@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../__generated__/graphql';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
+import {useProgramContext} from "../programContext";
 
 const CountrySelect = styled(Select)`
   && {
@@ -45,6 +46,7 @@ const CountrySelect = styled(Select)`
 
 export const GlobalProgramSelect = (): React.ReactElement => {
   const { businessArea, programId } = useBaseUrl();
+  const { selectedProgram, setSelectedProgram } = useProgramContext();
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea, first: 100 },
@@ -57,6 +59,30 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     },
     [data],
   );
+
+  const getCurrentProgram = () => {
+    const obj = data?.allPrograms.edges.filter(
+        (el) => el.node.id === programId
+    )
+    return obj ? obj[0].node : null
+  };
+
+  const program = getCurrentProgram();
+  if (!selectedProgram || (program && program.id !== programId)) {
+    const { id, name, status, individualDataNeeded } = program;
+
+    setSelectedProgram({
+      id,
+      name,
+      status,
+      individualDataNeeded,
+      dataCollectingType: {
+        id: program.dataCollectingType.id,
+        householdFiltersAvailable: program.dataCollectingType.householdFiltersAvailable,
+        individualFiltersAvailable: program.dataCollectingType.individualFiltersAvailable,
+      }
+    })
+  }
 
   useEffect(() => {
     if (programId && !isValidProgramId(programId) && programId !== 'all') {
