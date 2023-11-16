@@ -273,6 +273,8 @@ class RdiMergeTask:
                 imported_individual_id=imported_individual.id,
                 program=obj_hct.program,
             )
+            if household:
+                individual.registration_id = household.registration_id
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:
                 household.head_of_household = individual
