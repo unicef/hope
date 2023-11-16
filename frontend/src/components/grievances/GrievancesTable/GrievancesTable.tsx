@@ -77,7 +77,7 @@ export const GrievancesTable = ({
   };
 
   const [inputValue, setInputValue] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 1000);
+  const debouncedInputText = useDebounce(inputValue, 800);
   const [page, setPage] = useState<number>(0);
   const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
     variables: {

@@ -24,6 +24,7 @@ const HeaderContainer = styled.div`
   flex: 1;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-left: ${({ theme }) => theme.spacing(5)}px;
 `;
 const ActionsContainer = styled.div`
