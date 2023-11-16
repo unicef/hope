@@ -166,7 +166,6 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.user.partner.permissions = {f"{str(cls.business_area.pk)}": {"programs": {f"{str(cls.program.pk)}": []}}}
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",

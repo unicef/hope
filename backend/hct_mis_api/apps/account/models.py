@@ -97,6 +97,10 @@ class Partner(models.Model):
     def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
+    @property
+    def is_unicef(self):
+        return self.name == "UNICEF"
+
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
@@ -160,14 +164,17 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> List:
         """
         return list of permissions based on User Role BA and User Partner
-        if program_id in arguments need to check if user.partner.permmisions json has program
+        if program_id in arguments need to check if user.partner.permissions json has program id
         """
-        # TODO: MB remove in future default value 'has_program_access = True' or cross programs check will be without program_id ??
+        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
-            has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
-                business_area_slug=business_area_slug
-            )
+            if self.partner.is_unicef:
+                has_program_access = True
+            else:
+                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
+                    business_area_slug=business_area_slug
+                )
 
         partner_role_ids_per_ba = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
 
@@ -194,10 +201,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
-        # TODO: MB remove in future default value 'has_program_access = True' or cross programs check will be without program_id ??
+        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
-            has_program_access = program_id in self.get_partner_programs_areas_dict(business_area_id=business_area.pk)
+            if self.partner.is_unicef:
+                has_program_access = True
+            else:
+                has_program_access = program_id in self.get_partner_programs_areas_dict(business_area_id=business_area.pk)
 
         partner_role_ids = self.get_partner_role_ids_list(business_area_id=business_area.pk)
 
@@ -214,9 +224,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return has_program_access and (user_roles.count() > 0 or partner_roles.count() > 0)
 
     def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
-        # TODO: add if Partner "UNICEF (HOPE) always has access to all Program"
-        # if self.partner.name == "UNICEF":
-
         partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(
             str(program_id), []
         )
