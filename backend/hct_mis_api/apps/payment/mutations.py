@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
+from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     export_pdf_payment_plan_summary,
@@ -82,6 +83,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
@@ -104,6 +106,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
+    @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
         payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
             input["cash_or_payment_plan_id"]
@@ -240,6 +243,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
         cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
@@ -534,6 +538,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, payment_verification_plan_id: str) -> "ExportXlsxPaymentVerificationPlanFile":
         payment_verification_plan_id = decode_id_string_required(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -565,6 +570,7 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate(
         cls, root: Any, info: Any, file: io.BytesIO, payment_verification_plan_id: str
     ) -> "ImportXlsxPaymentVerificationPlanFile":

@@ -10,6 +10,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestCreatePaymentVerificationMutation(APITestCase):
@@ -28,6 +30,9 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
+        cls.active_program = ProgramFactory(status=Program.ACTIVE)
+        cls.finished_program = ProgramFactory(status=Program.FINISHED)
 
         cls.cash_plan = CashPlanFactory.create(
             id="0e2927af-c84d-4852-bb0b-773efe059e05",
@@ -60,7 +65,12 @@ class TestCreatePaymentVerificationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.active_program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
@@ -84,7 +94,12 @@ class TestCreatePaymentVerificationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.active_program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     **defaults,
@@ -101,7 +116,12 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         )
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.active_program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     **defaults,
@@ -115,7 +135,12 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         )
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.active_program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     **defaults,
@@ -138,7 +163,36 @@ class TestCreatePaymentVerificationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.active_program.id, "ProgramNode"),
+                },
+            },
+            variables={
+                "input": {
+                    "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+                    "sampling": "FULL_LIST",
+                    "fullListArguments": {"excludedAdminAreas": []},
+                    "verificationChannel": "MANUAL",
+                    "rapidProArguments": None,
+                    "randomSamplingArguments": None,
+                    "businessAreaSlug": "afghanistan",
+                }
+            },
+        )
+
+    def test_create_cash_plan_payment_verification_when_program_is_finished(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.MUTATION,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.finished_program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
