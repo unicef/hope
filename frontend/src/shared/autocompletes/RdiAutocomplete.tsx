@@ -1,4 +1,3 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,8 +12,7 @@ import {
   handleAutocompleteClose,
   handleOptionSelected,
 } from '../../utils/utils';
-import TextField from '../TextField';
-import { StyledAutocomplete } from './StyledAutocomplete';
+import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const RdiAutocomplete = ({
   disabled,
@@ -77,55 +75,36 @@ export const RdiAutocomplete = ({
   const allEdges = get(data, 'allRegistrationDataImports.edges', []);
 
   return (
-    <StyledAutocomplete
+    <BaseAutocomplete
       value={value}
-      data-cy='filters-registration-data-import'
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
+      disabled={disabled}
+      label={t('Registration Data Import')}
+      dataCy='filters-registration-data-import'
+      loadData={loadData}
+      loading={loading}
+      allEdges={allEdges}
+      handleChange={(_, selectedValue) => {
         handleAutocompleteChange(
           name,
           selectedValue?.node?.id,
           handleFilterChange,
-        )
-      }
-      onOpen={() => {
-        setOpen(true);
+        );
       }}
-      onClose={(_, reason) =>
+      handleOpen={() => setOpen(true)}
+      open={open}
+      handleClose={(_, reason) =>
         handleAutocompleteClose(setOpen, onInputTextChange, reason)
       }
-      getOptionSelected={(option, value1) =>
+      handleOptionSelected={(option, value1) =>
         handleOptionSelected(option?.node?.id, value1)
       }
-      getOptionLabel={(option) =>
+      handleOptionLabel={(option) =>
         getAutocompleteOptionLabel(option, allEdges, inputValue)
       }
-      disabled={disabled}
-      options={allEdges}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={t('Registration Data Import')}
-          data-cy='filters-registration-data-import-input'
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      data={data}
+      inputValue={inputValue}
+      onInputTextChange={onInputTextChange}
+      debouncedInputText={debouncedInputText}
     />
   );
 };

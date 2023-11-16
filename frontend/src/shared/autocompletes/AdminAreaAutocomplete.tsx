@@ -1,13 +1,8 @@
-import { CircularProgress, InputAdornment, TextField } from '@material-ui/core';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import { get } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  AllAdminAreasQuery,
-  useAllAdminAreasLazyQuery,
-} from '../../__generated__/graphql';
+import { useAllAdminAreasLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useDebounce } from '../../hooks/useDebounce';
 import {
@@ -17,7 +12,7 @@ import {
   handleAutocompleteClose,
   handleOptionSelected,
 } from '../../utils/utils';
-import { StyledAutocomplete } from './StyledAutocomplete';
+import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const AdminAreaAutocomplete = ({
   disabled,
@@ -48,7 +43,7 @@ export const AdminAreaAutocomplete = ({
   const location = useLocation();
   const { businessArea } = useBaseUrl();
 
-  const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
+  const [loadData, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
       first: 20,
       name: debouncedInputText,
@@ -60,14 +55,14 @@ export const AdminAreaAutocomplete = ({
 
   useEffect(() => {
     if (open) {
-      loadAdminAreas();
+      loadData();
     }
-  }, [open, debouncedInputText, loadAdminAreas]);
+  }, [open, debouncedInputText, loadData]);
 
   // load all admin areas on mount to match the value from the url
   useEffect(() => {
-    loadAdminAreas();
-  }, [loadAdminAreas]);
+    loadData();
+  }, [loadData]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -83,59 +78,39 @@ export const AdminAreaAutocomplete = ({
   const allEdges = get(data, 'allAdminAreas.edges', []);
 
   return (
-    <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
+    <BaseAutocomplete
       value={value}
-      data-cy={dataCy}
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) => {
+      disabled={disabled}
+      label={t('Admin Level 2')}
+      dataCy={dataCy}
+      loadData={loadData}
+      loading={loading}
+      allEdges={allEdges}
+      handleChange={(_, selectedValue) => {
+        if (!selectedValue) {
+          onInputTextChange('');
+        }
         handleAutocompleteChange(
           name,
           selectedValue?.node?.id,
           handleFilterChange,
         );
       }}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={(_, reason) =>
+      handleOpen={() => setOpen(true)}
+      open={open}
+      handleClose={(_, reason) =>
         handleAutocompleteClose(setOpen, onInputTextChange, reason)
       }
-      getOptionSelected={(option, value1) =>
+      handleOptionSelected={(option, value1) =>
         handleOptionSelected(option?.node?.id, value1)
       }
-      getOptionLabel={(option) =>
+      handleOptionLabel={(option) =>
         getAutocompleteOptionLabel(option, allEdges, inputValue)
       }
-      disabled={disabled}
-      options={allEdges}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={t('Admin Level 2')}
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position='start'>
-                <RoomRoundedIcon style={{ color: '#5f6368' }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      data={data}
+      inputValue={inputValue}
+      onInputTextChange={onInputTextChange}
+      debouncedInputText={debouncedInputText}
     />
   );
 };

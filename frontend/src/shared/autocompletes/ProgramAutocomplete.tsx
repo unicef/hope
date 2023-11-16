@@ -1,5 +1,4 @@
 import { InputAdornment } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -14,8 +13,7 @@ import {
   handleAutocompleteChange,
   handleOptionSelected,
 } from '../../utils/utils';
-import TextField from '../TextField';
-import { StyledAutocomplete } from './StyledAutocomplete';
+import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const ProgramAutocomplete = ({
   disabled,
@@ -76,62 +74,46 @@ export const ProgramAutocomplete = ({
   const allEdges = get(data, 'allPrograms.edges', []);
 
   return (
-    <StyledAutocomplete
+    <BaseAutocomplete
       value={value}
-      icon={<FlashOnIcon />}
-      data-cy='filters-program'
-      open={open}
-      filterOptions={(options) => options}
-      onChange={(_, selectedValue) => {
+      disabled={disabled}
+      label={t('Programme')}
+      dataCy='filters-program'
+      loadData={loadData}
+      loading={loading}
+      allEdges={allEdges}
+      handleChange={(_, selectedValue) => {
+        if (!selectedValue) {
+          onInputTextChange('');
+        }
         handleAutocompleteChange(
           name,
           selectedValue?.node?.id,
           handleFilterChange,
         );
       }}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={(_, reason) => {
+      handleOpen={() => setOpen(true)}
+      open={open}
+      handleClose={(_, reason) => {
         setOpen(false);
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) =>
-        handleOptionSelected(option.node?.id, value1)
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
       }
-      getOptionLabel={(option) =>
+      handleOptionLabel={(option) =>
         getAutocompleteOptionLabel(option, allEdges, inputValue)
       }
-      disabled={disabled}
-      options={allEdges}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={t('Programme')}
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position='start'>
-                <FlashOnIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      data={data}
+      inputValue={inputValue}
+      onInputTextChange={onInputTextChange}
+      debouncedInputText={debouncedInputText}
+      startAdornment={
+        <InputAdornment position='start'>
+          <FlashOnIcon />
+        </InputAdornment>
+      }
     />
   );
 };
