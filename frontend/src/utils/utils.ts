@@ -969,11 +969,11 @@ export const handleAutocompleteChange = (
   value,
   handleFilterChange,
 ): void => {
+  if (value === null || value === undefined) {
+    handleFilterChange(name, '');
+  }
   if (value) {
     handleFilterChange(name, value);
-  }
-  if (value === null) {
-    handleFilterChange(name, '');
   }
 };
 
@@ -1037,8 +1037,13 @@ export const getAutocompleteOptionLabel = (
   return optionLabel;
 };
 
-export const handleOptionSelected = (optionValue, value): boolean => {
+export const handleOptionSelected = (
+  optionValue: string,
+  value: string | null | undefined,
+  // onInputTextChange?: (value: string) => void,
+): boolean => {
   if (value === '' || value === null) {
+    // onInputTextChange('');
     return false;
   }
   return optionValue === value;

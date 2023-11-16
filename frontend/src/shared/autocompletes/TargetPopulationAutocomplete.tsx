@@ -43,7 +43,7 @@ export const TargetPopulationAutocomplete = ({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 500);
+  const debouncedInputText = useDebounce(inputValue, 1000);
   const { businessArea, programId } = useBaseUrl();
 
   const [
