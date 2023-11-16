@@ -83,7 +83,7 @@ class Partner(models.Model):
         permissions structure
         {
             "business_area_id": {
-                "roles": ["role_id_1", "role_id_2"]
+                "roles": ["role_id_1", "role_id_2"],
                 "programs": {"program_id":["admin_id"]}
             }
         }
@@ -98,7 +98,7 @@ class Partner(models.Model):
         return [(role.id, role.name) for role in cls.objects.all()]
 
     @property
-    def is_unicef(self):
+    def is_unicef(self) -> bool:
         return self.name == "UNICEF"
 
 
