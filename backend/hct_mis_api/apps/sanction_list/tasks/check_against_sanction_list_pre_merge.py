@@ -125,6 +125,7 @@ class CheckAgainstSanctionListPreMergeTask:
                                 admin2=admin_level_2,
                                 area=area,
                                 registration_data_import=registration_data_import,
+                                household_unicef_id=household.unicef_id if household else "",
                             )
                             ticket_details = TicketSystemFlaggingDetails(
                                 ticket=ticket,
