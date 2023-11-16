@@ -23,6 +23,7 @@ import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -40,6 +41,7 @@ export const GrievancesDetails = ({
   canViewIndividualDetails,
 }: GrievancesDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isAllPrograms } = useBaseUrl();
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -206,7 +208,7 @@ export const GrievancesDetails = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {ticket.household?.id ? (
+                    {ticket.household?.id && !isAllPrograms ? (
                       <ContentLink
                         href={
                           canViewHouseholdDetails
@@ -217,7 +219,9 @@ export const GrievancesDetails = ({
                         {ticket.household.unicefId}
                       </ContentLink>
                     ) : (
-                      '-'
+                      <div>
+                        {ticket.household?.id ? ticket.household.unicefId : '-'}
+                      </div>
                     )}
                   </span>
                 ),
@@ -227,7 +231,7 @@ export const GrievancesDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {ticket.individual?.id ? (
+                    {ticket.individual?.id && !isAllPrograms ? (
                       <ContentLink
                         href={
                           canViewIndividualDetails
@@ -238,7 +242,11 @@ export const GrievancesDetails = ({
                         {ticket.individual.unicefId}
                       </ContentLink>
                     ) : (
-                      '-'
+                      <div>
+                        {ticket.individual?.id
+                          ? ticket.individual.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),

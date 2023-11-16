@@ -39,7 +39,7 @@ export const AssigneeAutocomplete = ({
   const history = useHistory();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 1000);
+  const debouncedInputText = useDebounce(inputValue, 800);
   const { businessArea } = useBaseUrl();
   const [open, setOpen] = useState(false);
 
