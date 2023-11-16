@@ -95,8 +95,11 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         data_collecting_type = programme.data_collecting_type
         business_area = BusinessArea.objects.get(slug=project.organization.slug)
 
-        if not data_collecting_type:  # TODO add condition with deprecated
+        if not data_collecting_type:
             raise ValidationError("Program of given project does not have any Data Collecting Type")
+
+        if data_collecting_type.deprecated:
+            raise ValidationError("Data Collecting Type of program is deprecated")
 
         if business_area not in data_collecting_type.limit_to.all():
             raise ValidationError(
