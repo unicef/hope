@@ -1,7 +1,5 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
@@ -13,8 +11,7 @@ import {
   handleAutocompleteClose,
   handleOptionSelected,
 } from '../../utils/utils';
-import TextField from '../TextField';
-import { StyledAutocomplete } from './StyledAutocomplete';
+import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const AssigneeAutocomplete = ({
   disabled,
@@ -39,13 +36,12 @@ export const AssigneeAutocomplete = ({
   setFilter: (filter) => void;
   dataCy?: string;
 }): React.ReactElement => {
-  const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 1000);
   const { businessArea } = useBaseUrl();
+  const [open, setOpen] = useState(false);
 
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
     variables: {
@@ -57,17 +53,6 @@ export const AssigneeAutocomplete = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  useEffect(() => {
-    if (open) {
-      loadData();
-    }
-  }, [open, debouncedInputText, loadData]);
-
-  // load all users on mount to match the value from the url
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
     history,
@@ -78,59 +63,42 @@ export const AssigneeAutocomplete = ({
     setAppliedFilter,
   );
 
-  if (!data) return null;
-
   const allEdges = get(data, 'allUsers.edges', []);
 
   return (
-    <StyledAutocomplete
+    <BaseAutocomplete
       value={value}
-      data-cy={dataCy}
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) => {
+      disabled={disabled}
+      label={label}
+      dataCy={dataCy}
+      loadData={loadData}
+      loading={loading}
+      allEdges={allEdges}
+      handleChange={(_, selectedValue) => {
+        if (!selectedValue) {
+          onInputTextChange('');
+        }
         handleAutocompleteChange(
           name,
           selectedValue?.node?.id,
           handleFilterChange,
         );
       }}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={(_, reason) =>
+      handleOpen={() => setOpen(true)}
+      open={open}
+      handleClose={(_, reason) =>
         handleAutocompleteClose(setOpen, onInputTextChange, reason)
       }
-      getOptionSelected={(option, value1) =>
+      handleOptionSelected={(option, value1) =>
         handleOptionSelected(option.node?.id, value1)
       }
-      getOptionLabel={(option) =>
+      handleOptionLabel={(option) =>
         getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
       }
-      disabled={disabled}
-      options={allEdges}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label || t('Assignee')}
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      data={data}
+      inputValue={inputValue}
+      onInputTextChange={onInputTextChange}
+      debouncedInputText={debouncedInputText}
     />
   );
 };
