@@ -21,6 +21,7 @@ export const BaseAutocomplete = ({
   inputValue,
   onInputTextChange,
   debouncedInputText,
+  startAdornment = null,
 }: {
   value: string;
   disabled?: boolean;
@@ -40,6 +41,7 @@ export const BaseAutocomplete = ({
   inputValue: string;
   onInputTextChange: (value) => void;
   debouncedInputText: string;
+  startAdornment?: React.ReactNode;
 }): React.ReactElement => {
   const prevValueRef = useRef(value);
 
@@ -85,10 +87,12 @@ export const BaseAutocomplete = ({
           label={label}
           variant='outlined'
           margin='dense'
+          data-cy={`${label}-input`}
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
+            startAdornment,
             endAdornment: (
               <>
                 {loading ? (
