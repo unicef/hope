@@ -11,7 +11,7 @@ export const DatePickerFilter = ({
   fullWidth = true,
   ...props
 }): React.ReactElement => {
-  const datePickerValue = value ? moment.utc(value) : null;
+  const datePickerValue = value ? moment(value) : null;
 
   return (
     <Box display='flex' flexDirection='column'>

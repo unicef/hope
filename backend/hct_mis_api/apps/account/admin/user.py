@@ -16,10 +16,8 @@ from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 
 from admin_extra_buttons.decorators import button
-from admin_sync.mixin import SyncMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from jsoneditor.forms import JSONEditor
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.ad import ADUSerMixin
@@ -42,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(account_models.User)
-class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMixin, BaseUserAdmin, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -135,6 +133,11 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
                 "partner",
             )
         )
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[Any] = ...) -> Sequence[str]:
+        if request.user.is_superuser:
+            return super().get_readonly_fields(request, obj)
+        return self.get_fields(request)
 
     def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> List[str]:
         return [

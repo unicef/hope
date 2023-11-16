@@ -35,21 +35,13 @@ BATCH_SIZE_SMALL = 20
 
 
 def migrate_data_to_representations() -> None:
-    apply_country_specific_rules()
-    unknown_unassigned_dict = get_unknown_unassigned_dict()
     for business_area in BusinessArea.objects.all():
         logger.info("----- NEW BUSINESS AREA -----")
         logger.info(f"Handling business area: {business_area}")
-        migrate_data_to_representations_per_business_area(
-            business_area=business_area, unknown_unassigned_program=unknown_unassigned_dict.get(business_area)
-        )
-
-    apply_congo_withdrawal()
+        migrate_data_to_representations_per_business_area(business_area=business_area)
 
 
-def migrate_data_to_representations_per_business_area(
-    business_area: BusinessArea, unknown_unassigned_program: Optional[Program] = None
-) -> None:
+def migrate_data_to_representations_per_business_area(business_area: BusinessArea) -> None:
     """
     This function is used to migrate data from old models to new representations per business_area.
     Take TargetPopulations:
@@ -65,7 +57,16 @@ def migrate_data_to_representations_per_business_area(
     - adjust payments and payment_records to corresponding representations
 
     """
+    unknown_unassigned_dict = get_unknown_unassigned_dict()
+    unknown_unassigned_program = unknown_unassigned_dict.get(business_area)
+
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_rules()
+    elif business_area.name == "Sudan":
+        apply_sudan_rules()
+
     hhs_to_ignore = get_ignored_hhs() if business_area.name == "Afghanistan" else None
+
     for program in Program.objects.filter(
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
@@ -103,7 +104,9 @@ def migrate_data_to_representations_per_business_area(
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
             batched_households = households[batch_start:batch_end]
-            for individual in Individual.objects.filter(household__in=batched_households):
+            for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
+                "documents", "identities", "bank_account_info"
+            ):
                 individuals_per_household_dict[individual.household_id].append(individual)
             for household in batched_households:
                 with transaction.atomic():
@@ -133,6 +136,9 @@ def migrate_data_to_representations_per_business_area(
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
     ).update(is_migration_handled=True)
+
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_withdrawal()
 
 
 def get_household_representation_per_program_by_old_household_id(
@@ -374,7 +380,9 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     household_selections = household_selections.order_by("id")
 
     household_selection_count = household_selections.count()
+    counter = 0
     for _ in range(0, household_selection_count, BATCH_SIZE):
+        logger.info(f"Copying household selections {counter} - {counter + BATCH_SIZE}/{household_selection_count}")
         household_selections_to_create = []
         batched_household_selections = household_selections[0:BATCH_SIZE]
 
@@ -392,6 +400,8 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
                 is_migration_handled=True
             )
+
+        counter += BATCH_SIZE
 
 
 def adjust_payment_objects() -> None:
@@ -492,7 +502,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
     rdis_count = rdis.count()
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
-            logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
+            logger.info(f"Handling {i} - {i + 99}/{rdis_count} RDIs")
         rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)

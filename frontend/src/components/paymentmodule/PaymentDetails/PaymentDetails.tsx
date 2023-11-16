@@ -2,7 +2,11 @@ import { Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentQuery } from '../../../__generated__/graphql';
+import {
+  PaymentQuery,
+  PaymentStatus,
+  PaymentVerificationStatus,
+} from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
@@ -40,9 +44,19 @@ export const PaymentDetails = ({
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
-  if (payment.verification && payment.verification.status !== 'PENDING') {
+  if (
+    payment.verification &&
+    payment.verification.status !== PaymentVerificationStatus.Pending
+  ) {
     paymentVerification = payment.verification;
   }
+
+  const showFailureReason = [
+    PaymentStatus.NotDistributed,
+    PaymentStatus.ForceFailed,
+    PaymentStatus.TransactionErroneous,
+  ].includes(payment.status);
+
   return (
     <>
       <ContainerColumnWithBorder>
@@ -256,12 +270,14 @@ export const PaymentDetails = ({
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('Failure Reason')}
-              value={payment.reasonForUnsuccessfulPayment}
-            />
-          </Grid>
+          {showFailureReason && (
+            <Grid item xs={3}>
+              <LabelizedField
+                label={t('Failure Reason')}
+                value={payment.reasonForUnsuccessfulPayment}
+              />
+            </Grid>
+          )}
           <Grid item xs={3}>
             <LabelizedField
               label={t('Bank Account Number')}
