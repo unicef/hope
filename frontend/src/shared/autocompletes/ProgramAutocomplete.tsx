@@ -1,57 +1,63 @@
+import { InputAdornment } from '@material-ui/core';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import get from 'lodash/get';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
+import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useDebounce } from '../../hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
-  handleAutocompleteClose,
   handleOptionSelected,
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const AssigneeAutocomplete = ({
+export const ProgramAutocomplete = ({
   disabled,
   name,
   filter,
   value,
-  label,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  dataCy,
 }: {
   disabled?;
   name: string;
-  filter;
-  value: string;
-  label: string;
+  filter?;
+  value?: string;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
 }): React.ReactElement => {
+  const { businessArea } = useBaseUrl();
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const history = useHistory();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
-  const { businessArea } = useBaseUrl();
-  const [open, setOpen] = useState(false);
 
-  const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: debouncedInputText,
-    },
+  const [loadData, { data, loading }] = useAllProgramsForChoicesLazyQuery({
+    variables: { businessArea, search: debouncedInputText },
     fetchPolicy: 'cache-and-network',
   });
+
+  useEffect(() => {
+    if (open) {
+      loadData();
+    }
+  }, [open, debouncedInputText, loadData]);
+
+  // load all languages on mount to match the value from the url
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -63,14 +69,16 @@ export const AssigneeAutocomplete = ({
     setAppliedFilter,
   );
 
-  const allEdges = get(data, 'allUsers.edges', []);
+  if (!data) return null;
+
+  const allEdges = get(data, 'allPrograms.edges', []);
 
   return (
     <BaseAutocomplete
       value={value}
       disabled={disabled}
-      label={label}
-      dataCy={dataCy}
+      label={t('Programme')}
+      dataCy='filters-program'
       loadData={loadData}
       loading={loading}
       allEdges={allEdges}
@@ -86,19 +94,26 @@ export const AssigneeAutocomplete = ({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
+      handleClose={(_, reason) => {
+        setOpen(false);
+        if (reason === 'select-option') return;
+        onInputTextChange('');
+      }}
       handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option.node?.id, value1)
+        handleOptionSelected(option?.node?.id, value1)
       }
       handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
       }
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
+      startAdornment={
+        <InputAdornment position='start'>
+          <FlashOnIcon />
+        </InputAdornment>
+      }
     />
   );
 };

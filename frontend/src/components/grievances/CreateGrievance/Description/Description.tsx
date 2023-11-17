@@ -21,7 +21,7 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import { choicesToDict } from '../../../../utils/utils';
-import { ContentLink } from '../../../core/ContentLink';
+import { BlackLink } from '../../../core/BlackLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
@@ -80,6 +80,15 @@ export const Description = ({
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,
   );
+  const canViewHouseholdDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
+  const canViewIndividualDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+    permissions,
+  );
+
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
@@ -104,34 +113,50 @@ export const Description = ({
                 size: 9,
               },
               {
-                label: t('HOUSEHOLD ID'),
+                label: t('Household ID'),
                 value: (
                   <span>
-                    {values.selectedHousehold?.id ? (
-                      <ContentLink
-                        href={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
+                    {values.selectedHousehold?.id && !isAllPrograms ? (
+                      <BlackLink
+                        to={
+                          canViewHouseholdDetails
+                            ? `/${baseUrl}/population/household/${values.selectedHousehold.id}`
+                            : undefined
+                        }
                       >
                         {values.selectedHousehold.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
-                      '-'
+                      <div>
+                        {values.selectedHousehold?.id
+                          ? values.selectedHousehold.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
                 size: 3,
               },
               {
-                label: t('INDIVIDUAL ID'),
+                label: t('Individual ID'),
                 value: (
                   <span>
-                    {values.selectedIndividual?.id ? (
-                      <ContentLink
-                        href={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
+                    {values.selectedIndividual?.id && !isAllPrograms ? (
+                      <BlackLink
+                        to={
+                          canViewIndividualDetails
+                            ? `/${baseUrl}/population/individuals/${values.selectedIndividual.id}`
+                            : undefined
+                        }
                       >
                         {values.selectedIndividual.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
-                      '-'
+                      <div>
+                        {values.selectedIndividual?.id
+                          ? values.selectedIndividual.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
