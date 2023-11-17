@@ -39,7 +39,7 @@ export const LookUpHouseholdTableRow = ({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableRowProps): React.ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
 
@@ -91,9 +91,13 @@ export const LookUpHouseholdTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
-          {household.unicefId}
-        </BlackLink>
+        {!isAllPrograms ? (
+          <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
+            {household.unicefId}
+          </BlackLink>
+        ) : (
+          <span>{household.unicefId}</span>
+        )}
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
