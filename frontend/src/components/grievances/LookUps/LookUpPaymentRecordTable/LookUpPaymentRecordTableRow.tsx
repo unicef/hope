@@ -29,7 +29,7 @@ export function LookUpPaymentRecordTableRow({
   selected,
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const isSelected = (name: string): boolean => selected.includes(name);
@@ -68,9 +68,13 @@ export function LookUpPaymentRecordTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={renderUrl(paymentRecord.objType)}>
-          {paymentRecord.caId}
-        </BlackLink>
+        {!isAllPrograms ? (
+          <BlackLink to={renderUrl(paymentRecord.objType)}>
+            {paymentRecord.caId}
+          </BlackLink>
+        ) : (
+          <span>{paymentRecord.caId}</span>
+        )}
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.status ? (
