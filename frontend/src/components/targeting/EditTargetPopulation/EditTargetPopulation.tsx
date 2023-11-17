@@ -79,7 +79,7 @@ export const EditTargetPopulation = ({
   };
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(2, 'Too short')
+      .min(4, 'Too short')
       .max(255, 'Too long'),
     excludedIds: Yup.string().test(
       'testName',

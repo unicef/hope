@@ -58,7 +58,7 @@ export const MarkAsReleasedPaymentPlan = ({
 
   const validationSchema = Yup.object().shape({
     comment: Yup.string()
-      .min(2, 'Too short')
+      .min(4, 'Too short')
       .max(255, 'Too long'),
   });
 

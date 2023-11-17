@@ -96,7 +96,7 @@ export function ActivityLogPageFilters({
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            label='User'
+            label={t('User')}
             filter={filter}
             name='userId'
             value={filter.userId}
