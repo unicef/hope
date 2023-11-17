@@ -1,20 +1,17 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  useAllProgramsForChoicesQuery,
-  useFeedbackIssueTypeChoicesQuery,
-} from '../../../../__generated__/graphql';
+import { useFeedbackIssueTypeChoicesQuery } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { CreatedByFeedbackAutocomplete } from '../../../../shared/autocompletes/CreatedByFeedbackAutocomplete';
+import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
+import { ProgramAutocomplete } from '../../../../shared/autocompletes/ProgramAutocomplete';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -33,15 +30,11 @@ export const FeedbackFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { isAllPrograms } = useBaseUrl();
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useFeedbackIssueTypeChoicesQuery();
-  const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
 
   const {
     handleFilterChange,
@@ -65,10 +58,7 @@ export const FeedbackFilters = ({
     clearFilter();
   };
 
-  if (choicesLoading || loading) return <LoadingComponent />;
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
+  if (choicesLoading) return <LoadingComponent />;
 
   return (
     <FiltersSection
@@ -86,23 +76,15 @@ export const FeedbackFilters = ({
         </Grid>
         {isAllPrograms && (
           <Grid item xs={3}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('program', e.target.value)}
-              label={t('Programme')}
+            <ProgramAutocomplete
+              filter={filter}
+              name='program'
               value={filter.program}
-              icon={<FlashOnIcon />}
-              fullWidth
-              data-cy='filters-program'
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
           </Grid>
         )}
         <Grid item xs={3}>
@@ -120,7 +102,7 @@ export const FeedbackFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <CreatedByFeedbackAutocomplete
+          <CreatedByAutocomplete
             name='createdBy'
             filter={filter}
             value={filter.createdBy}
@@ -129,6 +111,7 @@ export const FeedbackFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isFeedbackCreator: true }}
           />
         </Grid>
         <Grid item xs={3}>

@@ -40,22 +40,10 @@ export const CashPlanTableRow = ({
       <TableCell align='left'>
         {!isAllPrograms ? (
           <BlackLink to={objectPath}>
-            <div
-              style={{
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {cashAndPaymentPlan.unicefId}
-            </div>
+            <div>{cashAndPaymentPlan.unicefId}</div>
           </BlackLink>
         ) : (
-          <div
-            style={{
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {cashAndPaymentPlan.unicefId}
-          </div>
+          <div>{cashAndPaymentPlan.unicefId}</div>
         )}
       </TableCell>
       <TableCell align='left'>

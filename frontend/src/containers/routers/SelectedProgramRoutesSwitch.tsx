@@ -1,12 +1,19 @@
 import React from 'react';
 import { Switch, useRouteMatch } from 'react-router-dom';
 import { SentryRoute } from '../../components/core/SentryRoute';
+import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
+import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
+import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
 import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
+import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
+import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
+import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
+import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { CreateGrievancePage } from '../pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from '../pages/grievances/EditGrievancePage';
 import { GrievancesDashboardPage } from '../pages/grievances/GrievancesDashboardPage';
@@ -41,19 +48,10 @@ import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationData
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
-import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
-import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopulationPage';
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
-import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
-import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
-import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
-import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPage';
-import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
-import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
-import { DashboardPage } from '../pages/dashboard/DashboardPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -230,12 +228,6 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/registration-data-import`}>
         <RegistrationDataImportPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/reporting/:id`}>
-        <ReportingDetailsPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/reporting`}>
-        <ReportingPage />
       </SentryRoute>
       <SentryRoute path={`${path}/users-list`}>
         <UsersPage />
