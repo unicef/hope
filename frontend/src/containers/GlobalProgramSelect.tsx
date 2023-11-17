@@ -68,7 +68,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   };
 
   const program = getCurrentProgram();
-  if (!selectedProgram || (program && program.id !== programId)) {
+  if (!selectedProgram || (program?.id !== programId)) {
     const { id, name, status, individualDataNeeded } = program;
 
     setSelectedProgram({
@@ -77,8 +77,8 @@ export const GlobalProgramSelect = (): React.ReactElement => {
       status,
       individualDataNeeded,
       dataCollectingType: {
-        id: program.dataCollectingType.id,
-        householdFiltersAvailable: program.dataCollectingType.householdFiltersAvailable,
+        id: program.dataCollectingType?.id,
+        householdFiltersAvailable: program.dataCollectingType?.householdFiltersAvailable,
         individualFiltersAvailable: program.dataCollectingType.individualFiltersAvailable,
       }
     })

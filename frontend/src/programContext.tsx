@@ -1,11 +1,6 @@
 import React, {createContext, ReactElement, useContext, useState} from "react";
+import {ProgramStatus} from "./__generated__/graphql";
 
-
-enum ProgramStatus {
-    DRAFT = "DRAFT",
-    ACTIVE = "ACTIVE",
-    FINISHED = "FINISHED"
-}
 
 export interface ProgramInterface {
     id: string,
