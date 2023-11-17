@@ -24,6 +24,7 @@ import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { BlackLink } from '../../core/BlackLink';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -209,15 +210,15 @@ export const GrievancesDetails = ({
                 value: (
                   <span>
                     {ticket.household?.id && !isAllPrograms ? (
-                      <ContentLink
-                        href={
+                      <BlackLink
+                        to={
                           canViewHouseholdDetails
                             ? `/${baseUrl}/population/household/${ticket.household.id}`
                             : undefined
                         }
                       >
                         {ticket.household.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
                       <div>
                         {ticket.household?.id ? ticket.household.unicefId : '-'}
@@ -232,15 +233,15 @@ export const GrievancesDetails = ({
                 value: (
                   <span>
                     {ticket.individual?.id && !isAllPrograms ? (
-                      <ContentLink
-                        href={
+                      <BlackLink
+                        to={
                           canViewIndividualDetails
                             ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
                             : undefined
                         }
                       >
                         {ticket.individual.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
                       <div>
                         {ticket.individual?.id

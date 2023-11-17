@@ -218,7 +218,8 @@ export const EditFeedbackPage = (): React.ReactElement => {
                         <Grid container xs={6} spacing={6}>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Household ID')}>
-                              {feedback.householdLookup?.id ? (
+                              {feedback.householdLookup?.id &&
+                              !isAllPrograms ? (
                                 <BlackLink
                                   to={
                                     canViewHouseholdDetails
@@ -229,13 +230,14 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                   {feedback.householdLookup.unicefId}
                                 </BlackLink>
                               ) : (
-                                '-'
+                                feedback.householdLookup.unicefId || '-'
                               )}
                             </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Individual ID')}>
-                              {feedback.individualLookup?.id ? (
+                              {feedback.individualLookup?.id &&
+                              !isAllPrograms ? (
                                 <BlackLink
                                   to={
                                     canViewIndividualDetails
@@ -246,7 +248,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                   {feedback.individualLookup.unicefId}
                                 </BlackLink>
                               ) : (
-                                '-'
+                                feedback.individualLookup.unicefId || '-'
                               )}
                             </LabelizedField>
                           </Grid>
