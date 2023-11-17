@@ -61,6 +61,7 @@ export const LookUpIndividualTable = ({
       getHousehold({ variables: { id: individual.household.id.toString() } });
     }
     setSelectedIndividual(individual);
+    setSelectedHousehold(individual.household);
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
