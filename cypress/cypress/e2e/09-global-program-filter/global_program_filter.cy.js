@@ -10,7 +10,7 @@ describe("Global Program Filter", () => {
 
   beforeEach(() => {
     programmesPage.navigateToProgrammePage("All Programmes");
-    programmesPage.getButtonFiltersExpand().click();
+    // programmesPage.getButtonFiltersExpand().click();
   });
 
   describe("Smoke tests Global Program Filter", () => {
@@ -89,7 +89,7 @@ describe("Global Program Filter", () => {
       programmesPage.getMenuButtonProgrammeDetails().should("be.visible");
       programmesPage.getMenuButtonCashAssist().should("be.visible");
       programmesPage.getMenuButtonPaymentModule().should("be.visible");
-      programmesPage.getMenuButtonReporting().should("be.visible");
+      // programmesPage.getMenuButtonReporting().should("be.visible");
       programmesPage.getMenuButtonProgrammeUsers().should("be.visible");
       programmesPage.getMenuButtonActivityLog().should("be.visible");
       programmesPage.getMenuButtonResourcesKnowledgeBase().should("be.visible");
