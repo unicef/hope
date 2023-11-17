@@ -8,17 +8,17 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
-  baseUrl: string;
 }
 
 export const LinkedGrievance = ({
   feedback,
-  baseUrl,
 }: LinkedGrievanceProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(
     feedback.linkedGrievance?.id,
     feedback.linkedGrievance?.category,

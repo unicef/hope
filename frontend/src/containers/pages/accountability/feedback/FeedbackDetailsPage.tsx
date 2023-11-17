@@ -1,6 +1,7 @@
 import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useFeedbackQuery } from '../../../../__generated__/graphql';
 import { FeedbackDetails } from '../../../../components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
 import { FeedbackDetailsToolbar } from '../../../../components/accountability/Feedback/FeedbackDetailsToolbar';
 import { LinkedGrievance } from '../../../../components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
@@ -9,14 +10,11 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
-import { useFeedbackQuery } from '../../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const FeedbackDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { baseUrl } = useBaseUrl();
 
   const { data, loading, error } = useFeedbackQuery({
     variables: { id },
@@ -49,11 +47,10 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
       <Grid container>
         <FeedbackDetails
           feedback={feedback}
-          baseUrl={baseUrl}
           canViewHouseholdDetails={canViewHouseholdDetails}
           canViewIndividualDetails={canViewIndividualDetails}
         />
-        <LinkedGrievance baseUrl={baseUrl} feedback={feedback} />
+        <LinkedGrievance feedback={feedback} />
       </Grid>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={feedback.id} />
