@@ -8,6 +8,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -61,16 +63,18 @@ class TestTargetPopulationQuery(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(name="test_program", status=Program.ACTIVE)
+
         _ = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area, "program": cls.program},
         )
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area, "program": cls.program},
         )
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area, "program": cls.program},
         )
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
@@ -84,6 +88,7 @@ class TestTargetPopulationQuery(APITestCase):
             created_by=cls.user,
             targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
+            program=cls.program,
         )
         cls.target_population_size_2.save()
         cls.target_population_size_2 = full_rebuild(cls.target_population_size_2)
@@ -96,6 +101,7 @@ class TestTargetPopulationQuery(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
             targeting_criteria=targeting_criteria,
+            program=cls.program,
         )
         cls.target_population_residence_status.save()
         cls.target_population_residence_status = full_rebuild(cls.target_population_residence_status)
@@ -110,6 +116,7 @@ class TestTargetPopulationQuery(APITestCase):
             targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
+            program=cls.program,
         )
         cls.target_population_size_1_approved.save()
         cls.target_population_size_1_approved = full_rebuild(cls.target_population_size_1_approved)
@@ -145,7 +152,7 @@ class TestTargetPopulationQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
