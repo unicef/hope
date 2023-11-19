@@ -172,9 +172,8 @@ def enrol_household_to_program(household: Household, program: Program) -> Tuple[
         copied_from=household,
     ).first():
         return household_representation_in_new_program, 0
-    else:
-        with transaction.atomic():
-            return create_new_household_representation(household, program), 1
+    with transaction.atomic():
+        return create_new_household_representation(household, program), 1
 
 
 def create_new_household_representation(household: Household, program: Program) -> Household:
