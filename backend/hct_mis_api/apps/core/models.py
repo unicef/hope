@@ -447,5 +447,4 @@ class DataCollectingType(TimeStampedModel):
                 name="unique_label_code_data_collecting_type",
             )
         ]
-        ordering = ("-weight", )
-
+        ordering = ("-weight",)
