@@ -398,6 +398,7 @@ class Query(graphene.ObjectType):
                 deprecated=False,
                 limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
+            .exclude(code__iexact="unknown")
             .only("code", "label")
             .values("code", "label")
             .order_by("label")
