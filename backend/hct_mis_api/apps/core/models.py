@@ -435,6 +435,7 @@ class DataCollectingType(TimeStampedModel):
     individual_filters_available = models.BooleanField(default=False)
     household_filters_available = models.BooleanField(default=True)
     recalculate_composition = models.BooleanField(default=False)
+    weight = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self) -> str:
         return self.label
@@ -446,3 +447,5 @@ class DataCollectingType(TimeStampedModel):
                 name="unique_label_code_data_collecting_type",
             )
         ]
+        ordering = ("-weight", )
+
