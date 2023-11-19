@@ -62,13 +62,13 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
-        program = ProgramFactory(business_area=cls.business_area)
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
 
         tp = TargetPopulation(
             name="Draft Target Population",
             status=TargetPopulation.STATUS_OPEN,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -82,7 +82,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             name="Approved Target Population with final filters",
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -96,7 +96,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             name="Approved Target Population",
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -126,7 +126,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "id": self.id_to_base64(self.target_population_draft.id, "TargetPopulationNode"),
             },
@@ -137,7 +137,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
@@ -177,13 +177,13 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
-        program = ProgramFactory(business_area=cls.business_area)
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
 
         tp = TargetPopulation(
             name="Draft Target Population",
             status=TargetPopulation.STATUS_OPEN,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -196,7 +196,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             name="Approved Target Population with final filters",
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -210,7 +210,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             name="Approved Target Population",
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -241,7 +241,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
@@ -255,7 +255,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"id": self.id_to_base64(self.target_population_draft.id, "TargetPopulationNode")},
         )
 
@@ -304,13 +304,13 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
-        program = ProgramFactory(business_area=cls.business_area)
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
 
         tp = TargetPopulation(
             name="Draft Target Population",
             status=TargetPopulation.STATUS_OPEN,
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -362,7 +362,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
@@ -382,7 +382,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulationNode")},
         )
 
@@ -391,7 +391,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "id": self.id_to_base64(
                     self.target_population_draft.id,

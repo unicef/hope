@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
+from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
@@ -178,6 +179,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
         input = kwargs.get("input")
@@ -311,6 +313,7 @@ class LockTargetPopulationMutation(ValidatedMutation):
         version = BigInt(required=False)
 
     @classmethod
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "LockTargetPopulationMutation":
         user = info.context.user
@@ -346,6 +349,7 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
         version = BigInt(required=False)
 
     @classmethod
+    @raise_program_status_is(Program.FINISHED)
     def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UnlockTargetPopulationMutation":
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
@@ -419,6 +423,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate_and_get_payload(cls, _root: Any, info: Any, **kwargs: Any) -> "CopyTargetPopulationMutation":
         try:
@@ -500,6 +505,7 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate_and_get_payload(cls, _root: Any, _info: Any, **kwargs: Any) -> "DeleteTargetPopulationMutation":
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)

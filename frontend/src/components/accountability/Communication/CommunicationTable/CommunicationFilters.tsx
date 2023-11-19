@@ -2,12 +2,11 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { CreatedByMessageAutocomplete } from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
+import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface CommunicationFiltersProps {
   filter;
@@ -49,7 +48,10 @@ export const CommunicationFilters = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete
@@ -63,7 +65,7 @@ export const CommunicationFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <CreatedByMessageAutocomplete
+          <CreatedByAutocomplete
             label={t('Created by')}
             filter={filter}
             name='createdBy'
@@ -72,6 +74,7 @@ export const CommunicationFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isMessageCreator: true }}
           />
         </Grid>
         <Grid container item xs={6} spacing={3} alignItems='flex-end'>
@@ -94,10 +97,6 @@ export const CommunicationFilters = ({
           </Grid>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

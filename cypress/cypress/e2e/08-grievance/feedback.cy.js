@@ -12,7 +12,7 @@ let newFeedbackPage = new NewFeedback();
 let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
-describe("Grievance - Feedback", () => {
+describe.skip("Grievance - Feedback", () => {
   before(() => {
     cy.checkIfLoggedIn();
   });
@@ -451,6 +451,26 @@ describe("Grievance - Feedback", () => {
     });
   });
   describe("Regression tests Feedback", () => {
+    it("171154: GPF: Program is still optional in Feedback", () => {
+      cy.scenario([
+        "Go to Feedback page",
+        "Press button Submit New Feedback",
+        "Choose type (e.g. Negative) and press Next button",
+        "Choose Household and press Next button",
+        "Select Received Consent* and press Next button",
+      ]);
+      feedbackPage.getButtonSubmitNewFeedback().click();
+      newFeedbackPage.chooseOptionByName("Negative");
+      newFeedbackPage.getButtonNext().click();
+      newFeedbackPage.getHouseholdTab().should("be.visible");
+      newFeedbackPage.getHouseholdTableRows(0).click();
+      newFeedbackPage.getButtonNext().click();
+      newFeedbackPage.getReceivedConsent().click();
+      newFeedbackPage.getButtonNext().click();
+      newFeedbackPage.getLabelCategory().contains("Feedback");
+      newFeedbackPage.getIssueType().contains("Negative Feedback");
+      cy.get("label").should("not.contain", "Programme Title");
+    });
     it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Feedback page",

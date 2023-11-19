@@ -10,7 +10,7 @@ import { clearCache } from '../utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
+  if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
       if (message.toLowerCase().includes('user is not authenticated')) {
         window.location.replace(
@@ -25,24 +25,23 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       }
     });
 
-    const maintenanceError =
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
-      networkError?.result?.message ===
-      'Migrations are running, please try again later';
+  const maintenanceError =
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    networkError?.result?.message ===
+    'Migrations are running, please try again later';
 
-    if (maintenanceError) {
-      window.location.href = '/maintenance';
-    }
-
-    if (networkError)
-      // eslint-disable-next-line no-console
-      console.error(
-        `[Network error]: ${networkError}`,
-        networkError,
-        graphQLErrors,
-      );
+  if (maintenanceError) {
+    window.location.href = '/maintenance';
   }
+
+  if (networkError)
+    // eslint-disable-next-line no-console
+    console.error(
+      `[Network error]: ${networkError}`,
+      networkError,
+      graphQLErrors,
+    );
 });
 
 const isDataNull = (data): boolean => {
@@ -161,15 +160,10 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
   });
 });
 
-interface HopeHeaders {
-  'Business-Area': string;
-  Program: string;
-}
-
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   const businessAreaSlug = window.location.pathname.split('/')[1];
   const programId = window.location.pathname.split('/')[3];
-  const headers: HopeHeaders = {
+  const headers = {
     'Business-Area': businessAreaSlug,
     Program: programId,
   };
@@ -206,7 +200,7 @@ export async function getClient(): Promise<
       );
     }, 1000);
   }
-  const cache = new InMemoryCache({ addTypename: true });
+  const cache = new InMemoryCache();
   await persistCache({
     cache,
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore

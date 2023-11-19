@@ -117,6 +117,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             end_date=program_data.get("end_date"),
             data_collecting_type=data_collecting_type,
         )
+
+        if program.status == Program.FINISHED:
+            # Only reactivation is possible
+            status = program_data.get("status")
+            if status != Program.ACTIVE or len(program_data) > 1:
+                raise ValidationError("You cannot change finished program")
+
         if data_collecting_type_code:
             program.data_collecting_type = data_collecting_type
 

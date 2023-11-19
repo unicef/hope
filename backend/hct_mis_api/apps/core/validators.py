@@ -1,7 +1,10 @@
 import logging
+import typing
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
+
+from graphql.execution.base import ResolveInfo
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
@@ -16,7 +19,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
-from hct_mis_api.apps.core.utils import xlrd_rows_iterator
+from hct_mis_api.apps.core.utils import decode_id_string_required, xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
 from hct_mis_api.apps.program.models import Program
 
@@ -336,3 +339,26 @@ class DataCollectingTypeValidator(BaseValidator):
                 raise ValidationError("Only active DataCollectingType can be used in Program")
             elif data_collecting_type.deprecated:
                 raise ValidationError("Avoid using the deprecated DataCollectingType in Program")
+
+
+def raise_program_status_is(status: str) -> typing.Callable:
+    def decorator(func: typing.Callable) -> typing.Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            if len(args) >= 3 and isinstance(args[2], ResolveInfo):
+                info = args[2]
+                inputs = kwargs.get("input", {})
+            else:
+                raise Exception("ResolveInfo object missing")
+
+            encoded_program_id = inputs.get("program") or info.context.headers.get("Program")
+            if encoded_program_id and encoded_program_id != "all":
+                program = Program.objects.get(id=decode_id_string_required(encoded_program_id))
+
+                if program.status == status:
+                    raise ValidationError(f"In order to proceed this action, program status must not be {status}")
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

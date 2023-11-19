@@ -6,10 +6,13 @@ export function useBaseUrl(): {
   programId: string;
   businessArea: string;
   isAllPrograms: boolean;
+  isGlobal: boolean;
 } {
   const businessArea = useBusinessArea();
   const programId = useGlobalProgram();
   const baseUrl = `${businessArea}/programs/${programId}`;
   const isAllPrograms = programId === 'all';
-  return { businessArea, programId, baseUrl, isAllPrograms };
+  const isGlobal = businessArea === 'global';
+
+  return { businessArea, programId, baseUrl, isAllPrograms, isGlobal };
 }

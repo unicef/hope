@@ -55,6 +55,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 
@@ -330,6 +331,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
+        program = Program.objects.first()
+
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
@@ -364,7 +367,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         self.graphql_request(
             request_string=LOCK_TARGET_POPULATION_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
             variables={
                 "id": target_population_id,
             },

@@ -16,6 +16,9 @@ export default class BaseComponent {
   navGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]';
   navFeedback = 'a[data-cy="nav-Feedback"]';
   navReporting = 'a[data-cy="nav-Reporting"]';
+  navAccountability = 'div[data-cy="nav-Accountability"]';
+  navCommunication = 'a[data-cy="nav-Communication"]';
+  navSurveys = 'a[data-cy="nav-Surveys"]';
   navProgrammeUsers = 'a[data-cy="nav-Programme Users"]';
   navActivityLog = 'a[data-cy="nav-Activity Log"]';
   navResourcesKnowledgeBase = 'a[data-cy="nav-resources-Knowledge Base"]';
@@ -29,6 +32,8 @@ export default class BaseComponent {
   ticketListRow = 'tr[role="checkbox"]';
   menuUserProfile = 'button[data-cy="menu-user-profile"]';
   menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]';
+  menuItemLogout = 'li[data-cy="menu-item-logout"]';
+  buttonFiltersExpand = 'button[data-cy="button-filters-expand"]';
 
   // Texts
   buttonPaymentVerificationText = "Payment Verification";
@@ -43,8 +48,10 @@ export default class BaseComponent {
   textAllProgrammes = "All Programmes";
 
   // Elements
+  getButtonFiltersExpand = () => cy.get(this.buttonFiltersExpand);
   getMenuUserProfile = () => cy.get(this.menuUserProfile);
   getMenuItemClearCache = () => cy.get(this.menuItemClearCache);
+  getMenuItemLogout = () => cy.get(this.menuItemLogout);
   getButtonPaymentModule = () => cy.get(this.buttonPaymentModule);
   getMenuButtonRegistrationDataImport = () =>
     cy.get(this.navRegistrationDataImport);
@@ -69,6 +76,9 @@ export default class BaseComponent {
   getMenuButtonPaymentVerification = () => cy.get(this.navPaymentVerification);
   getMenuButtonTargeting = () => cy.get(this.navTargeting);
   getMenuButtonGrievance = () => cy.get(this.navGrievance);
+  getMenuButtonAccountability = () => cy.get(this.navAccountability);
+  getMenuButtonCommunication = () => cy.get(this.navCommunication);
+  getMenuButtonSurveys = () => cy.get(this.navSurveys);
   getMenuButtonGrievanceTickets = () => cy.get(this.navGrievanceTickets);
   getMenuButtonGrievanceDashboard = () => cy.get(this.navGrievanceDashboard);
   getGlobalProgramFilter = () => cy.get(this.globalProgramFilter);

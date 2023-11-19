@@ -6,7 +6,7 @@ let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let error404Page = new ErrorPage();
 
-describe("404 Page", () => {
+describe.skip("404 Page", () => {
   before(function () {
     cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");

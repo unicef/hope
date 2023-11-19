@@ -19,8 +19,8 @@ import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTa
 const initialFilter = {
   name: '',
   status: '',
-  totalHouseholdsCountMin: null,
-  totalHouseholdsCountMax: null,
+  totalHouseholdsCountMin: '',
+  totalHouseholdsCountMax: '',
   createdAtRangeMin: '',
   createdAtRangeMax: '',
 };

@@ -23,6 +23,7 @@ export const DashboardPage = (): React.ReactElement => {
   const [selectedTab, setSelectedTab] = useState(0);
   const initialFilter = {
     administrativeArea: '',
+    program: '',
   };
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

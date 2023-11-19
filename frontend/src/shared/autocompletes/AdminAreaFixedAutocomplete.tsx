@@ -41,7 +41,7 @@ export const AdminAreaFixedAutocomplete = ({
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
 
-  const debouncedInputText = useDebounce(inputValue, 500);
+  const debouncedInputText = useDebounce(inputValue, 800);
   const [newValue, setNewValue] = useState(null);
   const { businessArea } = useBaseUrl();
   const { data, loading } = useAllAdminAreasQuery({
@@ -52,6 +52,7 @@ export const AdminAreaFixedAutocomplete = ({
       level: level === 1 ? 1 : 2,
       parentId: parentId || '',
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {

@@ -17,6 +17,8 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
@@ -61,6 +63,7 @@ class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
         cls.ticket = PositiveFeedbackTicketWithoutExtrasFactory()
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
+        cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
 
     @parameterized.expand(
         [
@@ -76,7 +79,7 @@ class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     "description": "Test Feedback",

@@ -16,8 +16,8 @@ class TestFilterHouseholdsByProgram(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     QUERY = """
-        query AllHouseholds{
-          allHouseholds(orderBy: "size", businessArea: "afghanistan") {
+        query AllHouseholds($program: ID){
+          allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan") {
             edges {
               node {
                 program {
@@ -55,5 +55,7 @@ class TestFilterHouseholdsByProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user, "headers": headers},
-            variables={},
+            variables={
+                "program": self.id_to_base64(self.program1.id, "ProgramNode"),
+            },
         )

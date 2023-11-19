@@ -22,7 +22,7 @@ export const FeedbackTableRow = ({
   canViewDetails,
 }: FeedbackTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
   const householdDetailsPath = `/${baseUrl}/population/households/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
@@ -35,6 +35,7 @@ export const FeedbackTableRow = ({
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);
   };
+
   return (
     <ClickableTableRow
       hover
@@ -55,7 +56,7 @@ export const FeedbackTableRow = ({
           : 'Negative Feedback'}
       </TableCell>
       <TableCell align='left'>
-        {feedback.householdLookup?.id ? (
+        {feedback.householdLookup?.id && !isAllPrograms ? (
           <BlackLink to={householdDetailsPath}>
             {feedback.householdLookup?.unicefId}
           </BlackLink>
@@ -76,6 +77,20 @@ export const FeedbackTableRow = ({
       <TableCell align='left'>
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
+      {isAllPrograms && (
+        <TableCell align='left'>
+          {feedback.program?.id ? (
+            <BlackLink
+              key={feedback.program?.id}
+              to={`/${baseUrl}/details/${feedback.program?.id}`}
+            >
+              {feedback?.program.name}
+            </BlackLink>
+          ) : (
+            '-'
+          )}
+        </TableCell>
+      )}
     </ClickableTableRow>
   );
 };

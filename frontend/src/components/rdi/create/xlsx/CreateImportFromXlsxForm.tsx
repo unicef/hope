@@ -28,7 +28,7 @@ const CircularProgressContainer = styled.div`
 const validationSchema = Yup.object().shape({
   name: Yup.string()
     .required('Title is required')
-    .min(2, 'Too short')
+    .min(4, 'Too short')
     .max(255, 'Too long'),
 });
 export function CreateImportFromXlsxForm({

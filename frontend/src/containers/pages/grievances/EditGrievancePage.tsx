@@ -14,6 +14,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsForChoicesQuery,
   useAllUsersQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
@@ -22,9 +23,9 @@ import {
   useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { ContentLink } from '../../../components/core/ContentLink';
 import { DividerLine } from '../../../components/core/DividerLine';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -89,7 +90,7 @@ const BoxWithBottomBorders = styled.div`
 
 export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -129,6 +130,15 @@ export const EditGrievancePage = (): React.ReactElement => {
     data: householdFieldsData,
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
+  const {
+    data: programsData,
+    loading: programsDataLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -146,7 +156,8 @@ export const EditGrievancePage = (): React.ReactElement => {
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    currentUserDataLoading
+    currentUserDataLoading ||
+    programsDataLoading
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -158,7 +169,8 @@ export const EditGrievancePage = (): React.ReactElement => {
     permissions === null ||
     !householdFieldsData ||
     !householdFieldsDict ||
-    !individualFieldsDict
+    !individualFieldsDict ||
+    !programsData
   )
     return null;
 
@@ -257,6 +269,10 @@ export const EditGrievancePage = (): React.ReactElement => {
     GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
       GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
     ] || '';
+
+  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
+    (element) => ({ name: element.node.name, value: element.node.id }),
+  );
 
   return (
     <Formik
@@ -377,18 +393,22 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={3}>
                           <LabelizedField label={t('Household ID')}>
                             <span>
-                              {ticket.household?.id ? (
-                                <ContentLink
-                                  href={
+                              {ticket.household?.id && !isAllPrograms ? (
+                                <BlackLink
+                                  to={
                                     canViewHouseholdDetails
                                       ? `/${baseUrl}/population/household/${ticket.household.id}`
                                       : undefined
                                   }
                                 >
                                   {ticket.household.unicefId}
-                                </ContentLink>
+                                </BlackLink>
                               ) : (
-                                '-'
+                                <div>
+                                  {ticket.household?.id
+                                    ? ticket.household.unicefId
+                                    : '-'}
+                                </div>
                               )}
                             </span>
                           </LabelizedField>
@@ -396,18 +416,22 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={3}>
                           <LabelizedField label={t('Individual ID')}>
                             <span>
-                              {ticket.individual?.id ? (
-                                <ContentLink
-                                  href={
+                              {ticket.individual?.id && !isAllPrograms ? (
+                                <BlackLink
+                                  to={
                                     canViewIndividualDetails
                                       ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
                                       : undefined
                                   }
                                 >
                                   {ticket.individual.unicefId}
-                                </ContentLink>
+                                </BlackLink>
                               ) : (
-                                '-'
+                                <div>
+                                  {ticket.individual?.id
+                                    ? ticket.individual.unicefId
+                                    : '-'}
+                                </div>
                               )}
                             </span>
                           </LabelizedField>
@@ -488,6 +512,20 @@ export const EditGrievancePage = (): React.ReactElement => {
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Field
+                            name='program'
+                            label={t('Programme Name')}
+                            fullWidth
+                            variant='outlined'
+                            choices={mappedProgramChoices}
+                            component={FormikSelectField}
+                            disabled={
+                              !isAllPrograms ||
+                              Boolean(ticket.programs?.[0]?.id)
+                            }
                           />
                         </Grid>
                       </Grid>

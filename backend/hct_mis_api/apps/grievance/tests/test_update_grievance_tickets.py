@@ -50,6 +50,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestUpdateGrievanceTickets(APITestCase):
@@ -102,16 +103,15 @@ class TestUpdateGrievanceTickets(APITestCase):
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123333")
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
 
-        program_one = ProgramFactory(
-            name="Test program ONE",
-            business_area=BusinessArea.objects.first(),
+        cls.program = ProgramFactory(
+            name="Test program ONE", business_area=BusinessArea.objects.first(), status=Program.ACTIVE
         )
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example")
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
+        household_one.programs.add(cls.program)
 
         cls.individuals_to_create = [
             {
@@ -337,7 +337,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
         self.add_individual_grievance_ticket.refresh_from_db()
@@ -465,7 +465,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
         self.individual_data_change_grievance_ticket.refresh_from_db()
@@ -586,7 +586,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
@@ -630,7 +630,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
@@ -669,7 +669,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
@@ -708,7 +708,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -736,7 +736,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=self._prepare_input_data(ticket_id, household_id),
         )
         ticket.refresh_from_db()
@@ -767,7 +767,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=self._prepare_input_data(ticket_id, individual_id=individual_id),
         )
         ticket.refresh_from_db()
@@ -798,7 +798,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=self._prepare_input_data(ticket_id, household_id),
         )
         ticket.refresh_from_db()
@@ -829,7 +829,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=self._prepare_input_data(ticket_id, individual_id=individual_id),
         )
         ticket.refresh_from_db()

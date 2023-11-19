@@ -36,6 +36,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCase):
@@ -98,6 +99,11 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         )
         program_two = ProgramFactory(
             name="Test program TWO",
+            business_area=BusinessArea.objects.first(),
+        )
+
+        cls.program = ProgramFactory(
+            status=Program.ACTIVE,
             business_area=BusinessArea.objects.first(),
         )
 
@@ -273,7 +279,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -354,7 +360,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -399,7 +405,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -452,7 +458,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -488,7 +494,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -531,7 +537,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -567,6 +573,6 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )

@@ -35,21 +35,13 @@ BATCH_SIZE_SMALL = 20
 
 
 def migrate_data_to_representations() -> None:
-    apply_country_specific_rules()
-    unknown_unassigned_dict = get_unknown_unassigned_dict()
     for business_area in BusinessArea.objects.all():
         logger.info("----- NEW BUSINESS AREA -----")
         logger.info(f"Handling business area: {business_area}")
-        migrate_data_to_representations_per_business_area(
-            business_area=business_area, unknown_unassigned_program=unknown_unassigned_dict.get(business_area)
-        )
-
-    apply_congo_withdrawal()
+        migrate_data_to_representations_per_business_area(business_area=business_area)
 
 
-def migrate_data_to_representations_per_business_area(
-    business_area: BusinessArea, unknown_unassigned_program: Optional[Program] = None
-) -> None:
+def migrate_data_to_representations_per_business_area(business_area: BusinessArea) -> None:
     """
     This function is used to migrate data from old models to new representations per business_area.
     Take TargetPopulations:
@@ -65,7 +57,16 @@ def migrate_data_to_representations_per_business_area(
     - adjust payments and payment_records to corresponding representations
 
     """
+    unknown_unassigned_dict = get_unknown_unassigned_dict()
+    unknown_unassigned_program = unknown_unassigned_dict.get(business_area)
+
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_rules()
+    elif business_area.name == "Sudan":
+        apply_sudan_rules()
+
     hhs_to_ignore = get_ignored_hhs() if business_area.name == "Afghanistan" else None
+
     for program in Program.objects.filter(
         business_area=business_area, status__in=[Program.ACTIVE, Program.FINISHED]
     ).order_by("status"):
@@ -133,6 +134,9 @@ def migrate_data_to_representations_per_business_area(
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
     ).update(is_migration_handled=True)
+
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_withdrawal()
 
 
 def get_household_representation_per_program_by_old_household_id(
@@ -516,6 +520,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
                     household_dict[household_original_id] = household_representation
 
                 copy_roles_from_dict(household_dict, program)  # type: ignore
+
     rdis.filter(program__isnull=True).update(program=program)
 
 

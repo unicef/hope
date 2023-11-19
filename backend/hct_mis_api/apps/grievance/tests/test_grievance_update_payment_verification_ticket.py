@@ -22,6 +22,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -69,12 +70,12 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         )
         cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        program = ProgramFactory(id="e6537f1e-27b5-4179-a443-d42498fb0478")
+        cls.program = ProgramFactory(id="e6537f1e-27b5-4179-a443-d42498fb0478", status=Program.ACTIVE)
         CashPlanFactory(
             id="0272dd2d-c41e-435d-9587-6ba280678c54",
             ca_id="B4M-21-CSH-00004",
             business_area=cls.business_area,
-            program=program,
+            program=cls.program,
         )
 
         household, _ = create_household_and_individuals(
@@ -98,7 +99,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
         cash_plan = CashPlanFactory(
             name="TEST",
-            program=program,
+            program=cls.program,
             business_area=cls.business_area,
         )
         payment_verification_plan = PaymentVerificationPlanFactory(
@@ -148,7 +149,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -174,7 +175,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 

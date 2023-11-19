@@ -29,8 +29,8 @@ class TestIndividualQuery(APITestCase):
     databases = "__all__"
 
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals($search: String, $searchType: String) {
-      allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, orderBy:"id") {
+    query AllIndividuals($search: String, $searchType: String, $program: ID) {
+      allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, program: $program, orderBy:"id") {
         edges {
           node {
             fullName
@@ -240,6 +240,7 @@ class TestIndividualQuery(APITestCase):
                 "user": self.user,
                 "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
             },
+            variables={"program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
         )
 
     @parameterized.expand(

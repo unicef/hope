@@ -8,14 +8,16 @@ import {
 import { Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const LookUpLinkedTicketsModal = ({
   onValueChange,
@@ -25,15 +27,24 @@ export const LookUpLinkedTicketsModal = ({
 }): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
-  const filterInitial = {
+  const location = useLocation();
+
+  const initialFilter = {
     search: '',
     status: '',
     fsp: '',
-    createdAtRange: '',
+    createdAtRangeMin: null,
+    createdAtRangeMax: null,
     admin2: '',
   };
-  const [filterApplied, setFilterApplied] = useState(filterInitial);
-  const [filter, setFilter] = useState(filterInitial);
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -67,12 +78,13 @@ export const LookUpLinkedTicketsModal = ({
             <LookUpLinkedTicketsFilters
               choicesData={choicesData}
               filter={filter}
-              setFilterApplied={setFilterApplied}
-              filterInitial={filterInitial}
-              onFilterChange={setFilter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
             />
             <LookUpLinkedTicketsTable
-              filter={filterApplied}
+              filter={appliedFilter}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
               initialValues={initialValues}

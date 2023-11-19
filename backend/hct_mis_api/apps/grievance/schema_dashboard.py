@@ -72,7 +72,7 @@ def pre_filter_query_with_headers(info: Any) -> QuerySet:
     if business_area_slug:
         query = query.filter(business_area__slug=business_area_slug)
 
-    if encoded_program_id:
+    if encoded_program_id and encoded_program_id != "all":
         decoded_id = decode_id_string_required(encoded_program_id)
         program = Program.objects.get(id=decoded_id)
         query = query.filter(programs__in=[program])

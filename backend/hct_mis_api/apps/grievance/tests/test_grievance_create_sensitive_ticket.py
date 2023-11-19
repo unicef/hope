@@ -16,6 +16,7 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
@@ -64,8 +65,8 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             {"size": 1, "business_area": cls.business_area},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
-        program = ProgramFactory(business_area=cls.business_area)
-        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cash_plan = CashPlanFactory(program=cls.program, business_area=cls.business_area)
         cls.payment_record = PaymentRecordFactory(
             household=cls.household,
             full_name=cls.individuals[0].full_name,
@@ -117,7 +118,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -156,7 +157,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -195,7 +196,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -238,7 +239,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -277,7 +278,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -315,7 +316,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -353,7 +354,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -384,6 +385,6 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )

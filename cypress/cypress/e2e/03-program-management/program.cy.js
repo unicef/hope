@@ -82,6 +82,7 @@ describe("Program Management", () => {
         "Edit Programme",
         "Check if programme was edited properly",
       ]);
+      // programManagement.getButtonFiltersExpand().click();
       programManagement.getStatusFilter().click();
       programManagement.getOption().contains("Active").click();
       programManagement.getButtonApply().click();
@@ -199,6 +200,16 @@ describe("Program Management", () => {
         programManagement.getButtonSave().click({ force: true });
         cy.get("p").contains("Data Collecting Type is required");
       });
+    });
+    it("171253 GPF: After delete program it is still visible and clickable in GPF", () => {
+      programDetails.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonRemoveProgram().click();
+      programDetails.getButtonRemoveProgram().eq(1).click();
+      programDetails.getGlobalProgramFilter().click();
+      programDetails
+        .getProgrammesOptions()
+        .should("not.contain", "Draft Program");
+      cy.url().should("include", "programs/all/list");
     });
   });
 });

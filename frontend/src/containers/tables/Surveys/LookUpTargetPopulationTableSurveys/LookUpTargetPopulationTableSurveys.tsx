@@ -43,14 +43,14 @@ export const LookUpTargetPopulationTableSurveys = ({
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin,
-    totalHouseholdsCountMax: filter.totalHouseholdsCountMax,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || 0,
+    totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
     program: [programId],
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: filter.createdAtRangeMin || null,
+      max: filter.createdAtRangeMax || null,
     }),
     statusNot: TargetPopulationStatus.Open,
   };

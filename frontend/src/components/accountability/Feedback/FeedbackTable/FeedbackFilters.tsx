@@ -3,14 +3,15 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useFeedbackIssueTypeChoicesQuery } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import {CreatedByFeedbackAutocomplete} from '../../../../shared/autocompletes/CreatedByFeedbackAutocomplete';
+import { ProgramAutocomplete } from '../../../../shared/autocompletes/ProgramAutocomplete';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -29,6 +30,7 @@ export const FeedbackFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const { isAllPrograms } = useBaseUrl();
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -59,7 +61,10 @@ export const FeedbackFilters = ({
   if (choicesLoading) return <LoadingComponent />;
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -69,6 +74,19 @@ export const FeedbackFilters = ({
             data-cy='filters-search'
           />
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <ProgramAutocomplete
+              filter={filter}
+              name='program'
+              value={filter.program}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
+          </Grid>
+        )}
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
@@ -76,7 +94,7 @@ export const FeedbackFilters = ({
             value={filter.issueType}
             data-cy='filters-issue-type'
           >
-            {choicesData.feedbackIssueTypeChoices.map((issueType) => (
+            {choicesData?.feedbackIssueTypeChoices?.map((issueType) => (
               <MenuItem key={issueType.name} value={issueType.value}>
                 {issueType.name}
               </MenuItem>
@@ -84,7 +102,7 @@ export const FeedbackFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <CreatedByFeedbackAutocomplete
+          <CreatedByAutocomplete
             name='createdBy'
             filter={filter}
             value={filter.createdBy}
@@ -93,6 +111,7 @@ export const FeedbackFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isFeedbackCreator: true }}
           />
         </Grid>
         <Grid item xs={3}>
@@ -112,11 +131,24 @@ export const FeedbackFilters = ({
             data-cy='filters-creation-date-to'
           />
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

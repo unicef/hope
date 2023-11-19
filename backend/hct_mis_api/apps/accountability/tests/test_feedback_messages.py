@@ -15,6 +15,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestFeedbackMessages(APITestCase):
@@ -54,6 +56,7 @@ class TestFeedbackMessages(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -79,7 +82,13 @@ class TestFeedbackMessages(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_FEEDBACK_MESSAGE_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "feedback": self.id_to_base64(self.feedback.id, "FeedbackNode"),
@@ -109,6 +118,12 @@ class TestFeedbackMessages(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FEEDBACK_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={"id": self.id_to_base64(self.feedback.id, "FeedbackNode")},
         )

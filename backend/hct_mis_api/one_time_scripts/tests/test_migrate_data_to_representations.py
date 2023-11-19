@@ -49,6 +49,9 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     migrate_data_to_representations,
     migrate_data_to_representations_per_business_area,
 )
+from hct_mis_api.one_time_scripts.soft_delete_original_objects import (
+    soft_delete_original_objects,
+)
 
 
 @skip(reason="Skip this test for GPF")
@@ -87,6 +90,9 @@ class TestMigrateDataToRepresentations(TestCase):
         self.business_area_afghanistan = BusinessAreaFactory(name="Afghanistan")
         self.business_area_congo = BusinessAreaFactory(name="Democratic Republic of Congo")
         self.business_area_sudan = BusinessAreaFactory(name="Sudan")
+        BusinessAreaFactory(name="Trinidad & Tobago")
+        BusinessAreaFactory(name="Slovakia")
+        BusinessAreaFactory(name="Sri Lanka")
 
         # collecting_types
         generate_data_collecting_types()
@@ -1643,6 +1649,34 @@ class TestMigrateDataToRepresentations(TestCase):
         # 4x for household1, 4x for household2, 2x for household3, 1x for household4, 4x household7,
         # 1x household6, 4x household5
         self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 20)
+
+        # test soft delete of original objects
+        soft_delete_original_objects()
+        self.refresh_objects()
+        self.assertEqual(Household.all_objects.filter(is_removed=True).count(), household_count)
+        self.assertEqual(Household.all_objects.filter(is_removed=True, is_original=True).count(), household_count)
+        self.assertEqual(Household.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(Individual.all_objects.filter(is_removed=True).count(), individual_count)
+        self.assertEqual(Individual.all_objects.filter(is_removed=True, is_original=True).count(), individual_count)
+        self.assertEqual(Individual.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(IndividualRoleInHousehold.all_objects.filter(is_removed=True).count(), roles_count)
+        self.assertEqual(
+            IndividualRoleInHousehold.all_objects.filter(is_removed=True, is_original=True).count(), roles_count
+        )
+        self.assertEqual(IndividualRoleInHousehold.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(Document.all_objects.filter(is_removed=True).count(), document_count)
+        self.assertEqual(Document.all_objects.filter(is_removed=True, is_original=True).count(), document_count)
+        self.assertEqual(Document.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(IndividualIdentity.all_objects.filter(is_removed=True).count(), identity_count)
+        self.assertEqual(
+            IndividualIdentity.all_objects.filter(is_removed=True, is_original=True).count(), identity_count
+        )
+        self.assertEqual(IndividualIdentity.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+        self.assertEqual(BankAccountInfo.all_objects.filter(is_removed=True).count(), bank_account_info_count)
+        self.assertEqual(
+            BankAccountInfo.all_objects.filter(is_removed=True, is_original=True).count(), bank_account_info_count
+        )
+        self.assertEqual(BankAccountInfo.all_objects.filter(is_removed=True, is_original=False).count(), 0)
 
     def test_adjust_payments_and_payment_records(self) -> None:
         payment_count = Payment.objects.filter(business_area=self.business_area).count()

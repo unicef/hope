@@ -2,20 +2,20 @@ import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import {
-  AllHouseholdsQuery,
+  AllHouseholdsForPopulationTableQuery,
   HouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { BlackLink } from '../../../core/BlackLink';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpHouseholdTableRowProps {
-  household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
+  household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
   radioChangeHandler: (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+    household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
   ) => void;
-  selectedHousehold: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
+  selectedHousehold: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event:
@@ -29,7 +29,7 @@ interface LookUpHouseholdTableRowProps {
   isFeedbackWithHouseholdOnly?: boolean;
 }
 
-export function LookUpHouseholdTableRow({
+export const LookUpHouseholdTableRow = ({
   household,
   radioChangeHandler,
   selectedHousehold,
@@ -38,8 +38,8 @@ export function LookUpHouseholdTableRow({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableRowProps): React.ReactElement {
-  const { baseUrl } = useBaseUrl();
+}: LookUpHouseholdTableRowProps): React.ReactElement => {
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
 
@@ -50,12 +50,6 @@ export function LookUpHouseholdTableRow({
     } else {
       radioChangeHandler(household);
     }
-  };
-  const renderPrograms = (): string => {
-    const programNames = household.programs?.edges?.map(
-      (edge) => edge.node.name,
-    );
-    return programNames?.length ? programNames.join(', ') : '-';
   };
 
   const isSelectionDisabled =
@@ -97,17 +91,29 @@ export function LookUpHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
-          {household.unicefId}
-        </BlackLink>
+        {!isAllPrograms ? (
+          <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
+            {household.unicefId}
+          </BlackLink>
+        ) : (
+          <span>{household.unicefId}</span>
+        )}
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household?.admin2?.name || '-'}</TableCell>
-      <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
+      <TableCell align='left'>
+        {household.program ? (
+          <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
+            {household.program.name}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
+      </TableCell>
     </ClickableTableRow>
   );
-}
+};

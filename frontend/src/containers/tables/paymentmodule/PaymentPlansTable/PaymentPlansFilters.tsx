@@ -13,13 +13,12 @@ import {
   AllPaymentPlansForTableQueryVariables,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '../../../../__generated__/graphql';
-import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
+import { FiltersSection } from '../../../../components/core/FiltersSection';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -79,7 +78,10 @@ export const PaymentPlansFilters = ({
   }
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container spacing={3} alignItems='flex-end'>
         <Grid item xs={3}>
           <SearchTextField
@@ -195,10 +197,6 @@ export const PaymentPlansFilters = ({
           </Box>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

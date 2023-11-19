@@ -55,8 +55,8 @@ export const LookUpSelectionSurveys = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    totalHouseholdsCountMin: null,
-    totalHouseholdsCountMax: null,
+    totalHouseholdsCountMin: '',
+    totalHouseholdsCountMax: '',
     createdAtRangeMin: undefined,
     createdAtRangeMax: undefined,
   };
@@ -143,7 +143,6 @@ export const LookUpSelectionSurveys = ({
               initialFilter={initialFilterTP}
               appliedFilter={appliedFilterTP}
               setAppliedFilter={setAppliedFilterTP}
-              addBorder={false}
             />
           )}
         </Box>

@@ -97,7 +97,12 @@ export const DrawerItems = ({
     };
     const cashAssistIndex = getIndexByName('Cash Assist');
     const programDetailsIndex = getIndexByName('Programme Details');
-    const programManagementIndex = getIndexByName('Programme Management');
+    const reportingIndex = getIndexByName('Reporting');
+
+    // Remove 'Reporting' item when program is selected
+    if (reportingIndex !== -1 && !isAllPrograms) {
+      updatedMenuItems.splice(reportingIndex, 1);
+    }
 
     //Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =
@@ -107,10 +112,18 @@ export const DrawerItems = ({
     if (!isAllPrograms) {
       updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
     }
-    //When GlobalProgramFilter not applied show Program Management only
+    //When GlobalProgramFilter not applied show some pages only
     if (isAllPrograms) {
-      const programManagementOnly = [updatedMenuItems[programManagementIndex]];
-      return programManagementOnly;
+      const pagesAvailableForAllPrograms = [
+        'Country Dashboard',
+        'Programme Management',
+        'Reporting',
+        'Grievance',
+        'Activity Log',
+      ];
+      return updatedMenuItems.filter((item) =>
+        pagesAvailableForAllPrograms.includes(item.name),
+      );
     }
     return updatedMenuItems;
   };

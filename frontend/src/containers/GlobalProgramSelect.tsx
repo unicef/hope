@@ -59,7 +59,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   );
 
   useEffect(() => {
-    if (programId && !isValidProgramId(programId)) {
+    if (programId && !isValidProgramId(programId) && programId !== 'all') {
       history.push(`/${businessArea}/programs/all/list`);
     }
   }, [programId, history, businessArea, isValidProgramId]);

@@ -26,7 +26,7 @@ describe("Program Details", () => {
         "Check if all elements on page exist",
       ]);
       programDetails.getTableTitle().should("be.visible");
-      programDetails.getTashPlanTableRow().should("have.length", 2);
+      programDetails.getCashPlanTableRow().should("have.length", 2);
       programDetails.getLabelAdministrativeAreasOfImplementation();
       programDetails.getButtonEditProgram().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
@@ -74,7 +74,7 @@ describe("Program Details", () => {
       programDetails.getTablePagination().should("not.exist");
       programDetails.getTableLabel().should("not.exist");
       programDetails.getTableTitle().should("not.exist");
-      programDetails.getTashPlanTableRow().should("not.exist");
+      programDetails.getCashPlanTableRow().should("not.exist");
     });
   });
 
@@ -122,6 +122,11 @@ describe("Program Details", () => {
         .should("contain", "Programme Management");
     });
     it("Remove Program", () => {
+      cy.scenario([
+        "Go to Program Details page (Draft Program)",
+        "Press Remove button",
+        "Check if program removed",
+      ]);
       programDetails.navigateToProgrammePage("Draft Program");
       programDetails.getButtonRemoveProgram().click();
       programDetails.getButtonRemoveProgram().eq(1).click();
@@ -142,5 +147,36 @@ describe("Program Details", () => {
 
   describe.skip("E2E tests Program Details", () => {});
 
-  describe.skip("Regression tests Program Details", () => {});
+  describe("Regression tests Program Details", () => {
+    [
+      ["Payment Plan ID", "PP-0060-23-00000001", "PP-0060-23-00000002"],
+      ["Status", "PP-0060-23-00000002", "PP-0060-23-00000001"],
+      // ToDo: 177103 ["Num. of Households"],
+      // ToDo: 177103 ["Currency"],
+      ["Total Entitled Quantity", "PP-0060-23-00000001", "PP-0060-23-00000002"],
+      [
+        "Total Delivered Quantity",
+        "PP-0060-23-00000001",
+        "PP-0060-23-00000002",
+      ],
+      [
+        "Total Undelivered Quantity",
+        "PP-0060-23-00000001",
+        "PP-0060-23-00000002",
+      ],
+      // ToDo: 177103 ["Dispersion Date"],
+    ].forEach((testData) => {
+      it(`176265: GPF: Error during sorting ${testData[0]} in Payment Plans in Programme Details`, () => {
+        cy.scenario([
+          "Go to Program Details with Payment Plans",
+          `Press column ${testData[0]} of Programme Details`,
+          "Check if sorted properly",
+        ]);
+        programDetails.navigateToProgrammePage("Test Program");
+        programDetails.getTableLabel().contains(testData[0]).click();
+        programDetails.getCashPlanTableRow().eq(0).contains(testData[1]);
+        programDetails.getCashPlanTableRow().eq(1).contains(testData[2]);
+      });
+    });
+  });
 });

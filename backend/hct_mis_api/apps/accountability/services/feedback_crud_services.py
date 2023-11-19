@@ -19,13 +19,12 @@ class FeedbackCrudServices:
                 raise Exception("Household lookup does not match individual lookup")
 
     @classmethod
-    def create(cls, user: AbstractUser, business_area: BusinessArea, program: Program, input_data: dict) -> Feedback:
+    def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Feedback:
         def check(key: Any) -> bool:
-            return key in input_data and input_data[key] is not None
+            return key in input_data and input_data[key] is not None and input_data[key] != ""
 
         obj = Feedback(
             business_area=business_area,
-            program=program,
             issue_type=input_data["issue_type"],
             description=input_data["description"],
         )
@@ -43,6 +42,12 @@ class FeedbackCrudServices:
             obj.language = input_data["language"]
         if check("consent"):
             obj.consent = input_data["consent"]
+
+        if obj.household_lookup:
+            obj.program = obj.household_lookup.program or obj.household_lookup.programs.first()
+
+        if not obj.program and check("program"):
+            obj.program = get_object_or_404(Program, id=decode_id_string(input_data["program"]))
         obj.created_by = user
         cls.validate_lookup(obj)
         obj.save()
@@ -51,7 +56,7 @@ class FeedbackCrudServices:
     @classmethod
     def update(cls, feedback: Feedback, input_data: dict) -> Feedback:
         def check(key: Any) -> bool:
-            return key in input_data and input_data[key] is not None
+            return key in input_data and input_data[key] is not None and input_data[key] != ""
 
         if check("issue_type"):
             feedback.issue_type = input_data["issue_type"]
@@ -75,6 +80,8 @@ class FeedbackCrudServices:
             feedback.language = input_data["language"]
         if check("consent"):
             feedback.consent = input_data["consent"]
+        if check("program"):
+            feedback.program = get_object_or_404(Program, id=decode_id_string(input_data["program"]))
         cls.validate_lookup(feedback)
         feedback.save()
         return feedback

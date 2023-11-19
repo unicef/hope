@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
   IndividualNode,
@@ -9,6 +10,7 @@ import {
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 
@@ -26,7 +28,8 @@ export const IndividualsListTable = ({
   choicesData,
 }: IndividualsListTableProps): React.ReactElement => {
   const { t } = useTranslation();
-  const initialVariables = {
+  const { programId } = useBaseUrl();
+  const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
     sex: [filter.sex],
@@ -39,6 +42,7 @@ export const IndividualsListTable = ({
       min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
       max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
     }),
+    program: programId,
   };
 
   return (

@@ -15,6 +15,7 @@ describe("Households Module", () => {
     cy.get("span").contains("Individuals");
     cy.get("span").contains("Households");
     cy.get("span").contains("Households").click();
+    // populationHouseholds.getButtonFiltersExpand().click();
   });
   describe("Smoke tests Households Population module", () => {
     it("Check Households Population page", () => {

@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsForChoicesQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -81,7 +82,7 @@ export const dataChangeComponentDict = {
 export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -113,7 +114,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     priority: null,
     urgency: null,
     partner: null,
-    program: programId,
+    program: isAllPrograms ? '' : programId,
     comments: null,
     linkedFeedbackId: linkedFeedbackId
       ? decodeIdString(linkedFeedbackId)
@@ -130,6 +131,15 @@ export const CreateGrievancePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery();
   const { data: userChoices } = useUserChoiceDataQuery();
   const [mutate, { loading }] = useCreateGrievanceMutation();
+  const {
+    data: programsData,
+    loading: programsDataLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
 
   const {
     data: allAddIndividualFieldsData,
@@ -162,7 +172,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     userDataLoading ||
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
-    householdFieldsLoading
+    householdFieldsLoading ||
+    programsDataLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -176,7 +187,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     !allAddIndividualFieldsData ||
     !householdFieldsData ||
     !householdFieldsDict ||
-    !individualFieldsDict
+    !individualFieldsDict ||
+    !programsData
   )
     return null;
 
@@ -368,6 +380,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             baseUrl={baseUrl}
                             choicesData={choicesData}
                             userChoices={userChoices}
+                            programsData={programsData}
                             setFieldValue={setFieldValue}
                             errors={errors}
                             permissions={permissions}

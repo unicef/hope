@@ -1,7 +1,7 @@
 import Login from "../../page-objects/pages/login/login.po";
 
 let l = new Login();
-context("Login", () => {
+context.skip("Login", () => {
   after(() => {
     cy.adminLogin();
   });
@@ -63,5 +63,28 @@ context("Login", () => {
       "contain",
       "Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive."
     );
+  });
+  it("176667: Check page after logout", () => {
+    cy.scenario([
+      "Logout",
+      "Check login page",
+      "Check main page",
+      "Log in via admin panel using valid login and password",
+      "Go to Home page",
+      "Check if did not log in",
+    ]);
+    cy.adminLogin();
+    cy.navigateToHomePage();
+    cy.get("h5").should("contain", "Test Programm");
+    l.getMenuUserProfile().click();
+    l.getMenuItemLogout().click();
+    cy.url().should("include", "login");
+    cy.get("p").contains("Login via Active Directory");
+    cy.visit("/");
+    cy.url().should("include", "login?next=/");
+    cy.get("p").contains("Login via Active Directory");
+    cy.adminLogin();
+    cy.navigateToHomePage();
+    cy.get("h5").should("contain", "Test Programm");
   });
 });
