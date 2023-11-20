@@ -10,10 +10,11 @@ import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ProgramForm } from '../../forms/ProgramForm';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PaperContainer } from '../../../components/targeting/PaperContainer';
 
-export const CreateProgram = (): ReactElement => {
+export const CreateProgramPage = (): ReactElement => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const [mutate, { loading }] = useCreateProgramMutation({
@@ -52,7 +53,7 @@ export const CreateProgram = (): ReactElement => {
   const renderSubmit = (submit): ReactElement => {
     return (
       <>
-        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button onClick={() => console.log('cancel')}>Cancel</Button>
         <LoadingButton
           loading={loading}
           onClick={submit}
@@ -68,22 +69,15 @@ export const CreateProgram = (): ReactElement => {
   };
 
   return (
-    <div>
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={() => setOpen(true)}
-        data-cy='button-new-program'
-      >
-        {t('New Programme')}
-      </Button>
-      <ProgramForm
-        onSubmit={submitFormHandler}
-        renderSubmit={renderSubmit}
-        open={open}
-        onClose={() => setOpen(false)}
-        title={t('Set-up a new Programme')}
-      />
-    </div>
+    <>
+      <PageHeader title={t('Create Program')} />
+      <PaperContainer>
+        <ProgramForm
+          onSubmit={submitFormHandler}
+          renderSubmit={renderSubmit}
+          title={t('Set-up a new Programme')}
+        />
+      </PaperContainer>
+    </>
   );
 };
