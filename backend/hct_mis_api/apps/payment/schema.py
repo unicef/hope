@@ -324,6 +324,8 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     service_provider = graphene.Field(FinancialServiceProviderNode)
     household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
+    debit_card_number = graphene.String()
+    debit_card_issuer = graphene.String()
     additional_collector_name = graphene.String()
     additional_document_type = graphene.String()
     additional_document_number = graphene.String()
@@ -369,6 +371,15 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
+
+    def resolve_debit_card_number(self, info: Any) -> str:
+        if bank_account_info := self.collector.bank_account_info.first():
+            return bank_account_info.debit_card_number
+        else:
+            return ""
+
+    def resolve_debit_card_issuer(self, info: Any) -> str:
+        return self.collector.full_name if self.collector.bank_account_info.first() else ""
 
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         # TODO: migrate old data maybe?
