@@ -12092,7 +12092,7 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'debitCardNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment' | 'snapshotCollectorFullName'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'debitCardNumber' | 'debitCardIssuer' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment' | 'snapshotCollectorFullName'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -22412,6 +22412,7 @@ export const PaymentDocument = gql`
     snapshotCollectorBankName
     snapshotCollectorBankAccountNumber
     debitCardNumber
+    debitCardIssuer
     targetPopulation {
       id
       name
