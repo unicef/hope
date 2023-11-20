@@ -27,6 +27,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.program.models import Program
 
 
 class APITestCase(SnapshotTestTestCase):
@@ -125,14 +126,34 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
+    def update_user_partner_perm_for_program(user: "User", business_area: "BusinessArea", program: "Program") -> None:
+        partner_permissions = user.partner.permissions or {}
+        if str(business_area.pk) in partner_permissions:
+            # only add new program_id
+            if str(program.pk) not in partner_permissions[str(business_area.pk)]["programs"]:
+                partner_permissions[str(business_area.pk)]["programs"].update({str(program.pk): []})
+            else:
+                pass
+                # TODO: add MB update program's areas
+        else:
+            partner_permissions.update({str(business_area.pk): {"programs": {str(program.pk): []}}})
+
+        user.partner.permissions = partner_permissions
+        user.partner.save()
+
+    @classmethod
     def create_user_role_with_permissions(
-        user: "User", permissions: Iterable, business_area: "BusinessArea"
+        cls, user: "User", permissions: Iterable, business_area: "BusinessArea", program: Optional["Program"] = None
     ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
         )
         user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+
+        # update Partner permissions for the program
+        if program:
+            cls.update_user_partner_perm_for_program(user, business_area, program)
         return user_role
 
 

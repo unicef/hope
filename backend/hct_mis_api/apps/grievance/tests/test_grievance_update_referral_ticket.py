@@ -62,6 +62,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
         cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
     @parameterized.expand(
         [

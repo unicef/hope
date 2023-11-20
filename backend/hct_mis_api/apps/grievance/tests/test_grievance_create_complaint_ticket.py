@@ -65,6 +65,8 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+
         cash_plan = CashPlanFactory(program=cls.program, business_area=cls.business_area)
         cls.payment_record = PaymentRecordFactory(
             household=cls.household,

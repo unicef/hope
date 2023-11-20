@@ -41,6 +41,7 @@ class TestIndividualFlagQuery(APITestCase):
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(status="ACTIVE")
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         individuals_to_create: List[Dict] = [
             {
