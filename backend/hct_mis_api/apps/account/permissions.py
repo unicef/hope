@@ -17,6 +17,7 @@ from graphene_django.filter.utils import (
 
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import get_program_id_from_headers
 
 logger = logging.getLogger(__name__)
 
@@ -234,18 +235,6 @@ POPULATION_DETAILS = (
 )
 
 
-POPULATION_LIST = (
-    Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
-)
-
-
-POPULATION_DETAILS = (
-    Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-    Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
-)
-
-
 class BasePermission:
     @classmethod
     def has_permission(cls, info: Any, **kwargs: Any) -> bool:
@@ -276,7 +265,8 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
         business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
     if business_area is None:
         return False
-    return any(user.has_permission(permission.name, business_area) for permission in permissions)
+    program_id = get_program_id_from_headers(kwargs)
+    return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
@@ -285,6 +275,7 @@ def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
             user = info.context.user
             permissions = [permission]
+            kwargs["Program"] = info.context.headers.get("Program")
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
@@ -295,6 +286,7 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
         @classmethod
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
             user = info.context.user
+            kwargs["Program"] = info.context.headers.get("Program")
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
@@ -334,10 +326,11 @@ class BaseNodePermissionMixin:
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
+        program_id = get_program_id_from_headers(info.context.headers)
         if not user.is_authenticated or not (
-            user.has_permission(general_permission, business_area)
-            or (is_creator and user.has_permission(creator_permission, business_area))
-            or (is_owner and user.has_permission(owner_permission, business_area))
+            user.has_permission(general_permission, business_area, program_id)
+            or (is_creator and user.has_permission(creator_permission, business_area, program_id))
+            or (is_owner and user.has_permission(owner_permission, business_area, program_id))
         ):
             raise PermissionDenied("Permission Denied")
 
@@ -401,11 +394,14 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if business_area := info.context.headers.get("Business-Area"):
             filter_kwargs["business_area"] = business_area
+        if program_id := get_program_id_from_headers(info.context.headers):
+            filter_kwargs["Program"] = program_id
+
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
-                filter_kwargs.get("business_area")
+                business_area_slug=filter_kwargs.get("business_area"), program_id=program_id
             )
         qs = super().resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs
@@ -448,11 +444,12 @@ class BaseMutationPermissionMixin:
             business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
             if business_area is None:
                 return cls.raise_permission_denied_error(raise_error=raise_error)
+        program_id = get_program_id_from_headers(info.context.headers)
         if not any(
             [
                 permission.name
                 for permission in permissions
-                if info.context.user.has_permission(permission.name, business_area)
+                if info.context.user.has_permission(permission.name, business_area, program_id)
             ]
         ):
             return cls.raise_permission_denied_error(raise_error=raise_error)

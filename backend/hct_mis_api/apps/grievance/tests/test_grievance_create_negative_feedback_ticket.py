@@ -48,6 +48,7 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
