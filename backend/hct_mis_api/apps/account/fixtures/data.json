@@ -4,7 +4,17 @@
   "pk": 1,
   "fields": {
     "name": "UNICEF",
-    "is_un": true
+    "is_un": true,
+    "permissions": {
+        "c259b1a0-ae3a-494e-b343-f7c8eb060c68": {
+          "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+          "programs": {
+            "939ff91b-7f89-4e3c-9519-26ed62f51718": [],
+            "61d7b5ce-b039-4884-9dec-0b41ff9d6650": [],
+            "de3a43bf-a755-41ff-a5c0-acd02cf3d244": []
+          }
+        }
+      }
   }
 },
 {

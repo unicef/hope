@@ -43,6 +43,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     encode_ids,
     get_model_choices_fields,
+    get_program_id_from_headers,
     resolve_flex_fields_choices_to_string,
     sum_lists_with_values,
     to_choice_object,
@@ -300,9 +301,10 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area, program_id
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -430,9 +432,12 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def check_node_permission(cls, info: Any, object_instance: Household) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
-        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+        if not user.has_permission(
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area, program_id
+        ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
             )

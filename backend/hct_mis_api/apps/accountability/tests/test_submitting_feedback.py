@@ -112,6 +112,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             individuals_data=[{}],
         )
         cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         country = geo_models.Country.objects.create(name="Afghanistan")
         cls.area_type = AreaTypeFactory(
