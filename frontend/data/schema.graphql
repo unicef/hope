@@ -2795,6 +2795,8 @@ type PaymentNode implements Node {
   verification: PaymentVerificationNode
   distributionModality: String
   serviceProvider: FinancialServiceProviderNode
+  debitCardNumber: String
+  debitCardIssuer: String
   totalPersonsCovered: Int
   snapshotCollectorFullName: String
   snapshotCollectorDeliveryPhoneNo: String
