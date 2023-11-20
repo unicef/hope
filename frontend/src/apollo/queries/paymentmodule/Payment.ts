@@ -10,6 +10,7 @@ export const Payment = gql`
       statusDate
       snapshotCollectorBankName
       snapshotCollectorBankAccountNumber
+      debitCardNumber
       targetPopulation {
         id
         name
