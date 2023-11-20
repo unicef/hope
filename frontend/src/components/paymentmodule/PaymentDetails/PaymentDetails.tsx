@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
+  PaymentDeliveryType,
   PaymentQuery,
   PaymentStatus,
   PaymentVerificationStatus,
@@ -284,12 +285,22 @@ export const PaymentDetails = ({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('Debit Card Number')}
-              value={payment.debitCardNumber}
-            />
-          </Grid>
+          {payment.deliveryType === PaymentDeliveryType.DepositToCard && (
+            <>
+              <Grid item xs={3}>
+                <LabelizedField
+                  label={t('Debit Card Issuer')}
+                  value={payment.debitCardIssuer}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <LabelizedField
+                  label={t('Debit Card Number')}
+                  value={payment.debitCardNumber}
+                />
+              </Grid>
+            </>
+          )}
         </Grid>
       </Overview>
       {canViewActivityLog && (
