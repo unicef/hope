@@ -78,7 +78,7 @@ export const EditTargetPopulationHeader = ({
             loading={loading}
             data-cy='button-save'
             disabled={
-              values.targetingCriteria?.length === 0 || !values.name || values.name < 3 || loading
+              values.targetingCriteria?.length === 0 || !values.name || loading
             }
           >
             {t('Save')}
