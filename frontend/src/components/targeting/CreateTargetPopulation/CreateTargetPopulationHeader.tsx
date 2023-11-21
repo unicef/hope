@@ -58,7 +58,7 @@ export function CreateTargetPopulationHeader({
             variant='contained'
             color='primary'
             onClick={handleSubmit}
-            disabled={values.criterias?.length === 0 || !values.name || values.name < 3 || loading}
+            disabled={values.criterias?.length === 0 || !values.name || loading}
             loading={loading}
             data-cy='button-target-population-create'
           >
