@@ -66,8 +66,8 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
+      .min(3, t('Targeting name should have at least 3 characters.'))
+      .max(255, t('Targeting name should have at most 255 characters.')),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',
