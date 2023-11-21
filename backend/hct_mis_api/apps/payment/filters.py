@@ -44,6 +44,17 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.program.models import Program
 
 
+class PaymentOrderingFilter(OrderingFilter):
+    def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
+        if value and any(v in ("mark", "-mark") for v in value):
+            # prevents before random ordering for the same value
+            qs = super().filter(qs, value).order_by("mark", "unicef_id")
+            if value[0] == "mark":
+                return qs
+            return qs.reverse()
+        return super().filter(qs, value)
+
+
 class PaymentRecordFilter(FilterSet):
     individual = CharFilter(method="individual_filter")
     business_area = CharFilter(field_name="business_area__slug")
@@ -312,7 +323,7 @@ class PaymentPlanFilter(FilterSet):
             queryset = queryset.order_by("unicef_id")
         return super().filter_queryset(queryset)
 
-    order_by = OrderingFilter(
+    order_by = PaymentOrderingFilter(
         fields=(
             "unicef_id",
             "status",
@@ -324,6 +335,7 @@ class PaymentPlanFilter(FilterSet):
             "dispersion_start_date",
             "dispersion_end_date",
             "created_at",
+            "mark",
         )
     )
 
@@ -353,7 +365,7 @@ class PaymentFilter(FilterSet):
         fields = tuple()
         model = Payment
 
-    order_by = OrderingFilter(
+    order_by = PaymentOrderingFilter(
         fields=(
             "unicef_id",
             "status",
