@@ -826,5 +826,7 @@
   "Data Collecting Type is required": "Data Collecting Type is required",
   "Registration Group": "Registration Group",
   "Related Payment Id": "Related Payment Id",
-  "Failure Reason": "Failure Reason"
+  "Failure Reason": "Failure Reason",
+  "Targeting name should have at least 3 characters.": "Targeting name should have at least 3 characters.",
+  "Targeting name should have at most 255 characters.": "Targeting name should have at most 255 characters."
 }
