@@ -243,6 +243,22 @@ export const PaymentDetails = ({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
+          {payment.deliveryType === PaymentDeliveryType.DepositToCard && (
+            <>
+              <Grid item xs={3}>
+                <LabelizedField
+                  label={t('Debit Card Issuer')}
+                  value={payment.debitCardIssuer}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <LabelizedField
+                  label={t('Debit Card Number')}
+                  value={payment.debitCardNumber}
+                />
+              </Grid>
+            </>
+          )}
         </Grid>
       </Overview>
       <Overview>
@@ -285,22 +301,6 @@ export const PaymentDetails = ({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
-          {payment.deliveryType === PaymentDeliveryType.DepositToCard && (
-            <>
-              <Grid item xs={3}>
-                <LabelizedField
-                  label={t('Debit Card Issuer')}
-                  value={payment.debitCardIssuer}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <LabelizedField
-                  label={t('Debit Card Number')}
-                  value={payment.debitCardNumber}
-                />
-              </Grid>
-            </>
-          )}
         </Grid>
       </Overview>
       {canViewActivityLog && (
