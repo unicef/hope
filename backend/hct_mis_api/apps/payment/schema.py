@@ -39,6 +39,10 @@ from hct_mis_api.apps.activity_log.schema import LogEntryNode
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.lookup_functions import (
+    get_debit_card_issuer,
+    get_debit_card_number,
+)
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
@@ -373,13 +377,10 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.financial_service_provider
 
     def resolve_debit_card_number(self, info: Any) -> str:
-        if bank_account_info := self.collector.bank_account_info.first():
-            return bank_account_info.debit_card_number
-        else:
-            return ""
+        return get_debit_card_number(self.collector)
 
     def resolve_debit_card_issuer(self, info: Any) -> str:
-        return self.collector.full_name if self.collector.bank_account_info.first() else ""
+        return get_debit_card_issuer(self.collector)
 
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         # TODO: migrate old data maybe?
