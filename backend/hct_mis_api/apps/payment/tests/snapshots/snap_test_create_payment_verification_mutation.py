@@ -116,3 +116,23 @@ snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_
         }
     ]
 }
+
+snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_verification_when_program_is_finished 1'] = {
+    'data': {
+        'createPaymentVerificationPlan': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 3
+                }
+            ],
+            'message': "['In order to proceed this action, program status must not be FINISHED']",
+            'path': [
+                'createPaymentVerificationPlan'
+            ]
+        }
+    ]
+}

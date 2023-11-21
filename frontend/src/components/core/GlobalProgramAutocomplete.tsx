@@ -1,76 +1,99 @@
-import { InputAdornment } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
+import { useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../TextField';
-import {
-  AllAdminAreasQuery,
-  AreaNodeEdge,
-  useAllAdminAreasLazyQuery,
-} from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 4px;
+  && {
+    width: ${({ theme }) => theme.spacing(58)}px;
+    color: #e3e6e7;
+  }
+  .MuiAutocomplete-inputRoot {
+    background-color: #465861;
+    margin-bottom: 5px;
+    color: #e3e6e7;
+    border-radius: 4px;
+    height: 42px;
+    padding: 0 10px;
+  }
+  .MuiAutocomplete-inputRoot:hover {
+    background-color: #1d2c32;
+  }
+  .MuiFormLabel-root {
+    color: #e3e6e7;
+  }
+  .MuiIconButton-label {
+    color: #e3e6e7;
+  }
+  .MuiOutlinedInput-notchedOutline {
+    border: none;
   }
 `;
 
-export const LookUpAdminAreaAutocomplete = ({
+export const GlobalProgramAutocomplete = ({
   disabled,
-  fullWidth = true,
+  fullWidth,
   onFilterChange,
   name,
   value,
-  dataCy,
 }: {
-  disabled?: boolean;
+  disabled?;
   fullWidth?: boolean;
   onFilterChange;
-  name: string;
-  value?: AreaNodeEdge;
-  dataCy?: string;
+  name?;
+  value?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
+  const debouncedInputText = useDebounce(inputValue, 800);
+  const { baseUrl, businessArea } = useBaseUrl();
+  const history = useHistory();
 
-  const debouncedInputText = useDebounce(inputValue, 500);
-  const businessArea = useBusinessArea();
-  const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
+  const [loadData, { data, loading }] = useAllProgramsForChoicesLazyQuery({
     variables: {
-      first: 20,
-      name: debouncedInputText,
       businessArea,
-      level: 2,
+      first: 20,
+      orderBy: 'name',
+      search: debouncedInputText,
     },
   });
+
   useEffect(() => {
     if (open) {
-      loadAdminAreas();
+      loadData();
     }
-  }, [open, debouncedInputText, loadAdminAreas]);
+  }, [open, debouncedInputText, loadData]);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({
       ...filters,
-      [name]: selectedValue || undefined,
+      [name]: selectedValue?.node?.id || undefined,
     }));
+
+    if (selectedValue?.node?.id) {
+      history.push(`/${baseUrl}/${selectedValue?.node?.id}`);
+    }
   };
+  const programsOptions = [
+    { node: { id: 'all', name: 'All' } },
+    ...get(data, 'allPrograms.edges', []),
+  ];
   return (
-    <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
+    <StyledAutocomplete
       value={value}
+      defaultValue={{ node: { id: 'all', name: 'All' } }}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
-      data-cy={dataCy}
       onOpen={() => {
         setOpen(true);
       }}
@@ -82,30 +105,20 @@ export const LookUpAdminAreaAutocomplete = ({
       getOptionSelected={(option, value1) => {
         return value1?.node?.id === option.node.id;
       }}
-      getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
-        }
-        return `${option.node.name}`;
-      }}
+      getOptionLabel={(option) => option.node.name}
       disabled={disabled}
-      options={get(data, 'allAdminAreas.edges', [])}
+      options={programsOptions}
       loading={loading}
       renderInput={(params) => (
         <TextField
           {...params}
-          label={t('Admin Level 2')}
+          placeholder={t('Programme')}
           variant='outlined'
           margin='dense'
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position='start'>
-                <RoomRoundedIcon style={{ color: '#5f6368' }} />
-              </InputAdornment>
-            ),
             endAdornment: (
               <>
                 {loading ? (

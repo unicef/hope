@@ -1,5 +1,7 @@
+import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from uuid import UUID
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -21,15 +23,12 @@ from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.core.models import BusinessArea
-
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +43,52 @@ USER_STATUS_CHOICES = (
 USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
+@dataclasses.dataclass(frozen=True)
+class ProgramAreasList:
+    program_id: UUID
+    areas: List[UUID]
+
+
+@dataclasses.dataclass(frozen=True)
+class BusinessAreaPartnerPermissions:
+    business_area_id: UUID
+    roles: List[UUID]
+    programs: ProgramAreasList
+
+    @classmethod
+    def from_dict(cls, data_permissions: Dict) -> List["BusinessAreaPartnerPermissions"]:
+        """
+        return: [BusinessAreaPartnerPermissions(
+            business_area_id='uuid_ba',
+            roles=['role_id_1', 'role_id_2'],
+            programs={'program_id_1': ['area_1', 'area_2']}
+        )]
+        """
+        ba_partner_perms_list: List = []
+        for business_area_id in data_permissions:
+            ba_partner_perms_list.append(
+                cls(
+                    business_area_id=business_area_id,
+                    roles=data_permissions[business_area_id].get("roles", []),
+                    programs=data_permissions[business_area_id].get("programs", {}),
+                )
+            )
+        return ba_partner_perms_list
+
+
 class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
+    """
+        permissions structure
+        {
+            "business_area_id": {
+                "roles": ["role_id_1", "role_id_2"],
+                "programs": {"program_id":["admin_id"]}
+            }
+        }
+    """
+    permissions = JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
         return self.name
@@ -55,11 +97,16 @@ class Partner(models.Model):
     def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
+    @property
+    def is_unicef(self) -> bool:
+        return self.name == "UNICEF"
+
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
+    # TODO: in future will remove null=True after migrate prod data
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
     email = models.EmailField(_("email address"), blank=True, unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
@@ -92,24 +139,98 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug: str) -> List:
-        all_roles_permissions_list = list(
+    def get_partner_role_ids_list(
+        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+    ) -> List:
+        if not business_area_slug and not business_area_id:
+            return list()
+
+        if not business_area_id and business_area_slug:
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        partner_role_ids = self.partner.permissions.get(str(business_area_id), {}).get("roles", [])
+        return partner_role_ids
+
+    def get_partner_programs_areas_dict(
+        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+    ) -> Dict:
+        if not business_area_slug and not business_area_id:
+            return dict()
+
+        if not business_area_id and business_area_slug:
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        partner_programs_dict = self.partner.permissions.get(str(business_area_id), {}).get("programs", {})
+        return partner_programs_dict
+
+    def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> List:
+        """
+        return list of permissions based on User Role BA and User Partner
+        if program_id in arguments need to check if user.partner.permissions json has program id
+        """
+        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        has_program_access = True
+        if program_id:
+            if self.partner.is_unicef:
+                has_program_access = True
+            else:
+                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
+                    business_area_slug=business_area_slug
+                )
+
+        partner_role_ids_per_ba = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
+
+        all_partner_roles_permissions_list = list(
+            Role.objects.filter(id__in=partner_role_ids_per_ba).values_list("permissions", flat=True)
+        )
+        all_user_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
                 user_roles__business_area__slug=business_area_slug,
             ).values_list("permissions", flat=True)
         )
-        return [
-            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
-        ]
+        return (
+            list(
+                set(
+                    [perm for perms in all_partner_roles_permissions_list for perm in perms]
+                    + [perm for perms in all_user_roles_permissions_list for perm in perms]
+                )
+            )
+            if has_program_access
+            else list()
+        )
 
-    def has_permission(self, permission: str, business_area: "BusinessArea", write: bool = False) -> bool:
-        query = Role.objects.filter(
+    def has_permission(
+        self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
+    ) -> bool:
+        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        has_program_access = True
+        if program_id:
+            if self.partner.is_unicef:
+                has_program_access = True
+            else:
+                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
+                    business_area_id=business_area.pk
+                )
+
+        partner_role_ids = self.get_partner_role_ids_list(business_area_id=business_area.pk)
+
+        partner_roles = Role.objects.filter(
+            id__in=partner_role_ids,
+            permissions__contains=[permission],
+        )
+
+        user_roles = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
             user_roles__business_area=business_area,
         )
-        return query.count() > 0
+        return has_program_access and (user_roles.count() > 0 or partner_roles.count() > 0)
+
+    def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
+        partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(
+            str(program_id), []
+        )
+
+        return partner_areas_ids_per_program
 
     def can_download_storage_files(self) -> bool:
         return any(

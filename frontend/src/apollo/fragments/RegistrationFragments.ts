@@ -17,6 +17,13 @@ export const registrationMinimal = gql`
     dataSource
     numberOfHouseholds
     numberOfIndividuals
+    program {
+      id
+      name
+      startDate
+      endDate
+      status
+    }
     refuseReason
     totalHouseholdsCountWithValidPhoneNo
   }

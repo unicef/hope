@@ -5,6 +5,7 @@ import { LoadingComponent } from '../../../core/LoadingComponent';
 import { CardTextLightLarge } from '../../DashboardCard';
 import { DashboardPaper } from '../../DashboardPaper';
 import { TotalAmountTransferredByAdminAreaTable } from '../../TotalAmountTransferredByAdminAreaTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;
@@ -19,11 +20,11 @@ export const TotalAmountTransferredSectionByAdminAreaSection = ({
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');
-
+  const { programId } = useBaseUrl();
   const variables = {
     year: parseInt(year, 10),
     businessAreaSlug: businessArea,
-    program: filter.program,
+    program: programId,
     administrativeArea: filter.administrativeArea?.node?.id,
   };
   const [

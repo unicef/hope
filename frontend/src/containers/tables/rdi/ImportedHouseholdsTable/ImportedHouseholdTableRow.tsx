@@ -7,7 +7,7 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -28,12 +28,12 @@ export const ImportedHouseholdTableRow = ({
   household,
   rdi,
 }: ImportedHouseholdTableRowProps): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const history = useHistory();
 
-  const importedHouseholdPath = `/${businessArea}/registration-data-import/household/${household.id}`;
-  const mergedHouseholdPath = `/${businessArea}/population/household/${household.id}`;
+  const importedHouseholdPath = `/${baseUrl}/registration-data-import/household/${household.id}`;
+  const mergedHouseholdPath = `/${baseUrl}/population/household/${household.id}`;
   const url = isMerged ? mergedHouseholdPath : importedHouseholdPath;
 
   const handleClick = (): void => {

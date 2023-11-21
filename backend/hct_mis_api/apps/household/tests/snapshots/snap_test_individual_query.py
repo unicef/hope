@@ -221,30 +221,43 @@ snapshots['TestIndividualQuery::test_individual_query_all_1_without_permission 1
     ]
 }
 
-snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 27,
-                    'line': 3
-                }
-            ],
-            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+snapshots['TestIndividualQuery::test_individual_query_draft 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+            ]
         }
-    ]
+    }
+}
+
+snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
+    'data': {
+        'individual': {
+            'birthDate': '1943-07-30',
+            'familyName': 'Butler',
+            'fullName': 'Benjamin Butler',
+            'givenName': 'Benjamin',
+            'phoneNo': '(953)682-4596'
+        }
+    }
 }
 
 snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
+    'data': {
+        'individual': None
+    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 27,
+                    'column': 7,
                     'line': 3
                 }
             ],
-            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+            'message': 'Permission Denied',
+            'path': [
+                'individual'
+            ]
         }
     ]
 }
@@ -253,6 +266,16 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_bank_account_nu
     'data': {
         'allIndividuals': {
             'edges': [
+                {
+                    'node': {
+                        'birthDate': '1965-06-26',
+                        'familyName': 'Bond',
+                        'fullName': 'James Bond',
+                        'givenName': 'James',
+                        'phoneNo': '(007)682-4596',
+                        'phoneNoValid': False
+                    }
+                },
                 {
                     'node': {
                         'birthDate': '1965-06-26',
@@ -567,12 +590,12 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter
             'edges': [
                 {
                     'node': {
-                        'birthDate': '1946-02-15',
-                        'familyName': 'Ford',
-                        'fullName': 'Robin Ford',
-                        'givenName': 'Robin',
-                        'phoneNo': '+18663567905',
-                        'phoneNoValid': True
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
                     }
                 }
             ]
@@ -626,6 +649,26 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
             ]
         }
     }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
 }
 
 snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_2_without_permission 1'] = {

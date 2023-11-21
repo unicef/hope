@@ -14,14 +14,21 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import (
     CommonValidator,
     DataCollectingTypeValidator,
 )
-from hct_mis_api.apps.program.inputs import CreateProgramInput, UpdateProgramInput
+from hct_mis_api.apps.program.celery_tasks import copy_program_task
+from hct_mis_api.apps.program.inputs import (
+    CopyProgramInput,
+    CreateProgramInput,
+    UpdateProgramInput,
+)
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
+from hct_mis_api.apps.program.utils import copy_program_object
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
     ProgramValidator,
@@ -65,8 +72,7 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
 
 
@@ -111,6 +117,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             end_date=program_data.get("end_date"),
             data_collecting_type=data_collecting_type,
         )
+
+        if program.status == Program.FINISHED:
+            # Only reactivation is possible
+            status = program_data.get("status")
+            if status != Program.ACTIVE or len(program_data) > 1:
+                raise ValidationError("You cannot change finished program")
+
         if data_collecting_type_code:
             program.data_collecting_type = data_collecting_type
 
@@ -120,8 +133,7 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
 
         program.full_clean()
         program.save()
-
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
 
@@ -143,11 +155,37 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.validate(program=program)
 
         program.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
+
+
+class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
+    program = graphene.Field(ProgramNode)
+
+    class Arguments:
+        program_data = CopyProgramInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
+        program_id = decode_id_string_required(program_data.pop("id"))
+        business_area = Program.objects.get(id=program_id).business_area
+        cls.has_permission(info, Permissions.PROGRAMME_DUPLICATE, business_area)
+
+        cls.validate(
+            start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+        )
+        program = copy_program_object(program_id, program_data)
+
+        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
+
+        return CopyProgram(program=program)
 
 
 class Mutations(graphene.ObjectType):
     create_program = CreateProgram.Field()
     update_program = UpdateProgram.Field()
     delete_program = DeleteProgram.Field()
+    copy_program = CopyProgram.Field()

@@ -11,6 +11,11 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import {
+  ProgramQuery,
+  useDataCollectionTypeChoiceDataQuery,
+  useProgrammeChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
@@ -18,11 +23,6 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
-import {
-  ProgramNode,
-  useDataCollectionTypeChoiceDataQuery,
-  useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
@@ -46,12 +46,13 @@ const FullWidth = styled.div`
 `;
 
 interface ProgramFormPropTypes {
-  program?: ProgramNode;
-  onSubmit: (values) => Promise<void>;
+  program?: ProgramQuery['program'];
+  onSubmit: (values, setFieldError) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;
   onClose: () => void;
   title: string;
+  initialValues?: { [key: string]: string | boolean | number };
 }
 
 export const ProgramForm = ({
@@ -61,6 +62,7 @@ export const ProgramForm = ({
   open,
   onClose,
   title,
+  initialValues,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
@@ -71,7 +73,7 @@ export const ProgramForm = ({
     name: Yup.string()
       .required(t('Programme name is required'))
       .min(2, t('Too short'))
-      .max(255, t('Too long')),
+      .max(150, t('Too long')),
     scope: Yup.string()
       .required(t('CashAssist Scope is required'))
       .min(2, t('Too short'))
@@ -113,8 +115,9 @@ export const ProgramForm = ({
     ),
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let initialValue: { [key: string]: any } = {
+  let formInitialValue: {
+    [key: string]: string | boolean | number;
+  } = initialValues || {
     name: '',
     scope: '',
     startDate: '',
@@ -129,16 +132,17 @@ export const ProgramForm = ({
     individualDataNeeded: 'NO',
     dataCollectingTypeCode: '',
   };
+
   if (program) {
-    initialValue = selectFields(program, Object.keys(initialValue));
-    initialValue.individualDataNeeded = program.individualDataNeeded
+    formInitialValue = selectFields(program, Object.keys(formInitialValue));
+    formInitialValue.individualDataNeeded = program.individualDataNeeded
       ? 'YES'
       : 'NO';
   }
-  if (initialValue.budget === 0) {
-    initialValue.budget = '0.00';
+  if (formInitialValue.budget === 0) {
+    formInitialValue.budget = '0.00';
   }
-  initialValue.dataCollectingTypeCode = program?.dataCollectingType?.code;
+  formInitialValue.dataCollectingTypeCode = program?.dataCollectingType?.code;
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
@@ -163,8 +167,8 @@ export const ProgramForm = ({
         aria-labelledby='form-dialog-title'
       >
         <Formik
-          initialValues={initialValue}
-          onSubmit={(values) => {
+          initialValues={formInitialValue}
+          onSubmit={(values, { setFieldError }) => {
             const newValues = { ...values };
             newValues.budget = Number(values.budget).toFixed(2);
             if (values.individualDataNeeded === 'YES') {
@@ -172,7 +176,7 @@ export const ProgramForm = ({
             } else if (values.individualDataNeeded === 'NO') {
               newValues.individualDataNeeded = false;
             }
-            return onSubmit(newValues);
+            return onSubmit(newValues, setFieldError);
           }}
           validationSchema={validationSchema}
           enableReinitialize
@@ -182,7 +186,9 @@ export const ProgramForm = ({
               {open && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
                 <DialogTitle disableTypography>
-                  <Typography variant='h6'>{title}</Typography>
+                  <Typography data-cy='dialog-title' variant='h6'>
+                    {title}
+                  </Typography>
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>

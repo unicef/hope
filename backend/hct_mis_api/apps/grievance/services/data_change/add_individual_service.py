@@ -143,7 +143,14 @@ class AddIndividualService(DataChangeService):
             recalculate_data(household)
         else:
             individual.recalculate_data()
-        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, None, individual)
+        log_create(
+            Individual.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            self.grievance_ticket.programs.all(),
+            None,
+            individual,
+        )
 
         update_es(individual)
 

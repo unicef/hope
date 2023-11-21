@@ -10,14 +10,17 @@ export const targetPopulationMinimal = gql`
     totalHouseholdsCount
     totalHouseholdsCountWithValidPhoneNo
     totalIndividualsCount
+    __typename
     program {
       id
       name
+      __typename
     }
     createdBy {
       id
       firstName
       lastName
+      __typename
     }
   }
 `;
@@ -37,8 +40,10 @@ export const targetPopulationDetailed = gql`
     excludedIds
     exclusionReason
     steficonRule {
+      __typename
       id
       rule {
+        __typename
         id
         name
       }
@@ -48,11 +53,13 @@ export const targetPopulationDetailed = gql`
     changeDate
     finalizedAt
     finalizedBy {
+      __typename
       id
       firstName
       lastName
     }
     program {
+      __typename
       id
       name
       status
@@ -60,23 +67,33 @@ export const targetPopulationDetailed = gql`
       endDate
     }
     createdBy {
+      __typename
       id
       email
       firstName
       lastName
     }
     targetingCriteria {
+      __typename
+      id
       flagExcludeIfActiveAdjudicationTicket
       flagExcludeIfOnSanctionList
       rules {
+        __typename
         id
         individualsFiltersBlocks {
+          __typename
           individualBlockFilters {
+            __typename
+
+            id
             fieldName
             isFlexField
             arguments
             comparisonMethod
             fieldAttribute {
+              __typename
+              id
               name
               labelEn
               type
@@ -88,11 +105,15 @@ export const targetPopulationDetailed = gql`
           }
         }
         filters {
+          __typename
+          id
           fieldName
           isFlexField
           arguments
           comparisonMethod
           fieldAttribute {
+            __typename
+            id
             name
             labelEn
             type

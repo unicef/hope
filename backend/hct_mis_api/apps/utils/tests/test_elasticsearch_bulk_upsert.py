@@ -62,6 +62,7 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         cls.household_1.admin1 = AreaFactory()
         cls.household_1.admin2 = AreaFactory()
         cls.household_1.registration_id = "12345"
+        cls.household_1.household_collection.save()
         cls.household_1.save()
 
         cls.rebuild_search_index()
@@ -83,6 +84,7 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         cls.household_2.admin1 = AreaFactory()
         cls.household_2.admin2 = AreaFactory()
         cls.household_2.registration_id = "54321"
+        cls.household_2.household_collection.save()
         cls.household_2.save()
 
         cls.household_unicef_id_to_search = Individual.objects.get(

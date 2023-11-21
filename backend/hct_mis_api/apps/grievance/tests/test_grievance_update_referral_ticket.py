@@ -15,6 +15,8 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import ReferralTicketWithoutExtrasFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceUpdateReferralTicketQuery(APITestCase):
@@ -59,6 +61,8 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         cls.ticket = ReferralTicketWithoutExtrasFactory()
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
+        cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
     @parameterized.expand(
         [
@@ -76,7 +80,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -99,7 +103,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -122,7 +126,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 
@@ -148,7 +152,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
 

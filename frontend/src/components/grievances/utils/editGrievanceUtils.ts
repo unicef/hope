@@ -33,7 +33,7 @@ interface EditValuesTypes {
   householdDataUpdateFields?;
   partner?;
   comments?;
-  programme?;
+  program?;
   documentation?;
   documentationToUpdate?;
   documentationToDelete?;
@@ -203,7 +203,7 @@ export function prepareInitialValues(
     urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
     partner: ticket.partner?.id,
     comments: ticket.comments,
-    programme: ticket.programme?.id,
+    program: [ticket.programs[0]?.id] || '',
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
@@ -508,7 +508,7 @@ export function prepareVariables(businessArea, values, ticket) {
     urgency: values.urgency === 'Not set' ? 0 : values.urgency,
     partner: values.partner,
     comments: values.comments,
-    programme: values.programme,
+    program: ticket.programs?.[0]?.id || values?.program,
     paymentRecord: values.selectedPaymentRecords
       ? values.selectedPaymentRecords[0]
       : null,

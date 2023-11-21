@@ -24,7 +24,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
         </svg>
       </div>
       <div
-        class="sc-gzVnrw coeMyM"
+        class="sc-gzVnrw eSbwlf"
       >
         <div>
           <div
@@ -35,7 +35,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
             >
               <a
                 class="sc-bdVaJa eFfWno"
-                href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
               >
                 Payment Module
               </a>
@@ -44,33 +44,37 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
           <div
             class="MuiBox-root MuiBox-root-1"
           >
-            <h5
-              class="MuiTypography-root MuiTypography-h5"
-              data-cy="page-header-title"
+            <div
+              class="sc-VigVT djZJTH"
             >
-              <div
-                class="MuiBox-root MuiBox-root-2"
+              <h5
+                class="MuiTypography-root MuiTypography-h5"
+                data-cy="page-header-title"
               >
-                Payment Plan
-                 ID
-                 
-                PP-0060-22-00000001
                 <div
-                  class="sc-VigVT iysrxQ"
+                  class="MuiBox-root MuiBox-root-2"
                 >
+                  Payment Plan
+                   ID
+                   
+                  PP-0060-22-00000001
                   <div
-                    class="sc-bxivhb cgarbp"
+                    class="sc-jTzLTM dpfANN"
                   >
                     <div
-                      class="sc-ifAKCX knuZap"
-                      data-cy="status-container"
+                      class="sc-bxivhb cgarbp"
                     >
-                      LOCKED
+                      <div
+                        class="sc-ifAKCX knuZap"
+                        data-cy="status-container"
+                      >
+                        LOCKED
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </h5>
+              </h5>
+            </div>
             <div
               class="MuiBox-root MuiBox-root-3"
             />
@@ -88,7 +92,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
               <a
                 aria-disabled="false"
                 class="MuiButtonBase-root MuiButton-root MuiButton-text"
-                href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
                 role="button"
                 tabindex="0"
               >

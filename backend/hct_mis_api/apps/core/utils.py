@@ -74,6 +74,16 @@ def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]
     return encode_id_base64_required(id_string, model_name)
 
 
+def get_program_id_from_headers(info_context_headers: Dict) -> Optional[str]:
+    # TODO: need to double check if program_id is str or uuid?
+    #  decoded/encoded ??
+    # sometimes it get from info.context.headers or kwargs["Program"]: str
+
+    program_id = info_context_headers.get("Program")
+    program_id = decode_id_string(program_id) if program_id != "all" else None
+    return program_id
+
+
 def unique_slugify(
     instance: "Model",
     value: Any,
@@ -288,9 +298,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     )
 
 
-def get_count_and_percentage(input_list: List, all_items_list: List) -> Dict[str, Any]:
-    count = len(input_list)
-    all_items_count = len(all_items_list) or 1
+def get_count_and_percentage(count: int, all_items_count: int = 1) -> Dict[str, Union[int, float]]:
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
 
@@ -632,10 +640,13 @@ def chart_permission_decorator(
         from hct_mis_api.apps.core.models import BusinessArea
 
         _, resolve_info = args
+        program_id = get_program_id_from_headers(resolve_info.context.headers)
         if resolve_info.context.user.is_authenticated:
             business_area_slug = kwargs.get("business_area_slug", "global")
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-            if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
+            if any(
+                resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
+            ):
                 return chart_resolve(*args, **kwargs)
             log_and_raise("Permission Denied")
 
@@ -643,6 +654,9 @@ def chart_permission_decorator(
 
 
 def chart_filters_decoder(filters: Dict) -> Dict:
+    # in GPF we have filtering by all programs in this case need to remove key {program: "all"}
+    if "program" in filters and filters.get("program") == "all":
+        filters.pop("program")
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 

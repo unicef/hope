@@ -2,8 +2,12 @@ import BaseComponent from "../../base.component";
 
 export default class RegistrationDataImport extends BaseComponent {
   // Locators
+  buttonImport = 'button[data-cy="button-import"]';
+
   // Texts
+
   // Elements
+  getButtonImport = () => cy.get(this.buttonImport);
 
   verifyMergedData() {
     let householdId;
@@ -72,22 +76,17 @@ export default class RegistrationDataImport extends BaseComponent {
   }
 
   mergeRDIFile() {
-    cy.get('[data-cy="number-of-households"]').contains(
-      "1 Household available to import",
-      {
-        timeout: 10000,
-      }
-    );
+    cy.get('[data-cy="number-of-households"]', {
+      timeout: 10000,
+    }).contains("1 Household available to import");
     cy.get('[data-cy="number-of-individuals"]').contains(
       "1 Individual available to import"
     );
     cy.get("div").contains("Errors").should("not.exist");
-    cy.get('[data-cy="button-import-rdi"').click();
+    cy.get('[data-cy="button-import-rdi"]', { timeout: 20000 }).click();
+    cy.get("h5").contains("Test import");
 
-    cy.wait(1000);
-    cy.reload();
-    cy.wait(500);
-    // it lets the browser load the status
+    cy.checkStatus("IN REVIEW", 10);
 
     cy.get("div").contains("IMPORT ERROR").should("not.exist");
     cy.get("div").contains("IN REVIEW");
@@ -95,10 +94,8 @@ export default class RegistrationDataImport extends BaseComponent {
     cy.get("span").contains("Merge").click({ force: true }); // top of page
     cy.get("span").contains("MERGE").click({ force: true }); // inside modal
 
-    cy.get("div").contains("MERGING");
-
-    cy.reload();
-
-    cy.get("div").contains("MERGED");
+    cy.get('[data-cy="status-container"]').contains("MERGED", {
+      timeout: 20000,
+    });
   }
 }

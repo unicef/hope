@@ -6,7 +6,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Select,
+  Select, Tooltip,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import React, { useEffect, useState } from 'react';
@@ -38,7 +38,7 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export function RegistrationDataImportCreateDialog(): React.ReactElement {
+export const RegistrationDataImportCreateDialog = ({ isImportDisabled }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -51,17 +51,33 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
     }
   }, [open]);
   const openModalButton = (
-    <span>
-      <Button
-        variant='contained'
-        color='primary'
-        startIcon={<ExitToAppRoundedIcon />}
-        onClick={() => setOpen(true)}
-        data-cy='button-import'
-      >
-        {t('IMPORT')}
-      </Button>
-    </span>
+
+        isImportDisabled ?
+            <Tooltip title="Program must be ACTIVE to import RDI">
+              <span>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  startIcon={<ExitToAppRoundedIcon />}
+                  disabled={isImportDisabled}
+                  onClick={() => setOpen(true)}
+                  data-cy='button-import'
+                >
+                  {t('IMPORT')}
+                </Button>
+              </span>
+            </Tooltip>
+            :
+            <Button
+              variant='contained'
+              color='primary'
+              startIcon={<ExitToAppRoundedIcon />}
+              disabled={isImportDisabled}
+              onClick={() => setOpen(true)}
+              data-cy='button-import'
+            >
+              {t('IMPORT')}
+            </Button>
   );
   let importTypeForm;
   switch (importType) {
@@ -149,4 +165,4 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
       </Dialog>
     </span>
   );
-}
+};

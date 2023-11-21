@@ -8,17 +8,22 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
-  businessArea: string;
 }
 
 export const LinkedGrievance = ({
   feedback,
-  businessArea,
 }: LinkedGrievanceProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
+  const grievanceDetailsPath = getGrievanceDetailsPath(
+    feedback.linkedGrievance?.id,
+    feedback.linkedGrievance?.category,
+    baseUrl,
+  );
   return (
     <Grid item xs={4}>
       {feedback.linkedGrievance ? (
@@ -29,13 +34,7 @@ export const LinkedGrievance = ({
             </Title>
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
-                <BlackLink
-                  to={getGrievanceDetailsPath(
-                    feedback.linkedGrievance.id,
-                    feedback.linkedGrievance.category,
-                    businessArea,
-                  )}
-                >
+                <BlackLink to={grievanceDetailsPath}>
                   {feedback.linkedGrievance.unicefId}
                 </BlackLink>
               </LabelizedField>

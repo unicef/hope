@@ -45,6 +45,10 @@ class TestUpdateProgram(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
         )
+        cls.program_finished = ProgramFactory.create(
+            status=Program.FINISHED,
+            business_area=cls.business_area,
+        )
 
     def test_update_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
@@ -184,5 +188,18 @@ class TestUpdateProgram(APITestCase):
                     "dataCollectingTypeCode": "test_wrong_ba",
                 },
                 "version": self.program.version,
+            },
+        )
+
+    def test_update_program_when_finished(self) -> None:
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {"id": self.id_to_base64(self.program_finished.id, "ProgramNode"), "name": "xyz"},
+                "version": self.program_finished.version,
             },
         )

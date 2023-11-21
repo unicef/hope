@@ -1,8 +1,8 @@
-import { AllIndividualsQuery } from '../../../../__generated__/graphql';
+import { AllIndividualsForPopulationTableQuery } from '../../../../__generated__/graphql';
 import { HeadCell } from '../../../core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<
-  AllIndividualsQuery['allIndividuals']['edges'][number]['node']
+  AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,

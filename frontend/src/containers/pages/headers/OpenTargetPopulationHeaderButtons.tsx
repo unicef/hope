@@ -14,7 +14,7 @@ import {
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -34,7 +34,7 @@ export const OpenTargetPopulationHeaderButtons = ({
   const [openLock, setOpenLock] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const [
     rebuildTargetPopulation,
@@ -63,7 +63,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             color='primary'
             startIcon={<EditRounded />}
             component={Link}
-            to={`/${businessArea}/target-population/edit-tp/${targetPopulation.id}`}
+            to={`/${baseUrl}/target-population/edit-tp/${targetPopulation.id}`}
           >
             Edit
           </Button>

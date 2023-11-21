@@ -13,10 +13,10 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { EmptyTable } from '../../../components/core/Table/EmptyTable';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { MainActivityLogTable } from '../../tables/MainActivityLogTable/MainActivityLogTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -48,14 +48,13 @@ function filtersToVariables(filters) {
   return variables;
 }
 
-const initialFilter = { search: '', module: '', userId: '' };
-
 export const ActivityLogPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const businessArea = useBusinessArea();
+  const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const initialFilter = { search: '', module: '', userId: '' };
   const permissions = usePermissions();
 
   const [filter, setFilter] = useState(
@@ -67,6 +66,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
+      programId: isAllPrograms ? null : programId,
       first: rowsPerPage,
       last: undefined,
       after: undefined,

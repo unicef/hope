@@ -347,7 +347,7 @@ export function prepareVariables(businessArea, values) {
         : values.urgency,
     partner: values.partner,
     comments: values.comments,
-    programme: values.programme,
+    program: values.program,
     linkedFeedbackId: values.linkedFeedbackId,
     documentation: values.documentation,
   };
@@ -377,9 +377,12 @@ export const matchGrievanceUrlByCategory = (category: number): string => {
 export const getGrievanceDetailsPath = (
   ticketId: string,
   category: number,
-  businessArea: string,
+  baseUrl: string,
 ): string => {
-  return `/${businessArea}/grievance/tickets/${matchGrievanceUrlByCategory(
+  if (!ticketId || !category) {
+    return null;
+  }
+  return `/${baseUrl}/grievance/tickets/${matchGrievanceUrlByCategory(
     category,
   )}/${ticketId}`;
 };
@@ -387,12 +390,12 @@ export const getGrievanceDetailsPath = (
 export const getGrievanceEditPath = (
   ticketId: string,
   category: number,
-  businessArea: string,
+  baseUrl: string,
 ): string => {
-  if (!ticketId || !category || !businessArea) {
+  if (!ticketId || !category) {
     return null;
   }
-  return `/${businessArea}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
+  return `/${baseUrl}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
     category,
   )}/${ticketId}`;
 };

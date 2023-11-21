@@ -10,18 +10,22 @@ exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 
       class="sc-bZQynM ktisbs"
     >
       <div
-        class="sc-gzVnrw coeMyM"
+        class="sc-gzVnrw eSbwlf"
       >
         <div>
           <div
             class="MuiBox-root MuiBox-root-1"
           >
-            <h5
-              class="MuiTypography-root MuiTypography-h5"
-              data-cy="page-header-title"
+            <div
+              class="sc-VigVT djZJTH"
             >
-              Edit Set up FSP
-            </h5>
+              <h5
+                class="MuiTypography-root MuiTypography-h5"
+                data-cy="page-header-title"
+              >
+                Edit Set up FSP
+              </h5>
+            </div>
             <div
               class="MuiBox-root MuiBox-root-2"
             />

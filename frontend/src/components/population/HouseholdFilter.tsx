@@ -9,18 +9,18 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
+import { householdTableOrderOptions } from '../../utils/constants';
 import { createHandleApplyFilterChange } from '../../utils/utils';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { FiltersSection } from '../core/FiltersSection';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { householdTableOrderOptions } from '../../utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
-  programs: ProgramNode[];
+  programs?: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;
@@ -42,7 +42,7 @@ export const HouseholdFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-
+  const { isAllPrograms } = useBaseUrl();
   const {
     handleFilterChange,
     applyFilterChanges,
@@ -65,8 +65,12 @@ export const HouseholdFilters = ({
     clearFilter();
   };
 
-  const filtersComponent = (
-    <>
+  return (
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+      isOnPaper={isOnPaper}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid container item xs={6} spacing={0}>
           <Grid item xs={8}>
@@ -97,22 +101,24 @@ export const HouseholdFilters = ({
             </SelectFilter>
           </Grid>
         </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            fullWidth
-            data-cy='hh-filters-program'
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              label={t('Programme')}
+              value={filter.program}
+              fullWidth
+              icon={<FlashOnIcon />}
+              data-cy='hh-filters-program'
+            >
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) =>
@@ -140,7 +146,7 @@ export const HouseholdFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            data-cy='hh-filters-admin2'
+            dataCy='hh-filters-admin2'
           />
         </Grid>
         <Grid item xs={3}>
@@ -201,17 +207,24 @@ export const HouseholdFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </>
-  );
-
-  return isOnPaper ? (
-    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
-  ) : (
-    filtersComponent
+    </FiltersSection>
   );
 };

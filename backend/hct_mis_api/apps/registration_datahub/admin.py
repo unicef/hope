@@ -544,6 +544,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
+
                 if service := registration.rdi_parser:
                     qs = (
                         Record.objects.defer("storage", "counters", "files", "fields")
@@ -557,6 +558,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                             rdi_name = name or {timezone.now()}
                             rdi = service.create_rdi(
                                 imported_by=request.user,
+                                program=project.program,
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
                                 is_open=is_open,
                             )

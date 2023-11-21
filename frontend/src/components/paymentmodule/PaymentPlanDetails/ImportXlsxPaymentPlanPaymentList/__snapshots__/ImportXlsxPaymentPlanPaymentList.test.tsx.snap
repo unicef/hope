@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentList should render 1`] = `
-<div
-  aria-hidden="true"
->
+<div>
   <div
     class="MuiBox-root MuiBox-root-1"
   >
