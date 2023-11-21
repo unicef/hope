@@ -323,7 +323,7 @@ class PaymentPlanFilter(FilterSet):
             queryset = queryset.order_by("unicef_id")
         return super().filter_queryset(queryset)
 
-    order_by = PaymentOrderingFilter(
+    order_by = OrderingFilter(
         fields=(
             "unicef_id",
             "status",
