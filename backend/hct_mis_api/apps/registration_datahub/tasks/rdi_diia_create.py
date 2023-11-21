@@ -51,6 +51,8 @@ from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registra
 if TYPE_CHECKING:
     from uuid import UUID
 
+    from hct_mis_api.apps.program.models import Program
+
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,11 @@ class RdiDiiaCreateTask:
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
     def create_rdi(
-        self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name", is_open: bool = False
+        self,
+        imported_by: Optional[ImportedIndividual],
+        program: "Program",
+        rdi_name: str = "rdi_name",
+        is_open: bool = False,
     ) -> RegistrationDataImport:
         number_of_individuals = 0
         number_of_households = 0
@@ -91,6 +97,7 @@ class RdiDiiaCreateTask:
             number_of_households=number_of_households,
             business_area=self.business_area,
             status=status,
+            program=program,
         )
 
         import_data = ImportData.objects.create(
@@ -133,6 +140,7 @@ class RdiDiiaCreateTask:
             ).values_list("id", flat=True)
 
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_id)
+        program = rdi_mis.program
 
         registration_data_import_data_hub = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=rdi_mis.datahub_id,
@@ -167,6 +175,7 @@ class RdiDiiaCreateTask:
                     diia_rec_id=diia_household.rec_id,
                     size=all_individuals.count(),
                     country=Country("UA"),
+                    program_id=program.id,
                 )
 
                 # if True ignore create HH and Individuals and set status 'STATUS_TAX_ID_ERROR'
@@ -213,6 +222,7 @@ class RdiDiiaCreateTask:
                         last_registration_date=registration_data_import_data_hub.created_at,
                         household=household_obj,
                         email=individual.email,
+                        program_id=program.id,
                         age_at_registration=calculate_age_at_registration(
                             registration_data_import_data_hub, individual.birth_date
                         ),
@@ -290,11 +300,13 @@ class RdiDiiaCreateTask:
         rdi_mis.number_of_individuals = individual_count
         rdi_mis.number_of_households = len(households_to_create)
         rdi_mis.save()
-        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis, rdi_mis)
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis.program_id, rdi_mis, rdi_mis
+        )
         if not rdi_mis.business_area.postpone_deduplication:
-            DeduplicateTask(registration_data_import_data_hub.business_area_slug).deduplicate_imported_individuals(
-                registration_data_import_datahub=registration_data_import_data_hub
-            )
+            DeduplicateTask(
+                business_area_slug=registration_data_import_data_hub.business_area_slug, program_id=program.id
+            ).deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import_data_hub)
 
     def _add_bank_account(self, individual: ImportedIndividual, individual_obj: ImportedIndividual) -> None:
         self.bank_accounts.append(

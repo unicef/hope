@@ -40,8 +40,10 @@ from hct_mis_api.apps.core.schema import (
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
+    decode_id_string,
     encode_ids,
     get_model_choices_fields,
+    get_program_id_from_headers,
     resolve_flex_fields_choices_to_string,
     sum_lists_with_values,
     to_choice_object,
@@ -82,6 +84,7 @@ from hct_mis_api.apps.household.services.household_programs_with_delivered_quant
     programs_with_delivered_quantity,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
@@ -298,9 +301,10 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area, program_id
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -428,9 +432,12 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def check_node_permission(cls, info: Any, object_instance: Household) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
-        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+        if not user.has_permission(
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area, program_id
+        ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
             )
@@ -549,6 +556,11 @@ class Query(graphene.ObjectType):
     household_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
+        program_id = info.context.headers.get("Program")
+        if program_id != "all":
+            program = Program.objects.filter(id=decode_id_string(program_id)).first()
+            if program and program.status == Program.DRAFT:
+                return Individual.objects.none()
         queryset = Individual.objects
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")  # type: ignore
@@ -568,6 +580,11 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
+        program_id = info.context.headers.get("Program")
+        if program_id != "all":
+            program = Program.objects.filter(id=decode_id_string(program_id)).first()
+            if program and program.status == Program.DRAFT:
+                return Household.objects.none()
         queryset = Household.objects.order_by("created_at")
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")

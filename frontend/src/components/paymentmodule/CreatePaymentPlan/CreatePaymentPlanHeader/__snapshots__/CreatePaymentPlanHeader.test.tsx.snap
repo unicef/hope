@@ -24,7 +24,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
         </svg>
       </div>
       <div
-        class="sc-gzVnrw coeMyM"
+        class="sc-gzVnrw eSbwlf"
       >
         <div>
           <div
@@ -35,7 +35,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             >
               <a
                 class="sc-bdVaJa eFfWno"
-                href="/afghanistan/payment-module/"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/"
               >
                 Payment Module
               </a>
@@ -44,12 +44,16 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
           <div
             class="MuiBox-root MuiBox-root-1"
           >
-            <h5
-              class="MuiTypography-root MuiTypography-h5"
-              data-cy="page-header-title"
+            <div
+              class="sc-VigVT djZJTH"
             >
-              New Payment Plan
-            </h5>
+              <h5
+                class="MuiTypography-root MuiTypography-h5"
+                data-cy="page-header-title"
+              >
+                New Payment Plan
+              </h5>
+            </div>
             <div
               class="MuiBox-root MuiBox-root-2"
             />
@@ -67,7 +71,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
               <a
                 aria-disabled="false"
                 class="MuiButtonBase-root MuiButton-root MuiButton-text"
-                href="/afghanistan/payment-module"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module"
                 role="button"
                 tabindex="0"
               >

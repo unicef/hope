@@ -241,8 +241,7 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         registration_datahub_import = imported_household.registration_data_import
         registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
-        self.assertEqual(registration_data_import.programs.count(), 1)
-        self.assertEqual(registration_data_import.programs.all()[0], self.program)
+        self.assertEqual(registration_data_import.program, self.program)
 
         head_of_household = ImportedIndividual.objects.get(full_name="Ivan Drago")
         self.assertEqual(head_of_household.sex, MALE)

@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestHousehold(TestCase):
@@ -88,6 +89,7 @@ class TestDocument(TestCase):
 
         cls.country = afghanistan
         cls.individual = individual
+        cls.program = ProgramFactory()
 
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
@@ -104,6 +106,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         with self.assertRaises(IntegrityError):
@@ -113,6 +116,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
 
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
@@ -130,6 +134,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         try:
@@ -139,6 +144,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
@@ -158,6 +164,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         with self.assertRaises(IntegrityError):
@@ -167,6 +174,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
 
     def test_raise_error_on_creating_duplicated_documents_with_different_numbers_and_unique_for_individual(
@@ -186,6 +194,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         with self.assertRaises(IntegrityError):
@@ -195,6 +204,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
 
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
@@ -219,6 +229,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         try:
@@ -228,6 +239,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type2,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")

@@ -148,4 +148,11 @@ class HouseholdDataUpdateService(DataChangeService):
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)
         updated_household = Household.objects.get(id=household.id)  # refresh_from_db() doesn't work here
-        log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", user, old_household, updated_household)
+        log_create(
+            Household.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            self.grievance_ticket.programs.all(),
+            old_household,
+            updated_household,
+        )

@@ -6,13 +6,13 @@ import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
 import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const initialFilter = {
   feedbackId: '',
@@ -20,10 +20,12 @@ const initialFilter = {
   createdBy: '',
   createdAtRangeMin: '',
   createdAtRangeMax: '',
+  program: '',
+  programState: 'active',
 };
 
 export const FeedbackPage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();
@@ -55,7 +57,7 @@ export const FeedbackPage = (): React.ReactElement => {
           variant='contained'
           color='primary'
           component={Link}
-          to={`/${businessArea}/grievance/feedback/create`}
+          to={`/${baseUrl}/grievance/feedback/create`}
           data-cy='button-submit-new-feedback'
         >
           {t('Submit New Feedback')}

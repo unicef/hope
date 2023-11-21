@@ -1,34 +1,28 @@
-import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
-import { AllIndividualsQuery } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
+import { AllIndividualsForPopulationTableQuery } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { sexToCapitalize } from '../../../../utils/utils';
+import { BlackLink } from '../../../core/BlackLink';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
-import { BlackLink } from '../../../core/BlackLink';
 
 interface LookUpIndividualTableRowProps {
-  individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
-
+  individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
   radioChangeHandler: (
-    individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
+    individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
   ) => void;
-  selectedIndividual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+  selectedIndividual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
 }
 
-export function LookUpIndividualTableRow({
+export const LookUpIndividualTableRow = ({
   individual,
   radioChangeHandler,
   selectedIndividual,
-}: LookUpIndividualTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
-  const renderPrograms = (): string => {
-    const programNames = individual?.household?.programs?.edges?.map(
-      (edge) => edge.node.name,
-    );
-    return programNames?.length ? programNames.join(', ') : '-';
-  };
+}: LookUpIndividualTableRowProps): React.ReactElement => {
+  const { baseUrl, isAllPrograms } = useBaseUrl();
+
   return (
     <ClickableTableRow
       onClick={() => {
@@ -52,25 +46,35 @@ export function LookUpIndividualTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          to={`/${businessArea}/population/individuals/${individual.id}`}
-        >
-          {individual.unicefId}
-        </BlackLink>
+        {!isAllPrograms ? (
+          <BlackLink to={`/${baseUrl}/population/individuals/${individual.id}`}>
+            {individual.unicefId}
+          </BlackLink>
+        ) : (
+          <span>{individual.unicefId || '-'}</span>
+        )}
       </TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
-        {individual.household ? individual.household.unicefId : ''}
+        {individual.household ? individual.household.unicefId : '-'}
       </TableCell>
       <TableCell align='right'>{individual.age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align='left'>
         {individual?.household?.admin2?.name || '-'}
       </TableCell>
-      <TableCell align='left'>{renderPrograms()}</TableCell>
+      <TableCell align='left'>
+        {individual.program ? (
+          <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
+            {individual.program.name}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
+      </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

@@ -4,8 +4,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { useCurrencyChoicesQuery } from '../../__generated__/graphql';
-import TextField from '../TextField';
+import { useCurrencyChoicesQuery } from '../../../__generated__/graphql';
+import TextField from '../../TextField';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}

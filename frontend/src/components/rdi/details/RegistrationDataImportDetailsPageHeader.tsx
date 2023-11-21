@@ -6,10 +6,10 @@ import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
-  useRefuseRdiMutation,
   useEraseRdiMutation,
+  useRefuseRdiMutation,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
@@ -17,7 +17,6 @@ import { PageHeader } from '../../core/PageHeader';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
-
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -31,15 +30,15 @@ const MergeButtonContainer = styled.span`
   margin-left: ${({ theme }) => theme.spacing(4)}px;
 `;
 
-export function RegistrationDataImportDetailsPageHeader({
+export const RegistrationDataImportDetailsPageHeader = ({
   registration,
   canMerge,
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
@@ -110,14 +109,14 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.Merged:
       buttons = (
         <MergeButtonContainer>
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${businessArea}/grievance/rdi/${registration.id}`}
-          >
-            {t('View Tickets')}
-          </Button>
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/grievance/rdi/${registration.id}`}
+            >
+              {t('View Tickets')}
+            </Button>
         </MergeButtonContainer>
       );
       break;
@@ -126,7 +125,7 @@ export function RegistrationDataImportDetailsPageHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Registration Data import'),
-      to: `/${businessArea}/registration-data-import/`,
+      to: `/${baseUrl}/registration-data-import/`,
     },
   ];
 
@@ -135,7 +134,6 @@ export function RegistrationDataImportDetailsPageHeader({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
-        isErased={registration.erased}
       >
         {registration.erased ? null : buttons}
       </PageHeader>
@@ -147,4 +145,4 @@ export function RegistrationDataImportDetailsPageHeader({
       />
     </>
   );
-}
+};

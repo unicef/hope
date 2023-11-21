@@ -1,13 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 import { AutoLogout } from './components/core/AutoLogout';
+import { SentryRoute } from './components/core/SentryRoute';
 import { DefaultRoute } from './containers/DefaultRoute';
-import { HomeRouter } from './containers/HomeRouter';
 import { LoginPage } from './containers/pages/core/LoginPage';
 import { ProfilePage } from './containers/pages/core/ProfilePage';
-import { Providers } from './providers';
-import { SentryRoute } from './components/core/SentryRoute';
 import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage';
+import { AllProgramsRoutesSwitch } from './containers/routers/AllProgramsRoutesSwitch';
+import { BaseHomeRouter } from './containers/routers/BaseHomeRouter';
+import { SelectedProgramRoutesSwitch } from './containers/routers/SelectedProgramRoutesSwitch';
+import { Providers } from './providers';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 import { PageNotFound } from './containers/pages/404/PageNotFound';
@@ -49,13 +51,20 @@ export const App: React.FC = () => {
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
-          <ProtectedRoute
-            path='/sanction-list'
-            component={SanctionList}
-            location={window.location}
-          />
-          <Route path='/:businessArea/'>
-            <HomeRouter />
+          <Route path='/:businessArea/programs/all'>
+            <BaseHomeRouter>
+              <AllProgramsRoutesSwitch />
+            </BaseHomeRouter>
+          </Route>
+          <Route path='/:businessArea/programs/:programId'>
+            <BaseHomeRouter>
+              <SelectedProgramRoutesSwitch />
+            </BaseHomeRouter>
+            <ProtectedRoute
+              path='/sanction-list'
+              component={SanctionList}
+              location={window.location}
+            />
           </Route>
           <Route path='/'>
             <DefaultRoute />

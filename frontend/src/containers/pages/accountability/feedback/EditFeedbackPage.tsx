@@ -4,6 +4,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
+import {
+  UpdateFeedbackInput,
+  useAllProgramsForChoicesQuery,
+  useAllUsersQuery,
+  useFeedbackIssueTypeChoicesQuery,
+  useFeedbackQuery,
+  useUpdateFeedbackTicketMutation,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../../components/core/ContainerColumnWithBorder';
@@ -13,24 +21,16 @@ import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import {
+  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
-  PERMISSIONS,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import {
-  UpdateFeedbackInput,
-  useAllProgramsQuery,
-  useAllUsersQuery,
-  useFeedbackIssueTypeChoicesQuery,
-  useFeedbackQuery,
-  useUpdateFeedbackTicketMutation,
-} from '../../../../__generated__/graphql';
+import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string()
@@ -49,7 +49,7 @@ export const validationSchema = Yup.object().shape({
 export const EditFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
@@ -68,39 +68,35 @@ export const EditFeedbackPage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useFeedbackIssueTypeChoicesQuery();
 
-  const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
-
   const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
+    data: programsData,
+    loading: programsDataLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
   });
 
-  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node?.name,
-    value: edge.node.id,
-  }));
+  const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
 
   if (
     userDataLoading ||
     choicesLoading ||
-    loadingPrograms ||
-    feedbackDataLoading
+    feedbackDataLoading ||
+    programsDataLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
     return <PermissionDenied />;
 
-  if (!choicesData || !userData || !feedbackData) return null;
+  if (!choicesData || !userData || !feedbackData || !programsData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/grievance/feedback/${id}`,
+      to: `/${baseUrl}/grievance/feedback/${id}`,
     },
   ];
 
@@ -143,6 +139,10 @@ export const EditFeedbackPage = (): React.ReactElement => {
     permissions,
   );
 
+  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
+    (element) => ({ name: element.node.name, value: element.node.id }),
+  );
+
   return (
     <Formik
       initialValues={initialValues}
@@ -152,7 +152,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
             variables: { input: prepareVariables(values) },
           });
           showMessage(t('Feedback updated'), {
-            pathname: `/${businessArea}/grievance/feedback/${response.data.updateFeedback.feedback.id}`,
+            pathname: `/${baseUrl}/grievance/feedback/${response.data.updateFeedback.feedback.id}`,
             historyMethod: 'push',
           });
         } catch (e) {
@@ -179,7 +179,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/grievance/feedback/${feedback.id}`}
+                    to={`/${baseUrl}/grievance/feedback/${feedback.id}`}
                   >
                     {t('Cancel')}
                   </Button>
@@ -218,35 +218,37 @@ export const EditFeedbackPage = (): React.ReactElement => {
                         <Grid container xs={6} spacing={6}>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Household ID')}>
-                              {feedback.householdLookup?.id ? (
+                              {feedback.householdLookup?.id &&
+                              !isAllPrograms ? (
                                 <BlackLink
                                   to={
                                     canViewHouseholdDetails
-                                      ? `/${businessArea}/population/household/${feedback.householdLookup.id}`
+                                      ? `/${baseUrl}/population/household/${feedback.householdLookup.id}`
                                       : undefined
                                   }
                                 >
                                   {feedback.householdLookup.unicefId}
                                 </BlackLink>
                               ) : (
-                                '-'
+                                feedback.householdLookup.unicefId || '-'
                               )}
                             </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Individual ID')}>
-                              {feedback.individualLookup?.id ? (
+                              {feedback.individualLookup?.id &&
+                              !isAllPrograms ? (
                                 <BlackLink
                                   to={
                                     canViewIndividualDetails
-                                      ? `/${businessArea}/population/individuals/${feedback.individualLookup.id}`
+                                      ? `/${baseUrl}/population/individuals/${feedback.individualLookup.id}`
                                       : undefined
                                   }
                                 >
                                   {feedback.individualLookup.unicefId}
                                 </BlackLink>
                               ) : (
-                                '-'
+                                feedback.individualLookup.unicefId || '-'
                               )}
                             </LabelizedField>
                           </Grid>
@@ -303,14 +305,17 @@ export const EditFeedbackPage = (): React.ReactElement => {
                             component={FormikTextField}
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={3}>
                           <Field
                             name='program'
+                            label={t('Programme Name')}
                             fullWidth
                             variant='outlined'
-                            label={t('Programme Title')}
-                            choices={mappedPrograms}
+                            choices={mappedProgramChoices}
                             component={FormikSelectField}
+                            disabled={
+                              !isAllPrograms || Boolean(feedback.program?.id)
+                            }
                           />
                         </Grid>
                       </Grid>

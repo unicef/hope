@@ -22,7 +22,7 @@ class Report(TimeStampedUUIDModel):
     PAYMENTS = 4
     PAYMENT_VERIFICATION = 5
     CASH_PLAN = 6
-    PROGRAM = 7
+    PROGRAM = 7  # Deprecated
     INDIVIDUALS_AND_PAYMENT = 8
     GRIEVANCES = 9
     PAYMENT_PLAN = 10

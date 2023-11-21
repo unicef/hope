@@ -526,6 +526,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
                     household_dict[household_original_id] = household_representation
 
                 copy_roles_from_dict(household_dict, program)  # type: ignore
+
     rdis.filter(program__isnull=True).update(program=program)
 
 

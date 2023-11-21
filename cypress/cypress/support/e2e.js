@@ -29,23 +29,41 @@ Cypress.Commands.add("createExcel", () => {
     );
   });
 });
-Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
+Cypress.Commands.add("adminLogin", () => {
   Cypress.session.clearCurrentSessionData();
   Cypress.session.clearAllSavedSessions();
-  cy.navigateToHomePage();
+  cy.visit("/");
   const expected_url =
     Cypress.config().baseUrl + "/api/unicorn/login/?next=/api/unicorn/";
-  function resolveAThing(n) {
-    cy.visit("/api/unicorn/");
+  function checkApiUrl(n) {
     cy.url().then((url) => {
       if (expected_url !== url) {
         cy.reload();
+        cy.wait(1000);
         cy.visit("/api/unicorn/");
+        cy.get('div[id="header"]')
+          .invoke("css", "background-color")
+          .then((bgcolor) => {
+            //rgb(255, 102, 0)
+            cy.log(bgcolor.toString());
+          });
+        if (n > 0) {
+          return checkApiUrl(n - 1);
+        } else {
+          return false;
+        }
+      } else {
+        return true;
       }
     });
+  }
+  function resolveAThing(n) {
+    cy.visit("/api/unicorn/");
+    checkApiUrl(5);
     cy.get('input[name="username"]').type(Cypress.env("username"));
     cy.get('input[name="password"]').type(Cypress.env("password"));
     cy.get("input").contains("Log in").click();
+    cy.get("a").contains("HOPE Administration");
     cy.navigateToHomePage();
     cy.get("div")
       .find("div")
@@ -58,13 +76,51 @@ Cypress.Commands.add("adminLogin", { retries: 3 }, () => {
         }
       });
   }
-
   return resolveAThing(10);
-  // }
+});
+
+Cypress.Commands.add("checkIfLoggedIn", () => {
+  cy.visit("/");
+  function retryCheck(n) {
+    cy.url().should("contain", Cypress.config().baseUrl);
+    cy.url().then((url) => {
+      cy.log(url);
+      if (url.includes("login")) {
+        cy.adminLogin();
+      } else if (url.includes("programs")) {
+        return;
+      }
+      if (n === 0) cy.url().should("include", "/programs/all/list");
+      cy.wait(1000);
+      return retryCheck(n - 1);
+    });
+  }
+  return retryCheck(10);
+});
+
+Cypress.Commands.add("checkStatus", (status = "IN REVIEW", repeat = 10) => {
+  function retryCheck(n) {
+    cy.wait(100);
+    cy.get('[data-cy="status-container"]').then((value) => {
+      cy.log(value.text());
+      if (value.text().includes(status)) {
+        return;
+      }
+      if (n === 0) cy.get('[data-cy="status-container"]').contains(status);
+      cy.wait(500);
+      return retryCheck(n - 1);
+    });
+  }
+  return retryCheck(repeat);
 });
 
 Cypress.Commands.add("navigateToHomePage", () => {
   cy.visit("/");
+  cy.url().should("include", "/programs/all/list");
+  cy.get('div[data-cy="global-program-filter"]', { timeout: 10000 })
+    .contains("All Programmes", { timeout: 10000 })
+    .click();
+  cy.get('li[role="option"]').contains("Test Program").click();
 });
 
 Cypress.Commands.add("initScenario", (scenario) => {
@@ -72,6 +128,7 @@ Cypress.Commands.add("initScenario", (scenario) => {
     cy.exec(
       `yarn init-scenario ${Cypress.config().baseUrl} ${scenario} ${seed}`
     );
+    cy.wait(1000);
   });
 });
 

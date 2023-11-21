@@ -16,7 +16,7 @@ import { PaymentPlanParameters } from '../../../components/paymentmodule/CreateP
 import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { today } from '../../../utils/utils';
@@ -36,14 +36,18 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const {
     data: allTargetPopulationsData,
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
-    variables: { businessArea, paymentPlanApplicable: false },
+    variables: {
+      businessArea,
+      paymentPlanApplicable: false,
+      program: [programId],
+    },
   });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
@@ -121,7 +125,7 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'), {
-        pathname: `/${businessArea}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+        pathname: `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -141,7 +145,7 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
           <EditPaymentPlanHeader
             paymentPlan={paymentPlan}
             handleSubmit={submitForm}
-            businessArea={businessArea}
+            baseUrl={baseUrl}
             permissions={permissions}
           />
           <PaymentPlanTargeting

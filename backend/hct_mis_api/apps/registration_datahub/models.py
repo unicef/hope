@@ -284,6 +284,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
+    program_id = models.UUIDField(
+        null=True, db_index=True, blank=True
+    )  # TODO temporary null=True until we migrate backward all data
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
     program_id = models.UUIDField(
         null=True, db_index=True, blank=True

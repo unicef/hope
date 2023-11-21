@@ -2,9 +2,9 @@ import { Grid } from '@material-ui/core';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { ContentLink } from '../../../core/ContentLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -13,7 +13,7 @@ interface HouseholdQuestionnaireProps {
 export const HouseholdQuestionnaire = ({
   values,
 }: HouseholdQuestionnaireProps): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const selectedHouseholdData = values.selectedHousehold;
   return (
@@ -48,7 +48,7 @@ export const HouseholdQuestionnaire = ({
           label: t('Head of Household'),
           value: (
             <ContentLink
-              href={`/${businessArea}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
+              href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
             >
               {selectedHouseholdData.headOfHousehold.fullName}
             </ContentLink>

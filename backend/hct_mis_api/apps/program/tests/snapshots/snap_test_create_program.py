@@ -16,9 +16,11 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'cashPlus': True,
                 'dataCollectingType': {
                     'active': True,
+                    'code': 'partial',
                     'code': 'partial_individuals',
                     'description': 'Partial individuals collected',
-                    'individualFiltersAvailable': True
+                    'individualFiltersAvailable': True,
+                    'label': 'Partial'
                 },
                 'description': 'my description of program',
                 'endDate': '2021-12-20',

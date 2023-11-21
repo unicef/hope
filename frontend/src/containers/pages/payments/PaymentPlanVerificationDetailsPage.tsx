@@ -19,7 +19,7 @@ import { CreateVerificationPlan } from '../../../components/payments/CreateVerif
 import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   decodeIdString,
@@ -61,7 +61,7 @@ const initialFilter = {
 export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const location = useLocation();
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -89,7 +89,7 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification`,
+      to: `/${baseUrl}/payment-verification`,
     },
   ];
 
@@ -120,13 +120,17 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const isFinished =
     paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
+  const { isFollowUp } = paymentPlan;
+
   const toolbar = (
     <PageHeader
       title={
         <BlackLink
           data-cy='plan-link'
+          to={`/${baseUrl}/payment-module/${
+            isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+          }/${paymentPlan.id}`}
           fullWidth
-          to={`/${businessArea}/payment-plans/${paymentPlan.id}`}
         >
           {t('Payment Plan')}{' '}
           <span data-cy='plan-id'>{paymentPlan.unicefId}</span>
@@ -150,18 +154,19 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
           />
         )}
 
-        {isFinished && (
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${businessArea}/grievance/payment-verification/${decodeIdString(
-              paymentPlan.id,
-            )}`}
-          >
-            {t('View Tickets')}
-          </Button>
-        )}
+        {isFinished &&
+          (isAllPrograms ? (
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
+                paymentPlan.id,
+              )}`}
+            >
+              {t('View Tickets')}
+            </Button>
+          ) : null)}
       </>
     </PageHeader>
   );
@@ -187,16 +192,14 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
         : null}
       {canSeeVerificationRecords() ? (
         <>
-          <Container>
-            <VerificationRecordsFilters
-              filter={filter}
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              verifications={paymentPlan.verificationPlans}
-            />
-          </Container>
+          <VerificationRecordsFilters
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            verifications={paymentPlan.verificationPlans}
+          />
           <TableWrapper>
             <VerificationsTable
               paymentPlanId={paymentPlan.id}

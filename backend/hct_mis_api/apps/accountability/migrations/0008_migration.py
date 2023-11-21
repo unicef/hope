@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('program', '0038_migration'),
         ('accountability', '0007_migration'),
+        ('targeting', '0039_migration'),
     ]
 
     operations = [

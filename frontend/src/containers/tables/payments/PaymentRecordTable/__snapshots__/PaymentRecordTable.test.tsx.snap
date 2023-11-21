@@ -299,7 +299,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               >
                 <a
                   class="sc-gzVnrw pWSop"
-                  href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6NWEyZmE4NWYtNTM4YS00M2VjLWEwZTItMzM4ZTBmZDNlODQ1"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6NWEyZmE4NWYtNTM4YS00M2VjLWEwZTItMzM4ZTBmZDNlODQ1"
                 >
                   123-21-PR-00006
                 </a>

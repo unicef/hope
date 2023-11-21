@@ -12,21 +12,21 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];
-  businessArea: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
 }
 
 export const FeedbackDetails = ({
   feedback,
-  businessArea,
   canViewHouseholdDetails,
   canViewIndividualDetails,
 }: FeedbackDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
 
   return (
     <Grid item xs={12}>
@@ -57,18 +57,18 @@ export const FeedbackDetails = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {feedback.householdLookup?.id ? (
+                    {feedback.householdLookup?.id && !isAllPrograms ? (
                       <BlackLink
                         to={
                           canViewHouseholdDetails
-                            ? `/${businessArea}/population/household/${feedback.householdLookup.id}`
+                            ? `/${baseUrl}/population/household/${feedback.householdLookup.id}`
                             : undefined
                         }
                       >
                         {feedback.householdLookup.unicefId}
                       </BlackLink>
                     ) : (
-                      '-'
+                      feedback.householdLookup.unicefId || '-'
                     )}
                   </span>
                 ),
@@ -78,18 +78,18 @@ export const FeedbackDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {feedback.individualLookup?.id ? (
+                    {feedback.individualLookup?.id && !isAllPrograms ? (
                       <BlackLink
                         to={
                           canViewIndividualDetails
-                            ? `/${businessArea}/population/individuals/${feedback.individualLookup.id}`
+                            ? `/${baseUrl}/population/individuals/${feedback.individualLookup.id}`
                             : undefined
                         }
                       >
                         {feedback.individualLookup.unicefId}
                       </BlackLink>
                     ) : (
-                      '-'
+                      feedback.individualLookup.unicefId || '-'
                     )}
                   </span>
                 ),
@@ -97,7 +97,19 @@ export const FeedbackDetails = ({
               },
               {
                 label: t('Programme'),
-                value: feedback.program?.name,
+                value: (
+                  <span>
+                    {feedback.program?.id ? (
+                      <BlackLink
+                        to={`/${baseUrl}/details/${feedback.program.id}`}
+                      >
+                        {feedback.program.name}
+                      </BlackLink>
+                    ) : (
+                      '-'
+                    )}
+                  </span>
+                ),
                 size: 3,
               },
               {

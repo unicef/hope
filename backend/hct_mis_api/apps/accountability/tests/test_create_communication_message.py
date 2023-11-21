@@ -8,6 +8,8 @@ from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -49,6 +51,8 @@ mutation CreateAccountabilityCommunicationMessage (
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
         cls.target_population = TargetPopulationFactory(
             business_area=cls.business_area,
             status=TargetPopulation.STATUS_PROCESSING,
@@ -79,7 +83,13 @@ mutation CreateAccountabilityCommunicationMessage (
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": {
                     "title": "Test message",
@@ -107,7 +117,13 @@ mutation CreateAccountabilityCommunicationMessage (
         ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock):
             self.snapshot_graphql_request(
                 request_string=self.MUTATION,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {
+                        "Business-Area": self.business_area.slug,
+                        "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    },
+                },
                 variables={
                     "input": {
                         "title": "Test message",
@@ -139,7 +155,13 @@ mutation CreateAccountabilityCommunicationMessage (
         ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock):
             self.snapshot_graphql_request(
                 request_string=self.MUTATION,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {
+                        "Business-Area": self.business_area.slug,
+                        "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    },
+                },
                 variables={
                     "input": {
                         "title": "Test message",

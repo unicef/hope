@@ -11,11 +11,7 @@ describe('containers/tables/payments/PaymentRecordTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentRecords}>
-        <PaymentRecordTable
-          cashPlan={fakeCashPlan}
-          openInNewTab={false}
-          businessArea='afghanistan'
-        />
+        <PaymentRecordTable cashPlan={fakeCashPlan} openInNewTab={false} />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
@@ -30,11 +26,7 @@ describe('containers/tables/payments/PaymentRecordTable', () => {
         addTypename={false}
         mocks={fakeApolloAllPaymentRecords}
       >
-        <PaymentRecordTable
-          cashPlan={fakeCashPlan}
-          openInNewTab={false}
-          businessArea='afghanistan'
-        />
+        <PaymentRecordTable cashPlan={fakeCashPlan} openInNewTab={false} />
       </MockedProvider>,
     );
 

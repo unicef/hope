@@ -3,12 +3,12 @@ import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { choicesToDict } from '../../utils/utils';
 import {
   GrievanceTicketQuery,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { choicesToDict } from '../../utils/utils';
 import { BlackLink } from '../core/BlackLink';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
@@ -30,7 +30,7 @@ export const DeleteHouseholdGrievanceDetails = ({
   canApproveDataChange: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const {
     data: choicesData,
@@ -59,7 +59,7 @@ export const DeleteHouseholdGrievanceDetails = ({
                   <p>This household is a duplicate of a household ID:</p>
                 </Box>
                 <BlackLink
-                  to={`/${businessArea}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
+                  to={`/${baseUrl}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
                 >
                   {ticket.deleteHouseholdTicketDetails.reasonHousehold.unicefId}
                 </BlackLink>
@@ -93,7 +93,7 @@ export const DeleteHouseholdGrievanceDetails = ({
         <Grid item xs={3}>
           <LabelizedField label={t('Head of Household')}>
             <ContentLink
-              href={`/${businessArea}/population/individuals/${ticket.household.headOfHousehold.id}`}
+              href={`/${baseUrl}/population/individuals/${ticket.household.headOfHousehold.id}`}
             >
               {ticket.household.headOfHousehold.fullName}
             </ContentLink>

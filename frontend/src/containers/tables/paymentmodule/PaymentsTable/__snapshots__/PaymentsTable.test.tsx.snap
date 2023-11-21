@@ -345,27 +345,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  RCPT-0060-23-0.000.010
+                  RCPT-0060-23-0.000.043
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  HH-23-0000.0012
+                  HH-22-0000.0003
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  5
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  John Latoya Smith
+                  4
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -375,7 +365,67 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  USD 2,123.00 (USD 2,123.00)
+                  Jan Kowalski
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Test FSP 1
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                  data-cy="delivered-quantity-cell"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                />
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fjdhpX gsvsfq MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  RCPT-0060-23-0.000.044
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  HH-22-0000.0004
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  4
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Adam Nowak
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Test FSP 1
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -446,7 +496,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
             <p
               class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
             >
-              1-1 of 1
+              1-2 of 2
             </p>
             <div
               class="MuiTablePagination-actions"

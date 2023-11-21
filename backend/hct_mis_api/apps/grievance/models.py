@@ -374,7 +374,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_SET)
     partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
     # will be deprecated and removed after data migrations. use m2m 'programs'
-    programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
+    # programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
     programs = models.ManyToManyField("program.Program", related_name="grievance_tickets", blank=True)
     comments = models.TextField(blank=True, null=True)
 

@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import {
-  AllIndividualsQuery,
-  AllIndividualsQueryVariables,
+  AllIndividualsForPopulationTableQuery,
+  AllIndividualsForPopulationTableQueryVariables,
   useAllIndividualsForPopulationTableQuery,
   useHouseholdLazyQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
 import { TableWrapper } from '../../../core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 
@@ -45,8 +46,8 @@ export const LookUpIndividualTable = ({
   excludedId,
   noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement => {
+  const { programId, isAllPrograms } = useBaseUrl();
   const [getHousehold, results] = useHouseholdLazyQuery();
-
   useEffect(() => {
     if (results.data && !results.loading && !results.error) {
       setFieldValue('selectedHousehold', results.data.household);
@@ -60,6 +61,7 @@ export const LookUpIndividualTable = ({
       getHousehold({ variables: { id: individual.household.id.toString() } });
     }
     setSelectedIndividual(individual);
+    setSelectedHousehold(individual.household);
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
@@ -72,7 +74,7 @@ export const LookUpIndividualTable = ({
       : null;
   }
 
-  const initialVariables: AllIndividualsQueryVariables = {
+  const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
     businessArea,
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     sex: [filter.sex],
@@ -88,13 +90,15 @@ export const LookUpIndividualTable = ({
     orderBy: filter.orderBy,
     householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
+    program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const renderTable = (): React.ReactElement => {
     return (
       <UniversalTable<
-        AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
-        AllIndividualsQueryVariables
+        AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+        AllIndividualsForPopulationTableQueryVariables
       >
         headCells={headCells}
         rowsPerPageOptions={[5, 10, 15, 20]}

@@ -6,26 +6,28 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Field } from 'formik';
-import styled from 'styled-components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import {
+  AllProgramsForChoicesQuery,
+  GrievancesChoiceDataQuery,
+  UserChoiceDataQuery,
+} from '../../../../__generated__/graphql';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import {
-  GrievancesChoiceDataQuery,
-  UserChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { ContentLink } from '../../../core/ContentLink';
+import { choicesToDict } from '../../../../utils/utils';
+import { BlackLink } from '../../../core/BlackLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
-import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
-import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { Title } from '../../../core/Title';
+import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
-import { choicesToDict } from '../../../../utils/utils';
+import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -46,13 +48,10 @@ export interface DescriptionProps {
   values;
   showIssueType: (values) => boolean;
   selectedIssueType: (values) => string;
-  businessArea: string;
+  baseUrl: string;
   choicesData: GrievancesChoiceDataQuery;
   userChoices: UserChoiceDataQuery;
-  mappedPrograms: {
-    name: string;
-    value: string;
-  }[];
+  programsData: AllProgramsForChoicesQuery;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
@@ -62,15 +61,16 @@ export const Description = ({
   values,
   showIssueType,
   selectedIssueType,
-  businessArea,
+  baseUrl,
   choicesData,
   userChoices,
-  mappedPrograms,
+  programsData,
   setFieldValue,
   errors,
   permissions,
 }: DescriptionProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isAllPrograms } = useBaseUrl();
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
@@ -80,6 +80,21 @@ export const Description = ({
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,
   );
+  const canViewHouseholdDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
+  const canViewIndividualDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+    permissions,
+  );
+
+  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
+    (element) => ({ name: element.node.name, value: element.node.id }),
+  );
+
+  const isAnonymousTicket =
+    !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
   return (
     <>
@@ -98,34 +113,50 @@ export const Description = ({
                 size: 9,
               },
               {
-                label: t('HOUSEHOLD ID'),
+                label: t('Household ID'),
                 value: (
                   <span>
-                    {values.selectedHousehold?.id ? (
-                      <ContentLink
-                        href={`/${businessArea}/population/household/${values.selectedHousehold.id}`}
+                    {values.selectedHousehold?.id && !isAllPrograms ? (
+                      <BlackLink
+                        to={
+                          canViewHouseholdDetails
+                            ? `/${baseUrl}/population/household/${values.selectedHousehold.id}`
+                            : undefined
+                        }
                       >
                         {values.selectedHousehold.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
-                      '-'
+                      <div>
+                        {values.selectedHousehold?.id
+                          ? values.selectedHousehold.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
                 size: 3,
               },
               {
-                label: t('INDIVIDUAL ID'),
+                label: t('Individual ID'),
                 value: (
                   <span>
-                    {values.selectedIndividual?.id ? (
-                      <ContentLink
-                        href={`/${businessArea}/population/individuals/${values.selectedIndividual.id}`}
+                    {values.selectedIndividual?.id && !isAllPrograms ? (
+                      <BlackLink
+                        to={
+                          canViewIndividualDetails
+                            ? `/${baseUrl}/population/individuals/${values.selectedIndividual.id}`
+                            : undefined
+                        }
                       >
                         {values.selectedIndividual.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
-                      '-'
+                      <div>
+                        {values.selectedIndividual?.id
+                          ? values.selectedIndividual.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
@@ -228,18 +259,17 @@ export const Description = ({
               component={FormikSelectField}
             />
           </Grid>
-          {+values.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-            <Grid item xs={6}>
-              <Field
-                name='programme'
-                fullWidth
-                variant='outlined'
-                label={t('Programme Title')}
-                choices={mappedPrograms}
-                component={FormikSelectField}
-              />
-            </Grid>
-          )}
+          <Grid item xs={3}>
+            <Field
+              name='program'
+              label={t('Programme Name')}
+              fullWidth
+              variant='outlined'
+              choices={mappedProgramChoices}
+              component={FormikSelectField}
+              disabled={!isAllPrograms || !isAnonymousTicket}
+            />
+          </Grid>
         </Grid>
         <Box pt={5}>
           <BoxWithBorders>

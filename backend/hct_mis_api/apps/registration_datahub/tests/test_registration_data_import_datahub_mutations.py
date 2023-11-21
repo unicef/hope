@@ -149,21 +149,23 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         ]
     )
     def test_registration_data_import_create(self, _: Any, permissions: List[Permissions]) -> None:
+        program = ProgramFactory(status=Program.ACTIVE)
+
         import_data_obj = ImportData.objects.create(
             file=self.valid_file,
             number_of_households=3,
             number_of_individuals=6,
         )
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.update_user_partner_perm_for_program(self.user, self.business_area, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
             variables={
                 "registrationDataImportData": {
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": self.business_area_slug,
-                    "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 }
             },
         )

@@ -28,9 +28,6 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.cache_keys import (
-    PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY,
-)
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
@@ -38,7 +35,6 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
-    save_data_in_cache,
     to_choice_object,
 )
 from hct_mis_api.apps.payment.filters import (
@@ -64,7 +60,7 @@ from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         ),
     )
 
@@ -85,12 +81,8 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_history(self, info: Any) -> QuerySet:
-        return self.history.all()
-
     def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
-        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
-        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
+        return self.total_number_of_households
 
     def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
@@ -99,7 +91,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     bank_reconciliation_success = graphene.Int()
@@ -142,7 +134,7 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
@@ -167,7 +159,7 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
             hopePermissionClass(
-                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
             ),
         ),
     )

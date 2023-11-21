@@ -5,6 +5,9 @@ let populationIndividuals = new PopulationIndividuals();
 let individualsDetailsPage = new IPDetailsPage();
 
 describe("Individuals Module", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.initScenario("payment_plan");
     cy.navigateToHomePage();
@@ -12,6 +15,7 @@ describe("Individuals Module", () => {
     cy.get("span").contains("Individuals");
     cy.get("span").contains("Households");
     cy.get("span").contains("Individuals").click();
+    // populationIndividuals.getButtonFiltersExpand().click();
   });
   describe("Smoke tests Individuals Population module", () => {
     it.skip("Check Individuals Population page", () => {});
@@ -46,7 +50,7 @@ describe("Individuals Module", () => {
   describe.skip("E2E tests Individuals Population", () => {});
 
   describe("Regression tests Individuals Population", () => {
-    it("174517: Check clear cash", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Individuals page",
         "Press Menu User Profile button",
@@ -54,9 +58,10 @@ describe("Individuals Module", () => {
         "Check if page was opened properly",
       ]);
       populationIndividuals.clearCache();
-      populationIndividuals
-        .getTitle()
-        .contains(populationIndividuals.textTitle);
+      cy.get('h5[data-cy="page-header-title"]').contains("Individuals");
+      // ToDo: populationIndividuals
+      //   .getTitle()
+      //   .contains(populationIndividuals.textTitle);
     });
   });
 });

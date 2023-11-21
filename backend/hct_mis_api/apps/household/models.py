@@ -684,7 +684,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["type", "country"],  # TODO: after GPF merge will add "program"
+                fields=["type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -698,7 +698,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
                 name="unique_for_individual_if_not_removed_and_valid",
             ),
             UniqueConstraint(
-                fields=["document_number", "type", "country"],  # TODO: after GPF merge will add "program"
+                fields=["document_number", "type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
