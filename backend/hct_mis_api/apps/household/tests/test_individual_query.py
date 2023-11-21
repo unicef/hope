@@ -143,6 +143,7 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(007)682-4596",
                 "birth_date": "1965-06-26",
                 "id": "972fdac5-d1bf-44ed-a4a5-14805b5dc606",
+                "program": cls.program,
             },
             {
                 "full_name": "Peter Parker",
@@ -151,22 +152,7 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(666)682-2345",
                 "birth_date": "1978-01-02",
                 "id": "430924a6-273e-4018-95e7-b133afa5e1b9",
-            },
-            {
-                "full_name": "James Bond",
-                "given_name": "James",
-                "family_name": "Bond",
-                "phone_no": "(007)682-4596",
-                "birth_date": "1965-06-26",
-                "id": "972fdac5-d1bf-44ed-a4a5-14805b5dc606",
-            },
-            {
-                "full_name": "Peter Parker",
-                "given_name": "Peter",
-                "family_name": "Parker",
-                "phone_no": "(666)682-2345",
-                "birth_date": "1978-01-02",
-                "id": "430924a6-273e-4018-95e7-b133afa5e1b9",
+                "program": cls.program,
             },
         ]
 
@@ -435,7 +421,7 @@ class TestIndividualQuery(APITestCase):
         # Should be James Bond
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": self.bank_account_info.bank_account_number, "searchType": "bank_account_number"},
         )
 
@@ -451,7 +437,7 @@ class TestIndividualQuery(APITestCase):
         # Should be Jenna Franklin
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": self.birth_certificate.document_number, "searchType": "birth_certificate"},
         )
 
@@ -467,7 +453,7 @@ class TestIndividualQuery(APITestCase):
         # Should be Peter Parker
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": self.disability_card.document_number, "searchType": "disability_card"},
         )
 
@@ -483,7 +469,7 @@ class TestIndividualQuery(APITestCase):
         # Should be Benjamin Butler
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": self.drivers_license.document_number, "searchType": "drivers_license"},
         )
 
@@ -500,6 +486,6 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"search": "1", "searchType": "registration_id"},
         )
