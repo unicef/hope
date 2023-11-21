@@ -47,6 +47,6 @@ TASKS_SCHEDULES = {
     # },
     "clean_old_record_files_task": {
         "task": "hct_mis_api.apps.registration_datahub.celery_tasks.clean_old_record_files_task",
-        "schedule": crontab(month_of_year="*/2"),
+        "schedule": crontab(month_of_year="2-12/2"),
     },
 }
