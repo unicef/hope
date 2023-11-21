@@ -16,6 +16,8 @@ import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackP
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
 import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
+import { CreateProgramPage } from '../pages/program/CreateProgramPage';
+import { EditProgramPage } from '../pages/program/EditProgramPage';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -23,6 +25,12 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
     <Switch>
       <SentryRoute label='/ - Dashboard' path={`${path}/country-dashboard`}>
         <DashboardPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/create`}>
+        <CreateProgramPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/edit/:id`}>
+        <EditProgramPage />
       </SentryRoute>
       <SentryRoute path={`${path}/list`}>
         <ProgramsPage />
