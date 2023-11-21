@@ -1,21 +1,26 @@
+import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
-import { Box, Button } from '@material-ui/core';
-import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import {
-  ProgramNode,
+  ProgramQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { CopyProgram } from '../../dialogs/programs/CopyProgram';
+import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   canActivate: boolean;
+  canDuplicate: boolean;
+  isPaymentPlanApplicable: boolean;
 }
 
 export const FinishedProgramDetailsPageHeaderButtons = ({
   program,
   canActivate,
+  canDuplicate,
+  isPaymentPlanApplicable,
 }: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -29,18 +34,25 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
           <ReactivateProgram program={program} />
         </Box>
       )}
-      <Box m={2}>
-        <Button
-          variant='contained'
-          color='primary'
-          component='a'
-          disabled={!program.caHashId}
-          href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
-          startIcon={<OpenInNewRoundedIcon />}
-        >
-          Open in CashAssist
-        </Button>
-      </Box>
+      {!isPaymentPlanApplicable && (
+        <Box m={2}>
+          <Button
+            variant='contained'
+            color='primary'
+            component='a'
+            disabled={!program.caHashId}
+            href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
+            startIcon={<OpenInNewRoundedIcon />}
+          >
+            Open in CashAssist
+          </Button>
+        </Box>
+      )}
+      {canDuplicate && (
+        <Box m={2}>
+          <CopyProgram program={program} />
+        </Box>
+      )}
     </Box>
   );
 };

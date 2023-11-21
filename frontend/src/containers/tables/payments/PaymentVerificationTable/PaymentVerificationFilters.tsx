@@ -1,35 +1,28 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  ProgramNode,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '../../../../__generated__/graphql';
-import { ClearApplyButtons } from '../../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
+import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { FiltersSection } from '../../../../components/core/FiltersSection';
 
-interface PaymentFiltersProps {
+interface PaymentVerificationFiltersProps {
   filter;
-  programs: ProgramNode[];
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const PaymentFilters = ({
+export const PaymentVerificationFilters = ({
   filter,
-  programs,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PaymentFiltersProps): React.ReactElement => {
+}: PaymentVerificationFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
   const {
@@ -63,7 +56,10 @@ export const PaymentFilters = ({
   }
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+    >
       <Grid container spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -140,27 +136,7 @@ export const PaymentFilters = ({
             value={filter.endDate}
           />
         </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label='Programme'
-            fullWidth
-            data-cy='filter-program'
-            value={filter.program}
-            icon={<FlashOnIcon />}
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

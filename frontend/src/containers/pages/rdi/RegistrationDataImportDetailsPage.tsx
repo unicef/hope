@@ -17,11 +17,11 @@ import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const Container = styled.div`
   && {
@@ -61,7 +61,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const {
     data,
     loading,

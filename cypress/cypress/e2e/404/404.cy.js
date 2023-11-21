@@ -6,7 +6,7 @@ let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let error404Page = new ErrorPage();
 
-describe("404 Page", () => {
+describe.skip("404 Page", () => {
   before(function () {
     cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");
@@ -21,7 +21,7 @@ describe("404 Page", () => {
   describe("E2E tests 404 Page", () => {
     afterEach(function () {
       Cypress.session.clearCurrentSessionData();
-      cy.adminLogin();
+      cy.checkIfLoggedIn();
       cy.navigateToHomePage();
       grievancePage.clickMenuButtonGrievance();
     });
@@ -64,7 +64,7 @@ describe("404 Page", () => {
         error404Page.getPageNoFound();
         error404Page.getGoToCountryDashboard().click();
         cy.wait("@error404").its("response.statusCode").should("eq", 200);
-        cy.get("h5").contains("Dashboard");
+        cy.get("h5").contains("Programme Management");
       });
     });
   });

@@ -8,7 +8,6 @@ import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
 import {
@@ -20,12 +19,13 @@ import {
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const SurveyDetailsPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { data, loading, error } = useSurveyQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -51,7 +51,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Surveys'),
-      to: `/${businessArea}/accountability/surveys`,
+      to: `/${baseUrl}/accountability/surveys`,
     },
   ];
 

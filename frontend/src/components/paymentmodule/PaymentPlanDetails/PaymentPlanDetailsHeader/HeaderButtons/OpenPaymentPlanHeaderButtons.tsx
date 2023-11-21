@@ -3,10 +3,10 @@ import { EditRounded } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
+import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -22,7 +22,7 @@ export const OpenPaymentPlanHeaderButtons = ({
   canLock,
 }: OpenPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const { id, isFollowUp } = paymentPlan;
 
   return (
@@ -35,7 +35,7 @@ export const OpenPaymentPlanHeaderButtons = ({
             color='primary'
             startIcon={<EditRounded />}
             component={Link}
-            to={`/${businessArea}/payment-module/${
+            to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/edit`}
           >

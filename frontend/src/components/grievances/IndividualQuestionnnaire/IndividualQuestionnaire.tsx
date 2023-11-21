@@ -2,9 +2,9 @@ import { Grid } from '@material-ui/core';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { ContentLink } from '../../core/ContentLink';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -14,7 +14,7 @@ export const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   return (
@@ -25,7 +25,7 @@ export const IndividualQuestionnaire = ({
           label: t('Individual Full Name'),
           value: (
             <ContentLink
-              href={`/${businessArea}/population/individuals/${selectedIndividualData.id}`}
+              href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
             >
               {selectedIndividualData.fullName}
             </ContentLink>

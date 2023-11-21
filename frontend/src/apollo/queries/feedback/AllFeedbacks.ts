@@ -12,6 +12,8 @@ export const AllFeedbacks = gql`
     $createdBy: String
     $feedbackId: String
     $orderBy: String
+    $program: String
+    $isActiveProgram: Boolean
   ) {
     allFeedbacks(
       offset: $offset
@@ -24,6 +26,8 @@ export const AllFeedbacks = gql`
       createdBy: $createdBy
       feedbackId: $feedbackId
       orderBy: $orderBy
+      program: $program
+      isActiveProgram: $isActiveProgram
     ) {
       totalCount
       pageInfo {
@@ -51,6 +55,10 @@ export const AllFeedbacks = gql`
             id
             unicefId
             category
+          }
+          program {
+            id
+            name
           }
         }
       }

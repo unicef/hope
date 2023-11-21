@@ -1,7 +1,8 @@
 from decimal import Decimal
-from typing import Union
+from typing import Collection, Optional, Union
 
 from django.contrib.postgres.fields import CICharField
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -9,7 +10,8 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
+from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -166,8 +168,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self) -> int:
-        qs = ExtendedQuerySetSequence(self.paymentplan_set.all(), self.cashplan_set.all())
-        return self.get_total_number_of_households_from_payments(qs)
+        return self.household_set.count()
 
     @property
     def households_with_tp_in_program(self) -> QuerySet:
@@ -181,11 +182,25 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return ", ".join(self.admin_areas.all())
 
     class Meta:
-        unique_together = ("name", "business_area")
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "business_area", "is_removed"],
+                condition=Q(is_removed=False),
+                name="unique_for_program_if_not_removed",
+            )
+        ]
         verbose_name = "Programme"
 
     def __str__(self) -> str:
         return self.name
+
+    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:  # type: ignore
+        query = Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False)
+        if query.exists() and query.first() != self:
+            raise ValidationError(
+                f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
+            )
+        super(Program, self).validate_unique()
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):

@@ -5,10 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
 import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
 import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
+import { ProgramAutocomplete } from '../../../shared/autocompletes/ProgramAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
@@ -17,9 +19,8 @@ import {
   GrievanceTypes,
 } from '../../../utils/constants';
 import { createHandleApplyFilterChange } from '../../../utils/utils';
-import { ClearApplyButtons } from '../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
+import { FiltersSection } from '../../core/FiltersSection';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
@@ -43,6 +44,7 @@ export const GrievancesFilters = ({
   setAppliedFilter,
 }: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
 
@@ -111,7 +113,10 @@ export const GrievancesFilters = ({
   const subCategories = issueTypeDict[filter.category]?.subCategories || [];
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid container item xs={6} spacing={0}>
           <Grid item xs={8}>
@@ -143,6 +148,19 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </Grid>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <ProgramAutocomplete
+              filter={filter}
+              name='program'
+              value={filter.program}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
+          </Grid>
+        )}
         <Grid container item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -235,6 +253,7 @@ export const GrievancesFilters = ({
         <Grid item xs={3}>
           <AssigneeAutocomplete
             filter={filter}
+            label={t('Assigned To')}
             name='assignedTo'
             value={filter.assignedTo}
             setFilter={setFilter}
@@ -254,7 +273,7 @@ export const GrievancesFilters = ({
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
-              dataCy='filters-created-by'
+              additionalVariables={{ isTicketCreator: true }}
             />
           </Grid>
         )}
@@ -290,7 +309,6 @@ export const GrievancesFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
             setFilter={setFilter}
-            dataCy='filters-registration-data-import'
           />
         </Grid>
         <Grid item xs={3}>
@@ -358,11 +376,24 @@ export const GrievancesFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
+        {isAllPrograms && (
+          <Grid item xs={3}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
+              label={t('Programme State')}
+              value={filter.programState}
+              fullWidth
+              disableClearable
+              data-cy='filters-program-state'
+            >
+              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
+              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

@@ -1,17 +1,12 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { SelectFilter } from '../../../core/SelectFilter';
-import {CreatedByMessageAutocomplete} from '../../../../shared/autocompletes/CreatedByMessageAutocomplete';
+import { FiltersSection } from '../../../core/FiltersSection';
+import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
 
 interface CommunicationFiltersProps {
   filter;
@@ -30,7 +25,6 @@ export const CommunicationFilters = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-
   const {
     handleFilterChange,
     applyFilterChanges,
@@ -53,33 +47,12 @@ export const CommunicationFilters = ({
     clearFilter();
   };
 
-  const businessArea = useBusinessArea();
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
-  if (programsLoading) return <LoadingComponent />;
-
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={5}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete
             name='targetPopulation'
@@ -92,7 +65,7 @@ export const CommunicationFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <CreatedByMessageAutocomplete
+          <CreatedByAutocomplete
             label={t('Created by')}
             filter={filter}
             name='createdBy'
@@ -101,6 +74,7 @@ export const CommunicationFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isMessageCreator: true }}
           />
         </Grid>
         <Grid container item xs={6} spacing={3} alignItems='flex-end'>
@@ -110,6 +84,7 @@ export const CommunicationFilters = ({
               label='From'
               onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
               value={filter.createdAtRangeMin}
+              data-cy='filters-creation-date-from'
             />
           </Grid>
           <Grid item xs={6}>
@@ -117,14 +92,11 @@ export const CommunicationFilters = ({
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
               value={filter.createdAtRangeMax}
+              data-cy='filters-creation-date-to'
             />
           </Grid>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

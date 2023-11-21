@@ -1,18 +1,21 @@
 import { Button } from '@material-ui/core';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  AllProgramsForChoicesDocument,
+  useCreateProgramMutation,
+} from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 
 export const CreateProgram = (): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [mutate, { loading }] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
@@ -30,9 +33,15 @@ export const CreateProgram = (): ReactElement => {
             businessAreaSlug: businessArea,
           },
         },
+        refetchQueries: () => [
+          {
+            query: AllProgramsForChoicesDocument,
+            variables: { businessArea, first: 100 },
+          },
+        ],
       });
       showMessage('Programme created.', {
-        pathname: `/${businessArea}/programs/${response.data.createProgram.program.id}`,
+        pathname: `/${baseUrl}/details/${response.data.createProgram.program.id}`,
         historyMethod: 'push',
       });
     } catch (e) {

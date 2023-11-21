@@ -7,24 +7,24 @@ import {
 } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
-  ProgramNode,
+  ProgramQuery,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
 interface ReactivateProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
 export function ReactivateProgram({
@@ -33,7 +33,7 @@ export function ReactivateProgram({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
@@ -67,7 +67,7 @@ export function ReactivateProgram({
     });
     if (!response.errors && response.data.updateProgram) {
       showMessage(t('Programme reactivated.'), {
-        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
     } else {
@@ -76,7 +76,12 @@ export function ReactivateProgram({
   };
   return (
     <span>
-      <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
+      <Button
+        data-cy='button-reactivate-program'
+        variant='outlined'
+        color='primary'
+        onClick={() => setOpen(true)}
+      >
         {t('Reactivate')}
       </Button>
       <Dialog
@@ -95,13 +100,16 @@ export function ReactivateProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <LoadingButton
               loading={loading}
               type='submit'
               color='primary'
               variant='contained'
               onClick={reactivateProgram}
+              data-cy='button-reactivate-program-popup'
             >
               {t('REACTIVATE')}
             </LoadingButton>

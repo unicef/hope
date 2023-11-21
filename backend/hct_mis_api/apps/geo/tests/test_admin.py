@@ -10,7 +10,7 @@ from factory import fuzzy
 from webtest import Upload
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.geo.admin import AreaAdmin
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area, AreaType
@@ -30,7 +30,9 @@ class TestGeoApp(WebTest):
     def setUp(self) -> None:
         self.site = AdminSite()
         self.admin = AreaAdmin(Area, self.site)
-        self.client.force_login(User.objects.get_or_create(username="testuser")[0])
+        self.client.force_login(
+            User.objects.get_or_create(username="testuser", partner=Partner.objects.get_or_create(name="UNICEF")[0])[0]
+        )
         self.file = BytesIO(b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n")
 
     def test_modeladmin_str(self) -> None:

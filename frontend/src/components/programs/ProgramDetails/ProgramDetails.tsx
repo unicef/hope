@@ -2,12 +2,12 @@ import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import {
+  ProgramQuery,
+  ProgrammeChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '../../../utils/utils';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
@@ -31,7 +31,7 @@ const NumberOfHouseHoldsValue = styled.div`
 `;
 
 interface ProgramDetailsProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -93,7 +93,7 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label={t('Data Collecting Type')}
-              value={program.dataCollectingType?.label}
+              value={program?.dataCollectingType?.label}
             />
           </Grid>
           <Grid item xs={4}>

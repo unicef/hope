@@ -8,6 +8,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -23,17 +24,18 @@ export const SurveysTable = ({
   canViewDetails,
   choicesData,
 }: SurveysTableProps): ReactElement => {
+  const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
     targetPopulation: filter.targetPopulation || '',
     createdBy: filter.createdBy || '',
+    program: programId,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
-    program: filter.program || '',
   };
   const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
 

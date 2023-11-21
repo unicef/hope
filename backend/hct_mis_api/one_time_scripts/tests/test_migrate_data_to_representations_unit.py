@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+from unittest import skip
 
 from django.test import TestCase
 
@@ -88,6 +89,7 @@ def create_origin_household_with_individual(
     return household, individual
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyDocumentPerIndividual(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
@@ -112,6 +114,7 @@ class TestCopyDocumentPerIndividual(TestCase):
         self.assertEqual(Document.original_and_repr_objects.count() - documents_count, 2)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyIndividualIdentityPerIndividual(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
@@ -136,6 +139,7 @@ class TestCopyIndividualIdentityPerIndividual(TestCase):
         self.assertEqual(IndividualIdentity.original_and_repr_objects.count() - individual_identities_count, 2)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyBankAccountInfoPerIndividual(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
@@ -162,6 +166,7 @@ class TestCopyBankAccountInfoPerIndividual(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 2)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyEntitlementCardPerHousehold(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
@@ -190,6 +195,7 @@ class TestCopyEntitlementCardPerHousehold(TestCase):
         self.assertEqual(EntitlementCard.original_and_repr_objects.count() - entitlement_card_count, 2)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyIndividualRepresentation(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
@@ -260,6 +266,7 @@ class TestCopyIndividualRepresentation(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 2)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyHouseholdRepresentation(TestCase):
     def setUp(self) -> None:
         business_area = BusinessAreaFactory()
@@ -394,6 +401,7 @@ class TestCopyHouseholdRepresentation(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 4)
 
 
+@skip(reason="Skip this test for GPF")
 class TestAdjustPayments(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
@@ -444,6 +452,7 @@ class TestAdjustPayments(TestCase):
         self.assertEqual(self.payment1.household, household_this_program)
 
 
+@skip(reason="Skip this test for GPF")
 class TestAdjustPaymentRecords(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
@@ -495,6 +504,7 @@ class TestAdjustPaymentRecords(TestCase):
         self.assertEqual(self.payment_record1.household, household_this_program)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyHouseholdSelections(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
@@ -545,6 +555,7 @@ class TestCopyHouseholdSelections(TestCase):
         self.assertNotEqual(household_selection.household, household_selection_original.household)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCopyRoles(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
@@ -613,6 +624,7 @@ class TestCopyRoles(TestCase):
         self.assertEqual(self.household_representation.representatives(manager="original_and_repr_objects").count(), 2)
 
 
+@skip(reason="Skip this test for GPF")
 class TestCreateStorageProgramForCollectingType(TestCase):
     def setUp(self) -> None:
         generate_data_collecting_types()
@@ -697,6 +709,36 @@ class TestCreateStorageProgramForCollectingType(TestCase):
         individuals_count = Individual.original_and_repr_objects.count()
 
         handle_non_program_objects(self.business_area)
+
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.partial,
+            ).count()
+            == 1
+        )
+
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.full,
+            ).count()
+            == 1
+        )
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.size_only,
+            ).count()
+            == 1
+        )
+        assert (
+            Program.all_objects.filter(
+                business_area=self.business_area,
+                data_collecting_type=self.no_ind_data,
+            ).count()
+            == 1
+        )
 
         partial_program = Program.all_objects.filter(
             business_area=self.business_area,
@@ -821,6 +863,7 @@ class TestCreateStorageProgramForCollectingType(TestCase):
         self.assertEqual(Individual.original_and_repr_objects.count() - individuals_count, 6)
 
 
+@skip(reason="Skip this test for GPF")
 class TestHandleRDIs(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()

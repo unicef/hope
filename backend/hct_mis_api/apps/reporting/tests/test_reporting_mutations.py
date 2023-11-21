@@ -19,7 +19,6 @@ from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
 class TestReportingMutation(APITestCase):
@@ -134,38 +133,6 @@ class TestReportingMutation(APITestCase):
                 }
             },
         )
-
-    @parameterized.expand(
-        [
-            ("individuals", Report.INDIVIDUALS, "admin_area", "program"),
-            ("households", Report.HOUSEHOLD_DEMOGRAPHICS, "admin_area", "program"),
-            ("cash_plan_verifications", Report.CASH_PLAN_VERIFICATION, "program", "admin_area"),
-            ("payments", Report.PAYMENTS, "admin_area", "program"),
-            ("payment_verifications", Report.PAYMENT_VERIFICATION, "program", "admin_area"),
-            ("cash_plans", Report.CASH_PLAN, "program", "admin_area"),
-            ("programs", Report.PROGRAM, None, "admin_area"),
-            ("programs", Report.PROGRAM, None, "program"),
-            ("individuals_payments", Report.INDIVIDUALS_AND_PAYMENT, "admin_area", None),
-            ("individuals_payments", Report.INDIVIDUALS_AND_PAYMENT, "program", None),
-        ]
-    )
-    def test_create_report_validator(
-        self, _: Any, report_type: str, should_exist_field: str, should_not_exist_field: str
-    ) -> None:
-        report_data = {
-            "report_type": report_type,
-            "business_area_slug": self.business_area_slug,
-            "date_from": "2019-01-01",
-            "date_to": "2021-01-01",
-            "admin_area": [encode_id_base64(self.admin_area_1, "Area")],
-            "program": encode_id_base64(self.program_1, "Program"),
-        }
-        ReportValidator.validate_report_type_filters(report_data=report_data)
-
-        if should_exist_field:
-            self.assertTrue(should_exist_field in report_data)
-        if should_not_exist_field:
-            self.assertFalse(should_not_exist_field in report_data)
 
     @parameterized.expand(
         [

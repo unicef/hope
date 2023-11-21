@@ -12,12 +12,12 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 
 interface FspSectionProps {
-  businessArea: string;
+  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const FspSection = ({
-  businessArea,
+  baseUrl,
   paymentPlan,
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -49,7 +49,7 @@ export const FspSection = ({
               color='primary'
               variant='contained'
               component={Link}
-              to={`/${businessArea}/payment-module/${
+              to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
               }/${id}/setup-fsp/edit`}
             >
@@ -84,7 +84,7 @@ export const FspSection = ({
             disabled={shouldDisableSetUpFsp()}
             data-cy='button-set-up-fsp'
             component={Link}
-            to={`/${businessArea}/payment-module/${
+            to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/setup-fsp/create`}
           >

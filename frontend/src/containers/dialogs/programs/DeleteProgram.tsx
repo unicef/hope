@@ -3,14 +3,13 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  AllProgramsQuery,
-  ProgramNode,
+  AllProgramsForChoicesDocument,
+  ProgramQuery,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
@@ -37,53 +36,42 @@ const MidDialog = styled(Dialog)`
 `;
 
 interface DeleteProgramProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
 }
 
-export function DeleteProgram({
+export const DeleteProgram = ({
   program,
-}: DeleteProgramProps): React.ReactElement {
+}: DeleteProgramProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
-  const [mutate] = useDeleteProgramMutation({
-    variables: {
-      programId: program.id,
-    },
-  });
+  const { businessArea } = useBaseUrl();
+  const [mutate] = useDeleteProgramMutation();
+
   const deleteProgram = async (): Promise<void> => {
-    const response = await mutate({
-      update(cache) {
-        const allProgramsData = cache.readQuery<AllProgramsQuery>({
-          query: ALL_PROGRAMS_QUERY,
-          variables: { businessArea },
-        });
-        const filtred = allProgramsData.allPrograms.edges.filter((item) => {
-          return item.node.id !== program.id;
-        });
-        const newAllProgramsData = { ...allProgramsData };
-        newAllProgramsData.allPrograms.edges = filtred;
-        cache.writeQuery({
-          query: ALL_PROGRAMS_QUERY,
-          variables: { businessArea },
-          data: newAllProgramsData,
-        });
-      },
-    });
-    if (!response.errors && response.data.deleteProgram) {
-      showMessage(t('Programme removed.'), {
-        pathname: `/${businessArea}/programs/`,
+    try {
+      await mutate({
+        variables: {
+          programId: program.id,
+        },
+
+        refetchQueries: () => [
+          {
+            query: AllProgramsForChoicesDocument,
+            variables: { businessArea, first: 100 },
+          },
+        ],
+      });
+      showMessage(t('Programme removed'), {
+        pathname: `/${businessArea}/programs/all/list`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });
-      setOpen(false);
-    } else {
-      showMessage(t('Programme remove action failed.'), {
-        dataCy: 'snackbar-program-remove-failure',
-      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
+
   return (
     <span>
       <RemoveButton
@@ -109,7 +97,9 @@ export function DeleteProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <RemoveModalButton
               type='submit'
               color='primary'
@@ -124,4 +114,4 @@ export function DeleteProgram({
       </MidDialog>
     </span>
   );
-}
+};

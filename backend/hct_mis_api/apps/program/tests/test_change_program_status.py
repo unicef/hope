@@ -45,7 +45,7 @@ class TestChangeProgramStatus(APITestCase):
     @parameterized.expand(
         [
             ("draft_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.DRAFT, Program.ACTIVE),
-            ("draft_to_acive_without_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.ACTIVE),
+            ("draft_to_active_without_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.ACTIVE),
             ("finish_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.FINISHED, Program.ACTIVE),
             ("finish_to_active_without_permission", [], Program.FINISHED, Program.ACTIVE),
             ("draft_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.FINISHED),

@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     generate_data_collecting_types,
@@ -23,8 +23,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds($search: String, $searchType: String) {
-        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", businessArea: "afghanistan") {
+      query AllHouseholds($search: String, $searchType: String, $program: ID) {
+        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", program: $program, businessArea: "afghanistan") {
           edges {
             node {
               size
@@ -36,11 +36,12 @@ ALL_HOUSEHOLD_QUERY = """
       }
     """
 ALL_HOUSEHOLD_QUERY_RANGE = """
-    query AllHouseholds{
+    query AllHouseholds($program: ID){
       allHouseholds(
         orderBy: "size",
         size: "{\\"min\\": 3, \\"max\\": 9}",
-        businessArea: "afghanistan"
+        businessArea: "afghanistan",
+        program: $program
       ) {
         edges {
           node {
@@ -53,8 +54,8 @@ ALL_HOUSEHOLD_QUERY_RANGE = """
     }
     """
 ALL_HOUSEHOLD_QUERY_MIN = """
-    query AllHouseholds{
-      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan") {
+    query AllHouseholds($program: ID){
+      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan", program: $program) {
         edges {
           node {
             size
@@ -66,8 +67,8 @@ ALL_HOUSEHOLD_QUERY_MIN = """
     }
     """
 ALL_HOUSEHOLD_QUERY_MAX = """
-    query AllHouseholds{
-      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan") {
+    query AllHouseholds($program: ID){
+      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan", program: $program) {
         edges {
           node {
             size
@@ -79,8 +80,8 @@ ALL_HOUSEHOLD_QUERY_MAX = """
     }
     """
 ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
-    query AllHouseholds($programs:[ID]){
-      allHouseholds(programs: $programs, businessArea: "afghanistan") {
+    query AllHouseholds {
+      allHouseholds(businessArea: "afghanistan") {
         edges {
           node {
             size
@@ -115,8 +116,7 @@ HOUSEHOLD_QUERY = """
     """
 
 
-class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
-    databases = {"default", "registration_datahub"}
+class TestHouseholdQuery(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -138,18 +138,30 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
             status=Program.ACTIVE,
             data_collecting_type=partial,
         )
+        cls.program_draft = ProgramFactory(
+            name="Test program DRAFT",
+            business_area=cls.business_area,
+            status=Program.DRAFT,
+        )
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_one)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_two)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
         cls.households = []
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
 
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household(
-                {"size": family_size, "address": "Lorem Ipsum", "country_origin": country_origin},
+                {"size": family_size, "address": f"Lorem Ipsum {family_size}", "country_origin": country_origin},
             )
             if index % 2:
                 household.programs.add(cls.program_one)
+                household.program_id = cls.program_one.pk
+                household.save()
             else:
                 household.programs.add(cls.program_two)
+                household.program_id = cls.program_two.pk
+                household.save()
                 # added for testing migrate_data_to_representations script
                 if family_size == 14:
                     household.programs.add(cls.program_one)
@@ -211,21 +223,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         self.snapshot_graphql_request(
             request_string=query_string,
             context={"user": self.user},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
-            ("without_permission", []),
-        ]
-    )
-    def test_household_filter_by_programme(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
-            variables={"programs": [self.id_to_base64(self.program_one.id, "ProgramNode")]},
-            context={"user": self.user},
+            variables={"program": self.id_to_base64(self.program_two.id, "ProgramNode")},
         )
 
     @parameterized.expand(
@@ -239,8 +237,21 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
+        )
+
+    def test_household_query_draft(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
+            },
         )
 
     @parameterized.expand(
@@ -256,7 +267,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": f"{household.unicef_id}", "searchType": "household_id"},
         )
 
@@ -273,7 +284,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": f"{household.head_of_household.unicef_id}", "searchType": "individual_id"},
         )
 
@@ -290,7 +301,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": f"{household.head_of_household.full_name}", "searchType": "individual_id"},
         )
 
@@ -305,7 +316,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": "+18663567905", "searchType": "phone_no"},
         )
 
@@ -320,14 +331,14 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": "123-456-789", "searchType": "national_id"},
         )
 
     @parameterized.expand(
         [
             ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123"),
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
+            ("with_permission_wrong_type_in_search", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
             ("without_permission", [], "123"),
         ]
     )
@@ -338,7 +349,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={"search": search, "searchType": "registration_id"},
         )
 
@@ -353,8 +364,23 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
             variables={
                 "search": "123-456-789",
             },
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_households_search_incorrect_kobo_asset_id(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            variables={"search": "qwerty12345", "searchType": "kobo_asset_id"},
         )

@@ -22,7 +22,7 @@ import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
@@ -42,7 +42,7 @@ export const CreateFollowUpPaymentPlan = ({
 }: CreateFollowUpPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { showMessage } = useSnackbar();
@@ -92,7 +92,7 @@ export const CreateFollowUpPaymentPlan = ({
       });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'), {
-        pathname: `/${businessArea}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+        pathname: `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {

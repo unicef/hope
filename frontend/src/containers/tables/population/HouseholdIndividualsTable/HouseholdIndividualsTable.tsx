@@ -10,7 +10,6 @@ import {
   TableComponent,
 } from '../../../../components/core/Table/TableComponent';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   populationStatusToColor,
@@ -21,6 +20,7 @@ import {
   HouseholdNode,
   IndividualNode,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -76,13 +76,13 @@ export function HouseholdIndividualsTable({
   choicesData,
 }: HouseholdIndividualsTableProps): ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const handleClick = (row): void => {
-    history.push(`/${businessArea}/population/individuals/${row.id}`);
+    history.push(`/${baseUrl}/population/individuals/${row.id}`);
   };
 
   const relationshipChoicesDict = choicesToDict(
@@ -122,9 +122,7 @@ export function HouseholdIndividualsTable({
             key={row.id}
           >
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/individuals/${row.id}`}
-              >
+              <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
                 {row.unicefId}
               </BlackLink>
             </TableCell>

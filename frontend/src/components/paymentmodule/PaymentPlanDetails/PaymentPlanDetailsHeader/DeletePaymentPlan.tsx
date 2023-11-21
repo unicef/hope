@@ -7,7 +7,6 @@ import {
   DialogTitle,
   IconButton,
 } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Delete } from '@material-ui/icons';
@@ -19,7 +18,8 @@ import {
   useDeletePpMutation,
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -30,20 +30,27 @@ export const DeletePaymentPlan = ({
 }: DeletePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const businessArea = useBusinessArea();
-  const history = useHistory();
+  const { baseUrl } = useBaseUrl();
+  const { showMessage } = useSnackbar();
   const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
   const { id } = paymentPlan;
 
-  const handleDelete = (): void => {
-    mutate({
-      variables: {
-        paymentPlanId: id,
-      },
-    });
-    history.push(`/${businessArea}/payment-module`);
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          paymentPlanId: id,
+        },
+      });
+      showMessage(t('Payment Plan Deleted'), {
+        pathname: `/${baseUrl}/payment-module`,
+        historyMethod: 'push',
+        dataCy: 'snackbar-payment-plan-remove-success',
+      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
   };
-
   return (
     <>
       <Box p={2}>

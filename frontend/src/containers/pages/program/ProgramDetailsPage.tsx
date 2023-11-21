@@ -2,18 +2,19 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  ProgramStatus,
+  useBusinessAreaDataQuery,
+  useProgrammeChoiceDataQuery,
+  useProgramQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import {
-  ProgramNode,
-  ProgramStatus,
-  useProgrammeChoiceDataQuery,
-  useProgramQuery,
-} from '../../../__generated__/graphql';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
@@ -50,12 +51,19 @@ const NoCashPlansSubTitle = styled.div`
   text-align: center;
 `;
 
-export function ProgramDetailsPage(): React.ReactElement {
+export const ProgramDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
+  });
+  const { businessArea } = useBaseUrl();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
   });
   const {
     data: choices,
@@ -63,13 +71,15 @@ export function ProgramDetailsPage(): React.ReactElement {
   } = useProgrammeChoiceDataQuery();
   const permissions = usePermissions();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.program || !choices || permissions === null) return null;
+  if (!data?.program || !choices || !businessAreaData || permissions === null)
+    return null;
 
-  const program = data.program as ProgramNode;
+  const { program } = data;
   return (
     <div>
       <ProgramDetailsPageHeader
@@ -81,6 +91,13 @@ export function ProgramDetailsPage(): React.ReactElement {
         canEdit={hasPermissions(PERMISSIONS.PROGRAMME_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.PROGRAMME_REMOVE, permissions)}
         canFinish={hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions)}
+        canDuplicate={hasPermissions(
+          PERMISSIONS.PROGRAMME_DUPLICATE,
+          permissions,
+        )}
+        isPaymentPlanApplicable={
+          businessAreaData.businessArea.isPaymentPlanApplicable
+        }
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
@@ -106,4 +123,4 @@ export function ProgramDetailsPage(): React.ReactElement {
       </Container>
     </div>
   );
-}
+};

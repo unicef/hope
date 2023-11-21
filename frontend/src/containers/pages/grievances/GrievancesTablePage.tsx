@@ -8,7 +8,7 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
@@ -18,7 +18,7 @@ import {
 import { getFilterFromQueryParams } from '../../../utils/utils';
 
 export const GrievancesTablePage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
@@ -46,6 +46,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
     priority: '',
     urgency: '',
     preferredLanguage: '',
+    program: '',
+    programState: 'active',
   };
 
   const [selectedTab, setSelectedTab] = useState(
@@ -66,8 +68,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
-  const userGeneratedPath = `/${businessArea}/grievance/tickets/user-generated`;
-  const systemGeneratedPath = `/${businessArea}/grievance/tickets/system-generated`;
+  const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
+  const systemGeneratedPath = `/${baseUrl}/grievance/tickets/system-generated`;
 
   const mappedTabs = grievanceTicketsTypes.map((el) => (
     <Tab data-cy={`tab-${el}`} key={el} label={el} />
@@ -81,6 +83,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
           ...filter,
           grievanceType: GrievanceTypes[newValue],
           category: '',
+          program: '',
         });
         history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
@@ -112,11 +115,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
         selectedTab={selectedTab}
       />
-      <GrievancesTable
-        filter={appliedFilter}
-        businessArea={businessArea}
-        selectedTab={selectedTab}
-      />
+      <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
     </>
   );
 };

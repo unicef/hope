@@ -24,6 +24,7 @@ const HeaderContainer = styled.div`
   flex: 1;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-left: ${({ theme }) => theme.spacing(5)}px;
 `;
 const ActionsContainer = styled.div`
@@ -58,6 +59,11 @@ const StatusErasedWrapper = styled.div`
   text-transform: uppercase;
 `;
 
+const TitleContainer = styled.div`
+  width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+`;
 interface Props {
   title: string | React.ReactElement;
   children?: React.ReactElement;
@@ -68,7 +74,7 @@ interface Props {
   isErased?: boolean;
 }
 
-export function PageHeader({
+export const PageHeader = ({
   title,
   children,
   breadCrumbs = null,
@@ -76,7 +82,7 @@ export function PageHeader({
   hasInputComponent,
   flags,
   isErased,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
@@ -94,9 +100,11 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Box display='flex' alignItems='center'>
-                  <Typography data-cy='page-header-title' variant='h5'>
-                    {title}
-                  </Typography>
+                  <TitleContainer>
+                    <Typography data-cy='page-header-title' variant='h5'>
+                      {title}
+                    </Typography>
+                  </TitleContainer>
                   {isErased ? (
                     <StatusErasedWrapper>
                       <StatusBox
@@ -118,4 +126,4 @@ export function PageHeader({
       <TabsWrapper>{tabs}</TabsWrapper>
     </Wrapper>
   );
-}
+};

@@ -3,10 +3,10 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { renderUserName } from '../../../../utils/utils';
 import { CommunicationMessageNode } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface CommunicationTableRowProps {
   message: CommunicationMessageNode;
@@ -18,8 +18,8 @@ export function CommunicationTableRow({
   canViewDetails,
 }: CommunicationTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const messageDetailsPath = `/${businessArea}/accountability/communication/${message.id}`;
+  const { baseUrl } = useBaseUrl();
+  const messageDetailsPath = `/${baseUrl}/accountability/communication/${message.id}`;
   const handleClick = (): void => {
     history.push(messageDetailsPath);
   };

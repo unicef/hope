@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { RegistrationDataImportCreateDialog } from '../../../components/rdi/create/RegistrationDataImportCreateDialog';
-import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { RegistrationDataImportCreateDialog } from '../../../components/rdi/create/RegistrationDataImportCreateDialog';
 import { RegistrationFilters } from '../../../components/rdi/RegistrationFilters';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
+import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
+import { useProgramQuery } from "../../../__generated__/graphql";
+import {useBaseUrl} from "../../../hooks/useBaseUrl";
 
 const initialFilter = {
   search: '',
@@ -22,6 +24,7 @@ const initialFilter = {
 
 export const RegistrationDataImportPage = (): React.ReactElement => {
   const location = useLocation();
+  const { programId } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
 
@@ -32,7 +35,17 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  if (permissions === null) return null;
+  const { data, loading: programLoading } = useProgramQuery({
+    variables: { id: programId },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  if (permissions === null || programLoading) return null;
+
+  let isImportDisabled = false;
+  if (data.program && data.program.status !== "ACTIVE") {
+    isImportDisabled = true
+  }
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
     return <PermissionDenied />;
@@ -40,7 +53,7 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
-        <RegistrationDataImportCreateDialog />
+        <RegistrationDataImportCreateDialog isImportDisabled={isImportDisabled} />
       )}
     </PageHeader>
   );

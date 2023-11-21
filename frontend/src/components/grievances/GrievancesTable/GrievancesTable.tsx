@@ -1,22 +1,9 @@
 import { Box, Button } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import Paper from '@material-ui/core/Paper';
-import {
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../../config/permissions';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKET_STATES,
-  GRIEVANCE_TICKETS_TYPES,
-} from '../../../utils/constants';
-import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -25,27 +12,41 @@ import {
   useGrievancesChoiceDataQuery,
   useMeQuery,
 } from '../../../__generated__/graphql';
+import {
+  PERMISSIONS,
+  hasCreatorOrOwnerPermissions,
+  hasPermissions,
+} from '../../../config/permissions';
+import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { usePermissions } from '../../../hooks/usePermissions';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_TICKETS_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '../../../utils/constants';
+import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import { LoadingComponent } from '../../core/LoadingComponent';
-import { TableWrapper } from '../../core/TableWrapper';
 import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
-import { BulkAssignModal } from './bulk/BulkAssignModal';
+import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
+import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
+import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 
 interface GrievancesTableProps {
-  businessArea: string;
   filter;
   selectedTab;
 }
 
 export const GrievancesTable = ({
-  businessArea,
   filter,
   selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -71,17 +72,21 @@ export const GrievancesTable = ({
     priority: filter.priority === 'Not Set' ? 0 : filter.priority,
     urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
+    program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [inputValue, setInputValue] = useState('');
+  const debouncedInputText = useDebounce(inputValue, 800);
   const [page, setPage] = useState<number>(0);
   const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
     variables: {
       businessArea,
       first: 20,
       orderBy: 'first_name,last_name,email',
-      search: inputValue,
+      search: debouncedInputText,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
@@ -191,6 +196,17 @@ export const GrievancesTable = ({
     setSelectedTickets([]);
   };
 
+  const headCellsWithProgramColumn = [
+    ...headCells,
+    {
+      disablePadding: false,
+      label: 'Programmes',
+      id: 'programs',
+      numeric: false,
+      dataCy: 'programs',
+    },
+  ];
+
   return (
     <>
       <Box display='flex' flexDirection='column' px={5} pt={5}>
@@ -255,7 +271,7 @@ export const GrievancesTable = ({
                     variant='contained'
                     color='primary'
                     component={Link}
-                    to={`/${businessArea}/grievance/new-ticket`}
+                    to={`/${baseUrl}/grievance/new-ticket`}
                     data-cy='button-new-ticket'
                   >
                     {t('NEW TICKET')}
@@ -267,7 +283,7 @@ export const GrievancesTable = ({
               AllGrievanceTicketQueryVariables
             >
               isOnPaper={false}
-              headCells={headCells}
+              headCells={isAllPrograms ? headCellsWithProgramColumn : headCells}
               rowsPerPageOptions={[10, 15, 20, 40]}
               query={useAllGrievanceTicketQuery}
               onSelectAllClick={handleSelectAllCheckboxesClick}

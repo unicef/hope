@@ -21,6 +21,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.conftest import disabled_locally_test
 
 
@@ -269,6 +270,26 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         }
         """
 
+    FILTER_BY_PROGRAM = """
+        query AllGrievanceTickets($program: String) {
+          allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", program: $program) {
+            edges {
+              node {
+                householdUnicefId
+                category
+                status
+                issueType
+                language
+                description
+                consent
+                urgency
+                priority
+              }
+            }
+          }
+        }
+        """
+
     FILTER_BY_MULTIPLE_FILTERS = """
         query AllGrievanceTickets(
           $status: [String],
@@ -319,6 +340,9 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type_new, p_code="123aa123")
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type_new, p_code="sadasdasfd222")
 
+        cls.program_1 = ProgramFactory(status="ACTIVE")
+        cls.program_2 = ProgramFactory(status="ACTIVE")
+
         cls.grievance_ticket_1 = GrievanceTicket.objects.create(
             **{
                 "business_area": cls.business_area,
@@ -357,6 +381,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "urgency": cls.grievance_ticket_1.urgency,
                 "grievance_type": "user",
                 "ticket_details": {"household": {"head_of_household": {"family_name": "Kowalska_1"}}},
+                "programs": [],
             },
         )
 
@@ -399,6 +424,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "urgency": cls.grievance_ticket_2.urgency,
                 "grievance_type": "user",
                 "ticket_details": {"household": {"head_of_household": {"family_name": "Kowalska_2"}}},
+                "programs": [],
             },
         )
 
@@ -440,8 +466,11 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "urgency": cls.grievance_ticket_3.urgency,
                 "grievance_type": "system",
                 "ticket_details": {"household": {"head_of_household": {"family_name": "Kowalska_3"}}},
+                "programs": [cls.program_1.id, cls.program_2.id],
             },
         )
+
+        cls.grievance_ticket_3.programs.set([cls.program_1, cls.program_2])
 
     @staticmethod
     def create_es_db() -> Elasticsearch:
@@ -639,7 +668,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_multiple_filters_should_return_grievance_1(self, mock_execute_test_es_query: Any) -> None:
-        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
@@ -651,4 +679,14 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "urgency": URGENCY_URGENT,
                 "grievanceType": "user",
             },
+        )
+
+    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    def test_program_filter_returns_grievance_3(self, mock_execute_test_es_query: Any) -> None:
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_PROGRAM,
+            context={"user": self.user},
+            variables={"program": self.id_to_base64(self.program_2.id, "ProgramNode")},
         )

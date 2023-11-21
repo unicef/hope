@@ -4,10 +4,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import {
   ProgramStatus,
   TargetPopulationQuery,
@@ -15,11 +11,15 @@ import {
   useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '../../../utils/utils';
+import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
-import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
-import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
 const Label = styled.p`
@@ -51,7 +51,7 @@ export const EditTargetPopulation = ({
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const {
     data: allProgramsData,
     loading: loadingPrograms,
@@ -59,6 +59,13 @@ export const EditTargetPopulation = ({
     variables: { businessArea, status: [ProgramStatus.Active] },
     fetchPolicy: 'cache-and-network',
   });
+
+  if (loadingPrograms) {
+    return <LoadingComponent />;
+  }
+  if (!allProgramsData) {
+    return null;
+  }
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria } = values;
@@ -72,7 +79,7 @@ export const EditTargetPopulation = ({
   };
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(2, 'Too short')
+      .min(4, 'Too short')
       .max(255, 'Too long'),
     excludedIds: Yup.string().test(
       'testName',
@@ -112,7 +119,7 @@ export const EditTargetPopulation = ({
         },
       });
       showMessage(t('Target Population Updated'), {
-        pathname: `/${businessArea}/target-population/${values.id}`,
+        pathname: `/${baseUrl}/target-population/${values.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -133,7 +140,7 @@ export const EditTargetPopulation = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm, setFieldValue }) => {
+      {({ values, submitForm }) => {
         return (
           <Form>
             <AutoSubmitFormOnEnter />
@@ -141,17 +148,9 @@ export const EditTargetPopulation = ({
               handleSubmit={submitForm}
               values={values}
               loading={loading}
-              businessArea={businessArea}
+              baseUrl={baseUrl}
               targetPopulation={targetPopulation}
             />
-            <TargetPopulationProgramme
-              allPrograms={allProgramsData}
-              loading={loadingPrograms}
-              program={values.program}
-              setFieldValue={setFieldValue}
-              values={values}
-            />
-
             <FieldArray
               name='targetingCriteria'
               render={(arrayHelpers) => (

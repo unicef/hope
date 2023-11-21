@@ -4,7 +4,7 @@ import {
   CashPlanDocument,
   PaymentPlanDocument,
 } from '../__generated__/graphql';
-import { useBusinessArea } from './useBusinessArea';
+import { useBaseUrl } from './useBaseUrl';
 
 export const usePaymentRefetchQueries = (
   paymentPlanId: string,
@@ -15,8 +15,8 @@ export const usePaymentRefetchQueries = (
   },
   { query: DocumentNode; variables: { id: string } },
 ]) => {
-  const businessArea = useBusinessArea();
-  const planType = atob(paymentPlanId).split(":")[0];
+  const { businessArea } = useBaseUrl();
+  const planType = atob(paymentPlanId).split(':')[0];
 
   return () => [
     {
@@ -33,7 +33,8 @@ export const usePaymentRefetchQueries = (
       },
     },
     {
-      query: planType === 'PaymentPlanNode' ? PaymentPlanDocument : CashPlanDocument,
+      query:
+        planType === 'PaymentPlanNode' ? PaymentPlanDocument : CashPlanDocument,
       variables: { id: paymentPlanId },
     },
   ];

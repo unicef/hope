@@ -1,30 +1,29 @@
+import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
 import styled from 'styled-components';
-import { Typography } from '@material-ui/core';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
-import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
-import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
-import { TargetPopulationProgramme } from '../../../components/targeting/TargetPopulationProgramme';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
+import * as Yup from 'yup';
 import {
   ProgramStatus,
   useAllProgramsForChoicesQuery,
   useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
-import { PaperContainer } from '../../../components/targeting/PaperContainer';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
+import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
+import { PaperContainer } from '../../../components/targeting/PaperContainer';
+import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
+import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '../../../utils/utils';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -32,10 +31,11 @@ const Label = styled.p`
 
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
   const initialValues = {
     name: '',
     criterias: [],
-    program: null,
+    program: programId,
     excludedIds: '',
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
@@ -43,7 +43,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
@@ -99,7 +99,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Target Population Created'), {
-        pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+        pathname: `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -113,22 +113,15 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values, setFieldValue }) => (
+      {({ submitForm, values }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
             handleSubmit={submitForm}
             loading={loading}
             values={values}
-            businessArea={businessArea}
+            baseUrl={baseUrl}
             permissions={permissions}
-          />
-          <TargetPopulationProgramme
-            allPrograms={allProgramsData}
-            loading={loadingPrograms}
-            program={values.program}
-            setFieldValue={setFieldValue}
-            values={values}
           />
           {values.program ? (
             <FieldArray
