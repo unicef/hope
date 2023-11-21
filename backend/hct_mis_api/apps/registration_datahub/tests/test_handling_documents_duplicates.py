@@ -209,6 +209,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(ticket_details.possible_duplicates.count(), 2)
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
 
+        self.household.refresh_from_db()
+        self.assertEqual(GrievanceTicket.objects.first().household_unicef_id, self.household.unicef_id)
+
     def test_hard_documents_deduplication_for_initially_valid(self) -> None:
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
