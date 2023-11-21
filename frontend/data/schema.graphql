@@ -2755,6 +2755,7 @@ type PaymentNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   unicefId: String
+  signatureHash: String!
   businessArea: UserBusinessAreaNode!
   status: PaymentStatus!
   statusDate: DateTime!
@@ -2794,6 +2795,8 @@ type PaymentNode implements Node {
   verification: PaymentVerificationNode
   distributionModality: String
   serviceProvider: FinancialServiceProviderNode
+  debitCardNumber: String
+  debitCardIssuer: String
   totalPersonsCovered: Int
   snapshotCollectorFullName: String
   snapshotCollectorDeliveryPhoneNo: String
