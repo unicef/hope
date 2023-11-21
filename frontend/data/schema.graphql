@@ -2780,6 +2780,7 @@ type PaymentNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   unicefId: String
+  signatureHash: String!
   businessArea: UserBusinessAreaNode!
   status: PaymentStatus!
   statusDate: DateTime!

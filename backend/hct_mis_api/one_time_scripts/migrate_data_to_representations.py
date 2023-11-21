@@ -104,7 +104,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
             batched_households = households[batch_start:batch_end]
-            for individual in Individual.objects.filter(household__in=batched_households):
+            for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
+                "documents", "identities", "bank_account_info"
+            ):
                 individuals_per_household_dict[individual.household_id].append(individual)
             for household in batched_households:
                 with transaction.atomic():
@@ -378,7 +380,9 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     household_selections = household_selections.order_by("id")
 
     household_selection_count = household_selections.count()
+    counter = 0
     for _ in range(0, household_selection_count, BATCH_SIZE):
+        logger.info(f"Copying household selections {counter} - {counter + BATCH_SIZE}/{household_selection_count}")
         household_selections_to_create = []
         batched_household_selections = household_selections[0:BATCH_SIZE]
 
@@ -396,6 +400,8 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
                 is_migration_handled=True
             )
+
+        counter += BATCH_SIZE
 
 
 def adjust_payment_objects() -> None:
@@ -496,7 +502,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
     rdis_count = rdis.count()
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
-            logger.info(f"Handling {i} - {i+99}/{rdis_count} RDIs")
+            logger.info(f"Handling {i} - {i + 99}/{rdis_count} RDIs")
         rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
