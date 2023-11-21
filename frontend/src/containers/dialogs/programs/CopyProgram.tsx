@@ -108,14 +108,14 @@ export const CopyProgram = ({
       <IconButton data-cy='button-copy-program' onClick={() => setOpen(true)}>
         <FileCopy />
       </IconButton>
-      <ProgramForm
+      {/* <ProgramForm
         onSubmit={submitFormHandler}
         renderSubmit={renderSubmit}
         open={open}
         onClose={() => setOpen(false)}
         title={t('Copy Programme')}
         initialValues={initialValues}
-      />
+      /> */}
     </>
   );
 };

@@ -77,13 +77,13 @@ export const CreateProgram = (): ReactElement => {
       >
         {t('New Programme')}
       </Button>
-      <ProgramForm
+      {/* <ProgramForm
         onSubmit={submitFormHandler}
         renderSubmit={renderSubmit}
         open={open}
         onClose={() => setOpen(false)}
         title={t('Set-up a new Programme')}
-      />
+      /> */}
     </div>
   );
 };

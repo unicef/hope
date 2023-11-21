@@ -15,26 +15,20 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
-import { Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 
 interface ProgramFormPropTypes {
   program?: ProgramQuery['program'];
   onSubmit: (values, setFieldError) => Promise<void>;
-  renderSubmit: (submit: () => Promise<void>) => ReactElement;
-  open?: boolean;
-  onClose?: () => void;
-  title: string;
   initialValues?: { [key: string]: string | boolean | number };
+  actions: (handleSubmit) => ReactElement;
 }
 
 export const ProgramForm = ({
   program = null,
   onSubmit,
-  renderSubmit,
-  open,
-  onClose,
-  title,
   initialValues,
+  actions,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
@@ -305,6 +299,11 @@ export const ProgramForm = ({
                 component={FormikRadioGroup}
                 data-cy='input-individual-data-needed'
               />
+            </Grid>
+            <Grid item xs={12}>
+              <Box display='flex' justifyContent='space-between'>
+                {actions(submitForm)}
+              </Box>
             </Grid>
           </Form>
         </Grid>
