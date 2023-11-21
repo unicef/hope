@@ -39,6 +39,10 @@ from hct_mis_api.apps.activity_log.schema import LogEntryNode
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.lookup_functions import (
+    get_debit_card_issuer,
+    get_debit_card_number,
+)
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
@@ -324,6 +328,8 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     service_provider = graphene.Field(FinancialServiceProviderNode)
     household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
+    debit_card_number = graphene.String()
+    debit_card_issuer = graphene.String()
     additional_collector_name = graphene.String()
     additional_document_type = graphene.String()
     additional_document_number = graphene.String()
@@ -369,6 +375,12 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
+
+    def resolve_debit_card_number(self, info: Any) -> str:
+        return get_debit_card_number(self.collector)
+
+    def resolve_debit_card_issuer(self, info: Any) -> str:
+        return get_debit_card_issuer(self.collector)
 
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         # TODO: migrate old data maybe?
