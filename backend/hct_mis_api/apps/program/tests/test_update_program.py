@@ -10,6 +10,7 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -116,6 +117,29 @@ class TestUpdateProgram(APITestCase):
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "dataCollectingTypeCode": "partial_individuals",
+                },
+                "version": self.program.version,
+            },
+        )
+        self.assertEqual(self.program.data_collecting_type.code, "full_collection")
+
+    def test_update_draft_not_empty_program_with_dct(self) -> None:
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        data_collecting_type = DataCollectingType.objects.get(code="full_collection")
+        data_collecting_type.limit_to.add(self.business_area)
+        pr = Program.objects.get(id=self.program.id)
+        self.assertEqual(pr.status, Program.DRAFT)
+        self.assertEqual(self.program.status, Program.DRAFT)
+        create_household(household_args={"program": self.program})
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
