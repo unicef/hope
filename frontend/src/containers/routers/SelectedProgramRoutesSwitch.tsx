@@ -52,6 +52,8 @@ import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopul
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
+import { CreateProgramPage } from '../pages/program/CreateProgramPage';
+import { EditProgramPage } from '../pages/program/EditProgramPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -210,6 +212,12 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/list`}>
         <ProgramsPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/create`}>
+        <CreateProgramPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/edit/:id`}>
+        <EditProgramPage />
       </SentryRoute>
       <SentryRoute path={`${path}/details/:id`}>
         <ProgramDetailsPage />

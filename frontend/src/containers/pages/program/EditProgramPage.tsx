@@ -1,26 +1,24 @@
 import { Button } from '@material-ui/core';
-import React, { ReactElement, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
 import {
-  AllProgramsForChoicesDocument,
-  useCreateProgramMutation,
   useProgramQuery,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { ProgramForm } from '../../forms/ProgramForm';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PaperContainer } from '../../../components/targeting/PaperContainer';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { decodeIdString } from '../../../utils/utils';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PaperContainer } from '../../../components/targeting/PaperContainer';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { decodeIdString } from '../../../utils/utils';
+import { ProgramForm } from '../../forms/ProgramForm';
 
 export const EditProgramPage = (): ReactElement => {
+  console.log('loooool');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -51,11 +49,11 @@ export const EditProgramPage = (): ReactElement => {
     },
   });
 
-  if (!data) return null;
+  // if (!data) return null;
   if (loadingProgram) return <LoadingComponent />;
   const { program } = data;
 
-  const submitFormHandler = async (values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const response = await mutate({
         variables: {
@@ -77,13 +75,15 @@ export const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const renderSubmit = (submit): ReactElement => {
+  const renderActions = (submitHandler): ReactElement => {
     return (
       <>
-        <Button onClick={() => console.log('cancel')}>Cancel</Button>
+        <Button component={Link} to={`/${baseUrl}/details/${id}`}>
+          {t('Cancel')}
+        </Button>
         <LoadingButton
           loading={loading}
-          onClick={submit}
+          onClick={submitHandler}
           type='submit'
           color='primary'
           variant='contained'
@@ -97,12 +97,11 @@ export const EditProgramPage = (): ReactElement => {
 
   return (
     <>
-      <PageHeader title={t('Create Program')} />
+      <PageHeader title={`${t('Edit Programme')}: (${program.name})`} />
       <PaperContainer>
         <ProgramForm
-          onSubmit={submitFormHandler}
-          renderSubmit={renderSubmit}
-          title={t('Set-up a new Programme')}
+          actions={(submit) => renderActions(submit)}
+          onSubmit={handleSubmit}
         />
       </PaperContainer>
     </>

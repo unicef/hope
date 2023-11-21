@@ -826,5 +826,7 @@
   "Data Collecting Type is required": "Data Collecting Type is required",
   "Registration Group": "Registration Group",
   "Related Payment Id": "Related Payment Id",
-  "Failure Reason": "Failure Reason"
+  "Failure Reason": "Failure Reason",
+  "Create Programme": "Create Programme",
+  "Edit Programme": "Edit Programme"
 }

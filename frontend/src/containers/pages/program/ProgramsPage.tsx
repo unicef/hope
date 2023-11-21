@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -9,9 +9,9 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { CreateProgram } from '../../dialogs/programs/CreateProgram';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
+import { Button } from '@material-ui/core';
 
 const initialFilter = {
   search: '',
@@ -34,7 +34,7 @@ export const ProgramsPage = (): React.ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { businessArea } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const {
@@ -60,7 +60,15 @@ export const ProgramsPage = (): React.ReactElement => {
 
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
-      <CreateProgram />
+      <Button
+        variant='contained'
+        color='primary'
+        component={Link}
+        to={`/${baseUrl}/create`}
+        data-cy='button-new-program'
+      >
+        {t('Create Programme')}
+      </Button>
     </PageHeader>
   );
 

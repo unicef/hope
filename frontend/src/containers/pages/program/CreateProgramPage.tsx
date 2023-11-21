@@ -1,5 +1,6 @@
 import { Button } from '@material-ui/core';
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   AllProgramsForChoicesDocument,
@@ -23,7 +24,7 @@ export const CreateProgramPage = (): ReactElement => {
     ],
   });
 
-  const submitFormHandler = async (values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const response = await mutate({
         variables: {
@@ -50,13 +51,15 @@ export const CreateProgramPage = (): ReactElement => {
     }
   };
 
-  const renderSubmit = (submit): ReactElement => {
+  const renderActions = (submitHandler): ReactElement => {
     return (
       <>
-        <Button onClick={() => console.log('cancel')}>Cancel</Button>
+        <Button component={Link} to={`/${baseUrl}/list`}>
+          {t('Cancel')}
+        </Button>
         <LoadingButton
           loading={loading}
-          onClick={submit}
+          onClick={submitHandler}
           type='submit'
           color='primary'
           variant='contained'
@@ -70,12 +73,11 @@ export const CreateProgramPage = (): ReactElement => {
 
   return (
     <>
-      <PageHeader title={t('Create Program')} />
+      <PageHeader title={t('Create Programme')} />
       <PaperContainer>
         <ProgramForm
-          onSubmit={submitFormHandler}
-          renderSubmit={renderSubmit}
-          title={t('Set-up a new Programme')}
+          actions={(submit) => renderActions(submit)}
+          onSubmit={handleSubmit}
         />
       </PaperContainer>
     </>
