@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -14,6 +14,14 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    NEEDS_ADJUDICATION,
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+    Individual,
+)
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -133,6 +141,38 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     def all_imported_individuals(self) -> models.QuerySet[ImportedIndividual]:
         return ImportedIndividual.objects.filter(registration_data_import=self.datahub_id)
 
+    @cached_property
+    def all_individuals(self) -> models.QuerySet[Individual]:
+        return Individual.objects.filter(registration_data_import=self.id)
+
+    @property
+    def population(self) -> Union[models.QuerySet[ImportedIndividual], models.QuerySet[Individual]]:
+        if self.status == self.MERGED:
+            return self.all_individuals
+        return self.all_imported_individuals
+
+    @property
+    def batch_duplicates(self) -> Union[models.QuerySet[ImportedIndividual], models.QuerySet[Individual]]:
+        return self.population.filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
+
+    @property
+    def golden_record_duplicates(self) -> Union[models.QuerySet[ImportedIndividual], models.QuerySet[Individual]]:
+        return self.population.filter(deduplication_golden_record_status=DUPLICATE)
+
+    @property
+    def golden_record_possible_duplicates(
+        self,
+    ) -> Union[models.QuerySet[ImportedIndividual], models.QuerySet[Individual]]:
+        return self.population.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+
+    @property
+    def batch_unique(self) -> Union[models.QuerySet[ImportedIndividual], models.QuerySet[Individual]]:
+        return self.population.filter(deduplication_golden_record_status=UNIQUE)
+
+    @property
+    def golden_record_unique(self) -> Union[models.QuerySet[ImportedIndividual], models.QuerySet[Individual]]:
+        return self.population.filter(deduplication_batch_status=UNIQUE_IN_BATCH)
+
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
@@ -155,4 +195,4 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         ]
 
     def can_be_merged(self) -> bool:
-        return self.status in [self.IN_REVIEW, self.MERGE_ERROR]
+        return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
