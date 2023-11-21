@@ -11,16 +11,16 @@ snapshots['TestDataCollectionTypeSchema::test_dct_with_unknown_code_is_not_in_li
     'data': {
         'dataCollectionTypeChoices': [
             {
-                'name': 'Full',
-                'value': 'full'
+                'name': 'Size Only',
+                'value': 'size_only'
             },
             {
                 'name': 'Partial',
                 'value': 'partial'
             },
             {
-                'name': 'Size Only',
-                'value': 'size_only'
+                'name': 'Full',
+                'value': 'full'
             }
         ]
     }
