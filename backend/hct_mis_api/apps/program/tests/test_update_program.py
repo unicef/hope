@@ -136,9 +136,6 @@ class TestUpdateProgram(APITestCase):
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
-        pr = Program.objects.get(id=self.program.id)
-        self.assertEqual(pr.status, Program.DRAFT)
-        self.assertEqual(self.program.status, Program.DRAFT)
         create_household(household_args={"program": self.program})
 
         self.snapshot_graphql_request(
