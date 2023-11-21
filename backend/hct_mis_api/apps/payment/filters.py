@@ -3,7 +3,7 @@ from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -42,6 +42,39 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
 )
 from hct_mis_api.apps.program.models import Program
+
+# class PaymentOrderingFilter(OrderingFilter):
+#     def __init__(self, *args: Any, **kwargs: Any) -> None:
+#         super().__init__(*args, **kwargs)
+#         self.extra["choices"] += [
+#             ("mark", "Ordering by Payment Status"),
+#             ("-mark", "Ordering by Payment Status (descending)"),
+#         ]
+#
+#     def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
+#         if value and any(v in ["mark", "-mark"] for v in value):
+#             qs = super().filter(qs, value)
+#             qs = (
+#                 qs.annotate(
+#                     mark=Case(
+#                         When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
+#                         When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
+#                         When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
+#                         When(status=Payment.STATUS_ERROR, then=Value(4)),
+#                         When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
+#                         When(status=Payment.STATUS_PENDING, then=Value(6)),
+#                         output_field=IntegerField(),
+#                     )
+#                 )
+#                 .order_by("mark")
+#             )
+#             print("*****")
+#             print(qs.values("mark"))
+#
+#             if value == ["-mark"]:
+#                 return qs.reverse()
+#             return qs
+#         return super().filter(qs, value)
 
 
 class PaymentRecordFilter(FilterSet):
@@ -366,11 +399,22 @@ class PaymentFilter(FilterSet):
             "financial_service_provider__name",
             "parent__program__name",
             "delivery_date",
+            "mark",
         )
     )
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        queryset = queryset.select_related("financial_service_provider")
+        queryset = queryset.select_related("financial_service_provider").annotate(
+            mark=Case(
+                When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
+                When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
+                When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
+                When(status=Payment.STATUS_ERROR, then=Value(4)),
+                When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
+                When(status=Payment.STATUS_PENDING, then=Value(6)),
+                output_field=IntegerField(),
+            )
+        )
         if not self.form.cleaned_data.get("order_by"):
             queryset = queryset.order_by("unicef_id")
 
