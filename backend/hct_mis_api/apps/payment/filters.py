@@ -43,39 +43,6 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.program.models import Program
 
-# class PaymentOrderingFilter(OrderingFilter):
-#     def __init__(self, *args: Any, **kwargs: Any) -> None:
-#         super().__init__(*args, **kwargs)
-#         self.extra["choices"] += [
-#             ("mark", "Ordering by Payment Status"),
-#             ("-mark", "Ordering by Payment Status (descending)"),
-#         ]
-#
-#     def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
-#         if value and any(v in ["mark", "-mark"] for v in value):
-#             qs = super().filter(qs, value)
-#             qs = (
-#                 qs.annotate(
-#                     mark=Case(
-#                         When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
-#                         When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
-#                         When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
-#                         When(status=Payment.STATUS_ERROR, then=Value(4)),
-#                         When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
-#                         When(status=Payment.STATUS_PENDING, then=Value(6)),
-#                         output_field=IntegerField(),
-#                     )
-#                 )
-#                 .order_by("mark")
-#             )
-#             print("*****")
-#             print(qs.values("mark"))
-#
-#             if value == ["-mark"]:
-#                 return qs.reverse()
-#             return qs
-#         return super().filter(qs, value)
-
 
 class PaymentRecordFilter(FilterSet):
     individual = CharFilter(method="individual_filter")
