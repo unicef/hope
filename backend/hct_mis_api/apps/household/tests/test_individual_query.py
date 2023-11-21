@@ -152,6 +152,22 @@ class TestIndividualQuery(APITestCase):
                 "birth_date": "1978-01-02",
                 "id": "430924a6-273e-4018-95e7-b133afa5e1b9",
             },
+            {
+                "full_name": "James Bond",
+                "given_name": "James",
+                "family_name": "Bond",
+                "phone_no": "(007)682-4596",
+                "birth_date": "1965-06-26",
+                "id": "972fdac5-d1bf-44ed-a4a5-14805b5dc606",
+            },
+            {
+                "full_name": "Peter Parker",
+                "given_name": "Peter",
+                "family_name": "Parker",
+                "phone_no": "(666)682-2345",
+                "birth_date": "1978-01-02",
+                "id": "430924a6-273e-4018-95e7-b133afa5e1b9",
+            },
         ]
 
         cls.individuals = [
@@ -165,6 +181,20 @@ class TestIndividualQuery(APITestCase):
         household_one.head_of_household = cls.individuals_from_hh_one[0]
         # household_two.head_of_household = cls.individuals_from_hh_two[1]
         household_one.save()
+
+        cls.bank_account_info = BankAccountInfoFactory(
+            individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
+        )
+
+        cls.individual_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").unicef_id
+        cls.household_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").household.unicef_id
+
+        DocumentTypeFactory(key="national_id")
+        DocumentTypeFactory(key="national_passport")
+        DocumentTypeFactory(key="tax_id")
+        DocumentTypeFactory(key="birth_certificate")
+        DocumentTypeFactory(key="disability_card")
+        DocumentTypeFactory(key="drivers_license")
 
         cls.bank_account_info = BankAccountInfoFactory(
             individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
