@@ -1,7 +1,9 @@
 import { Button } from '@material-ui/core';
+import { v4 as uuidv4 } from 'uuid';
 import React, { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import AddIcon from '@material-ui/icons/Add';
 import {
   AllProgramsForChoicesDocument,
   useCreateProgramMutation,
@@ -14,6 +16,7 @@ import { ProgramForm } from '../../forms/ProgramForm';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { BaseSection } from '../../../components/core/BaseSection';
 import { ProgramPartnersSection } from '../../../components/programs/CreateProgram/ProgramPartnersSection';
+import { ProgramPartnerAccessCard } from '../../../components/programs/CreateProgram/ProgramPartnerCard';
 
 export const CreateProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
@@ -77,6 +80,19 @@ export const CreateProgramPage = (): ReactElement => {
     'To create a new Programme, please complete all required fields on the form below and save.',
   );
 
+  const [partners, setPartners] = useState([
+    { id: uuidv4() },
+    { id: uuidv4() },
+    { id: uuidv4() },
+  ]);
+
+  const handleAddNewPartner = (): void => {
+    setPartners([...partners, { id: uuidv4() }]);
+  };
+
+  const handleDeleteProgramPartner = (id: string): void => {
+    setPartners(partners.filter((item) => item.id !== id));
+  };
   return (
     <>
       {step === 0 && (
@@ -104,7 +120,23 @@ export const CreateProgramPage = (): ReactElement => {
                 handleClick: () => setStep(0),
               },
             ]}
-          />
+          >
+            <Button
+              onClick={() => handleAddNewPartner()}
+              variant='outlined'
+              color='primary'
+              endIcon={<AddIcon />}
+            >
+              {t('Add Partner')}
+            </Button>
+          </PageHeader>
+          {partners.map((partner) => (
+            <ProgramPartnerAccessCard
+              key={partner.id}
+              partner={partner}
+              handleDeleteProgramPartner={handleDeleteProgramPartner}
+            />
+          ))}
         </>
       )}
     </>
