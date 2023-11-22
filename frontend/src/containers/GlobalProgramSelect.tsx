@@ -61,27 +61,29 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   );
 
   const getCurrentProgram = () => {
-    const obj = data?.allPrograms.edges.filter(
+  const obj = data?.allPrograms.edges.filter(
         (el) => el.node.id === programId
     )
     return obj ? obj[0].node : null
   };
 
-  const program = getCurrentProgram();
-  if (!selectedProgram || (program?.id !== programId)) {
-    const { id, name, status, individualDataNeeded } = program;
+  if (programId !== 'all') {
+    const program = getCurrentProgram();
+    if (!selectedProgram || (program?.id !== programId)) {
+      const { id, name, status, individualDataNeeded } = program;
 
-    setSelectedProgram({
-      id,
-      name,
-      status,
-      individualDataNeeded,
-      dataCollectingType: {
-        id: program.dataCollectingType?.id,
-        householdFiltersAvailable: program.dataCollectingType?.householdFiltersAvailable,
-        individualFiltersAvailable: program.dataCollectingType.individualFiltersAvailable,
-      }
-    })
+      setSelectedProgram({
+        id,
+        name,
+        status,
+        individualDataNeeded,
+        dataCollectingType: {
+          id: program.dataCollectingType?.id,
+          householdFiltersAvailable: program.dataCollectingType?.householdFiltersAvailable,
+          individualFiltersAvailable: program.dataCollectingType?.individualFiltersAvailable,
+        }
+      })
+    }
   }
 
   useEffect(() => {

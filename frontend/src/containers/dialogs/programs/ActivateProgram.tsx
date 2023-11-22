@@ -17,6 +17,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import {useProgramContext} from "../../../programContext";
 
 interface ActivateProgramProps {
   program: ProgramQuery['program'];
@@ -29,6 +30,8 @@ export function ActivateProgram({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { selectedProgram, setSelectedProgram } = useProgramContext();
+
   const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
@@ -61,6 +64,12 @@ export function ActivateProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
+
+      setSelectedProgram({
+        ...selectedProgram,
+        status: ProgramStatus.Active
+      })
+
       showMessage(t('Programme activated.'), {
         pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
         dataCy: 'snackbar-program-activate-success',

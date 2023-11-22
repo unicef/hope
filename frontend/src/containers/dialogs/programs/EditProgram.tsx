@@ -13,6 +13,7 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString } from '../../../utils/utils';
 import { ProgramForm } from '../../forms/ProgramForm';
+import {useProgramContext} from "../../../programContext";
 
 interface EditProgramProps {
   program: ProgramQuery['program'];
@@ -23,6 +24,8 @@ export const EditProgram = ({ program }: EditProgramProps): ReactElement => {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { setSelectedProgram } = useProgramContext();
+
   const [mutate, { loading }] = useUpdateProgramMutation({
     refetchQueries: [
       {
@@ -58,6 +61,20 @@ export const EditProgram = ({ program }: EditProgramProps): ReactElement => {
           version: program.version,
         },
       });
+
+      const { id, name, status, individualDataNeeded, dataCollectingType } = response.data.updateProgram.program
+      setSelectedProgram({
+        id,
+        name,
+        status,
+        individualDataNeeded,
+        dataCollectingType: {
+          id: dataCollectingType?.id,
+          householdFiltersAvailable: dataCollectingType?.householdFiltersAvailable,
+          individualFiltersAvailable: dataCollectingType?.individualFiltersAvailable,
+        }
+      })
+
       showMessage(t('Programme edited.'), {
         pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       });
