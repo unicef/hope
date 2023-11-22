@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -12,9 +12,11 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { PaperContainer } from '../../../components/targeting/PaperContainer';
+import { BaseSection } from '../../../components/core/BaseSection';
+import { ProgramPartnersSection } from '../../../components/programs/CreateProgram/ProgramPartnersSection';
 
 export const CreateProgramPage = (): ReactElement => {
+  const [step, setStep] = useState(0);
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -71,15 +73,40 @@ export const CreateProgramPage = (): ReactElement => {
     );
   };
 
+  const detailsDescription = t(
+    'To create a new Programme, please complete all required fields on the form below and save.',
+  );
+
   return (
     <>
-      <PageHeader title={t('Create Programme')} />
-      <PaperContainer>
-        <ProgramForm
-          actions={(submit) => renderActions(submit)}
-          onSubmit={handleSubmit}
-        />
-      </PaperContainer>
+      {step === 0 && (
+        <>
+          <PageHeader title={t('Create Programme')} />
+          <BaseSection title={t('Details')} description={detailsDescription}>
+            <>
+              <ProgramForm
+                actions={(submit) => renderActions(submit)}
+                onSubmit={handleSubmit}
+              />
+            </>
+          </BaseSection>
+          <ProgramPartnersSection setStep={setStep} />
+        </>
+      )}
+      {step === 1 && (
+        <>
+          <PageHeader
+            title={t('Add Partners')}
+            handleBack={() => setStep(0)}
+            breadCrumbs={[
+              {
+                title: t('New Programme'),
+                handleClick: () => setStep(0),
+              },
+            ]}
+          />
+        </>
+      )}
     </>
   );
 };
