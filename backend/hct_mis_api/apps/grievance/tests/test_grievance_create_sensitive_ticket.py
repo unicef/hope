@@ -71,12 +71,14 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
             parent=cash_plan,
+            currency="PLN",
         )
         cls.second_payment_record = PaymentRecordFactory(
             household=cls.household,
             full_name=f"{cls.individuals[0].full_name} second Individual",
             business_area=cls.business_area,
             parent=cash_plan,
+            currency="PLN",
         )
         cls.maxDiff = None
 

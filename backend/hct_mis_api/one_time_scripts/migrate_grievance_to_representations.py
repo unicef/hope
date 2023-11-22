@@ -1,4 +1,5 @@
 import copy
+import logging
 from itertools import chain
 from typing import Any, Optional, Union
 
@@ -41,6 +42,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     get_individual_representation_per_program_by_old_individual_id,
 )
 
+logger = logging.getLogger(__name__)
+
 BATCH_SIZE = 100
 
 
@@ -80,65 +83,113 @@ def migrate_grievance_to_representations() -> None:
             model._meta.get_field("created_at").auto_now_add = True
 
 
-def migrate_grievance_tickets() -> None:
+def migrate_grievance_to_representations_per_business_area(business_area: Optional[BusinessArea] = None) -> None:
+    """
+    Migrate grievance tickets and feedback into representations per business area.
+    """
+    model_list = [
+        TicketComplaintDetails,
+        TicketSensitiveDetails,
+        TicketPaymentVerificationDetails,
+        TicketIndividualDataUpdateDetails,
+        TicketHouseholdDataUpdateDetails,
+        TicketAddIndividualDetails,
+        TicketDeleteIndividualDetails,
+        TicketDeleteHouseholdDetails,
+        TicketSystemFlaggingDetails,
+        TicketPositiveFeedbackDetails,
+        TicketNegativeFeedbackDetails,
+        TicketReferralDetails,
+        TicketNeedsAdjudicationDetails,
+        GrievanceTicket,
+        TicketNote,
+        GrievanceDocument,
+        Message,
+        Feedback,
+        FeedbackMessage,
+    ]
+    for model in model_list:
+        model._meta.get_field("created_at").auto_now_add = False
+    try:
+        migrate_grievance_tickets(business_area)
+        migrate_messages(business_area)
+        migrate_feedback(business_area)
+    finally:
+        for model in model_list:
+            model._meta.get_field("created_at").auto_now_add = True
+
+
+def migrate_grievance_tickets(business_area: Optional[BusinessArea] = None) -> None:
     """
     Migrate grievance tickets into representations.
     """
     # print("Handle payment related tickets")
     # handle_payment_related_tickets()
-    print("Handle non payment related tickets")
-    handle_non_payment_related_tickets()
-    print("Handle tickets not connected to any program")
-    handle_non_program_tickets()
+    logger.info("Handle non payment related tickets")
+    handle_non_payment_related_tickets(business_area)
+    logger.info("Handle tickets not connected to any program")
+    handle_non_program_tickets(business_area)
 
 
-def handle_non_payment_related_tickets() -> None:
+def handle_non_payment_related_tickets(business_area: Optional[BusinessArea] = None) -> None:
     """
     Copy grievance tickets to representations.
     Applied for tickets not connected to specific payment but connected to household or its individual.
     """
-    print("Handle TicketComplaintDetails without payment")
-    handle_complaint_tickets_without_payments()
-    print("Handle TicketSensitiveDetails without payment")
-    handle_sensitive_tickets_without_payments()
-    print("Handle TicketHouseholdDataUpdateDetails")
-    handle_household_data_update_tickets()
-    print("Handle TicketIndividualDataUpdateDetails")
-    handle_individual_data_update_tickets()
-    print("Handle TicketAddIndividualDetails")
-    handle_add_individual_tickets()
-    print("Handle TicketDeleteIndividualDetails")
-    handle_delete_individual_tickets()
-    print("Handle TicketDeleteHouseholdDetails")
-    handle_delete_household_tickets()
-    print("Handle TicketSystemFlaggingDetails")
-    handle_system_flagging_details_tickets()
-    print("Handle TicketPositiveFeedbackDetails")
-    handle_positive_feedback_tickets()
-    print("Handle TicketNegativeFeedbackDetails")
-    handle_negative_feedback_tickets()
-    print("Handle TicketReferralDetails")
-    handle_referral_tickets()
-    print("Handle TicketNeedsAdjudicationDetails")
-    handle_needs_adjudication_tickets()
+    logger.info("Handle TicketComplaintDetails without payment")
+    handle_complaint_tickets_without_payments(business_area)
+    logger.info("Handle TicketSensitiveDetails without payment")
+    handle_sensitive_tickets_without_payments(business_area)
+    logger.info("Handle TicketHouseholdDataUpdateDetails")
+    handle_household_data_update_tickets(business_area)
+    logger.info("Handle TicketIndividualDataUpdateDetails")
+    handle_individual_data_update_tickets(business_area)
+    logger.info("Handle TicketAddIndividualDetails")
+    handle_add_individual_tickets(business_area)
+    logger.info("Handle TicketDeleteIndividualDetails")
+    handle_delete_individual_tickets(business_area)
+    logger.info("Handle TicketDeleteHouseholdDetails")
+    handle_delete_household_tickets(business_area)
+    logger.info("Handle TicketSystemFlaggingDetails")
+    handle_system_flagging_details_tickets(business_area)
+    logger.info("Handle TicketPositiveFeedbackDetails")
+    handle_positive_feedback_tickets(business_area)
+    logger.info("Handle TicketNegativeFeedbackDetails")
+    handle_negative_feedback_tickets(business_area)
+    logger.info("Handle TicketReferralDetails")
+    handle_referral_tickets(business_area)
+    logger.info("Handle TicketNeedsAdjudicationDetails")
+    handle_needs_adjudication_tickets(business_area)
 
 
-def handle_complaint_tickets_without_payments() -> None:
+def handle_complaint_tickets_without_payments(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     complaint_tickets_without_payments = TicketComplaintDetails.objects.select_related(
         "ticket",
         "household",
         "individual",
-    ).filter(payment_object_id__isnull=True, ticket__is_original=True, ticket__is_migration_handled=False)
+    ).filter(
+        payment_object_id__isnull=True, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
+    )
     handle_closed_tickets_with_household_and_individual(complaint_tickets_without_payments)
     handle_active_tickets_with_household_and_individual(complaint_tickets_without_payments)
 
 
-def handle_sensitive_tickets_without_payments() -> None:
+def handle_sensitive_tickets_without_payments(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     sensitive_tickets_without_payments = TicketSensitiveDetails.objects.select_related(
         "ticket",
         "household",
         "individual",
-    ).filter(payment_object_id__isnull=True, ticket__is_original=True, ticket__is_migration_handled=False)
+    ).filter(
+        payment_object_id__isnull=True, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
+    )
     handle_closed_tickets_with_household_and_individual(sensitive_tickets_without_payments)
     handle_active_tickets_with_household_and_individual(sensitive_tickets_without_payments)
 
@@ -148,7 +199,7 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> No
     In case of closed complaint ticket, we need to copy the ticket to random representation of assigned
     household/individual.
     """
-    print("Handle closed tickets with household and individual")
+    logger.info("Handle closed tickets with household and individual")
     closed_tickets = tickets.filter(ticket__status=GrievanceTicket.STATUS_CLOSED)
 
     for closed_ticket in closed_tickets.iterator():
@@ -196,7 +247,7 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet) -> No
     """
     For active complaint tickets, we need to copy tickets for every household/individual representation
     """
-    print("Handle active tickets with household and individual")
+    logger.info("Handle active tickets with household and individual")
     active_tickets = tickets.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator()
 
     for active_ticket in active_tickets:
@@ -243,7 +294,11 @@ def copy_active_ticket_with_household_and_individual(active_ticket: Any, program
     ticket_copy.save()
 
 
-def handle_tickets_with_household(model: Any) -> None:
+def handle_tickets_with_household(model: Any, business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     tickets_with_hh = (
         model.objects.select_related(
             "ticket",
@@ -252,7 +307,7 @@ def handle_tickets_with_household(model: Any) -> None:
         .prefetch_related(
             "household__copied_to",
         )
-        .filter(household__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False)
+        .filter(household__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
     )
     # Handle closed tickets - copy only for 1 random representation
     for closed_ticket in tickets_with_hh.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
@@ -293,7 +348,13 @@ def copy_ticket_with_household(
     ticket.save()
 
 
-def handle_tickets_with_individual(model: Any, individual_field_name: str = "individual") -> None:
+def handle_tickets_with_individual(
+    model: Any, individual_field_name: str = "individual", business_area: Optional[BusinessArea] = None
+) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     tickets_with_ind = (
         model.objects.select_related(
             "ticket",
@@ -303,7 +364,10 @@ def handle_tickets_with_individual(model: Any, individual_field_name: str = "ind
             f"{individual_field_name}__copied_to",
         )
         .filter(
-            **{f"{individual_field_name}__isnull": False}, ticket__is_original=True, ticket__is_migration_handled=False
+            **{f"{individual_field_name}__isnull": False},
+            ticket__is_original=True,
+            ticket__is_migration_handled=False,
+            **filter_kwargs,
         )
     )
     # Handle closed tickets
@@ -359,55 +423,79 @@ def copy_ticket_with_individual(
     ticket.save()
 
 
-def handle_individual_data_update_tickets() -> None:
-    handle_tickets_with_individual(TicketIndividualDataUpdateDetails)
+def handle_individual_data_update_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    handle_tickets_with_individual(TicketIndividualDataUpdateDetails, business_area=business_area)
 
 
-def handle_household_data_update_tickets() -> None:
-    handle_tickets_with_household(TicketHouseholdDataUpdateDetails)
+def handle_household_data_update_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    handle_tickets_with_household(TicketHouseholdDataUpdateDetails, business_area=business_area)
 
 
-def handle_add_individual_tickets() -> None:
-    handle_tickets_with_household(TicketAddIndividualDetails)
+def handle_add_individual_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    handle_tickets_with_household(TicketAddIndividualDetails, business_area=business_area)
 
 
-def handle_delete_individual_tickets() -> None:
-    handle_tickets_with_individual(TicketDeleteIndividualDetails)
+def handle_delete_individual_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    handle_tickets_with_individual(TicketDeleteIndividualDetails, business_area=business_area)
 
 
-def handle_delete_household_tickets() -> None:
-    handle_tickets_with_household(TicketDeleteHouseholdDetails)
+def handle_delete_household_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    handle_tickets_with_household(TicketDeleteHouseholdDetails, business_area=business_area)
 
 
-def handle_system_flagging_details_tickets() -> None:
-    handle_tickets_with_individual(TicketSystemFlaggingDetails, individual_field_name="golden_records_individual")
+def handle_system_flagging_details_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    handle_tickets_with_individual(
+        TicketSystemFlaggingDetails, individual_field_name="golden_records_individual", business_area=business_area
+    )
 
 
-def handle_positive_feedback_tickets() -> None:
+def handle_positive_feedback_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     positive_feedback_tickets = TicketPositiveFeedbackDetails.objects.filter(
-        ticket__is_original=True, ticket__is_migration_handled=False
+        ticket__is_original=True,
+        ticket__is_migration_handled=False,
+        **filter_kwargs,
     )
     handle_closed_tickets_with_household_and_individual(positive_feedback_tickets)
     handle_active_tickets_with_household_and_individual(positive_feedback_tickets)
 
 
-def handle_negative_feedback_tickets() -> None:
+def handle_negative_feedback_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     negative_feedback_tickets = TicketNegativeFeedbackDetails.objects.filter(
-        ticket__is_original=True, ticket__is_migration_handled=False
+        ticket__is_original=True,
+        ticket__is_migration_handled=False,
+        **filter_kwargs,
     )
     handle_closed_tickets_with_household_and_individual(negative_feedback_tickets)
     handle_active_tickets_with_household_and_individual(negative_feedback_tickets)
 
 
-def handle_referral_tickets() -> None:
+def handle_referral_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     referral_tickets = TicketReferralDetails.objects.filter(
-        ticket__is_original=True, ticket__is_migration_handled=False
+        ticket__is_original=True,
+        ticket__is_migration_handled=False,
+        **filter_kwargs,
     )
     handle_closed_tickets_with_household_and_individual(referral_tickets)
     handle_active_tickets_with_household_and_individual(referral_tickets)
 
 
-def handle_needs_adjudication_tickets() -> None:
+def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     needs_adjudication_tickets = (
         TicketNeedsAdjudicationDetails.objects.select_related(
             "ticket",
@@ -417,7 +505,7 @@ def handle_needs_adjudication_tickets() -> None:
             "possible_duplicates",
             "selected_individuals",
         )
-        .filter(ticket__is_original=True, ticket__is_migration_handled=False)
+        .filter(ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
     )
 
     for needs_adjudication_ticket in needs_adjudication_tickets.iterator():
@@ -485,8 +573,12 @@ def handle_needs_adjudication_tickets() -> None:
         grievance_ticket.save(update_fields=["is_migration_handled"])
 
 
-def migrate_messages() -> None:
-    print("Handle Messages")
+def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
+    logger.info("Handle Messages")
+    if business_area:
+        filter_kwargs = {"business_area": business_area}
+    else:
+        filter_kwargs = {}
     message_objects = (
         Message.objects.select_related(
             "target_population",
@@ -496,7 +588,7 @@ def migrate_messages() -> None:
             "households",
             "households__copied_to",
         )
-        .filter(is_original=True, is_migration_handled=False)
+        .filter(is_original=True, is_migration_handled=False, **filter_kwargs)
         .distinct()
     )
     for message in message_objects.iterator():
@@ -513,8 +605,8 @@ def migrate_messages() -> None:
                 message.is_migration_handled = True
                 message.save(update_fields=["is_migration_handled"])
 
-    print("Handle Messages not connected to any program")
-    handle_non_program_messages()
+    logger.info("Handle Messages not connected to any program")
+    handle_non_program_messages(business_area)
 
 
 def copy_message(active_message: Message, program: Program) -> None:
@@ -540,18 +632,22 @@ def copy_message(active_message: Message, program: Program) -> None:
     message.households.set(households_representations)
 
 
-def migrate_feedback() -> None:
-    print("Handle Feedback objects")
+def migrate_feedback(business_area: Optional[BusinessArea] = None) -> None:
+    logger.info("Handle Feedback objects")
     # Handle closed Feedback (Feedback related to a closed grievance ticket) OR Feedback with program
-    copy_feedback_to_specific_program()
+    copy_feedback_to_specific_program(business_area)
     # Handle active Feedback objects without program -
     # (Feedback with active tickets OR Feedback not related to any ticket) AND without defined program
-    handle_active_feedback()
-    print("Handle Feedback not connected to any program")
-    handle_non_program_feedback()
+    handle_active_feedback(business_area)
+    logger.info("Handle Feedback not connected to any program")
+    handle_non_program_feedback(business_area)
 
 
-def copy_feedback_to_specific_program() -> None:
+def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"business_area": business_area}
+    else:
+        filter_kwargs = {}
     feedback_objects_for_specific_program = (
         Feedback.objects.select_related(
             "program",
@@ -566,6 +662,7 @@ def copy_feedback_to_specific_program() -> None:
             & Q(is_original=True)
             & Q(is_migration_handled=False)
         )
+        .filter(**filter_kwargs)
         .distinct()
     )
     for feedback_obj in feedback_objects_for_specific_program.iterator():
@@ -610,7 +707,11 @@ def copy_feedback_to_specific_program() -> None:
                 linked_grievance.save(update_fields=["is_migration_handled"])
 
 
-def handle_active_feedback() -> None:
+def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"business_area": business_area}
+    else:
+        filter_kwargs = {}
     active_feedback_objects = (
         Feedback.objects.select_related(
             "linked_grievance",
@@ -629,6 +730,7 @@ def handle_active_feedback() -> None:
             & Q(is_original=True)
             & Q(is_migration_handled=False)
         )
+        .filter(**filter_kwargs)
         .distinct()
     )
     for feedback_obj in active_feedback_objects.iterator():
@@ -738,8 +840,8 @@ def copy_grievance_ticket(
 
 
 def create_void_program(business_area: BusinessArea) -> Program:
-    return Program.objects.get_or_create(
-        name="Void Program",
+    return Program.all_objects.get_or_create(
+        name="Storage Program For Non-Program Grievance And Accountability",
         business_area=business_area,
         defaults=dict(
             status=Program.DRAFT,
@@ -751,16 +853,18 @@ def create_void_program(business_area: BusinessArea) -> Program:
             scope=Program.SCOPE_FOR_PARTNERS,
             cash_plus=True,
             population_goal=1,
+            is_visible=False,
         ),
     )[0]
 
 
-def handle_non_program_tickets() -> None:
+def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> None:
     """
-    Handle tickets that are not connected to any project. They should be moved to dummy program.
+    Handle tickets that are not connected to any program. They should be moved to dummy program.
     Exclude payment-related-tickets that will be handled during sync.
     """
-    for business_area in BusinessArea.objects.all().iterator():
+    business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
+    for business_area in business_areas:
         non_program_query = (
             Q(ticket__business_area=business_area) & Q(ticket__is_migration_handled=False) & Q(ticket__is_original=True)
         )
@@ -788,7 +892,7 @@ def handle_non_program_tickets() -> None:
             return
         non_program_tickets = chain([first], non_program_tickets)
 
-        void_program = create_void_program(business_area)
+        void_program = create_void_program(business_area)  # type: ignore[arg-type]
 
         for non_program_ticket in non_program_tickets:
             ticket_copy = copy.deepcopy(non_program_ticket)
@@ -801,28 +905,30 @@ def handle_non_program_tickets() -> None:
             grievance_ticket.save()
 
 
-def handle_non_program_feedback() -> None:
+def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) -> None:
     """
     Handle feedback that is not connected to any project. They should be moved to dummy program.
     """
-    for business_area in BusinessArea.objects.all().iterator():
+    business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
+    for business_area in business_areas:
         non_program_feedback_objects = Feedback.objects.filter(
             is_original=True, is_migration_handled=False, business_area=business_area
         )
         if non_program_feedback_objects:
-            void_program = create_void_program(business_area)
+            void_program = create_void_program(business_area)  # type: ignore[arg-type]
             for feedback in non_program_feedback_objects:
                 copy_feedback(feedback, void_program)
             non_program_feedback_objects.update(is_migration_handled=True)
 
 
-def handle_non_program_messages() -> None:
-    for business_area in BusinessArea.objects.all().iterator():
+def handle_non_program_messages(business_area: Optional[BusinessArea] = None) -> None:
+    business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
+    for business_area in business_areas:
         non_program_messages = Message.objects.filter(
             is_original=True, business_area=business_area, is_migration_handled=False
         )
         if non_program_messages:
-            void_program = create_void_program(business_area)
+            void_program = create_void_program(business_area)  # type: ignore[arg-type]
             for message in non_program_messages:
                 copy_message(message, void_program)
             non_program_messages.update(is_migration_handled=True)
@@ -1177,21 +1283,28 @@ class IndividualDataObjectsToEditHandler:
                 ] = self.encoded_individual_id
 
 
-def handle_payment_related_tickets() -> None:
+def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None) -> None:
     """
     Assign grievance tickets to representations. Applied for tickets connected to specific payment.
     Handle TicketComplaintDetails, TicketSensitiveDetails, TicketPaymentVerificationDetails with related payment_obj
     """
-
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
     # Fetch all objects of TicketComplaintDetails and TicketSensitiveDetails with non-null payment_obj
     complaint_tickets_with_payments = TicketComplaintDetails.objects.select_related(
         "household",
         "individual",
-    ).filter(payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False)
+    ).filter(
+        payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
+    )
     sensitive_tickets_with_payments = TicketSensitiveDetails.objects.select_related(
         "household",
         "individual",
-    ).filter(payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False)
+    ).filter(
+        payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
+    )
 
     complaint_and_sensitive_details_tickets = chain(complaint_tickets_with_payments, sensitive_tickets_with_payments)
 
@@ -1233,6 +1346,7 @@ def handle_payment_related_tickets() -> None:
             payment_verification__payment_object_id__isnull=False,
             ticket__is_original=True,
             ticket__is_migration_handled=False,
+            **filter_kwargs,
         )
         .distinct()
     )

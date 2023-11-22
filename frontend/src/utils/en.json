@@ -820,5 +820,10 @@
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
   "Preview Exclusion": "Preview Exclusion",
-  "Data Collecting Type is required": "Data Collecting Type is required"
+  "Data Collecting Type is required": "Data Collecting Type is required",
+  "Registration Group": "Registration Group",
+  "Related Payment Id": "Related Payment Id",
+  "Failure Reason": "Failure Reason",
+  "Debit Card Number": "Debit Card Number",
+  "Debit Card Issuer": "Debit Card Issuer"
 }

@@ -57,6 +57,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
@@ -69,8 +70,8 @@ from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
 
 class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
     def setUp(self) -> None:
-        self.PAYMENT_RECORD_CT_ID = ContentType.objects.get(app_label="payment", model="paymentrecord").id
-        self.PAYMENT_CT_ID = ContentType.objects.get(app_label="payment", model="payment").id
+        self.PAYMENT_RECORD_CT_ID = ContentType.objects.get_for_model(PaymentRecord).id
+        self.PAYMENT_CT_ID = ContentType.objects.get_for_model(Payment).id
 
         self.business_area = BusinessAreaFactory()
         self.program1 = ProgramFactory(name="program1", business_area=self.business_area, status=Program.ACTIVE)
@@ -167,11 +168,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             1,
         )
         self.assertEqual(
-            ticket_representation.ticket.programs.count(),
+            ticket_representation.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            ticket_representation.ticket.programs.first().name,
+            ticket_representation.ticket.programs(manager="all_objects").first().name,
             program.name,
         )
         self.assertEqual(
@@ -183,7 +184,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
     def check_original_ticket(self, original_ticket: Any) -> None:
         self.assertEqual(
-            original_ticket.ticket.programs.count(),
+            original_ticket.ticket.programs(manager="all_objects").count(),
             0,
         )
         self.assertEqual(
@@ -282,7 +283,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
         target_population1 = TargetPopulationFactory(program=self.program1)
         payment_plan = PaymentPlanFactory(target_population=target_population1)
-        payment = PaymentFactory(parent=payment_plan)
+        payment = PaymentFactory(parent=payment_plan, currency="PLN")
 
         self.complaint_ticket_with_payment = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment,
@@ -297,7 +298,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         )
         target_population2 = TargetPopulationFactory(program=self.program2)
         payment_record = PaymentRecordFactory(
-            target_population=target_population2, household=self.household_complaint_ticket_with_payment_record
+            target_population=target_population2,
+            household=self.household_complaint_ticket_with_payment_record,
+            currency="PLN",
         )
 
         self.complaint_ticket_with_payment_record = GrievanceComplaintTicketWithoutExtrasFactory(
@@ -451,6 +454,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         payment_record = PaymentRecordFactory(
             target_population=target_population2,
             household=self.household_sensitive_ticket_with_payment_record,
+            currency="PLN",
         )
         self.sensitive_ticket_with_payment_record = SensitiveGrievanceTicketWithoutExtrasFactory(
             household=self.household_sensitive_ticket_with_payment_record,
@@ -1330,7 +1334,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
         # ticket_closed_no_hh
         self.assertEqual(ticket_closed_no_hh.ticket.copied_to(manager="default_for_migrations_fix").count(), 1)
-        void_program = Program.objects.filter(name="Void Program", business_area=self.business_area).first()
+        void_program = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
+        ).first()
         repr_ticket_closed_no_hh = getattr(
             ticket_closed_no_hh.ticket.copied_to(manager="default_for_migrations_fix").first(), related_name
         )
@@ -1356,7 +1362,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         repr_ticket_closed_2hh = getattr(
             ticket_closed_2hh.ticket.copied_to(manager="default_for_migrations_fix").first(), related_name
         )
-        program_ticket_closed_2hh = repr_ticket_closed_2hh.ticket.programs.first()
+        program_ticket_closed_2hh = repr_ticket_closed_2hh.ticket.programs(manager="all_objects").first()
         self.check_closed_ticket(ticket_closed_2hh, program_ticket_closed_2hh, repr_ticket_closed_2hh)
         self.assertEqual(
             repr_ticket_closed_2hh.household.program,
@@ -1371,7 +1377,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
         # ticket_active_no_hh
         self.assertEqual(ticket_active_no_hh.ticket.copied_to(manager="default_for_migrations_fix").count(), 1)
-        void_program = Program.objects.filter(name="Void Program", business_area=self.business_area).first()
+        void_program = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
+        ).first()
         repr_ticket_active_no_hh = getattr(
             ticket_active_no_hh.ticket.copied_to(manager="default_for_migrations_fix").first(), related_name
         )
@@ -1379,11 +1387,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.check_ticket_representation(repr_ticket_active_no_hh)
 
         self.assertEqual(
-            repr_ticket_active_no_hh.ticket.programs.count(),
+            repr_ticket_active_no_hh.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            repr_ticket_active_no_hh.ticket.programs.first(),
+            repr_ticket_active_no_hh.ticket.programs(manager="all_objects").first(),
             void_program,
         )
         self.assertIsNone(ticket_active_no_hh.household)
@@ -1416,11 +1424,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             ticket_active_1hh.household,
         )
         self.assertEqual(
-            repr_ticket_active_1hh.ticket.programs.count(),
+            repr_ticket_active_1hh.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            repr_ticket_active_1hh.ticket.programs.first(),
+            repr_ticket_active_1hh.ticket.programs(manager="all_objects").first(),
             self.program2,
         )
         self.check_grievance_household_unicef_id(
@@ -1558,7 +1566,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         repr_ticket_closed_2ind = getattr(
             ticket_closed_2ind.ticket.copied_to(manager="default_for_migrations_fix").first(), related_name
         )
-        program_ticket_closed_2ind = repr_ticket_closed_2ind.ticket.programs.first()
+        program_ticket_closed_2ind = repr_ticket_closed_2ind.ticket.programs(manager="all_objects").first()
         self.check_closed_ticket(ticket_closed_2ind, program_ticket_closed_2ind, repr_ticket_closed_2ind)
         self.assertEqual(
             repr_ticket_closed_2ind.individual.program,
@@ -1900,8 +1908,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
     def _test_ticket_complaint_details(self) -> None:
         # Test complaint_ticket_no_payment_no_hh_no_ind_closed_gt
-        program_complaint_ticket_no_payment_no_hh_no_ind_closed_gt = Program.objects.filter(
-            name="Void Program", business_area=self.business_area
+        program_complaint_ticket_no_payment_no_hh_no_ind_closed_gt = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
         ).first()
         repr_complaint_ticket_no_payment_no_hh_no_ind_closed_gt = (
             self.complaint_ticket_no_payment_no_hh_no_ind_closed_gt.ticket.copied_to(
@@ -2229,8 +2237,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             ).count(),
             1,
         )
-        program_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind = Program.objects.filter(
-            name="Void Program", business_area=self.business_area
+        program_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
         ).first()
         repr_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind = (
             self.complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket.copied_to(
@@ -2244,11 +2252,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.check_ticket_representation(repr_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind)
 
         self.assertEqual(
-            repr_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket.programs.count(),
+            repr_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            repr_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket.programs.first(),
+            repr_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket.programs(manager="all_objects").first(),
             program_complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind,
         )
 
@@ -2638,8 +2646,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             ).count(),
             1,
         )
-        program_payment_verification_ticket_no_payment_verification = Program.objects.filter(
-            name="Void Program", business_area=self.business_area
+        program_payment_verification_ticket_no_payment_verification = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
         ).first()
         repr_payment_verification_ticket_no_payment_verification = (
             self.payment_verification_ticket_no_payment_verification.ticket.copied_to(
@@ -2653,11 +2661,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.check_ticket_representation(repr_payment_verification_ticket_no_payment_verification)
 
         self.assertEqual(
-            repr_payment_verification_ticket_no_payment_verification.ticket.programs.count(),
+            repr_payment_verification_ticket_no_payment_verification.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            repr_payment_verification_ticket_no_payment_verification.ticket.programs.first(),
+            repr_payment_verification_ticket_no_payment_verification.ticket.programs(manager="all_objects").first(),
             program_payment_verification_ticket_no_payment_verification,
         )
 
@@ -2767,13 +2775,15 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(self.message_no_tp_no_hh.copied_to(manager="original_and_repr_objects").count(), 1)
 
         repr_message_no_tp_no_hh = self.message_no_tp_no_hh.copied_to(manager="original_and_repr_objects").first()
-        self.assertEqual(repr_message_no_tp_no_hh.program.name, "Void Program")
+        self.assertEqual(
+            repr_message_no_tp_no_hh.program.name, "Storage Program For Non-Program Grievance And Accountability"
+        )
         self.assertIsNone(repr_message_no_tp_no_hh.households(manager="original_and_repr_objects").first())
 
     def _test_ticket_referral_details(self) -> None:
         # Test referral_closed_gt_no_hh_no_ind
-        program_referral_closed_gt_no_hh_no_ind = Program.objects.filter(
-            name="Void Program", business_area=self.business_area
+        program_referral_closed_gt_no_hh_no_ind = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
         ).first()
         repr_referral_closed_gt_no_hh_no_ind = (
             self.referral_closed_gt_no_hh_no_ind.ticket.copied_to(manager="default_for_migrations_fix")
@@ -2815,7 +2825,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             .referral_ticket_details
         )
 
-        program_repr_referral_closed_gt_1hh_1ind = repr_referral_closed_gt_1hh_1ind.ticket.programs.first()
+        program_repr_referral_closed_gt_1hh_1ind = repr_referral_closed_gt_1hh_1ind.ticket.programs(
+            manager="all_objects"
+        ).first()
         self.check_closed_ticket(
             self.referral_closed_gt_1hh_1ind,
             program_repr_referral_closed_gt_1hh_1ind,
@@ -2913,8 +2925,8 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(
             self.referral_active_gt_no_hh_no_ind.ticket.copied_to(manager="default_for_migrations_fix").count(), 1
         )
-        program_referral_active_gt_no_hh_no_ind = Program.objects.filter(
-            name="Void Program", business_area=self.business_area
+        program_referral_active_gt_no_hh_no_ind = Program.all_objects.filter(
+            name="Storage Program For Non-Program Grievance And Accountability", business_area=self.business_area
         ).first()
         repr_referral_active_gt_no_hh_no_ind = (
             self.referral_active_gt_no_hh_no_ind.ticket.copied_to(manager="default_for_migrations_fix")
@@ -2926,11 +2938,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.check_ticket_representation(repr_referral_active_gt_no_hh_no_ind)
 
         self.assertEqual(
-            repr_referral_active_gt_no_hh_no_ind.ticket.programs.count(),
+            repr_referral_active_gt_no_hh_no_ind.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            repr_referral_active_gt_no_hh_no_ind.ticket.programs.first(),
+            repr_referral_active_gt_no_hh_no_ind.ticket.programs(manager="all_objects").first(),
             program_referral_active_gt_no_hh_no_ind,
         )
 
@@ -3248,7 +3260,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             program,
         )
         self.assertEqual(
-            ticket_pr.ticket.programs.first(),
+            ticket_pr.ticket.programs(manager="all_objects").first(),
             program,
         )
 
@@ -3615,7 +3627,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         )
         self.assertEqual(repr_feedback_closed_2hh_3ind.is_original, False)
         program = repr_feedback_closed_2hh_3ind.program
-        self.assertEqual(repr_feedback_closed_2hh_3ind.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_closed_2hh_3ind.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(repr_feedback_closed_2hh_3ind.copied_from, self.feedback_closed_2hh_3ind)
         self.assertEqual(repr_feedback_closed_2hh_3ind.household_lookup.program, program)
         self.assertEqual(
@@ -3656,8 +3670,10 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
         self.assertEqual(repr_feedback_closed_no_hh_no_ind.is_original, False)
         program = repr_feedback_closed_no_hh_no_ind.program
-        self.assertEqual(program.name, "Void Program")
-        self.assertEqual(repr_feedback_closed_no_hh_no_ind.linked_grievance.programs.first(), program)
+        self.assertEqual(program.name, "Storage Program For Non-Program Grievance And Accountability")
+        self.assertEqual(
+            repr_feedback_closed_no_hh_no_ind.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(repr_feedback_closed_no_hh_no_ind.copied_from, self.feedback_closed_no_hh_no_ind)
         self.assertEqual(repr_feedback_closed_no_hh_no_ind.linked_grievance.is_original, False)
 
@@ -3679,7 +3695,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(repr_feedback_closed_1hh_1ind_same_program.is_original, False)
         program = repr_feedback_closed_1hh_1ind_same_program.program
         self.assertEqual(program, self.program1)
-        self.assertEqual(repr_feedback_closed_1hh_1ind_same_program.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_closed_1hh_1ind_same_program.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(
             repr_feedback_closed_1hh_1ind_same_program.copied_from, self.feedback_closed_1hh_1ind_same_program
         )
@@ -3716,7 +3734,10 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         program = repr_feedback_closed_1hh_1ind_diff_program_with_repr.program
         self.assertEqual(program, self.program1)
         self.assertEqual(
-            repr_feedback_closed_1hh_1ind_diff_program_with_repr.linked_grievance.programs.first(), program
+            repr_feedback_closed_1hh_1ind_diff_program_with_repr.linked_grievance.programs(
+                manager="all_objects"
+            ).first(),
+            program,
         )
         self.assertEqual(
             repr_feedback_closed_1hh_1ind_diff_program_with_repr.copied_from,
@@ -3749,7 +3770,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(repr_feedback_closed_only_hh.is_original, False)
         program = repr_feedback_closed_only_hh.program
         self.assertEqual(program, self.program1)
-        self.assertEqual(repr_feedback_closed_only_hh.linked_grievance.programs.first(), program)
+        self.assertEqual(repr_feedback_closed_only_hh.linked_grievance.programs(manager="all_objects").first(), program)
         self.assertEqual(repr_feedback_closed_only_hh.copied_from, self.feedback_closed_only_hh)
         self.assertEqual(repr_feedback_closed_only_hh.household_lookup.program, program)
         self.assertEqual(
@@ -3773,7 +3794,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(repr_feedback_closed_only_ind.is_original, False)
         program = repr_feedback_closed_only_ind.program
         self.assertEqual(program, self.program1)
-        self.assertEqual(repr_feedback_closed_only_ind.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_closed_only_ind.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(repr_feedback_closed_only_ind.copied_from, self.feedback_closed_only_ind)
         self.assertEqual(repr_feedback_closed_only_ind.household_lookup, None)
         self.assertEqual(
@@ -3808,7 +3831,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(repr_feedback_closed_1hh_1ind_diff_program.is_original, False)
         program = repr_feedback_closed_1hh_1ind_diff_program.program
         self.assertEqual(program, self.program1)
-        self.assertEqual(repr_feedback_closed_1hh_1ind_diff_program.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_closed_1hh_1ind_diff_program.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(
             repr_feedback_closed_1hh_1ind_diff_program.copied_from, self.feedback_closed_1hh_1ind_diff_program
         )
@@ -3840,7 +3865,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         program = repr_feedback_closed_2hh_3ind_in_pr3.program
         self.assertEqual(program, self.program3)
         self.assertEqual(repr_feedback_closed_2hh_3ind_in_pr3.copied_from, self.feedback_closed_2hh_3ind_in_pr3)
-        self.assertEqual(repr_feedback_closed_2hh_3ind_in_pr3.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_closed_2hh_3ind_in_pr3.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(repr_feedback_closed_2hh_3ind_in_pr3.household_lookup.program, program)
         self.assertEqual(
             repr_feedback_closed_2hh_3ind_in_pr3.household_lookup.copied_from,
@@ -3905,7 +3932,10 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(
             repr_feedback_active_gt_no_hh_no_ind_in_pr1.copied_from, self.feedback_active_gt_no_hh_no_ind_in_pr1
         )
-        self.assertEqual(repr_feedback_active_gt_no_hh_no_ind_in_pr1.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_active_gt_no_hh_no_ind_in_pr1.linked_grievance.programs(manager="all_objects").first(),
+            program,
+        )
         self.assertEqual(
             repr_feedback_active_gt_no_hh_no_ind_in_pr1.linked_grievance.status, GrievanceTicket.STATUS_ASSIGNED
         )
@@ -3933,7 +3963,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         program = repr_feedback_active_only_ind_in_pr2.program
         self.assertEqual(program, self.program2)
         self.assertEqual(repr_feedback_active_only_ind_in_pr2.copied_from, self.feedback_active_only_ind_in_pr2)
-        self.assertEqual(repr_feedback_active_only_ind_in_pr2.linked_grievance.programs.first(), program)
+        self.assertEqual(
+            repr_feedback_active_only_ind_in_pr2.linked_grievance.programs(manager="all_objects").first(), program
+        )
         self.assertEqual(repr_feedback_active_only_ind_in_pr2.linked_grievance.status, GrievanceTicket.STATUS_ASSIGNED)
         self.assertEqual(repr_feedback_active_only_ind_in_pr2.household_lookup, None)
         self.assertEqual(repr_feedback_active_only_ind_in_pr2.individual_lookup.program, program)
@@ -3972,7 +4004,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         ).first()
         self.assertEqual(repr_feedback_no_program_no_gt_no_hh_no_ind.is_original, False)
         program = repr_feedback_no_program_no_gt_no_hh_no_ind.program
-        self.assertEqual(program.name, "Void Program")
+        self.assertEqual(program.name, "Storage Program For Non-Program Grievance And Accountability")
         self.assertEqual(repr_feedback_no_program_no_gt_no_hh_no_ind.household_lookup, None)
         self.assertEqual(repr_feedback_no_program_no_gt_no_hh_no_ind.individual_lookup, None)
         self.assertEqual(repr_feedback_no_program_no_gt_no_hh_no_ind.linked_grievance, None)
@@ -4028,7 +4060,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             program = repr.program
             self.assertEqual(program, program)
             self.assertEqual(repr.copied_from, self.feedback_active_gt_no_program_3hh_2ind)
-            self.assertEqual(repr.linked_grievance.programs.first(), program)
+            self.assertEqual(repr.linked_grievance.programs(manager="all_objects").first(), program)
             self.assertEqual(repr.household_lookup.program, program)
             self.assertEqual(repr.household_lookup.copied_from, self.household_feedback_active_gt_no_program_3hh_2ind)
             if program != self.program1:
@@ -4086,7 +4118,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                 == repr3_feedback_no_gt_2hh_3ind_in_pr3.feedback_messages.order_by("created_at").last().created_at
             )
 
-    def test(self) -> None:
+    def test_migrate_grievance_to_representations(self) -> None:
         migrate_grievance_to_representations()
         self.refresh_objects()
 
@@ -4135,11 +4167,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             self.complaint_ticket_with_payment.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
         )
         self.assertEqual(
-            self.complaint_ticket_with_payment.ticket.programs.count(),
+            self.complaint_ticket_with_payment.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            self.complaint_ticket_with_payment.ticket.programs.first(),
+            self.complaint_ticket_with_payment.ticket.programs(manager="all_objects").first(),
             self.program1,
         )
         self.check_grievance_household_unicef_id(
@@ -4169,11 +4201,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             self.complaint_ticket_with_payment_record.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
         )
         self.assertEqual(
-            self.complaint_ticket_with_payment_record.ticket.programs.count(),
+            self.complaint_ticket_with_payment_record.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            self.complaint_ticket_with_payment_record.ticket.programs.first(),
+            self.complaint_ticket_with_payment_record.ticket.programs(manager="all_objects").first(),
             self.program2,
         )
         self.check_grievance_household_unicef_id(
@@ -4202,11 +4234,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             self.sensitive_ticket_with_payment.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
         )
         self.assertEqual(
-            self.sensitive_ticket_with_payment.ticket.programs.count(),
+            self.sensitive_ticket_with_payment.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            self.sensitive_ticket_with_payment.ticket.programs.first(),
+            self.sensitive_ticket_with_payment.ticket.programs(manager="all_objects").first(),
             self.program1,
         )
         self.check_grievance_household_unicef_id(
@@ -4244,11 +4276,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             self.sensitive_ticket_with_payment_record.ticket.copied_to(manager="default_for_migrations_fix").count(), 0
         )
         self.assertEqual(
-            self.sensitive_ticket_with_payment_record.ticket.programs.count(),
+            self.sensitive_ticket_with_payment_record.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            self.sensitive_ticket_with_payment_record.ticket.programs.first(),
+            self.sensitive_ticket_with_payment_record.ticket.programs(manager="all_objects").first(),
             self.program2,
         )
         self.check_grievance_household_unicef_id(
@@ -4277,11 +4309,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             0,
         )
         self.assertEqual(
-            self.payment_verification_ticket_with_payment_record.ticket.programs.count(),
+            self.payment_verification_ticket_with_payment_record.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            self.payment_verification_ticket_with_payment_record.ticket.programs.first(),
+            self.payment_verification_ticket_with_payment_record.ticket.programs(manager="all_objects").first(),
             self.program1,
         )
         self.check_grievance_household_unicef_id(
@@ -4324,11 +4356,11 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             0,
         )
         self.assertEqual(
-            self.payment_verification_ticket_with_payment.ticket.programs.count(),
+            self.payment_verification_ticket_with_payment.ticket.programs(manager="all_objects").count(),
             1,
         )
         self.assertEqual(
-            self.payment_verification_ticket_with_payment.ticket.programs.first(),
+            self.payment_verification_ticket_with_payment.ticket.programs(manager="all_objects").first(),
             self.program2,
         )
         self.check_grievance_household_unicef_id(

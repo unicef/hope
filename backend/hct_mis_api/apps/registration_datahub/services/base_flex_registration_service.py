@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class BaseRegistrationService(AuroraProcessor, abc.ABC):
     PROCESS_FLEX_RECORDS_TASK = process_flex_records_task
 
-    def __init__(self, registration: Registration):
+    def __init__(self, registration: Registration) -> None:
         self.registration = registration
 
     @atomic("default")
@@ -47,6 +47,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         programme = project.programme
         organization = project.organization
         business_area = BusinessArea.objects.get(slug=organization.slug)
+
+        self.validate_data_collection_type()
 
         number_of_individuals = 0
         number_of_households = 0
@@ -86,6 +88,23 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
     @abc.abstractmethod
     def create_household_for_rdi_household(self, record: Record, rdi_datahub: RegistrationDataImportDatahub) -> None:
         raise NotImplementedError
+
+    def validate_data_collection_type(self) -> None:
+        project = self.registration.project
+        programme = project.programme
+        data_collecting_type = programme.data_collecting_type
+        business_area = BusinessArea.objects.get(slug=project.organization.slug)
+
+        if not data_collecting_type:
+            raise ValidationError("Program of given project does not have any Data Collecting Type")
+
+        if data_collecting_type.deprecated:
+            raise ValidationError("Data Collecting Type of program is deprecated")
+
+        if business_area not in data_collecting_type.limit_to.all():
+            raise ValidationError(
+                f"{business_area.slug.capitalize()} is not limited for DataCollectingType: {data_collecting_type.code}"
+            )
 
     def process_records(
         self,

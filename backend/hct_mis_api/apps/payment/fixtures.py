@@ -685,7 +685,7 @@ def create_payment_verification_plan_with_status(
 
         currency = getattr(cash_plan, "currency", None)
         if currency is None:
-            currency = "USD"
+            currency = "PLN"
 
         if isinstance(cash_plan, CashPlan):
             payment_record = PaymentRecordFactory(

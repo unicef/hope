@@ -1,4 +1,4 @@
-from unittest import TestCase
+from django.test import TestCase
 
 from hct_mis_api.apps.utils.celery_utils import format_tasks
 

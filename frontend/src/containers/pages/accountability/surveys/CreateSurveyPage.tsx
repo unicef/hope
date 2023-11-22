@@ -97,8 +97,27 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const confirm = useConfirmation();
-  const [category] = useState(history.location.state?.category);
 
+  const { pathname } = history.location;
+  const parts = pathname.split('/');
+  const categoryIndex = parts.indexOf('create') + 1;
+  const categoryFromUrl = parts[categoryIndex];
+  const isCategoryValid = [
+    SurveyCategory.Sms,
+    SurveyCategory.Manual,
+    SurveyCategory.RapidPro,
+  ].includes(categoryFromUrl as SurveyCategory);
+  const [category, setCategory] = useState<string | undefined>(categoryFromUrl);
+  useEffect(() => {
+    setCategory(categoryFromUrl);
+  }, [category, pathname, categoryFromUrl]);
+
+  //Set category to SMS if the user types random string in url
+  if (!isCategoryValid) {
+    history.push(
+      `/${businessArea}/accountability/surveys/create/${SurveyCategory.Sms}`,
+    );
+  }
   const initialValues = {
     category,
     message: '',

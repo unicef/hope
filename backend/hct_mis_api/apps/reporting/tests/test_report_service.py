@@ -119,24 +119,28 @@ class TestGenerateReportService(TestCase):
             business_area=self.business_area,
             delivery_date="2020-01-01T00:00+00:00",
             parent=self.cash_plan_1,
+            currency="PLN",
         )
         record_2 = PaymentRecordFactory(
             household=self.households[1],
             business_area=self.business_area,
             delivery_date="2020-01-01T00:00+00:00",
             parent=self.cash_plan_2,
+            currency="PLN",
         )
         payment_1 = PaymentFactory(
             household=self.households[0],
             business_area=self.business_area,
             delivery_date="2020-01-01T14:30+00:00",
             parent=self.payment_plan_1,
+            currency="PLN",
         )
         payment_2 = PaymentFactory(
             household=self.households[1],
             business_area=self.business_area,
             delivery_date="2020-01-01T14:30+00:00",
             parent=self.payment_plan_2,
+            currency="PLN",
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.cash_plan_verification_1,
