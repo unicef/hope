@@ -55,6 +55,12 @@ class ChoiceObjectInt(graphene.ObjectType):
     value = Int()
 
 
+class DataCollectingTypeChoiceObject(graphene.ObjectType):
+    name = String()
+    value = String()
+    description = String()
+
+
 class BusinessAreaNode(DjangoObjectType):
     is_accountability_applicable = graphene.Boolean()
 
@@ -333,7 +339,7 @@ class Query(graphene.ObjectType):
         LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
     data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
-    data_collection_type_choices = graphene.List(ChoiceObject)
+    data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -397,18 +403,23 @@ class Query(graphene.ObjectType):
         return Languages.filter_by_code(code)
 
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        # TODO: maybe add filter by BA 'DataCollectingType.limit_to'
         data_collecting_types = (
             DataCollectingType.objects.filter(
                 active=True,
                 deprecated=False,
                 limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
-            .only("code", "label")
-            .values("code", "label")
+            .only("code", "label", "description")
+            .values("code", "label", "description")
             .order_by("label")
         )
         result = []
         for data_collection_type in data_collecting_types:
-            result.append({"name": data_collection_type["label"], "value": data_collection_type["code"]})
+            result.append(
+                {
+                    "name": data_collection_type["label"],
+                    "value": data_collection_type["code"],
+                    "description": data_collection_type["description"],
+                }
+            )
         return result
