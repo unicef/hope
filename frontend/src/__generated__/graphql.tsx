@@ -10752,7 +10752,7 @@ export type UpdateProgramMutation = (
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
       & { dataCollectingType: Maybe<(
         { __typename?: 'DataCollectingTypeNode' }
-        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable'>
+        & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
       )> }
     )> }
   )> }
@@ -18738,6 +18738,7 @@ export const UpdateProgramDocument = gql`
         label
         active
         individualFiltersAvailable
+        householdFiltersAvailable
       }
     }
     validationErrors
