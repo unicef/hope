@@ -102,7 +102,7 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         )
         item = es_response.to_dict()["hits"]["hits"][0]["_source"]
         self.assertEqual(item["business_area"], self.household_2.business_area.slug)
-        self.assertEqual(item["registration_id"], int(self.household_2.registration_id))
+        self.assertEqual(str(item["registration_id"]), str(self.household_2.registration_id))
         self.assertEqual(item["unicef_id"], self.household_unicef_id_to_search)
         self.assertEqual(item["head_of_household"]["full_name"], self.individual_2.full_name)
 
