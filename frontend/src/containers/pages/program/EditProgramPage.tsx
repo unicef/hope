@@ -11,14 +11,13 @@ import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { PaperContainer } from '../../../components/targeting/PaperContainer';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString } from '../../../utils/utils';
 import { ProgramForm } from '../../forms/ProgramForm';
+import { BaseSection } from '../../../components/core/BaseSection';
 
 export const EditProgramPage = (): ReactElement => {
-  console.log('loooool');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -49,7 +48,7 @@ export const EditProgramPage = (): ReactElement => {
     },
   });
 
-  // if (!data) return null;
+  if (!data) return null;
   if (loadingProgram) return <LoadingComponent />;
   const { program } = data;
 
@@ -94,16 +93,20 @@ export const EditProgramPage = (): ReactElement => {
       </>
     );
   };
+  const detailsDescription = t(
+    'To edit an existing Programme, please complete all required fields on the form below and save.',
+  );
 
   return (
     <>
       <PageHeader title={`${t('Edit Programme')}: (${program.name})`} />
-      <PaperContainer>
+      <BaseSection title={t('Details')} description={detailsDescription}>
         <ProgramForm
           actions={(submit) => renderActions(submit)}
           onSubmit={handleSubmit}
+          program={program}
         />
-      </PaperContainer>
+      </BaseSection>
     </>
   );
 };

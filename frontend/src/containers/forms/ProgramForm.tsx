@@ -16,6 +16,8 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
 import { Box, Grid } from '@material-ui/core';
+import { BaseSection } from '../../components/core/BaseSection';
+import { GreyBox } from '../../components/core/GreyBox';
 
 interface ProgramFormPropTypes {
   program?: ProgramQuery['program'];
@@ -81,6 +83,8 @@ export const ProgramForm = ({
     ),
   });
 
+  if (!data || !dataCollectionTypeChoicesData) return null;
+
   let formInitialValue: {
     [key: string]: string | boolean | number;
   } = initialValues || {
@@ -110,16 +114,6 @@ export const ProgramForm = ({
   }
   formInitialValue.dataCollectingTypeCode = program?.dataCollectingType?.code;
 
-  if (!data || !dataCollectionTypeChoicesData) return null;
-
-  const withoutIndividualDataText = t(
-    'This programme will use only household and/or head of household details for targeting or entitlement calculation',
-  );
-
-  const withIndividualDataText = t(
-    'This programme will use household member individuals’ details for targeting or entitlement calculation. Setting this flag can reduce the number of households filtered in the target population.',
-  );
-
   const filteredDataCollectionTypeChoicesData = dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
     (el) => el.name !== '',
   );
@@ -141,8 +135,8 @@ export const ProgramForm = ({
       enableReinitialize
     >
       {({ submitForm, values }) => (
-        <Grid container>
-          <Form>
+        <Form>
+          <Grid container spacing={3}>
             <Grid item xs={6}>
               <Field
                 name='name'
@@ -155,42 +149,7 @@ export const ProgramForm = ({
                 data-cy='input-programme-name'
               />
             </Grid>
-            <Grid item xs={6}>
-              <Field
-                name='scope'
-                label={t('CashAssist Scope')}
-                fullWidth
-                variant='outlined'
-                required
-                choices={data.programScopeChoices}
-                component={FormikSelectField}
-                data-cy='input-cash-assist-scope'
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Field
-                name='sector'
-                label={t('Sector')}
-                fullWidth
-                required
-                variant='outlined'
-                choices={data.programSectorChoices}
-                component={FormikSelectField}
-                data-cy='input-sector'
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Field
-                name='dataCollectingTypeCode'
-                label={t('Data Collecting Type')}
-                fullWidth
-                variant='outlined'
-                required
-                choices={filteredDataCollectionTypeChoicesData || []}
-                component={FormikSelectField}
-                data-cy='input-data-collecting-type'
-              />
-            </Grid>
+            <Grid item xs={6} />
             <Grid item xs={6}>
               <Field
                 name='startDate'
@@ -216,8 +175,33 @@ export const ProgramForm = ({
                 data-cy='input-end-date'
               />
             </Grid>
-
             <Grid item xs={6}>
+              <Field
+                name='sector'
+                label={t('Sector')}
+                fullWidth
+                required
+                variant='outlined'
+                choices={data.programSectorChoices}
+                component={FormikSelectField}
+                data-cy='input-sector'
+              />
+            </Grid>
+            <Grid item xs={6} />
+            <Grid item xs={6}>
+              <Field
+                name='dataCollectingTypeCode'
+                label={t('Data Collecting Type')}
+                fullWidth
+                variant='outlined'
+                required
+                choices={filteredDataCollectionTypeChoicesData || []}
+                component={FormikSelectField}
+                data-cy='input-data-collecting-type'
+              />
+            </Grid>
+            <Grid item xs={6} />
+            <Grid item xs={12}>
               <Field
                 name='description'
                 label={t('Description')}
@@ -241,16 +225,8 @@ export const ProgramForm = ({
                 data-cy='input-budget'
               />
             </Grid>
-            <Grid item xs={6}>
-              <Field
-                name='frequencyOfPayments'
-                label={t('Frequency of Payment')}
-                choices={data.programFrequencyOfPaymentsChoices}
-                component={FormikRadioGroup}
-                data-cy='input-frequency-of-payment'
-              />
-            </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={6} />
+            <Grid item xs={12}>
               <Field
                 name='administrativeAreasOfImplementation'
                 label={t('Administrative Areas of Implementation')}
@@ -272,6 +248,7 @@ export const ProgramForm = ({
                 data-cy='input-population-goal'
               />
             </Grid>
+            <Grid item xs={6} />
             <Grid item xs={6}>
               <Field
                 name='cashPlus'
@@ -281,23 +258,14 @@ export const ProgramForm = ({
                 data-cy='input-cash-plus'
               />
             </Grid>
+            <Grid item xs={6} />
             <Grid item xs={6}>
               <Field
-                name='individualDataNeeded'
-                disabled={program && program.status === 'ACTIVE'}
-                label={t('Data for targeting or entitlement calculation*')}
-                choices={[
-                  {
-                    name: withoutIndividualDataText,
-                    value: 'NO',
-                  },
-                  {
-                    name: withIndividualDataText,
-                    value: 'YES',
-                  },
-                ]}
+                name='frequencyOfPayments'
+                label={t('Frequency of Payment')}
+                choices={data.programFrequencyOfPaymentsChoices}
                 component={FormikRadioGroup}
-                data-cy='input-individual-data-needed'
+                data-cy='input-frequency-of-payment'
               />
             </Grid>
             <Grid item xs={12}>
@@ -305,8 +273,8 @@ export const ProgramForm = ({
                 {actions(submitForm)}
               </Box>
             </Grid>
-          </Form>
-        </Grid>
+          </Grid>
+        </Form>
       )}
     </Formik>
   );
