@@ -72,6 +72,7 @@ interface Props {
   hasInputComponent?: boolean;
   flags?: React.ReactElement;
   isErased?: boolean;
+  handleBack?: () => void;
 }
 
 export const PageHeader = ({
@@ -82,13 +83,16 @@ export const PageHeader = ({
   hasInputComponent,
   flags,
   isErased,
+  handleBack,
 }: Props): React.ReactElement => {
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
-          <BackButton onClick={() => window.history.back()}>
+          <BackButton
+            onClick={() => (handleBack ? handleBack() : window.history.back())}
+          >
             <ArrowBackRoundedIcon fontSize='large' />
           </BackButton>
         ) : null}
