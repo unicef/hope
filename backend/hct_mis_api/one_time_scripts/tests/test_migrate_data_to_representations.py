@@ -1,4 +1,5 @@
 from typing import List, Optional
+from unittest.mock import patch
 
 from django.db.models import Count
 from django.test import TestCase
@@ -668,6 +669,22 @@ class TestMigrateDataToRepresentations(TestCase):
         self.rdi_mixed.refresh_from_db()
         self.rdi_mixed_active.refresh_from_db()
 
+    def test_migrate_data_to_representations_per_business_area_running_two_times(self) -> None:
+        self.refresh_objects()
+        self.assertEqual(Household.original_and_repr_objects.count(), 23)
+        with patch("hct_mis_api.one_time_scripts.migrate_data_to_representations.copy_household_selections") as mock:
+            mock.side_effect = lambda x, y: (_ for _ in ()).throw(ZeroDivisionError())
+            try:
+                migrate_data_to_representations_per_business_area(business_area=self.business_area)
+            except ZeroDivisionError:
+                pass
+            self.assertEqual(Household.original_and_repr_objects.count(), 31)
+            try:
+                migrate_data_to_representations_per_business_area(business_area=self.business_area)
+            except ZeroDivisionError:
+                pass
+            self.assertEqual(Household.original_and_repr_objects.count(), 31)
+
     def test_migrate_data_to_representations_per_business_area(self) -> None:
         household_count = Household.original_and_repr_objects.filter(business_area=self.business_area).count()
         individual_count = Individual.original_and_repr_objects.filter(business_area=self.business_area).count()
@@ -687,6 +704,9 @@ class TestMigrateDataToRepresentations(TestCase):
         self.refresh_objects()
 
         migrate_data_to_representations_per_business_area(business_area=self.business_area)
+        self.assertEqual(Household.original_and_repr_objects.count(), 51)
+        migrate_data_to_representations_per_business_area(business_area=self.business_area)
+        self.assertEqual(Household.original_and_repr_objects.count(), 51)
 
         self.refresh_objects()
         # Test household1
