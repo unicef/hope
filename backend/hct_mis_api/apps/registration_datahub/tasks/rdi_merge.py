@@ -142,6 +142,7 @@ class RdiMergeTask:
         "disability_certificate_picture",
         "preferred_language",
         "age_at_registration",
+        "payment_delivery_phone_no",
     )
 
     def merge_admin_areas(

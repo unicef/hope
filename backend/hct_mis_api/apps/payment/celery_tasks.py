@@ -383,7 +383,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 )
                 payment.entitlement_date = timezone.now()
                 updates.append(payment)
-            Payment.objects.bulk_update(
+            Payment.signature_manager.bulk_update_with_signature(
                 updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
             )
 
@@ -439,8 +439,6 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
             payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
 
             PaymentPlanService.create_payments(payment_plan)
-            payment_plan.refresh_from_db()
-            create_payment_plan_snapshot_data(payment_plan)
             payment_plan.update_population_count_fields()
             payment_plan.update_money_fields()
             payment_plan.status_open()
@@ -465,6 +463,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
         payment_plan.refresh_from_db()
+        create_payment_plan_snapshot_data(payment_plan)
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
         payment_plan.status_open()

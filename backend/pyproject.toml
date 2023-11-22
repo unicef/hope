@@ -77,7 +77,7 @@ django_settings_module = "hct_mis_api.settings.dev"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2023.10.5"
+version = "2023.11.3"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -176,6 +176,7 @@ urllib3 = "^1.26.9"
 xlrd = "^1.2"  # update to 2 breaks
 weasyprint = "^59.0"
 pytest-cov = "^4.1.0"
+coverage = "^7.3.2"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "0.982"

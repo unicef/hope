@@ -20,7 +20,6 @@ from hct_mis_api.apps.payment.models import (
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 
-
 encode_typedict: Dict[type, Callable[[Any], Any]] = {
     UUID: lambda x: str(x),
     PhoneNumber: lambda x: str(x),
@@ -47,11 +46,18 @@ def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
         .values_list("id", flat=True)
         .order_by("id")
     )
+    bulk_create_payment_snapshot_data(payments_ids)
+
+
+def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
     payments_queryset = (
         Payment.objects.filter(id__in=payments_ids)
         .select_related("household")
         .prefetch_related(
-            "household__individuals", "household__individuals__documents", "household__individuals_and_roles"
+            "household__individuals",
+            "household__individuals__documents",
+            "household__individuals_and_roles",
+            "household__individuals__bank_account_info",
         )
         .order_by("id")
     )
@@ -112,6 +118,7 @@ def get_individual_snapshot(individual: Individual) -> dict:
         individual_data[key] = handle_type_mapping(value)
     individual_data["documents"] = []
     individual_data["needs_adjudication_tickets_count"] = get_needs_adjudication_tickets_count(individual)
+    individual_data["bank_account_info"] = {}
 
     for document in individual.documents.all():
         document_data = {
@@ -126,6 +133,15 @@ def get_individual_snapshot(individual: Individual) -> dict:
             "cleared_date": handle_type_mapping(document.cleared_date),
         }
         individual_data["documents"].append(document_data)
+
+    bank_account_info = individual.bank_account_info.first()
+    if bank_account_info:
+        individual_data["bank_account_info"] = {
+            "bank_name": bank_account_info.bank_name,
+            "bank_account_number": bank_account_info.bank_account_number,
+            "debit_card_number": bank_account_info.debit_card_number,
+        }
+
     return individual_data
 
 

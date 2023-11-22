@@ -46,6 +46,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 delivered_quantity_usd=200.20,
                 parent=cash_plan,
                 household=household,
+                currency="PLN",
             )
             PaymentRecordFactory.create_batch(
                 3,
@@ -55,6 +56,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 delivered_quantity_usd=100.00,
                 parent=cash_plan,
                 household=household,
+                currency="PLN",
             )
 
     @parameterized.expand(

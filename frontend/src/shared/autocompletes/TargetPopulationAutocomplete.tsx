@@ -81,6 +81,7 @@ export const TargetPopulationAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
@@ -104,7 +105,7 @@ export const TargetPopulationAutocomplete = ({
       }}
       getOptionLabel={(option) => {
         let optionLabel;
-        if (option.node) {
+        if (option?.node) {
           optionLabel = `${option.node.name}`;
         } else {
           optionLabel =

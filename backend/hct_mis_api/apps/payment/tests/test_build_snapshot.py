@@ -53,6 +53,7 @@ class TestBuildSnapshot(TestCase):
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
+                currency="PLN",
             )
             cls.p2 = PaymentFactory(
                 parent=cls.pp,
@@ -63,6 +64,7 @@ class TestBuildSnapshot(TestCase):
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
+                currency="PLN",
             )
 
     def test_build_snapshot(self) -> None:
@@ -105,6 +107,7 @@ class TestBuildSnapshot(TestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
                 financial_service_provider=None,
+                currency="PLN",
             )
         self.assertEqual(pp.payment_items.count(), number_of_payments)
         create_payment_plan_snapshot_data(pp)

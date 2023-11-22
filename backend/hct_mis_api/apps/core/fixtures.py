@@ -1,3 +1,5 @@
+from typing import Any, List
+
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -34,11 +36,14 @@ class StorageFileFactory(DjangoModelFactory):
 
 def generate_data_collecting_types() -> None:
     data_collecting_types = [
-        {"label": "Partial", "code": "partial", "description": "Partial individuals collected"},
-        {"label": "Full", "code": "full", "description": "Full individual collected"},
+        {"label": "Partial", "code": "partial_individuals", "description": "Partial individuals collected"},
+        {"label": "Full", "code": "full_collection", "description": "Full individual collected"},
         {"label": "Size only", "code": "size_only", "description": "Size only collected"},
-        {"label": "No individual data", "code": "no_ind_data", "description": "No individual data"},
-        {"label": "Unknown", "code": "unknown", "description": "Unknown"},
+        {
+            "label": "size/age/gender disaggregated",
+            "code": "size_age_gender_disaggregated",
+            "description": "No individual data",
+        },
     ]
 
     for data_dict in data_collecting_types:
@@ -48,3 +53,12 @@ def generate_data_collecting_types() -> None:
 class DataCollectingTypeFactory(DjangoModelFactory):
     class Meta:
         model = DataCollectingType
+
+    @factory.post_generation
+    def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:
+        if not create:
+            return
+
+        if extracted:
+            for business_area in extracted:
+                self.limit_to.add(business_area)

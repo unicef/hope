@@ -3,6 +3,10 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
+from hct_mis_api.apps.core.field_attributes.lookup_functions import (
+    get_debit_card_issuer,
+    get_debit_card_number,
+)
 
 PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
@@ -43,6 +47,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_issuer_i_c",
         "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL],
+        "lookup_function": get_debit_card_issuer,
     },
     {
         "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
@@ -56,5 +61,19 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_number_i_c",
         "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL],
+        "lookup_function": get_debit_card_number,
+    },
+    {
+        "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
+        "type": TYPE_STRING,
+        "name": "payment_delivery_phone_no",
+        "lookup": "payment_delivery_phone_no",
+        "required": False,
+        "label": {"English(EN)": "Payment delivery phone number"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "payment_delivery_phone_no_i_c",
+        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.INDIVIDUAL_UPDATE, Scope.TARGETING],
     },
 ]

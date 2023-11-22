@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
@@ -15,6 +14,7 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+import {CreatedBySurveyAutocomplete} from '../../../../shared/autocompletes/CreatedBySurveyAutocomplete';
 
 interface SurveysFiltersProps {
   filter;
@@ -106,7 +106,7 @@ export const SurveysFilters = ({
         </Grid>
         <Grid container item xs={12} spacing={3} alignItems='flex-end'>
           <Grid item xs={4}>
-            <AssigneeAutocomplete
+            <CreatedBySurveyAutocomplete
               name='createdBy'
               label={t('Created by')}
               value={filter.createdBy}

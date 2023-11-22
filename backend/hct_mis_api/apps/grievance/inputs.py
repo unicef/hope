@@ -181,6 +181,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     payment_channels_to_remove = graphene.List(graphene.ID)
     preferred_language = graphene.String()
     flex_fields = Arg()
+    payment_delivery_phone_no = graphene.String()
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
@@ -217,6 +218,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     business_area = graphene.String()
     preferred_language = graphene.String()
     flex_fields = Arg()
+    payment_delivery_phone_no = graphene.String()
 
 
 class HouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):

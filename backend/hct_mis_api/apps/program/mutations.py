@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 import graphene
@@ -14,7 +15,10 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.core.validators import CommonValidator
+from hct_mis_api.apps.core.validators import (
+    CommonValidator,
+    DataCollectingTypeValidator,
+)
 from hct_mis_api.apps.program.inputs import CreateProgramInput, UpdateProgramInput
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
@@ -25,7 +29,7 @@ from hct_mis_api.apps.program.validators import (
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 
-class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -36,13 +40,18 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-        data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
-        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
+
+        if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
+            raise ValidationError("DataCollectingType is required for creating new Program")
+        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+            data_collecting_type=data_collecting_type,
+            business_area=business_area,
         )
 
         program = Program(
@@ -61,7 +70,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         return CreateProgram(program=program)
 
 
-class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutationMixin):
+class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -87,6 +96,11 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
 
+        data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
+        data_collecting_type = old_program.data_collecting_type
+        if data_collecting_type_code and data_collecting_type_code != data_collecting_type.code:
+            data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+
         # permission if updating any other fields
         if [k for k, v in program_data.items() if k != "status"]:
             cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
@@ -95,11 +109,10 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
             program=program,
             start_date=program_data.get("start_date"),
             end_date=program_data.get("end_date"),
+            data_collecting_type=data_collecting_type,
         )
-
-        data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
-        if data_collecting_type_code and data_collecting_type_code != old_program.data_collecting_type.code:
-            program.data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        if data_collecting_type_code:
+            program.data_collecting_type = data_collecting_type
 
         for attrib, value in program_data.items():
             if hasattr(program, attrib):

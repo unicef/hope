@@ -70,6 +70,11 @@ export const PaymentDetailsPage = (): React.ReactElement => {
     return null;
   };
 
+  const canViewHouseholdDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
+
   return (
     <>
       <PageHeader
@@ -85,6 +90,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
             PERMISSIONS.ACTIVITY_LOG_VIEW,
             permissions,
           )}
+          canViewHouseholdDetails={canViewHouseholdDetails}
         />
       </Box>
     </>

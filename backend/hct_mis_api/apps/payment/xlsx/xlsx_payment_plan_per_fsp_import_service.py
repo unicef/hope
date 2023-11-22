@@ -193,7 +193,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row, exchange_rate)
 
-        Payment.objects.bulk_update(
+        Payment.signature_manager.bulk_update_with_signature(
             self.payments_to_save,
             (
                 "delivered_quantity",
@@ -201,6 +201,9 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "status",
                 "delivery_date",
                 "reason_for_unsuccessful_payment",
+                "additional_collector_name",
+                "additional_document_type",
+                "additional_document_number",
             ),
         )
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
@@ -250,12 +253,25 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         else:
             reason_for_unsuccessful_payment = None
 
-        if delivery_date is None:
-            delivery_date = timezone.now()
-        elif isinstance(delivery_date, str):
+        if "additional_collector_name" in self.xlsx_headers:
+            additional_collector_name = row[self.xlsx_headers.index("additional_collector_name")].value
+        else:
+            additional_collector_name = None
+
+        if "additional_document_type" in self.xlsx_headers:
+            additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
+        else:
+            additional_document_type = None
+
+        if "additional_document_number" in self.xlsx_headers:
+            additional_document_number = row[self.xlsx_headers.index("additional_document_number")].value
+        else:
+            additional_document_number = None
+
+        if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
-        if delivery_date.tzinfo is None:
+        if delivery_date and delivery_date.tzinfo is None:
             delivery_date = pytz.utc.localize(delivery_date)
 
         if payment_delivery_date := payment.delivery_date:
@@ -270,6 +286,10 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 (delivered_quantity != payment.delivered_quantity)
                 or (status != payment.status)
                 or (delivery_date != payment_delivery_date)
+                or (reason_for_unsuccessful_payment != payment.reason_for_unsuccessful_payment)
+                or (additional_collector_name != payment.additional_collector_name)
+                or (additional_document_type != payment.additional_document_type)
+                or (additional_document_number != payment.additional_document_number)
             ):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
@@ -281,6 +301,10 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.status = status
                 payment.delivery_date = delivery_date
                 payment.reason_for_unsuccessful_payment = reason_for_unsuccessful_payment
+                payment.additional_collector_name = additional_collector_name
+                payment.additional_document_type = additional_document_type
+                payment.additional_document_number = additional_document_number
+
                 self.payments_to_save.append(payment)
                 # update PaymentVerification status
                 if payment.payment_verification.exists():

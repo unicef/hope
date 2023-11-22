@@ -8,7 +8,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -74,9 +74,14 @@ class TestChangeProgramStatus(APITestCase):
     def test_status_change(
         self, _: Any, permissions: List[Permissions], initial_status: str, target_status: str
     ) -> None:
+        data_collecting_type, _ = DataCollectingType.objects.update_or_create(
+            **{"label": "Full", "code": "full_collection", "description": "Full"}
+        )
+        data_collecting_type.limit_to.add(self.business_area)
         program = ProgramFactory.create(
             status=initial_status,
             business_area=self.business_area,
+            data_collecting_type=data_collecting_type,
         )
 
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)

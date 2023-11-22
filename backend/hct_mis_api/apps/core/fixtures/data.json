@@ -3219,6 +3219,35 @@
   },
   {
     "model": "core.businessarea",
+    "pk": "3745963c-908b-4792-a4e9-8ea54ccb70ee",
+    "fields": {
+      "created_at": "2022-03-30 09:05:21.522-00:00",
+      "updated_at": "2022-03-30 09:05:21.522-00:00",
+      "code": "BOCZ",
+      "name": "Czech Republic",
+      "long_name": "The Czech Republic",
+      "region_code": "66",
+      "region_name": "ECAR",
+      "kobo_username": null,
+      "rapid_pro_host": null,
+      "slug": "czech-republic",
+      "custom_fields": {},
+      "has_data_sharing_agreement": true,
+      "parent": null,
+      "is_split": false,
+      "deduplication_duplicate_score": 6.0,
+      "deduplication_possible_duplicate_score": 6.0,
+      "deduplication_batch_duplicates_percentage": 50,
+      "deduplication_batch_duplicates_allowed": 5,
+      "deduplication_golden_record_duplicates_percentage": 50,
+      "deduplication_golden_record_duplicates_allowed": 5,
+      "screen_beneficiary": false,
+      "countries": [],
+      "is_payment_plan_applicable": false
+    }
+  },
+  {
+    "model": "core.businessarea",
     "pk": "a63414eb-3c08-4d65-b069-a560ab6eec45",
     "fields": {
       "created_at": "2022-03-30 09:05:21.340-00:00",
@@ -6631,12 +6660,15 @@
     "fields": {
         "created": "2023-09-25T17:57:16.282Z",
         "modified": "2023-09-25T17:57:16.282Z",
-        "code": "0",
+        "code": "partial_individuals",
+        "label": "Partial",
         "description": "Partial individuals collected",
+        "type": "SOCIAL",
         "active": true,
-        "individual_filters_available": true,
+        "individual_filters_available": false,
+        "household_filters_available": true,
         "compatible_types": [],
-        "limit_to": []
+        "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
 },
 {
@@ -6645,12 +6677,14 @@
     "fields": {
         "created": "2023-09-25T17:57:16.284Z",
         "modified": "2023-09-25T17:57:16.284Z",
-        "code": "1",
+        "code": "full_collection",
+        "label": "Full",
         "description": "Full individual collected",
         "active": true,
         "individual_filters_available": true,
+        "household_filters_available": true,
         "compatible_types": [],
-        "limit_to": []
+        "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
   },
   {
@@ -6659,12 +6693,15 @@
       "fields": {
           "created": "2023-09-25T17:57:16.285Z",
           "modified": "2023-09-25T17:57:16.285Z",
-          "code": "2",
+          "code": "size_only",
+          "label": "Size only",
           "description": "Size only collected",
+          "type": "STANDARD",
           "active": true,
-          "individual_filters_available": true,
+          "individual_filters_available": false,
+          "household_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
@@ -6673,12 +6710,14 @@
       "fields": {
           "created": "2023-09-25T17:57:16.286Z",
           "modified": "2023-09-25T17:57:16.286Z",
-          "code": "3",
+          "code": "size_age_gender_disaggregated",
+          "label": "size/age/gender disaggregated",
           "description": "No individual data",
           "active": true,
-          "individual_filters_available": true,
+          "individual_filters_available": false,
+          "household_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {
@@ -6687,12 +6726,45 @@
       "fields": {
           "created": "2023-09-25T17:57:16.287Z",
           "modified": "2023-09-25T17:57:16.287Z",
-          "code": "99",
+          "code": "unknown",
+          "label": "Unknown",
           "description": "Unknown",
           "active": true,
+          "individual_filters_available": false,
+          "household_filters_available": false,
+          "compatible_types": [],
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+      }
+  },
+  {
+      "model": "core.datacollectingtype",
+      "pk": 6,
+      "fields": {
+          "created": "2023-09-25T17:57:16.287Z",
+          "modified": "2023-09-25T17:57:16.287Z",
+          "code": "inactive",
+          "label": "Inactive",
+          "description": "Inactive",
+          "active": false,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": []
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+      }
+  },
+  {
+      "model": "core.datacollectingtype",
+      "pk": 7,
+      "fields": {
+          "created": "2023-09-25T17:57:16.287Z",
+          "modified": "2023-09-25T17:57:16.287Z",
+          "code": "deprecated",
+          "label": "Deprecated",
+          "description": "Deprecated",
+          "active": true,
+          "deprecated": true,
+          "individual_filters_available": true,
+          "compatible_types": [],
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
       }
   },
   {

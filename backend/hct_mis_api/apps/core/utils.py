@@ -868,6 +868,11 @@ class IsOriginalManager(models.Manager):
         return super().get_queryset().filter(is_original=True)
 
 
+class SoftDeletableIsVisibleManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_visible=True)
+
+
 class SoftDeletableIsOriginalManagerMixin:
     """
     Manager that limits the queryset by default to show only not removed

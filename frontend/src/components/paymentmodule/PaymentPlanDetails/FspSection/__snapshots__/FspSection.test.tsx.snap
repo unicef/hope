@@ -50,7 +50,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Cash"
             >
               <span
-                class="sc-ifAKCX fziVZR"
+                class="sc-ifAKCX eVOAmK"
                 color="textSecondary"
               >
                 Miranda Ltd
@@ -72,7 +72,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-In Kind"
             >
               <span
-                class="sc-ifAKCX fziVZR"
+                class="sc-ifAKCX eVOAmK"
                 color="textSecondary"
               >
                 Frazier-Watson
@@ -94,7 +94,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Transfer"
             >
               <span
-                class="sc-ifAKCX fziVZR"
+                class="sc-ifAKCX eVOAmK"
                 color="textSecondary"
               >
                 Bray Group
@@ -147,7 +147,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Cash (Miranda Ltd)"
                   >
                     <span
-                      class="sc-ifAKCX fziVZR"
+                      class="sc-ifAKCX eVOAmK"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -174,7 +174,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-In Kind (Frazier-Watson)"
                   >
                     <span
-                      class="sc-ifAKCX fziVZR"
+                      class="sc-ifAKCX eVOAmK"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -201,7 +201,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Transfer (Bray Group)"
                   >
                     <span
-                      class="sc-ifAKCX fziVZR"
+                      class="sc-ifAKCX eVOAmK"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)

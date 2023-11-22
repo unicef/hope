@@ -26,10 +26,11 @@ logger = logging.getLogger(__name__)
 
 class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
+        self.batch_size = 5000
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.eligible_payments.select_related(
-            "household", "collector", "financial_service_provider"
-        ).order_by("unicef_id")
+        self.payment_ids_list = (
+            payment_plan.eligible_payments.order_by("unicef_id").only("id").values_list("id", flat=True)
+        )
 
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [
@@ -39,8 +40,11 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self.ws_export_list.append(payment_row)
 
     def _add_payment_list(self) -> None:
-        for payment in self.payment_list:
-            self._add_payment_row(payment)
+        for i in range(0, len(self.payment_ids_list), self.batch_size):
+            batch_ids = self.payment_ids_list[i : i + self.batch_size]
+            payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
+            for payment in payment_qs:
+                self._add_payment_row(payment)
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
@@ -51,7 +55,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             [
                 self.HEADERS.index("entitlement_quantity") + 1,
             ],
-            no_of_columns=len(self.payment_list) + 1,
+            no_of_columns=len(self.payment_ids_list) + 1,
         )
         return self.wb
 
