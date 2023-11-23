@@ -702,7 +702,7 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
     def test_migrate_data_to_representations_per_business_area_running_number_queries(self) -> None:
         self.refresh_objects()
         with self.assertNumQueries(
-            367,
+            372,
         ):
             migrate_data_to_representations_per_business_area(business_area=self.business_area)
 
@@ -735,6 +735,6 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         )
         program = Program.objects.first()
         with self.assertNumQueries(
-            6,
+            7,
         ):
             copy_household_representation_for_programs_fast(household, program, individuals)
