@@ -271,40 +271,49 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     household.unicef_id = None
     household.program = program
     household.is_original = False
-
+    external_collectors_id_to_update = []
     individuals_to_update = []
     individuals_to_create = []
     documents_to_create = []
     identities_to_create = []
     bank_account_info_to_create = []
+    individuals_to_exclude_dict = {
+        str(x["copied_from_id"]): str(x["pk"])
+        for x in Individual.original_and_repr_objects.filter(
+            copied_from_id__in=individuals, is_original=False, program=program
+        ).values("copied_from_id", "pk")
+    }
 
     for individual in individuals:
-        copy_result = copy_individual_representation_fast(program, individual)
-        if isinstance(copy_result, Individual):
-            individuals_to_update.append(copy_result)
-        else:
-            (
-                individual_to_create,
-                documents_to_create_batch,
-                identities_to_create_batch,
-                bank_account_info_to_create_batch,
-            ) = copy_result
-            individuals_to_update.append(individual_to_create)
-            documents_to_create.extend(documents_to_create_batch)
-            identities_to_create.extend(identities_to_create_batch)
-            bank_account_info_to_create.extend(bank_account_info_to_create_batch)
-            individuals_to_create.append(individual_to_create)
+        if str(individual.id) in individuals_to_exclude_dict:
+            external_collectors_id_to_update.append(individuals_to_exclude_dict[str(individual.id)])
+            continue
+        (
+            individual_to_create,
+            documents_to_create_batch,
+            identities_to_create_batch,
+            bank_account_info_to_create_batch,
+        ) = copy_individual_representation_fast(program, individual)
+        individuals_to_update.append(individual_to_create)
+        documents_to_create.extend(documents_to_create_batch)
+        identities_to_create.extend(identities_to_create_batch)
+        bank_account_info_to_create.extend(bank_account_info_to_create_batch)
+        individuals_to_create.append(individual_to_create)
     individuals_dict = {i.copied_from_id: i for i in individuals_to_update}
     Individual.objects.bulk_create(individuals_to_create)
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
     BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
-    household.head_of_household = individuals_dict.get(original_head_of_household_id)
+    if original_head_of_household_id in individuals_dict:
+        household.head_of_household = individuals_dict[original_head_of_household_id]
+    else:
+        copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_id)]
+        household.head_of_household_id = copied_individual_id
     Household.objects.bulk_create([household])
     for individual in individuals_to_update:
         individual.household = household
-
-    Individual.original_and_repr_objects.bulk_update(individuals_to_update, ["household"])
+    ids_to_update = [x.pk for x in individuals_to_update] + external_collectors_id_to_update
+    Individual.original_and_repr_objects.filter(id__in=ids_to_update).update(household=household)
 
     # copy_entitlement_card_per_household(household=original_household, household_representation=household)
 
@@ -346,26 +355,23 @@ def copy_individual_representation_fast(
     Return existing representation if it exists.
     """
     # copy representations only based on original individuals
-    return copy_individual_fast(individual, program)
+    if individual.is_original:
+        return copy_individual_fast(individual, program)
+    else:
+        raise Exception("Cannot copy representation of representation")
 
 
 def copy_individual(individual: Individual, program: Program) -> Individual:
-    documents = list(individual.documents.all())
-    identities = list(individual.identities.all())
-    bank_account_info = list(individual.bank_account_info.all())
-    original_individual_id = individual.id
-    individual.copied_from_id = original_individual_id
-    individual.origin_unicef_id = individual.unicef_id
-    individual.pk = None
-    individual.unicef_id = None
-    individual.program = program
-    individual.household = None
-    individual.is_original = False
-    (created_individual,) = Individual.objects.bulk_create([individual])
-    copy_document_per_individual(documents, individual)
-    copy_individual_identity_per_individual(identities, individual)
-    copy_bank_account_info_per_individual(bank_account_info, individual)
-
+    (
+        individual_to_create,
+        documents_to_create,
+        identities_to_create,
+        bank_account_info_to_create,
+    ) = copy_individual_fast(individual, program)
+    (created_individual,) = Individual.objects.bulk_create([individual_to_create])
+    Document.objects.bulk_create(documents_to_create)
+    IndividualIdentity.objects.bulk_create(identities_to_create)
+    BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
     return created_individual
 
 
@@ -703,7 +709,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
                     individuals_per_household_dict[individual.household_id].append(individual)
                 for household in batched_households:
                     household_original_id = household.pk
-                    household_representation = copy_household_representation(
+                    household_representation = copy_household_representation_for_programs_fast(
                         household,
                         program,
                         individuals_per_household_dict[household_original_id],
