@@ -400,7 +400,6 @@ class Query(graphene.ObjectType):
             )
             .only("code", "label")
             .values("code", "label")
-            .order_by("label")
         )
         result = []
         for data_collection_type in data_collecting_types:
