@@ -204,20 +204,6 @@ def copy_household_representation(
     return household
 
 
-def copy_household_representation_for_programs(
-    household: Household,
-    program: Program,
-    individuals: list[Individual],
-) -> Optional[Household]:
-    """
-    Copy household into representation for given program if it does not exist yet.
-    """
-    # copy representations only based on original households
-    if household.is_original:
-        return copy_household(household, program, individuals)
-    return household
-
-
 def copy_household_representation_for_programs_fast(
     household: Household,
     program: Program,
@@ -420,16 +406,16 @@ def copy_roles(households: QuerySet, program: Program) -> None:
         household_representations = Household.original_and_repr_objects.filter(
             program=program,
             copied_from_id__in=original_household_ids,
-        )
-        individual_representation = Individual.original_and_repr_objects.filter(
+        ).only("copied_from_id", "id")
+        individual_representations = Individual.original_and_repr_objects.filter(
             program=program,
             copied_from_id__in=original_individual_ids,
-        )
+        ).only("copied_from_id", "id")
         household_representations_dict = {
             household.copied_from_id: household for household in household_representations
         }
         individual_representation_dict = {
-            individual.copied_from_id: individual for individual in individual_representation
+            individual.copied_from_id: individual for individual in individual_representations
         }
         individuals_to_create = []
         documents_to_create = []
