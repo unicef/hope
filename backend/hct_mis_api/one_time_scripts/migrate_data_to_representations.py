@@ -103,14 +103,25 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             batch_end = batch_start + BATCH_SIZE
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
+
             batched_households = households[batch_start:batch_end]
+            already_copied_households_ids = list(
+                Household.original_and_repr_objects.filter(
+                    program=program,
+                    copied_from__in=batched_households,
+                    is_original=False,
+                ).values_list("copied_from_id", flat=True)
+            )
+            batched_households = households.exclude(id__in=already_copied_households_ids)[batch_start:batch_end]
             for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
                 "documents", "identities", "bank_account_info"
             ):
                 individuals_per_household_dict[individual.household_id].append(individual)
             for household in batched_households:
                 with transaction.atomic():
-                    copy_household_representation(household, program, individuals_per_household_dict[household.id])
+                    copy_household_representation_for_programs(
+                        household, program, individuals_per_household_dict[household.id]
+                    )
 
         rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
         rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
@@ -182,6 +193,20 @@ def copy_household_representation(
             return household_representation
         else:
             return copy_household(household, program, individuals)
+    return household
+
+
+def copy_household_representation_for_programs(
+    household: Household,
+    program: Program,
+    individuals: list[Individual],
+) -> Optional[Household]:
+    """
+    Copy household into representation for given program if it does not exist yet.
+    """
+    # copy representations only based on original households
+    if household.is_original:
+        return copy_household(household, program, individuals)
     return household
 
 
@@ -273,8 +298,9 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             household__is_removed=False,
             is_original=True,
         )
+        .distinct("individual", "household")
         .exclude(copied_to__household__program=program)
-        .order_by("pk")
+        .order_by("individual", "household")
     )
 
     roles_count = roles.count()
