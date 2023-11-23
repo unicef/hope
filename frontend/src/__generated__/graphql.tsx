@@ -16,10 +16,10 @@ export type Scalars = {
   Int: number,
   Float: number,
   DateTime: any,
+  JSONString: any,
   BigInt: any,
   Date: any,
   UUID: any,
-  JSONString: any,
   Decimal: any,
   Arg: any,
   GeoJSON: any,
@@ -1274,6 +1274,13 @@ export type CreateTicketNoteMutation = {
 export type CreateVerificationPlanMutation = {
    __typename?: 'CreateVerificationPlanMutation',
   paymentPlan?: Maybe<GenericPaymentPlanNode>,
+};
+
+export type DataCollectingTypeChoiceObject = {
+   __typename?: 'DataCollectingTypeChoiceObject',
+  name?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+  description?: Maybe<Scalars['String']>,
 };
 
 export type DataCollectingTypeNode = Node & {
@@ -4370,11 +4377,18 @@ export type PaginatedPaymentRecordsAndPaymentsNode = {
   totalCount?: Maybe<Scalars['Int']>,
 };
 
+export type PartnerNodeForProgram = {
+   __typename?: 'PartnerNodeForProgram',
+  name?: Maybe<Scalars['String']>,
+  areas?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
 export type PartnerType = {
    __typename?: 'PartnerType',
   id: Scalars['ID'],
   name: Scalars['String'],
   isUn: Scalars['Boolean'],
+  permissions: Scalars['JSONString'],
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -5211,6 +5225,7 @@ export type ProgramNode = Node & {
   totalUndeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
   totalNumberOfHouseholdsWithTpInProgram?: Maybe<Scalars['Int']>,
+  partners?: Maybe<Array<Maybe<PartnerNodeForProgram>>>,
 };
 
 
@@ -5508,7 +5523,7 @@ export type Query = {
   cashAssistUrlPrefix?: Maybe<Scalars['String']>,
   allLanguages?: Maybe<LanguageObjectConnection>,
   dataCollectingType?: Maybe<DataCollectingTypeNode>,
-  dataCollectionTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  dataCollectionTypeChoices?: Maybe<Array<Maybe<DataCollectingTypeChoiceObject>>>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
@@ -11534,8 +11549,8 @@ export type DataCollectionTypeChoiceDataQueryVariables = {};
 export type DataCollectionTypeChoiceDataQuery = (
   { __typename?: 'Query' }
   & { dataCollectionTypeChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
+    { __typename?: 'DataCollectingTypeChoiceObject' }
+    & Pick<DataCollectingTypeChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -28092,6 +28107,7 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   UserStatus: UserStatus,
   PartnerType: ResolverTypeWrapper<PartnerType>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
@@ -28109,7 +28125,6 @@ export type ResolversTypes = {
   AreaNode: ResolverTypeWrapper<AreaNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   AreaTypeNodeConnection: ResolverTypeWrapper<AreaTypeNodeConnection>,
   AreaTypeNodeEdge: ResolverTypeWrapper<AreaTypeNodeEdge>,
   AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>,
@@ -28264,6 +28279,7 @@ export type ResolversTypes = {
   FeedbackMessageNodeConnection: ResolverTypeWrapper<FeedbackMessageNodeConnection>,
   FeedbackMessageNodeEdge: ResolverTypeWrapper<FeedbackMessageNodeEdge>,
   FeedbackMessageNode: ResolverTypeWrapper<FeedbackMessageNode>,
+  PartnerNodeForProgram: ResolverTypeWrapper<PartnerNodeForProgram>,
   UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
   RoleSubsystem: RoleSubsystem,
@@ -28406,6 +28422,7 @@ export type ResolversTypes = {
   LanguageObjectConnection: ResolverTypeWrapper<LanguageObjectConnection>,
   LanguageObjectEdge: ResolverTypeWrapper<LanguageObjectEdge>,
   LanguageObject: ResolverTypeWrapper<LanguageObject>,
+  DataCollectingTypeChoiceObject: ResolverTypeWrapper<DataCollectingTypeChoiceObject>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -28601,6 +28618,7 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'],
   UserStatus: UserStatus,
   PartnerType: PartnerType,
+  JSONString: Scalars['JSONString'],
   Int: Scalars['Int'],
   UserNodeConnection: UserNodeConnection,
   PageInfo: PageInfo,
@@ -28618,7 +28636,6 @@ export type ResolversParentTypes = {
   AreaNode: AreaNode,
   UUID: Scalars['UUID'],
   AreaTypeNode: AreaTypeNode,
-  JSONString: Scalars['JSONString'],
   AreaTypeNodeConnection: AreaTypeNodeConnection,
   AreaTypeNodeEdge: AreaTypeNodeEdge,
   AreaNodeConnection: AreaNodeConnection,
@@ -28773,6 +28790,7 @@ export type ResolversParentTypes = {
   FeedbackMessageNodeConnection: FeedbackMessageNodeConnection,
   FeedbackMessageNodeEdge: FeedbackMessageNodeEdge,
   FeedbackMessageNode: FeedbackMessageNode,
+  PartnerNodeForProgram: PartnerNodeForProgram,
   UserRoleNode: UserRoleNode,
   RoleNode: RoleNode,
   RoleSubsystem: RoleSubsystem,
@@ -28915,6 +28933,7 @@ export type ResolversParentTypes = {
   LanguageObjectConnection: LanguageObjectConnection,
   LanguageObjectEdge: LanguageObjectEdge,
   LanguageObject: LanguageObject,
+  DataCollectingTypeChoiceObject: DataCollectingTypeChoiceObject,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -29635,6 +29654,12 @@ export type CreateTicketNoteMutationResolvers<ContextType = any, ParentType exte
 
 export type CreateVerificationPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateVerificationPlanMutation'] = ResolversParentTypes['CreateVerificationPlanMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['GenericPaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type DataCollectingTypeChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['DataCollectingTypeChoiceObject'] = ResolversParentTypes['DataCollectingTypeChoiceObject']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type DataCollectingTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DataCollectingTypeNode'] = ResolversParentTypes['DataCollectingTypeNode']> = {
@@ -30965,10 +30990,16 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
+export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+};
+
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerTypeIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerTypeGrievanceticketSetArgs>,
@@ -31377,6 +31408,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfHouseholdsWithTpInProgram?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  partners?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerNodeForProgram']>>>, ParentType, ContextType>,
 };
 
 export type ProgramNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']> = {
@@ -31491,7 +31523,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   allLanguages?: Resolver<Maybe<ResolversTypes['LanguageObjectConnection']>, ParentType, ContextType, QueryAllLanguagesArgs>,
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType, RequireFields<QueryDataCollectingTypeArgs, 'id'>>,
-  dataCollectionTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  dataCollectionTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['DataCollectingTypeChoiceObject']>>>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
@@ -32764,6 +32796,7 @@ export type Resolvers<ContextType = any> = {
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>,
   CreateVerificationPlanMutation?: CreateVerificationPlanMutationResolvers<ContextType>,
+  DataCollectingTypeChoiceObject?: DataCollectingTypeChoiceObjectResolvers<ContextType>,
   DataCollectingTypeNode?: DataCollectingTypeNodeResolvers<ContextType>,
   DataCollectingTypeNodeConnection?: DataCollectingTypeNodeConnectionResolvers<ContextType>,
   DataCollectingTypeNodeEdge?: DataCollectingTypeNodeEdgeResolvers<ContextType>,
@@ -32887,6 +32920,7 @@ export type Resolvers<ContextType = any> = {
   PageInfoNode?: PageInfoNodeResolvers<ContextType>,
   PaginatedCashPlanAndPaymentPlanNode?: PaginatedCashPlanAndPaymentPlanNodeResolvers<ContextType>,
   PaginatedPaymentRecordsAndPaymentsNode?: PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType>,
+  PartnerNodeForProgram?: PartnerNodeForProgramResolvers<ContextType>,
   PartnerType?: PartnerTypeResolvers<ContextType>,
   PaymentConflictDataNode?: PaymentConflictDataNodeResolvers<ContextType>,
   PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>,

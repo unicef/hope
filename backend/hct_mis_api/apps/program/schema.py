@@ -57,6 +57,48 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
+class PartnerNodeForProgram(graphene.ObjectType):
+    # TODO: udpdate this one as well
+    id = graphene.ID()
+    name = graphene.String()
+    areas = graphene.List(graphene.JSONString)
+
+    def resolve_areas(self, info: Any, **kwargs: Any) -> List:
+        return [
+            {
+                "id": "1",
+                "name": "Child - 1",
+                "selected": True,
+            },
+            {
+                "id": "2",
+                "name": "Child - 2",
+                "children": [
+                    {
+                        "id": "22",
+                        "name": "Child - 22",
+                        "selected": True,
+                    },
+                ],
+            },
+            {
+                "id": "3",
+                "name": "Child - 3",
+                "children": [
+                    {
+                        "id": "33",
+                        "name": "Child - 33",
+                        "selected": True,
+                    },
+                    {
+                        "id": "333",
+                        "name": "Child - 333",
+                    },
+                ],
+            },
+        ]
+
+
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
@@ -72,6 +114,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_number_of_households_with_tp_in_program = graphene.Int()
     individual_data_needed = graphene.Boolean()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
+    partners = graphene.List(PartnerNodeForProgram)
 
     class Meta:
         model = Program
@@ -86,6 +129,13 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
+
+    def resolve_partners(self, info: Any, **kwargs: Any) -> List:
+        # TODO: just added this one temporary for test
+        partner_abc = {"id": "1", "name": "ABC", "areas": []}
+        partner_wfp = {"id": "2", "name": "WFP", "areas": []}
+        partners = [partner_abc, partner_wfp]
+        return partners
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
