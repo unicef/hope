@@ -342,6 +342,33 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
+    def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
+        create_household({"registration_id": "ABCD-123123#0"})
+        create_household({"registration_id": "ABCD-321321#0"})
+
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            program_registration_id="ABCD-123123",
+        )
+        self.set_imported_individuals(imported_household)
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            program_registration_id="ABCD-123123",
+        )
+        self.set_imported_individuals(imported_household)
+        imported_household = ImportedHouseholdFactory(
+            registration_data_import=self.rdi_hub,
+            program_registration_id="ABCD-111111",
+        )
+        self.set_imported_individuals(imported_household)
+
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+
+        registrations_ids = Household.objects.all().values_list("registration_id", flat=True)
+
+        self.assertEqual(len(registrations_ids), len(set(registrations_ids)))
+
     def test_merging_external_collector(self) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
@@ -372,30 +399,3 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         role.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
-
-    def test_registration_id_from_kobo_registration_id_should_be_unique(self) -> None:
-        create_household({"registration_id": "ABCD-123123#0"})
-        create_household({"registration_id": "ABCD-321321#0"})
-
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=self.rdi_hub,
-            kobo_registration_id="ABCD-123123",
-        )
-        self.set_imported_individuals(imported_household)
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=self.rdi_hub,
-            kobo_registration_id="ABCD-123123",
-        )
-        self.set_imported_individuals(imported_household)
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=self.rdi_hub,
-            kobo_registration_id="ABCD-111111",
-        )
-        self.set_imported_individuals(imported_household)
-
-        with capture_on_commit_callbacks(execute=True):
-            RdiMergeTask().execute(self.rdi.pk)
-
-        registrations_ids = Household.objects.all().values_list("registration_id", flat=True)
-
-        self.assertEqual(len(registrations_ids), len(set(registrations_ids)))

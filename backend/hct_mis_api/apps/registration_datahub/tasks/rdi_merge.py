@@ -379,14 +379,14 @@ class RdiMergeTask:
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
 
                     for imported_household in imported_households:
-                        kobo_registration_id = imported_household.kobo_registration_id
-                        if kobo_registration_id:
+                        program_registration_id = imported_household.program_registration_id
+                        if program_registration_id:
                             household = households_dict[imported_household.id]
                             reg_id_count = Household.objects.filter(
-                                registration_id__istartswith=kobo_registration_id
+                                registration_id__istartswith=program_registration_id
                             ).count()
                             Household.objects.filter(id=household.id).update(
-                                registration_id=f"{kobo_registration_id}#{reg_id_count}"
+                                registration_id=f"{program_registration_id}#{reg_id_count}"
                             )
 
                     # DEDUPLICATION

@@ -486,7 +486,7 @@ class Household(
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
     registration_id = models.CharField(
-        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and kobo_registration_id"
+        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and Program Registration Id"
     )
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -973,7 +973,7 @@ class Individual(
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     registration_id = models.CharField(
-        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and kobo_registration_id"
+        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and Program Registration Id"
     )
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)

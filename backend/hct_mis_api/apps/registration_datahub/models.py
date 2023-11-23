@@ -153,7 +153,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
-    kobo_registration_id = models.CharField(max_length=50, blank=True, null=True)
+    program_registration_id = models.CharField(max_length=50, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
