@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllProgramsQuery,
@@ -22,6 +22,7 @@ import { programCompare } from '../../../utils/utils';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import {useProgramContext} from "../../../programContext";
 
 interface ReactivateProgramProps {
   program: ProgramQuery['program'];
@@ -34,6 +35,8 @@ export function ReactivateProgram({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { selectedProgram, setSelectedProgram } = useProgramContext();
+
   const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
@@ -66,6 +69,12 @@ export function ReactivateProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
+
+      setSelectedProgram({
+        ...selectedProgram,
+        status: ProgramStatus.Active
+      })
+
       showMessage(t('Programme reactivated.'), {
         pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       });

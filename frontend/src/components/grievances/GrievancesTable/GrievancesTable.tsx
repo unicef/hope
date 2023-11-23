@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
+  ProgramStatus,
   useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
@@ -36,6 +37,8 @@ import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { ButtonTooltip } from "../../core/ButtonTooltip";
+import { useProgramContext } from "../../../programContext";
 
 interface GrievancesTableProps {
   filter;
@@ -48,6 +51,8 @@ export const GrievancesTable = ({
 }: GrievancesTableProps): React.ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
@@ -266,16 +271,18 @@ export const GrievancesTable = ({
               />
               {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
                 hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-                  <Button
+                  <ButtonTooltip
                     alignItems='center'
                     variant='contained'
                     color='primary'
                     component={Link}
+                    title={t('Program has to be active to create a new Grievance Ticket')}
                     to={`/${baseUrl}/grievance/new-ticket`}
                     data-cy='button-new-ticket'
+                    disabled={selectedProgram?.status !== ProgramStatus.Active}
                   >
                     {t('NEW TICKET')}
-                  </Button>
+                  </ButtonTooltip>
                 )}
             </Box>
             <UniversalTable<

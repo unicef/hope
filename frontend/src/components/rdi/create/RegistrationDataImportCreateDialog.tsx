@@ -6,7 +6,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Select, Tooltip,
+  Select,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import React, { useEffect, useState } from 'react';
@@ -19,6 +19,9 @@ import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapp
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
+import { ButtonTooltip } from "../../core/ButtonTooltip";
+import { useProgramContext } from "../../../programContext";
+import { ProgramStatus } from "../../../__generated__/graphql";
 
 const ComboBox = styled(Select)`
   & {
@@ -38,47 +41,35 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export const RegistrationDataImportCreateDialog = ({ isImportDisabled }): React.ReactElement => {
+export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
+  const { selectedProgram } = useProgramContext();
+
   useEffect(() => {
     if (!open) {
       setImportType('');
       setSubmitDisabled(true);
     }
   }, [open]);
-  const openModalButton = (
 
-        isImportDisabled ?
-            <Tooltip title="Program must be ACTIVE to import RDI">
-              <span>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  startIcon={<ExitToAppRoundedIcon />}
-                  disabled={isImportDisabled}
-                  onClick={() => setOpen(true)}
-                  data-cy='button-import'
-                >
-                  {t('IMPORT')}
-                </Button>
-              </span>
-            </Tooltip>
-            :
-            <Button
-              variant='contained'
-              color='primary'
-              startIcon={<ExitToAppRoundedIcon />}
-              disabled={isImportDisabled}
-              onClick={() => setOpen(true)}
-              data-cy='button-import'
-            >
-              {t('IMPORT')}
-            </Button>
+  const openModalButton = (
+    <ButtonTooltip
+      variant='contained'
+      color='primary'
+      startIcon={<ExitToAppRoundedIcon />}
+      onClick={() => setOpen(true)}
+      data-cy='button-import'
+      title={t('Program has to be active to create a new RegistrationDataImport')}
+      disabled={selectedProgram?.status !== ProgramStatus.Active}
+    >
+      {t('IMPORT')}
+    </ButtonTooltip>
   );
+
   let importTypeForm;
   switch (importType) {
     case 'kobo':
