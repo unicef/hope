@@ -201,6 +201,7 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> No
     """
     logger.info("Handle closed tickets with household and individual")
     closed_tickets = tickets.filter(ticket__status=GrievanceTicket.STATUS_CLOSED)
+    logger.info(f"Tickets to handle: {closed_tickets.count()}")
 
     for closed_ticket in closed_tickets.iterator():
         household_representation = None
@@ -249,6 +250,7 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet) -> No
     """
     logger.info("Handle active tickets with household and individual")
     active_tickets = tickets.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator()
+    logger.info(f"Tickets to handle: {active_tickets.count()}")
 
     for active_ticket in active_tickets:
         if active_ticket.individual:
@@ -309,6 +311,8 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
         )
         .filter(household__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
     )
+    logger.info(f"Tickets to handle: {tickets_with_hh.count()}")
+
     # Handle closed tickets - copy only for 1 random representation
     for closed_ticket in tickets_with_hh.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
         household_representation = closed_ticket.household.copied_to(manager="original_and_repr_objects").first()
@@ -370,6 +374,8 @@ def handle_tickets_with_individual(
             **filter_kwargs,
         )
     )
+    logger.info(f"Tickets to handle: {tickets_with_ind.count()}")
+
     # Handle closed tickets
     for closed_ticket in tickets_with_ind.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
         individual_representation = (
@@ -507,6 +513,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
         )
         .filter(ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
     )
+    logger.info(f"Tickets to handle: {needs_adjudication_tickets.count()}")
 
     for needs_adjudication_ticket in needs_adjudication_tickets.iterator():
         individuals = [
@@ -591,6 +598,8 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
         .filter(is_original=True, is_migration_handled=False, **filter_kwargs)
         .distinct()
     )
+    logger.info(f"Messages to handle: {message_objects.count()}")
+
     for message in message_objects.iterator():
         if message.households.exists():
             if message.target_population:
@@ -665,6 +674,9 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
         .filter(**filter_kwargs)
         .distinct()
     )
+    logger.info("Handle Feedback objects with program or closed grievance ticket")
+    logger.info(f"Feedback objects to handle: {feedback_objects_for_specific_program.count()}")
+
     for feedback_obj in feedback_objects_for_specific_program.iterator():
         household_representation = None
         individual_representation = None
@@ -733,6 +745,9 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
         .filter(**filter_kwargs)
         .distinct()
     )
+    logger.info("Handle Feedback objects without program and without closed grievance ticket")
+    logger.info(f"Feedback objects to handle: {active_feedback_objects.count()}")
+
     for feedback_obj in active_feedback_objects.iterator():
         if feedback_obj.individual_lookup:
             individual_representations = feedback_obj.individual_lookup.copied_to(
