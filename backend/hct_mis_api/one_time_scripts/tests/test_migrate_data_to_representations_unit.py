@@ -1186,4 +1186,3 @@ class TestHandleRDIs(TestCase):
             ).count(),
             2,
         )
-
