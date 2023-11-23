@@ -15,11 +15,13 @@ import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import {
   PaymentPlanQuery,
+  ProgramStatus,
   useDeletePpMutation,
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useProgramContext } from "../../../../programContext";
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -34,6 +36,7 @@ export const DeletePaymentPlan = ({
   const { showMessage } = useSnackbar();
   const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
   const { id } = paymentPlan;
+  const { selectedProgram } = useProgramContext();
 
   const handleDelete = async (): Promise<void> => {
     try {
@@ -54,7 +57,10 @@ export const DeletePaymentPlan = ({
   return (
     <>
       <Box p={2}>
-        <IconButton onClick={() => setDeleteDialogOpen(true)}>
+        <IconButton
+          onClick={() => setDeleteDialogOpen(true)}
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
+        >
           <Delete />
         </IconButton>
       </Box>

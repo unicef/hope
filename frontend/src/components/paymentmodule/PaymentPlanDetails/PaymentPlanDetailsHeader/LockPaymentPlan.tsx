@@ -13,9 +13,10 @@ import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery, ProgramStatus } from '../../../../__generated__/graphql';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
+import { useProgramContext } from "../../../../programContext";
 
 export interface LockPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -27,6 +28,8 @@ export const LockPaymentPlan = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  const { selectedProgram } = useProgramContext();
+
   const {
     mutatePaymentPlanAction: lock,
     loading: loadingLock,
@@ -45,6 +48,7 @@ export const LockPaymentPlan = ({
           variant='contained'
           onClick={() => setLockDialogOpen(true)}
           data-cy='button-lock-plan'
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
         >
           {t('Lock')}
         </Button>
