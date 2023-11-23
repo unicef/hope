@@ -7,9 +7,9 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from "@material-ui/core";
 import { SurveyCategory } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import {Button} from "@material-ui/core";
 
 const StyledMenu = withStyles({
   paper: {

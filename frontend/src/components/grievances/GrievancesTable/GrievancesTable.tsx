@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -31,14 +31,14 @@ import { choicesToDict, dateToIsoString } from '../../../utils/utils';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '../../core/TableWrapper';
+import { ButtonTooltip } from "../../core/ButtonTooltip";
+import { useProgramContext } from "../../../programContext";
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { ButtonTooltip } from "../../core/ButtonTooltip";
-import { useProgramContext } from "../../../programContext";
 
 interface GrievancesTableProps {
   filter;
