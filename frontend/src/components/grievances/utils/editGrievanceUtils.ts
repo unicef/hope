@@ -203,7 +203,7 @@ export function prepareInitialValues(
     urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
     partner: ticket.partner?.id,
     comments: ticket.comments,
-    program: [ticket.programs[0]?.id] || '',
+    program: ticket.programs[0]?.id || '',
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
