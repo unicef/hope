@@ -19,7 +19,11 @@ from hct_mis_api.apps.targeting.forms import TargetPopulationForm
 from hct_mis_api.apps.targeting.mixins import TargetPopulationFromListMixin
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.steficon import SteficonExecutorMixin
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    IsOriginalAdminMixin,
+    SoftDeletableAdminMixin,
+)
 
 
 @admin.register(TargetPopulation)
@@ -97,7 +101,7 @@ class TargetPopulationAdmin(
 
 
 @admin.register(HouseholdSelection)
-class HouseholdSelectionAdmin(HOPEModelAdminBase):
+class HouseholdSelectionAdmin(HOPEModelAdminBase, IsOriginalAdminMixin):
     list_display = (
         "household",
         "target_population",
@@ -116,6 +120,13 @@ class HouseholdSelectionAdmin(HOPEModelAdminBase):
         ("vulnerability_score", MaxMinFilter),
     )
     actions = ["reset_sync_date", "reset_vulnerability_score"]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = self.model.original_and_repr_objects.get_queryset()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
 
     def reset_sync_date(self, request: "HttpRequest", queryset: "QuerySet") -> None:
         from hct_mis_api.apps.household.models import Household
