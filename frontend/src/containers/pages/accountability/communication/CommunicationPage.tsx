@@ -1,8 +1,7 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { ProgramStatus, useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
@@ -15,12 +14,15 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { ButtonTooltip } from "../../../../components/core/ButtonTooltip";
+import { useProgramContext } from "../../../../programContext";
 
 export const CommunicationPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
 
   const initialFilter = {
     createdBy: '',
@@ -54,15 +56,17 @@ export const CommunicationPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Communication')}>
-        <Button
+        <ButtonTooltip
           variant='contained'
           color='primary'
           component={Link}
           to={`/${baseUrl}/accountability/communication/create`}
           data-cy='button-communication-create-new'
+          title={t('Program has to be active to create new Message')}
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
         >
           {t('New message')}
-        </Button>
+        </ButtonTooltip>
       </PageHeader>
       <CommunicationFilters
         filter={filter}

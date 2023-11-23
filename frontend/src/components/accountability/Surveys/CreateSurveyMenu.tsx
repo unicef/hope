@@ -1,4 +1,3 @@
-import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu, { MenuProps } from '@material-ui/core/Menu';
@@ -10,6 +9,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SurveyCategory } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import {Button} from "@material-ui/core";
 
 const StyledMenu = withStyles({
   paper: {

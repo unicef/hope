@@ -64,9 +64,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
             <ButtonTooltip
               variant='contained'
               color='primary'
-              title={t(
-                'Program has to be active to create a new Target Population',
-              )}
+              title={t('Program has to be active to create a new Target Population')}
               component={Link}
               to={`/${baseUrl}/target-population/create`}
               data-cy='button-target-population-create-new'

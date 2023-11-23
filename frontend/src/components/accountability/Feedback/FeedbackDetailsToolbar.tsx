@@ -1,12 +1,14 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { FeedbackQuery } from '../../../__generated__/graphql';
+import {FeedbackQuery, ProgramStatus} from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ButtonTooltip } from "../../core/ButtonTooltip";
+import { useProgramContext } from "../../../programContext";
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
@@ -21,6 +23,7 @@ export const FeedbackDetailsToolbar = ({
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const history = useHistory();
+  const { selectedProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -42,21 +45,23 @@ export const FeedbackDetailsToolbar = ({
       <Box display='flex' alignItems='center'>
         {canEdit && (
           <Box mr={3}>
-            <Button
+            <ButtonTooltip
               color='primary'
               variant='outlined'
               component={Link}
               to={`/${baseUrl}/grievance/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
+              title={t('Program has to be active to edit a Feedback')}
+              disabled={selectedProgram?.status !== ProgramStatus.Active}
             >
               {t('Edit')}
-            </Button>
+            </ButtonTooltip>
           </Box>
         )}
         {!hasLinkedGrievance && (
           <Box mr={3}>
-            <Button
+            <ButtonTooltip
               onClick={() =>
                 history.push({
                   pathname: `/${baseUrl}/grievance/new-ticket`,
@@ -71,9 +76,11 @@ export const FeedbackDetailsToolbar = ({
               variant='contained'
               color='primary'
               data-cy='button-create-linked-ticket'
+              title={t('Program has to be active to create a Linked Ticket to Feedback')}
+              disabled={selectedProgram?.status !== ProgramStatus.Active}
             >
               {t('Create Linked Ticket')}
-            </Button>
+            </ButtonTooltip>
           </Box>
         )}
       </Box>
