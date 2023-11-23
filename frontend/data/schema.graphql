@@ -812,6 +812,12 @@ type CreateVerificationPlanMutation {
   paymentPlan: GenericPaymentPlanNode
 }
 
+type DataCollectingTypeChoiceObject {
+  name: String
+  value: String
+  description: String
+}
+
 type DataCollectingTypeNode implements Node {
   id: ID!
   created: DateTime!
@@ -2727,10 +2733,16 @@ type PaginatedPaymentRecordsAndPaymentsNode {
   totalCount: Int
 }
 
+type PartnerNodeForProgram {
+  name: String
+  areas: [String]
+}
+
 type PartnerType {
   id: ID!
   name: String!
   isUn: Boolean!
+  permissions: JSONString!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3430,6 +3442,7 @@ type ProgramNode implements Node {
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
+  partners: [PartnerNodeForProgram]
 }
 
 type ProgramNodeConnection {
@@ -3565,7 +3578,7 @@ type Query {
   cashAssistUrlPrefix: String
   allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   dataCollectingType(id: ID!): DataCollectingTypeNode
-  dataCollectionTypeChoices: [ChoiceObject]
+  dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
