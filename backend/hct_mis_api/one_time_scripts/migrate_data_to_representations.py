@@ -402,10 +402,10 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             household__is_removed=False,
             is_original=True,
         )
+        .exclude(copied_to__household__program=program)
         .select_related("individual", "household")
         .prefetch_related("individual__documents", "individual__identities", "individual__bank_account_info")
         .distinct("individual", "household")
-        .exclude(copied_to__household__program=program)
         .order_by("individual", "household")
     )
 
@@ -457,11 +457,12 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             role.individual = individual_representation
             role.is_original = False
             roles_list.append(role)
-        Individual.objects.bulk_create(individuals_to_create)
-        Document.objects.bulk_create(documents_to_create)
-        IndividualIdentity.objects.bulk_create(identities_to_create)
-        BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
-        IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_list)
+        with transaction.atomic():
+            Individual.objects.bulk_create(individuals_to_create)
+            Document.objects.bulk_create(documents_to_create)
+            IndividualIdentity.objects.bulk_create(identities_to_create)
+            BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+            IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_list)
         del roles_list
 
 
