@@ -20,6 +20,7 @@ import {
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
+  ProgramStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
@@ -32,6 +33,7 @@ import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
+import { useProgramContext } from "../../../../programContext";
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -98,6 +100,8 @@ export const Entitlement = ({
 }: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
     paymentPlan.steficonRule?.rule.id || '',
   );
@@ -139,16 +143,17 @@ export const Entitlement = ({
   );
 
   const shouldDisableEntitlementSelect =
-    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked;
+    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked ||
+    selectedProgram?.status !== ProgramStatus.Active;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked;
+    paymentPlan.status !== PaymentPlanStatus.Locked || selectedProgram?.status !== ProgramStatus.Active;
 
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting;
+    paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    selectedProgram?.status !== ProgramStatus.Active;
 
   return (
     <Box m={5}>
@@ -195,7 +200,8 @@ export const Entitlement = ({
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun
+                    paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun ||
+                    selectedProgram?.status !== ProgramStatus.Active
                   }
                   data-cy='button-apply-steficon'
                   onClick={async () => {

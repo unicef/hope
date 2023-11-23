@@ -5,11 +5,13 @@ import { Link, useParams } from 'react-router-dom';
 import {
   PaymentPlanQuery,
   PaymentPlanStatus,
+  ProgramStatus,
 } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
+import { useProgramContext } from "../../../../programContext";
 
 interface FspSectionProps {
   baseUrl: string;
@@ -22,6 +24,7 @@ export const FspSection = ({
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { selectedProgram } = useProgramContext();
   const { deliveryMechanisms, isFollowUp } = paymentPlan;
   const showFspDisplay = deliveryMechanisms.length;
   const shouldDisableSetUpFsp = (): boolean => {
@@ -29,6 +32,9 @@ export const FspSection = ({
       return false;
     }
     if (!paymentPlan.totalEntitledQuantityUsd) {
+      return true;
+    }
+    if (selectedProgram?.status !== ProgramStatus.Active) {
       return true;
     }
     return false;

@@ -18,8 +18,9 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField/Formi
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery, ProgramStatus } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { useProgramContext } from "../../../../programContext";
 
 export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -29,6 +30,7 @@ export const ApprovePaymentPlan = ({
   paymentPlan,
 }: ApprovePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
 
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -81,6 +83,7 @@ export const ApprovePaymentPlan = ({
                 variant='contained'
                 onClick={() => setApproveDialogOpen(true)}
                 data-cy='button-approve'
+                disabled={selectedProgram?.status !== ProgramStatus.Active}
               >
                 {t('Approve')}
               </Button>
