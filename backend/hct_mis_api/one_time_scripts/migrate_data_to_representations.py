@@ -4,6 +4,7 @@ import os
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -555,13 +556,13 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     Copy HouseholdSelections to new households representations. By this TargetPopulations are adjusted.
     Because TargetPopulation is per program, HouseholdSelections are per program.
     """
-    household_selections = household_selections.order_by("id")
-    household_selection_count = household_selections.count()
-    counter = 0
-    for _ in range(0, household_selection_count, BATCH_SIZE):
-        logger.info(f"Copying household selections {counter} - {counter + BATCH_SIZE}/{household_selection_count}")
+    household_selections_ids = list(household_selections.values_list("id", flat=True))
+    household_selections_queryset = HouseholdSelection.objects.filter(id__in=household_selections_ids).order_by("id")
+    paginator = Paginator(household_selections_queryset, BATCH_SIZE)
+    for page_number in paginator.page_range:
+        batched_household_selections = paginator.page(page_number).object_list
+        logger.info(f"Copying household selections {page_number} of {paginator.num_pages}")
         household_selections_to_create = []
-        batched_household_selections = household_selections[0:BATCH_SIZE]
         household_ids = [x.household_id for x in batched_household_selections]
         household_representations = Household.original_and_repr_objects.filter(
             program=program, copied_from__in=household_ids
@@ -578,8 +579,6 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
                 is_migration_handled=True
             )
-
-        counter += BATCH_SIZE
 
 
 def adjust_payment_objects(business_area: Optional[BusinessArea] = None) -> None:
