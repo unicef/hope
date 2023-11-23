@@ -430,12 +430,13 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
         counter += BATCH_SIZE
 
 
-def adjust_payment_objects() -> None:
-    for business_area in BusinessArea.objects.all():
+def adjust_payment_objects(business_area: Optional[BusinessArea] = None) -> None:
+    business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
+    for business_area in business_areas:
         logger.info(f"Adjusting payments for business area {business_area.name}")
-        adjust_payments(business_area)
+        adjust_payments(business_area)  # type: ignore
         logger.info(f"Adjusting payment records for business area {business_area.name}")
-        adjust_payment_records(business_area)
+        adjust_payment_records(business_area)  # type: ignore
 
 
 def adjust_payments(business_area: BusinessArea) -> None:
