@@ -1,14 +1,13 @@
-import logging
 from typing import Union
 
 from django import forms
 from django.contrib import admin
 from django.forms import CheckboxSelectMultiple, formset_factory
-from django.http import HttpRequest, HttpResponsePermanentRedirect
-from django.shortcuts import redirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
+from django.urls import reverse
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.models import PartnerPermission, Role
@@ -17,8 +16,6 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
 from mptt.forms import TreeNodeMultipleChoiceField
-
-logger = logging.getLogger(__name__)
 
 
 class BusinessAreaRoleForm(forms.Form):
@@ -43,7 +40,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     )
 
     @button()
-    def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponsePermanentRedirect]:
+    def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         parent: account_models.Partner = context["original"]
 
@@ -79,20 +76,18 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
             if business_area_role_form_set.is_valid():
                 for form in business_area_role_form_set.cleaned_data:
-                    if form:
+                    if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
                         role_ids = list(map(lambda role: str(role.id), form["roles"]))
-                        if not form["DELETE"]:
-                            partner_permissions.set_roles(business_area_id, role_ids)
+                        partner_permissions.set_roles(business_area_id, role_ids)
 
             if program_area_form_set.is_valid():
                 for form in program_area_form_set.cleaned_data:
-                    if form:
+                    if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
                         program_id = str(form["program"].id)
                         areas_ids = list(map(lambda area: str(area.id), form["areas"]))
-                        if not form["DELETE"]:
-                            partner_permissions.set_program_areas(business_area_id, program_id, areas_ids)
+                        partner_permissions.set_program_areas(business_area_id, program_id, areas_ids)
 
             for program_area_form in program_area_form_set:
                 if program_area_form.cleaned_data.get("business_area"):
@@ -102,7 +97,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                 parent.set_permissions(partner_permissions)
                 parent.save()
 
-                return redirect(".")
+                return HttpResponseRedirect(reverse("admin:account_partner_change", args=[pk]))
 
         context["business_area_role_formset"] = business_area_role_form_set
         context["program_area_formset"] = program_area_form_set
