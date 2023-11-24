@@ -15,7 +15,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { today } from '../../utils/utils';
 
 interface ProgramFormPropTypes {
-  values: { [key: string]: string | boolean | number };
+  values;
 }
 
 export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
@@ -163,6 +163,7 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             choices={data.programFrequencyOfPaymentsChoices}
             component={FormikRadioGroup}
             data-cy='input-frequency-of-payment'
+            alignItems='center'
           />
         </Grid>
       </Grid>

@@ -26,6 +26,7 @@ export const FormikRadioGroup = ({
   field,
   form,
   withGreyBox = false,
+  alignItems = 'start',
   ...otherProps
 }): React.ReactElement => {
   return (
@@ -48,23 +49,16 @@ export const FormikRadioGroup = ({
               name: string;
             }) => (
               <Box p={2} mb={2} key={each.value}>
-                {withGreyBox ? (
-                  <GreyBox p={2}>
-                    <FormControlLabel
-                      key={each.value}
-                      value={each.value}
-                      label={each.optionLabel || each.name}
-                      control={<Radio color='primary' />}
-                    />
-                  </GreyBox>
-                ) : (
-                  <FormControlLabel
-                    key={each.value}
-                    value={each.value}
-                    label={each.optionLabel || each.name}
-                    control={<Radio color='primary' />}
-                  />
-                )}
+                <Box display='flex' alignItems={alignItems}>
+                  <Radio color='primary' value={each.value} />
+                  {withGreyBox ? (
+                    <GreyBox p={2}>
+                      <Box ml={2}>{each.optionLabel || each.name}</Box>
+                    </GreyBox>
+                  ) : (
+                    <Box ml={2}>{each.optionLabel || each.name}</Box>
+                  )}
+                </Box>
               </Box>
             ),
           )}
