@@ -1,4 +1,3 @@
-import logging
 from typing import Union
 
 from django import forms
@@ -17,8 +16,6 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
 from mptt.forms import TreeNodeMultipleChoiceField
-
-logger = logging.getLogger(__name__)
 
 
 class BusinessAreaRoleForm(forms.Form):
