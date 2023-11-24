@@ -69,7 +69,6 @@ export const LookUpHouseholdTable = ({
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
     program: isAllPrograms ? filter.program : programId,
-    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [selected, setSelected] = useState<string[]>(

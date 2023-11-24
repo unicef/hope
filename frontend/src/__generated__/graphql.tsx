@@ -2336,7 +2336,6 @@ export type HouseholdNodeIndividualsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6391,7 +6390,6 @@ export type QueryAllHouseholdsArgs = {
   headOfHousehold_PhoneNoValid?: Maybe<Scalars['Boolean']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6425,7 +6423,6 @@ export type QueryAllIndividualsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -13034,8 +13031,7 @@ export type AllHouseholdsForPopulationTableQueryVariables = {
   admin2?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   headOfHouseholdPhoneNoValid?: Maybe<Scalars['Boolean']>,
-  program?: Maybe<Scalars['ID']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>
+  program?: Maybe<Scalars['ID']>
 };
 
 
@@ -13183,8 +13179,7 @@ export type AllIndividualsForPopulationTableQueryVariables = {
   withdrawn?: Maybe<Scalars['Boolean']>,
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
-  program?: Maybe<Scalars['ID']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>
+  program?: Maybe<Scalars['ID']>
 };
 
 
@@ -24671,8 +24666,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, searchType: $searchType, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, program: $program, isActiveProgram: $isActiveProgram) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, searchType: $searchType, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, program: $program) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -24766,7 +24761,6 @@ export function withAllHouseholdsForPopulationTable<TProps, TChildProps = {}>(op
  *      withdrawn: // value for 'withdrawn'
  *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
  *      program: // value for 'program'
- *      isActiveProgram: // value for 'isActiveProgram'
  *   },
  * });
  */
@@ -24918,8 +24912,8 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, searchType: $searchType, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags, program: $program, isActiveProgram: $isActiveProgram) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, searchType: $searchType, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags, program: $program) {
     totalCount
     pageInfo {
       startCursor
@@ -25007,7 +25001,6 @@ export function withAllIndividualsForPopulationTable<TProps, TChildProps = {}>(o
  *      admin2: // value for 'admin2'
  *      flags: // value for 'flags'
  *      program: // value for 'program'
- *      isActiveProgram: // value for 'isActiveProgram'
  *   },
  * });
  */

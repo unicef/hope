@@ -7044,16 +7044,6 @@
                 "defaultValue": null
               },
               {
-                "name": "isActiveProgram",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -7350,16 +7340,6 @@
                     "name": "String",
                     "ofType": null
                   }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "isActiveProgram",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -17428,16 +17408,6 @@
                     "name": "String",
                     "ofType": null
                   }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "isActiveProgram",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
                 },
                 "defaultValue": null
               },
