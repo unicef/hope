@@ -1,3 +1,4 @@
+import { Box, Grid } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
@@ -15,9 +16,6 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { selectFields, today } from '../../utils/utils';
-import { Box, Grid } from '@material-ui/core';
-import { BaseSection } from '../../components/core/BaseSection';
-import { GreyBox } from '../../components/core/GreyBox';
 
 interface ProgramFormPropTypes {
   program?: ProgramQuery['program'];
