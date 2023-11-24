@@ -409,9 +409,9 @@ class Query(graphene.ObjectType):
                 deprecated=False,
                 limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
+            .exclude(code__iexact="unknown")
             .only("code", "label", "description")
             .values("code", "label", "description")
-            .order_by("label")
         )
         result = []
         for data_collection_type in data_collecting_types:
