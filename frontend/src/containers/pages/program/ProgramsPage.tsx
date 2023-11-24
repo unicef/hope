@@ -1,3 +1,4 @@
+import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
@@ -5,13 +6,12 @@ import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
-import { Button } from '@material-ui/core';
 
 const initialFilter = {
   search: '',

@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
+import { GreyBox } from '../../../components/core/GreyBox';
 
 const FormLabelContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing(3)}px;
@@ -24,6 +25,7 @@ const FormLabelContainer = styled.div`
 export const FormikRadioGroup = ({
   field,
   form,
+  withGreyBox = false,
   ...otherProps
 }): React.ReactElement => {
   return (
@@ -39,16 +41,33 @@ export const FormikRadioGroup = ({
           value={form.values[field.name]}
           id={`radioGroup-${field.name}`}
         >
-          {otherProps.choices.map((each) => (
-            <Box p={1} mb={3} key={each.value}>
-              <FormControlLabel
-                key={each.value}
-                value={each.value}
-                label={each.name}
-                control={<Radio color='primary' />}
-              />
-            </Box>
-          ))}
+          {otherProps.choices.map(
+            (each: {
+              value: string;
+              optionLabel?: string | React.ReactElement;
+              name: string;
+            }) => (
+              <Box p={2} mb={3} key={each.value}>
+                {withGreyBox ? (
+                  <GreyBox p={2}>
+                    <FormControlLabel
+                      key={each.value}
+                      value={each.value}
+                      label={each.optionLabel || each.name}
+                      control={<Radio color='primary' />}
+                    />
+                  </GreyBox>
+                ) : (
+                  <FormControlLabel
+                    key={each.value}
+                    value={each.value}
+                    label={each.optionLabel || each.name}
+                    control={<Radio color='primary' />}
+                  />
+                )}
+              </Box>
+            ),
+          )}
         </RadioGroup>
       </Box>
     </>
