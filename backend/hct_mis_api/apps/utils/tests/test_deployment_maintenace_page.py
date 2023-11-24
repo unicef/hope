@@ -23,23 +23,23 @@ class TestMaintenancePage(APITestCase):
             response = api_client.get(endpoint)
             assert response.status_code == 403
 
-        not_blocked_endpoionts = [
+        not_blocked_endpoints = [
             "/api/unicorn",
             "/_health",
             "/api/_health",
         ]
-        blocked_enpoints = [
+        blocked_endpoints = [
             "/",
         ]
 
         assert MigrationStatus.objects.count() == 0
-        for endpoint in not_blocked_endpoionts:
+        for endpoint in not_blocked_endpoints:
             assert_ok(endpoint)
-        for endpoint in blocked_enpoints:
+        for endpoint in blocked_endpoints:
             assert_ok(endpoint)
 
         MigrationStatus.objects.create(is_running=True)
-        for endpoint in not_blocked_endpoionts:
+        for endpoint in not_blocked_endpoints:
             assert_ok(endpoint)
-        for endpoint in blocked_enpoints:
+        for endpoint in blocked_endpoints:
             assert_forbidden(endpoint)
