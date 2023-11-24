@@ -30,6 +30,9 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
 )
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
@@ -311,6 +314,16 @@ class PaymentPlanService:
             Payment.objects.bulk_create(payments_to_create)
         except IntegrityError as e:
             raise GraphQLError("Duplicated Households in provided Targeting") from e
+        payment_plan.refresh_from_db()
+        create_payment_plan_snapshot_data(payment_plan)
+        PaymentPlanService.generate_signature(payment_plan)
+
+    @staticmethod
+    def generate_signature(payment_plan: PaymentPlan) -> None:
+        payments = payment_plan.payment_items.select_related("household_snapshot").all()
+        for payment in payments:
+            payment.update_signature_hash()
+        Payment.objects.bulk_update(payments, ["signature_hash"])
 
     @staticmethod
     def create(input_data: Dict, user: "User") -> PaymentPlan:
@@ -589,6 +602,8 @@ class PaymentPlanService:
             for payment in payments_to_copy
         ]
         Payment.objects.bulk_create(follow_up_payments)
+        create_payment_plan_snapshot_data(self.payment_plan)
+        PaymentPlanService.generate_signature(self.payment_plan)
 
     @transaction.atomic
     def create_follow_up(

@@ -33,7 +33,7 @@ describe("Targeting", () => {
         "Go to Targeting Details page",
         "Check if all elements on page exist",
       ]);
-      targetingPage.getButtonFiltersExpand().click();
+      // targetingPage.getButtonFiltersExpand().click();
       targetingPage.selectStatus("Open");
       targetingPage.getTargetPopulationsRows().should("have.length", 1);
       targetingPage.chooseTargetPopulationRow(0).click();
@@ -167,7 +167,7 @@ describe("Targeting", () => {
         "Delete value from Number of Households",
         "Press button Apply",
       ]);
-      targetingPage.getButtonFiltersExpand().click();
+      // targetingPage.getButtonFiltersExpand().click();
       targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
       targetingPage.getMinNumberOfHouseholdsFilter().type("456");
       targetingPage.getApply().click();

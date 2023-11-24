@@ -62,6 +62,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         )
         cls.household = household
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
         tp = TargetPopulation(
             name="Original Target Population", status="LOCKED", business_area=cls.business_area, program=cls.program
         )

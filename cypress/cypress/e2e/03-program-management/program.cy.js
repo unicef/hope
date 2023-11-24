@@ -82,7 +82,7 @@ describe("Program Management", () => {
         "Edit Programme",
         "Check if programme was edited properly",
       ]);
-      programManagement.getButtonFiltersExpand().click();
+      // programManagement.getButtonFiltersExpand().click();
       programManagement.getStatusFilter().click();
       programManagement.getOption().contains("Active").click();
       programManagement.getButtonApply().click();

@@ -143,6 +143,9 @@ class TestHouseholdQuery(APITestCase):
             business_area=cls.business_area,
             status=Program.DRAFT,
         )
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_one)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_two)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
         cls.households = []
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()

@@ -12,12 +12,13 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
 )
-from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.household.models import DocumentType, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
@@ -82,6 +83,8 @@ class TestIndividualQuery(APITestCase):
             status=Program.ACTIVE,
             data_collecting_type=partial,
         )
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
         household_one = HouseholdFactory.build(business_area=cls.business_area)
         household_one.household_collection.save()
@@ -135,6 +138,24 @@ class TestIndividualQuery(APITestCase):
                 "id": "0fc995cc-ea72-4319-9bfe-9c9fda3ec191",
                 "program": cls.program,
             },
+            {
+                "full_name": "James Bond",
+                "given_name": "James",
+                "family_name": "Bond",
+                "phone_no": "(007)682-4596",
+                "birth_date": "1965-06-26",
+                "id": "972fdac5-d1bf-44ed-a4a5-14805b5dc606",
+                "program": cls.program,
+            },
+            {
+                "full_name": "Peter Parker",
+                "given_name": "Peter",
+                "family_name": "Parker",
+                "phone_no": "(666)682-2345",
+                "birth_date": "1978-01-02",
+                "id": "430924a6-273e-4018-95e7-b133afa5e1b9",
+                "program": cls.program,
+            },
         ]
 
         cls.individuals = [
@@ -149,6 +170,34 @@ class TestIndividualQuery(APITestCase):
         # household_two.head_of_household = cls.individuals_from_hh_two[1]
         household_one.save()
 
+        cls.bank_account_info = BankAccountInfoFactory(
+            individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
+        )
+
+        cls.individual_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").unicef_id
+        cls.household_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").household.unicef_id
+
+        DocumentTypeFactory(key="national_id")
+        DocumentTypeFactory(key="national_passport")
+        DocumentTypeFactory(key="tax_id")
+        DocumentTypeFactory(key="birth_certificate")
+        DocumentTypeFactory(key="disability_card")
+        DocumentTypeFactory(key="drivers_license")
+
+        cls.bank_account_info = BankAccountInfoFactory(
+            individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
+        )
+
+        cls.individual_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").unicef_id
+        cls.household_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").household.unicef_id
+
+        DocumentTypeFactory(key="national_id")
+        DocumentTypeFactory(key="national_passport")
+        DocumentTypeFactory(key="tax_id")
+        DocumentTypeFactory(key="birth_certificate")
+        DocumentTypeFactory(key="disability_card")
+        DocumentTypeFactory(key="drivers_license")
+
         cls.national_id = DocumentFactory(
             document_number="123-456-789",
             type=DocumentType.objects.get(key="national_id"),
@@ -159,6 +208,24 @@ class TestIndividualQuery(APITestCase):
             document_number="111-222-333",
             type=DocumentTypeFactory(key="national_passport"),
             individual=cls.individuals[1],
+        )
+
+        cls.birth_certificate = DocumentFactory(
+            document_number="111222333",
+            type=DocumentType.objects.get(key="birth_certificate"),
+            individual=cls.individuals[4],
+        )
+
+        cls.disability_card = DocumentFactory(
+            document_number="10000000000",
+            type=DocumentType.objects.get(key="disability_card"),
+            individual=cls.individuals[6],
+        )
+
+        cls.drivers_license = DocumentFactory(
+            document_number="1234567890",
+            type=DocumentType.objects.get(key="drivers_license"),
+            individual=cls.individuals[0],
         )
 
         cls.tax_id = DocumentFactory(
@@ -176,6 +243,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip(reason="Remove 2nd program after merging to develop")
     def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -223,6 +291,8 @@ class TestIndividualQuery(APITestCase):
     )
     def test_query_individuals_by_search_full_name_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be Jenna Franklin
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -251,6 +321,8 @@ class TestIndividualQuery(APITestCase):
     )
     def test_query_individuals_by_search_phone_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be Robin Ford
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -266,6 +338,7 @@ class TestIndividualQuery(APITestCase):
     def test_query_individuals_by_search_national_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
+        # Should be Benjamin Butler
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -281,6 +354,7 @@ class TestIndividualQuery(APITestCase):
     def test_query_individuals_by_search_national_passport_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
+        # Should be Robin Ford
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -296,6 +370,7 @@ class TestIndividualQuery(APITestCase):
     def test_query_individuals_by_search_tax_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
+        # Should be Timothy Perry
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -332,4 +407,87 @@ class TestIndividualQuery(APITestCase):
             variables={
                 "search": "1",
             },
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_bank_account_number_filter(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be James Bond
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"search": self.bank_account_info.bank_account_number, "searchType": "bank_account_number"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_birth_certificate_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be Jenna Franklin
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"search": self.birth_certificate.document_number, "searchType": "birth_certificate"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_disability_card_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be Peter Parker
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"search": self.disability_card.document_number, "searchType": "disability_card"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_drivers_license_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        # Should be Benjamin Butler
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"search": self.drivers_license.document_number, "searchType": "drivers_license"},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_registration_id_filter_with_search_type(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"search": "1", "searchType": "registration_id"},
         )

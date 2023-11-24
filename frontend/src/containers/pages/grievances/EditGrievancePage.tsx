@@ -23,9 +23,9 @@ import {
   useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { ContentLink } from '../../../components/core/ContentLink';
 import { DividerLine } from '../../../components/core/DividerLine';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -393,18 +393,22 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={3}>
                           <LabelizedField label={t('Household ID')}>
                             <span>
-                              {ticket.household?.id ? (
-                                <ContentLink
-                                  href={
+                              {ticket.household?.id && !isAllPrograms ? (
+                                <BlackLink
+                                  to={
                                     canViewHouseholdDetails
                                       ? `/${baseUrl}/population/household/${ticket.household.id}`
                                       : undefined
                                   }
                                 >
                                   {ticket.household.unicefId}
-                                </ContentLink>
+                                </BlackLink>
                               ) : (
-                                '-'
+                                <div>
+                                  {ticket.household?.id
+                                    ? ticket.household.unicefId
+                                    : '-'}
+                                </div>
                               )}
                             </span>
                           </LabelizedField>
@@ -412,18 +416,22 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={3}>
                           <LabelizedField label={t('Individual ID')}>
                             <span>
-                              {ticket.individual?.id ? (
-                                <ContentLink
-                                  href={
+                              {ticket.individual?.id && !isAllPrograms ? (
+                                <BlackLink
+                                  to={
                                     canViewIndividualDetails
                                       ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
                                       : undefined
                                   }
                                 >
                                   {ticket.individual.unicefId}
-                                </ContentLink>
+                                </BlackLink>
                               ) : (
-                                '-'
+                                <div>
+                                  {ticket.individual?.id
+                                    ? ticket.individual.unicefId
+                                    : '-'}
+                                </div>
                               )}
                             </span>
                           </LabelizedField>
