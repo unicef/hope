@@ -5,9 +5,9 @@ from django.contrib import admin
 from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
 
 from admin_extra_buttons.decorators import button
-from django.urls import reverse
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.models import PartnerPermission, Role
