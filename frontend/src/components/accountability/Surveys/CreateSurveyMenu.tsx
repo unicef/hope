@@ -8,8 +8,9 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from "@material-ui/core";
-import { SurveyCategory } from '../../../__generated__/graphql';
+import { ProgramStatus, SurveyCategory } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useProgramContext } from "../../../programContext";
 
 const StyledMenu = withStyles({
   paper: {
@@ -46,6 +47,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
@@ -72,6 +74,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         onClick={handleClick}
         endIcon={anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         data-cy='button-new-survey'
+        disabled={selectedProgram?.status !== ProgramStatus.Active}
       >
         {t('New Survey')}
       </Button>
