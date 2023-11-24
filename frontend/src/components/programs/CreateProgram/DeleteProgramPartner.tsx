@@ -36,6 +36,7 @@ export const DeleteProgramPartner = ({
   return (
     <>
       <Button
+        style={{ color: '#979797' }}
         variant='outlined'
         color='secondary'
         onClick={() => setOpen(true)}
@@ -63,7 +64,7 @@ export const DeleteProgramPartner = ({
               error
               type='submit'
               variant='contained'
-              onClick={() => handleDeleteProgramPartner(partner.id)}
+              onClick={() => handleDeleteProgramPartner()}
               data-cy='button-delete'
               endIcon={<WhiteDeleteIcon />}
             >

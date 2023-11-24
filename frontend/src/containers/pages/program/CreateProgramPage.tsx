@@ -1,5 +1,6 @@
 import { Box, Button, Step, StepLabel, Stepper } from '@material-ui/core';
 import React, { ReactElement, useState } from 'react';
+import AddIcon from '@material-ui/icons/Add';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,10 +30,6 @@ export const CreateProgramPage = (): ReactElement => {
       .required(t('Programme name is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    scope: Yup.string()
-      .required(t('CashAssist Scope is required'))
-      .min(2, t('Too short'))
-      .max(50, t('Too long')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
@@ -49,25 +46,22 @@ export const CreateProgramPage = (): ReactElement => {
           ),
         '',
       ),
-    sector: Yup.string()
-      .required(t('Sector is required'))
+    sector: Yup.string().required(t('Sector is required')),
+    dataCollectingTypeCode: Yup.string().required(
+      t('Data Collecting Type is required'),
+    ),
+    description: Yup.string()
       .min(2, t('Too short'))
-      .max(50, t('Too long')),
+      .max(255, t('Too long')),
     budget: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    description: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
     populationGoal: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
-    dataCollectingTypeCode: Yup.string().required(
-      t('Data Collecting Type is required'),
-    ),
   });
 
   const [step, setStep] = useState(0);
@@ -106,26 +100,6 @@ export const CreateProgramPage = (): ReactElement => {
     }
   };
 
-  const renderActions = (submitHandler): ReactElement => {
-    return (
-      <>
-        <Button component={Link} to={`/${baseUrl}/list`}>
-          {t('Cancel')}
-        </Button>
-        <LoadingButton
-          loading={loading}
-          onClick={submitHandler}
-          type='submit'
-          color='primary'
-          variant='contained'
-          data-cy='button-save'
-        >
-          {t('Save')}
-        </LoadingButton>
-      </>
-    );
-  };
-
   const detailsDescription = t(
     'To create a new Programme, please complete all required fields on the form below and save.',
   );
@@ -134,117 +108,122 @@ export const CreateProgramPage = (): ReactElement => {
     'Provide info about Programme Partner and set Area Access',
   );
 
-  const [partners, setPartners] = useState([
-    { id: uuidv4() },
-    { id: uuidv4() },
-    { id: uuidv4() },
-  ]);
-
-  const handleAddNewPartner = (): void => {
-    setPartners([...partners, { id: uuidv4() }]);
-  };
-
-  const handleDeleteProgramPartner = (id: string): void => {
-    setPartners(partners.filter((item) => item.id !== id));
-  };
+  //TODO: remove this
+  const partners = [{ id: uuidv4() }, { id: uuidv4() }, { id: uuidv4() }];
 
   const initialValues = {
     name: '',
-    scope: '',
     startDate: '',
     endDate: '',
+    sector: '',
+    dataCollectingTypeCode: '',
     description: '',
     budget: '0.00',
     administrativeAreasOfImplementation: '',
-    populationGoal: 0,
-    frequencyOfPayments: 'REGULAR',
-    sector: '',
+    populationGoal: null,
     cashPlus: false,
-    dataCollectingTypeCode: '',
+    frequencyOfPayments: 'REGULAR',
+    partners,
   };
 
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values, { setValues, submitForm }) => {
+      onSubmit={(values, { setValues }) => {
         const newValues = { ...values };
         newValues.budget = Number(values.budget).toFixed(2);
         setValues(newValues);
-        return submitForm();
+        handleSubmit(values);
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values }) => (
-        <>
-          <PageHeader title={t('Create Programme')}>
-            <Box display='flex' alignItems='center'>
-              <Button component={Link} to={`${baseUrl}/list`}>
-                {t('Cancel')}
-              </Button>
-              <Button variant='contained' color='primary' onClick={submitForm}>
-                {t('Save')}
-              </Button>
-            </Box>
-          </PageHeader>
-          <Stepper activeStep={step}>
-            <Step>
-              <StepLabel>{t('Details')}</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>{t('Programme Partners')}</StepLabel>
-            </Step>
-          </Stepper>
-          {step === 0 && (
-            <BaseSection title={t('Details')} description={detailsDescription}>
-              <>
-                <ProgramForm values={values} />
-                <Box display='flex' justifyContent='flex-end'>
-                  <Box mr={2}>
+      {({ submitForm, values }) => {
+        return (
+          <>
+            <PageHeader title={t('Create Programme')}>
+              <Box display='flex' alignItems='center'>
+                <Button component={Link} to={`${baseUrl}/list`}>
+                  {t('Cancel')}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={submitForm}
+                >
+                  {t('Save')}
+                </Button>
+              </Box>
+            </PageHeader>
+            <Stepper activeStep={step}>
+              <Step>
+                <StepLabel>{t('Details')}</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>{t('Programme Partners')}</StepLabel>
+              </Step>
+            </Stepper>
+            {step === 0 && (
+              <BaseSection
+                title={t('Details')}
+                description={detailsDescription}
+              >
+                <>
+                  <ProgramForm values={values} />
+                  <Box display='flex' justifyContent='flex-end'>
+                    <Box mr={2}>
+                      <Button
+                        variant='outlined'
+                        onClick={() => setStep(step - 1)}
+                        disabled={step === 0}
+                      >
+                        {t('Back')}
+                      </Button>
+                    </Box>
                     <Button
-                      variant='outlined'
-                      onClick={() => setStep(step - 1)}
-                      disabled={step === 0}
+                      variant='contained'
+                      color='primary'
+                      onClick={() => setStep(step + 1)}
                     >
-                      {t('Back')}
+                      {t('Next')}
                     </Button>
                   </Box>
-                  <Button
-                    variant='contained'
-                    color='primary'
-                    onClick={() => setStep(step + 1)}
-                  >
-                    {t('Next')}
-                  </Button>
-                </Box>
-              </>
-            </BaseSection>
-          )}
-          {step === 1 && (
-            <BaseSection
-              title={t('Programme Partners')}
-              description={partnersDescription}
-            >
-              <FieldArray
-                name='partners'
-                render={(arrayHelpers) => (
-                  <>
-                    {partners.map((partner, index) => (
-                      <ProgramPartnerCard
-                        key={partner.id}
-                        partner={partner}
-                        handleDeleteProgramPartner={handleDeleteProgramPartner}
-                        index={index}
-                        total={partners.length}
-                        arrayHelpers={arrayHelpers}
-                      />
-                    ))}
-                  </>
-                )}
-              />
-            </BaseSection>
-          )}
-        </>
-      )}
+                </>
+              </BaseSection>
+            )}
+            {step === 1 && (
+              <BaseSection
+                title={t('Programme Partners')}
+                description={partnersDescription}
+              >
+                <FieldArray
+                  name='partners'
+                  render={(arrayHelpers) => (
+                    <>
+                      {values.partners.map((partner, index) => (
+                        <ProgramPartnerCard
+                          key={partner.id}
+                          partner={partner}
+                          index={index}
+                          values={values}
+                          arrayHelpers={arrayHelpers}
+                        />
+                      ))}
+                      <Button
+                        onClick={() => arrayHelpers.push({ id: uuidv4() })}
+                        variant='outlined'
+                        color='primary'
+                        endIcon={<AddIcon />}
+                      >
+                        {t('Add Partner')}
+                      </Button>
+                    </>
+                  )}
+                />
+              </BaseSection>
+            )}
+          </>
+        );
+      }}
     </Formik>
   );
 };
