@@ -9,8 +9,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-2"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-text makeStyles-error-3"
-        tabindex="0"
+        class="MuiButtonBase-root MuiButton-root MuiButton-text makeStyles-error-3 Mui-disabled Mui-disabled"
+        disabled=""
+        tabindex="-1"
         type="button"
       >
         <span
@@ -18,18 +19,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
         >
           Reject
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </button>
     </div>
     <div
       class="MuiBox-root MuiBox-root-4"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
         data-cy="button-authorize"
-        tabindex="0"
+        disabled=""
+        tabindex="-1"
         type="button"
       >
         <span
@@ -37,9 +36,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
         >
           Authorize
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </button>
     </div>
   </div>

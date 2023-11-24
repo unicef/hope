@@ -3,12 +3,7 @@ import re
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import (
-    CharFilter,
-    ChoiceFilter,
-    FilterSet,
-    UUIDFilter,
-)
+from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
 
 from hct_mis_api.apps.accountability.models import (
     Feedback,
