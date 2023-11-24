@@ -1,22 +1,22 @@
 import { Button } from '@material-ui/core';
-import { v4 as uuidv4 } from 'uuid';
-import React, { ReactElement, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import AddIcon from '@material-ui/icons/Add';
+import React, { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AllProgramsForChoicesDocument,
   useCreateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { BaseSection } from '../../../components/core/BaseSection';
 import { LoadingButton } from '../../../components/core/LoadingButton';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { ProgramPartnerCard } from '../../../components/programs/CreateProgram/ProgramPartnerCard';
+import { ProgramPartnersSection } from '../../../components/programs/CreateProgram/ProgramPartnersSection';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ProgramForm } from '../../forms/ProgramForm';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { BaseSection } from '../../../components/core/BaseSection';
-import { ProgramPartnersSection } from '../../../components/programs/CreateProgram/ProgramPartnersSection';
-import { ProgramPartnerAccessCard } from '../../../components/programs/CreateProgram/ProgramPartnerCard';
 
 export const CreateProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
@@ -131,7 +131,7 @@ export const CreateProgramPage = (): ReactElement => {
             </Button>
           </PageHeader>
           {partners.map((partner) => (
-            <ProgramPartnerAccessCard
+            <ProgramPartnerCard
               key={partner.id}
               partner={partner}
               handleDeleteProgramPartner={handleDeleteProgramPartner}
