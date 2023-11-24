@@ -56,7 +56,7 @@ export const FeedbackTableRow = ({
           : 'Negative Feedback'}
       </TableCell>
       <TableCell align='left'>
-        {feedback.householdLookup?.id ? (
+        {feedback.householdLookup?.id && !isAllPrograms ? (
           <BlackLink to={householdDetailsPath}>
             {feedback.householdLookup?.unicefId}
           </BlackLink>

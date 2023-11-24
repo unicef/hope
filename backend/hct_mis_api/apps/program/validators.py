@@ -47,12 +47,13 @@ class CashPlanValidator(BaseValidator):
 
 
 def validate_data_collecting_type(
-    original_program_data_collecting_type: "DataCollectingType",
-    data_collecting_type: "DataCollectingType",
     business_area: "BusinessArea",
+    original_program_data_collecting_type: Optional["DataCollectingType"] = None,
+    data_collecting_type: Optional["DataCollectingType"] = None,
 ) -> None:
     if business_area not in data_collecting_type.limit_to.all():
         raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
-
-    if data_collecting_type not in original_program_data_collecting_type.compatible_types.all():
-        raise ValidationError("The Data Collection Type must match or be compatible with the original Programme.")
+    if not original_program_data_collecting_type:
+        raise ValidationError("The original Programme must have a Data Collection Type.")
+    elif data_collecting_type not in original_program_data_collecting_type.compatible_types.all():
+        raise ValidationError("The Data Collection Type must be compatible with the original Programme.")

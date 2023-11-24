@@ -38,6 +38,7 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     chart_permission_decorator,
     encode_ids,
+    get_program_id_from_headers,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
@@ -117,6 +118,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
+        # TODO: grievances should be cross program ??? remove program_id
+        program_id = get_program_id_from_headers(info.context.headers)
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
@@ -127,9 +130,13 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
             owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
 
-        check_creator = object_instance.created_by == user and user.has_permission(creator_perm, business_area)
-        check_assignee = object_instance.assigned_to == user and user.has_permission(owner_perm, business_area)
-        if user.has_permission(perm, business_area) or check_creator or check_assignee:
+        check_creator = object_instance.created_by == user and user.has_permission(
+            creator_perm, business_area, program_id
+        )
+        check_assignee = object_instance.assigned_to == user and user.has_permission(
+            owner_perm, business_area, program_id
+        )
+        if user.has_permission(perm, business_area, program_id) or check_creator or check_assignee:
             return None
 
         log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")

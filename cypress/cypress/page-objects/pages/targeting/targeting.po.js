@@ -53,7 +53,7 @@ export default class Targeting extends BaseComponent {
 
   checkElementsOnPage() {
     this.getTitlePage().should("be.visible").contains(this.textTitlePage);
-    this.getButtonFiltersExpand().click();
+    // this.getButtonFiltersExpand().click();
     this.getSearchFilter().should("be.visible");
     this.getStatusFilter().should("be.visible");
     this.getMinNumberOfHouseholdsFilter().should("be.visible");

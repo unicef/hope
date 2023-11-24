@@ -83,7 +83,7 @@ class Partner(models.Model):
         permissions structure
         {
             "business_area_id": {
-                "roles": ["role_id_1", "role_id_2"]
+                "roles": ["role_id_1", "role_id_2"],
                 "programs": {"program_id":["admin_id"]}
             }
         }
@@ -96,6 +96,10 @@ class Partner(models.Model):
     @classmethod
     def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
+
+    @property
+    def is_unicef(self) -> bool:
+        return self.name == "UNICEF"
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -138,16 +142,44 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def get_partner_role_ids_list(
         self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
     ) -> List:
+        if not business_area_slug and not business_area_id:
+            return list()
+
         if not business_area_id and business_area_slug:
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
         partner_role_ids = self.partner.permissions.get(str(business_area_id), {}).get("roles", [])
         return partner_role_ids
 
-    def permissions_in_business_area(self, business_area_slug: str) -> List:
-        partner_role_ids = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
+    def get_partner_programs_areas_dict(
+        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+    ) -> Dict:
+        if not business_area_slug and not business_area_id:
+            return dict()
+
+        if not business_area_id and business_area_slug:
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        partner_programs_dict = self.partner.permissions.get(str(business_area_id), {}).get("programs", {})
+        return partner_programs_dict
+
+    def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> List:
+        """
+        return list of permissions based on User Role BA and User Partner
+        if program_id in arguments need to check if user.partner.permissions json has program id
+        """
+        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        has_program_access = True
+        if program_id:
+            if self.partner.is_unicef:
+                has_program_access = True
+            else:
+                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
+                    business_area_slug=business_area_slug
+                )
+
+        partner_role_ids_per_ba = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
 
         all_partner_roles_permissions_list = list(
-            Role.objects.filter(id__in=partner_role_ids).values_list("permissions", flat=True)
+            Role.objects.filter(id__in=partner_role_ids_per_ba).values_list("permissions", flat=True)
         )
         all_user_roles_permissions_list = list(
             Role.objects.filter(
@@ -155,14 +187,30 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
                 user_roles__business_area__slug=business_area_slug,
             ).values_list("permissions", flat=True)
         )
-        return list(
-            set(
-                [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                + [perm for perms in all_user_roles_permissions_list for perm in perms]
+        return (
+            list(
+                set(
+                    [perm for perms in all_partner_roles_permissions_list for perm in perms]
+                    + [perm for perms in all_user_roles_permissions_list for perm in perms]
+                )
             )
+            if has_program_access
+            else list()
         )
 
-    def has_permission(self, permission: str, business_area: BusinessArea, write: bool = False) -> bool:
+    def has_permission(
+        self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
+    ) -> bool:
+        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        has_program_access = True
+        if program_id:
+            if self.partner.is_unicef:
+                has_program_access = True
+            else:
+                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
+                    business_area_id=business_area.pk
+                )
+
         partner_role_ids = self.get_partner_role_ids_list(business_area_id=business_area.pk)
 
         partner_roles = Role.objects.filter(
@@ -175,7 +223,14 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             user_roles__user=self,
             user_roles__business_area=business_area,
         )
-        return user_roles.count() > 0 or partner_roles.count() > 0
+        return has_program_access and (user_roles.count() > 0 or partner_roles.count() > 0)
+
+    def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
+        partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(
+            str(program_id), []
+        )
+
+        return partner_areas_ids_per_program
 
     def can_download_storage_files(self) -> bool:
         return any(

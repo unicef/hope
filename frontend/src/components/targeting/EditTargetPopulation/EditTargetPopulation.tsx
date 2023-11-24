@@ -79,8 +79,8 @@ export const EditTargetPopulation = ({
   };
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(2, 'Too short')
-      .max(255, 'Too long'),
+      .min(3, 'Targeting name should have at least 3 characters.')
+      .max(255, 'Targeting name should have at most 255 characters.'),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',

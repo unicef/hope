@@ -324,7 +324,7 @@ DATABASE_APPS_MAPPING: Dict[str, str] = {
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 
 MIDDLEWARE = [
-    "hct_mis_api.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
+    # "hct_mis_api.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
 ] + [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",

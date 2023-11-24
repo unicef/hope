@@ -21,7 +21,7 @@ export const LookUpIndividualTableRow = ({
   radioChangeHandler,
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
 
   return (
     <ClickableTableRow
@@ -46,13 +46,17 @@ export const LookUpIndividualTableRow = ({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${baseUrl}/population/individuals/${individual.id}`}>
-          {individual.unicefId}
-        </BlackLink>
+        {!isAllPrograms ? (
+          <BlackLink to={`/${baseUrl}/population/individuals/${individual.id}`}>
+            {individual.unicefId}
+          </BlackLink>
+        ) : (
+          <span>{individual.unicefId || '-'}</span>
+        )}
       </TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
-        {individual.household ? individual.household.unicefId : ''}
+        {individual.household ? individual.household.unicefId : '-'}
       </TableCell>
       <TableCell align='right'>{individual.age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>

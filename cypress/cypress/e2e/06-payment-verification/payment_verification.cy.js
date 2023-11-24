@@ -13,7 +13,7 @@ describe("Payment Verification", () => {
   beforeEach(() => {
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
-    paymentVerificationPage.getButtonFiltersExpand().click();
+    // paymentVerificationPage.getButtonFiltersExpand().click();
   });
 
   after(() => {

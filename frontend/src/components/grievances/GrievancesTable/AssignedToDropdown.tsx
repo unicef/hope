@@ -41,6 +41,7 @@ export const AssignedToDropdown = ({
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
   const { selectedProgram } = useProgramContext();
+  const debouncedInputText = useDebounce(inputValue, 800);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     e.preventDefault();
