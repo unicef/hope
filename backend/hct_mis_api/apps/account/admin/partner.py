@@ -76,20 +76,18 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
             if business_area_role_form_set.is_valid():
                 for form in business_area_role_form_set.cleaned_data:
-                    if form:
+                    if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
                         role_ids = list(map(lambda role: str(role.id), form["roles"]))
-                        if not form["DELETE"]:
-                            partner_permissions.set_roles(business_area_id, role_ids)
+                        partner_permissions.set_roles(business_area_id, role_ids)
 
             if program_area_form_set.is_valid():
                 for form in program_area_form_set.cleaned_data:
-                    if form:
+                    if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
                         program_id = str(form["program"].id)
                         areas_ids = list(map(lambda area: str(area.id), form["areas"]))
-                        if not form["DELETE"]:
-                            partner_permissions.set_program_areas(business_area_id, program_id, areas_ids)
+                        partner_permissions.set_program_areas(business_area_id, program_id, areas_ids)
 
             for program_area_form in program_area_form_set:
                 if program_area_form.cleaned_data.get("business_area"):
