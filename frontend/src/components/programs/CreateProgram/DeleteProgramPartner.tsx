@@ -12,7 +12,6 @@ import styled from 'styled-components';
 import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { ErrorButton } from '../../core/ErrorButton';
 import { GreyText } from '../../core/GreyText';
 import { LoadingButton } from '../../core/LoadingButton';
 
@@ -36,13 +35,14 @@ export const DeleteProgramPartner = ({
 
   return (
     <>
-      <ErrorButton
+      <Button
         variant='outlined'
+        color='secondary'
         onClick={() => setOpen(true)}
         disabled={!canDeleteProgramPartner}
       >
         <Delete />
-      </ErrorButton>
+      </Button>
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <DialogTitleWrapper>
           <DialogTitle>

@@ -100,12 +100,9 @@ export const EditProgramPage = (): ReactElement => {
   return (
     <>
       <PageHeader title={`${t('Edit Programme')}: (${program.name})`} />
+      {/* //TODO: fix */}
       <BaseSection title={t('Details')} description={detailsDescription}>
-        <ProgramForm
-          actions={(submit) => renderActions(submit)}
-          onSubmit={handleSubmit}
-          program={program}
-        />
+        <ProgramForm values={{}} />
       </BaseSection>
     </>
   );

@@ -47,7 +47,7 @@ export const FormikRadioGroup = ({
               optionLabel?: string | React.ReactElement;
               name: string;
             }) => (
-              <Box p={2} mb={3} key={each.value}>
+              <Box p={2} mb={2} key={each.value}>
                 {withGreyBox ? (
                   <GreyBox p={2}>
                     <FormControlLabel
