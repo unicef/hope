@@ -13,7 +13,6 @@ export const AllFeedbacks = gql`
     $feedbackId: String
     $orderBy: String
     $program: String
-    $isActiveProgram: Boolean
   ) {
     allFeedbacks(
       offset: $offset
@@ -27,7 +26,6 @@ export const AllFeedbacks = gql`
       feedbackId: $feedbackId
       orderBy: $orderBy
       program: $program
-      isActiveProgram: $isActiveProgram
     ) {
       totalCount
       pageInfo {

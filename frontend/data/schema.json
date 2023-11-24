@@ -495,16 +495,6 @@
                 "defaultValue": null
               },
               {
-                "name": "isActiveProgram",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "program",
                 "description": null,
                 "type": {
