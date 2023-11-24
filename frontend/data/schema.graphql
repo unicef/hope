@@ -186,6 +186,14 @@ type AreaNodeEdge {
   cursor: String!
 }
 
+type AreaSimpleNode {
+  id: String
+  name: String
+  level: Int
+  treeId: Int
+  children: [AreaSimpleNode]
+}
+
 type AreaTypeNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2734,8 +2742,9 @@ type PaginatedPaymentRecordsAndPaymentsNode {
 }
 
 type PartnerNodeForProgram {
+  id: ID
   name: String
-  areas: [String]
+  areas: [JSONString]
 }
 
 type PartnerType {
@@ -3500,6 +3509,7 @@ type Query {
   surveyAvailableFlows: [RapidProFlowNode]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
+  allAdminAreasTree(businessArea: String!): [AreaSimpleNode]
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
