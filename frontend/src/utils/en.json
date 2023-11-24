@@ -835,5 +835,8 @@
   "Provide info about Programme Partner and set Area Access": "Provide info about Programme Partner and set Area Access",
   "The partner has access to the entire business area": "The partner has access to the entire business area",
   "The partner has access to selected admin areas": "The partner has access to selected admin areas",
-  "Selected Admin Areas:": "Selected Admin Areas:"
+  "Selected Admin Areas:": "Selected Admin Areas:",
+  "Failure Reason": "Failure Reason",
+  "Targeting name should have at least 3 characters.": "Targeting name should have at least 3 characters.",
+  "Targeting name should have at most 255 characters.": "Targeting name should have at most 255 characters."
 }

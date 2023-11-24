@@ -186,12 +186,11 @@ type AreaNodeEdge {
   cursor: String!
 }
 
-type AreaSimpleNode {
-  id: String
+type AreaTreeNode {
+  id: ID
   name: String
-  level: Int
-  treeId: Int
-  children: [AreaSimpleNode]
+  pCode: String
+  areas: [AreaTreeNode]
 }
 
 type AreaTypeNode implements Node {
@@ -841,6 +840,7 @@ type DataCollectingTypeNode implements Node {
   individualFiltersAvailable: Boolean!
   householdFiltersAvailable: Boolean!
   recalculateComposition: Boolean!
+  weight: Int!
   datacollectingtypeSet(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
@@ -2800,6 +2800,7 @@ type PaymentNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   unicefId: String
+  signatureHash: String!
   businessArea: UserBusinessAreaNode!
   status: PaymentStatus!
   statusDate: DateTime!
@@ -3509,7 +3510,7 @@ type Query {
   surveyAvailableFlows: [RapidProFlowNode]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
-  allAdminAreasTree(businessArea: String!): [AreaSimpleNode]
+  allAreasTree(businessArea: String!): [AreaTreeNode]
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode

@@ -992,7 +992,7 @@
             "deprecationReason": null
           },
           {
-            "name": "allAdminAreasTree",
+            "name": "allAreasTree",
             "description": null,
             "args": [
               {
@@ -1015,7 +1015,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "AreaSimpleNode",
+                "name": "AreaTreeNode",
                 "ofType": null
               }
             },
@@ -23782,6 +23782,22 @@
             "deprecationReason": null
           },
           {
+            "name": "weight",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "datacollectingtypeSet",
             "description": null,
             "args": [
@@ -40709,6 +40725,22 @@
             "deprecationReason": null
           },
           {
+            "name": "signatureHash",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "businessArea",
             "description": null,
             "args": [],
@@ -51147,7 +51179,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AreaSimpleNode",
+        "name": "AreaTreeNode",
         "description": null,
         "fields": [
           {
@@ -51156,7 +51188,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "String",
+              "name": "ID",
               "ofType": null
             },
             "isDeprecated": false,
@@ -51175,31 +51207,19 @@
             "deprecationReason": null
           },
           {
-            "name": "level",
+            "name": "pCode",
             "description": null,
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "Int",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "treeId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "children",
+            "name": "areas",
             "description": null,
             "args": [],
             "type": {
@@ -51207,7 +51227,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "AreaSimpleNode",
+                "name": "AreaTreeNode",
                 "ofType": null
               }
             },
