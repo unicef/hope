@@ -11,6 +11,8 @@ import { DeleteProgramPartner } from './DeleteProgramPartner';
 interface ProgramPartnerCardProps {
   partner;
   handleDeleteProgramPartner: (id: string) => void;
+  setStep: (step: number) => void;
+  step: number;
 }
 
 const BigText = styled(Box)`
@@ -26,6 +28,8 @@ const SmallText = styled(Box)`
 export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   partner,
   handleDeleteProgramPartner,
+  setStep,
+  step,
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [isEdit, setEdit] = useState(false);
@@ -139,27 +143,40 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
               buttons={buttons}
               description={description}
             >
-              <Grid container direction='column'>
-                <Grid item xs={6}>
-                  <Field
-                    name='areaAccess'
-                    choices={[
-                      {
-                        value: 'BUSINESS_AREA',
-                        name: t('Business Area'),
-                        optionLabel: businessAreaOptionLabel,
-                      },
-                      {
-                        value: 'ADMIN_AREA',
-                        name: t('Admin Area'),
-                        optionLabel: adminAreaOptionLabel,
-                      },
-                    ]}
-                    component={FormikRadioGroup}
-                    withGreyBox
-                  />
+              <>
+                <Grid container direction='column'>
+                  <Grid item xs={6}>
+                    <Field
+                      name='areaAccess'
+                      choices={[
+                        {
+                          value: 'BUSINESS_AREA',
+                          name: t('Business Area'),
+                          optionLabel: businessAreaOptionLabel,
+                        },
+                        {
+                          value: 'ADMIN_AREA',
+                          name: t('Admin Area'),
+                          optionLabel: adminAreaOptionLabel,
+                        },
+                      ]}
+                      component={FormikRadioGroup}
+                      withGreyBox
+                    />
+                  </Grid>
                 </Grid>
-              </Grid>
+                <Button variant='outlined' onClick={() => setStep(step - 1)}>
+                  {t('Back')}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={() => setStep(step + 1)}
+                  disabled={step === 1}
+                >
+                  {t('Next')}
+                </Button>
+              </>
             </BaseSection>
           </Form>
         );

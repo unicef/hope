@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button, Step, StepLabel, Stepper } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -95,46 +95,48 @@ export const CreateProgramPage = (): ReactElement => {
   };
   return (
     <>
+      <PageHeader title={t('Create Programme')} />
+      <Stepper activeStep={step}>
+        <Step>
+          <StepLabel>{t('Details')}</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>{t('Programme Partners')}</StepLabel>
+        </Step>
+      </Stepper>
       {step === 0 && (
-        <>
-          <PageHeader title={t('Create Programme')} />
-          <BaseSection title={t('Details')} description={detailsDescription}>
-            <>
-              <ProgramForm
-                actions={(submit) => renderActions(submit)}
-                onSubmit={handleSubmit}
-              />
-            </>
-          </BaseSection>
-          <ProgramPartnersSection setStep={setStep} />
-        </>
+        <BaseSection title={t('Details')} description={detailsDescription}>
+          <>
+            <ProgramForm
+              actions={(submit) => renderActions(submit)}
+              onSubmit={handleSubmit}
+            />
+            <Button
+              variant='outlined'
+              onClick={() => setStep(step - 1)}
+              disabled={step === 0}
+            >
+              {t('Back')}
+            </Button>
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={() => setStep(step + 1)}
+            >
+              {t('Next')}
+            </Button>
+          </>
+        </BaseSection>
       )}
       {step === 1 && (
         <>
-          <PageHeader
-            title={t('Add Partners')}
-            handleBack={() => setStep(0)}
-            breadCrumbs={[
-              {
-                title: t('New Programme'),
-                handleClick: () => setStep(0),
-              },
-            ]}
-          >
-            <Button
-              onClick={() => handleAddNewPartner()}
-              variant='outlined'
-              color='primary'
-              endIcon={<AddIcon />}
-            >
-              {t('Add Partner')}
-            </Button>
-          </PageHeader>
           {partners.map((partner) => (
             <ProgramPartnerCard
               key={partner.id}
               partner={partner}
               handleDeleteProgramPartner={handleDeleteProgramPartner}
+              setStep={setStep}
+              step={step}
             />
           ))}
         </>
