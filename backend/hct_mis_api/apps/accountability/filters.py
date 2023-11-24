@@ -4,7 +4,6 @@ from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import (
-    BooleanFilter,
     CharFilter,
     ChoiceFilter,
     FilterSet,
@@ -24,7 +23,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string_required,
 )
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.program.models import Program
 
 
 class MessagesFilter(FilterSet):

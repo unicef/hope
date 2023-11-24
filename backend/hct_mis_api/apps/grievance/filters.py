@@ -27,7 +27,6 @@ from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_quer
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
