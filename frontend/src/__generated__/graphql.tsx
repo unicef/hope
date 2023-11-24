@@ -296,6 +296,15 @@ export type AreaNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type AreaSimpleNode = {
+   __typename?: 'AreaSimpleNode',
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  level?: Maybe<Scalars['Int']>,
+  treeId?: Maybe<Scalars['Int']>,
+  children?: Maybe<Array<Maybe<AreaSimpleNode>>>,
+};
+
 export type AreaTypeNode = Node & {
    __typename?: 'AreaTypeNode',
   id: Scalars['ID'],
@@ -4379,8 +4388,9 @@ export type PaginatedPaymentRecordsAndPaymentsNode = {
 
 export type PartnerNodeForProgram = {
    __typename?: 'PartnerNodeForProgram',
+  id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
-  areas?: Maybe<Array<Maybe<Scalars['String']>>>,
+  areas?: Maybe<Array<Maybe<Scalars['JSONString']>>>,
 };
 
 export type PartnerType = {
@@ -5445,6 +5455,7 @@ export type Query = {
   surveyAvailableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
+  allAdminAreasTree?: Maybe<Array<Maybe<AreaSimpleNode>>>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
   logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   report?: Maybe<ReportNode>,
@@ -5711,6 +5722,11 @@ export type QueryAllAdminAreasArgs = {
   businessArea?: Maybe<Scalars['String']>,
   level?: Maybe<Scalars['Int']>,
   parentId?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllAdminAreasTreeArgs = {
+  businessArea: Scalars['String']
 };
 
 
@@ -28376,6 +28392,7 @@ export type ResolversTypes = {
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: ResolverTypeWrapper<AccountabilitySampleSizeNode>,
   RapidProFlowNode: ResolverTypeWrapper<RapidProFlowNode>,
+  AreaSimpleNode: ResolverTypeWrapper<AreaSimpleNode>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -28887,6 +28904,7 @@ export type ResolversParentTypes = {
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: AccountabilitySampleSizeNode,
   RapidProFlowNode: RapidProFlowNode,
+  AreaSimpleNode: AreaSimpleNode,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -29223,6 +29241,14 @@ export type AreaNodeConnectionResolvers<ContextType = any, ParentType extends Re
 export type AreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNodeEdge'] = ResolversParentTypes['AreaNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type AreaSimpleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaSimpleNode'] = ResolversParentTypes['AreaSimpleNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  level?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  treeId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  children?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaSimpleNode']>>>, ParentType, ContextType>,
 };
 
 export type AreaTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNode'] = ResolversParentTypes['AreaTypeNode']> = {
@@ -30991,8 +31017,9 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
 };
 
 export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['JSONString']>>>, ParentType, ContextType>,
 };
 
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
@@ -31445,6 +31472,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   surveyAvailableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
+  allAdminAreasTree?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaSimpleNode']>>>, ParentType, ContextType, RequireFields<QueryAllAdminAreasTreeArgs, 'businessArea'>>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
   logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType, RequireFields<QueryReportArgs, 'id'>>,
@@ -32743,6 +32771,7 @@ export type Resolvers<ContextType = any> = {
   AreaNode?: AreaNodeResolvers<ContextType>,
   AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>,
   AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>,
+  AreaSimpleNode?: AreaSimpleNodeResolvers<ContextType>,
   AreaTypeNode?: AreaTypeNodeResolvers<ContextType>,
   AreaTypeNodeConnection?: AreaTypeNodeConnectionResolvers<ContextType>,
   AreaTypeNodeEdge?: AreaTypeNodeEdgeResolvers<ContextType>,

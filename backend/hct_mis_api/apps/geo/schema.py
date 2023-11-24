@@ -26,60 +26,53 @@ class AreaTypeNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class AreaSimpleNode(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+    level = graphene.Int()
+    tree_id = graphene.Int()
+    children = graphene.List(lambda: AreaSimpleNode)
+
+
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AreaNode)
     all_admin_areas = DjangoFilterConnectionField(AreaNode, filterset_class=AreaFilter)
-    all_admin_areas_tree = graphene.List(AreaNode)
+    all_admin_areas_tree = graphene.List(AreaSimpleNode, business_area=graphene.String(required=True))
 
-    def resolve_all_admin_areas_tree(self, info: Any) -> Any:  # business_area: Optional[str]
-        # TODO: update this one
-        """
-        [{
-                "id": "2",
-                "name": "Child - 2",
-                "children": [
-                    {
-                        "id": "22",
-                        "name": "Child - 22",
-                        "selected": True,
-                    },
-                ],
-            }]
-        """
+    def resolve_all_admin_areas_tree(self, info: Any, business_area: str) -> Any:
+        # add filters
         filters = {}
-        resp = []
-        # if business_area:
-        #     filters.update({"business_area": business_area})
+        if business_area:
+            filters.update({"area_type__country__business_areas__slug": business_area})
 
-        qs = Area.objects.filter(area_type__country__business_areas__slug="afghanistan").only("id", "tree_id", "name", "level")
+        qs = Area.objects.filter(**filters).only("id", "tree_id", "name", "level")
 
-        # def _get_area_with_children(area_obj) -> dict:
-        #     area_with_children = {"id": area_obj.id, "name": area_obj.name, "children": [area_obj.get_children()]}
-        #
-        #     for children_list in area_with_children.get("children", []):
-        #         update_children_with_recursive_check(children_list)
-        #
-        #
-        #
-        #     return area_with_children
-        #
-        # def update_children_with_recursive_check(children_list):
-        #     for child in children_list:
-        #         child_obj =  {"id": child.id, "name": child.name, "children": [child.get_children()]}
-        #         child_obj["children"] = update_children_with_recursive_check(child.get_children())
-        #
-        #     return children_list
-        #
-        # for tree_id in qs.values_list("tree_id", flat=True):
-        #     qs_tree = qs.filter(tree_id=tree_id)
-        #     parent_area = qs_tree.filter(parent=None).first()
-        #     if parent_area:
-        #         tree = _get_area_with_children(parent_area)
-        #         # for children in children_list["children"]:
-        #         #     children["children"] = children
-        #         resp.append(tree)
+        def _get_sub_tree(area: Area) -> Optional[dict]:
+            return (
+                {
+                    "id": str(area.id),
+                    "level": area.level,
+                    "tree_id": area.tree_id,
+                    "name": area.name,
+                    "children": [_get_sub_tree(child) for child in list(area.get_children())],
+                }
+                if isinstance(area, Area)
+                else None
+            )
 
-        return resp
+        def _get_area_with_children(area_obj: Area) -> dict:
+            return {
+                "id": str(area_obj.id),
+                "level": area_obj.level,
+                "tree_id": area_obj.tree_id,
+                "name": area_obj.name,
+                "children": [_get_sub_tree(child) for child in list(area_obj.get_children())],
+            }
 
+        trees = [
+            _get_area_with_children(parent_area)
+            for tree_id in qs.values_list("tree_id", flat=True).distinct("tree_id")
+            for parent_area in qs.filter(tree_id=tree_id, parent=None)
+        ]
 
-
+        return trees
