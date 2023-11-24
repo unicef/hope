@@ -344,14 +344,6 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs
 
-    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        if value is True:
-            return qs.filter(programs__status=Program.ACTIVE)
-        elif value is False:
-            return qs.filter(programs__status=Program.FINISHED)
-        else:
-            return qs
-
 
 class ExistingGrievanceTicketFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)

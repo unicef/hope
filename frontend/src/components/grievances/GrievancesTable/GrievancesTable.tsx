@@ -78,7 +78,6 @@ export const GrievancesTable = ({
     urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
     program: isAllPrograms ? filter.program : programId,
-    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const [inputValue, setInputValue] = useState('');
