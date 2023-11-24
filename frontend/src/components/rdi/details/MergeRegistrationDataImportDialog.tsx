@@ -13,10 +13,12 @@ import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
+  ProgramStatus,
   RegistrationDetailedFragment,
   useMergeRdiMutation,
 } from '../../../__generated__/graphql';
 import { LoadingButton } from '../../core/LoadingButton';
+import { useProgramContext } from "../../../programContext";
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -28,6 +30,8 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+
   const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
   });
@@ -46,6 +50,7 @@ export function MergeRegistrationDataImportDialog({
         color='primary'
         variant='contained'
         onClick={() => setOpen(true)}
+        disabled={selectedProgram?.status !== ProgramStatus.Active}
       >
         {t('Merge')}
       </Button>

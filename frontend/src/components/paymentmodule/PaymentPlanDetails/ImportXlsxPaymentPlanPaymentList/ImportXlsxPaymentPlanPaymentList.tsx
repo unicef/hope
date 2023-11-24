@@ -19,9 +19,11 @@ import {
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
+  ProgramStatus,
   useImportXlsxPpListMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
+import { useProgramContext } from "../../../../programContext";
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -40,7 +42,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
-
+  const { selectedProgram } = useProgramContext();
   const { t } = useTranslation();
 
   const [
@@ -87,7 +89,8 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 
   const shouldDisableUpload =
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    !canUploadFile;
+    !canUploadFile ||
+    selectedProgram?.status !== ProgramStatus.Active;
 
   return (
     <>

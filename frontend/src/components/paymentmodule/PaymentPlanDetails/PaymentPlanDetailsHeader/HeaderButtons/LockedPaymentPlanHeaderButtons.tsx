@@ -3,9 +3,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import {Action, PaymentPlanQuery, ProgramStatus} from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
+import {useProgramContext} from "../../../../../programContext";
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -21,6 +22,8 @@ export const LockedPaymentPlanHeaderButtons = ({
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+
   const {
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
@@ -37,6 +40,7 @@ export const LockedPaymentPlanHeaderButtons = ({
             variant='outlined'
             color='primary'
             onClick={() => unlock()}
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             {t('Unlock')}
           </LoadingButton>

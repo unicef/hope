@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import {
+  ProgramStatus,
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useEraseRdiMutation,
@@ -14,6 +15,7 @@ import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
+import { useProgramContext } from "../../../programContext";
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
@@ -40,6 +42,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
+  const { selectedProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
@@ -63,6 +66,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
       }
       variant='contained'
       color='primary'
+      disabled={selectedProgram?.status !== ProgramStatus.Active}
     >
       {t('Erase import')}
     </LoadingButton>
@@ -82,6 +86,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
               onClick={() => setShowRefuseRdiForm(true)}
               variant='contained'
               color='primary'
+              disabled={selectedProgram?.status !== ProgramStatus.Active}
             >
               {t('Refuse Import')}
             </LoadingButton>

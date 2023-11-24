@@ -16,11 +16,12 @@ import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWr
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
-import { Action } from '../../../../__generated__/graphql';
+import {Action, ProgramStatus} from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '../../../core/ErrorButton';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
+import {useProgramContext} from "../../../../programContext";
 
 export interface RejectPaymentPlanProps {
   paymentPlanId: string;
@@ -32,6 +33,8 @@ export const RejectPaymentPlan = ({
   const { t } = useTranslation();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+
   const {
     mutatePaymentPlanAction: reject,
     loading: loadingReject,
@@ -66,7 +69,10 @@ export const RejectPaymentPlan = ({
         <>
           {rejectDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
-            <ErrorButton onClick={() => setRejectDialogOpen(true)}>
+            <ErrorButton
+                onClick={() => setRejectDialogOpen(true)}
+                disabled={selectedProgram?.status !== ProgramStatus.Active}
+            >
               {t('Reject')}
             </ErrorButton>
           </Box>

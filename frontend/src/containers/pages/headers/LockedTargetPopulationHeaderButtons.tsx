@@ -14,6 +14,7 @@ import {
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
+import { useProgramContext } from "../../../programContext";
 
 const IconContainer = styled.span`
   button {
@@ -47,13 +48,17 @@ export const LockedTargetPopulationHeaderButtons = ({
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useUnlockTpMutation();
+  const { selectedProgram } = useProgramContext();
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
+          <Button
+              onClick={() => setOpenDuplicate(true)}
+              disabled={selectedProgram?.status !== ProgramStatus.Active}
+          >
             <FileCopy />
           </Button>
         </IconContainer>
@@ -75,6 +80,7 @@ export const LockedTargetPopulationHeaderButtons = ({
               }
             }}
             data-cy='button-target-population-unlocked'
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             Unlock
           </LoadingButton>
@@ -94,9 +100,7 @@ export const LockedTargetPopulationHeaderButtons = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={
-                    targetPopulation.program.status !== ProgramStatus.Active
-                  }
+                  disabled={selectedProgram?.status !== ProgramStatus.Active}
                   onClick={() => setOpenFinalizePaymentPlan(true)}
                   data-cy='button-target-population-send-to-hope'
                 >

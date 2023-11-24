@@ -19,7 +19,6 @@ export const AllHouseholdsForPopulationTable = gql`
     $withdrawn: Boolean
     $headOfHouseholdPhoneNoValid: Boolean
     $program: ID
-    $isActiveProgram: Boolean
   ) {
     allHouseholds(
       after: $after
@@ -39,7 +38,6 @@ export const AllHouseholdsForPopulationTable = gql`
       withdrawn: $withdrawn
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
       program: $program
-      isActiveProgram: $isActiveProgram
     ) {
       pageInfo {
         hasNextPage

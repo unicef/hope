@@ -3,6 +3,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import styled from 'styled-components';
 import { useDebounce } from '../../../hooks/useDebounce';
 import TextField from '../../../shared/TextField';
+import { useProgramContext } from "../../../programContext";
+import { ProgramStatus } from "../../../__generated__/graphql";
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '180px')}
@@ -38,6 +40,7 @@ export const AssignedToDropdown = ({
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
+  const { selectedProgram } = useProgramContext();
 
   const onChangeMiddleware = (e, selectedValue): void => {
     e.preventDefault();
@@ -94,6 +97,7 @@ export const AssignedToDropdown = ({
       }}
       value={value}
       options={sortedOptions}
+      disabled={selectedProgram?.status !== ProgramStatus.Active}
       renderInput={(params) => (
         <TextField
           {...params}
