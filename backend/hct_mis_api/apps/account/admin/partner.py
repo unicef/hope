@@ -3,9 +3,9 @@ from typing import Union
 from django import forms
 from django.contrib import admin
 from django.forms import CheckboxSelectMultiple, formset_factory
-from django.http import HttpRequest, HttpResponsePermanentRedirect
-from django.shortcuts import redirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
 
 from admin_extra_buttons.decorators import button
 
@@ -40,7 +40,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     )
 
     @button()
-    def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponsePermanentRedirect]:
+    def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         parent: account_models.Partner = context["original"]
 
@@ -99,7 +99,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                 parent.set_permissions(partner_permissions)
                 parent.save()
 
-                return redirect(".")
+                return HttpResponseRedirect(reverse("admin:account_partner_change", args=[pk]))
 
         context["business_area_role_formset"] = business_area_role_form_set
         context["program_area_formset"] = program_area_form_set
