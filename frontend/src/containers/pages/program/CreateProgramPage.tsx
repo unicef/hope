@@ -1,11 +1,9 @@
 import { Box, Button, Step, StepButton, Stepper } from '@material-ui/core';
+import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import * as Yup from 'yup';
-import { Formik } from 'formik';
-import moment from 'moment';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
@@ -16,50 +14,12 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { today } from '../../../utils/utils';
 
 export const CreateProgramPage = (): ReactElement => {
   const { t } = useTranslation();
-  const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required(t('Programme name is required'))
-      .min(2, t('Too short'))
-      .max(150, t('Too long')),
-    startDate: Yup.date().required(t('Start Date is required')),
-    endDate: Yup.date()
-      .required(t('End Date is required'))
-      .min(today, t('End Date cannot be in the past'))
-      .when(
-        'startDate',
-        (startDate, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date have to be greater than')} ${moment(
-              startDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      ),
-    sector: Yup.string().required(t('Sector is required')),
-    dataCollectingTypeCode: Yup.string().required(
-      t('Data Collecting Type is required'),
-    ),
-    description: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
-    budget: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
-    administrativeAreasOfImplementation: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
-    populationGoal: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
-  });
 
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
@@ -80,8 +40,7 @@ export const CreateProgramPage = (): ReactElement => {
         variables: {
           programData: {
             ...values,
-            startDate: values.startDate,
-            endDate: values.endDate,
+            budget: parseFloat(values.budget).toFixed(2),
             businessAreaSlug: businessArea,
           },
         },
@@ -127,20 +86,17 @@ export const CreateProgramPage = (): ReactElement => {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values, { setValues }) => {
-        const newValues = { ...values };
-        newValues.budget = Number(values.budget).toFixed(2);
-        setValues(newValues);
+      onSubmit={(values) => {
         handleSubmit(values);
       }}
-      validationSchema={validationSchema}
+      validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values }) => {
         return (
           <>
             <PageHeader title={t('Create Programme')}>
               <Box display='flex' alignItems='center'>
-                <Button component={Link} to={`${baseUrl}/list`}>
+                <Button component={Link} to={`/${baseUrl}/list`}>
                   {t('Cancel')}
                 </Button>
                 <Button

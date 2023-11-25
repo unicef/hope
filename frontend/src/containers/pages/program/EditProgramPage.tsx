@@ -1,32 +1,40 @@
-import { Button } from '@material-ui/core';
-import React, { ReactElement } from 'react';
+import { Box, Button, Step, StepButton, Stepper } from '@material-ui/core';
+import { Formik } from 'formik';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import {
+  useAllAreasTreeQuery,
   useProgramQuery,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingButton } from '../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
+import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString } from '../../../utils/utils';
-import { ProgramForm } from '../../forms/ProgramForm';
-import { BaseSection } from '../../../components/core/BaseSection';
+import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
 
 export const EditProgramPage = (): ReactElement => {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
   const { id } = useParams();
+
+  const [step, setStep] = useState(0);
+  const { showMessage } = useSnackbar();
+  const { baseUrl, businessArea } = useBaseUrl();
+  const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
+    variables: { businessArea },
+  });
   const { data, loading: loadingProgram } = useProgramQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { baseUrl, businessArea } = useBaseUrl();
-  const [mutate, { loading }] = useUpdateProgramMutation({
+  const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
         query: ALL_LOG_ENTRIES_QUERY,
@@ -40,9 +48,7 @@ export const EditProgramPage = (): ReactElement => {
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
         query: PROGRAM_QUERY,
-        variables: {
-          id,
-        },
+        variables: { id },
         data: { program: updateProgram.program },
       });
     },
@@ -50,7 +56,20 @@ export const EditProgramPage = (): ReactElement => {
 
   if (!data) return null;
   if (loadingProgram) return <LoadingComponent />;
-  const { program } = data;
+  const {
+    name,
+    startDate,
+    endDate,
+    sector,
+    dataCollectingType,
+    description,
+    budget = '0.00',
+    administrativeAreasOfImplementation,
+    populationGoal = 0,
+    cashPlus = false,
+    frequencyOfPayments = 'REGULAR',
+    version,
+  } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
     try {
@@ -59,11 +78,9 @@ export const EditProgramPage = (): ReactElement => {
           programData: {
             id,
             ...values,
-            startDate: values.startDate,
-            endDate: values.endDate,
             budget: parseFloat(values.budget).toFixed(2),
           },
-          version: program.version,
+          version,
         },
       });
       showMessage(t('Programme edited.'), {
@@ -74,36 +91,75 @@ export const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const renderActions = (submitHandler): ReactElement => {
-    return (
-      <>
-        <Button component={Link} to={`/${baseUrl}/details/${id}`}>
-          {t('Cancel')}
-        </Button>
-        <LoadingButton
-          loading={loading}
-          onClick={submitHandler}
-          type='submit'
-          color='primary'
-          variant='contained'
-          data-cy='button-save'
-        >
-          {t('Save')}
-        </LoadingButton>
-      </>
-    );
+  //TODO: remove this
+  const partners = [{ id: uuidv4() }, { id: uuidv4() }, { id: uuidv4() }];
+
+  const initialValues = {
+    name,
+    startDate,
+    endDate,
+    sector,
+    dataCollectingTypeCode: dataCollectingType?.code,
+    description,
+    budget,
+    administrativeAreasOfImplementation,
+    populationGoal,
+    cashPlus,
+    frequencyOfPayments,
+    partners,
   };
-  const detailsDescription = t(
-    'To edit an existing Programme, please complete all required fields on the form below and save.',
-  );
+
+  if (treeLoading) return <LoadingComponent />;
+  if (!treeData) return null;
+
+  const { allAreasTree } = treeData;
 
   return (
-    <>
-      <PageHeader title={`${t('Edit Programme')}: (${program.name})`} />
-      {/* //TODO: fix */}
-      <BaseSection title={t('Details')} description={detailsDescription}>
-        <ProgramForm values={{}} />
-      </BaseSection>
-    </>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => {
+        handleSubmit(values);
+      }}
+      validationSchema={programValidationSchema(t)}
+    >
+      {({ submitForm, values }) => {
+        return (
+          <>
+            <PageHeader title={`${t('Edit Programme')}: (${name})`}>
+              <Box display='flex' alignItems='center'>
+                <Button component={Link} to={`/${baseUrl}/details/${id}`}>
+                  {t('Cancel')}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={submitForm}
+                >
+                  {t('Save')}
+                </Button>
+              </Box>
+            </PageHeader>
+            <Stepper activeStep={step}>
+              <Step>
+                <StepButton onClick={() => setStep(0)}>
+                  {t('Details')}
+                </StepButton>
+              </Step>
+              <Step>
+                <StepButton onClick={() => setStep(1)}>
+                  {t('Programme Partners')}
+                </StepButton>
+              </Step>
+            </Stepper>
+            {step === 0 && (
+              <DetailsStep values={values} step={step} setStep={setStep} />
+            )}
+            {step === 1 && (
+              <PartnersStep values={values} allAreasTree={allAreasTree} />
+            )}
+          </>
+        );
+      }}
+    </Formik>
   );
 };
