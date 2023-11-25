@@ -6,6 +6,7 @@ from django.db.models import (
     Func,
     OuterRef,
     Prefetch,
+    Q,
     QuerySet,
     Subquery,
     Sum,
@@ -19,6 +20,7 @@ from graphene import Boolean, DateTime, Enum, Int, String, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
@@ -31,7 +33,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     FieldAttributeNode,
@@ -48,6 +50,7 @@ from hct_mis_api.apps.core.utils import (
     sum_lists_with_values,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.filters import (
@@ -556,17 +559,40 @@ class Query(graphene.ObjectType):
     household_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
-        program_id = info.context.headers.get("Program")
+        program_id = decode_id_string(info.context.headers.get("Program"))
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
         if program_id != "all":
-            program = Program.objects.filter(id=decode_id_string(program_id)).first()
+            program = Program.objects.filter(id=program_id).first()
             if program and program.status == Program.DRAFT:
                 return Individual.objects.none()
+
+        try:
+            partner_permission = info.context.user.partner.get_permissions()
+            program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+        except (Partner.DoesNotExist, AssertionError):
+            return Household.objects.none()
+
+        areas = Area.objects.filter(id__in=program_area_ids)
+        areas_level_1 = areas.filter(level=0).values_list("id")
+        areas_level_2 = areas.filter(level=1).values_list("id")
+        areas_level_3 = areas.filter(level=2).values_list("id")
+
         queryset = Individual.objects
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")  # type: ignore
         if does_path_exist_in_query("edges.node.household.admin2", info):
             queryset = queryset.select_related("household__admin_area")  # type: ignore
             queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
+
+        queryset = queryset.filter(  # type: ignore
+            Q(household__admin1__in=areas_level_1)
+            | Q(household__admin2__in=areas_level_2)
+            | Q(household__admin3__in=areas_level_3)
+            | Q(household__admin_area__isnull=True)
+        )
+
         return queryset  # type: ignore
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
@@ -580,12 +606,32 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
-        program_id = info.context.headers.get("Program")
+        program_id = decode_id_string(info.context.headers.get("Program"))
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
         if program_id != "all":
-            program = Program.objects.filter(id=decode_id_string(program_id)).first()
+            program = Program.objects.filter(id=program_id).first()
             if program and program.status == Program.DRAFT:
                 return Household.objects.none()
-        queryset = Household.objects.order_by("created_at")
+        try:
+            partner_permission = info.context.user.partner.get_permissions()
+            program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+        except (Partner.DoesNotExist, AssertionError):
+            return Household.objects.none()
+
+        areas = Area.objects.filter(id__in=program_area_ids)
+        areas_level_1 = areas.filter(level=0).values_list("id")
+        areas_level_2 = areas.filter(level=1).values_list("id")
+        areas_level_3 = areas.filter(level=2).values_list("id")
+
+        queryset = Household.objects.order_by("created_at").filter(
+            Q(admin1__in=areas_level_1)
+            | Q(admin2__in=areas_level_2)
+            | Q(admin3__in=areas_level_3)
+            | Q(admin_area__isnull=True)
+        )
+
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")
             queryset = queryset.select_related("admin_area__area_type")
