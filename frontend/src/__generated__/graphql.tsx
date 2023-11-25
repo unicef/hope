@@ -11330,6 +11330,31 @@ export type AllAdminAreasQuery = (
   )> }
 );
 
+export type AllAreasTreeQueryVariables = {
+  businessArea: Scalars['String']
+};
+
+
+export type AllAreasTreeQuery = (
+  { __typename?: 'Query' }
+  & { allAreasTree: Maybe<Array<Maybe<(
+    { __typename?: 'AreaTreeNode' }
+    & Pick<AreaTreeNode, 'id' | 'name' | 'pCode'>
+    & { areas: Maybe<Array<Maybe<(
+      { __typename?: 'AreaTreeNode' }
+      & Pick<AreaTreeNode, 'id' | 'name' | 'pCode'>
+      & { areas: Maybe<Array<Maybe<(
+        { __typename?: 'AreaTreeNode' }
+        & Pick<AreaTreeNode, 'id' | 'name' | 'pCode'>
+        & { areas: Maybe<Array<Maybe<(
+          { __typename?: 'AreaTreeNode' }
+          & Pick<AreaTreeNode, 'id' | 'name' | 'pCode'>
+        )>>> }
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
 export type AllBusinessAreasQueryVariables = {
   slug?: Maybe<Scalars['String']>
 };
@@ -20374,6 +20399,73 @@ export function useAllAdminAreasLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type AllAdminAreasQueryHookResult = ReturnType<typeof useAllAdminAreasQuery>;
 export type AllAdminAreasLazyQueryHookResult = ReturnType<typeof useAllAdminAreasLazyQuery>;
 export type AllAdminAreasQueryResult = ApolloReactCommon.QueryResult<AllAdminAreasQuery, AllAdminAreasQueryVariables>;
+export const AllAreasTreeDocument = gql`
+    query AllAreasTree($businessArea: String!) {
+  allAreasTree(businessArea: $businessArea) {
+    id
+    name
+    pCode
+    areas {
+      id
+      name
+      pCode
+      areas {
+        id
+        name
+        pCode
+        areas {
+          id
+          name
+          pCode
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllAreasTreeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAreasTreeQuery, AllAreasTreeQueryVariables>, 'query'> & ({ variables: AllAreasTreeQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllAreasTreeComponent = (props: AllAreasTreeComponentProps) => (
+      <ApolloReactComponents.Query<AllAreasTreeQuery, AllAreasTreeQueryVariables> query={AllAreasTreeDocument} {...props} />
+    );
+    
+export type AllAreasTreeProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAreasTreeQuery, AllAreasTreeQueryVariables> & TChildProps;
+export function withAllAreasTree<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAreasTreeQuery,
+  AllAreasTreeQueryVariables,
+  AllAreasTreeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAreasTreeQuery, AllAreasTreeQueryVariables, AllAreasTreeProps<TChildProps>>(AllAreasTreeDocument, {
+      alias: 'allAreasTree',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAreasTreeQuery__
+ *
+ * To run a query within a React component, call `useAllAreasTreeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAreasTreeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAreasTreeQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllAreasTreeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAreasTreeQuery, AllAreasTreeQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, baseOptions);
+      }
+export function useAllAreasTreeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAreasTreeQuery, AllAreasTreeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, baseOptions);
+        }
+export type AllAreasTreeQueryHookResult = ReturnType<typeof useAllAreasTreeQuery>;
+export type AllAreasTreeLazyQueryHookResult = ReturnType<typeof useAllAreasTreeLazyQuery>;
+export type AllAreasTreeQueryResult = ApolloReactCommon.QueryResult<AllAreasTreeQuery, AllAreasTreeQueryVariables>;
 export const AllBusinessAreasDocument = gql`
     query AllBusinessAreas($slug: String) {
   allBusinessAreas(slug: $slug) {

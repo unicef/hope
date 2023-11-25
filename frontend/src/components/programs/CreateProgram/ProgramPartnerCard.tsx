@@ -1,4 +1,7 @@
 import { Box, Collapse, Grid, IconButton } from '@material-ui/core';
+import { TreeView, TreeItem } from '@material-ui/lab';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Field } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,12 +11,15 @@ import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { DividerLine } from '../../core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
+import { AllAreasTreeQuery } from '../../../__generated__/graphql';
 
 interface ProgramPartnerCardProps {
   values;
   partner;
   index: number;
   arrayHelpers;
+  allAreasTree: AllAreasTreeQuery['allAreasTree'];
+  setFieldValue;
 }
 
 const BiggestText = styled(Box)`
@@ -37,8 +43,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   partner,
   index,
   arrayHelpers,
+  allAreasTree,
+  setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
 
   const businessAreaOptionLabel = (
     <Box display='flex' flexDirection='column'>
@@ -48,7 +57,25 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       </SmallText>
     </Box>
   );
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
+
+  const renderTree = (nodes): React.ReactElement => (
+    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
+      {Array.isArray(nodes.areas)
+        ? nodes.areas.map((node) => renderTree(node))
+        : null}
+    </TreeItem>
+  );
+
+  const handleNodeSelect = (_event, nodeId): void => {
+    let newSelected = [...(values.partners[index].adminAreas || [])];
+    if (newSelected.includes(nodeId)) {
+      newSelected = newSelected.filter((id) => id !== nodeId);
+    } else {
+      newSelected.push(nodeId);
+    }
+    setFieldValue(`partners[${index}].adminAreas`, newSelected);
+  };
+
   const adminAreaOptionLabel = (
     <Box display='flex' flexDirection='column'>
       <Box display='flex' justifyContent='space-between' alignItems='center'>
@@ -70,7 +97,15 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
         </IconButton>
       </Box>
       <Collapse in={isAdminAreaExpanded}>
-        <div>placeholder</div>
+        <TreeView
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+          multiSelect
+          selected={(values.partners[index]?.adminAreas || []).map(String)}
+          onNodeSelect={handleNodeSelect}
+        >
+          {allAreasTree.map((tree) => renderTree(tree))}
+        </TreeView>
       </Collapse>
     </Box>
   );
