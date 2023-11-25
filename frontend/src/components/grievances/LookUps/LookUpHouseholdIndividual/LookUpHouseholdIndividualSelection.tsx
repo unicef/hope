@@ -1,5 +1,5 @@
 import { Box, FormHelperText, Grid } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isInvalid } from '../../../../utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
@@ -25,6 +25,17 @@ export const LookUpHouseholdIndividualSelection = ({
   const [selectedIndividual, setSelectedIndividual] = useState(
     values.selectedIndividual,
   );
+
+  useEffect(() => {
+    if (selectedHousehold?.admin2) {
+      onValueChange('admin', { node: selectedHousehold.admin2 });
+      onValueChange('admin2', { node: selectedHousehold.admin2 });
+    } else {
+      onValueChange('admin', null);
+      onValueChange('admin2', null);
+    }
+  }, [selectedHousehold, onValueChange]);
+
   return (
     <>
       <LookUpHouseholdIndividualSelectionDetail
