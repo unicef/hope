@@ -216,6 +216,7 @@ export const Description = ({
               name='admin'
               variant='outlined'
               component={FormikAdminAreaAutocomplete}
+              disabled={Boolean(values.selectedHousehold?.admin2)}
             />
           </Grid>
           <Grid item xs={6}>
