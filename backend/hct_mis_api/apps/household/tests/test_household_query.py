@@ -4,7 +4,11 @@ from django.conf import settings
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -121,8 +125,10 @@ class TestHouseholdQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory()
+        cls.user = UserFactory.create(partner=cls.partner)
         cls.business_area = create_afghanistan()
+
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         generate_data_collecting_types()
         partial = DataCollectingType.objects.get(code="partial_individuals")
@@ -143,6 +149,7 @@ class TestHouseholdQuery(APITestCase):
             business_area=cls.business_area,
             status=Program.DRAFT,
         )
+
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_one)
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_two)
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
@@ -194,6 +201,17 @@ class TestHouseholdQuery(APITestCase):
             individual=household.head_of_household,
         )
 
+        cls.partner.permissions = {
+            str(cls.business_area.id): {
+                "programs": {
+                    str(cls.program_one.id): [str(cls.households[0].admin_area.id)],
+                    str(cls.program_two.id): [str(cls.households[0].admin_area.id)],
+                    str(cls.program_draft.id): [str(cls.households[0].admin_area.id)],
+                }
+            }
+        }
+        cls.partner.save()
+
         # remove after data migration
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
@@ -222,7 +240,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=query_string,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"program": self.id_to_base64(self.program_two.id, "ProgramNode")},
         )
 
@@ -237,7 +261,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
@@ -250,7 +280,10 @@ class TestHouseholdQuery(APITestCase):
             request_string=ALL_HOUSEHOLD_QUERY,
             context={
                 "user": self.user,
-                "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
+                "headers": {
+                    "Program": self.id_to_base64(self.program_draft.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
             },
         )
 
@@ -267,7 +300,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": f"{household.unicef_id}", "searchType": "household_id"},
         )
 
@@ -284,7 +323,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": f"{household.head_of_household.unicef_id}", "searchType": "individual_id"},
         )
 
@@ -301,7 +346,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": f"{household.head_of_household.full_name}", "searchType": "individual_id"},
         )
 
@@ -316,7 +367,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "+18663567905", "searchType": "phone_no"},
         )
 
@@ -331,7 +388,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "123-456-789", "searchType": "national_id"},
         )
 
@@ -349,7 +412,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": search, "searchType": "registration_id"},
         )
 
@@ -364,7 +433,13 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": "123-456-789",
             },
@@ -381,6 +456,12 @@ class TestHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program_two.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "qwerty12345", "searchType": "kobo_asset_id"},
         )
