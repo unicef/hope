@@ -1,17 +1,17 @@
-import { Box, Collapse, Grid, IconButton } from '@material-ui/core';
-import { TreeView, TreeItem } from '@material-ui/lab';
+import { Box, Checkbox, Collapse, Grid, IconButton } from '@material-ui/core';
+import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { TreeItem, TreeView } from '@material-ui/lab';
 import { Field } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { AllAreasTreeQuery } from '../../../__generated__/graphql';
 import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { DividerLine } from '../../core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
-import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
-import { AllAreasTreeQuery } from '../../../__generated__/graphql';
 
 interface ProgramPartnerCardProps {
   values;
@@ -58,23 +58,42 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     </Box>
   );
 
+  const handleNodeSelect = (_event, nodeId): void => {
+    let selectedNodeId = nodeId;
+    let newSelected = [...(values.partners[index]?.adminAreas || [])].flat();
+    selectedNodeId = Array.isArray(selectedNodeId)
+      ? selectedNodeId.flat()
+      : [selectedNodeId];
+    if (newSelected.includes(selectedNodeId)) {
+      newSelected = newSelected.filter((id) => id !== selectedNodeId);
+    } else {
+      newSelected.push(...selectedNodeId);
+    }
+    setFieldValue(`partners[${index}].adminAreas`, newSelected);
+  };
+
   const renderTree = (nodes): React.ReactElement => (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
+    <TreeItem
+      key={nodes.id}
+      nodeId={nodes.id}
+      label={
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Checkbox
+            color='primary'
+            checked={(values.partners[index]?.adminAreas || [])
+              .flat()
+              .includes(nodes.id)}
+            onChange={(event) => handleNodeSelect(event, nodes.id)}
+          />
+          {nodes.name}
+        </div>
+      }
+    >
       {Array.isArray(nodes.areas)
         ? nodes.areas.map((node) => renderTree(node))
         : null}
     </TreeItem>
   );
-
-  const handleNodeSelect = (_event, nodeId): void => {
-    let newSelected = [...(values.partners[index].adminAreas || [])];
-    if (newSelected.includes(nodeId)) {
-      newSelected = newSelected.filter((id) => id !== nodeId);
-    } else {
-      newSelected.push(nodeId);
-    }
-    setFieldValue(`partners[${index}].adminAreas`, newSelected);
-  };
 
   const adminAreaOptionLabel = (
     <Box display='flex' flexDirection='column'>
@@ -97,15 +116,17 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
         </IconButton>
       </Box>
       <Collapse in={isAdminAreaExpanded}>
-        <TreeView
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          multiSelect
-          selected={(values.partners[index]?.adminAreas || []).map(String)}
-          onNodeSelect={handleNodeSelect}
-        >
-          {allAreasTree.map((tree) => renderTree(tree))}
-        </TreeView>
+        <Box style={{ maxHeight: '30vh', overflow: 'auto' }}>
+          <TreeView
+            defaultCollapseIcon={<ExpandMoreIcon />}
+            defaultExpandIcon={<ChevronRightIcon />}
+            multiSelect
+            selected={(values.partners[index]?.adminAreas || []).map(String)}
+            onNodeSelect={handleNodeSelect}
+          >
+            {allAreasTree.map((tree) => renderTree(tree))}
+          </TreeView>
+        </Box>
       </Collapse>
     </Box>
   );

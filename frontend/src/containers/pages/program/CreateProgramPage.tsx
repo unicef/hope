@@ -1,36 +1,24 @@
-import {
-  Box,
-  Button,
-  Step,
-  StepButton,
-  StepLabel,
-  Stepper,
-} from '@material-ui/core';
+import { Box, Button, Step, StepButton, Stepper } from '@material-ui/core';
 import React, { ReactElement, useState } from 'react';
-import AddIcon from '@material-ui/icons/Add';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import * as Yup from 'yup';
-
+import { Formik } from 'formik';
+import moment from 'moment';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { BaseSection } from '../../../components/core/BaseSection';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { ProgramPartnerCard } from '../../../components/programs/CreateProgram/ProgramPartnerCard';
-import { ProgramPartnersSection } from '../../../components/programs/CreateProgram/ProgramPartnersSection';
+import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { ProgramForm } from '../../forms/ProgramForm';
-import { FieldArray, Formik } from 'formik';
-import moment from 'moment';
 import { today } from '../../../utils/utils';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
 export const CreateProgramPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -80,7 +68,7 @@ export const CreateProgramPage = (): ReactElement => {
     variables: { businessArea },
   });
 
-  const [mutate, { loading }] = useCreateProgramMutation({
+  const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
     ],
@@ -113,14 +101,6 @@ export const CreateProgramPage = (): ReactElement => {
     }
   };
 
-  const detailsDescription = t(
-    'To create a new Programme, please complete all required fields on the form below and save.',
-  );
-
-  const partnersDescription = t(
-    'Provide info about Programme Partner and set Area Access',
-  );
-
   //TODO: remove this
   const partners = [{ id: uuidv4() }, { id: uuidv4() }, { id: uuidv4() }];
 
@@ -133,7 +113,7 @@ export const CreateProgramPage = (): ReactElement => {
     description: '',
     budget: '0.00',
     administrativeAreasOfImplementation: '',
-    populationGoal: null,
+    populationGoal: 0,
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners,
@@ -156,11 +136,6 @@ export const CreateProgramPage = (): ReactElement => {
       validationSchema={validationSchema}
     >
       {({ submitForm, values }) => {
-        console.log(
-          '😎 ~ file: CreateProgramPage.tsx:159 ~ CreateProgramPage ~ values:',
-          values,
-        );
-
         return (
           <>
             <PageHeader title={t('Create Programme')}>
@@ -190,70 +165,10 @@ export const CreateProgramPage = (): ReactElement => {
               </Step>
             </Stepper>
             {step === 0 && (
-              <BaseSection
-                title={t('Details')}
-                description={detailsDescription}
-              >
-                <>
-                  <ProgramForm values={values} />
-                  <Box display='flex' justifyContent='flex-end'>
-                    <Box mr={2}>
-                      <Button
-                        variant='outlined'
-                        onClick={() => setStep(step - 1)}
-                        disabled={step === 0}
-                      >
-                        {t('Back')}
-                      </Button>
-                    </Box>
-                    <Button
-                      variant='contained'
-                      color='primary'
-                      onClick={() => setStep(step + 1)}
-                    >
-                      {t('Next')}
-                    </Button>
-                  </Box>
-                </>
-              </BaseSection>
+              <DetailsStep values={values} step={step} setStep={setStep} />
             )}
             {step === 1 && (
-              <BaseSection
-                title={t('Programme Partners')}
-                description={partnersDescription}
-              >
-                <FieldArray
-                  name='partners'
-                  render={(arrayHelpers) => {
-                    const {
-                      form: { setFieldValue },
-                    } = arrayHelpers;
-                    return (
-                      <>
-                        {values.partners.map((partner, index) => (
-                          <ProgramPartnerCard
-                            key={partner.id}
-                            partner={partner}
-                            index={index}
-                            values={values}
-                            arrayHelpers={arrayHelpers}
-                            allAreasTree={allAreasTree}
-                            setFieldValue={setFieldValue}
-                          />
-                        ))}
-                        <Button
-                          onClick={() => arrayHelpers.push({ id: uuidv4() })}
-                          variant='outlined'
-                          color='primary'
-                          endIcon={<AddIcon />}
-                        >
-                          {t('Add Partner')}
-                        </Button>
-                      </>
-                    );
-                  }}
-                />
-              </BaseSection>
+              <PartnersStep values={values} allAreasTree={allAreasTree} />
             )}
           </>
         );

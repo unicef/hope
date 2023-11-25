@@ -16,8 +16,8 @@ import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackP
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
 import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
-import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 import { EditProgramPage } from '../pages/program/EditProgramPage';
+import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();

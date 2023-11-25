@@ -1,11 +1,5 @@
+import { Box, Radio, RadioGroup, Typography } from '@material-ui/core';
 import React from 'react';
-import {
-  Box,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Typography,
-} from '@material-ui/core';
 import styled from 'styled-components';
 import { GreyBox } from '../../../components/core/GreyBox';
 

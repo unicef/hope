@@ -52,8 +52,8 @@ import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopul
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
-import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 import { EditProgramPage } from '../pages/program/EditProgramPage';
+import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
