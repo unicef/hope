@@ -1,15 +1,19 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, Dialog, IconButton } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
-import React, { ReactElement, useState } from 'react';
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useTranslation } from 'react-i18next';
 import {
   AllProgramsForChoicesDocument,
   ProgramQuery,
   useCopyProgramMutation,
 } from '../../../__generated__/graphql';
-import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { Formik } from 'formik';
+import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
+import { ProgramForm } from '../../forms/ProgramForm';
+import { DialogContainer } from '../DialogContainer';
 
 interface CopyProgramProps {
   program: ProgramQuery['program'];
@@ -22,49 +26,28 @@ export const CopyProgram = ({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const [mutate, { loading }] = useCopyProgramMutation();
+  const [mutate] = useCopyProgramMutation();
 
   const {
-    id,
     name,
-    scope,
     startDate,
     endDate,
-    description,
-    budget,
-    administrativeAreasOfImplementation,
-    populationGoal,
-    frequencyOfPayments,
     sector,
-    cashPlus,
-    individualDataNeeded,
+    dataCollectingType,
+    description,
+    budget = '0.00',
+    administrativeAreasOfImplementation,
+    populationGoal = 0,
+    cashPlus = false,
+    frequencyOfPayments = 'REGULAR',
   } = program;
 
-  const initialValues: { [key: string]: string | boolean | number } = {
-    id,
-    name: `Copy of ${name}`,
-    scope,
-    startDate,
-    endDate,
-    description: description || '',
-    budget: budget || 0,
-    administrativeAreasOfImplementation:
-      administrativeAreasOfImplementation || '',
-    populationGoal: populationGoal || 0,
-    frequencyOfPayments: frequencyOfPayments || 'REGULAR',
-    sector,
-    cashPlus: cashPlus || false,
-    individualDataNeeded: individualDataNeeded ? 'YES' : 'NO',
-  };
-
-  const submitFormHandler = async (values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const response = await mutate({
         variables: {
           programData: {
             ...values,
-            startDate: values.startDate,
-            endDate: values.endDate,
             businessAreaSlug: businessArea,
           },
         },
@@ -84,37 +67,43 @@ export const CopyProgram = ({
     }
   };
 
-  const renderSubmit = (submit): ReactElement => {
-    return (
-      <>
-        <Button onClick={() => setOpen(false)}>Cancel</Button>
-        <LoadingButton
-          loading={loading}
-          onClick={submit}
-          type='submit'
-          color='primary'
-          variant='contained'
-          data-cy='button-save'
-        >
-          {t('Save')}
-        </LoadingButton>
-      </>
-    );
+  //TODO: remove this
+  const partners = [{ id: uuidv4() }, { id: uuidv4() }, { id: uuidv4() }];
+
+  const initialValues = {
+    name,
+    startDate,
+    endDate,
+    sector,
+    dataCollectingTypeCode: dataCollectingType?.code,
+    description,
+    budget,
+    administrativeAreasOfImplementation,
+    populationGoal,
+    cashPlus,
+    frequencyOfPayments,
+    partners,
   };
 
   return (
     <>
-      <IconButton data-cy='button-copy-program' onClick={() => setOpen(true)}>
+      {/* //TODO: fix this view */}
+      {/* <IconButton data-cy='button-copy-program' onClick={() => setOpen(true)}>
         <FileCopy />
-      </IconButton>
-      {/* <ProgramForm
-        onSubmit={submitFormHandler}
-        renderSubmit={renderSubmit}
-        open={open}
-        onClose={() => setOpen(false)}
-        title={t('Copy Programme')}
-        initialValues={initialValues}
-      /> */}
+      </IconButton> */}
+      <DialogContainer>
+        <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
+          <Formik
+            initialValues={initialValues}
+            onSubmit={(values) => {
+              handleSubmit(values);
+            }}
+            validationSchema={programValidationSchema(t)}
+          >
+            {({ values }) => <ProgramForm values={values} />}
+          </Formik>
+        </Dialog>
+      </DialogContainer>
     </>
   );
 };
