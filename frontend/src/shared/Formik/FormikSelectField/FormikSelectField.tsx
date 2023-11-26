@@ -81,11 +81,11 @@ export const FormikSelectField = ({
               </EndInputAdornment>
             )
           }
-          InputProps={{
-            startAdornment: icon ? (
+          startAdornment={
+            icon ? (
               <StartInputAdornment position='start'>{icon}</StartInputAdornment>
-            ) : null,
-          }}
+            ) : null
+          }
         >
           {otherProps.choices.map((each) => (
             <MenuItem

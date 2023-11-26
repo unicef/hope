@@ -47,7 +47,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
+  const selectedAdminAreasLength = values.partners[index]?.adminAreas?.length;
+  const initialExpanded = selectedAdminAreasLength > 0;
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(
+    initialExpanded,
+  );
 
   const businessAreaOptionLabel = (
     <Box display='flex' flexDirection='column'>
@@ -64,11 +68,15 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     selectedNodeId = Array.isArray(selectedNodeId)
       ? selectedNodeId.flat()
       : [selectedNodeId];
-    if (newSelected.includes(selectedNodeId)) {
-      newSelected = newSelected.filter((id) => id !== selectedNodeId);
-    } else {
-      newSelected.push(...selectedNodeId);
-    }
+
+    selectedNodeId.forEach((id) => {
+      if (newSelected.includes(id)) {
+        newSelected = newSelected.filter((newId) => newId !== id);
+      } else {
+        newSelected.push(id);
+      }
+    });
+
     setFieldValue(`partners[${index}].adminAreas`, newSelected);
   };
 
@@ -103,14 +111,16 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           <SmallText>
             {t('The partner has access to selected Admin Areas')}
           </SmallText>
-          <SmallText>
-            Selected Admin Areas:
-            {/* //TODO: add admin areas */}
-            {/* {values.adminAreas.length > 0 ? values.adminAreas.length : 0} */}
-          </SmallText>
+          <Box mt={2} mb={2}>
+            <SmallText>
+              Selected Admin Areas: {selectedAdminAreasLength || 0}
+            </SmallText>
+          </Box>
         </Box>
         <IconButton
-          onClick={() => setIsAdminAreaExpanded(!isAdminAreaExpanded)}
+          onClick={() => {
+            setIsAdminAreaExpanded(!isAdminAreaExpanded);
+          }}
         >
           {isAdminAreaExpanded ? <ArrowDropDown /> : <ArrowRight />}
         </IconButton>
@@ -187,6 +197,9 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           ]}
           component={FormikRadioGroup}
           withGreyBox
+          onChange={(event) =>
+            setIsAdminAreaExpanded(event.target.value === 'ADMIN_AREA')
+          }
         />
       </Grid>
       {index + 1 < values.partners.length && <DividerLine />}

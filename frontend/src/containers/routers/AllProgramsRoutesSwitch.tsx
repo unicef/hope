@@ -18,6 +18,7 @@ import { FeedbackPage } from '../pages/accountability/feedback/FeedbackPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
 import { EditProgramPage } from '../pages/program/EditProgramPage';
 import { CreateProgramPage } from '../pages/program/CreateProgramPage';
+import { DuplicateProgramPage } from '../pages/program/DuplicateProgramPage';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -31,6 +32,9 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
       </SentryRoute>
       <SentryRoute path={`${path}/edit/:id`}>
         <EditProgramPage />
+      </SentryRoute>
+      <SentryRoute path={`${path}/duplicate/:id`}>
+        <DuplicateProgramPage />
       </SentryRoute>
       <SentryRoute path={`${path}/list`}>
         <ProgramsPage />

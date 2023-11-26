@@ -6,7 +6,7 @@ import {
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { CopyProgram } from '../../dialogs/programs/CopyProgram';
+import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
@@ -50,7 +50,7 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
       )}
       {canDuplicate && (
         <Box m={2}>
-          <CopyProgram program={program} />
+          <DuplicateProgramButtonLink program={program} />
         </Box>
       )}
     </Box>
