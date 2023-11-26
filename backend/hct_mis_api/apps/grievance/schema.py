@@ -121,6 +121,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         # TODO: grievances should be cross program ??? remove program_id
         program_id = get_program_id_from_headers(info.context.headers)
 
+        if object_instance.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
+            partner_permission = user.partner.get_permissions()
+
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
             creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value
