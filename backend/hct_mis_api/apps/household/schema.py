@@ -572,7 +572,7 @@ class Query(graphene.ObjectType):
             partner_permission = info.context.user.partner.get_permissions()
             program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
         except (Partner.DoesNotExist, AssertionError):
-            return Household.objects.none()
+            return Individual.objects.none()
 
         areas = Area.objects.filter(id__in=program_area_ids)
         areas_level_1 = areas.filter(level=0).values_list("id")
