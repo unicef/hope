@@ -133,6 +133,12 @@ class TestIndividualFlagQuery(APITestCase):
     def test_individual_programme_filter(self, flags: Any) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={"flags": flags},
         )
